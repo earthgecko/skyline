@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>boundary.boundary_alerters &mdash; Skyline 1.2.14 documentation</title>
+  <title>boundary.boundary_alerters &mdash; Skyline 1.3.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.2.14 documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.3.0 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                1.2
+                1.3
               </div>
             
           
@@ -94,6 +94,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../docker.html">docker - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../analyzer.html">Analyzer</a></li>
@@ -107,7 +109,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../../ionosphere_echo.html">Ionosphere echo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
@@ -269,9 +274,9 @@
     <span class="c1"># The alerters did send an individual email to each recipient. This would be</span>
     <span class="c1"># more useful if one email was sent with the first smtp recipient being the</span>
     <span class="c1"># to recipient and the subsequent recipients were add in cc.</span>
+    <span class="n">primary_recipient</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">cc_recipients</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">if</span> <span class="n">recipients</span><span class="p">:</span>
-        <span class="n">primary_recipient</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="n">cc_recipients</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">for</span> <span class="n">i_recipient</span> <span class="ow">in</span> <span class="n">recipients</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">primary_recipient</span><span class="p">:</span>
                 <span class="n">primary_recipient</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">i_recipient</span><span class="p">)</span>
@@ -345,11 +350,18 @@
     <span class="n">graphite_target</span> <span class="o">=</span> <span class="s1">&#39;target=cactiStyle(</span><span class="si">%s</span><span class="s1">)&#39;</span>
     <span class="k">if</span> <span class="n">known_derivative_metric</span><span class="p">:</span>
         <span class="n">graphite_target</span> <span class="o">=</span> <span class="s1">&#39;target=cactiStyle(nonNegativeDerivative(</span><span class="si">%s</span><span class="s1">))&#39;</span>
-    <span class="n">link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1">/render/?from=</span><span class="si">%s</span><span class="s1">&amp;until=</span><span class="si">%s</span><span class="s1">&amp;</span><span class="si">%s%s%s</span><span class="s1">&amp;colorList=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-        <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PROTOCOL</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span> <span class="n">graphite_port</span><span class="p">,</span>
-        <span class="nb">str</span><span class="p">(</span><span class="n">graphite_from</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_until</span><span class="p">),</span> <span class="n">graphite_target</span><span class="p">,</span>
-        <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_GRAPH_SETTINGS</span><span class="p">,</span> <span class="n">graph_title</span><span class="p">,</span>
-        <span class="n">graphite_graph_line_color</span><span class="p">)</span>
+    <span class="c1"># @modified 20190520 - Branch #3002: docker</span>
+    <span class="c1"># Use GRAPHITE_RENDER_URI</span>
+    <span class="c1"># link = &#39;%s://%s:%s/render/?from=%s&amp;until=%s&amp;%s%s%s&amp;colorList=%s&#39; % (</span>
+    <span class="c1">#     settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, graphite_port,</span>
+    <span class="c1">#     str(graphite_from), str(graphite_until), graphite_target,</span>
+    <span class="c1">#     settings.GRAPHITE_GRAPH_SETTINGS, graph_title,</span>
+    <span class="c1">#     graphite_graph_line_color)</span>
+    <span class="n">link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/?from=</span><span class="si">%s</span><span class="s1">&amp;until=</span><span class="si">%s</span><span class="s1">&amp;</span><span class="si">%s%s%s</span><span class="s1">&amp;colorList=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PROTOCOL</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span>
+        <span class="n">graphite_port</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_RENDER_URI</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_from</span><span class="p">),</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">graphite_until</span><span class="p">),</span> <span class="n">graphite_target</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_GRAPH_SETTINGS</span><span class="p">,</span>
+        <span class="n">graph_title</span><span class="p">,</span> <span class="n">graphite_graph_line_color</span><span class="p">)</span>
 
     <span class="n">content_id</span> <span class="o">=</span> <span class="n">metric_name</span>
     <span class="n">image_data</span> <span class="o">=</span> <span class="kc">None</span>
@@ -472,15 +484,29 @@
             <span class="c1"># link = &#39;%s://%s:%s/render/?from=-%shours&amp;target=cactiStyle(%s)%s%s&amp;colorList=%s&#39; % (</span>
                 <span class="c1"># settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT,</span>
                 <span class="c1"># graphite_previous_hours, metric_name, settings.GRAPHITE_GRAPH_SETTINGS,</span>
-            <span class="n">link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1">/render/?from=</span><span class="si">%s</span><span class="s1">&amp;until=</span><span class="si">%s</span><span class="s1">&amp;target=cactiStyle(</span><span class="si">%s</span><span class="s1">)</span><span class="si">%s%s</span><span class="s1">&amp;colorList=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="c1"># @modified 20190520 - Branch #3002: docker</span>
+            <span class="c1"># Use GRAPHITE_RENDER_URI</span>
+            <span class="c1"># link = &#39;%s://%s:%s/render/?from=%s&amp;until=%s&amp;target=cactiStyle(%s)%s%s&amp;colorList=%s&#39; % (</span>
+            <span class="c1">#     settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT,</span>
+            <span class="c1">#     graphite_from, graphite_until, metric_name, settings.GRAPHITE_GRAPH_SETTINGS,</span>
+            <span class="c1">#     graph_title, graphite_graph_line_color)</span>
+            <span class="n">link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/?from=</span><span class="si">%s</span><span class="s1">&amp;until=</span><span class="si">%s</span><span class="s1">&amp;target=cactiStyle(</span><span class="si">%s</span><span class="s1">)</span><span class="si">%s%s</span><span class="s1">&amp;colorList=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                 <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PROTOCOL</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PORT</span><span class="p">,</span>
-                <span class="n">graphite_from</span><span class="p">,</span> <span class="n">graphite_until</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_GRAPH_SETTINGS</span><span class="p">,</span>
-                <span class="n">graph_title</span><span class="p">,</span> <span class="n">graphite_graph_line_color</span><span class="p">)</span>
+                <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_RENDER_URI</span><span class="p">,</span> <span class="n">graphite_from</span><span class="p">,</span> <span class="n">graphite_until</span><span class="p">,</span>
+                <span class="n">metric_name</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_GRAPH_SETTINGS</span><span class="p">,</span> <span class="n">graph_title</span><span class="p">,</span>
+                <span class="n">graphite_graph_line_color</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># link = &#39;%s://%s/render/?from=-%shour&amp;target=cactiStyle(%s)%s%s&amp;colorList=%s&#39; % (</span>
                 <span class="c1"># settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, graphite_previous_hours,</span>
-            <span class="n">link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">/render/?from=</span><span class="si">%s</span><span class="s1">&amp;until=</span><span class="si">%s</span><span class="s1">&amp;target=cactiStyle(</span><span class="si">%s</span><span class="s1">)</span><span class="si">%s%s</span><span class="s1">&amp;colorList=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PROTOCOL</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span> <span class="n">graphite_from</span><span class="p">,</span> <span class="n">graphite_until</span><span class="p">,</span>
+            <span class="c1"># @modified 20190520 - Branch #3002: docker</span>
+            <span class="c1"># Use GRAPHITE_RENDER_URI</span>
+            <span class="c1"># link = &#39;%s://%s/render/?from=%s&amp;until=%s&amp;target=cactiStyle(%s)%s%s&amp;colorList=%s&#39; % (</span>
+            <span class="c1">#     settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, graphite_from, graphite_until,</span>
+            <span class="c1">#     metric_name, settings.GRAPHITE_GRAPH_SETTINGS, graph_title,</span>
+            <span class="c1">#     graphite_graph_line_color)</span>
+            <span class="n">link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/?from=</span><span class="si">%s</span><span class="s1">&amp;until=</span><span class="si">%s</span><span class="s1">&amp;target=cactiStyle(</span><span class="si">%s</span><span class="s1">)</span><span class="si">%s%s</span><span class="s1">&amp;colorList=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PROTOCOL</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span>
+                <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_RENDER_URI</span><span class="p">,</span> <span class="n">graphite_from</span><span class="p">,</span> <span class="n">graphite_until</span><span class="p">,</span>
                 <span class="n">metric_name</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_GRAPH_SETTINGS</span><span class="p">,</span> <span class="n">graph_title</span><span class="p">,</span>
                 <span class="n">graphite_graph_line_color</span><span class="p">)</span>
 
@@ -590,26 +616,54 @@
 
     <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PORT</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">known_derivative_metric</span><span class="p">:</span>
-            <span class="n">link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1">/render/?from=</span><span class="si">%s</span><span class="s1">&amp;until=</span><span class="si">%s</span><span class="s1">&amp;target=cactiStyle(nonNegativeDerivative(</span><span class="si">%s</span><span class="s1">))</span><span class="si">%s%s</span><span class="s1">&amp;colorList=orange&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="c1"># @modified 20190520 - Branch #3002: docker</span>
+            <span class="c1"># Use GRAPHITE_RENDER_URI</span>
+            <span class="c1"># link = &#39;%s://%s:%s/render/?from=%s&amp;until=%s&amp;target=cactiStyle(nonNegativeDerivative(%s))%s%s&amp;colorList=orange&#39; % (</span>
+            <span class="c1">#     settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,</span>
+            <span class="c1">#     settings.GRAPHITE_PORT, str(graphite_from), str(graphite_until),</span>
+            <span class="c1">#     metric, settings.GRAPHITE_GRAPH_SETTINGS, graph_title)</span>
+            <span class="n">link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/?from=</span><span class="si">%s</span><span class="s1">&amp;until=</span><span class="si">%s</span><span class="s1">&amp;target=cactiStyle(nonNegativeDerivative(</span><span class="si">%s</span><span class="s1">))</span><span class="si">%s%s</span><span class="s1">&amp;colorList=orange&#39;</span> <span class="o">%</span> <span class="p">(</span>
                 <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PROTOCOL</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span>
-                <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PORT</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_from</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_until</span><span class="p">),</span>
+                <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PORT</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_RENDER_URI</span><span class="p">,</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">graphite_from</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_until</span><span class="p">),</span>
                 <span class="n">metric</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_GRAPH_SETTINGS</span><span class="p">,</span> <span class="n">graph_title</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1">/render/?from=</span><span class="si">%s</span><span class="s1">&amp;until=</span><span class="si">%s</span><span class="s1">&amp;target=cactiStyle(</span><span class="si">%s</span><span class="s1">)</span><span class="si">%s%s</span><span class="s1">&amp;colorList=orange&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="c1"># @modified 20190520 - Branch #3002: docker</span>
+            <span class="c1"># Use GRAPHITE_RENDER_URI</span>
+            <span class="c1"># link = &#39;%s://%s:%s/render/?from=%s&amp;until=%s&amp;target=cactiStyle(%s)%s%s&amp;colorList=orange&#39; % (</span>
+            <span class="c1">#     settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,</span>
+            <span class="c1">#     settings.GRAPHITE_PORT, str(graphite_from), str(graphite_until),</span>
+            <span class="c1">#     metric, settings.GRAPHITE_GRAPH_SETTINGS, graph_title)</span>
+            <span class="n">link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/?from=</span><span class="si">%s</span><span class="s1">&amp;until=</span><span class="si">%s</span><span class="s1">&amp;target=cactiStyle(</span><span class="si">%s</span><span class="s1">)</span><span class="si">%s%s</span><span class="s1">&amp;colorList=orange&#39;</span> <span class="o">%</span> <span class="p">(</span>
                 <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PROTOCOL</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span>
-                <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PORT</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_from</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_until</span><span class="p">),</span>
-                <span class="n">metric</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_GRAPH_SETTINGS</span><span class="p">,</span> <span class="n">graph_title</span><span class="p">)</span>
+                <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PORT</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_RENDER_URI</span><span class="p">,</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">graphite_from</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_until</span><span class="p">),</span> <span class="n">metric</span><span class="p">,</span>
+                <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_GRAPH_SETTINGS</span><span class="p">,</span> <span class="n">graph_title</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">known_derivative_metric</span><span class="p">:</span>
-            <span class="n">link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">/render/?from=</span><span class="si">%s</span><span class="s1">&amp;until=</span><span class="si">%s</span><span class="s1">&amp;target=cactiStyle(nonNegativeDerivative(</span><span class="si">%s</span><span class="s1">))</span><span class="si">%s%s</span><span class="s1">&amp;colorList=orange&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="c1"># @modified 20190520 - Branch #3002: docker</span>
+            <span class="c1"># Use GRAPHITE_RENDER_URI</span>
+            <span class="c1"># link = &#39;%s://%s/render/?from=%s&amp;until=%s&amp;target=cactiStyle(nonNegativeDerivative(%s))%s%s&amp;colorList=orange&#39; % (</span>
+            <span class="c1">#     settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,</span>
+            <span class="c1">#     str(graphite_from), str(graphite_until), metric,</span>
+            <span class="c1">#     settings.GRAPHITE_GRAPH_SETTINGS, graph_title)</span>
+            <span class="n">link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/?from=</span><span class="si">%s</span><span class="s1">&amp;until=</span><span class="si">%s</span><span class="s1">&amp;target=cactiStyle(nonNegativeDerivative(</span><span class="si">%s</span><span class="s1">))</span><span class="si">%s%s</span><span class="s1">&amp;colorList=orange&#39;</span> <span class="o">%</span> <span class="p">(</span>
                 <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PROTOCOL</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span>
-                <span class="nb">str</span><span class="p">(</span><span class="n">graphite_from</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_until</span><span class="p">),</span> <span class="n">metric</span><span class="p">,</span>
-                <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_GRAPH_SETTINGS</span><span class="p">,</span> <span class="n">graph_title</span><span class="p">)</span>
+                <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_RENDER_URI</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_from</span><span class="p">),</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">graphite_until</span><span class="p">),</span> <span class="n">metric</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_GRAPH_SETTINGS</span><span class="p">,</span>
+                <span class="n">graph_title</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">/render/?from=</span><span class="si">%s</span><span class="s1">&amp;until=</span><span class="si">%s</span><span class="s1">&amp;target=cactiStyle(</span><span class="si">%s</span><span class="s1">)</span><span class="si">%s%s</span><span class="s1">&amp;colorList=orange&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="c1"># @modified 20190520 - Branch #3002: docker</span>
+            <span class="c1"># Use GRAPHITE_RENDER_URI</span>
+            <span class="c1"># link = &#39;%s://%s/render/?from=%s&amp;until=%s&amp;target=cactiStyle(%s)%s%s&amp;colorList=orange&#39; % (</span>
+            <span class="c1">#     settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,</span>
+            <span class="c1">#     str(graphite_from), str(graphite_until), metric,</span>
+            <span class="c1">#     settings.GRAPHITE_GRAPH_SETTINGS, graph_title)</span>
+            <span class="n">link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/?from=</span><span class="si">%s</span><span class="s1">&amp;until=</span><span class="si">%s</span><span class="s1">&amp;target=cactiStyle(</span><span class="si">%s</span><span class="s1">)</span><span class="si">%s%s</span><span class="s1">&amp;colorList=orange&#39;</span> <span class="o">%</span> <span class="p">(</span>
                 <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PROTOCOL</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span>
-                <span class="nb">str</span><span class="p">(</span><span class="n">graphite_from</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_until</span><span class="p">),</span> <span class="n">metric</span><span class="p">,</span>
-                <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_GRAPH_SETTINGS</span><span class="p">,</span> <span class="n">graph_title</span><span class="p">)</span>
+                <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_RENDER_URI</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_from</span><span class="p">),</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">graphite_until</span><span class="p">),</span> <span class="n">metric</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_GRAPH_SETTINGS</span><span class="p">,</span>
+                <span class="n">graph_title</span><span class="p">)</span>
 
     <span class="c1"># slack does not allow embedded images, nor will it fetch links behind</span>
     <span class="c1"># authentication so Skyline uploads a png graphite image with the message</span>
@@ -761,7 +815,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.2.14',
+            VERSION:'1.3.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

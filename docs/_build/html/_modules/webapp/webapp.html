@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>webapp.webapp &mdash; Skyline 1.2.14 documentation</title>
+  <title>webapp.webapp &mdash; Skyline 1.3.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.2.14 documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.3.0 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                1.2
+                1.3
               </div>
             
           
@@ -94,6 +94,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../docker.html">docker - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../analyzer.html">Analyzer</a></li>
@@ -107,7 +109,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../../ionosphere_echo.html">Ionosphere echo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
@@ -178,7 +183,7 @@
 <span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">wraps</span>
 <span class="kn">from</span> <span class="nn">flask</span> <span class="k">import</span> <span class="p">(</span>
     <span class="n">Flask</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">render_template</span><span class="p">,</span> <span class="n">redirect</span><span class="p">,</span> <span class="n">Response</span><span class="p">,</span> <span class="n">abort</span><span class="p">,</span> <span class="n">flash</span><span class="p">,</span>
-    <span class="n">send_file</span><span class="p">)</span>
+    <span class="n">send_file</span><span class="p">,</span> <span class="n">jsonify</span><span class="p">)</span>
 <span class="kn">from</span> <span class="nn">daemon</span> <span class="k">import</span> <span class="n">runner</span>
 <span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">isdir</span>
 <span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">path</span>
@@ -258,6 +263,12 @@
     <span class="n">in_list</span><span class="p">,</span>
     <span class="c1"># @added 20180804 - Feature #2488: Allow user to specifically set metric as a derivative metric in training_data</span>
     <span class="n">set_metric_as_derivative</span><span class="p">,</span>
+    <span class="c1"># @added 20190510 - Feature #2990: Add metrics id to relevant web pages</span>
+    <span class="n">get_memcache_metric_object</span><span class="p">,</span>
+    <span class="c1"># @added 20190920 - Feature #3230: users DB table</span>
+    <span class="c1">#                   Ideas #2476: Label and relate anomalies</span>
+    <span class="c1">#                   Feature #2516: Add label to features profile</span>
+    <span class="n">get_user_details</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="kn">from</span> <span class="nn">backend</span> <span class="k">import</span> <span class="p">(</span>
@@ -298,9 +309,14 @@
     <span class="n">get_metrics_with_features_profiles_to_validate</span><span class="p">,</span>
     <span class="c1"># @added 20181205 - Bug #2746: webapp time out - Graphs in search_features_profiles</span>
     <span class="c1">#                   Feature #2602: Graphs in search_features_profiles</span>
-    <span class="n">ionosphere_show_graphs</span><span class="p">,)</span>
+    <span class="n">ionosphere_show_graphs</span><span class="p">,</span>
+    <span class="c1"># @added 20190502 - Branch #2646: slack</span>
+    <span class="n">webapp_update_slack_thread</span><span class="p">,</span>
+    <span class="c1"># @added 20190601 - Feature #3084: Ionosphere - validated matches</span>
+    <span class="n">validate_ionosphere_match</span><span class="p">,</span>
+<span class="p">)</span>
 
-<span class="c1">#from utilites import alerts_matcher</span>
+<span class="c1"># from utilites import alerts_matcher</span>
 
 <span class="c1"># @added 20170114 - Feature #1854: Ionosphere learn</span>
 <span class="c1"># Decoupled the create_features_profile from ionosphere_backend and moved to</span>
@@ -320,7 +336,7 @@
 <span class="n">skyline_app_logwait</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.wait&#39;</span> <span class="o">%</span> <span class="n">skyline_app_logfile</span>
 <span class="n">logfile</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.log&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">)</span>
 
-<span class="c1"># werkzeug access log</span>
+<span class="c1"># werkzeug access log for Python errors</span>
 <span class="n">access_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;werkzeug&#39;</span><span class="p">)</span>
 
 <span class="n">python_version</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
@@ -344,9 +360,11 @@
 
 <span class="n">app</span> <span class="o">=</span> <span class="n">Flask</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
 
-<span class="n">gunicorn_error_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;gunicorn.error&#39;</span><span class="p">)</span>
-<span class="n">logger</span><span class="o">.</span><span class="n">handlers</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">gunicorn_error_logger</span><span class="o">.</span><span class="n">handlers</span><span class="p">)</span>
-<span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">)</span>
+<span class="c1"># @modified 20190502 - Branch #2646: slack</span>
+<span class="c1"># Reduce logging, removed gunicorn</span>
+<span class="c1"># gunicorn_error_logger = logging.getLogger(&#39;gunicorn.error&#39;)</span>
+<span class="c1"># logger.handlers.extend(gunicorn_error_logger.handlers)</span>
+<span class="c1"># logger.setLevel(logging.DEBUG)</span>
 
 <span class="c1"># app.secret_key = str(uuid.uuid5(uuid.NAMESPACE_DNS, settings.GRAPHITE_HOST))</span>
 <span class="n">secret_key</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid5</span><span class="p">(</span><span class="n">uuid</span><span class="o">.</span><span class="n">NAMESPACE_DNS</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span><span class="p">))</span>
@@ -361,7 +379,7 @@
 <span class="p">)</span>
 
 <span class="n">graph_url_string</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">GRAPH_URL</span><span class="p">)</span>
-<span class="n">PANORAMA_GRAPH_URL</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39;\/render\/.*&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">graph_url_string</span><span class="p">)</span>
+<span class="n">PANORAMA_GRAPH_URL</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s1">&#39;\/render.*&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">graph_url_string</span><span class="p">)</span>
 
 <span class="c1"># @added 20160727 - Bug #1524: Panorama dygraph not aligning correctly</span>
 <span class="c1"># Defaults for momentjs to work if the setttings.py was not updated</span>
@@ -377,6 +395,12 @@
     <span class="n">WEBAPP_JAVASCRIPT_DEBUG</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">WEBAPP_JAVASCRIPT_DEBUG</span>
 <span class="k">except</span><span class="p">:</span>
     <span class="n">WEBAPP_JAVASCRIPT_DEBUG</span> <span class="o">=</span> <span class="kc">False</span>
+
+<span class="c1"># @added 20190520 - Branch #3002: docker</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">GRAPHITE_RENDER_URI</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_RENDER_URI</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">GRAPHITE_RENDER_URI</span> <span class="o">=</span> <span class="s1">&#39;render&#39;</span>
 
 
 <span class="nd">@app</span><span class="o">.</span><span class="n">before_request</span>
@@ -564,6 +588,9 @@
 
     <span class="k">try</span><span class="p">:</span>
         <span class="n">test_errorhandler_500_internal_error</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">test_500_string</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+            <span class="s1">&#39;debug :: test_errorhandler_500_internal_error tests OK with </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">test_errorhandler_500_internal_error</span><span class="p">)))</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: test OK&#39;</span><span class="p">)</span>
@@ -674,6 +701,68 @@
 <span class="c1"># they are used.</span>
 <span class="c1"># def data():</span>
 <div class="viewcode-block" id="api"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.api">[docs]</a><span class="k">def</span> <span class="nf">api</span><span class="p">():</span>
+    <span class="c1"># @added 20180929</span>
+    <span class="k">if</span> <span class="s1">&#39;get_json&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+        <span class="n">source</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">metric</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">full_duration_data</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="s1">&#39;source&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+            <span class="n">valid_source</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">source</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;source&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">source</span> <span class="o">==</span> <span class="s1">&#39;features_profile&#39;</span> <span class="ow">or</span> <span class="n">source</span> <span class="o">==</span> <span class="s1">&#39;training_data&#39;</span><span class="p">:</span>
+                <span class="n">valid_source</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">valid_source</span><span class="p">:</span>
+                <span class="n">resp</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
+                    <span class="p">{</span><span class="s1">&#39;results&#39;</span><span class="p">:</span> <span class="s1">&#39;Error: an invalid source parameter was passed to /api?get_json valid sources are features_profile or training_data&#39;</span><span class="p">})</span>
+                <span class="k">return</span> <span class="n">resp</span><span class="p">,</span> <span class="mi">400</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">resp</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
+                <span class="p">{</span><span class="s1">&#39;results&#39;</span><span class="p">:</span> <span class="s1">&#39;Error: the required parameter source was not passed to /api?get_json - valid sources are features_profile or training_data&#39;</span><span class="p">})</span>
+            <span class="k">return</span> <span class="n">resp</span><span class="p">,</span> <span class="mi">400</span>
+        <span class="k">if</span> <span class="s1">&#39;metric&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+            <span class="n">metric</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;metric&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">metric</span><span class="p">:</span>
+            <span class="n">resp</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
+                <span class="p">{</span><span class="s1">&#39;results&#39;</span><span class="p">:</span> <span class="s1">&#39;Error: no metric parameter was passed to /api?get_json&#39;</span><span class="p">})</span>
+            <span class="k">return</span> <span class="n">resp</span><span class="p">,</span> <span class="mi">400</span>
+        <span class="k">if</span> <span class="s1">&#39;timestamp&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+            <span class="n">timestamp</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;timestamp&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">timestamp</span><span class="p">:</span>
+            <span class="n">resp</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
+                <span class="p">{</span><span class="s1">&#39;results&#39;</span><span class="p">:</span> <span class="s1">&#39;Error: no timestamp parameter was passed to /api?get_json&#39;</span><span class="p">})</span>
+            <span class="k">return</span> <span class="n">resp</span><span class="p">,</span> <span class="mi">400</span>
+        <span class="k">if</span> <span class="n">metric</span> <span class="ow">and</span> <span class="n">timestamp</span><span class="p">:</span>
+            <span class="n">tuple_json_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.json&#39;</span> <span class="o">%</span> <span class="n">metric</span>
+            <span class="k">if</span> <span class="n">full_duration_data</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+                <span class="n">full_duration_data</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;full_duration_data&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">full_duration_data</span> <span class="o">==</span> <span class="s1">&#39;true&#39;</span><span class="p">:</span>
+                    <span class="n">full_duration_in_hours</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span> <span class="o">/</span> <span class="mi">60</span> <span class="o">/</span> <span class="mi">60</span>
+                    <span class="n">tuple_json_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.mirage.redis.</span><span class="si">%s</span><span class="s1">h.json&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">full_duration_in_hours</span><span class="p">))</span>
+            <span class="n">metric_timeseries_dir</span> <span class="o">=</span> <span class="n">metric</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">source</span> <span class="o">==</span> <span class="s1">&#39;features_profile&#39;</span><span class="p">:</span>
+                <span class="n">source_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_PROFILES_FOLDER</span><span class="p">,</span> <span class="n">metric_timeseries_dir</span><span class="p">,</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">timestamp</span><span class="p">),</span> <span class="n">tuple_json_file</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">source</span> <span class="o">==</span> <span class="s1">&#39;training_data&#39;</span><span class="p">:</span>
+                <span class="n">source_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_DATA_FOLDER</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">timestamp</span><span class="p">),</span>
+                    <span class="n">metric_timeseries_dir</span><span class="p">,</span> <span class="n">tuple_json_file</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;converting tuple data for </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> at </span><span class="si">%s</span><span class="s1"> to json&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">))</span>
+            <span class="n">datapoints</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">source_file</span><span class="p">):</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: file not found - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">source_file</span><span class="p">)</span>
+                <span class="n">resp</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
+                    <span class="p">{</span><span class="s1">&#39;results&#39;</span><span class="p">:</span> <span class="s1">&#39;404 data file not found&#39;</span><span class="p">})</span>
+                <span class="k">return</span> <span class="n">resp</span><span class="p">,</span> <span class="mi">404</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">source_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="n">datapoints</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">line</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">,</span> <span class="s1">&#39;[&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;)&#39;</span><span class="p">,</span> <span class="s1">&#39;]&#39;</span><span class="p">)</span>
+            <span class="n">data_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;metric&#39;</span><span class="p">:</span> <span class="n">metric</span><span class="p">}</span>
+            <span class="n">datapoints</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">datapoints</span><span class="p">)</span>
+            <span class="n">data_dict</span><span class="p">[</span><span class="s1">&#39;datapoints&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">datapoints</span>
+            <span class="k">return</span> <span class="n">jsonify</span><span class="p">(</span><span class="n">data_dict</span><span class="p">),</span> <span class="mi">200</span>
+
     <span class="c1"># @added 20180720 - Feature #2464: luminosity_remote_data</span>
     <span class="c1"># Added luminosity_remote_data endpoint, requires two request parameter:</span>
     <span class="k">if</span> <span class="s1">&#39;luminosity_remote_data&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
@@ -894,13 +983,45 @@
                     <span class="s1">&#39;panorama_anomaly_id&#39;</span><span class="p">,</span>
                     <span class="p">]</span>
 
+    <span class="c1"># @added 20190919 - Feature #3230: users DB table</span>
+    <span class="c1">#                   Ideas #2476: Label and relate anomalies</span>
+    <span class="c1">#                   Feature #2516: Add label to features profile</span>
+    <span class="n">user_id</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">WEBAPP_AUTH_ENABLED</span><span class="p">:</span>
+        <span class="n">auth</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">authorization</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="n">auth</span><span class="o">.</span><span class="n">username</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="s1">&#39;Skyline&#39;</span>
+        <span class="n">user_id</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">user_id</span><span class="p">:</span>
+        <span class="n">success</span><span class="p">,</span> <span class="n">user_id</span> <span class="o">=</span> <span class="n">get_user_details</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="s1">&#39;username&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">user</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">success</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error : /panorama could not get_user_details(</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">user</span><span class="p">))</span>
+            <span class="k">return</span> <span class="s1">&#39;Internal Server Error - ref: i - could not determine user_id&#39;</span><span class="p">,</span> <span class="mi">500</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">user_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">user_id</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: /panorama get_user_details(</span><span class="si">%s</span><span class="s1">) did not return an int&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">user</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">user_id</span><span class="p">)))</span>
+                <span class="k">return</span> <span class="s1">&#39;Internal Server Error - ref: p - user_id not int&#39;</span><span class="p">,</span> <span class="mi">500</span>
+
     <span class="n">get_anomaly_id</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">if</span> <span class="n">request_args_present</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
             <span class="n">key</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">REQUEST_ARGS</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: invalid request argument - </span><span class="si">%s</span><span class="s1">=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)))</span>
-                <span class="k">return</span> <span class="s1">&#39;Bad Request&#39;</span><span class="p">,</span> <span class="mi">400</span>
+                <span class="c1"># @modified 20190524 - Branch #3002: docker</span>
+                <span class="c1"># Return data</span>
+                <span class="c1"># return &#39;Bad Request&#39;, 400</span>
+                <span class="n">error_string</span> <span class="o">=</span> <span class="s1">&#39;error :: invalid request argument - </span><span class="si">%s</span><span class="s1">=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error_string</span><span class="p">)</span>
+                <span class="n">resp</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
+                    <span class="p">{</span><span class="s1">&#39;400 Bad Request&#39;</span><span class="p">:</span> <span class="n">error_string</span><span class="p">})</span>
+                <span class="k">return</span> <span class="n">flask_escape</span><span class="p">(</span><span class="n">resp</span><span class="p">),</span> <span class="mi">400</span>
+
             <span class="n">value</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;request argument - </span><span class="si">%s</span><span class="s1">=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)))</span>
 
@@ -952,7 +1073,7 @@
                         <span class="n">error_string</span> <span class="o">=</span> <span class="s1">&#39;error :: no metric - </span><span class="si">%s</span><span class="s1"> - exists in Redis&#39;</span> <span class="o">%</span> <span class="n">metric_name</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error_string</span><span class="p">)</span>
                         <span class="n">resp</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
-                            <span class="p">{</span><span class="s1">&#39;results&#39;</span><span class="p">:</span> <span class="n">error_string</span><span class="p">})</span>
+                            <span class="p">{</span><span class="s1">&#39;404 Not Found&#39;</span><span class="p">:</span> <span class="n">error_string</span><span class="p">})</span>
                         <span class="c1"># @modified 20190116 - Cross-Site Scripting Security Vulnerability #85</span>
                         <span class="c1">#                      Bug #2816: Cross-Site Scripting Security Vulnerability</span>
                         <span class="c1"># return resp, 404</span>
@@ -965,9 +1086,14 @@
                 <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;true&#39;</span><span class="p">:</span>
                     <span class="n">count_by_metric_invalid</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="k">if</span> <span class="n">count_by_metric_invalid</span><span class="p">:</span>
-                    <span class="n">error_string</span> <span class="o">=</span> <span class="s1">&#39;error :: invalid </span><span class="si">%s</span><span class="s1"> value passed </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: invalid </span><span class="si">%s</span><span class="s1"> value passed </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
-                    <span class="k">return</span> <span class="s1">&#39;Bad Request&#39;</span><span class="p">,</span> <span class="mi">400</span>
+                    <span class="n">error_string</span> <span class="o">=</span> <span class="s1">&#39;error :: invalid </span><span class="si">%s</span><span class="s1"> value passed </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error_string</span><span class="p">)</span>
+                    <span class="c1"># @modified 20190524 - Branch #3002: docker</span>
+                    <span class="c1"># Return data</span>
+                    <span class="c1"># return &#39;Bad Request&#39;, 400</span>
+                    <span class="n">resp</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
+                        <span class="p">{</span><span class="s1">&#39;400 Bad Request&#39;</span><span class="p">:</span> <span class="n">error_string</span><span class="p">})</span>
+                    <span class="k">return</span> <span class="n">flask_escape</span><span class="p">(</span><span class="n">resp</span><span class="p">),</span> <span class="mi">400</span>
 
             <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;metric_like&#39;</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
@@ -1009,7 +1135,12 @@
                 <span class="k">if</span> <span class="n">timestamp_format_invalid</span><span class="p">:</span>
                     <span class="n">error_string</span> <span class="o">=</span> <span class="s1">&#39;error :: invalid </span><span class="si">%s</span><span class="s1"> value passed </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: invalid </span><span class="si">%s</span><span class="s1"> value passed </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
-                    <span class="k">return</span> <span class="s1">&#39;Bad Request&#39;</span><span class="p">,</span> <span class="mi">400</span>
+                    <span class="c1"># @modified 20190524 - Branch #3002: docker</span>
+                    <span class="c1"># Return data</span>
+                    <span class="c1"># return &#39;Bad Request&#39;, 400</span>
+                    <span class="n">resp</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
+                        <span class="p">{</span><span class="s1">&#39;400 Bad Request&#39;</span><span class="p">:</span> <span class="n">error_string</span><span class="p">})</span>
+                    <span class="k">return</span> <span class="n">flask_escape</span><span class="p">(</span><span class="n">resp</span><span class="p">),</span> <span class="mi">400</span>
 
             <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;app&#39;</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">value</span> <span class="o">!=</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
@@ -1208,6 +1339,32 @@
 
     <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
 
+    <span class="c1"># @added 20190919 - Feature #3230: users DB table</span>
+    <span class="c1">#                   Ideas #2476: Label and relate anomalies</span>
+    <span class="c1">#                   Feature #2516: Add label to features profile</span>
+    <span class="n">user_id</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">WEBAPP_AUTH_ENABLED</span><span class="p">:</span>
+        <span class="n">auth</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">authorization</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="n">auth</span><span class="o">.</span><span class="n">username</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">user</span> <span class="o">=</span> <span class="s1">&#39;Skyline&#39;</span>
+        <span class="n">user_id</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">user_id</span><span class="p">:</span>
+        <span class="n">success</span><span class="p">,</span> <span class="n">user_id</span> <span class="o">=</span> <span class="n">get_user_details</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="s1">&#39;username&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">user</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">success</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: /ionosphere could not get_user_details(</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">user</span><span class="p">))</span>
+            <span class="k">return</span> <span class="s1">&#39;Internal Server Error - ref: i - could not determine user_id&#39;</span><span class="p">,</span> <span class="mi">500</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">user_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">user_id</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;/ionosphere get_user_details() with </span><span class="si">%s</span><span class="s1"> returned user id </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">user</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">user_id</span><span class="p">)))</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: /ionosphere get_user_details() with </span><span class="si">%s</span><span class="s1"> did not return an int&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">user</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">user_id</span><span class="p">)))</span>
+                <span class="k">return</span> <span class="s1">&#39;Internal Server Error - ref: i - user_id not int&#39;</span><span class="p">,</span> <span class="mi">500</span>
+
     <span class="n">request_args_present</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">request_args_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">)</span>
@@ -1233,6 +1390,8 @@
     <span class="c1"># Added ionosphere_echo</span>
     <span class="n">echo_hdate</span> <span class="o">=</span> <span class="kc">False</span>
 
+    <span class="n">metric_id</span> <span class="o">=</span> <span class="kc">False</span>
+
     <span class="c1"># @added 20180812 - Feature #2430: Ionosphere validate learnt features profiles page</span>
     <span class="n">features_profiles_to_validate</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">fp_validate_req</span> <span class="o">=</span> <span class="kc">False</span>
@@ -1242,7 +1401,8 @@
             <span class="n">fp_validate_req</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">if</span> <span class="n">fp_validate_req</span><span class="p">:</span>
         <span class="n">metric_found</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="n">timestamp</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="c1"># @modified 20190503 - Branch #2646: slack - linting</span>
+        <span class="c1"># timestamp = False</span>
         <span class="n">base_name</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="c1"># @added 20181013 - Feature #2430: Ionosphere validate learnt features profiles page</span>
         <span class="c1"># Added the validate_all context and function</span>
@@ -1306,8 +1466,8 @@
                     <span class="k">try</span><span class="p">:</span>
                         <span class="n">unique_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">REDIS_CONN</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span> <span class="o">+</span> <span class="s1">&#39;unique_metrics&#39;</span><span class="p">))</span>
                     <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: Webapp could not get the unique_metrics list from Redis&#39;</span><span class="p">)</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                         <span class="k">return</span> <span class="s1">&#39;Internal Server Error&#39;</span><span class="p">,</span> <span class="mi">500</span>
                     <span class="k">if</span> <span class="n">metric_name</span> <span class="ow">in</span> <span class="n">unique_metrics</span><span class="p">:</span>
                         <span class="n">metric_found</span> <span class="o">=</span> <span class="kc">True</span>
@@ -1351,7 +1511,12 @@
                     <span class="k">return</span> <span class="n">internal_error</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">trace</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">features_profiles_to_validate_count</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="k">try</span><span class="p">:</span>
-                        <span class="n">all_validated</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">traceback_format_exc</span> <span class="o">=</span> <span class="n">validate_fp</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">metric_id</span><span class="p">),</span> <span class="s1">&#39;metric_id&#39;</span><span class="p">)</span>
+                        <span class="c1"># @modified 20190919 - Feature #3230: users DB table</span>
+                        <span class="c1">#                      Ideas #2476: Label and relate anomalies</span>
+                        <span class="c1">#                      Feature #2516: Add label to features profile</span>
+                        <span class="c1"># Added user_id</span>
+                        <span class="c1"># all_validated, fail_msg, traceback_format_exc = validate_fp(int(metric_id), &#39;metric_id&#39;)</span>
+                        <span class="n">all_validated</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">traceback_format_exc</span> <span class="o">=</span> <span class="n">validate_fp</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">metric_id</span><span class="p">),</span> <span class="s1">&#39;metric_id&#39;</span><span class="p">,</span> <span class="n">user_id</span><span class="p">)</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;validated all the enabled, unvalidated features profiles for metric_id - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_id</span><span class="p">))</span>
                         <span class="k">if</span> <span class="n">all_validated</span><span class="p">:</span>
                             <span class="n">validated_count</span> <span class="o">=</span> <span class="n">features_profiles_to_validate_count</span>
@@ -1385,7 +1550,32 @@
                 <span class="c1"># metrics_with_features_profiles_to_validate</span>
                 <span class="c1"># [[metric_id, metric, fps_to_validate_count]]</span>
                 <span class="n">metrics_with_features_profiles_to_validate</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">get_metrics_with_features_profiles_to_validate</span><span class="p">()</span>
+
+                <span class="c1"># @added 20190501 - Feature #2430: Ionosphere validate learnt features profiles page</span>
+                <span class="c1"># Only add to features_profiles_to_validate if the metric is active</span>
+                <span class="c1"># in Redis</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">settings</span><span class="o">.</span><span class="n">OTHER_SKYLINE_REDIS_INSTANCES</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">metrics_with_features_profiles_to_validate</span><span class="p">:</span>
+                        <span class="n">active_metrics_with_features_profiles_to_validate</span> <span class="o">=</span> <span class="p">[]</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">unique_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">REDIS_CONN</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span> <span class="o">+</span> <span class="s1">&#39;unique_metrics&#39;</span><span class="p">))</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: Webapp could not get the unique_metrics list from Redis&#39;</span><span class="p">)</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                            <span class="k">return</span> <span class="s1">&#39;Internal Server Error&#39;</span><span class="p">,</span> <span class="mi">500</span>
+                        <span class="k">for</span> <span class="n">i_metric_id</span><span class="p">,</span> <span class="n">i_metric</span><span class="p">,</span> <span class="n">fps_to_validate_count</span> <span class="ow">in</span> <span class="n">metrics_with_features_profiles_to_validate</span><span class="p">:</span>
+                            <span class="n">i_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">i_metric</span><span class="p">))</span>
+                            <span class="k">if</span> <span class="n">i_metric_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">unique_metrics</span><span class="p">:</span>
+                                <span class="k">continue</span>
+                            <span class="n">active_metrics_with_features_profiles_to_validate</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">i_metric_id</span><span class="p">,</span> <span class="n">i_metric</span><span class="p">,</span> <span class="n">fps_to_validate_count</span><span class="p">])</span>
+                        <span class="n">metrics_with_features_profiles_to_validate</span> <span class="o">=</span> <span class="n">active_metrics_with_features_profiles_to_validate</span>
+
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;no features_profiles_to_validate was passed so determined metrics_with_features_profiles_to_validate&#39;</span><span class="p">)</span>
+
+            <span class="c1"># @added 20190503 - Branch #2646: slack</span>
+            <span class="k">if</span> <span class="n">validated_count</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">slack_updated</span> <span class="o">=</span> <span class="n">webapp_update_slack_thread</span><span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">validated_count</span><span class="p">,</span> <span class="s1">&#39;validated&#39;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;slack_updated for validated features profiles </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">slack_updated</span><span class="p">))</span>
 
             <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span>
                 <span class="s1">&#39;ionosphere.html&#39;</span><span class="p">,</span> <span class="n">fp_validate</span><span class="o">=</span><span class="n">fp_validate_req</span><span class="p">,</span>
@@ -1397,6 +1587,9 @@
                 <span class="n">validate_all</span><span class="o">=</span><span class="n">validate_all</span><span class="p">,</span> <span class="n">all_validated</span><span class="o">=</span><span class="n">all_validated</span><span class="p">,</span>
                 <span class="n">validated_count</span><span class="o">=</span><span class="n">validated_count</span><span class="p">,</span>
                 <span class="n">version</span><span class="o">=</span><span class="n">skyline_version</span><span class="p">,</span>
+                <span class="c1"># @added 20190919 - Feature #3230: users DB table</span>
+                <span class="c1">#                   Feature #2516: Add label to features profile</span>
+                <span class="n">user</span><span class="o">=</span><span class="n">user</span><span class="p">,</span>
                 <span class="n">duration</span><span class="o">=</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">),</span> <span class="n">print_debug</span><span class="o">=</span><span class="kc">False</span><span class="p">),</span> <span class="mi">200</span>
 
     <span class="c1"># @added 20170220 - Feature #1862: Ionosphere features profiles search page</span>
@@ -1469,8 +1662,16 @@
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
             <span class="n">key</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">REQUEST_ARGS</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: invalid request argument - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">))</span>
-                <span class="k">return</span> <span class="s1">&#39;Bad Request&#39;</span><span class="p">,</span> <span class="mi">400</span>
+                <span class="c1"># @modified 20190524 - Branch #3002: docker</span>
+                <span class="c1"># Return data</span>
+                <span class="c1"># logger.error(&#39;error :: invalid request argument - %s&#39; % (key))</span>
+                <span class="c1"># return &#39;Bad Request&#39;, 400</span>
+                <span class="n">error_string</span> <span class="o">=</span> <span class="s1">&#39;error :: invalid request argument - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error_string</span><span class="p">)</span>
+                <span class="n">resp</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
+                    <span class="p">{</span><span class="s1">&#39;400 Bad Request&#39;</span><span class="p">:</span> <span class="n">error_string</span><span class="p">})</span>
+                <span class="k">return</span> <span class="n">flask_escape</span><span class="p">(</span><span class="n">resp</span><span class="p">),</span> <span class="mi">400</span>
+
             <span class="n">value</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;request argument - </span><span class="si">%s</span><span class="s1">=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)))</span>
 
@@ -1505,7 +1706,23 @@
                 <span class="k">if</span> <span class="n">timestamp_format_invalid</span><span class="p">:</span>
                     <span class="n">error_string</span> <span class="o">=</span> <span class="s1">&#39;error :: invalid </span><span class="si">%s</span><span class="s1"> value passed </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: invalid </span><span class="si">%s</span><span class="s1"> value passed </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
-                    <span class="k">return</span> <span class="s1">&#39;Bad Request&#39;</span><span class="p">,</span> <span class="mi">400</span>
+                    <span class="c1"># @modified 20190524 - Branch #3002: docker</span>
+                    <span class="c1"># Return data</span>
+                    <span class="c1"># return &#39;Bad Request&#39;, 400</span>
+                    <span class="n">error_string</span> <span class="o">=</span> <span class="s1">&#39;error :: invalid request argument - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error_string</span><span class="p">)</span>
+                    <span class="n">resp</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
+                        <span class="p">{</span><span class="s1">&#39;400 Bad Request&#39;</span><span class="p">:</span> <span class="n">error_string</span><span class="p">})</span>
+                    <span class="k">return</span> <span class="n">flask_escape</span><span class="p">(</span><span class="n">resp</span><span class="p">),</span> <span class="mi">400</span>
+
+                <span class="c1"># @added 20190524 - Bug #3050: Ionosphere - Skyline and Graphite feedback</span>
+                <span class="c1">#                   Branch #3002: docker</span>
+                <span class="c1"># Added the missing definition of these 2 variables in the</span>
+                <span class="c1"># fp_matches context</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;from_timestamp&#39;</span><span class="p">:</span>
+                    <span class="n">from_timestamp</span> <span class="o">=</span> <span class="n">value</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;until_timestamp&#39;</span><span class="p">:</span>
+                    <span class="n">until_timestamp</span> <span class="o">=</span> <span class="n">value</span>
 
             <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;count_by_metric&#39;</span><span class="p">:</span>
                 <span class="n">count_by_metric</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="s1">&#39;count_by_metric&#39;</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
@@ -1531,9 +1748,9 @@
 
                 <span class="c1"># @added 20180423 - Feature #2034: analyse_derivatives</span>
                 <span class="c1">#                   Branch #2270: luminosity</span>
+                <span class="n">metric_found_in_other_redis</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="n">other_unique_metrics</span> <span class="o">=</span> <span class="p">[]</span>
                 <span class="k">if</span> <span class="n">metric_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">unique_metrics</span> <span class="ow">and</span> <span class="n">settings</span><span class="o">.</span><span class="n">OTHER_SKYLINE_REDIS_INSTANCES</span><span class="p">:</span>
-                    <span class="n">metric_found_in_other_redis</span> <span class="o">=</span> <span class="kc">False</span>
                     <span class="c1"># @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow</span>
                     <span class="c1"># for redis_ip, redis_port in settings.OTHER_SKYLINE_REDIS_INSTANCES:</span>
                     <span class="k">for</span> <span class="n">redis_ip</span><span class="p">,</span> <span class="n">redis_port</span><span class="p">,</span> <span class="n">redis_password</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">OTHER_SKYLINE_REDIS_INSTANCES</span><span class="p">:</span>
@@ -1632,7 +1849,9 @@
                 <span class="k">if</span> <span class="n">show_graphs</span> <span class="o">==</span> <span class="s1">&#39;true&#39;</span><span class="p">:</span>
                     <span class="n">show_graphs</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">if</span> <span class="n">search_success</span> <span class="ow">and</span> <span class="n">fps</span> <span class="ow">and</span> <span class="n">show_graphs</span><span class="p">:</span>
-                <span class="n">query_context</span> <span class="o">=</span> <span class="s1">&#39;features_profiles&#39;</span>
+                <span class="c1"># @modified 20190503 - Branch #2646: slack - linting</span>
+                <span class="c1"># query_context = &#39;features_profiles&#39;</span>
+
                 <span class="k">for</span> <span class="n">fp_elements</span> <span class="ow">in</span> <span class="n">fps</span><span class="p">:</span>
                     <span class="c1"># Get images</span>
                     <span class="k">try</span><span class="p">:</span>
@@ -1660,7 +1879,10 @@
                         <span class="n">full_duration</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">full_duration_float</span><span class="p">)</span>
                         <span class="n">full_duration_in_hours</span> <span class="o">=</span> <span class="n">full_duration</span> <span class="o">/</span> <span class="mi">60</span> <span class="o">/</span> <span class="mi">60</span>
                         <span class="n">full_duration_in_hours_image_string</span> <span class="o">=</span> <span class="s1">&#39;.</span><span class="si">%s</span><span class="s1">h.png&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">full_duration_in_hours</span><span class="p">))</span>
-                        <span class="n">show_graph_images</span> <span class="o">=</span> <span class="p">[]</span>
+
+                        <span class="c1"># @modified 20190503 - Branch #2646: slack - linting</span>
+                        <span class="c1"># show_graph_images = []</span>
+
                         <span class="n">redis_image</span> <span class="o">=</span> <span class="s1">&#39;No Redis data graph&#39;</span>
                         <span class="n">full_duration_image</span> <span class="o">=</span> <span class="s1">&#39;No full duration graph&#39;</span>
                         <span class="c1"># @modified 20180918 - Feature #2602: Graphs in search_features_profiles</span>
@@ -1732,28 +1954,42 @@
         <span class="c1"># Added by fp_id or layer_id as well</span>
         <span class="n">fp_id</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">layer_id</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># @added 20190619 - Feature #3084: Ionosphere - validated matches</span>
+        <span class="n">validated_equals</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
             <span class="n">key</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
             <span class="n">value</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;fp_id&#39;</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;request key </span><span class="si">%s</span><span class="s1"> set to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)))</span>
                 <span class="k">try</span><span class="p">:</span>
-                    <span class="n">test_fp_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">+</span> <span class="mi">0</span>
-                    <span class="k">if</span> <span class="n">test_fp_id</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-                        <span class="n">fp_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">test_fp_id</span><span class="p">)</span>
+                    <span class="c1"># @modified 20190524 - Branch #3002: docker</span>
+                    <span class="c1"># test_fp_id = int(value) + 0</span>
+                    <span class="c1"># if test_fp_id &gt; 0:</span>
+                    <span class="c1">#     fp_id = str(test_fp_id)</span>
+                    <span class="n">test_fp_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+                    <span class="k">if</span> <span class="n">test_fp_id</span> <span class="o">&gt;</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+                        <span class="n">fp_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="c1"># @modified 20190116 - Cross-Site Scripting Security Vulnerability #85</span>
                         <span class="c1">#                      Bug #2816: Cross-Site Scripting Security Vulnerability</span>
                         <span class="c1"># Test that the fp_id is an int first</span>
                         <span class="c1"># fp_id = None</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: invalid request argument - fp_id is not an int&#39;</span><span class="p">)</span>
-                        <span class="k">return</span> <span class="s1">&#39;Bad Request&#39;</span><span class="p">,</span> <span class="mi">400</span>
+                        <span class="c1"># @modified 20190524 - Branch #3002: docker</span>
+                        <span class="c1"># Return data</span>
+                        <span class="c1"># return &#39;Bad Request&#39;, 400</span>
+                        <span class="n">error_string</span> <span class="o">=</span> <span class="s1">&#39;error :: invalid request argument - fp_id is not an int&#39;</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error_string</span><span class="p">)</span>
+                        <span class="n">resp</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
+                            <span class="p">{</span><span class="s1">&#39;400 Bad Request&#39;</span><span class="p">:</span> <span class="n">error_string</span><span class="p">})</span>
+                        <span class="k">return</span> <span class="n">flask_escape</span><span class="p">(</span><span class="n">resp</span><span class="p">),</span> <span class="mi">200</span>
+
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fp_id now set to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">)))</span>
                 <span class="k">except</span><span class="p">:</span>
                     <span class="n">error_string</span> <span class="o">=</span> <span class="s1">&#39;error :: the fp_id argument was passed but not as an int - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error_string</span><span class="p">)</span>
                     <span class="n">resp</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
-                        <span class="p">{</span><span class="s1">&#39;results&#39;</span><span class="p">:</span> <span class="n">error_string</span><span class="p">})</span>
+                        <span class="p">{</span><span class="s1">&#39;400 Bad Request&#39;</span><span class="p">:</span> <span class="n">error_string</span><span class="p">})</span>
                     <span class="c1"># @modified 20190116 - Cross-Site Scripting Security Vulnerability #85</span>
                     <span class="c1">#                      Bug #2816: Cross-Site Scripting Security Vulnerability</span>
                     <span class="c1"># return resp, 404</span>
@@ -1771,11 +2007,15 @@
                     <span class="n">error_string</span> <span class="o">=</span> <span class="s1">&#39;error :: the layer_id argument was passed but not as an int - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error_string</span><span class="p">)</span>
                     <span class="n">resp</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
-                        <span class="p">{</span><span class="s1">&#39;results&#39;</span><span class="p">:</span> <span class="n">error_string</span><span class="p">})</span>
+                        <span class="p">{</span><span class="s1">&#39;400 Bad Request&#39;</span><span class="p">:</span> <span class="n">error_string</span><span class="p">})</span>
                     <span class="c1"># @modified 20190116 - Cross-Site Scripting Security Vulnerability #85</span>
                     <span class="c1">#                      Bug #2816: Cross-Site Scripting Security Vulnerability</span>
                     <span class="c1"># return resp, 404</span>
                     <span class="k">return</span> <span class="n">flask_escape</span><span class="p">(</span><span class="n">resp</span><span class="p">),</span> <span class="mi">404</span>
+
+            <span class="c1"># @added 20190619 - Feature #3084: Ionosphere - validated matches</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;validated_equals&#39;</span><span class="p">:</span>
+                <span class="n">validated_equals</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;get_fp_matches with arguments :: </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
             <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_like</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">layer_id</span><span class="p">),</span>
@@ -1785,6 +2025,22 @@
         <span class="n">matches</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">get_fp_matches</span><span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="n">metric_like</span><span class="p">,</span> <span class="n">fp_id</span><span class="p">,</span> <span class="n">layer_id</span><span class="p">,</span> <span class="n">from_timestamp</span><span class="p">,</span> <span class="n">until_timestamp</span><span class="p">,</span> <span class="n">limited_by</span><span class="p">,</span> <span class="n">ordered_by</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">matches</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">internal_error</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span><span class="p">)</span>
+
+        <span class="c1"># @added 20190619 - Feature #3084: Ionosphere - validated matches</span>
+        <span class="k">if</span> <span class="n">validated_equals</span><span class="p">:</span>
+            <span class="n">filter_matches</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">validated_equals</span> <span class="o">==</span> <span class="s1">&#39;any&#39;</span><span class="p">:</span>
+                <span class="n">filter_matches</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">validated_equals</span> <span class="o">==</span> <span class="s1">&#39;true&#39;</span><span class="p">:</span>
+                <span class="n">filter_match_validation</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="n">validated_equals</span> <span class="o">==</span> <span class="s1">&#39;false&#39;</span><span class="p">:</span>
+                <span class="n">filter_match_validation</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">if</span> <span class="n">validated_equals</span> <span class="o">==</span> <span class="s1">&#39;invalid&#39;</span><span class="p">:</span>
+                <span class="n">filter_match_validation</span> <span class="o">=</span> <span class="mi">2</span>
+            <span class="k">if</span> <span class="n">filter_matches</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;matches filtered by validated = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">filter_match_validation</span><span class="p">)))</span>
+
         <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span>
             <span class="s1">&#39;ionosphere.html&#39;</span><span class="p">,</span> <span class="n">fp_matches</span><span class="o">=</span><span class="n">fp_matches_req</span><span class="p">,</span> <span class="n">for_metric</span><span class="o">=</span><span class="n">metric</span><span class="p">,</span>
             <span class="n">fp_matches_results</span><span class="o">=</span><span class="n">matches</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">ordered_by</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="n">limited_by</span><span class="p">,</span>
@@ -1822,12 +2078,21 @@
         <span class="s1">&#39;matched_fp_id&#39;</span><span class="p">,</span> <span class="s1">&#39;matched_layer_id&#39;</span><span class="p">,</span>
         <span class="c1"># @added 20180804 - Feature #2488: Allow user to specifically set metric as a derivative metric in training_data</span>
         <span class="s1">&#39;load_derivative_graphs&#39;</span><span class="p">,</span>
+        <span class="c1"># @added 20190601 - Feature #3084: Ionosphere - validated matches</span>
+        <span class="s1">&#39;match_validation&#39;</span><span class="p">,</span>
+        <span class="c1"># @added 20190922 - Feature #2516: Add label to features profile</span>
+        <span class="s1">&#39;label&#39;</span><span class="p">,</span>
     <span class="p">]</span>
 
-    <span class="n">determine_metric</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="c1"># @modified 20190503 - Branch #2646: slack - linting</span>
+    <span class="c1"># determine_metric = False</span>
+
     <span class="n">dated_list</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">td_requested_timestamp</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="n">feature_profile_view</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="c1"># @modified 20190503 - Branch #2646: slack - linting</span>
+    <span class="c1"># feature_profile_view = False</span>
+
     <span class="n">calculate_features</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">create_feature_profile</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">fp_view</span> <span class="o">=</span> <span class="kc">False</span>
@@ -1856,6 +2121,11 @@
     <span class="c1"># @added 20170917 - Feature #1996: Ionosphere - matches page</span>
     <span class="n">matched_fp_id</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">matched_layer_id</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="c1"># @added 20190601 - Feature #3084: Ionosphere - validated matches</span>
+    <span class="n">match_validated</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># @added 20190922 - Feature #2516: Add label to features profile</span>
+    <span class="n">fp_label</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">try</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">request_args_present</span><span class="p">:</span>
@@ -1875,6 +2145,18 @@
                     <span class="n">matched_fp_id</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="s1">&#39;matched_fp_id&#39;</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
                 <span class="k">if</span> <span class="s1">&#39;matched_layer_id&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
                     <span class="n">matched_layer_id</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="s1">&#39;matched_layer_id&#39;</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="c1"># @added 20190601 - Feature #3084: Ionosphere - validated matches</span>
+                <span class="k">if</span> <span class="s1">&#39;match_validation&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+                    <span class="n">match_validated_str</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="s1">&#39;match_validation&#39;</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">match_validated_str</span><span class="p">:</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">match_validated</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">match_validated_str</span><span class="p">)</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">error_string</span> <span class="o">=</span> <span class="s1">&#39;error :: invalid request argument - match_validation is not an int - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">match_validated_str</span><span class="p">)</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error_string</span><span class="p">)</span>
+                            <span class="n">resp</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
+                                <span class="p">{</span><span class="s1">&#39;results&#39;</span><span class="p">:</span> <span class="n">error_string</span><span class="p">})</span>
+                            <span class="k">return</span> <span class="n">flask_escape</span><span class="p">(</span><span class="n">resp</span><span class="p">),</span> <span class="mi">400</span>
 
                 <span class="c1"># @added 20170122 - Feature #1872: Ionosphere - features profile page by id only</span>
                 <span class="c1"># Determine the features profile dir path for a fp_id</span>
@@ -1885,12 +2167,23 @@
                     <span class="k">try</span><span class="p">:</span>
                         <span class="n">test_fp_id</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="s1">&#39;fp_id&#39;</span><span class="p">))</span>
                         <span class="n">test_fp_id_valid</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">test_fp_id</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;test_fp_id_valid tests OK with </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">test_fp_id_valid</span><span class="p">))</span>
                     <span class="k">except</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: invalid request argument - fp_id is not an int&#39;</span><span class="p">)</span>
-                        <span class="k">return</span> <span class="s1">&#39;Bad Request&#39;</span><span class="p">,</span> <span class="mi">400</span>
+                        <span class="c1"># @modified 20190524 - Branch #3002: docker</span>
+                        <span class="c1"># Return data</span>
+                        <span class="c1"># return &#39;Bad Request&#39;, 400</span>
+                        <span class="n">error_string</span> <span class="o">=</span> <span class="s1">&#39;error :: the fp_id argument was passed but not as an int - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error_string</span><span class="p">)</span>
+                        <span class="n">resp</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
+                            <span class="p">{</span><span class="s1">&#39;results&#39;</span><span class="p">:</span> <span class="n">error_string</span><span class="p">})</span>
+                        <span class="k">return</span> <span class="n">flask_escape</span><span class="p">(</span><span class="n">resp</span><span class="p">),</span> <span class="mi">400</span>
 
                     <span class="n">fp_id</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="s1">&#39;fp_id&#39;</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
-                    <span class="n">metric_timestamp</span> <span class="o">=</span> <span class="mi">0</span>
+
+                    <span class="c1"># @modified 20190503 - Branch #2646: slack - linting</span>
+                    <span class="c1"># metric_timestamp = 0</span>
+
                     <span class="k">try</span><span class="p">:</span>
                         <span class="n">fp_details</span><span class="p">,</span> <span class="n">fp_details_successful</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">traceback_format_exc</span><span class="p">,</span> <span class="n">fp_details_object</span> <span class="o">=</span> <span class="n">features_profile_details</span><span class="p">(</span><span class="n">fp_id</span><span class="p">)</span>
                         <span class="n">anomaly_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">fp_details_object</span><span class="p">[</span><span class="s1">&#39;anomaly_timestamp&#39;</span><span class="p">])</span>
@@ -2026,6 +2319,14 @@
                                 <span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_URL</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">use_timestamp</span><span class="p">),</span> <span class="n">base_name</span><span class="p">,</span>
                                 <span class="nb">str</span><span class="p">(</span><span class="n">matched_layer_id</span><span class="p">))</span>
 
+                    <span class="c1"># @added 20190601 - Feature #3084: Ionosphere - validated matches</span>
+                    <span class="k">if</span> <span class="n">matched_fp_id</span> <span class="ow">or</span> <span class="n">matched_layer_id</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="s1">&#39;match_validation&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">match_validated</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                                <span class="n">validate_matched_redirect_url</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&amp;match_validation=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                    <span class="n">redirect_url</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">match_validated</span><span class="p">))</span>
+                                <span class="n">redirect_url</span> <span class="o">=</span> <span class="n">validate_matched_redirect_url</span>
+
                     <span class="c1"># @modified 20170327 - Feature #2004: Ionosphere layers - edit_layers</span>
                     <span class="c1">#                      Task #2002: Review and correct incorrectly defined layers</span>
                     <span class="c1"># Build the query string from the previous parameters</span>
@@ -2049,7 +2350,15 @@
                 <span class="n">key</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">IONOSPHERE_REQUEST_ARGS</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: invalid request argument - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">))</span>
-                    <span class="k">return</span> <span class="s1">&#39;Bad Request&#39;</span><span class="p">,</span> <span class="mi">400</span>
+                    <span class="c1"># @modified 20190524 - Branch #3002: docker</span>
+                    <span class="c1"># Return data</span>
+                    <span class="c1"># return &#39;Bad Request&#39;, 400</span>
+                    <span class="n">error_string</span> <span class="o">=</span> <span class="s1">&#39;error :: invalid request argument - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error_string</span><span class="p">)</span>
+                    <span class="n">resp</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
+                        <span class="p">{</span><span class="s1">&#39;400 Bad Request&#39;</span><span class="p">:</span> <span class="n">error_string</span><span class="p">})</span>
+                    <span class="k">return</span> <span class="n">flask_escape</span><span class="p">(</span><span class="n">resp</span><span class="p">),</span> <span class="mi">400</span>
+
                 <span class="n">value</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;request argument - </span><span class="si">%s</span><span class="s1">=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)))</span>
 
@@ -2100,6 +2409,8 @@
 
                 <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;features_profiles&#39;</span><span class="p">:</span>
                     <span class="n">fp_profiles</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                    <span class="c1"># @added 20190503 - Branch #2646: slack - linting</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fp_profiles is </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fp_profiles</span><span class="p">)</span>
 
                 <span class="c1"># @added 20170327 - Feature #2004: Ionosphere layers - edit_layers</span>
                 <span class="c1">#                   Task #2002: Review and correct incorrectly defined layers</span>
@@ -2163,6 +2474,11 @@
                     <span class="k">if</span> <span class="ow">not</span> <span class="n">fp_view</span><span class="p">:</span>
                         <span class="n">check_for_purged</span> <span class="o">=</span> <span class="kc">True</span>
 
+                <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;label&#39;</span><span class="p">:</span>
+                    <span class="n">label_arg</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;label&#39;</span><span class="p">)</span>
+                    <span class="n">label</span> <span class="o">=</span> <span class="n">label_arg</span><span class="p">[:</span><span class="mi">255</span><span class="p">]</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;label - </span><span class="si">%s</span><span class="s1"> &#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)))</span>
+
                 <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;timestamp&#39;</span> <span class="ow">or</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;timestamp_td&#39;</span><span class="p">:</span>
                     <span class="n">valid_timestamp</span> <span class="o">=</span> <span class="kc">True</span>
                     <span class="k">if</span> <span class="ow">not</span> <span class="nb">len</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">))</span> <span class="o">==</span> <span class="mi">10</span><span class="p">:</span>
@@ -2173,6 +2489,8 @@
                     <span class="k">if</span> <span class="n">valid_timestamp</span><span class="p">:</span>
                         <span class="k">try</span><span class="p">:</span>
                             <span class="n">timestamp_numeric</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+                            <span class="c1"># @added 20190503 - Branch #2646: slack - linting</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;timestamp_numeric tests OK with </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">timestamp_numeric</span><span class="p">))</span>
                         <span class="k">except</span><span class="p">:</span>
                             <span class="n">valid_timestamp</span> <span class="o">=</span> <span class="kc">False</span>
                             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;bad request argument - </span><span class="si">%s</span><span class="s1">=</span><span class="si">%s</span><span class="s1"> not numeric&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)))</span>
@@ -2629,12 +2947,23 @@
                 <span class="n">parent_id</span> <span class="o">=</span> <span class="mi">0</span>
                 <span class="n">generation</span> <span class="o">=</span> <span class="mi">0</span>
                 <span class="n">ionosphere_job</span> <span class="o">=</span> <span class="s1">&#39;learn_fp_human&#39;</span>
+                <span class="c1"># @added 20190503 - Branch #2646: slack</span>
+                <span class="c1"># Added slack_ionosphere_job</span>
+                <span class="n">slack_ionosphere_job</span> <span class="o">=</span> <span class="n">ionosphere_job</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="c1"># @modified 20170120 -  Feature #1854: Ionosphere learn - generations</span>
                     <span class="c1"># Added fp_learn parameter to allow the user to not learn the</span>
                     <span class="c1"># use_full_duration_days</span>
                     <span class="c1"># fp_id, fp_in_successful, fp_exists, fail_msg, traceback_format_exc = create_features_profile(skyline_app, requested_timestamp, base_name, context, ionosphere_job, parent_id, generation, fp_learn)</span>
-                    <span class="n">fp_id</span><span class="p">,</span> <span class="n">fp_in_successful</span><span class="p">,</span> <span class="n">fp_exists</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">traceback_format_exc</span> <span class="o">=</span> <span class="n">create_features_profile</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">requested_timestamp</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">ionosphere_job</span><span class="p">,</span> <span class="n">parent_id</span><span class="p">,</span> <span class="n">generation</span><span class="p">,</span> <span class="n">fp_learn</span><span class="p">)</span>
+                    <span class="c1"># @modified 20190503 - Branch #2646: slack</span>
+                    <span class="c1"># Added slack_ionosphere_job</span>
+                    <span class="c1"># fp_id, fp_in_successful, fp_exists, fail_msg, traceback_format_exc = create_features_profile(skyline_app, requested_timestamp, base_name, context, ionosphere_job, parent_id, generation, fp_learn)</span>
+                    <span class="c1"># @modified 20190919 - Feature #3230: users DB table</span>
+                    <span class="c1">#                      Ideas #2476: Label and relate anomalies</span>
+                    <span class="c1">#                      Feature #2516: Add label to features profile</span>
+                    <span class="c1"># Added user_id and label</span>
+                    <span class="c1"># fp_id, fp_in_successful, fp_exists, fail_msg, traceback_format_exc = create_features_profile(skyline_app, requested_timestamp, base_name, context, ionosphere_job, parent_id, generation, fp_learn, slack_ionosphere_job)</span>
+                    <span class="n">fp_id</span><span class="p">,</span> <span class="n">fp_in_successful</span><span class="p">,</span> <span class="n">fp_exists</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">traceback_format_exc</span> <span class="o">=</span> <span class="n">create_features_profile</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">requested_timestamp</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">ionosphere_job</span><span class="p">,</span> <span class="n">parent_id</span><span class="p">,</span> <span class="n">generation</span><span class="p">,</span> <span class="n">fp_learn</span><span class="p">,</span> <span class="n">slack_ionosphere_job</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">label</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">create_feature_profile</span><span class="p">:</span>
                         <span class="n">generation_zero</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="k">except</span><span class="p">:</span>
@@ -2681,7 +3010,12 @@
                     <span class="c1"># @modified 20181013 - Feature #2430: Ionosphere validate learnt features profiles page</span>
                     <span class="c1"># Added the extended validate_fp parameter of id_column_name</span>
                     <span class="c1"># validated_fp_success, fail_msg, traceback_format_exc = validate_fp(fp_id)</span>
-                    <span class="n">validated_fp_success</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">traceback_format_exc</span> <span class="o">=</span> <span class="n">validate_fp</span><span class="p">(</span><span class="n">fp_id</span><span class="p">,</span> <span class="s1">&#39;id&#39;</span><span class="p">)</span>
+                    <span class="c1"># @modified 20190919 - Feature #3230: users DB table</span>
+                    <span class="c1">#                      Ideas #2476: Label and relate anomalies</span>
+                    <span class="c1">#                      Feature #2516: Add label to features profile</span>
+                    <span class="c1"># Added user_id</span>
+                    <span class="c1"># validated_fp_success, fail_msg, traceback_format_exc = validate_fp(fp_id, &#39;id&#39;)</span>
+                    <span class="n">validated_fp_success</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">traceback_format_exc</span> <span class="o">=</span> <span class="n">validate_fp</span><span class="p">(</span><span class="n">fp_id</span><span class="p">,</span> <span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="n">user_id</span><span class="p">)</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;validated fp_id - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">))</span>
                 <span class="k">except</span><span class="p">:</span>
                     <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
@@ -2721,7 +3055,16 @@
                 <span class="n">fp_layers_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">fp_details_object</span><span class="p">[</span><span class="s1">&#39;layers_id&#39;</span><span class="p">])</span>
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">fp_layers_id</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="n">layer_details</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="c1"># @added 20190922 - Feature #2516: Add label to features profile</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">fp_label</span> <span class="o">=</span> <span class="n">fp_details_object</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">fp_label</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="c1"># @modified 20190503 - Branch #2646: slack - linting</span>
+            <span class="c1"># layer_details = None</span>
+
             <span class="n">layer_details_success</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="k">if</span> <span class="n">fp_layers_id</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
@@ -2778,7 +3121,13 @@
             <span class="c1"># @added 20170309  - Feature #1960: ionosphere_layers - i_ts_json</span>
             <span class="c1"># Show the last 30</span>
             <span class="k">if</span> <span class="n">ts_json</span><span class="p">:</span>
-                <span class="n">sample_ts_json</span> <span class="o">=</span> <span class="n">ts_json</span><span class="p">[</span><span class="o">-</span><span class="mi">30</span><span class="p">:]</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">sample_ts_json</span> <span class="o">=</span> <span class="n">ts_json</span><span class="p">[</span><span class="o">-</span><span class="mi">30</span><span class="p">:]</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+                    <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;Failed to smaple ts_json&#39;</span>
+                    <span class="k">return</span> <span class="n">internal_error</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">trace</span><span class="p">)</span>
+
             <span class="c1"># @modified 20170331 - Task #1988: Review - Ionosphere layers - always show layers</span>
             <span class="c1">#                      Feature #1960: ionosphere_layers</span>
             <span class="c1"># Return the anomalous_timeseries as an array to sample</span>
@@ -2855,6 +3204,9 @@
             <span class="c1"># Added ionosphere_echo</span>
             <span class="n">echo_fp_value</span> <span class="o">=</span> <span class="mi">0</span>
 
+            <span class="c1"># @added 20190619 - Feature #2990: Add metrics id to relevant web pages</span>
+            <span class="n">metric_id</span> <span class="o">=</span> <span class="kc">False</span>
+
             <span class="c1"># Determine the parent_id and generation as they were added to the</span>
             <span class="c1"># fp_details_object</span>
             <span class="k">if</span> <span class="n">fp_details</span><span class="p">:</span>
@@ -2872,6 +3224,12 @@
                         <span class="n">echo_fp_value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">fp_details_object</span><span class="p">[</span><span class="s1">&#39;echo_fp&#39;</span><span class="p">])</span>
                     <span class="k">except</span><span class="p">:</span>
                         <span class="k">pass</span>
+
+                    <span class="c1"># @added 20190619 - Feature #2990: Add metrics id to relevant web pages</span>
+                    <span class="c1"># Determine the metric_id from the fp_details_object</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">metric_id</span><span class="p">:</span>
+                        <span class="n">metric_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">fp_details_object</span><span class="p">[</span><span class="s1">&#39;metric_id&#39;</span><span class="p">])</span>
+
                 <span class="k">except</span><span class="p">:</span>
                     <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
                     <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;Uh oh ... a Skyline 500 :( :: failed to determine parent or generation values from the fp_details_object&#39;</span>
@@ -2924,7 +3282,10 @@
 
             <span class="c1"># @added 20170303 - Feature #1960: ionosphere_layers</span>
             <span class="n">vconds</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;&lt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;==&#39;</span><span class="p">,</span> <span class="s1">&#39;!=&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;=&#39;</span><span class="p">,</span> <span class="s1">&#39;&gt;=&#39;</span><span class="p">]</span>
-            <span class="n">condition_list</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;&lt;&#39;</span><span class="p">,</span> <span class="s1">&#39;&gt;&#39;</span><span class="p">,</span> <span class="s1">&#39;==&#39;</span><span class="p">,</span> <span class="s1">&#39;!=&#39;</span><span class="p">,</span> <span class="s1">&#39;&lt;=&#39;</span><span class="p">,</span> <span class="s1">&#39;&gt;=&#39;</span><span class="p">,</span> <span class="s1">&#39;in&#39;</span><span class="p">,</span> <span class="s1">&#39;not in&#39;</span><span class="p">]</span>
+
+            <span class="c1"># @modified 20190503 - Branch #2646: slack - linting</span>
+            <span class="c1"># condition_list = [&#39;&lt;&#39;, &#39;&gt;&#39;, &#39;==&#39;, &#39;!=&#39;, &#39;&lt;=&#39;, &#39;&gt;=&#39;, &#39;in&#39;, &#39;not in&#39;]</span>
+
             <span class="n">crit_types</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">,</span> <span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="s1">&#39;day&#39;</span><span class="p">,</span> <span class="s1">&#39;from_time&#39;</span><span class="p">,</span> <span class="s1">&#39;until_time&#39;</span><span class="p">]</span>
 
             <span class="n">fp_layers</span> <span class="o">=</span> <span class="kc">None</span>
@@ -2951,6 +3312,8 @@
                 <span class="n">l_id</span><span class="p">,</span> <span class="n">layer_successful</span><span class="p">,</span> <span class="n">new_l_algos</span><span class="p">,</span> <span class="n">new_l_algos_ids</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">create_ionosphere_layers</span><span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="n">fp_id</span><span class="p">,</span> <span class="n">requested_timestamp</span><span class="p">)</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">layer_successful</span><span class="p">:</span>
                     <span class="k">return</span> <span class="n">internal_error</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">webapp_update_slack_thread</span><span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="n">requested_timestamp</span><span class="p">,</span> <span class="n">fp_id</span><span class="p">,</span> <span class="s1">&#39;layers_created&#39;</span><span class="p">)</span>
 
             <span class="c1"># @added 20170308 - Feature #1960: ionosphere_layers</span>
             <span class="c1"># To present the operator with the existing layers and algorithms for the metric</span>
@@ -3037,6 +3400,47 @@
                 <span class="n">minmax</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">matched_details_object</span><span class="p">[</span><span class="s1">&#39;minmax&#39;</span><span class="p">])</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;the fp match has minmax set to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">minmax</span><span class="p">))</span>
 
+            <span class="c1"># @added 20190601 - Feature #3084: Ionosphere - validated matches</span>
+            <span class="c1"># Update the DB that the match has been validated or invalidated</span>
+            <span class="n">validated_match_successful</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">match_validated_db_value</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">matched_fp_id</span> <span class="ow">or</span> <span class="n">matched_layer_id</span><span class="p">:</span>
+                <span class="n">match_validated_db_value</span> <span class="o">=</span> <span class="n">matched_details_object</span><span class="p">[</span><span class="s1">&#39;validated&#39;</span><span class="p">]</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;the match_validated_db_value is set to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">match_validated_db_value</span><span class="p">))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;the match_validated is set to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">match_validated</span><span class="p">))</span>
+                <span class="c1"># Only update if the value in the DB is different from the value</span>
+                <span class="c1"># in the argument, due to there being a difficulty in the</span>
+                <span class="c1"># removal of the match_validation argument due to the</span>
+                <span class="c1"># redirect_url function being applied earlier ^^ in the process.</span>
+                <span class="c1"># Unfortunately without the redirect_url function being applied</span>
+                <span class="c1"># this match_validation and match_validated would not work as</span>
+                <span class="c1"># the matched context the redirect_url function is used.  Hence</span>
+                <span class="c1"># more F.</span>
+                <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">match_validated_db_value</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">int</span><span class="p">(</span><span class="n">match_validated</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="s1">&#39;match_validation&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">match_validated</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;validating match&#39;</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">matched_fp_id</span><span class="p">:</span>
+                                <span class="n">match_id</span> <span class="o">=</span> <span class="n">matched_fp_id</span>
+                                <span class="n">validate_context</span> <span class="o">=</span> <span class="s1">&#39;ionosphere_matched&#39;</span>
+                            <span class="k">if</span> <span class="n">matched_layer_id</span><span class="p">:</span>
+                                <span class="n">match_id</span> <span class="o">=</span> <span class="n">matched_layer_id</span>
+                                <span class="n">validate_context</span> <span class="o">=</span> <span class="s1">&#39;ionosphere_layers_matched&#39;</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="c1"># @modified 20190920 -</span>
+                                <span class="c1"># Added user_id</span>
+                                <span class="c1"># validated_match_successful = validate_ionosphere_match(match_id, validate_context, match_validated)</span>
+                                <span class="n">validated_match_successful</span> <span class="o">=</span> <span class="n">validate_ionosphere_match</span><span class="p">(</span><span class="n">match_id</span><span class="p">,</span> <span class="n">validate_context</span><span class="p">,</span> <span class="n">match_validated</span><span class="p">,</span> <span class="n">user_id</span><span class="p">)</span>
+                                <span class="c1"># @added 20190921 - Feature #3234: Ionosphere - related matches vaildation</span>
+                                <span class="c1"># TODO - here related matches will also be validated</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;validated match&#39;</span><span class="p">)</span>
+                                <span class="n">match_validated_db_value</span> <span class="o">=</span> <span class="n">match_validated</span>
+                            <span class="k">except</span><span class="p">:</span>
+                                <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+                                <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: Webapp error with search_ionosphere&#39;</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
+                                <span class="k">return</span> <span class="n">internal_error</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span><span class="p">)</span>
+
             <span class="c1"># @added 20180921 - Feature #2558: Ionosphere - fluid approximation - approximately_close on layers</span>
             <span class="n">approx_close</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="k">if</span> <span class="n">matched_layer_id</span><span class="p">:</span>
@@ -3069,10 +3473,57 @@
                         <span class="n">graph_title_string</span> <span class="o">=</span> <span class="n">quote</span><span class="p">(</span><span class="n">unencoded_graph_title</span><span class="p">,</span> <span class="n">safe</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
                         <span class="n">graph_title</span> <span class="o">=</span> <span class="s1">&#39;&amp;title=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">graph_title_string</span>
                         <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PORT</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
-                            <span class="n">correlation_graphite_link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1">/render/?from=</span><span class="si">%s</span><span class="s1">&amp;until=</span><span class="si">%s</span><span class="s1">&amp;target=cactiStyle(</span><span class="si">%s</span><span class="s1">)</span><span class="si">%s%s</span><span class="s1">&amp;colorList=blue&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PROTOCOL</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PORT</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_from</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_until</span><span class="p">),</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_GRAPH_SETTINGS</span><span class="p">,</span> <span class="n">graph_title</span><span class="p">)</span>
+                            <span class="c1"># @modified 20190520 - Branch #3002: docker</span>
+                            <span class="c1"># correlation_graphite_link = &#39;%s://%s:%s/render/?from=%s&amp;until=%s&amp;target=cactiStyle(%s)%s%s&amp;colorList=blue&#39; % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT, str(graphite_from), str(graphite_until), metric_name, settings.GRAPHITE_GRAPH_SETTINGS, graph_title)</span>
+                            <span class="n">correlation_graphite_link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/?from=</span><span class="si">%s</span><span class="s1">&amp;until=</span><span class="si">%s</span><span class="s1">&amp;target=cactiStyle(</span><span class="si">%s</span><span class="s1">)</span><span class="si">%s%s</span><span class="s1">&amp;colorList=blue&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PROTOCOL</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span>
+                                <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PORT</span><span class="p">,</span> <span class="n">GRAPHITE_RENDER_URI</span><span class="p">,</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">graphite_from</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_until</span><span class="p">),</span> <span class="n">metric_name</span><span class="p">,</span>
+                                <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_GRAPH_SETTINGS</span><span class="p">,</span> <span class="n">graph_title</span><span class="p">)</span>
                         <span class="k">else</span><span class="p">:</span>
-                            <span class="n">correlation_graphite_link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">/render/?from=</span><span class="si">%s</span><span class="s1">&amp;until=</span><span class="si">%s</span><span class="s1">target=cactiStyle(</span><span class="si">%s</span><span class="s1">)</span><span class="si">%s%s</span><span class="s1">&amp;colorList=blue&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PROTOCOL</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_from</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_until</span><span class="p">),</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_GRAPH_SETTINGS</span><span class="p">,</span> <span class="n">graph_title</span><span class="p">)</span>
+                            <span class="c1"># @modified 20190520 - Branch #3002: docker</span>
+                            <span class="c1"># correlation_graphite_link = &#39;%s://%s/render/?from=%s&amp;until=%starget=cactiStyle(%s)%s%s&amp;colorList=blue&#39; % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, str(graphite_from), str(graphite_until), metric_name, settings.GRAPHITE_GRAPH_SETTINGS, graph_title)</span>
+                            <span class="n">correlation_graphite_link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/?from=</span><span class="si">%s</span><span class="s1">&amp;until=</span><span class="si">%s</span><span class="s1">target=cactiStyle(</span><span class="si">%s</span><span class="s1">)</span><span class="si">%s%s</span><span class="s1">&amp;colorList=blue&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PROTOCOL</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span>
+                                <span class="n">GRAPHITE_RENDER_URI</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_from</span><span class="p">),</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">graphite_until</span><span class="p">),</span> <span class="n">metric_name</span><span class="p">,</span>
+                                <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_GRAPH_SETTINGS</span><span class="p">,</span> <span class="n">graph_title</span><span class="p">)</span>
                         <span class="n">correlations_with_graph_links</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">metric_name</span><span class="p">,</span> <span class="n">coefficient</span><span class="p">,</span> <span class="n">shifted</span><span class="p">,</span> <span class="n">shifted_coefficient</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">correlation_graphite_link</span><span class="p">)])</span>
+
+            <span class="c1"># @added 20190510 - Feature #2990: Add metrics id to relevant web pages</span>
+            <span class="c1"># By this point in the request the previous function calls will have</span>
+            <span class="c1"># populated memcache with the metric details</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">metric_id</span><span class="p">:</span>
+                <span class="n">metric_id</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">cache_key</span> <span class="o">=</span> <span class="s1">&#39;panorama.mysql_ids.metrics.metric.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span>
+                    <span class="n">metric_id_msg_pack</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="n">metric_id_msg_pack</span> <span class="o">=</span> <span class="n">REDIS_CONN</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">metric_id_msg_pack</span><span class="p">:</span>
+                        <span class="n">unpacker</span> <span class="o">=</span> <span class="n">Unpacker</span><span class="p">(</span><span class="n">use_list</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                        <span class="n">unpacker</span><span class="o">.</span><span class="n">feed</span><span class="p">(</span><span class="n">metric_id_msg_pack</span><span class="p">)</span>
+                        <span class="n">metric_id</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">unpacker</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metrics id is </span><span class="si">%s</span><span class="s1"> from Redis key -</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">metric_id</span><span class="p">),</span> <span class="n">cache_key</span><span class="p">))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Webapp could not get metric id from Redis key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">cache_key</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: Webapp could not get metric id from Redis key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">cache_key</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metrics id is </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_id</span><span class="p">))</span>
+
+            <span class="c1"># @added 20190502 - Branch #2646: slack</span>
+            <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;training_data&#39;</span><span class="p">:</span>
+                <span class="n">update_slack</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="c1"># Do not update if a fp_id is present</span>
+                <span class="k">if</span> <span class="n">fp_id</span><span class="p">:</span>
+                    <span class="n">update_slack</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="c1"># Do not update slack when extract features is run</span>
+                <span class="k">if</span> <span class="n">calculate_features</span><span class="p">:</span>
+                    <span class="n">update_slack</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">if</span> <span class="n">update_slack</span><span class="p">:</span>
+                    <span class="n">slack_updated</span> <span class="o">=</span> <span class="n">webapp_update_slack_thread</span><span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="n">requested_timestamp</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;training_data_viewed&#39;</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;slack_updated for training_data_viewed </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">slack_updated</span><span class="p">))</span>
 
             <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span>
                 <span class="s1">&#39;ionosphere.html&#39;</span><span class="p">,</span> <span class="n">timestamp</span><span class="o">=</span><span class="n">requested_timestamp</span><span class="p">,</span>
@@ -3141,6 +3592,14 @@
                 <span class="c1"># Added ionosphere_echo</span>
                 <span class="n">echo_fp</span><span class="o">=</span><span class="n">echo_fp_value</span><span class="p">,</span> <span class="n">echo_human_date</span><span class="o">=</span><span class="n">echo_hdate</span><span class="p">,</span>
                 <span class="n">metric_full_duration_in_hours_image_str</span><span class="o">=</span><span class="n">m_fd_in_hours_img_str</span><span class="p">,</span>
+                <span class="c1"># @added 20190510 - Feature #2990: Add metrics id to relevant web pages</span>
+                <span class="n">metric_id</span><span class="o">=</span><span class="n">metric_id</span><span class="p">,</span>
+                <span class="c1"># @added 20190601 - Feature #3084: Ionosphere - validated matches</span>
+                <span class="n">match_validated</span><span class="o">=</span><span class="n">match_validated</span><span class="p">,</span>
+                <span class="n">match_validated_db_value</span><span class="o">=</span><span class="n">match_validated_db_value</span><span class="p">,</span>
+                <span class="n">validated_match_successful</span><span class="o">=</span><span class="n">validated_match_successful</span><span class="p">,</span>
+                <span class="c1"># @added 20190922 - Feature #2516: Add label to features profile</span>
+                <span class="n">fp_label</span><span class="o">=</span><span class="n">fp_label</span><span class="p">,</span>
                 <span class="n">version</span><span class="o">=</span><span class="n">skyline_version</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">),</span>
                 <span class="n">print_debug</span><span class="o">=</span><span class="n">debug_on</span><span class="p">),</span> <span class="mi">200</span>
         <span class="k">except</span><span class="p">:</span>
@@ -3169,6 +3628,7 @@
         <span class="n">request_args_present</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">request_args_len</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: request arguments have no length - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">request_args_len</span><span class="p">))</span>
 
     <span class="n">IONOSPHERE_REQUEST_ARGS</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;image&#39;</span><span class="p">]</span>
 
@@ -3177,7 +3637,15 @@
             <span class="n">key</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">IONOSPHERE_REQUEST_ARGS</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: invalid request argument - </span><span class="si">%s</span><span class="s1">=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)))</span>
-                <span class="k">return</span> <span class="s1">&#39;Bad Request&#39;</span><span class="p">,</span> <span class="mi">400</span>
+                <span class="c1"># @modified 20190524 - Branch #3002: docker</span>
+                <span class="c1"># Return data</span>
+                <span class="c1"># return &#39;Bad Request&#39;, 400</span>
+                <span class="n">error_string</span> <span class="o">=</span> <span class="s1">&#39;error :: invalid request argument - </span><span class="si">%s</span><span class="s1">=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error_string</span><span class="p">)</span>
+                <span class="n">resp</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
+                    <span class="p">{</span><span class="s1">&#39;400 Bad Request&#39;</span><span class="p">:</span> <span class="n">error_string</span><span class="p">})</span>
+                <span class="k">return</span> <span class="n">flask_escape</span><span class="p">(</span><span class="n">resp</span><span class="p">),</span> <span class="mi">400</span>
+
             <span class="n">value</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;request argument - </span><span class="si">%s</span><span class="s1">=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)))</span>
 
@@ -3212,7 +3680,7 @@
 <span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/utilities&quot;</span><span class="p">)</span>
 <span class="nd">@requires_auth</span>
 <div class="viewcode-block" id="utilities"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.utilities">[docs]</a><span class="k">def</span> <span class="nf">utilities</span><span class="p">():</span>
-    <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+    <span class="c1"># start = time.time()</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;utilities.html&#39;</span><span class="p">),</span> <span class="mi">200</span>
     <span class="k">except</span><span class="p">:</span>
@@ -3334,9 +3802,17 @@
 <span class="c1"># elky84</span>
 <div class="viewcode-block" id="get_redis"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.get_redis">[docs]</a><span class="k">def</span> <span class="nf">get_redis</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">db</span><span class="p">,</span> <span class="n">password</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">password</span> <span class="o">==</span> <span class="s2">&quot;&quot;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">redis</span><span class="o">.</span><span class="n">StrictRedis</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">port</span><span class="p">,</span> <span class="n">db</span><span class="o">=</span><span class="n">db</span><span class="p">)</span>
+        <span class="c1"># @modified 20190517 - Branch #3002: docker</span>
+        <span class="c1"># Allow rebrow to connect to Redis on the socket too</span>
+        <span class="k">if</span> <span class="n">host</span> <span class="o">==</span> <span class="s1">&#39;unix_socket&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">redis</span><span class="o">.</span><span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">,</span> <span class="n">db</span><span class="o">=</span><span class="n">db</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">redis</span><span class="o">.</span><span class="n">StrictRedis</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">port</span><span class="p">,</span> <span class="n">db</span><span class="o">=</span><span class="n">db</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">redis</span><span class="o">.</span><span class="n">StrictRedis</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">port</span><span class="p">,</span> <span class="n">db</span><span class="o">=</span><span class="n">db</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="n">password</span><span class="p">)</span></div>
+        <span class="k">if</span> <span class="n">host</span> <span class="o">==</span> <span class="s1">&#39;unix_socket&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">redis</span><span class="o">.</span><span class="n">StrictRedis</span><span class="p">(</span><span class="n">password</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">,</span> <span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">,</span> <span class="n">db</span><span class="o">=</span><span class="n">db</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">redis</span><span class="o">.</span><span class="n">StrictRedis</span><span class="p">(</span><span class="n">host</span><span class="o">=</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="o">=</span><span class="n">port</span><span class="p">,</span> <span class="n">db</span><span class="o">=</span><span class="n">db</span><span class="p">,</span> <span class="n">password</span><span class="o">=</span><span class="n">password</span><span class="p">)</span></div>
 
 
 <span class="c1"># @added 20180527 - Feature #2378: Add redis auth to Skyline and rebrow</span>
@@ -3392,7 +3868,6 @@
 
 <span class="sd">    :param client_id: the client_id string</span>
 <span class="sd">    :type client_id: str</span>
-<span class="sd">    return token, decoded_redis_password, fail_msg, trace</span>
 <span class="sd">    :return: token, decoded_redis_password, fail_msg, trace</span>
 <span class="sd">    :rtype: str, str, str, str</span>
 
@@ -3581,6 +4056,23 @@
         <span class="c1"># Added client message to give relevant messages on the login page</span>
         <span class="n">client_message</span> <span class="o">=</span> <span class="kc">False</span>
 
+        <span class="c1"># @added 20190519 - Branch #3002: docker</span>
+        <span class="n">display_redis_password</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">host_input_value</span> <span class="o">=</span> <span class="s1">&#39;localhost&#39;</span>
+        <span class="n">rebrow_redis_password</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">running_on_docker</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">DOCKER</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">running_on_docker</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">running_on_docker</span><span class="p">:</span>
+            <span class="n">host_input_value</span> <span class="o">=</span> <span class="s1">&#39;unix_socket&#39;</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">display_redis_password</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">DOCKER_DISPLAY_REDIS_PASSWORD_IN_REBROW</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">display_redis_password</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">display_redis_password</span><span class="p">:</span>
+                <span class="n">rebrow_redis_password</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span>
+
         <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span>
             <span class="s1">&#39;rebrow_login.html&#39;</span><span class="p">,</span>
             <span class="c1"># @modified 20180527 - Feature #2378: Add redis auth to Skyline and rebrow</span>
@@ -3589,6 +4081,11 @@
             <span class="c1"># redis_password=redis_password,</span>
             <span class="n">protocol</span><span class="o">=</span><span class="n">protocol</span><span class="p">,</span> <span class="n">proxied</span><span class="o">=</span><span class="n">proxied</span><span class="p">,</span> <span class="n">client_message</span><span class="o">=</span><span class="n">client_message</span><span class="p">,</span>
             <span class="n">version</span><span class="o">=</span><span class="n">skyline_version</span><span class="p">,</span>
+            <span class="c1"># @added 20190519 - Branch #3002: docker</span>
+            <span class="n">running_on_docker</span><span class="o">=</span><span class="n">running_on_docker</span><span class="p">,</span>
+            <span class="n">rebrow_redis_password</span><span class="o">=</span><span class="n">rebrow_redis_password</span><span class="p">,</span>
+            <span class="n">display_redis_password</span><span class="o">=</span><span class="n">display_redis_password</span><span class="p">,</span>
+            <span class="n">host_input_value</span><span class="o">=</span><span class="n">host_input_value</span><span class="p">,</span>
             <span class="n">duration</span><span class="o">=</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">))</span></div>
 
 
@@ -3737,9 +4234,12 @@
 <span class="sd">    Show a specific key.</span>
 <span class="sd">    key is expected to be URL-safe base64 encoded</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-<span class="c1"># @added 20160703 - Feature #1464: Webapp Redis browser</span>
-<span class="c1"># metrics encoded with msgpack</span>
-    <span class="n">original_key</span> <span class="o">=</span> <span class="n">key</span>
+    <span class="c1"># @added 20160703 - Feature #1464: Webapp Redis browser</span>
+    <span class="c1"># metrics encoded with msgpack</span>
+    <span class="c1"># @modified 20190503 - Branch #2646: slack - linting</span>
+    <span class="c1"># original_key not used</span>
+    <span class="c1"># original_key = key</span>
+
     <span class="n">msg_pack_key</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="c1"># if key.startswith(&#39;metrics.&#39;):</span>
     <span class="c1">#     msg_packed_key = True</span>
@@ -4037,7 +4537,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.2.14',
+            VERSION:'1.3.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

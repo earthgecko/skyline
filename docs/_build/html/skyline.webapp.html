@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>skyline.webapp package &mdash; Skyline 1.2.14 documentation</title>
+  <title>skyline.webapp package &mdash; Skyline 1.3.0 documentation</title>
   
 
   
@@ -35,9 +35,9 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.2.14 documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.3.0 documentation" href="index.html"/>
         <link rel="up" title="skyline package" href="skyline.html"/>
-        <link rel="prev" title="skyline.tsfresh_features package" href="skyline.tsfresh_features.html"/> 
+        <link rel="prev" title="skyline.vista package" href="skyline.vista.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                1.2
+                1.3
               </div>
             
           
@@ -95,6 +95,8 @@
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="docker.html">docker - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
 <li class="toctree-l1"><a class="reference internal" href="analyzer.html">Analyzer</a></li>
@@ -108,7 +110,10 @@
 <li class="toctree-l1"><a class="reference internal" href="ionosphere_echo.html">Ionosphere echo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-multiple-skylines.html">Running multiple Skyline instances</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
@@ -127,19 +132,20 @@
 <li class="toctree-l3"><a class="reference internal" href="skyline.analyzer_dev.html">skyline.analyzer_dev package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.boundary.html">skyline.boundary package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.crucible.html">skyline.crucible package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.flux.html">skyline.flux package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.horizon.html">skyline.horizon package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.ionosphere.html">skyline.ionosphere package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.luminosity.html">skyline.luminosity package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.mirage.html">skyline.mirage package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.panorama.html">skyline.panorama package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.tsfresh_features.html">skyline.tsfresh_features package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.vista.html">skyline.vista package</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">skyline.webapp package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-webapp.backend">skyline.webapp.backend module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-webapp.gunicorn">skyline.webapp.gunicorn module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-webapp.ionosphere_backend">skyline.webapp.ionosphere_backend module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-webapp.utilities">skyline.webapp.utilities module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#skyline-webapp-webapp-preprocess-module">skyline.webapp.webapp.preprocess module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-webapp.webapp">skyline.webapp.webapp module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-webapp">Module contents</a></li>
 </ul>
@@ -154,6 +160,7 @@
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-settings">skyline.settings module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-skyline_functions">skyline.skyline_functions module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-skyline_version">skyline.skyline_version module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-slack_functions">skyline.slack_functions module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-tsfresh_feature_names">skyline.tsfresh_feature_names module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-validate_settings">skyline.validate_settings module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-contents">Module contents</a></li>
@@ -275,35 +282,6 @@ ensure the minimum about of bandwidth is used.</p>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">list</td>
 </tr>
 <tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="function">
-<dt id="webapp.backend.aggregate_timeseries">
-<code class="descname">aggregate_timeseries</code><span class="sig-paren">(</span><em>base_name</em>, <em>timeseries</em>, <em>aggregate_by</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/backend.html#aggregate_timeseries"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.backend.aggregate_timeseries" title="Permalink to this definition">¶</a></dt>
-<dd><p>Allow for the time series to be aggregated by median or sum
-per minute so that webapp can return a reasonable number of data points for
-dyngraph to load and display in the browser without causing lag.  This is
-achieved by aggregating the time series using either the median of values
-per minute or the sum.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>base_name</strong> (<em>str</em>) &#8211; the base_name of the metric</li>
-<li><strong>timeseries</strong> (<em>list</em>) &#8211; the time series to aggregate</li>
-<li><strong>aggregate_by</strong> (<em>str</em>) &#8211; the method to be used to aggregate the time series by</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">(list, str, str)</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">tuple</p>
-</td>
 </tr>
 </tbody>
 </table>
@@ -512,7 +490,7 @@ array of the features profiles that matched the query.</p>
 
 <dl class="function">
 <dt id="webapp.ionosphere_backend.validate_fp">
-<code class="descname">validate_fp</code><span class="sig-paren">(</span><em>update_id</em>, <em>id_column_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#validate_fp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.validate_fp" title="Permalink to this definition">¶</a></dt>
+<code class="descname">validate_fp</code><span class="sig-paren">(</span><em>update_id</em>, <em>id_column_name</em>, <em>user_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#validate_fp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.validate_fp" title="Permalink to this definition">¶</a></dt>
 <dd><p>Validate a single features profile or validate all enabled, unvalidated
 features profiles for a metric_id.</p>
 <table class="docutils field-list" frame="void" rules="none">
@@ -521,7 +499,8 @@ features profiles for a metric_id.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>update_id</strong> (<em>int</em>) &#8211; the features profile id or metric_id to validate</li>
-<li><strong>id_column_name</strong> &#8211; the column name to select where on, e.g. id or metric_id</li>
+<li><strong>id_column_name</strong> (<em>str</em>) &#8211; the column name to select where on, e.g. id or metric_id</li>
+<li><strong>user_id</strong> (<em>int</em>) &#8211; the user id of the user that is validating</li>
 </ul>
 </td>
 </tr>
@@ -661,12 +640,14 @@ profiles, the whole family tree.</p>
 for a metric and returns a list of the details for each of the features
 profile including the ionosphere_image API URIs for all the relevant graph
 images for the weabpp Ionosphere validate_features_profiles page.
-[[  fp_id, metric_id, metric, fp_full_duration, anomaly_timestamp,</p>
-<blockquote>
-<div>fp_parent_id, parent_full_duration, parent_anomaly_timestamp, fp_date,
-fp_graph_uri, parent_fp_date, parent_fp_graph_uri, parent_parent_fp_id,
-fp_learn_graph_uri, parent_fp_learn_graph_uri, minimum_full_duration,
-maximum_full_duration]]</div></blockquote>
+For example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">[[</span>  <span class="n">fp_id</span><span class="p">,</span> <span class="n">metric_id</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">fp_full_duration</span><span class="p">,</span> <span class="n">anomaly_timestamp</span><span class="p">,</span>
+    <span class="n">fp_parent_id</span><span class="p">,</span> <span class="n">parent_full_duration</span><span class="p">,</span> <span class="n">parent_anomaly_timestamp</span><span class="p">,</span> <span class="n">fp_date</span><span class="p">,</span>
+    <span class="n">fp_graph_uri</span><span class="p">,</span> <span class="n">parent_fp_date</span><span class="p">,</span> <span class="n">parent_fp_graph_uri</span><span class="p">,</span> <span class="n">parent_parent_fp_id</span><span class="p">,</span>
+    <span class="n">fp_learn_graph_uri</span><span class="p">,</span> <span class="n">parent_fp_learn_graph_uri</span><span class="p">,</span> <span class="n">minimum_full_duration</span><span class="p">,</span>
+    <span class="n">maximum_full_duration</span><span class="p">,</span> <span class="n">generation</span><span class="p">]]</span>
+</pre></div>
+</div>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -703,6 +684,59 @@ and return a list of the details for each metric.
 <dt id="webapp.ionosphere_backend.ionosphere_show_graphs">
 <code class="descname">ionosphere_show_graphs</code><span class="sig-paren">(</span><em>requested_timestamp</em>, <em>data_for_metric</em>, <em>fp_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#ionosphere_show_graphs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.ionosphere_show_graphs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get a list of all graphs</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="webapp.ionosphere_backend.webapp_update_slack_thread">
+<code class="descname">webapp_update_slack_thread</code><span class="sig-paren">(</span><em>base_name</em>, <em>metric_timestamp</em>, <em>value</em>, <em>message_context</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#webapp_update_slack_thread"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.webapp_update_slack_thread" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update slack threads with enabled events.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>base_name</strong> (<em>str</em>) &#8211; metric base_name</li>
+<li><strong>metric_timestamp</strong> (<em>str or int</em>) &#8211; the anomaly_timestamp</li>
+<li><strong>value</strong> (<em>int or None</em>) &#8211; the features profile id, the validated_count or None</li>
+<li><strong>message_context</strong> (<em>str</em>) &#8211; training_data_viewed or layers_created</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">True or False</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">boolean</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="webapp.ionosphere_backend.validate_ionosphere_match">
+<code class="descname">validate_ionosphere_match</code><span class="sig-paren">(</span><em>match_id</em>, <em>validate_context</em>, <em>match_validated</em>, <em>user_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#validate_ionosphere_match"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.validate_ionosphere_match" title="Permalink to this definition">¶</a></dt>
+<dd><p>Update the validated value in the DB for the match.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>match_id</strong> (<em>str</em>) &#8211; the match id</li>
+<li><strong>validate_context</strong> (<em>str</em>) &#8211; the context to validate either ionosphere_matched
+or ionosphere_layers_matched</li>
+<li><strong>match_validated</strong> (<em>int</em>) &#8211; 1 for valid or 2 for invalid</li>
+<li><strong>user_id</strong> (<em>int</em>) &#8211; the user id of the user validating</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">True or False</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">boolean</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>
@@ -743,9 +777,6 @@ Mirage should surface the metric timeseries for</li>
 </table>
 </dd></dl>
 
-</div>
-<div class="section" id="skyline-webapp-webapp-preprocess-module">
-<h2>skyline.webapp.webapp.preprocess module<a class="headerlink" href="#skyline-webapp-webapp-preprocess-module" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="module-webapp.webapp">
 <span id="skyline-webapp-webapp-module"></span><h2>skyline.webapp.webapp module<a class="headerlink" href="#module-webapp.webapp" title="Permalink to this headline">¶</a></h2>
@@ -911,11 +942,12 @@ payload and determine the Redis password.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>client_id</strong> (<em>str</em>) &#8211; the client_id string</td>
 </tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">token, decoded_redis_password, fail_msg, trace</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">str, str, str, str</td>
+</tr>
 </tbody>
 </table>
-<p>return token, decoded_redis_password, fail_msg, trace
-:return: token, decoded_redis_password, fail_msg, trace
-:rtype: str, str, str, str</p>
 </dd></dl>
 
 <dl class="function">
@@ -978,7 +1010,7 @@ key is expected to be URL-safe base64 encoded</p>
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
       
-        <a href="skyline.tsfresh_features.html" class="btn btn-neutral" title="skyline.tsfresh_features package" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="skyline.vista.html" class="btn btn-neutral" title="skyline.vista package" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -1009,7 +1041,7 @@ key is expected to be URL-safe base64 encoded</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2.14',
+            VERSION:'1.3.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Installation &mdash; Skyline 1.2.14 documentation</title>
+  <title>Installation &mdash; Skyline 1.3.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.2.14 documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.3.0 documentation" href="index.html"/>
         <link rel="next" title="Upgrading" href="upgrading/index.html"/>
         <link rel="prev" title="Running Skyline in a Python virtualenv" href="running-in-python-virtualenv.html"/> 
 
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                1.2
+                1.3
               </div>
             
           
@@ -99,9 +99,9 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#steps">Steps</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#skyline-configuration">Skyline configuration</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#dawn">Dawn</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#python-virtualenv">Python virtualenv</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#firewall">Firewall</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#dawn">Dawn</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#redis">Redis</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#memcached">memcached</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#skyline-directories">Skyline directories</a></li>
@@ -120,6 +120,8 @@
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="docker.html">docker - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
 <li class="toctree-l1"><a class="reference internal" href="analyzer.html">Analyzer</a></li>
@@ -133,7 +135,10 @@
 <li class="toctree-l1"><a class="reference internal" href="ionosphere_echo.html">Ionosphere echo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-multiple-skylines.html">Running multiple Skyline instances</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
@@ -197,7 +202,8 @@
 <div class="section" id="intended-audience">
 <h2>Intended audience<a class="headerlink" href="#intended-audience" title="Permalink to this headline">¶</a></h2>
 <p>Skyline is not really a <code class="docutils literal"><span class="pre">localhost</span></code> application, it needs lots of data, unless
-you have a <code class="docutils literal"><span class="pre">localhost</span></code> Graphite or pickle Graphite to your localhost.</p>
+you have a <code class="docutils literal"><span class="pre">localhost</span></code> Graphite or pickle Graphite to your localhost, however
+Skyline can run on localhost using Docker (experimental and not for production).</p>
 <p>Given the specific nature of Skyline, it is assumed that the audience will have
 a certain level of technical knowledge, e.g. it is assumed that the user will be
 familiar with the installation, configuration, operation and security practices
@@ -216,7 +222,7 @@ configurations of things that are directly related Skyline.  Although it cannot
 possibly cover all possible set ups or scenarios, it does describe
 recommendations in terms of configurations of the various components and how and
 where they should be run in relation to Skyline.  There are no cfengine, puppet,
-chef, ansible or docker patterns here.</p>
+chef or ansible patterns here.</p>
 <p>The documentation is aimed at installing Skyline securely by default.  It is
 possible to run Skyline very insecurely, however this documentation does not
 specify how to do that.  Both the set up and documentation are verbose.  Setting
@@ -238,16 +244,17 @@ separate application that will probably be running on another server, although
 Graphite could run on the same server, in a production environment it would
 probably be a remote machine or container.  Graphite is not part of Skyline.</li>
 <li>Redis - stores <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a> seconds (usefully 24 hours worth)
-of time series data that Graphite sends to Skyline Horizon.  Skyline Analyzer
-pulls the data from Redis for analysis.  Redis must run on the same host as
-Skyline.  It may be possible to run Redis in another container or VM that was
-on the same host, but this has not been tested.</li>
-<li>MySQL/mariadb - stores data about anomalies and time series features
-fingerprints for learning things that are not anomalous.  MySQL can run on the
-same host as Skyline or it can be remote.</li>
-<li>Apache (or nginx) - serves the Skyline webapp via gunicorn and handles SSL
-termination and basic http auth.  Ideally should run on the same host as
-Skyline.</li>
+of time series data that Graphite sends to Skyline Horizon and Horizon writes
+the data to Redis.  Skyline Analyzer pulls the data from Redis for analysis.
+Redis must run on the same host as Skyline.  It may be possible to run Redis
+in another container or VM that is on the same host.</li>
+<li>MySQL/mariadb - stores data about anomalies and time series features profile
+fingerprints for matching and learning things that are not anomalous.  MySQL
+can run on the same host as Skyline or it can be remote.  Running the DB
+remotely will make the Skyline UI a bit slower.</li>
+<li>Apache (or nginx) - Skyline serves the webapp via gunicorn and Apache handles
+endpoint routing, SSL termination and basic http auth.  Ideally Apache should
+be run on the same host as Skyline.</li>
 <li>memcached - caches Ionosphere MySQL data, memcached should ideally be run on
 the same host as Skyline.</li>
 </ul>
@@ -273,6 +280,15 @@ updated to use Python-2.7.16.</p>
 documentation configuration options are referred to via their docstrings name
 e.g. <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a> which links to their description in the
 documentation.</p>
+</div>
+<div class="section" id="dawn">
+<h3>Dawn<a class="headerlink" href="#dawn" title="Permalink to this headline">¶</a></h3>
+<ul class="simple">
+<li>Should you wish to review the build steps, component builds and installs
+described below, there is a convenience build script for <strong>testing</strong> purposes
+<strong>only</strong> in <cite>utils/dawn/skyline.dawn.sh</cite> see
+<a class="reference external" href="development/dawn.html">Dawn</a> section</li>
+</ul>
 </div>
 <div class="section" id="python-virtualenv">
 <h3>Python virtualenv<a class="headerlink" href="#python-virtualenv" title="Permalink to this headline">¶</a></h3>
@@ -303,19 +319,12 @@ multiple distributed Skyline instances should be 127.0.0.1, even if you are
 running multiple distributed Skyline instances this can and still should be
 127.0.0.1 as Skyline makes an API endpoint available to remote Skyline
 instances for any required remote Redis data retrieval and preprocessing.</li>
+<li>If you are going to run Vista and Flux, ensure that the Skyline IP is
+allowed to connect to the Graphite node on the <cite>PICKLE_RECEIVER_PORT</cite></li>
 <li>Please ensure you handle all of these with iptables AND ip6tables (or the
 equivalent) before continuing.</li>
 </ul>
 </li>
-</ul>
-</div>
-<div class="section" id="dawn">
-<h3>Dawn<a class="headerlink" href="#dawn" title="Permalink to this headline">¶</a></h3>
-<ul class="simple">
-<li>Should you wish to review the build steps, component builds and installs
-described below, there is a convenience build script for <strong>testing</strong> purposes
-<strong>only</strong> in <cite>utils/dawn/skyline.dawn.sh</cite> see
-<a class="reference external" href="development/dawn.html">Dawn</a> section)</li>
 </ul>
 </div>
 <div class="section" id="redis">
@@ -366,7 +375,7 @@ mkdir -p /opt/skyline/panorama/check
 mkdir -p /opt/skyline/mirage/check
 mkdir -p /opt/skyline/crucible/check
 mkdir -p /opt/skyline/crucible/data
-mkdir -p /opt/skyline/ionosphere
+mkdir -p /opt/skyline/ionosphere/check
 mkdir /etc/skyline
 mkdir /tmp/skyline
 </pre></div>
@@ -520,6 +529,23 @@ password that you provide in <cite>settings.py</cite> for
 </div>
 <div class="section" id="skyline-settings">
 <h3>Skyline settings<a class="headerlink" href="#skyline-settings" title="Permalink to this headline">¶</a></h3>
+<p>The Skyline settings are declared in the settings.py file as valid Python
+variables which are used in code.  The settings values therefore need to be
+defined correctly as the required Python types.  Strings, floats, ints, lists
+and tuples are used in the various settings.  Examples of these Python types
+are briefly outlined here to inform the user of the types.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">a_string</span> <span class="o">=</span> <span class="s1">&#39;single quoted string&#39;</span>  <span class="c1"># str</span>
+<span class="n">another_string</span> <span class="o">=</span> <span class="s1">&#39;127.0.0.1&#39;</span>  <span class="c1"># str</span>
+<span class="n">a_float</span> <span class="o">=</span> <span class="mf">0.1</span>  <span class="c1"># float</span>
+<span class="n">an_int</span> <span class="o">=</span> <span class="mi">12345</span>  <span class="c1"># int</span>
+<span class="n">a_list</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.1</span><span class="p">,</span> <span class="mf">1.4</span><span class="p">,</span> <span class="mf">1.7</span><span class="p">]</span>  <span class="c1"># list</span>
+<span class="n">another_list_of_strings</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;one&#39;</span><span class="p">,</span> <span class="s1">&#39;two&#39;</span><span class="p">,</span> <span class="s1">&#39;bob&#39;</span><span class="p">]</span>  <span class="c1"># list</span>
+<span class="n">a_list_of_lists</span> <span class="o">=</span> <span class="p">[[</span><span class="s1">&#39;server1.cpu.user&#39;</span><span class="p">,</span> <span class="mf">23.6</span><span class="p">,</span> <span class="mi">1563912300</span><span class="p">],</span> <span class="p">[</span><span class="s1">&#39;server2.cpu.user&#39;</span><span class="p">,</span> <span class="mf">3.22</span><span class="p">,</span> <span class="mi">1563912300</span><span class="p">]]</span>  <span class="c1"># list</span>
+<span class="n">a_tuple</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;server1.cpu.user&#39;</span><span class="p">,</span> <span class="mf">23.6</span><span class="p">,</span> <span class="mi">1563912300</span><span class="p">)</span>  <span class="c1"># tuple</span>
+<span class="n">a_tuple_of_tuples</span> <span class="o">=</span> <span class="p">((</span><span class="s1">&#39;server1.cpu.user&#39;</span><span class="p">,</span> <span class="mf">23.6</span><span class="p">,</span> <span class="mi">1563912300</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;server2.cpu.user&#39;</span><span class="p">,</span> <span class="mf">3.22</span><span class="p">,</span> <span class="mi">1563912300</span><span class="p">))</span>  <span class="c1"># tuple</span>
+</pre></div>
+</div>
+<p>Required changes to settings.py follow.</p>
 <ul class="simple">
 <li>Edit the <code class="docutils literal"><span class="pre">skyline/settings.py</span></code> file and enter your appropriate settings,
 specifically ensure you set the following variables to the correct
@@ -744,7 +770,7 @@ if you use an exec of any sort, ensure the pandas install has a long timeout.</l
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2.14',
+            VERSION:'1.3.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

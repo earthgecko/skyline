@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>skyline.analyzer package &mdash; Skyline 1.2.14 documentation</title>
+  <title>skyline.analyzer package &mdash; Skyline 1.3.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.2.14 documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.3.0 documentation" href="index.html"/>
         <link rel="up" title="skyline package" href="skyline.html"/>
         <link rel="next" title="skyline.analyzer_dev package" href="skyline.analyzer_dev.html"/>
         <link rel="prev" title="skyline package" href="skyline.html"/> 
@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                1.2
+                1.3
               </div>
             
           
@@ -96,6 +96,8 @@
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="docker.html">docker - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
 <li class="toctree-l1"><a class="reference internal" href="analyzer.html">Analyzer</a></li>
@@ -109,7 +111,10 @@
 <li class="toctree-l1"><a class="reference internal" href="ionosphere_echo.html">Ionosphere echo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-multiple-skylines.html">Running multiple Skyline instances</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
@@ -136,12 +141,14 @@
 <li class="toctree-l3"><a class="reference internal" href="skyline.analyzer_dev.html">skyline.analyzer_dev package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.boundary.html">skyline.boundary package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.crucible.html">skyline.crucible package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.flux.html">skyline.flux package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.horizon.html">skyline.horizon package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.ionosphere.html">skyline.ionosphere package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.luminosity.html">skyline.luminosity package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.mirage.html">skyline.mirage package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.panorama.html">skyline.panorama package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.tsfresh_features.html">skyline.tsfresh_features package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.vista.html">skyline.vista package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.webapp.html">skyline.webapp package</a></li>
 </ul>
 </li>
@@ -153,6 +160,7 @@
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-settings">skyline.settings module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-skyline_functions">skyline.skyline_functions module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-skyline_version">skyline.skyline_version module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-slack_functions">skyline.slack_functions module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-tsfresh_feature_names">skyline.tsfresh_feature_names module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-validate_settings">skyline.validate_settings module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-contents">Module contents</a></li>
@@ -237,10 +245,10 @@ are available for the app.</p>
 <span id="skyline-analyzer-alerters-module"></span><h2>skyline.analyzer.alerters module<a class="headerlink" href="#module-analyzer.alerters" title="Permalink to this headline">¶</a></h2>
 <dl class="data">
 <dt id="analyzer.alerters.skyline_version">
-<code class="descname">skyline_version</code><em class="property"> = 'Skyline (luminosity v1.2.14 stable)'</em><a class="headerlink" href="#analyzer.alerters.skyline_version" title="Permalink to this definition">¶</a></dt>
+<code class="descname">skyline_version</code><em class="property"> = 'Skyline (docker v1.3.0 stable)'</em><a class="headerlink" href="#analyzer.alerters.skyline_version" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create any alerter you want here. The function will be invoked from
 trigger_alert.</p>
-<p>Three arguments will be passed, two of them tuples: alert and metric.</p>
+<p>Three arguments will be passed, two of them tuples: alert and metric, and context</p>
 <p>alert: the tuple specified in your settings:</p>
 <blockquote>
 <div><p>alert[0]: The matched substring of the anomalous metric</p>
@@ -254,6 +262,24 @@ trigger_alert.</p>
 <p>metric[2]: anomaly timestamp</p>
 </div></blockquote>
 <p>context: app name</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="analyzer.alerters.get_graphite_port">
+<code class="descname">get_graphite_port</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/alerters.html#get_graphite_port"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.alerters.get_graphite_port" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns graphite port based on configuration in settings.py</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="analyzer.alerters.get_graphite_render_uri">
+<code class="descname">get_graphite_render_uri</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/alerters.html#get_graphite_render_uri"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.alerters.get_graphite_render_uri" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns graphite render uri based on configuration in settings.py</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="analyzer.alerters.get_graphite_custom_headers">
+<code class="descname">get_graphite_custom_headers</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer/alerters.html#get_graphite_custom_headers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer.alerters.get_graphite_custom_headers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns custom http headers</p>
 </dd></dl>
 
 <dl class="function">
@@ -528,7 +554,7 @@ memory leaks in the parent.</p>
 <li>unpack the <cite>raw_timeseries</cite> for the metric.</li>
 <li>Analyse each timeseries against <cite>ALGORITHMS</cite> to determine if it is
 anomalous.</li>
-<li>If anomalous add it to the <code class="xref py py-obj docutils literal"><span class="pre">self.anomalous_metrics</span></code> list</li>
+<li>If anomalous add it to the Redis set analyzer.anomalous_metrics</li>
 <li>Add what algorithms triggered to the <code class="xref py py-obj docutils literal"><span class="pre">self.anomaly_breakdown_q</span></code>
 queue</li>
 <li>If <a class="reference internal" href="skyline.html#settings.ENABLE_CRUCIBLE" title="settings.ENABLE_CRUCIBLE"><code class="xref py py-mod docutils literal"><span class="pre">settings.ENABLE_CRUCIBLE</span></code></a> is <code class="docutils literal"><span class="pre">True</span></code>:<ul>
@@ -625,7 +651,7 @@ and assign each process a set of metrics to analyse for anomalies.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2.14',
+            VERSION:'1.3.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

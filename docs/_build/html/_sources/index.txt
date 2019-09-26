@@ -20,6 +20,8 @@ Contents:
   upgrading/index.rst
   getting-data-into-skyline
   alert-testing
+  docker
+  slack
   monotonic-metrics
   horizon
   analyzer
@@ -33,7 +35,10 @@ Contents:
   ionosphere_echo
   tsfresh
   luminosity
+  flux
+  vista
   redis-integration
+  rebrow
   running-multiple-skylines
   skyline-and-friends
   logging

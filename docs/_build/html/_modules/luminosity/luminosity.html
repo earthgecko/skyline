@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>luminosity.luminosity &mdash; Skyline 1.2.14 documentation</title>
+  <title>luminosity.luminosity &mdash; Skyline 1.3.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.2.14 documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.3.0 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                1.2
+                1.3
               </div>
             
           
@@ -94,6 +94,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../docker.html">docker - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../analyzer.html">Analyzer</a></li>
@@ -107,7 +109,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../../ionosphere_echo.html">Ionosphere echo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
@@ -177,14 +182,19 @@
     <span class="kn">from</span> <span class="nn">queue</span> <span class="k">import</span> <span class="n">Empty</span>
 <span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">time</span><span class="p">,</span> <span class="n">sleep</span>
 <span class="kn">from</span> <span class="nn">threading</span> <span class="k">import</span> <span class="n">Thread</span>
-<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="k">import</span> <span class="n">Process</span><span class="p">,</span> <span class="n">Manager</span>
+<span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+<span class="c1"># Use Redis sets in place of Manager().list() to reduce memory and number of</span>
+<span class="c1"># processes</span>
+<span class="c1"># from multiprocessing import Process, Manager</span>
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="k">import</span> <span class="n">Process</span>
 <span class="kn">from</span> <span class="nn">redis</span> <span class="k">import</span> <span class="n">StrictRedis</span>
 <span class="kn">import</span> <span class="nn">traceback</span>
 <span class="kn">import</span> <span class="nn">mysql.connector</span>
 <span class="kn">from</span> <span class="nn">pymemcache.client.base</span> <span class="k">import</span> <span class="n">Client</span> <span class="k">as</span> <span class="n">pymemcache_Client</span>
 
 <span class="kn">import</span> <span class="nn">settings</span>
-<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="p">(</span><span class="n">mysql_select</span><span class="p">,</span> <span class="n">send_graphite_metric</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">mysql_select</span><span class="p">,</span> <span class="n">send_graphite_metric</span><span class="p">)</span>
 <span class="kn">from</span> <span class="nn">database</span> <span class="k">import</span> <span class="n">get_engine</span>
 <span class="c1"># from process_correlations import *</span>
 
@@ -215,13 +225,13 @@
     <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
 
 <span class="k">try</span><span class="p">:</span>
-    <span class="n">luminosity_processes</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">LUMINOSITY_PROCESSES</span>
+    <span class="n">LUMINOSITY_PROCESSES</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">LUMINOSITY_PROCESSES</span>
 <span class="k">except</span><span class="p">:</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;warning :: cannot determine LUMINOSITY_PROCESSES from settings&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
     <span class="c1"># @modified 20180110 - Task #2266: Evaluate luminol for the luminosity branch</span>
     <span class="c1"># It is fast and lightweight</span>
     <span class="c1"># luminosity_processes = 2</span>
-    <span class="n">luminosity_processes</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">LUMINOSITY_PROCESSES</span> <span class="o">=</span> <span class="mi">1</span>
 
 <span class="n">skyline_app_graphite_namespace</span> <span class="o">=</span> <span class="s1">&#39;skyline.</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">SERVER_METRIC_PATH</span><span class="p">)</span>
 
@@ -300,10 +310,18 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parent_pid</span> <span class="o">=</span> <span class="n">parent_pid</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">current_pid</span> <span class="o">=</span> <span class="n">getpid</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">correlations</span> <span class="o">=</span> <span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
+        <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+        <span class="c1">#                      Task #3032: Debug number of Python processes and memory use</span>
+        <span class="c1">#                      Branch #3002: docker</span>
+        <span class="c1"># Reduce amount of Manager instances that are used as each requires a</span>
+        <span class="c1"># copy of entire memory to be copied into each subprocess so this</span>
+        <span class="c1"># results in a python process per Manager instance, using as much</span>
+        <span class="c1"># memory as the parent.  OK on a server, not so much in a container.</span>
+        <span class="c1"># Disabled all the Manager().list() below and replaced with Redis sets</span>
+        <span class="c1"># self.correlations = Manager().list()</span>
         <span class="c1"># @added 20180720 - Task #2462: Implement useful metrics for Luminosity</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">metrics_checked_for_correlation</span> <span class="o">=</span> <span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">runtimes</span> <span class="o">=</span> <span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
+        <span class="c1"># self.metrics_checked_for_correlation = Manager().list()</span>
+        <span class="c1"># self.runtimes = Manager().list()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mysql_conn</span> <span class="o">=</span> <span class="n">mysql</span><span class="o">.</span><span class="n">connector</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="o">**</span><span class="n">config</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHE_ENABLED</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">memcache_client</span> <span class="o">=</span> <span class="n">pymemcache_Client</span><span class="p">((</span><span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHED_SERVER_IP</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHED_SERVER_PORT</span><span class="p">),</span> <span class="n">connect_timeout</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
@@ -442,8 +460,25 @@
                 <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">correlated_metrics</span><span class="p">)),</span> <span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">)))</span>
 
         <span class="c1"># @added 20180720 - Task #2462: Implement useful metrics for Luminosity</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">metrics_checked_for_correlation</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metrics_checked_for_correlation</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">runtimes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">runtime</span><span class="p">)</span>
+        <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+        <span class="c1"># self.metrics_checked_for_correlation.append(metrics_checked_for_correlation)</span>
+        <span class="c1"># self.runtimes.append(runtime)</span>
+        <span class="n">redis_set</span> <span class="o">=</span> <span class="s1">&#39;luminosity.correlations&#39;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metrics_checked_for_correlation</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="n">redis_set</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add </span><span class="si">%s</span><span class="s1"> to Redis set </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">redis_set</span><span class="p">)))</span>
+        <span class="n">redis_set</span> <span class="o">=</span> <span class="s1">&#39;luminosity.runtimes&#39;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">runtime</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="n">redis_set</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add </span><span class="si">%s</span><span class="s1"> to Redis set </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">redis_set</span><span class="p">)))</span>
 
         <span class="n">metrics_str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
         <span class="k">for</span> <span class="n">metric_name</span> <span class="ow">in</span> <span class="n">correlated_metrics</span><span class="p">:</span>
@@ -491,10 +526,21 @@
             <span class="k">for</span> <span class="n">anomaly_id</span><span class="p">,</span> <span class="n">metric_id</span><span class="p">,</span> <span class="n">coefficient</span><span class="p">,</span> <span class="n">shifted</span><span class="p">,</span> <span class="n">shifted_coefficient</span> <span class="ow">in</span> <span class="n">luminosity_correlations</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">coefficient</span><span class="p">:</span>
                     <span class="n">values_present</span> <span class="o">=</span> <span class="kc">True</span>
-                <span class="c1"># @added 20170720 - Task #2462: Implement useful metrics for Luminosity</span>
-                <span class="c1"># Populate the self.correlations list to send a count to Graphite</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">correlations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">coefficient</span><span class="p">)</span>
+                    <span class="c1"># @added 20170720 - Task #2462: Implement useful metrics for Luminosity</span>
+                    <span class="c1"># Populate the self.correlations list to send a count to Graphite</span>
+                    <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+                    <span class="c1"># self.correlations.append(coefficient)</span>
+                    <span class="n">redis_set</span> <span class="o">=</span> <span class="s1">&#39;luminosity.correlations&#39;</span>
+                    <span class="n">data</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">coefficient</span><span class="p">)</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="n">redis_set</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add </span><span class="si">%s</span><span class="s1"> to Redis set </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">redis_set</span><span class="p">)))</span>
+
                     <span class="n">number_of_correlations_in_insert</span> <span class="o">+=</span> <span class="mi">1</span>
+
                 <span class="n">ins_values</span> <span class="o">=</span> <span class="s1">&#39;(</span><span class="si">%s</span><span class="s1">,</span><span class="si">%s</span><span class="s1">,</span><span class="si">%s</span><span class="s1">,</span><span class="si">%s</span><span class="s1">,</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">),</span>
                                                    <span class="nb">str</span><span class="p">(</span><span class="n">metric_id</span><span class="p">),</span>
                                                    <span class="nb">str</span><span class="p">(</span><span class="nb">round</span><span class="p">(</span><span class="n">coefficient</span><span class="p">,</span> <span class="mi">5</span><span class="p">)),</span>
@@ -562,6 +608,42 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;bin/</span><span class="si">%s</span><span class="s1">.d log management done&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
 
+        <span class="c1"># @added 20190417 - Feature #2948: LUMINOSITY_ENABLED setting</span>
+        <span class="c1"># If Luminosity is not enabled, do nothing</span>
+        <span class="n">luminosity_enabled</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">luminosity_enabled</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">LUMINOSITY_ENABLED</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;LUMINOSITY_ENABLED is set to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">luminosity_enabled</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;warning :: LUMINOSITY_ENABLED is not declared in settings.py, defaults to True&#39;</span><span class="p">)</span>
+
+        <span class="c1"># @added 20190417 - Feature #2950: Report defaulted settings to log</span>
+        <span class="c1"># Added all the globally declared settings to enable reporting in the</span>
+        <span class="c1"># log the state of each setting.</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">ENABLE_LUMINOSITY_DEBUG</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_LUMINOSITY_DEBUG</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ENABLE_LUMINOSITY_DEBUG is set from settings.py to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">ENABLE_LUMINOSITY_DEBUG</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;warning :: ENABLE_LUMINOSITY_DEBUG is not declared in settings.py, defaults to False&#39;</span><span class="p">)</span>
+            <span class="n">ENABLE_LUMINOSITY_DEBUG</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">SERVER_METRICS_NAME</span>
+            <span class="k">if</span> <span class="n">SERVER_METRIC_PATH</span> <span class="o">==</span> <span class="s1">&#39;.&#39;</span><span class="p">:</span>
+                <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;SERVER_METRIC_PATH is set from settings.py to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">SERVER_METRIC_PATH</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;warning :: SERVER_METRIC_PATH is not declared in settings.py, defaults to </span><span class="se">\&#39;\&#39;</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">LUMINOSITY_PROCESSES</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">LUMINOSITY_PROCESSES</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;LUMINOSITY_PROCESSES is set from settings.py to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">LUMINOSITY_PROCESSES</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="c1"># @modified 20180110 - Task #2266: Evaluate luminol for the luminosity branch</span>
+            <span class="c1"># It is fast and lightweight</span>
+            <span class="c1"># luminosity_processes = 2</span>
+            <span class="n">LUMINOSITY_PROCESSES</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;warning :: cannot determine LUMINOSITY_PROCESSES from settings.py, defaults to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">LUMINOSITY_PROCESSES</span><span class="p">))</span>
+
         <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
 
@@ -588,6 +670,13 @@
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to update Redis key for </span><span class="si">%s</span><span class="s1"> up&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
 
+            <span class="c1"># @added 20190417 - Feature #: LUMINOSITY_ENABLED setting</span>
+            <span class="c1"># If Luminosity is not enabled, do nothing</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">luminosity_enabled</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;luminosity is not enabled LUMINOSITY_ENABLED set to </span><span class="si">%s</span><span class="s1">, sleeping for 20 seconds&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LUMINOSITY_ENABLED</span><span class="p">))</span>
+                <span class="n">sleep</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+                <span class="k">continue</span>
+
             <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Determine if any new anomalies have been added</span>
 <span class="sd">            &quot;&quot;&quot;</span>
@@ -613,7 +702,13 @@
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;last_processed_anomaly_id found in memcache - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">last_processed_anomaly_id</span><span class="p">))</span>
                     <span class="n">memcache_last_processed_anomaly_id_data</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;last_processed_anomaly_id key was NOT found in memcache - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">last_processed_anomaly_id</span><span class="p">))</span>
+                    <span class="c1"># @modified 20190517 - Bug #3016: Handle no anomaly ids in luminosity</span>
+                    <span class="c1">#                      Branch #3002: docker</span>
+                    <span class="c1"># Log appropriate to whether memcache is enabled or not</span>
+                    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHE_ENABLED</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;last_processed_anomaly_id key was NOT found in memcache - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">last_processed_anomaly_id</span><span class="p">))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;memcache not enabled not checking for last_processed_anomaly_id key&#39;</span><span class="p">)</span>
 
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">last_processed_anomaly_id</span><span class="p">:</span>
                     <span class="n">query</span> <span class="o">=</span> <span class="s1">&#39;SELECT id FROM luminosity WHERE id=(SELECT MAX(id) FROM luminosity) ORDER BY id DESC LIMIT 1&#39;</span>
@@ -661,6 +756,13 @@
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;no new anomalies in the anomalies table&#39;</span><span class="p">)</span>
 
+                <span class="c1"># @added 20190517 - Bug #3016: Handle no anomaly ids in luminosity</span>
+                <span class="c1">#                   Branch #3002: docker</span>
+                <span class="c1"># When Skyline is first installed, if luminosity is enabled it</span>
+                <span class="c1"># reports errors as there are no anomaly ids</span>
+                <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">last_processed_anomaly_id</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;None&#39;</span><span class="p">:</span>
+                    <span class="n">last_processed_anomaly_id</span> <span class="o">=</span> <span class="mi">0</span>
+
                 <span class="n">query</span> <span class="o">=</span> <span class="s1">&#39;SELECT * FROM anomalies WHERE id &gt; </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">last_processed_anomaly_id</span><span class="p">)</span>  <span class="c1"># nosec</span>
                 <span class="n">results</span> <span class="o">=</span> <span class="kc">None</span>
                 <span class="k">try</span><span class="p">:</span>
@@ -705,29 +807,44 @@
                 <span class="c1"># Flush metrics to Graphite</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">redis_sent_graphite_metrics</span><span class="p">:</span>
                     <span class="k">try</span><span class="p">:</span>
-                        <span class="n">correlations</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">correlations</span><span class="p">))</span>
+                        <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+                        <span class="c1"># correlations = str(len(self.correlations))</span>
+                        <span class="n">correlations</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;luminosity.correlations&#39;</span><span class="p">))))</span>
                     <span class="k">except</span><span class="p">:</span>
                         <span class="n">correlations</span> <span class="o">=</span> <span class="s1">&#39;0&#39;</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;correlations       :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">correlations</span><span class="p">)</span>
                     <span class="n">send_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.correlations&#39;</span> <span class="o">%</span> <span class="n">skyline_app_graphite_namespace</span>
                     <span class="n">send_graphite_metric</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">send_metric_name</span><span class="p">,</span> <span class="n">correlations</span><span class="p">)</span>
 
+                    <span class="c1"># @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">runtimes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;luminosity.runtimes&#39;</span><span class="p">))</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">runtimes</span> <span class="o">=</span> <span class="p">[]</span>
+
                     <span class="c1"># @added 20180720 - Task #2462: Implement useful metrics for Luminosity</span>
                     <span class="c1">#                   Branch #2270: luminosity</span>
                     <span class="c1"># runtime metric to monitor the time it takes to process</span>
                     <span class="c1"># correlations</span>
                     <span class="k">try</span><span class="p">:</span>
-                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">runtimes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                            <span class="n">avg_runtime</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">runtimes</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">runtimes</span><span class="p">)</span>
+                        <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+                        <span class="c1"># if len(self.runtimes) &gt; 1:</span>
+                        <span class="c1">#     avg_runtime = sum(self.runtimes) / len(self.runtimes)</span>
+                        <span class="c1"># else:</span>
+                        <span class="c1">#     avg_runtime = sum(self.runtimes)</span>
+                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">runtimes</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                            <span class="n">avg_runtime</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">runtimes</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">runtimes</span><span class="p">)</span>
                         <span class="k">else</span><span class="p">:</span>
-                            <span class="n">avg_runtime</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">runtimes</span><span class="p">)</span>
+                            <span class="n">avg_runtime</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">runtimes</span><span class="p">)</span>
                     <span class="k">except</span><span class="p">:</span>
                         <span class="n">avg_runtime</span> <span class="o">=</span> <span class="s1">&#39;0&#39;</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;avg_runtime       :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">avg_runtime</span><span class="p">))</span>
                     <span class="n">send_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.avg_runtime&#39;</span> <span class="o">%</span> <span class="n">skyline_app_graphite_namespace</span>
                     <span class="n">send_graphite_metric</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">send_metric_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">avg_runtime</span><span class="p">))</span>
                     <span class="k">try</span><span class="p">:</span>
-                        <span class="n">metrics_checked_for_correlation</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metrics_checked_for_correlation</span><span class="p">))</span>
+                        <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+                        <span class="c1"># metrics_checked_for_correlation = str(sum(self.metrics_checked_for_correlation))</span>
+                        <span class="n">metrics_checked_for_correlation</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;luminosity.metrics_checked_for_correlation&#39;</span><span class="p">))))</span>
                     <span class="k">except</span><span class="p">:</span>
                         <span class="n">metrics_checked_for_correlation</span> <span class="o">=</span> <span class="s1">&#39;0&#39;</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metrics_checked_for_correlation   :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metrics_checked_for_correlation</span><span class="p">)</span>
@@ -741,10 +858,28 @@
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to update Redis key - </span><span class="si">%s</span><span class="s1"> up&#39;</span> <span class="o">%</span> <span class="n">cache_key</span><span class="p">)</span>
 
                     <span class="c1"># Reset lists</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">correlations</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+                    <span class="c1"># self.correlations[:] = []</span>
                     <span class="c1"># @added 20180720 - Task #2462: Implement useful metrics for Luminosity</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">runtimes</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[]</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">metrics_checked_for_correlation</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+                    <span class="c1"># self.runtimes[:] = []</span>
+                    <span class="c1"># self.metrics_checked_for_correlation[:] = []</span>
+
+                    <span class="c1"># @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+                    <span class="c1"># Use Redis sets instead of Manager().list()</span>
+                    <span class="n">delete_redis_sets</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="s1">&#39;luminosity.correlations&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;luminosity.runtimes&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;luminosity.metrics_checked_for_correlation&#39;</span>
+                    <span class="p">]</span>
+                    <span class="k">for</span> <span class="n">i_redis_set</span> <span class="ow">in</span> <span class="n">delete_redis_sets</span><span class="p">:</span>
+                        <span class="n">redis_set_to_delete</span> <span class="o">=</span> <span class="n">i_redis_set</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">redis_set_to_delete</span><span class="p">)</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;deleted Redis set - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">redis_set_to_delete</span><span class="p">)</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to delete Redis set - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">redis_set_to_delete</span><span class="p">)</span>
 
                 <span class="c1"># @added 20180720 - Task #2462: Implement useful metrics for Luminosity</span>
                 <span class="c1">#                   Feature #2464: luminosity_remote_data</span>
@@ -783,7 +918,7 @@
             <span class="n">spawned_pids</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="n">pid_count</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">luminosity_processes</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">LUMINOSITY_PROCESSES</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">p</span> <span class="o">=</span> <span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">spin_process</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">process_anomaly_id</span><span class="p">))</span>
                     <span class="n">pids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
@@ -791,7 +926,7 @@
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
                         <span class="s1">&#39;starting </span><span class="si">%s</span><span class="s1"> of </span><span class="si">%s</span><span class="s1"> spin_process/es&#39;</span> <span class="o">%</span> <span class="p">(</span>
                             <span class="nb">str</span><span class="p">(</span><span class="n">pid_count</span><span class="p">),</span>
-                            <span class="nb">str</span><span class="p">(</span><span class="n">luminosity_processes</span><span class="p">)))</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">LUMINOSITY_PROCESSES</span><span class="p">)))</span>
                     <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
                     <span class="n">spawned_pids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
                 <span class="k">except</span><span class="p">:</span>
@@ -811,7 +946,7 @@
                     <span class="n">time_to_run</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">p_starts</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
                         <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> spin_process completed in </span><span class="si">%.2f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                            <span class="nb">str</span><span class="p">(</span><span class="n">luminosity_processes</span><span class="p">),</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">LUMINOSITY_PROCESSES</span><span class="p">),</span>
                             <span class="n">time_to_run</span><span class="p">))</span>
                     <span class="k">break</span>
             <span class="k">else</span><span class="p">:</span>
@@ -877,7 +1012,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.2.14',
+            VERSION:'1.3.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

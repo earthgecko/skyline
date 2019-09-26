@@ -36,14 +36,6 @@ skyline.webapp.utilities module
     :undoc-members:
     :show-inheritance:
 
-skyline.webapp.webapp.preprocess module
----------------------------------------
-
-.. automodule:: webapp.webapp.preprocess
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 skyline.webapp.webapp module
 ----------------------------
 

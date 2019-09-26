@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>skyline package &mdash; Skyline 1.2.14 documentation</title>
+  <title>skyline package &mdash; Skyline 1.3.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.2.14 documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.3.0 documentation" href="index.html"/>
         <link rel="next" title="skyline.analyzer package" href="skyline.analyzer.html"/>
         <link rel="prev" title="Roadmap" href="roadmap.html"/> 
 
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                1.2
+                1.3
               </div>
             
           
@@ -95,6 +95,8 @@
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="docker.html">docker - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
 <li class="toctree-l1"><a class="reference internal" href="analyzer.html">Analyzer</a></li>
@@ -108,7 +110,10 @@
 <li class="toctree-l1"><a class="reference internal" href="ionosphere_echo.html">Ionosphere echo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-multiple-skylines.html">Running multiple Skyline instances</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
@@ -127,12 +132,14 @@
 <li class="toctree-l3"><a class="reference internal" href="skyline.analyzer_dev.html">skyline.analyzer_dev package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.boundary.html">skyline.boundary package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.crucible.html">skyline.crucible package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.flux.html">skyline.flux package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.horizon.html">skyline.horizon package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.ionosphere.html">skyline.ionosphere package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.luminosity.html">skyline.luminosity package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.mirage.html">skyline.mirage package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.panorama.html">skyline.panorama package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.tsfresh_features.html">skyline.tsfresh_features package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.vista.html">skyline.vista package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.webapp.html">skyline.webapp package</a></li>
 </ul>
 </li>
@@ -144,6 +151,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#module-settings">skyline.settings module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-skyline_functions">skyline.skyline_functions module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-skyline_version">skyline.skyline_version module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-slack_functions">skyline.slack_functions module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-tsfresh_feature_names">skyline.tsfresh_feature_names module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-validate_settings">skyline.validate_settings module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-contents">Module contents</a></li>
@@ -234,6 +242,18 @@
 <li class="toctree-l2"><a class="reference internal" href="skyline.crucible.html#module-crucible">Module contents</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="skyline.flux.html">skyline.flux package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="skyline.flux.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.flux.html#module-flux.flux">skyline.flux.flux module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.flux.html#module-flux.gunicorn">skyline.flux.gunicorn module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.flux.html#module-flux.listen">skyline.flux.listen module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.flux.html#module-flux.logger">skyline.flux.logger module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.flux.html#module-flux.populate_metric">skyline.flux.populate_metric module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.flux.html#module-flux.populate_metric_worker">skyline.flux.populate_metric_worker module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.flux.html#module-flux.worker">skyline.flux.worker module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.flux.html#module-flux">Module contents</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="skyline.horizon.html">skyline.horizon package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="skyline.horizon.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.horizon.html#module-horizon.agent">skyline.horizon.agent module</a></li>
@@ -286,13 +306,20 @@
 <li class="toctree-l2"><a class="reference internal" href="skyline.tsfresh_features.html#module-tsfresh_features">Module contents</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="skyline.vista.html">skyline.vista package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="skyline.vista.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.vista.html#module-vista.agent">skyline.vista.agent module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.vista.html#module-vista.fetcher">skyline.vista.fetcher module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.vista.html#module-vista.worker">skyline.vista.worker module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.vista.html#module-vista">Module contents</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="skyline.webapp.html">skyline.webapp package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="skyline.webapp.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.webapp.html#module-webapp.backend">skyline.webapp.backend module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.webapp.html#module-webapp.gunicorn">skyline.webapp.gunicorn module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.webapp.html#module-webapp.ionosphere_backend">skyline.webapp.ionosphere_backend module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.webapp.html#module-webapp.utilities">skyline.webapp.utilities module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="skyline.webapp.html#skyline-webapp-webapp-preprocess-module">skyline.webapp.webapp.preprocess module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.webapp.html#module-webapp.webapp">skyline.webapp.webapp module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.webapp.html#module-webapp">Module contents</a></li>
 </ul>
@@ -470,7 +497,7 @@ webapp/ionosphere_backend</p>
 
 <dl class="function">
 <dt id="ionosphere_functions.create_features_profile">
-<code class="descname">create_features_profile</code><span class="sig-paren">(</span><em>current_skyline_app</em>, <em>requested_timestamp</em>, <em>data_for_metric</em>, <em>context</em>, <em>ionosphere_job</em>, <em>fp_parent_id</em>, <em>fp_generation</em>, <em>fp_learn</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere_functions.html#create_features_profile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere_functions.create_features_profile" title="Permalink to this definition">¶</a></dt>
+<code class="descname">create_features_profile</code><span class="sig-paren">(</span><em>current_skyline_app</em>, <em>requested_timestamp</em>, <em>data_for_metric</em>, <em>context</em>, <em>ionosphere_job</em>, <em>fp_parent_id</em>, <em>fp_generation</em>, <em>fp_learn</em>, <em>slack_ionosphere_job</em>, <em>user_id</em>, <em>label</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere_functions.html#create_features_profile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere_functions.create_features_profile" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a features_profile to the Skyline ionosphere database table.</p>
 <table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
@@ -491,6 +518,9 @@ learnt from, 0 being an original human generated features profile</li>
 human generated features profile, 0 being an original human generated
 features profile.</li>
 <li><strong>fp_learn</strong> (<em>boolean</em>) &#8211; Whether Ionosphere should learn at use_full_duration_days</li>
+<li><strong>slack_ionosphere_job</strong> (<em>str</em>) &#8211; The originating ionosphere_job name</li>
+<li><strong>user_id</strong> (<em>int</em>) &#8211; The user id of the user creating the features profile</li>
+<li><strong>label</strong> (<em>str</em>) &#8211; A label for the feature profile</li>
 </ul>
 </td>
 </tr>
@@ -696,7 +726,8 @@ the mini namespace.</td>
 Be sure to pick a value that suits your memory capacity, your CPU capacity
 and your overall metrics count. Longer durations take a longer to analyze,
 but they can help the algorithms reduce the noise and provide more accurate
-anomaly detection.</td>
+anomaly detection.  However, Mirage handles longer durations so ideally this
+should be 86400.</td>
 </tr>
 </tbody>
 </table>
@@ -718,15 +749,41 @@ displayed in the Webapp &#8216;mini&#8217; view.</td>
 </dd></dl>
 
 <dl class="data">
+<dt id="settings.GRAPHITE_AUTH_HEADER">
+<code class="descname">GRAPHITE_AUTH_HEADER</code><em class="property"> = False</em><a class="headerlink" href="#settings.GRAPHITE_AUTH_HEADER" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.GRAPHITE_AUTH_HEADER" title="settings.GRAPHITE_AUTH_HEADER"><strong>GRAPHITE_AUTH_HEADER</strong></a> (<em>str</em>) &#8211; the Authorization header for Graphite api</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.GRAPHITE_CUSTOM_HEADERS">
+<code class="descname">GRAPHITE_CUSTOM_HEADERS</code><em class="property"> = {}</em><a class="headerlink" href="#settings.GRAPHITE_CUSTOM_HEADERS" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.GRAPHITE_CUSTOM_HEADERS" title="settings.GRAPHITE_CUSTOM_HEADERS"><strong>GRAPHITE_CUSTOM_HEADERS</strong></a> (<em>dict</em>) &#8211; Dictionary with custom headers</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
 <dt id="settings.GRAPHITE_HOST">
 <code class="descname">GRAPHITE_HOST</code><em class="property"> = 'YOUR_GRAPHITE_HOST.example.com'</em><a class="headerlink" href="#settings.GRAPHITE_HOST" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.GRAPHITE_HOST" title="settings.GRAPHITE_HOST"><strong>GRAPHITE_HOST</strong></a> (<em>str</em>) &#8211; If you have a Graphite host set up, set this metric to get
-graphs on Skyline and Horizon. Don&#8217;t include <a class="reference external" href="http://">http://</a> since this is used for
-carbon host as well.</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.GRAPHITE_HOST" title="settings.GRAPHITE_HOST"><strong>GRAPHITE_HOST</strong></a> (<em>str</em>) &#8211; If you have a Graphite host set up, set this variable to get
+graphs on Skyline and Horizon. Don&#8217;t include <a class="reference external" href="http://">http://</a> since this can be used
+for CARBON_HOST as well.</td>
 </tr>
 </tbody>
 </table>
@@ -816,8 +873,23 @@ than the default graphite graphs.</td>
 </dd></dl>
 
 <dl class="data">
+<dt id="settings.GRAPHITE_RENDER_URI">
+<code class="descname">GRAPHITE_RENDER_URI</code><em class="property"> = 'render'</em><a class="headerlink" href="#settings.GRAPHITE_RENDER_URI" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.GRAPHITE_RENDER_URI" title="settings.GRAPHITE_RENDER_URI"><strong>GRAPHITE_RENDER_URI</strong></a> (<em>str</em>) &#8211; Base URI for graphite render, this can generally be
+render, api/datasources/1/render,  api/datasources/proxy/1/render, etc,
+depending on how your Graphite (or grafana proxy) is set up.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
 <dt id="settings.GRAPH_URL">
-<code class="descname">GRAPH_URL</code><em class="property"> = 'http://YOUR_GRAPHITE_HOST.example.com:80/render/?width=1400&amp;from=-7hour&amp;target='</em><a class="headerlink" href="#settings.GRAPH_URL" title="Permalink to this definition">¶</a></dt>
+<code class="descname">GRAPH_URL</code><em class="property"> = 'http://YOUR_GRAPHITE_HOST.example.com:80/render?width=1400&amp;from=-7hour&amp;target='</em><a class="headerlink" href="#settings.GRAPH_URL" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -832,6 +904,20 @@ relevant metric name in each alert.</td>
 <p class="last">There is probably no neeed to change this unless you what a different
 size graph sent with alerts.</p>
 </div>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.CARBON_HOST">
+<code class="descname">CARBON_HOST</code><em class="property"> = 'YOUR_GRAPHITE_HOST.example.com'</em><a class="headerlink" href="#settings.CARBON_HOST" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.CARBON_HOST" title="settings.CARBON_HOST"><strong>CARBON_HOST</strong></a> &#8211; endpoint to send metrics that sould reach graphite if
+the CARBON_HOST is a different host to the GRAPHITE_HOST set it here.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="data">
@@ -882,6 +968,38 @@ instance on the Skyline namespace sharded by this setting, like carbon.relays.
 If you want multiple Skyline hosts, set the hostname of the skyline here and
 metrics will be as e.g. <code class="docutils literal"><span class="pre">skyline.analyzer.skyline-01.run_time</span></code></li>
 </ul>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.SKYLINE_FEEDBACK_NAMESPACES">
+<code class="descname">SKYLINE_FEEDBACK_NAMESPACES</code><em class="property"> = ['YOUR_HOSTNAME', 'YOUR_GRAPHITE_HOST.example.com']</em><a class="headerlink" href="#settings.SKYLINE_FEEDBACK_NAMESPACES" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.SKYLINE_FEEDBACK_NAMESPACES" title="settings.SKYLINE_FEEDBACK_NAMESPACES"><strong>SKYLINE_FEEDBACK_NAMESPACES</strong></a> (<em>list</em>) &#8211; <p>This is a list of namespaces that can cause
+feedback in Skyline.  If you are analysing the system metrics of the Skyline
+host (server or container), then if a lot of metrics become anomalous, the
+Skyline host/s are going to be working much more and pulling more data from
+the GRAPHITE_HOST, the Skyline mysql database metrics and Redis queries
+will all change substantially too.  Although Skyline can be trained and
+learn them, when Skyline is in a known busy state, the monitoring of its
+own metrics and related metrics should take 2md priority.  In fact when the
+ionosphere_busy state is determined, Skyline will rate limit the analysis of
+any metrics in the namespaces declared here.
+This list works in the same way that Horizon SKIP_LIST does, it matches in
+the string or dotted namespace elements.
+<strong>For example</strong>:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">SKYLINE_FEEDBACK_NAMESPACES</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="n">SERVER_METRICS_NAME</span><span class="p">,</span>
+    <span class="s1">&#39;stats.skyline-docker-graphite-statsd-1&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;stats.skyline-mysql&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="data">
@@ -1411,7 +1529,7 @@ the <a class="reference internal" href="#settings.CRUCIBLE_DATA_FOLDER" title="s
 
 <dl class="data">
 <dt id="settings.ALERTS">
-<code class="descname">ALERTS</code><em class="property"> = (('skyline', 'smtp', 1800), ('skyline_test.alerters.test', 'smtp', 1800), ('skyline_test.alerters.test', 'hipchat', 1800), ('skyline_test.alerters.test', 'slack', 1800), ('skyline_test.alerters.test', 'pagerduty', 1800))</em><a class="headerlink" href="#settings.ALERTS" title="Permalink to this definition">¶</a></dt>
+<code class="descname">ALERTS</code><em class="property"> = (('horizon.udp.test', 'smtp', 30), ('skyline', 'smtp', 1800), ('skyline_test.alerters.test', 'smtp', 1800), ('skyline_test.alerters.test', 'hipchat', 1800), ('skyline_test.alerters.test', 'slack', 1800), ('skyline_test.alerters.test', 'pagerduty', 1800))</em><a class="headerlink" href="#settings.ALERTS" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1565,7 +1683,7 @@ defined.</p>
 
 <dl class="data">
 <dt id="settings.HIPCHAT_OPTS">
-<code class="descname">HIPCHAT_OPTS</code><em class="property"> = {'color': 'purple', 'auth_token': 'hipchat_auth_token', 'sender': 'hostname or identifier', 'rooms': {'skyline': (12345,), 'skyline_test.alerters.test': (12345,)}}</em><a class="headerlink" href="#settings.HIPCHAT_OPTS" title="Permalink to this definition">¶</a></dt>
+<code class="descname">HIPCHAT_OPTS</code><em class="property"> = {'color': 'purple', 'auth_token': 'hipchat_auth_token', 'sender': 'hostname or identifier', 'rooms': {'horizon.udp.test': (12345,), 'skyline': (12345,), 'skyline_test.alerters.test': (12345,)}}</em><a class="headerlink" href="#settings.HIPCHAT_OPTS" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1579,7 +1697,7 @@ defined.</p>
 
 <dl class="data">
 <dt id="settings.SLACK_OPTS">
-<code class="descname">SLACK_OPTS</code><em class="property"> = {'channels': {'skyline': ('#general',), 'skyline_test.alerters.test': ('#general',)}, 'bot_user_oauth_access_token': 'YOUR_slack_bot_user_oauth_access_token', 'icon_emoji': ':chart_with_upwards_trend:'}</em><a class="headerlink" href="#settings.SLACK_OPTS" title="Permalink to this definition">¶</a></dt>
+<code class="descname">SLACK_OPTS</code><em class="property"> = {'message_on_features_profile_learnt_reaction_emoji': 'heavy_check_mark', 'message_on_features_profile_created_reaction_emoji': 'thumbsup', 'message_on_validated_features_profiles': True, 'channels': {'horizon.udp.test': ('#skyline',), 'skyline': ('#skyline',), 'skyline_test.alerters.test': ('#skyline',)}, 'thread_updates': True, 'icon_emoji': ':chart_with_upwards_trend:', 'message_on_features_profile_disabled': True, 'default_channel_id': 'YOUR_default_slack_channel_id', 'message_on_training_data_viewed_reaction_emoji': 'eyes', 'message_on_features_profile_learnt': True, 'message_on_features_profile_disabled_reaction_emoji': 'x', 'message_on_training_data_viewed': True, 'bot_user_oauth_access_token': 'YOUR_slack_bot_user_oauth_access_token', 'default_channel': 'YOUR_default_slack_channel', 'message_on_features_profile_created': True}</em><a class="headerlink" href="#settings.SLACK_OPTS" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1612,7 +1730,7 @@ defined.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.SYSLOG_OPTS" title="settings.SYSLOG_OPTS"><strong>SYSLOG_OPTS</strong></a> (<em>dictionary</em>) &#8211; Your SMTP settings.</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.SYSLOG_OPTS" title="settings.SYSLOG_OPTS"><strong>SYSLOG_OPTS</strong></a> (<em>dictionary</em>) &#8211; Your syslog settings.</td>
 </tr>
 </tbody>
 </table>
@@ -1620,6 +1738,22 @@ defined.</p>
 LOG_LOCAL4 which will ship to any syslog or rsyslog down the line.  The
 <code class="docutils literal"><span class="pre">EXPIRATION_TIME</span></code> for the syslog alert method should be set to 1 to fire
 every anomaly into the syslog.</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.CUSTOM_ALERT_OPTS">
+<code class="descname">CUSTOM_ALERT_OPTS</code><em class="property"> = {'analyzer_alert_heading': 'Analyzer', 'mirage_alert_heading': 'Mirage', 'boundary_alert_heading': 'Boundary', 'ionosphere_alert_heading': 'Ionosphere', 'append_environment': '', 'main_alert_title': 'Skyline'}</em><a class="headerlink" href="#settings.CUSTOM_ALERT_OPTS" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.CUSTOM_ALERT_OPTS" title="settings.CUSTOM_ALERT_OPTS"><strong>CUSTOM_ALERT_OPTS</strong></a> (<em>dictionary</em>) &#8211; Any custom alert headings you want to use</td>
+</tr>
+</tbody>
+</table>
+<p>Here you can specify any custom alert titles and headings you want for each
+alerting app.  You also can use the append_environment option to append the
+environment from which the alert originated.</p>
 </dd></dl>
 
 <dl class="data">
@@ -3425,11 +3559,12 @@ population.</td>
 </tr>
 </tbody>
 </table>
-<p>For example, the IP or FQDN, the username and password as a strings str:
-REMOTE_SKYLINE_INSTANCES = [</p>
-<blockquote>
-<div>[&#8216;<a class="reference external" href="http://skyline-na.example.com:8080','remote_WEBAPP_AUTH_USER','remote_WEBAPP_AUTH_USER_PASSWORD">http://skyline-na.example.com:8080&#8217;,&#8217;remote_WEBAPP_AUTH_USER&#8217;,&#8217;remote_WEBAPP_AUTH_USER_PASSWORD</a>&#8216;],
-[&#8216;<a class="reference external" href="http://skyline-eu.example.com">http://skyline-eu.example.com</a>&#8216;, &#8216;another_remote_WEBAPP_AUTH_USER&#8217;,&#8217;another_WEBAPP_AUTH_USER_PASSWORD&#8217;]]</div></blockquote>
+<p><strong>For example</strong>, the IP or FQDN, the username and password as a strings str:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">REMOTE_SKYLINE_INSTANCES</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">[</span><span class="s1">&#39;http://skyline-na.example.com:8080&#39;</span><span class="p">,</span><span class="s1">&#39;remote_WEBAPP_AUTH_USER&#39;</span><span class="p">,</span><span class="s1">&#39;remote_WEBAPP_AUTH_USER_PASSWORD&#39;</span><span class="p">],</span>
+    <span class="p">[</span><span class="s1">&#39;http://skyline-eu.example.com&#39;</span><span class="p">,</span> <span class="s1">&#39;another_remote_WEBAPP_AUTH_USER&#39;</span><span class="p">,</span><span class="s1">&#39;another_WEBAPP_AUTH_USER_PASSWORD&#39;</span><span class="p">]]</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="data">
@@ -3464,6 +3599,368 @@ however in root cause analysis and determining relationships between metrics
 0.9 has proved more useful for in seeing the tress in the forest.
 This can be a value between 0.0 and 1.00000 - 1.0 being STRONGEST cross
 correlation</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.DOCKER">
+<code class="descname">DOCKER</code><em class="property"> = False</em><a class="headerlink" href="#settings.DOCKER" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.DOCKER" title="settings.DOCKER"><strong>DOCKER</strong></a> (<em>boolean</em>) &#8211; Whether Skyline is running on Docker or not</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.DOCKER_DISPLAY_REDIS_PASSWORD_IN_REBROW">
+<code class="descname">DOCKER_DISPLAY_REDIS_PASSWORD_IN_REBROW</code><em class="property"> = False</em><a class="headerlink" href="#settings.DOCKER_DISPLAY_REDIS_PASSWORD_IN_REBROW" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.DOCKER_DISPLAY_REDIS_PASSWORD_IN_REBROW" title="settings.DOCKER_DISPLAY_REDIS_PASSWORD_IN_REBROW"><strong>DOCKER_DISPLAY_REDIS_PASSWORD_IN_REBROW</strong></a> (<em>boolean</em>) &#8211; Whether to show the Redis password
+in the webapp Rebrow login page</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.DOCKER_FAKE_EMAIL_ALERTS">
+<code class="descname">DOCKER_FAKE_EMAIL_ALERTS</code><em class="property"> = False</em><a class="headerlink" href="#settings.DOCKER_FAKE_EMAIL_ALERTS" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.DOCKER_FAKE_EMAIL_ALERTS" title="settings.DOCKER_FAKE_EMAIL_ALERTS"><strong>DOCKER_FAKE_EMAIL_ALERTS</strong></a> (<em>boolean</em>) &#8211; Whether to make docker fake email alerts.  At the
+moment docker has no support to send email alerts, however an number of
+Ionosphere resources are created when a email alert is sent.  Therefore in
+the docker context email alerts are processed only the SMTP action is not
+run.  If Skyline is running on docker, this must be set to True.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.FLUX_IP">
+<code class="descname">FLUX_IP</code><em class="property"> = '127.0.0.1'</em><a class="headerlink" href="#settings.FLUX_IP" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.FLUX_IP" title="settings.FLUX_IP"><strong>FLUX_IP</strong></a> (<em>str</em>) &#8211; The IP to bind the gunicorn flux server on.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.FLUX_PORT">
+<code class="descname">FLUX_PORT</code><em class="property"> = 8000</em><a class="headerlink" href="#settings.FLUX_PORT" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.FLUX_PORT" title="settings.FLUX_PORT"><strong>FLUX_PORT</strong></a> (<em>int</em>) &#8211; The port for the gunicorn flux server to listen on.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.FLUX_WORKERS">
+<code class="descname">FLUX_WORKERS</code><em class="property"> = 1</em><a class="headerlink" href="#settings.FLUX_WORKERS" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.FLUX_WORKERS" title="settings.FLUX_WORKERS"><strong>FLUX_WORKERS</strong></a> (<em>int</em>) &#8211; The number of gunicorn flux workers</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.FLUX_SELF_API_KEY">
+<code class="descname">FLUX_SELF_API_KEY</code><em class="property"> = 'YOURown32charSkylineAPIkeySecret'</em><a class="headerlink" href="#settings.FLUX_SELF_API_KEY" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.FLUX_SELF_API_KEY" title="settings.FLUX_SELF_API_KEY"><strong>FLUX_SELF_API_KEY</strong></a> (<em>str</em>) &#8211; this is a 32 alphanumeric string that is used to
+validate direct requests to Flux. Vista uses it and connects directly to
+Flux and bypass the reverse proxy and authenticates itself.  It can only be
+digits and letters e.g. [0-9][a-Z]</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.FLUX_BACKLOG">
+<code class="descname">FLUX_BACKLOG</code><em class="property"> = 254</em><a class="headerlink" href="#settings.FLUX_BACKLOG" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.FLUX_BACKLOG" title="settings.FLUX_BACKLOG"><strong>FLUX_BACKLOG</strong></a> &#8211; The maximum number of pending connections.  This refers to
+the number of clients that can be waiting to be served. Exceeding this number
+results in the client getting an error when attempting to connect. It should
+only affect servers under significant load.  As per
+<a class="reference external" href="http://docs.gunicorn.org/en/stable/settings.html#backlog">http://docs.gunicorn.org/en/stable/settings.html#backlog</a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.FLUX_SEND_TO_CARBON">
+<code class="descname">FLUX_SEND_TO_CARBON</code><em class="property"> = False</em><a class="headerlink" href="#settings.FLUX_SEND_TO_CARBON" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.FLUX_SEND_TO_CARBON" title="settings.FLUX_SEND_TO_CARBON"><strong>FLUX_SEND_TO_CARBON</strong></a> (<em>boolean</em>) &#8211; Whether to send metrics recieved by flux to
+Graphite.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.FLUX_CARBON_HOST">
+<code class="descname">FLUX_CARBON_HOST</code><em class="property"> = 'YOUR_GRAPHITE_HOST.example.com'</em><a class="headerlink" href="#settings.FLUX_CARBON_HOST" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.FLUX_CARBON_HOST" title="settings.FLUX_CARBON_HOST"><strong>FLUX_CARBON_HOST</strong></a> (<em>str</em>) &#8211; The carbon host that flux should send metrics to if
+FLUX_SEND_TO_CARBON is enabled.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.FLUX_CARBON_PORT">
+<code class="descname">FLUX_CARBON_PORT</code><em class="property"> = 2003</em><a class="headerlink" href="#settings.FLUX_CARBON_PORT" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.FLUX_CARBON_PORT" title="settings.FLUX_CARBON_PORT"><strong>FLUX_CARBON_PORT</strong></a> (<em>int</em>) &#8211; The carbon host port that flux should send metrics via
+FLUX_SEND_TO_CARBON is enabled.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.FLUX_CARBON_PICKLE_PORT">
+<code class="descname">FLUX_CARBON_PICKLE_PORT</code><em class="property"> = 2004</em><a class="headerlink" href="#settings.FLUX_CARBON_PICKLE_PORT" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.FLUX_CARBON_PICKLE_PORT" title="settings.FLUX_CARBON_PICKLE_PORT"><strong>FLUX_CARBON_PICKLE_PORT</strong></a> (<em>int</em>) &#8211; The port for the Carbon PICKLE_RECEIVER_PORT on
+Graphite as per defined in Graphite&#8217;s carbon.conf</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.FLUX_SEND_TO_STATSD">
+<code class="descname">FLUX_SEND_TO_STATSD</code><em class="property"> = False</em><a class="headerlink" href="#settings.FLUX_SEND_TO_STATSD" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.FLUX_SEND_TO_STATSD" title="settings.FLUX_SEND_TO_STATSD"><strong>FLUX_SEND_TO_STATSD</strong></a> (<em>boolean</em>) &#8211; Whether to send metrics recieved by flux to statsd.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.FLUX_STATSD_HOST">
+<code class="descname">FLUX_STATSD_HOST</code><em class="property"> = None</em><a class="headerlink" href="#settings.FLUX_STATSD_HOST" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.FLUX_STATSD_HOST" title="settings.FLUX_STATSD_HOST"><strong>FLUX_STATSD_HOST</strong></a> (<em>str</em>) &#8211; The statsd host that flux should send metrics to if
+FLUX_SEND_TO_STATSD is enabled.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.FLUX_STATSD_PORT">
+<code class="descname">FLUX_STATSD_PORT</code><em class="property"> = 8125</em><a class="headerlink" href="#settings.FLUX_STATSD_PORT" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.FLUX_STATSD_PORT" title="settings.FLUX_STATSD_PORT"><strong>FLUX_STATSD_PORT</strong></a> (<em>int</em>) &#8211; The statsd host port that flux should send metrics via
+FLUX_SEND_TO_STATSD is enabled.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.VISTA_ENABLED">
+<code class="descname">VISTA_ENABLED</code><em class="property"> = False</em><a class="headerlink" href="#settings.VISTA_ENABLED" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.VISTA_ENABLED" title="settings.VISTA_ENABLED"><strong>VISTA_ENABLED</strong></a> (<em>boolean</em>) &#8211; Enables Skyline vista</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.VISTA_FETCHER_PROCESSES">
+<code class="descname">VISTA_FETCHER_PROCESSES</code><em class="property"> = 1</em><a class="headerlink" href="#settings.VISTA_FETCHER_PROCESSES" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.VISTA_FETCHER_PROCESSES" title="settings.VISTA_FETCHER_PROCESSES"><strong>VISTA_FETCHER_PROCESSES</strong></a> (<em>int</em>) &#8211; the number of Vista fetcher processes to run.
+In all circumstances 1 process should be sufficient as the process runs
+asynchronous requests.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.VISTA_FETCHER_PROCESS_MAX_RUNTIME">
+<code class="descname">VISTA_FETCHER_PROCESS_MAX_RUNTIME</code><em class="property"> = 50</em><a class="headerlink" href="#settings.VISTA_FETCHER_PROCESS_MAX_RUNTIME" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.VISTA_FETCHER_PROCESS_MAX_RUNTIME" title="settings.VISTA_FETCHER_PROCESS_MAX_RUNTIME"><strong>VISTA_FETCHER_PROCESS_MAX_RUNTIME</strong></a> (<em>int</em>) &#8211; the maximum number of seconds Vista
+fetcher process/es should run before being terminated.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.VISTA_WORKER_PROCESSES">
+<code class="descname">VISTA_WORKER_PROCESSES</code><em class="property"> = 1</em><a class="headerlink" href="#settings.VISTA_WORKER_PROCESSES" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.VISTA_WORKER_PROCESSES" title="settings.VISTA_WORKER_PROCESSES"><strong>VISTA_WORKER_PROCESSES</strong></a> (<em>int</em>) &#8211; the number of Vista worker processes to run to
+validate and submit the metrics to Flux and Graphite.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.VISTA_DO_NOT_SUBMIT_CURRENT_MINUTE">
+<code class="descname">VISTA_DO_NOT_SUBMIT_CURRENT_MINUTE</code><em class="property"> = True</em><a class="headerlink" href="#settings.VISTA_DO_NOT_SUBMIT_CURRENT_MINUTE" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.VISTA_DO_NOT_SUBMIT_CURRENT_MINUTE" title="settings.VISTA_DO_NOT_SUBMIT_CURRENT_MINUTE"><strong>VISTA_DO_NOT_SUBMIT_CURRENT_MINUTE</strong></a> (<em>boolean</em>) &#8211; Do not resample or send data that falls
+into the current minute bin to Graphite.  This means that Skyline will only
+analyse data 60 seconds behind.  In terms of fetching high frequency data
+this should always be the default, so that Skyline is analysing the last
+complete data point for a minute and is not analysing a partially populated
+data point which will result in false positives.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.VISTA_FETCH_GRAPHITE_METRICS">
+<code class="descname">VISTA_FETCH_GRAPHITE_METRICS</code><em class="property"> = ()</em><a class="headerlink" href="#settings.VISTA_FETCH_GRAPHITE_METRICS" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><strong>VISTA_FETCH_METRICS</strong> (<em>tuple</em>) &#8211; Enables Skyline vista</td>
+</tr>
+</tbody>
+</table>
+<p>This is the config where metrics that need to be fetched are defined.</p>
+<ul>
+<li><p class="first"><strong>Tuple schema example</strong>:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">VISTA_FETCH_METRICS</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="c1"># (remote_host, remote_host_type, frequency, remote_target, graphite_target, uri, namespace_prefix, api_key, token, user, password, (populate_at_resolution_1, populate_at_resolution_2, ...)),</span>
+    <span class="c1"># Example with no authentication</span>
+    <span class="p">(</span><span class="s1">&#39;https://graphite.example.org&#39;</span><span class="p">,</span> <span class="s1">&#39;graphite&#39;</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="s1">&#39;stats.web01.cpu.user&#39;</span><span class="p">,</span> <span class="s1">&#39;stats.web01.cpu.user&#39;</span><span class="p">,</span> <span class="s1">&#39;/render/?from=-10minutes&amp;format=json&amp;target=&#39;</span><span class="p">,</span> <span class="s1">&#39;vista.graphite_example_org&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;90days&#39;</span><span class="p">,</span> <span class="s1">&#39;7days&#39;</span><span class="p">,</span> <span class="s1">&#39;24hours&#39;</span><span class="p">,</span> <span class="s1">&#39;6hours&#39;</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s1">&#39;https://graphite.example.org&#39;</span><span class="p">,</span> <span class="s1">&#39;graphite&#39;</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="s1">&#39;sumSeries(stats.*.cpu.user)&#39;</span><span class="p">,</span> <span class="s1">&#39;stats.cumulative.cpu.user&#39;</span><span class="p">,</span> <span class="s1">&#39;/render/?from=-10minutes&amp;format=json&amp;target=&#39;</span><span class="p">,</span> <span class="s1">&#39;vista.graphite_example_org&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;90days&#39;</span><span class="p">,</span> <span class="s1">&#39;7days&#39;</span><span class="p">,</span> <span class="s1">&#39;24hours&#39;</span><span class="p">,</span> <span class="s1">&#39;6hours&#39;</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s1">&#39;https://graphite.example.org&#39;</span><span class="p">,</span> <span class="s1">&#39;graphite&#39;</span><span class="p">,</span> <span class="mi">3600</span><span class="p">,</span> <span class="s1">&#39;swell.tar.hm0&#39;</span><span class="p">,</span> <span class="s1">&#39;swell.tar.hm0&#39;</span><span class="p">,</span> <span class="s1">&#39;/render/?from=-120minutes&amp;format=json&amp;target=&#39;</span><span class="p">,</span> <span class="s1">&#39;graphite_example_org&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;90days&#39;</span><span class="p">,</span> <span class="s1">&#39;7days&#39;</span><span class="p">,</span> <span class="s1">&#39;24hours&#39;</span><span class="p">,</span> <span class="s1">&#39;6hours&#39;</span><span class="p">)),</span>
+    <span class="p">(</span><span class="s1">&#39;http://prometheus.example.org:9090&#39;</span><span class="p">,</span> <span class="s1">&#39;prometheus&#39;</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="s1">&#39;node_load1&#39;</span><span class="p">,</span> <span class="s1">&#39;node_load1&#39;</span><span class="p">,</span> <span class="s1">&#39;default&#39;</span><span class="p">,</span> <span class="s1">&#39;vista.prometheus_example_org&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">,</span> <span class="p">(</span><span class="s1">&#39;15d&#39;</span><span class="p">,))</span>
+    <span class="p">(</span><span class="s1">&#39;http://prometheus.example.org:9090&#39;</span><span class="p">,</span> <span class="s1">&#39;prometheus&#39;</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="s1">&#39;node_network_transmit_bytes_total{device=&quot;eth0&quot;}&#39;</span><span class="p">,</span> <span class="s1">&#39;node_network_transmit_bytes_total.eth0&#39;</span><span class="p">,</span> <span class="s1">&#39;/api/v1/query?query=node_network_transmit_bytes_total%7Bdevice%3D</span><span class="si">%22e</span><span class="s1">th0</span><span class="si">%22%</span><span class="s1">7D%5B5m%5D&#39;</span><span class="p">,</span> <span class="s1">&#39;vista.prometheus_example_org&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">,</span> <span class="p">(</span><span class="s1">&#39;15d&#39;</span><span class="p">,))</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">All the fetch tuple parameters are required to be present in each fetch tuple.</p>
+</li>
+</ul>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>remote_host</strong> (<em>str</em>) &#8211; the remote metric host base URL, including the protocol and
+port.</li>
+<li><strong>remote_host_type</strong> (<em>str</em>) &#8211; the type of remote host, valid options are graphite and
+prometheus.</li>
+<li><strong>frequency</strong> (<em>int</em>) &#8211; the frequency with which to fetch data in seconds.</li>
+<li><strong>remote_target</strong> (<em>str</em>) &#8211; the remote target to fetch, this can be a single metric,
+a single metric with function/s applied or a series of metrics with
+function/s applied which result is a single derived time series.</li>
+<li><strong>graphite_target</strong> (<em>str</em>) &#8211; the absolute metric name to be used to store in Graphite
+this excludes the namespace_prefix set by the namespace_prefix param below.</li>
+<li><strong>uri</strong> (<em>str</em>) &#8211; the metric host endpoint URI used to retrieve the metric.
+FOR GRAPHITE: valid Graphite URIs are only in the form of
+<cite>from=-&lt;period&gt;&lt;minutes|hours|days&gt;`</cite>, only minutes, hours and days can be
+passed otherwise the regexs for back filling any missing data will not work.
+FOR PROMETHEUS: the uri can be passed a &#8216;default&#8217;, this will dynamically
+generate a URI in terms of the URLENCODED_TARGET, start=
+and end= parameters that are passed to query_range, based on the current
+time.  A Prometheus API URI can be passed, but the query should be URL
+encoded and cannot have any dynamic date based parameters.</li>
+<li><strong>namespace_prefix</strong> (<em>str</em>) &#8211; the Graphite namespace prefix to use for submitting
+metrics to, can be passed as <cite>&#8216;&#8217;</cite> if you do not want to prefix the metric
+names.  The namespace_prefix must NOT have a trailing dot.</li>
+<li><strong>api_key</strong> &#8211; an API key if one is required, otherwise pass the boolean None</li>
+<li><strong>token</strong> (<em>str</em>) &#8211; a token if one is required, otherwise pass the boolean None</li>
+<li><strong>user</strong> (<em>str</em>) &#8211; a username if one is required, otherwise pass the boolean None</li>
+<li><strong>password</strong> (<em>str</em>) &#8211; a password if one is required, otherwise pass the boolean None</li>
+<li><strong>populate_at_resolutions</strong> &#8211; if you want Vista to populate the metric with
+historic data this tuple allows you to declare at what resolutions to
+populate the data with.  If you do not want to pre-populated then do not
+declare a tuple and simply pass an empty tuple (). For a detailed
+description of this functionality please see the Vista documentation page
+at:
+<a class="reference external" href="https://earthgecko-skyline.readthedocs.io/en/latest/vista.html#pre-populating-metrics-with-historic-data">https://earthgecko-skyline.readthedocs.io/en/latest/vista.html#pre-populating-metrics-with-historic-data</a>
+<a class="reference external" href="https://earthgecko-skyline.readthedocs.io/en/latest/vista.html#populate_at_resolutions">https://earthgecko-skyline.readthedocs.io/en/latest/vista.html#populate_at_resolutions</a></li>
+</ul>
+</td>
 </tr>
 </tbody>
 </table>
@@ -3666,7 +4163,7 @@ check files, etc</p>
 <li><p class="first"><strong>Example usage</strong>:</p>
 <div class="highlight-default"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="n">mysql_select</span>
 <span class="n">query</span> <span class="o">=</span> <span class="s1">&#39;select id, metric from anomalies&#39;</span>
-<span class="n">result</span> <span class="o">=</span> <span class="n">mysql_select</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+<span class="n">results</span> <span class="o">=</span> <span class="n">mysql_select</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
 </pre></div>
 </div>
 </li>
@@ -3811,10 +4308,97 @@ z_derivative_metrics Redis key.</p>
 </table>
 </dd></dl>
 
+<dl class="function">
+<dt id="skyline_functions.get_user_details">
+<code class="descname">get_user_details</code><span class="sig-paren">(</span><em>current_skyline_app</em>, <em>desired_value</em>, <em>key</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/skyline_functions.html#get_user_details"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skyline_functions.get_user_details" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determines the user details for a user given the desired_value, key and
+value.  If you want the username of the user with id 1 then:
+get_user_details(&#8216;username&#8217;, &#8216;id&#8217;, 1)  # Will return &#8216;Skyline&#8217;
+get_user_details(&#8216;id&#8217;, &#8216;username&#8217;, &#8216;Skyline&#8217;)  # Will return &#8216;1&#8217;</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>current_skyline_app</strong> (<em>str</em>) &#8211; the app calling the function so the function
+knows which log to write too.</li>
+<li><strong>desired_value</strong> (<em>str</em>) &#8211; the id or username</li>
+<li><strong>key</strong> (<em>str</em>) &#8211; the field for the value</li>
+<li><strong>value</strong> (<em>str or int</em>) &#8211; the value of the item you want to query in the key field</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">tuple</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(boolean, str)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </div>
 <div class="section" id="module-skyline_version">
 <span id="skyline-skyline-version-module"></span><h2>skyline.skyline_version module<a class="headerlink" href="#module-skyline_version" title="Permalink to this headline">¶</a></h2>
 <p>version info</p>
+</div>
+<div class="section" id="module-slack_functions">
+<span id="skyline-slack-functions-module"></span><h2>skyline.slack_functions module<a class="headerlink" href="#module-slack_functions" title="Permalink to this headline">¶</a></h2>
+<p>slack functions</p>
+<p>These are shared slack functions that are required in multiple modules.</p>
+<dl class="function">
+<dt id="slack_functions.slack_post_message">
+<code class="descname">slack_post_message</code><span class="sig-paren">(</span><em>current_skyline_app</em>, <em>channel</em>, <em>thread_ts</em>, <em>message</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/slack_functions.html#slack_post_message"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#slack_functions.slack_post_message" title="Permalink to this definition">¶</a></dt>
+<dd><p>Post a message to a slack channel or thread.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>current_skyline_app</strong> (<em>str</em>) &#8211; the skyline app using this function</li>
+<li><strong>channel</strong> (<em>str</em>) &#8211; the slack channel</li>
+<li><strong>thread_ts</strong> (<em>str or None</em>) &#8211; the slack thread timestamp</li>
+<li><strong>message</strong> (<em>str</em>) &#8211; message</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">slack response dict</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">dict</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="slack_functions.slack_post_reaction">
+<code class="descname">slack_post_reaction</code><span class="sig-paren">(</span><em>current_skyline_app</em>, <em>channel</em>, <em>thread_ts</em>, <em>emoji</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/slack_functions.html#slack_post_reaction"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#slack_functions.slack_post_reaction" title="Permalink to this definition">¶</a></dt>
+<dd><p>Post a message to a slack channel or thread.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>current_skyline_app</strong> (<em>str</em>) &#8211; the skyline app using this function</li>
+<li><strong>channel</strong> (<em>str</em>) &#8211; the slack channel</li>
+<li><strong>thread_ts</strong> (<em>str</em>) &#8211; the slack thread timestamp</li>
+<li><strong>emoji</strong> (<em>str</em>) &#8211; emoji e.g. thumbsup</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">slack response dict</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">dict</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </div>
 <div class="section" id="module-tsfresh_feature_names">
 <span id="skyline-tsfresh-feature-names-module"></span><h2>skyline.tsfresh_feature_names module<a class="headerlink" href="#module-tsfresh_feature_names" title="Permalink to this headline">¶</a></h2>
@@ -3944,7 +4528,7 @@ settings.py are valid</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2.14',
+            VERSION:'1.3.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

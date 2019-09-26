@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>webapp.backend &mdash; Skyline 1.2.14 documentation</title>
+  <title>webapp.backend &mdash; Skyline 1.3.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.2.14 documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.3.0 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                1.2
+                1.3
               </div>
             
           
@@ -94,6 +94,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../docker.html">docker - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../analyzer.html">Analyzer</a></li>
@@ -107,7 +109,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../../ionosphere_echo.html">Ionosphere echo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
@@ -724,88 +729,6 @@
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;luminosity_remote_data :: </span><span class="si">%s</span><span class="s1"> valid metric time series data preprocessed for the remote request&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">luminosity_data</span><span class="p">)))</span>
 
     <span class="k">return</span> <span class="n">luminosity_data</span><span class="p">,</span> <span class="n">success</span><span class="p">,</span> <span class="n">message</span></div>
-
-
-<span class="c1"># @added 20181119 - Feature #2714: webapp - now - preprocess time series</span>
-<span class="c1"># Allow for the time series to be aggregated by median or sum per interval</span>
-<span class="c1"># period</span>
-<div class="viewcode-block" id="aggregate_timeseries"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.backend.aggregate_timeseries">[docs]</a><span class="k">def</span> <span class="nf">aggregate_timeseries</span><span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">,</span> <span class="n">aggregate_by</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Allow for the time series to be aggregated by median or sum</span>
-<span class="sd">    per minute so that webapp can return a reasonable number of data points for</span>
-<span class="sd">    dyngraph to load and display in the browser without causing lag.  This is</span>
-<span class="sd">    achieved by aggregating the time series using either the median of values</span>
-<span class="sd">    per minute or the sum.</span>
-
-<span class="sd">    :param base_name: the base_name of the metric</span>
-<span class="sd">    :type base_name: str</span>
-<span class="sd">    :param timeseries: the time series to aggregate</span>
-<span class="sd">    :type timeseries: list</span>
-<span class="sd">    :param aggregate_by: the method to be used to aggregate the time series by</span>
-<span class="sd">    :type aggregate_by: str</span>
-<span class="sd">    :return: (list, str, str)</span>
-<span class="sd">    :rtype: tuple</span>
-
-<span class="sd">    &quot;&quot;&quot;</span>
-
-    <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-    <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-    <span class="n">trace</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
-    <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
-
-    <span class="n">started_at</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-    <span class="n">aggregated_timeseries</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="c1"># logger.info(&#39;aggregate_timeseries :: aggregating time series for %s by %s at a %s second interval&#39; % (</span>
-    <span class="c1">#    base_name, aggregate_by, str(aggregation_interval)))</span>
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;aggregate_timeseries :: aggregating time series for </span><span class="si">%s</span><span class="s1"> by </span><span class="si">%s</span><span class="s1"> at a </span><span class="si">%s</span><span class="s1"> second interval&#39;</span> <span class="o">%</span> <span class="p">(</span>
-        <span class="n">base_name</span><span class="p">,</span> <span class="n">aggregate_by</span><span class="p">))</span>
-
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">60</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;aggregate_timeseries :: time series for </span><span class="si">%s</span><span class="s1"> less than 60 datapoints, too short&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
-        <span class="n">trace</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
-        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;aggregate_timeseries :: time series for </span><span class="si">%s</span><span class="s1"> less than 60 datapoints, too short&#39;</span> <span class="o">%</span> <span class="n">base_name</span>
-        <span class="k">return</span> <span class="n">aggregated_timeseries</span><span class="p">,</span> <span class="n">trace</span><span class="p">,</span> <span class="n">fail_msg</span>
-
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">epoch_timeseries</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">ts</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">:</span>
-            <span class="n">epoch_timeseries</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="nb">int</span><span class="p">(</span><span class="n">ts</span><span class="p">),</span> <span class="n">value</span><span class="p">))</span>
-        <span class="k">del</span> <span class="n">timeseries</span>
-        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">epoch_timeseries</span><span class="p">)</span>
-        <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ts&#39;</span><span class="p">,</span> <span class="s1">&#39;value&#39;</span><span class="p">]</span>
-        <span class="n">df</span><span class="p">[</span><span class="s1">&#39;ts&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;ts&#39;</span><span class="p">],</span> <span class="n">unit</span><span class="o">=</span><span class="s1">&#39;s&#39;</span><span class="p">)</span>
-        <span class="n">aggregate_by</span> <span class="o">=</span> <span class="s1">&#39;median&#39;</span>
-        <span class="k">if</span> <span class="n">aggregate_by</span> <span class="o">==</span> <span class="s1">&#39;median&#39;</span><span class="p">:</span>
-            <span class="n">aggregated_df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="s1">&#39;1T&#39;</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s1">&#39;ts&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">median</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">aggregate_by</span> <span class="o">==</span> <span class="s1">&#39;sum&#39;</span><span class="p">:</span>
-            <span class="n">aggregated_df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">resample</span><span class="p">(</span><span class="s1">&#39;1T&#39;</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s1">&#39;ts&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-        <span class="k">del</span> <span class="n">df</span>
-        <span class="n">epoch_aggregated_df</span> <span class="o">=</span> <span class="n">aggregated_df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)</span> <span class="o">//</span> <span class="mi">10</span> <span class="o">**</span> <span class="mi">9</span>
-        <span class="n">value_aggregated_df</span> <span class="o">=</span> <span class="n">aggregated_df</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">to_frame</span><span class="p">()</span>
-        <span class="k">del</span> <span class="n">aggregated_df</span>
-        <span class="n">timestamps</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">ts</span> <span class="ow">in</span> <span class="n">epoch_aggregated_df</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
-            <span class="n">timestamps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ts</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-        <span class="k">del</span> <span class="n">epoch_aggregated_df</span>
-        <span class="n">values</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">value_aggregated_df</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
-            <span class="n">values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-        <span class="k">del</span> <span class="n">value_aggregated_df</span>
-        <span class="n">aggregated_timeseries</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">ts</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">timestamps</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
-            <span class="n">aggregated_timeseries</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">ts</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
-        <span class="n">ended_at</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
-        <span class="n">seconds_to_run</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ended_at</span><span class="p">)</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">started_at</span><span class="p">)</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;aggregate_timeseries :: aggregated time series for </span><span class="si">%s</span><span class="s1"> in </span><span class="si">%s</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
-            <span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">seconds_to_run</span><span class="p">)))</span>
-    <span class="k">except</span><span class="p">:</span>
-        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;aggregate_timeseries :: failed to aggregate time series for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
-        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;aggregate_timeseries :: failed to aggregate time series for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span>
-        <span class="k">return</span> <span class="n">aggregated_timeseries</span><span class="p">,</span> <span class="n">trace</span><span class="p">,</span> <span class="n">fail_msg</span>
-
-    <span class="k">return</span> <span class="n">aggregated_timeseries</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span></div>
 </pre></div>
 
            </div>
@@ -839,7 +762,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.2.14',
+            VERSION:'1.3.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

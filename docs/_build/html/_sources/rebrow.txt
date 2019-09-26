@@ -17,9 +17,9 @@ a web UI view of Redis.
 
 Further, being able to easily view Skyline metric sets such as:
 
-- analyzer.boring
-- analyzer.too_short
-- analyzer.stale
+- `analyzer.boring`
+- `analyzer.too_short`
+- `analyzer.stale`
 
 Is very useful to understanding your metric pipelines and often can be used to
 inform you on any namespaces that are not spending metrics frequently, etc.

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>panorama.panorama &mdash; Skyline 1.2.14 documentation</title>
+  <title>panorama.panorama &mdash; Skyline 1.3.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.2.14 documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.3.0 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                1.2
+                1.3
               </div>
             
           
@@ -94,6 +94,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../docker.html">docker - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../analyzer.html">Analyzer</a></li>
@@ -107,7 +109,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../../ionosphere_echo.html">Ionosphere echo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
@@ -173,7 +178,11 @@
     <span class="kn">from</span> <span class="nn">queue</span> <span class="k">import</span> <span class="n">Empty</span>
 <span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">time</span><span class="p">,</span> <span class="n">sleep</span>
 <span class="kn">from</span> <span class="nn">threading</span> <span class="k">import</span> <span class="n">Thread</span>
-<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="k">import</span> <span class="n">Process</span><span class="p">,</span> <span class="n">Manager</span>
+<span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+<span class="c1"># Use Redis sets in place of Manager().list() to reduce memory and number of</span>
+<span class="c1"># processes</span>
+<span class="c1"># from multiprocessing import Process, Manager</span>
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="k">import</span> <span class="n">Process</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">kill</span><span class="p">,</span> <span class="n">getpid</span><span class="p">,</span> <span class="n">listdir</span>
 <span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">join</span><span class="p">,</span> <span class="n">isfile</span>
@@ -186,6 +195,9 @@
 <span class="kn">import</span> <span class="nn">mysql.connector</span>
 <span class="kn">from</span> <span class="nn">mysql.connector</span> <span class="k">import</span> <span class="n">errorcode</span>
 
+<span class="c1"># @added 20190502 - Branch #2646: slack</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy.sql</span> <span class="k">import</span> <span class="n">select</span>
+
 <span class="kn">import</span> <span class="nn">settings</span>
 <span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="n">fail_check</span><span class="p">,</span> <span class="n">mkdir_p</span>
 
@@ -196,6 +208,9 @@
 <span class="c1"># from settings.IONOSPHERE_LEARN_NAMESPACE_CONFIG to the metric database</span>
 <span class="c1"># entry.</span>
 <span class="kn">from</span> <span class="nn">ionosphere_functions</span> <span class="k">import</span> <span class="n">get_ionosphere_learn_details</span>
+
+<span class="c1"># @added 20190502 - Branch #2646: slack</span>
+<span class="kn">from</span> <span class="nn">database</span> <span class="k">import</span> <span class="n">get_engine</span><span class="p">,</span> <span class="n">metrics_table_meta</span><span class="p">,</span> <span class="n">anomalies_table_meta</span>
 
 <span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;panorama&#39;</span>
 <span class="n">skyline_app_logger</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">Log&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span>
@@ -222,6 +237,12 @@
         <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
 <span class="k">except</span><span class="p">:</span>
     <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+<span class="c1"># @added 20190523 - Branch #2646: slack</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">SLACK_ENABLED</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SLACK_ENABLED</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">SLACK_ENABLED</span> <span class="o">=</span> <span class="kc">False</span>
 
 <span class="n">skyline_app_graphite_namespace</span> <span class="o">=</span> <span class="s1">&#39;skyline.</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">SERVER_METRIC_PATH</span><span class="p">)</span>
 
@@ -260,7 +281,7 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize Panorama</span>
 
-<span class="sd">        Create the :obj:`self.anomalous_metrics` list</span>
+<span class="sd">        Create the :obj:`mysql_conn`</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Panorama</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
@@ -272,8 +293,16 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parent_pid</span> <span class="o">=</span> <span class="n">parent_pid</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">current_pid</span> <span class="o">=</span> <span class="n">getpid</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">anomalous_metrics</span> <span class="o">=</span> <span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">metric_variables</span> <span class="o">=</span> <span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
+        <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+        <span class="c1">#                      Task #3032: Debug number of Python processes and memory use</span>
+        <span class="c1">#                      Branch #3002: docker</span>
+        <span class="c1"># Reduce amount of Manager instances that are used as each requires a</span>
+        <span class="c1"># copy of entire memory to be copied into each subprocess so this</span>
+        <span class="c1"># results in a python process per Manager instance, using as much</span>
+        <span class="c1"># memory as the parent.  OK on a server, not so much in a container.</span>
+        <span class="c1"># Disabled all the Manager().list() below and replaced with Redis sets</span>
+        <span class="c1"># self.anomalous_metrics = Manager().list()</span>
+        <span class="c1"># self.metric_variables = Manager().list()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mysql_conn</span> <span class="o">=</span> <span class="n">mysql</span><span class="o">.</span><span class="n">connector</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="o">**</span><span class="n">config</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Panorama.check_if_parent_is_alive"><a class="viewcode-back" href="../../skyline.panorama.html#panorama.panorama.Panorama.check_if_parent_is_alive">[docs]</a>    <span class="k">def</span> <span class="nf">check_if_parent_is_alive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -495,6 +524,129 @@
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_vars_array</span><span class="p">))</span>
 
         <span class="k">return</span> <span class="n">metric_vars_array</span></div>
+
+<div class="viewcode-block" id="Panorama.update_slack_thread_ts"><a class="viewcode-back" href="../../skyline.panorama.html#panorama.panorama.Panorama.update_slack_thread_ts">[docs]</a>    <span class="k">def</span> <span class="nf">update_slack_thread_ts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">,</span> <span class="n">slack_thread_ts</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update an anomaly record with the slack_thread_ts.</span>
+
+<span class="sd">        :param i: python process id</span>
+<span class="sd">        :param metric_check_file: full path to the metric check file</span>
+
+<span class="sd">        :return: returns True</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">get_an_engine</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">engine</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">get_engine</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">engine</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">log_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: update_slack_thread_ts :: failed to get MySQL engine in update_slack_thread_ts&#39;</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: update_slack_thread_ts :: failed to get MySQL engine in update_slack_thread_ts&#39;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span>
+
+        <span class="k">def</span> <span class="nf">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">engine</span><span class="o">.</span><span class="n">dispose</span><span class="p">()</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: update_slack_thread_ts :: calling engine.dispose()&#39;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="n">child_process_pid</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;update_slack_thread_ts :: child_process_pid </span><span class="si">%s</span><span class="s1">, processing </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">child_process_pid</span><span class="p">),</span> <span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">),</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">slack_thread_ts</span><span class="p">)))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">engine</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">get_an_engine</span><span class="p">()</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: update_slack_thread_ts :: could not get a MySQL engine to update slack_thread_ts in anomalies for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">engine</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: update_slack_thread_ts :: engine not obtained to update slack_thread_ts in anomalies for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">))</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">metrics_table</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">metrics_table_meta</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">log_msg</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;update_slack_thread_ts :: metrics_table OK&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: update_slack_thread_ts :: failed to get metrics_table meta for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
+        <span class="n">metric_id</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+            <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">metrics_table</span><span class="p">])</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">metrics_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">metric</span> <span class="o">==</span> <span class="n">base_name</span><span class="p">)</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+                <span class="n">metric_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
+            <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: update_slack_thread_ts :: could not determine metric id from metrics table&#39;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;update_slack_thread_ts :: metric id determined as </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_id</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">metric_id</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">anomalies_table</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">anomalies_table_meta</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">log_msg</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;update_slack_thread_ts :: anomalies_table OK&#39;</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: update_slack_thread_ts :: failed to get anomalies_table meta for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
+        <span class="n">anomaly_id</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+            <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">anomalies_table</span><span class="p">])</span><span class="o">.</span>\
+                <span class="n">where</span><span class="p">(</span><span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">metric_id</span> <span class="o">==</span> <span class="n">metric_id</span><span class="p">)</span><span class="o">.</span>\
+                <span class="n">where</span><span class="p">(</span><span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">anomaly_timestamp</span> <span class="o">==</span> <span class="n">metric_timestamp</span><span class="p">)</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+                <span class="n">anomaly_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
+            <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: update_slack_thread_ts :: could not determine anomaly id from anomaly table&#39;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;update_slack_thread_ts :: anomaly id determined as </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">))</span>
+        <span class="n">anomaly_record_updated</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">anomaly_id</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+                <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                    <span class="n">anomalies_table</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                        <span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">anomaly_id</span><span class="p">)</span><span class="o">.</span>
+                    <span class="n">values</span><span class="p">(</span><span class="n">slack_thread_ts</span><span class="o">=</span><span class="n">slack_thread_ts</span><span class="p">))</span>
+                <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;update_slack_thread_ts :: updated slack_thread_ts for anomaly id </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">))</span>
+                <span class="n">anomaly_record_updated</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: update_slack_thread_ts :: could not update slack_thread_ts for anomaly id </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: update_slack_thread_ts :: could not dispose engine&#39;</span><span class="p">)</span>
+        <span class="n">cache_key</span> <span class="o">=</span> <span class="s1">&#39;panorama.slack_thread_ts.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">),</span> <span class="n">base_name</span><span class="p">)</span>
+        <span class="n">delete_cache_key</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">anomaly_record_updated</span><span class="p">:</span>
+            <span class="n">delete_cache_key</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">anomaly_record_updated</span><span class="p">:</span>
+            <span class="c1"># Allow for 60 seconds for an anomaly to be added</span>
+            <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+            <span class="n">anomaly_age</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">now</span><span class="p">)</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">anomaly_age</span> <span class="o">&gt;</span> <span class="mi">60</span><span class="p">:</span>
+                <span class="n">delete_cache_key</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">delete_cache_key</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;update_slack_thread_ts :: deleting cache_key </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">cache_key</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;update_slack_thread_ts :: cache_key </span><span class="si">%s</span><span class="s1"> deleted&#39;</span> <span class="o">%</span> <span class="n">cache_key</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: update_slack_thread_ts :: failed to delete cache_key </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">cache_key</span><span class="p">)</span>
+        <span class="k">return</span></div>
 
 <div class="viewcode-block" id="Panorama.spin_process"><a class="viewcode-back" href="../../skyline.panorama.html#panorama.panorama.Panorama.spin_process">[docs]</a>    <span class="k">def</span> <span class="nf">spin_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">metric_check_file</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1265,6 +1417,88 @@
                 <span class="k">if</span> <span class="n">metric_var_files</span><span class="p">:</span>
                     <span class="k">break</span>
 
+                <span class="c1"># @added 20190501 - Branch #2646: slack</span>
+                <span class="c1"># Check if any Redis keys exist with a slack_thread_ts to update</span>
+                <span class="c1"># any anomaly records</span>
+                <span class="n">slack_thread_ts_updates</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="c1"># @added 20190523 - Branch #3002: docker</span>
+                <span class="c1">#                   Branch #2646: slack</span>
+                <span class="c1"># Only check if slack is enabled</span>
+                <span class="k">if</span> <span class="n">SLACK_ENABLED</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">slack_thread_ts_updates</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">scan_iter</span><span class="p">(</span><span class="n">match</span><span class="o">=</span><span class="s1">&#39;panorama.slack_thread_ts.*&#39;</span><span class="p">))</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to scan panorama.slack_thread_ts.* from Redis&#39;</span><span class="p">)</span>
+                        <span class="n">slack_thread_ts_updates</span> <span class="o">=</span> <span class="p">[]</span>
+
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">slack_thread_ts_updates</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;no panorama.slack_thread_ts Redis keys to process, OK&#39;</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">slack_thread_ts_updates</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">cache_key</span> <span class="ow">in</span> <span class="n">slack_thread_ts_updates</span><span class="p">:</span>
+                        <span class="n">base_name</span> <span class="o">=</span> <span class="kc">None</span>
+                        <span class="n">metric_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">update_on</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span>
+                            <span class="c1"># cache_key_value = [base_name, metric_timestamp, slack_thread_ts]</span>
+                            <span class="n">update_for</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">update_on</span><span class="p">)</span>
+                            <span class="n">base_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">update_for</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                            <span class="n">metric_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">update_for</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+                            <span class="n">slack_thread_ts</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">update_for</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get details from cache_key </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">cache_key</span><span class="p">)</span>
+                        <span class="n">update_db_record</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="k">if</span> <span class="n">base_name</span> <span class="ow">and</span> <span class="n">metric_timestamp</span><span class="p">:</span>
+                            <span class="n">update_db_record</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Could not determine base_name and metric_timestamp from cache_key </span><span class="si">%s</span><span class="s1">, deleting&#39;</span> <span class="o">%</span> <span class="n">cache_key</span><span class="p">)</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span>
+                            <span class="k">except</span><span class="p">:</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to delete cache_key </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">cache_key</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">update_db_record</span><span class="p">:</span>
+                            <span class="c1"># Spawn update_slack_thread_ts process</span>
+                            <span class="n">pids</span> <span class="o">=</span> <span class="p">[]</span>
+                            <span class="n">spawned_pids</span> <span class="o">=</span> <span class="p">[]</span>
+                            <span class="n">pid_count</span> <span class="o">=</span> <span class="mi">0</span>
+                            <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+                            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
+                                <span class="k">try</span><span class="p">:</span>
+                                    <span class="n">p</span> <span class="o">=</span> <span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">update_slack_thread_ts</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">,</span> <span class="n">slack_thread_ts</span><span class="p">))</span>
+                                    <span class="n">pids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+                                    <span class="n">pid_count</span> <span class="o">+=</span> <span class="mi">1</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;starting update_slack_thread_ts&#39;</span><span class="p">)</span>
+                                    <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+                                    <span class="n">spawned_pids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+                                <span class="k">except</span><span class="p">:</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: to start update_slack_thread_ts&#39;</span><span class="p">)</span>
+                                    <span class="k">continue</span>
+                            <span class="n">p_starts</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+                            <span class="c1"># @modified 20190509 - Branch #2646: slack</span>
+                            <span class="c1"># If the Skyline MySQL database is on a remote host</span>
+                            <span class="c1"># 2 seconds here is sometimes not sufficient so</span>
+                            <span class="c1"># increased to 10</span>
+                            <span class="k">while</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">p_starts</span> <span class="o">&lt;=</span> <span class="mi">10</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">):</span>
+                                    <span class="c1"># Just to avoid hogging the CPU</span>
+                                    <span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
+                                <span class="k">else</span><span class="p">:</span>
+                                    <span class="c1"># All the processes are done, break now.</span>
+                                    <span class="n">time_to_run</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">p_starts</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                                        <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: update_slack_thread_ts completed in </span><span class="si">%.2f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                            <span class="n">skyline_app</span><span class="p">,</span> <span class="n">time_to_run</span><span class="p">))</span>
+                                    <span class="k">break</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="c1"># We only enter this if we didn&#39;t &#39;break&#39; above.</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: timed out, killing all update_slack_thread_ts processes&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">))</span>
+                                <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">:</span>
+                                    <span class="n">p</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+
             <span class="n">metric_var_files_sorted</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">metric_var_files</span><span class="p">)</span>
             <span class="n">metric_check_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_CHECK_PATH</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_var_files_sorted</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
 
@@ -1370,7 +1604,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.2.14',
+            VERSION:'1.3.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

@@ -1,0 +1,457 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>docker - EXPERIMENTAL &mdash; Skyline 1.3.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="Skyline 1.3.0 documentation" href="index.html"/>
+        <link rel="next" title="slack" href="slack.html"/>
+        <link rel="prev" title="Alert testing" href="alert-testing.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Skyline
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.3
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">docker - EXPERIMENTAL</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#why-docker-was-added">Why docker was added</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#docker-application">Docker application</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#requirements">Requirements</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#notable-docker-aspects">Notable docker aspects</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installation-quick-start">Installation - quick start</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#working-with-the-docker-stack-on-localhost">Working with the Docker stack on localhost</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#skyline-optimisations-for-containerisation">Skyline optimisations for containerisation</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monotonic-metrics.html">Strictly increasing monotonicity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-multiple-skylines.html">Running multiple Skyline instances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#reliability">Reliability</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">Skyline</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>docker - EXPERIMENTAL</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/docker.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="docker-experimental">
+<h1>docker - EXPERIMENTAL<a class="headerlink" href="#docker-experimental" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="why-docker-was-added">
+<h2>Why docker was added<a class="headerlink" href="#why-docker-was-added" title="Permalink to this headline">¶</a></h2>
+<p>Because the team at wix-playground forked Skyline and dockerized in its simplest
+context.</p>
+<p>Merging the wix-playground&#8217;s changes Skyline had to be tested running on docker
+and with that, the docker event horizon was crossed.</p>
+<p>Docker does add a lot of potential in terms of developing Skyline in integrate
+with other things.</p>
+<p>So Skyline can now be run on docker in a meaningful way, with thanks going to
+the team &#64;wix-playground for pulling Skyline over the docker event horizon.</p>
+<p>Docker should only be used for <strong>testing</strong> and it is probably <strong>not suitable</strong>
+for production.  Running the Skyline Docker application should only be done on a
+developer or test machine until you are familiar with the docker application and
+can modify it to fit with docker practices and standards for your environment.</p>
+</div>
+<div class="section" id="docker-application">
+<h2>Docker application<a class="headerlink" href="#docker-application" title="Permalink to this headline">¶</a></h2>
+<p>Seeing as it is possible to ran anything on docker and your localhost, the entire
+Skyline stack can be composed with docker with every dependencies provided for
+by a container, constructing a docker-compose multi-container Docker application
+for Skyline.</p>
+<p>The Skyline Docker application provides the following containers:</p>
+<ul class="simple">
+<li>busybox: to provide a shared /tmp/docker volume for a Redis unix socket</li>
+<li>mysql</li>
+<li>redis</li>
+<li>memcached</li>
+<li>graphite-statsd</li>
+<li>skyline</li>
+</ul>
+<p>Running on a Docker user defined network.</p>
+<p>The use of docker is EXPERIMENTAL.  It has a lot more components than it
+requires to be just a simple Skyline docker container.  It is not really
+container friendly yet.  Containers should run one thing each, here this is not
+the case, the Skyline docker application is basically a group of containerised
+VMs.</p>
+<p>No extensive testing has been done with Skyline on docker and no security or
+docker best practices have been applied.</p>
+<p>The experimental Skyline docker implementation uses the graphite-statsd docker
+image <a class="reference external" href="https://hub.docker.com/r/graphiteapp/graphite-statsd/">https://hub.docker.com/r/graphiteapp/graphite-statsd/</a> to provide Skyline
+with data.</p>
+</div>
+<div class="section" id="requirements">
+<h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>git</li>
+<li>rsync</li>
+<li>docker (Docker Engine version 17.09.0 and higher)</li>
+<li>docker-compose</li>
+</ul>
+</div>
+<div class="section" id="notable-docker-aspects">
+<h2>Notable docker aspects<a class="headerlink" href="#notable-docker-aspects" title="Permalink to this headline">¶</a></h2>
+<p>Feel free to skip to start of the Installation section if you are not interested
+in the docker internals.</p>
+<p>The docker Skyline container currently runs on the debian:stretch docker image,
+not debian:latest which was recently bumped to up to buster.  This is less than
+ideal seeing as this image ships with more vulnerabilities than any other
+popular docker OS image.  All future docker work should be focused on getting
+Skyline to run on the alpine image with each Skyline application running as
+individual containers.</p>
+<p>For now it is a monolithic stretch container, which is useful for development
+purposes at least.</p>
+<p>There are hard coded variables in terms of the user defined network which is
+subnet 172.118.0.0/16 called skylinenetwork.  For all the container static IPs
+see the docker-compose.yml file.</p>
+</div>
+<div class="section" id="installation-quick-start">
+<h2>Installation - quick start<a class="headerlink" href="#installation-quick-start" title="Permalink to this headline">¶</a></h2>
+<p>The data for the Skyline, Graphite, Redis and MySQL containers are persisted in
+the below patterns.</p>
+<p>There is a convenience build script for testing purposes only in
+utils/dawn/skyline.docker.dawn.sh see see
+<a class="reference external" href="development/dawn-docker.html">Development - dawn-docker</a> section or you can
+follow the simple steps below.</p>
+<div class="admonition note">
+<p class="first admonition-title">Note</p>
+<p class="last">Ensure you provide the appropriate ownership and permissions to the
+below specified directories for the user you wish to run the Skyline process
+as.</p>
+</div>
+<p>If you want to modify the default docker settings that is deployed, after
+cloning add the file /opt/skyline/github/skyline/skyline/docker.settings.py with
+your desired settings based on the cloned
+/opt/skyline/github/skyline/skyline/docker.settings.py.default</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="c1"># Create the required directories for persisting data</span>
+<span class="c1"># NOTE if you change this, you will have to modify all the paths in the</span>
+<span class="c1"># skyline/Dockerfile to match</span>
+<span class="c1"># Also NOTE due to docker processes running as root you will need to use</span>
+<span class="c1"># sudo to read or clean up these dirs or files</span>
+sudo mkdir -p /opt/skyline/github
+
+<span class="c1"># If your group is different from your username like on MacOS it will probably</span>
+<span class="c1"># be staff</span>
+<span class="nv">YOUR_GROUP</span><span class="o">=</span><span class="s2">&quot;</span><span class="nv">$USER</span><span class="s2">&quot;</span>
+sudo chown -R <span class="nv">$USER</span>:<span class="nv">$YOUR_GROUP</span> /opt/skyline
+
+<span class="c1"># Define SKYLINE_DOCKER_HOME directory</span>
+<span class="nv">SKYLINE_DOCKER_HOME</span><span class="o">=</span><span class="s2">&quot;/opt/skyline/docker&quot;</span>
+
+mkdir -p <span class="nv">$SKYLINE_DOCKER_HOME</span>/skyline-docker-skyline-1/skyline
+mkdir -p <span class="nv">$SKYLINE_DOCKER_HOME</span>/skyline-docker-mysql-1/var/lib/mysql
+mkdir -p <span class="nv">$SKYLINE_DOCKER_HOME</span>/skyline-docker-redis-1/var/lib/redis
+mkdir -p <span class="nv">$SKYLINE_DOCKER_HOME</span>/skyline-docker-graphite-statsd-1/opt/graphite/storage
+mkdir -p <span class="nv">$SKYLINE_DOCKER_HOME</span>/skyline-docker-graphite-statsd-1/var/log
+mkdir -p <span class="nv">$SKYLINE_DOCKER_HOME</span>/skyline-docker-skyline-1/opt/skyline/ionosphere
+mkdir -p <span class="nv">$SKYLINE_DOCKER_HOME</span>/skyline-docker-skyline-1/var/log/skyline
+mkdir -p <span class="nv">$SKYLINE_DOCKER_HOME</span>/skyline-docker-skyline-1/var/log/apache2
+
+<span class="nb">cd</span> /opt/skyline/github
+git clone https://github.com/earthgecko/skyline
+<span class="c1"># Switch to a branch or git commitref if you want to</span>
+
+<span class="c1"># If you do not want to use the default settings add your desired settings</span>
+<span class="c1"># to /opt/skyline/github/skyline/skyline/docker.settings.py based on the</span>
+<span class="c1"># cloned /opt/skyline/github/skyline/skyline/docker.settings.py.default</span>
+
+<span class="c1"># Now copy the repo to the container directory</span>
+rsync -az --exclude .git/ /opt/skyline/github/skyline/ <span class="nv">$SKYLINE_DOCKER_HOME</span>/skyline-docker-skyline-1/skyline/
+<span class="nb">cd</span> <span class="nv">$SKYLINE_DOCKER_HOME</span>/skyline-docker-skyline-1/skyline
+
+docker-compose build
+
+docker-compose up  <span class="c1"># first run takes a while for all the apps to start and initialise</span>
+<span class="c1"># After 2 or 3 minutes when all the apps have started and are logging</span>
+<span class="c1"># consistently you can Ctrl+c to stop the containers and then start detached</span>
+<span class="c1"># Ctrl+c</span>
+docker-compose up -d
+</pre></div>
+</div>
+</div>
+<div class="section" id="working-with-the-docker-stack-on-localhost">
+<h2>Working with the Docker stack on localhost<a class="headerlink" href="#working-with-the-docker-stack-on-localhost" title="Permalink to this headline">¶</a></h2>
+<p>To access the Skyline and Graphite applications on your localhost you need to
+add the following entries to your <cite>/etc/hosts</cite> file (or the equivalent)</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nb">echo</span> <span class="s2">&quot;172.118.0.7 skyline-docker-skyline-1&quot;</span> &gt;&gt; /etc/hosts
+<span class="nb">echo</span> <span class="s2">&quot;172.118.0.6 skyline-docker-graphite-statsd-1&quot;</span> &gt;&gt; /etc/hosts
+</pre></div>
+</div>
+<p>You can now access the apps in your browser (using the default username and
+password if you did not add your own docker.settings.py) via:</p>
+<ul class="simple">
+<li><a class="reference external" href="https://skyline-docker-skyline-1">https://skyline-docker-skyline-1</a> (username: admin password: skyline-docker-skyline-1)</li>
+<li><a class="reference external" href="https://skyline-docker-graphite-statsd-1">https://skyline-docker-graphite-statsd-1</a> (user: admin pass: skyline-docker-skyline-1)</li>
+</ul>
+<p>You need to accept the self signed SSL certificates for each in your browser.</p>
+<p>In this scenario metric transport can be provided from your localhost directly
+to the skyline-docker-graphite-statsd-1 via various means.  You can configure
+any local Graphite compatible metric collector to send metrics directly to
+skyline-docker-graphite-statsd-1:2013.  Using telegraf for instance:</p>
+<p>telegraf &#8212;&gt; skyline-docker-graphite-statsd-1:2013 &#8212;&gt; skyline-docker-skyline-1</p>
+<p>telegraf.conf would need:</p>
+<p>The Skyline docker container is configured and deployed at build using:</p>
+<ul class="simple">
+<li>utils/docker/init.sh</li>
+<li>utils/docker/configure.sh</li>
+<li>with the utils/docker/configs/skyline/skyline/etc/skyline/skyline.dawn.conf
+configuration variables.</li>
+<li>and skyline/docker.settings.py.default (or skyline/docker.settings.py if you
+provided it)</li>
+</ul>
+<p>Accessing the Skyline containers via the command line:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="c1"># List the containers</span>
+docker ps
+<span class="c1"># Skyline container access</span>
+docker <span class="nb">exec</span> -it skyline_skyline-docker-skyline-1_1 /bin/bash
+<span class="c1"># Graphite container access</span>
+docker <span class="nb">exec</span> -it skyline-docker-graphite-statsd-1 /bin/sh
+<span class="c1"># Redis container access</span>
+docker <span class="nb">exec</span> -it skyline-docker-redis-1 /bin/bash
+<span class="c1"># MySQL container access</span>
+docker <span class="nb">exec</span> -it skyline-docker-mysql-1 /bin/bash
+<span class="c1"># memcached container access</span>
+docker <span class="nb">exec</span> -it skyline-docker-memcached-1 /bin/bash
+</pre></div>
+</div>
+<p>You can also change the Skyline settings.py for the docker instance directly on
+the skyline_skyline-docker-skyline-1_1 container in
+<cite>/opt/skyline/github/skyline/skyline/docker.settings.py</cite> or in the source on the
+host filesystem <cite>$SKYLINE_DOCKER_HOME/skyline-docker-skyline-1/skyline/skyline/settings.py</cite>,
+then stop the Skyline container and start it again.</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span>docker stop skyline_skyline-docker-skyline-1_1
+docker start skyline_skyline-docker-skyline-1_1
+</pre></div>
+</div>
+<p>Or restart the Skyline apps one by one in the container itself.</p>
+<p>Other app configurations can be changed in the relevant configuration files in
+the relevant local app volume directories as well, e.g.</p>
+<ul class="simple">
+<li>/opt/skyline/github/skyline/utils/docker/configs/skyline/redis/etc/redis (container volume /etc/redis)</li>
+<li>/opt/skyline/docker/skyline-docker-skyline-1/skyline/utils/docker/configs/skyline/graphite-statsd/opt/graphite/conf (container volume /opt/graphite/conf)</li>
+<li>/opt/skyline/docker/skyline-docker-skyline-1/skyline/utils/docker/configs/skyline/graphite-statsd/opt/statsd/config (container volume /opt/statsd/config)</li>
+<li>/opt/skyline/docker/skyline-docker-skyline-1/skyline/utils/docker/configs/skyline/graphite-statsd/etc/nginx (container volume /etc/nginx)</li>
+<li>/opt/skyline/docker/skyline-docker-skyline-1/skyline/utils/docker/configs/skyline/graphite-statsd/etc/logrotate.d (container volume /etc/logrotate.d)</li>
+</ul>
+</div>
+<div class="section" id="skyline-optimisations-for-containerisation">
+<h2>Skyline optimisations for containerisation<a class="headerlink" href="#skyline-optimisations-for-containerisation" title="Permalink to this headline">¶</a></h2>
+<p>Changes were made to Skyline from using Python multiprocessing Manager().list()
+to using Redis sets to reduce the overall footprint greatly especially in terms
+of process count and resident segment sizes.</p>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="slack.html" class="btn btn-neutral float-right" title="slack" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="alert-testing.html" class="btn btn-neutral" title="Alert testing" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2019, Gary Wilson.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.3.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

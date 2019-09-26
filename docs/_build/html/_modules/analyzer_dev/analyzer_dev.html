@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>analyzer_dev.analyzer_dev &mdash; Skyline 1.2.14 documentation</title>
+  <title>analyzer_dev.analyzer_dev &mdash; Skyline 1.3.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.2.14 documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.3.0 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                1.2
+                1.3
               </div>
             
           
@@ -94,6 +94,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../docker.html">docker - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../analyzer.html">Analyzer</a></li>
@@ -107,7 +109,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../../ionosphere_echo.html">Ionosphere echo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
@@ -168,9 +173,12 @@
   <h1>Source code for analyzer_dev.analyzer_dev</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
 <span class="kn">import</span> <span class="nn">logging</span>
-<span class="kn">from</span> <span class="nn">Queue</span> <span class="k">import</span> <span class="n">Empty</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">Queue</span> <span class="k">import</span> <span class="n">Empty</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">queue</span> <span class="k">import</span> <span class="n">Empty</span>
 <span class="kn">from</span> <span class="nn">redis</span> <span class="k">import</span> <span class="n">StrictRedis</span>
-<span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">time</span><span class="p">,</span> <span class="n">sleep</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">time</span><span class="p">,</span> <span class="n">sleep</span><span class="p">,</span> <span class="n">strftime</span><span class="p">,</span> <span class="n">gmtime</span>
 <span class="kn">from</span> <span class="nn">threading</span> <span class="k">import</span> <span class="n">Thread</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">defaultdict</span>
 <span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="k">import</span> <span class="n">Process</span><span class="p">,</span> <span class="n">Manager</span><span class="p">,</span> <span class="n">Queue</span>
@@ -183,17 +191,24 @@
 <span class="kn">import</span> <span class="nn">socket</span>
 <span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">from</span> <span class="nn">sys</span> <span class="k">import</span> <span class="n">version_info</span>
-
 <span class="kn">import</span> <span class="nn">os.path</span>
+<span class="kn">import</span> <span class="nn">resource</span>
+<span class="kn">from</span> <span class="nn">ast</span> <span class="k">import</span> <span class="n">literal_eval</span>
+
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)),</span> <span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">))</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
 <span class="kn">import</span> <span class="nn">settings</span>
+<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">send_graphite_metric</span><span class="p">,</span> <span class="n">write_data_to_file</span><span class="p">,</span> <span class="n">send_anomalous_metric_to</span><span class="p">,</span> <span class="n">mkdir_p</span><span class="p">,</span>
+    <span class="n">filesafe_metricname</span><span class="p">,</span>
+    <span class="c1"># @added 20170602 - Feature #2034: analyse_derivatives</span>
+    <span class="n">nonNegativeDerivative</span><span class="p">,</span> <span class="n">strictly_increasing_monotonicity</span><span class="p">,</span> <span class="n">in_list</span><span class="p">)</span>
 
 <span class="kn">from</span> <span class="nn">alerters</span> <span class="k">import</span> <span class="n">trigger_alert</span>
 <span class="kn">from</span> <span class="nn">algorithms_dev</span> <span class="k">import</span> <span class="n">run_selected_algorithm</span>
 <span class="c1"># from skyline import algorithm_exceptions</span>
-<span class="kn">from</span> <span class="nn">algorithm_exceptions</span> <span class="k">import</span> <span class="o">*</span>
+<span class="kn">from</span> <span class="nn">algorithm_exceptions</span> <span class="k">import</span> <span class="n">TooShort</span><span class="p">,</span> <span class="n">Stale</span><span class="p">,</span> <span class="n">Boring</span>
 
 <span class="k">try</span><span class="p">:</span>
     <span class="n">send_algorithm_run_metrics</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_ALGORITHM_RUN_METRICS</span>
@@ -214,6 +229,8 @@
 
 <span class="n">python_version</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
+<span class="n">this_host</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">uname</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span>
+
 <span class="k">try</span><span class="p">:</span>
     <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">SERVER_METRICS_NAME</span>
     <span class="k">if</span> <span class="n">SERVER_METRIC_PATH</span> <span class="o">==</span> <span class="s1">&#39;.&#39;</span><span class="p">:</span>
@@ -223,8 +240,9 @@
 
 <span class="n">skyline_app_graphite_namespace</span> <span class="o">=</span> <span class="s1">&#39;skyline.</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">SERVER_METRIC_PATH</span><span class="p">)</span>
 
+<span class="n">LOCAL_DEBUG</span> <span class="o">=</span> <span class="kc">True</span>
 
-<div class="viewcode-block" id="Analyzer"><a class="viewcode-back" href="../../skyline.analyzer_dev.html#analyzer_dev.analyzer_dev.Analyzer">[docs]</a><span class="k">class</span> <span class="nc">Analyzer</span><span class="p">(</span><span class="n">Thread</span><span class="p">):</span>
+<div class="viewcode-block" id="AnalyzerDev"><a class="viewcode-back" href="../../skyline.analyzer_dev.html#analyzer_dev.analyzer_dev.AnalyzerDev">[docs]</a><span class="k">class</span> <span class="nc">AnalyzerDev</span><span class="p">(</span><span class="n">Thread</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    The Analyzer class which controls the analyzer thread and spawned processes.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -252,9 +270,33 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">anomalous_metrics</span> <span class="o">=</span> <span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">exceptions_q</span> <span class="o">=</span> <span class="n">Queue</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">anomaly_breakdown_q</span> <span class="o">=</span> <span class="n">Queue</span><span class="p">()</span>
+        <span class="c1"># @modified 20160813 - Bug #1558: Memory leak in Analyzer</span>
+        <span class="c1"># Not used</span>
+        <span class="c1"># self.mirage_metrics = Manager().list()</span>
+        <span class="c1"># @added 20160923 - Branch #922: Ionosphere</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mirage_metrics</span> <span class="o">=</span> <span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ionosphere_metrics</span> <span class="o">=</span> <span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
+        <span class="c1"># @added 20161119 - Branch #922: ionosphere</span>
+        <span class="c1">#                   Task #1718: review.tsfresh</span>
+        <span class="c1"># Send a breakdown of what metrics were sent to other apps</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sent_to_mirage</span> <span class="o">=</span> <span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sent_to_crucible</span> <span class="o">=</span> <span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sent_to_panorama</span> <span class="o">=</span> <span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">sent_to_ionosphere</span> <span class="o">=</span> <span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
+        <span class="c1"># @added 20161229 - Feature #1830: Ionosphere alerts</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">all_anomalous_metrics</span> <span class="o">=</span> <span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
+        <span class="c1"># @added 20170108 - Feature #1830: Ionosphere alerts</span>
+        <span class="c1"># Adding lists of smtp_alerter_metrics and non_smtp_alerter_metrics</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">smtp_alerter_metrics</span> <span class="o">=</span> <span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">non_smtp_alerter_metrics</span> <span class="o">=</span> <span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
+        <span class="c1"># @added 20180903 - Feature #2580: illuminance</span>
+        <span class="c1">#                   Feature #1986: flux</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">illuminance_datapoints</span> <span class="o">=</span> <span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
+        <span class="c1"># @added 20190408 - Feature #2882: Mirage - periodic_check</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">mirage_periodic_check_metrics</span> <span class="o">=</span> <span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">real_anomalous_metrics</span> <span class="o">=</span> <span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
 
-<div class="viewcode-block" id="Analyzer.check_if_parent_is_alive"><a class="viewcode-back" href="../../skyline.analyzer_dev.html#analyzer_dev.analyzer_dev.Analyzer.check_if_parent_is_alive">[docs]</a>    <span class="k">def</span> <span class="nf">check_if_parent_is_alive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="AnalyzerDev.check_if_parent_is_alive"><a class="viewcode-back" href="../../skyline.analyzer_dev.html#analyzer_dev.analyzer_dev.AnalyzerDev.check_if_parent_is_alive">[docs]</a>    <span class="k">def</span> <span class="nf">check_if_parent_is_alive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Self explanatory</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -264,60 +306,48 @@
         <span class="k">except</span><span class="p">:</span>
             <span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Analyzer.send_graphite_metric"><a class="viewcode-back" href="../../skyline.analyzer_dev.html#analyzer_dev.analyzer_dev.Analyzer.send_graphite_metric">[docs]</a>    <span class="k">def</span> <span class="nf">send_graphite_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<div class="viewcode-block" id="AnalyzerDev.spawn_alerter_process"><a class="viewcode-back" href="../../skyline.analyzer_dev.html#analyzer_dev.analyzer_dev.AnalyzerDev.spawn_alerter_process">[docs]</a>    <span class="k">def</span> <span class="nf">spawn_alerter_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Sends the skyline_app metrics to the `GRAPHITE_HOST` if a graphite</span>
-<span class="sd">        host is defined.</span>
+<span class="sd">        Spawn a process to trigger an alert.</span>
+
+<span class="sd">        This is used by smtp alerters so that matplotlib objects are cleared</span>
+<span class="sd">        down and the alerter cannot create a memory leak in this manner and</span>
+<span class="sd">        plt.savefig keeps the object in memory until the process terminates.</span>
+<span class="sd">        Seeing as data is being surfaced and processed in the alert_smtp</span>
+<span class="sd">        context, multiprocessing the alert creation and handling prevents any</span>
+<span class="sd">        memory leaks in the parent.</span>
+
+<span class="sd">        Added 20160814 relating to:</span>
+
+<span class="sd">        * Bug #1558: Memory leak in Analyzer</span>
+<span class="sd">        * Issue #21 Memory leak in Analyzer see https://github.com/earthgecko/skyline/issues/21</span>
+
+<span class="sd">        Parameters as per :py:func:`skyline.analyzer.alerters.trigger_alert</span>
+<span class="sd">        &lt;analyzer.alerters.trigger_alert&gt;`</span>
+
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
 
-            <span class="n">skyline_app_metric</span> <span class="o">=</span> <span class="n">skyline_app_graphite_namespace</span> <span class="o">+</span> <span class="n">name</span>
+        <span class="n">trigger_alert</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span></div>
 
-            <span class="n">sock</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">socket</span><span class="p">()</span>
-            <span class="n">sock</span><span class="o">.</span><span class="n">settimeout</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
-
-            <span class="c1"># Handle connection error to Graphite #116 @etsy</span>
-            <span class="c1"># Fixed as per https://github.com/etsy/skyline/pull/116 and</span>
-            <span class="c1"># mlowicki:etsy_handle_connection_error_to_graphite</span>
-            <span class="c1"># Handle connection error to Graphite #7 @ earthgecko</span>
-            <span class="c1"># merged 1 commit into earthgecko:master from</span>
-            <span class="c1"># mlowicki:handle_connection_error_to_graphite on 16 Mar 2015</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">sock</span><span class="o">.</span><span class="n">connect</span><span class="p">((</span><span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">CARBON_PORT</span><span class="p">))</span>
-                <span class="n">sock</span><span class="o">.</span><span class="n">settimeout</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
-            <span class="k">except</span> <span class="n">socket</span><span class="o">.</span><span class="n">error</span><span class="p">:</span>
-                <span class="n">sock</span><span class="o">.</span><span class="n">settimeout</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
-                <span class="n">endpoint</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">:</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span>
-                                      <span class="n">settings</span><span class="o">.</span><span class="n">CARBON_PORT</span><span class="p">)</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Can&#39;t connect to Graphite at </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">endpoint</span><span class="p">)</span>
-                <span class="k">return</span> <span class="kc">False</span>
-
-            <span class="c1"># For the same reason as above</span>
-            <span class="c1"># sock.sendall(&#39;%s %s %i\n&#39; % (name, value, time()))</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">sock</span><span class="o">.</span><span class="n">sendall</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> </span><span class="si">%i</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app_metric</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">time</span><span class="p">()))</span>
-                <span class="n">sock</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-                <span class="k">return</span> <span class="kc">True</span>
-            <span class="k">except</span><span class="p">:</span>
-                <span class="n">endpoint</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">:</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span>
-                                      <span class="n">settings</span><span class="o">.</span><span class="n">CARBON_PORT</span><span class="p">)</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s2">&quot;Can&#39;t connect to Graphite at </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">endpoint</span><span class="p">)</span>
-                <span class="k">return</span> <span class="kc">False</span>
-
-        <span class="k">return</span> <span class="kc">False</span></div>
-
-<div class="viewcode-block" id="Analyzer.spin_process"><a class="viewcode-back" href="../../skyline.analyzer_dev.html#analyzer_dev.analyzer_dev.Analyzer.spin_process">[docs]</a>    <span class="k">def</span> <span class="nf">spin_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">unique_metrics</span><span class="p">):</span>
+<div class="viewcode-block" id="AnalyzerDev.spin_process"><a class="viewcode-back" href="../../skyline.analyzer_dev.html#analyzer_dev.analyzer_dev.AnalyzerDev.spin_process">[docs]</a>    <span class="k">def</span> <span class="nf">spin_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">unique_metrics</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Assign a bunch of metrics for a process to analyze.</span>
 
 <span class="sd">        Multiple get the assigned_metrics to the process from Redis.</span>
 
-<span class="sd">        For each metric:\n</span>
-<span class="sd">        * unpack the `raw_timeseries` for the metric.\n</span>
-<span class="sd">        * Analyse each timeseries against `ALGORITHMS` to determine if it is\n</span>
-<span class="sd">          anomalous.\n</span>
-<span class="sd">        * If anomalous add it to the :obj:`self.anomalous_metrics` list\n</span>
-<span class="sd">        * Add what algorithms triggered to the :obj:`self.anomaly_breakdown_q` queue\n</span>
+<span class="sd">        For each metric:</span>
+
+<span class="sd">        - unpack the `raw_timeseries` for the metric.</span>
+<span class="sd">        - Analyse each timeseries against `ALGORITHMS` to determine if it is</span>
+<span class="sd">          anomalous.</span>
+<span class="sd">        - If anomalous add it to the :obj:`self.anomalous_metrics` list</span>
+<span class="sd">        - Add what algorithms triggered to the :obj:`self.anomaly_breakdown_q`</span>
+<span class="sd">          queue</span>
+<span class="sd">        - If :mod:`settings.ENABLE_CRUCIBLE` is ``True``:</span>
+
+<span class="sd">          - Add a crucible data file with the details about the timeseries and</span>
+<span class="sd">            anomaly.</span>
+<span class="sd">          - Write the timeseries to a json file for crucible.</span>
 
 <span class="sd">        Add keys and values to the queue so the parent process can collate for:\n</span>
 <span class="sd">        * :py:obj:`self.anomaly_breakdown_q`</span>
@@ -326,6 +356,21 @@
 
         <span class="n">spin_start</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;spin_process started&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: Memory usage spin_process start: </span><span class="si">%s</span><span class="s1"> (kb)&#39;</span> <span class="o">%</span> <span class="n">resource</span><span class="o">.</span><span class="n">getrusage</span><span class="p">(</span><span class="n">resource</span><span class="o">.</span><span class="n">RUSAGE_SELF</span><span class="p">)</span><span class="o">.</span><span class="n">ru_maxrss</span><span class="p">)</span>
+
+        <span class="c1"># TESTING removal of p.join() from p.terminate()</span>
+        <span class="c1"># sleep(4)</span>
+
+        <span class="c1"># @modified 20160801 - Adding additional exception handling to Analyzer</span>
+        <span class="c1"># Check the unique_metrics list is valid</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="nb">len</span><span class="p">(</span><span class="n">unique_metrics</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: the unique_metrics list is not valid&#39;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;nothing to do, no unique_metrics&#39;</span><span class="p">)</span>
+            <span class="k">return</span>
 
         <span class="c1"># Discover assigned metrics</span>
         <span class="n">keys_per_processor</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ceil</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">unique_metrics</span><span class="p">))</span> <span class="o">/</span> <span class="nb">float</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">ANALYZER_PROCESSES</span><span class="p">)))</span>
@@ -341,17 +386,219 @@
 
         <span class="c1"># Compile assigned metrics</span>
         <span class="n">assigned_metrics</span> <span class="o">=</span> <span class="p">[</span><span class="n">unique_metrics</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">assigned_keys</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: Memory usage spin_process after assigned_metrics: </span><span class="si">%s</span><span class="s1"> (kb)&#39;</span> <span class="o">%</span> <span class="n">resource</span><span class="o">.</span><span class="n">getrusage</span><span class="p">(</span><span class="n">resource</span><span class="o">.</span><span class="n">RUSAGE_SELF</span><span class="p">)</span><span class="o">.</span><span class="n">ru_maxrss</span><span class="p">)</span>
+
+        <span class="c1"># @added 20190410 - Feature #2916: ANALYZER_ENABLED setting</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">ANALYZER_ENABLED</span><span class="p">:</span>
+            <span class="n">len_assigned_metrics</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">assigned_metrics</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ANALYZER_ENABLED is set to </span><span class="si">%s</span><span class="s1"> removing the </span><span class="si">%s</span><span class="s1"> assigned_metrics&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">ANALYZER_ENABLED</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">len_assigned_metrics</span><span class="p">)))</span>
+            <span class="n">assigned_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">del</span> <span class="n">unique_metrics</span>
 
         <span class="c1"># Check if this process is unnecessary</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">assigned_metrics</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span>
 
         <span class="c1"># Multi get series</span>
-        <span class="n">raw_assigned</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">mget</span><span class="p">(</span><span class="n">assigned_metrics</span><span class="p">)</span>
+        <span class="c1"># @modified 20160801 - Adding additional exception handling to Analyzer</span>
+        <span class="n">raw_assigned_failed</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">raw_assigned</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">mget</span><span class="p">(</span><span class="n">assigned_metrics</span><span class="p">)</span>
+            <span class="n">raw_assigned_failed</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: Memory usage spin_process after raw_assigned: </span><span class="si">%s</span><span class="s1"> (kb)&#39;</span> <span class="o">%</span> <span class="n">resource</span><span class="o">.</span><span class="n">getrusage</span><span class="p">(</span><span class="n">resource</span><span class="o">.</span><span class="n">RUSAGE_SELF</span><span class="p">)</span><span class="o">.</span><span class="n">ru_maxrss</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get assigned_metrics from Redis&#39;</span><span class="p">)</span>
 
         <span class="c1"># Make process-specific dicts</span>
         <span class="n">exceptions</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
         <span class="n">anomaly_breakdown</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+        <span class="c1"># @added 20160803 - Adding additional exception handling to Analyzer</span>
+        <span class="k">if</span> <span class="n">raw_assigned_failed</span><span class="p">:</span>
+            <span class="k">return</span>
+
+        <span class="c1"># @added 20161119 - Branch #922: ionosphere</span>
+        <span class="c1">#                   Task #1718: review.tsfresh</span>
+        <span class="c1"># Determine the unique Mirage and Ionosphere metrics once, which are</span>
+        <span class="c1"># used later to determine how Analyzer should handle/route anomalies</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">mirage_unique_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;mirage.unique_metrics&#39;</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">mirage_unique_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># @added 20190408 - Feature #2882: Mirage - periodic_check</span>
+        <span class="c1"># Add Mirage periodic checks so that Mirage is analysing each metric at</span>
+        <span class="c1"># least once per hour.</span>
+        <span class="n">mirage_periodic_check_metric_list</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">mirage_periodic_check_enabled</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">MIRAGE_PERIODIC_CHECK</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">mirage_periodic_check_enabled</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">mirage_periodic_check_interval</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">MIRAGE_PERIODIC_CHECK_INTERVAL</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">mirage_periodic_check_interval</span> <span class="o">=</span> <span class="mi">3600</span>
+        <span class="n">mirage_periodic_check_interval_minutes</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">mirage_periodic_check_interval</span><span class="p">)</span> <span class="o">/</span> <span class="mi">60</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">mirage_unique_metrics</span> <span class="ow">and</span> <span class="n">mirage_periodic_check_enabled</span><span class="p">:</span>
+            <span class="n">mirage_unique_metrics_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">mirage_unique_metrics</span><span class="p">)</span>
+            <span class="c1"># Mirage periodic checks are only done on declared namespaces as to</span>
+            <span class="c1"># process all Mirage metrics periodically would probably create a</span>
+            <span class="c1"># substantial load on Graphite and is probably not required only key</span>
+            <span class="c1"># metrics should be analysed by Mirage periodically.</span>
+            <span class="n">periodic_check_mirage_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">mirage_periodic_check_namespaces</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">MIRAGE_PERIODIC_CHECK_NAMESPACES</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">mirage_periodic_check_namespaces</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">namespace</span> <span class="ow">in</span> <span class="n">mirage_periodic_check_namespaces</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">metric_name</span> <span class="ow">in</span> <span class="n">mirage_unique_metrics</span><span class="p">:</span>
+                    <span class="n">metric_namespace_elements</span> <span class="o">=</span> <span class="n">metric_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+                    <span class="n">mirage_periodic_metric</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="k">for</span> <span class="n">periodic_namespace</span> <span class="ow">in</span> <span class="n">mirage_periodic_check_namespaces</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">namespace</span> <span class="ow">in</span> <span class="n">mirage_periodic_check_namespaces</span><span class="p">:</span>
+                            <span class="k">continue</span>
+                        <span class="n">periodic_namespace_namespace_elements</span> <span class="o">=</span> <span class="n">periodic_namespace</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+                        <span class="n">elements_matched</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">metric_namespace_elements</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">periodic_namespace_namespace_elements</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">elements_matched</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">periodic_namespace_namespace_elements</span><span class="p">):</span>
+                            <span class="n">mirage_periodic_metric</span> <span class="o">=</span> <span class="kc">True</span>
+                            <span class="k">break</span>
+                    <span class="k">if</span> <span class="n">mirage_periodic_metric</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">metric_name</span> <span class="ow">in</span> <span class="n">periodic_check_mirage_metrics</span><span class="p">:</span>
+                            <span class="n">periodic_check_mirage_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric_name</span><span class="p">)</span>
+
+            <span class="n">periodic_check_mirage_metrics_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">periodic_check_mirage_metrics</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="s1">&#39;there are </span><span class="si">%s</span><span class="s1"> known Mirage periodic metrics&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">periodic_check_mirage_metrics_count</span><span class="p">)))</span>
+            <span class="k">for</span> <span class="n">metric_name</span> <span class="ow">in</span> <span class="n">periodic_check_mirage_metrics</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="s1">&#39;new.mirage.periodic_check.metrics.all&#39;</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not add </span><span class="si">%s</span><span class="s1"> to Redis set new.mirage.periodic_check.metrics.all: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">metric_name</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s1">&#39;mirage.periodic_check.metrics.all&#39;</span><span class="p">,</span> <span class="s1">&#39;mirage.periodic_check.metrics.all.old&#39;</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s1">&#39;new.mirage.periodic_check.metrics.all&#39;</span><span class="p">,</span> <span class="s1">&#39;mirage.periodic_check.metrics.all&#39;</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s1">&#39;mirage.periodic_check.metrics.all.old&#39;</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+            <span class="k">if</span> <span class="n">periodic_check_mirage_metrics_count</span> <span class="o">&gt;</span> <span class="n">mirage_periodic_check_interval_minutes</span><span class="p">:</span>
+                <span class="n">mirage_periodic_checks_per_minute</span> <span class="o">=</span> <span class="n">periodic_check_mirage_metrics_count</span> <span class="o">/</span> <span class="n">mirage_periodic_check_interval_minutes</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">mirage_periodic_checks_per_minute</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> Mirage periodic checks can be added&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">mirage_periodic_checks_per_minute</span><span class="p">))))</span>
+            <span class="k">for</span> <span class="n">metric_name</span> <span class="ow">in</span> <span class="n">periodic_check_mirage_metrics</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">mirage_periodic_check_metric_list</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">mirage_periodic_checks_per_minute</span><span class="p">):</span>
+                    <span class="k">break</span>
+                <span class="n">base_name</span> <span class="o">=</span> <span class="n">metric_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="n">mirage_periodic_check_cache_key</span> <span class="o">=</span> <span class="s1">&#39;mirage.periodic_check.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span>
+                <span class="n">mirage_periodic_check_key</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">mirage_periodic_check_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">mirage_periodic_check_cache_key</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not query Redis for cache_key: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">mirage_periodic_check_key</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">key_created_at</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span>
+                            <span class="n">mirage_periodic_check_cache_key</span><span class="p">,</span>
+                            <span class="n">mirage_periodic_check_interval</span><span class="p">,</span> <span class="n">key_created_at</span><span class="p">)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                            <span class="s1">&#39;created Mirage periodic_check Redis key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">mirage_periodic_check_cache_key</span><span class="p">))</span>
+                        <span class="n">mirage_periodic_check_metric_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric_name</span><span class="p">)</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="s1">&#39;new.mirage.periodic_check.metrics&#39;</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">)</span>
+                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not add </span><span class="si">%s</span><span class="s1"> to Redis set new.mirage.periodic_check.metrics: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="n">metric_name</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                            <span class="s1">&#39;error :: failed to create Mirage periodic_check Redis key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">mirage_periodic_check_cache_key</span><span class="p">))</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s1">&#39;mirage.periodic_check.metrics&#39;</span><span class="p">,</span> <span class="s1">&#39;mirage.periodic_check.metrics.old&#39;</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s1">&#39;new.mirage.periodic_check.metrics&#39;</span><span class="p">,</span> <span class="s1">&#39;mirage.periodic_check.metrics&#39;</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s1">&#39;mirage.periodic_check.metrics.old&#39;</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="n">mirage_periodic_check_metric_list_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">mirage_periodic_check_metric_list</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> Mirage periodic checks were added&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">mirage_periodic_check_metric_list_count</span><span class="p">)))</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">ionosphere_unique_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;ionosphere.unique_metrics&#39;</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">ionosphere_unique_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># @added 20170602 - Feature #2034: analyse_derivatives</span>
+        <span class="c1"># In order to convert monotonic, incrementing metrics to a deriative</span>
+        <span class="c1"># metric</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">derivative_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;derivative_metrics&#39;</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">derivative_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">non_derivative_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;non_derivative_metrics&#39;</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">non_derivative_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># This is here to refresh the sets</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">manage_derivative_metrics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;analyzer.derivative_metrics_expiry&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not query Redis for analyzer.derivative_metrics_expiry key: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+            <span class="n">manage_derivative_metrics</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="c1"># @added 20170901 - Bug #2154: Infrequent missing new_ Redis keys</span>
+        <span class="c1"># If the analyzer.derivative_metrics_expiry is going to expire in the</span>
+        <span class="c1"># next 60 seconds, just manage the derivative_metrics in the run as</span>
+        <span class="c1"># there is an overlap some times where the key existed at the start of</span>
+        <span class="c1"># the run but has expired by the end of the run.</span>
+        <span class="n">derivative_metrics_expiry_ttl</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">manage_derivative_metrics</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">derivative_metrics_expiry_ttl</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">ttl</span><span class="p">(</span><span class="s1">&#39;analyzer.derivative_metrics_expiry&#39;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;the analyzer.derivative_metrics_expiry key ttl is </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">derivative_metrics_expiry_ttl</span><span class="p">))</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not query Redis for analyzer.derivative_metrics_expiry key: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">derivative_metrics_expiry_ttl</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">derivative_metrics_expiry_ttl</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">60</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;managing derivative_metrics as the analyzer.derivative_metrics_expiry key ttl is less than 60 with </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">derivative_metrics_expiry_ttl</span><span class="p">))</span>
+                    <span class="n">manage_derivative_metrics</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s1">&#39;analyzer.derivative_metrics_expiry&#39;</span><span class="p">)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;deleted the Redis key analyzer.derivative_metrics_expiry&#39;</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to delete Redis key :: analyzer.derivative_metrics_expiry&#39;</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">non_derivative_monotonic_metrics</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">NON_DERIVATIVE_MONOTONIC_METRICS</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">non_derivative_monotonic_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># @added 20180519 - Feature #2378: Add redis auth to Skyline and rebrow</span>
+        <span class="c1"># Added Redis sets for Boring, TooShort and Stale</span>
+        <span class="n">redis_set_errors</span> <span class="o">=</span> <span class="mi">0</span>
 
         <span class="c1"># Distill timeseries strings into lists</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">metric_name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">assigned_metrics</span><span class="p">):</span>
@@ -364,13 +611,122 @@
                 <span class="n">unpacker</span> <span class="o">=</span> <span class="n">Unpacker</span><span class="p">(</span><span class="n">use_list</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
                 <span class="n">unpacker</span><span class="o">.</span><span class="n">feed</span><span class="p">(</span><span class="n">raw_series</span><span class="p">)</span>
                 <span class="n">timeseries</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">unpacker</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">timeseries</span> <span class="o">=</span> <span class="p">[]</span>
 
+            <span class="c1"># @added 20170602 - Feature #2034: analyse_derivatives</span>
+            <span class="c1"># In order to convert monotonic, incrementing metrics to a deriative</span>
+            <span class="c1"># metric</span>
+            <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">unknown_deriv_status</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">metric_name</span> <span class="ow">in</span> <span class="n">non_derivative_metrics</span><span class="p">:</span>
+                <span class="n">unknown_deriv_status</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">unknown_deriv_status</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">metric_name</span> <span class="ow">in</span> <span class="n">derivative_metrics</span><span class="p">:</span>
+                    <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">unknown_deriv_status</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="c1"># This is here to refresh the sets</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">manage_derivative_metrics</span><span class="p">:</span>
+                <span class="n">unknown_deriv_status</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="n">base_name</span> <span class="o">=</span> <span class="n">metric_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+            <span class="c1"># @added 20170617 - Bug #2050: analyse_derivatives - change in monotonicity</span>
+            <span class="c1"># First check if it has its own Redis z.derivative_metric key</span>
+            <span class="c1"># that has not expired</span>
+            <span class="n">derivative_metric_key</span> <span class="o">=</span> <span class="s1">&#39;z.derivative_metric.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">unknown_deriv_status</span><span class="p">:</span>
+                <span class="c1"># @added 20170617 - Bug #2050: analyse_derivatives - change in monotonicity</span>
+                <span class="n">last_derivative_metric_key</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">last_derivative_metric_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">derivative_metric_key</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not query Redis for last_derivative_metric_key: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+
+                <span class="c1"># Determine if it is a strictly increasing monotonically metric</span>
+                <span class="c1"># or has been in last FULL_DURATION via its z.derivative_metric</span>
+                <span class="c1"># key</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">last_derivative_metric_key</span><span class="p">:</span>
+                    <span class="n">is_strictly_increasing_monotonically</span> <span class="o">=</span> <span class="n">strictly_increasing_monotonicity</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">is_strictly_increasing_monotonically</span><span class="p">:</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">last_expire_set</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span>
+                                <span class="n">derivative_metric_key</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span><span class="p">,</span> <span class="n">last_expire_set</span><span class="p">)</span>
+                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not set Redis derivative_metric key: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># Until the z.derivative_metric key expires, it is classed</span>
+                    <span class="c1"># as such</span>
+                    <span class="n">is_strictly_increasing_monotonically</span> <span class="o">=</span> <span class="kc">True</span>
+
+                <span class="n">skip_derivative</span> <span class="o">=</span> <span class="n">in_list</span><span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="n">non_derivative_monotonic_metrics</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">skip_derivative</span><span class="p">:</span>
+                    <span class="n">is_strictly_increasing_monotonically</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">if</span> <span class="n">is_strictly_increasing_monotonically</span><span class="p">:</span>
+                    <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="s1">&#39;derivative_metrics&#39;</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add metric to Redis derivative_metrics set&#39;</span><span class="p">)</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="s1">&#39;new_derivative_metrics&#39;</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add metric to Redis new_derivative_metrics set&#39;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="s1">&#39;non_derivative_metrics&#39;</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add metric to Redis non_derivative_metrics set&#39;</span><span class="p">)</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="s1">&#39;new_non_derivative_metrics&#39;</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add metric to Redis new_non_derivative_metrics set&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">known_derivative_metric</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">derivative_timeseries</span> <span class="o">=</span> <span class="n">nonNegativeDerivative</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span>
+                    <span class="n">timeseries</span> <span class="o">=</span> <span class="n">derivative_timeseries</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: nonNegativeDerivative failed&#39;</span><span class="p">)</span>
+
+            <span class="c1"># @added 20180903 - Feature #2580: illuminance</span>
+            <span class="c1">#                   Feature #1986: flux</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">illuminance_datapoint</span> <span class="o">=</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">if</span> <span class="s1">&#39;.illuminance&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">metric_name</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">illuminance_datapoints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">illuminance_datapoint</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+            <span class="k">try</span><span class="p">:</span>
                 <span class="n">anomalous</span><span class="p">,</span> <span class="n">ensemble</span><span class="p">,</span> <span class="n">datapoint</span> <span class="o">=</span> <span class="n">run_selected_algorithm</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">)</span>
+
+                <span class="c1"># @added 20190408 - Feature #2882: Mirage - periodic_check</span>
+                <span class="c1"># Add for Mirage periodic - is really anomalous add to</span>
+                <span class="c1"># real_anomalous_metrics and if in mirage_periodic_check_metric_list</span>
+                <span class="c1"># add as anomalous</span>
+                <span class="k">if</span> <span class="n">anomalous</span><span class="p">:</span>
+                    <span class="c1"># @modified 20190412 - Bug #2932: self.real_anomalous_metrics not being populated correctly</span>
+                    <span class="c1">#                      Feature #2882: Mirage - periodic_check</span>
+                    <span class="c1"># self.real_anomalous_metrics.append(base_name)</span>
+                    <span class="n">base_name</span> <span class="o">=</span> <span class="n">metric_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                    <span class="n">metric_timestamp</span> <span class="o">=</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">metric</span> <span class="o">=</span> <span class="p">[</span><span class="n">datapoint</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">real_anomalous_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">metric_name</span> <span class="ow">in</span> <span class="n">mirage_periodic_check_metric_list</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">mirage_periodic_check_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+                    <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">True</span>
 
                 <span class="c1"># If it&#39;s anomalous, add it to list</span>
                 <span class="k">if</span> <span class="n">anomalous</span><span class="p">:</span>
                     <span class="n">base_name</span> <span class="o">=</span> <span class="n">metric_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-                    <span class="n">metric</span> <span class="o">=</span> <span class="p">[</span><span class="n">datapoint</span><span class="p">,</span> <span class="n">base_name</span><span class="p">]</span>
+                    <span class="n">metric_timestamp</span> <span class="o">=</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">metric</span> <span class="o">=</span> <span class="p">[</span><span class="n">datapoint</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">]</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">anomalous_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
 
                     <span class="c1"># Get the anomaly breakdown - who returned True?</span>
@@ -409,7 +765,7 @@
         <span class="n">spin_end</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">spin_start</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;spin_process took </span><span class="si">%.2f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="n">spin_end</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="Analyzer.run"><a class="viewcode-back" href="../../skyline.analyzer_dev.html#analyzer_dev.analyzer_dev.Analyzer.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="AnalyzerDev.run"><a class="viewcode-back" href="../../skyline.analyzer_dev.html#analyzer_dev.analyzer_dev.AnalyzerDev.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Called when the process intializes.</span>
 
@@ -755,7 +1111,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.2.14',
+            VERSION:'1.3.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

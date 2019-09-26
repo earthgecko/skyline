@@ -1,0 +1,431 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>skyline.flux package &mdash; Skyline 1.3.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="Skyline 1.3.0 documentation" href="index.html"/>
+        <link rel="up" title="skyline package" href="skyline.html"/>
+        <link rel="next" title="skyline.horizon package" href="skyline.horizon.html"/>
+        <link rel="prev" title="skyline.crucible package" href="skyline.crucible.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Skyline
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.3
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="docker.html">docker - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monotonic-metrics.html">Strictly increasing monotonicity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-multiple-skylines.html">Running multiple Skyline instances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#reliability">Reliability</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="skyline.html">skyline package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="skyline.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="skyline.analyzer.html">skyline.analyzer package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.analyzer_dev.html">skyline.analyzer_dev package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.boundary.html">skyline.boundary package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.crucible.html">skyline.crucible package</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">skyline.flux package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-flux.flux">skyline.flux.flux module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-flux.gunicorn">skyline.flux.gunicorn module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-flux.listen">skyline.flux.listen module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-flux.logger">skyline.flux.logger module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-flux.populate_metric">skyline.flux.populate_metric module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-flux.populate_metric_worker">skyline.flux.populate_metric_worker module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-flux.worker">skyline.flux.worker module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#module-flux">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.horizon.html">skyline.horizon package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.ionosphere.html">skyline.ionosphere package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.luminosity.html">skyline.luminosity package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.mirage.html">skyline.mirage package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.panorama.html">skyline.panorama package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.tsfresh_features.html">skyline.tsfresh_features package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.vista.html">skyline.vista package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.webapp.html">skyline.webapp package</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#submodules">Submodules</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-algorithm_exceptions">skyline.algorithm_exceptions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-database">skyline.database module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-features_profile">skyline.features_profile module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-ionosphere_functions">skyline.ionosphere_functions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-settings">skyline.settings module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-skyline_functions">skyline.skyline_functions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-skyline_version">skyline.skyline_version module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-slack_functions">skyline.slack_functions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-tsfresh_feature_names">skyline.tsfresh_feature_names module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-validate_settings">skyline.validate_settings module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-contents">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">Skyline</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="skyline.html">skyline package</a> &raquo;</li>
+      
+    <li>skyline.flux package</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/skyline.flux.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="skyline-flux-package">
+<h1>skyline.flux package<a class="headerlink" href="#skyline-flux-package" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-flux.flux">
+<span id="skyline-flux-flux-module"></span><h2>skyline.flux.flux module<a class="headerlink" href="#module-flux.flux" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-flux.gunicorn">
+<span id="skyline-flux-gunicorn-module"></span><h2>skyline.flux.gunicorn module<a class="headerlink" href="#module-flux.gunicorn" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-flux.listen">
+<span id="skyline-flux-listen-module"></span><h2>skyline.flux.listen module<a class="headerlink" href="#module-flux.listen" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="flux.listen.validate_key">
+<code class="descname">validate_key</code><span class="sig-paren">(</span><em>caller</em>, <em>apikey</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/listen.html#validate_key"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flux.listen.validate_key" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="flux.listen.validate_timestamp">
+<code class="descname">validate_timestamp</code><span class="sig-paren">(</span><em>caller</em>, <em>timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/listen.html#validate_timestamp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flux.listen.validate_timestamp" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="class">
+<dt id="flux.listen.MetricData">
+<em class="property">class </em><code class="descname">MetricData</code><a class="reference internal" href="_modules/flux/listen.html#MetricData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flux.listen.MetricData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="flux.listen.MetricData.on_get">
+<code class="descname">on_get</code><span class="sig-paren">(</span><em>req</em>, <em>resp</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/listen.html#MetricData.on_get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flux.listen.MetricData.on_get" title="Permalink to this definition">¶</a></dt>
+<dd><p>The /flux/metric_data endpoint is called via a GET with the URI
+parameters as defined below:
+/flux/metric_data?metric=&lt;metric|str&gt;&amp;timestamp=&lt;timestamp|int&gt;&amp;value=&lt;value|float&gt;&amp;key=&lt;key|str&gt;
+For example:
+/flux/metric_data?metric=vista.nodes.skyline-1.cpu.user&amp;timestamp=1478021700&amp;value=1.0&amp;key=YOURown32charSkylineAPIkeySecret</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="flux.listen.MetricDataPost">
+<em class="property">class </em><code class="descname">MetricDataPost</code><a class="reference internal" href="_modules/flux/listen.html#MetricDataPost"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flux.listen.MetricDataPost" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="flux.listen.MetricDataPost.on_post">
+<code class="descname">on_post</code><span class="sig-paren">(</span><em>req</em>, <em>resp</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/listen.html#MetricDataPost.on_post"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flux.listen.MetricDataPost.on_post" title="Permalink to this definition">¶</a></dt>
+<dd><p>The /flux/metric_data_post endpoint is called via a POST with a json
+object as defined below
+For example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;metric&quot;</span><span class="p">:</span> <span class="s2">&quot;metric|str&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="s2">&quot;timestamp|int&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;value|float&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;key&quot;</span><span class="p">:</span> <span class="s2">&quot;api_key|str&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+<p>For example:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">{</span>
+    <span class="s2">&quot;metric&quot;</span><span class="p">:</span> <span class="s2">&quot;vista.nodes.skyline-1.cpu.user&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="s2">&quot;1478021700&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;1.0&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;key&quot;</span><span class="p">:</span> <span class="s2">&quot;YOURown32charSkylineAPIkeySecret&quot;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-flux.logger">
+<span id="skyline-flux-logger-module"></span><h2>skyline.flux.logger module<a class="headerlink" href="#module-flux.logger" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="flux.logger.set_up_logging">
+<code class="descname">set_up_logging</code><span class="sig-paren">(</span><em>app</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/logger.html#set_up_logging"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flux.logger.set_up_logging" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+<div class="section" id="module-flux.populate_metric">
+<span id="skyline-flux-populate-metric-module"></span><h2>skyline.flux.populate_metric module<a class="headerlink" href="#module-flux.populate_metric" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="flux.populate_metric.PopulateMetric">
+<em class="property">class </em><code class="descname">PopulateMetric</code><a class="reference internal" href="_modules/flux/populate_metric.html#PopulateMetric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flux.populate_metric.PopulateMetric" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
+<dl class="method">
+<dt id="flux.populate_metric.PopulateMetric.on_post">
+<code class="descname">on_post</code><span class="sig-paren">(</span><em>req</em>, <em>resp</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/populate_metric.html#PopulateMetric.on_post"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flux.populate_metric.PopulateMetric.on_post" title="Permalink to this definition">¶</a></dt>
+<dd><p>The endpoint is called via a POST with a json payload as defined in the
+payload variable in skyline/vista/fetcher.py</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-flux.populate_metric_worker">
+<span id="skyline-flux-populate-metric-worker-module"></span><h2>skyline.flux.populate_metric_worker module<a class="headerlink" href="#module-flux.populate_metric_worker" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="flux.populate_metric_worker.PopulateMetricWorker">
+<em class="property">class </em><code class="descname">PopulateMetricWorker</code><span class="sig-paren">(</span><em>queue</em>, <em>parent_pid</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/populate_metric_worker.html#PopulateMetricWorker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flux.populate_metric_worker.PopulateMetricWorker" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">multiprocessing.process.Process</span></code></p>
+<p>The worker grabs metrics from the queue, surfaces the data from the remote
+Graphite and sends them to the Skyline Graphite.</p>
+<dl class="method">
+<dt id="flux.populate_metric_worker.PopulateMetricWorker.check_if_parent_is_alive">
+<code class="descname">check_if_parent_is_alive</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/populate_metric_worker.html#PopulateMetricWorker.check_if_parent_is_alive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flux.populate_metric_worker.PopulateMetricWorker.check_if_parent_is_alive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Self explanatory.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="flux.populate_metric_worker.PopulateMetricWorker.run">
+<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/populate_metric_worker.html#PopulateMetricWorker.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flux.populate_metric_worker.PopulateMetricWorker.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called when the process intializes.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-flux.worker">
+<span id="skyline-flux-worker-module"></span><h2>skyline.flux.worker module<a class="headerlink" href="#module-flux.worker" title="Permalink to this headline">¶</a></h2>
+<dl class="class">
+<dt id="flux.worker.Worker">
+<em class="property">class </em><code class="descname">Worker</code><span class="sig-paren">(</span><em>queue</em>, <em>parent_pid</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/worker.html#Worker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flux.worker.Worker" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">multiprocessing.process.Process</span></code></p>
+<p>The worker processes metric from the queue and sends them to Graphite.</p>
+<dl class="method">
+<dt id="flux.worker.Worker.check_if_parent_is_alive">
+<code class="descname">check_if_parent_is_alive</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/worker.html#Worker.check_if_parent_is_alive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flux.worker.Worker.check_if_parent_is_alive" title="Permalink to this definition">¶</a></dt>
+<dd><p>Self explanatory.</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="flux.worker.Worker.run">
+<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/worker.html#Worker.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flux.worker.Worker.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called when the process intializes.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-flux">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-flux" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="skyline.horizon.html" class="btn btn-neutral float-right" title="skyline.horizon package" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="skyline.crucible.html" class="btn btn-neutral" title="skyline.crucible package" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2019, Gary Wilson.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.3.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

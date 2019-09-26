@@ -1,0 +1,308 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>slack &mdash; Skyline 1.3.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
+  
+
+  
+        <link rel="index" title="Index"
+              href="genindex.html"/>
+        <link rel="search" title="Search" href="search.html"/>
+    <link rel="top" title="Skyline 1.3.0 documentation" href="index.html"/>
+        <link rel="next" title="Strictly increasing monotonicity" href="monotonic-metrics.html"/>
+        <link rel="prev" title="docker - EXPERIMENTAL" href="docker.html"/> 
+
+  
+  <script src="_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="index.html" class="icon icon-home"> Skyline
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                1.3
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="docker.html">docker - EXPERIMENTAL</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">slack</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#skyline-slack-settings">Skyline slack settings</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="monotonic-metrics.html">Strictly increasing monotonicity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-multiple-skylines.html">Running multiple Skyline instances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#reliability">Reliability</a></li>
+<li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="index.html">Skyline</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+ 
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="index.html">Docs</a> &raquo;</li>
+      
+    <li>slack</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+            <a href="_sources/slack.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="slack">
+<h1>slack<a class="headerlink" href="#slack" title="Permalink to this headline">¶</a></h1>
+<p>Skyline can be integrated with slack in terms of alerts and making automatic
+updates to slack alert threads, informing you that a training data page has been
+reviewed, a features profile has been created or learnt and validated.</p>
+<p>To use slack with Skyline you need to create a slack skyline app and a bot user.</p>
+<p>On slack:</p>
+<ul class="simple">
+<li>Create a Slack App</li>
+<li>Basic Information &gt; Building Apps for Slack &gt; Add features and functionality &gt; Bots</li>
+<li>Bot User click Add a Bot User</li>
+<li>Set Display name and Default username to skyline</li>
+<li>And Save Changes</li>
+<li>In the left hand Settings menu for the skyline app, click Basic Information</li>
+<li>In App Credentials click Add features and functionality &gt; Permissions</li>
+<li>Under OAuth Tokens &amp; Redirect URLs click Install App to Workspace and click Authorize</li>
+<li>Copy the Bot User OAuth Access Token and add it to <a class="reference internal" href="skyline.html#settings.SLACK_OPTS" title="settings.SLACK_OPTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.SLACK_OPTS</span></code></a> as the value for bot_user_oauth_access_token</li>
+<li>If you want to add the Skyline icon to the app, in the left hand Settings menu for the skyline app, click Basic Information
+Under Display Information &gt; App icon &amp; Preview and click and add:
+<a class="reference external" href="https://github.com/earthgecko/skyline/blob/master/docs/images/slack.skyline.app.icon.png">https://github.com/earthgecko/skyline/blob/master/docs/images/slack.skyline.app.icon.png</a></li>
+<li>Create a new channel called skyline and invite the skyline bot user.</li>
+</ul>
+<div class="section" id="skyline-slack-settings">
+<h2>Skyline slack settings<a class="headerlink" href="#skyline-slack-settings" title="Permalink to this headline">¶</a></h2>
+<p>In <cite>settings.py</cite> set</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">SLACK_ENABLED</span> <span class="o">=</span> <span class="bp">True</span>
+</pre></div>
+</div>
+<p>And update the the <cite>SLACK_OPTS</cite> as appropriate for your metrics.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">SLACK_OPTS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="c1"># Bot User OAuth Access Token</span>
+    <span class="s1">&#39;bot_user_oauth_access_token&#39;</span><span class="p">:</span> <span class="s1">&#39;YOUR_slack_bot_user_oauth_access_token&#39;</span><span class="p">,</span>
+    <span class="c1"># list of slack channels to notify about each anomaly</span>
+    <span class="c1"># (similar to SMTP_OPTS[&#39;recipients&#39;])</span>
+    <span class="c1"># channel names - you can either pass the channel name (#general) or encoded</span>
+    <span class="c1"># ID (C024BE91L)</span>
+    <span class="s1">&#39;channels&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;skyline&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;#skyline&#39;</span><span class="p">,),</span>
+        <span class="s1">&#39;skyline_test.alerters.test&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;#skyline&#39;</span><span class="p">,),</span>
+        <span class="s1">&#39;horizon.udp.test&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;#skyline&#39;</span><span class="p">,),</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;icon_emoji&#39;</span><span class="p">:</span> <span class="s1">&#39;:chart_with_upwards_trend:&#39;</span><span class="p">,</span>
+    <span class="c1"># Your default slack Skyline channel name e.g. &#39;#skyline&#39;</span>
+    <span class="s1">&#39;default_channel&#39;</span><span class="p">:</span> <span class="s1">&#39;YOUR_default_slack_channel&#39;</span><span class="p">,</span>
+    <span class="c1"># Your default slack Skyline channel id e.g. &#39;C0XXXXXX&#39;</span>
+    <span class="s1">&#39;default_channel_id&#39;</span><span class="p">:</span> <span class="s1">&#39;YOUR_default_slack_channel_id&#39;</span><span class="p">,</span>
+    <span class="c1"># Whether to update slack message threads on any of the below events</span>
+    <span class="s1">&#39;thread_updates&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+    <span class="s1">&#39;message_on_training_data_viewed&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+    <span class="s1">&#39;message_on_training_data_viewed_reaction_emoji&#39;</span><span class="p">:</span> <span class="s1">&#39;eyes&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;message_on_features_profile_created&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+    <span class="s1">&#39;message_on_features_profile_created_reaction_emoji&#39;</span><span class="p">:</span> <span class="s1">&#39;thumbsup&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;message_on_features_profile_learnt&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+    <span class="s1">&#39;message_on_features_profile_learnt_reaction_emoji&#39;</span><span class="p">:</span> <span class="s1">&#39;heavy_check_mark&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;message_on_features_profile_disabled&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+    <span class="s1">&#39;message_on_features_profile_disabled_reaction_emoji&#39;</span><span class="p">:</span> <span class="s1">&#39;x&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;message_on_validated_features_profiles&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+           </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="monotonic-metrics.html" class="btn btn-neutral float-right" title="Strictly increasing monotonicity" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="docker.html" class="btn btn-neutral" title="docker - EXPERIMENTAL" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2019, Gary Wilson.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'./',
+            VERSION:'1.3.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="_static/jquery.js"></script>
+      <script type="text/javascript" src="_static/underscore.js"></script>
+      <script type="text/javascript" src="_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

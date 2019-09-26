@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ionosphere.ionosphere &mdash; Skyline 1.2.14 documentation</title>
+  <title>ionosphere.ionosphere &mdash; Skyline 1.3.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.2.14 documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.3.0 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                1.2
+                1.3
               </div>
             
           
@@ -94,6 +94,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../docker.html">docker - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../analyzer.html">Analyzer</a></li>
@@ -107,7 +109,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../../ionosphere_echo.html">Ionosphere echo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
@@ -178,7 +183,11 @@
     <span class="kn">from</span> <span class="nn">queue</span> <span class="k">import</span> <span class="n">Empty</span>
 <span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">time</span><span class="p">,</span> <span class="n">sleep</span>
 <span class="kn">from</span> <span class="nn">threading</span> <span class="k">import</span> <span class="n">Thread</span>
-<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="k">import</span> <span class="n">Process</span><span class="p">,</span> <span class="n">Manager</span>
+<span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+<span class="c1"># Use Redis sets in place of Manager().list to reduce memory and number of</span>
+<span class="c1"># processes</span>
+<span class="c1"># from multiprocessing import Process, Manager</span>
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="k">import</span> <span class="n">Process</span>
 <span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">from</span> <span class="nn">shutil</span> <span class="k">import</span> <span class="n">rmtree</span>
 <span class="c1"># import csv</span>
@@ -289,11 +298,29 @@
 <span class="c1"># and currently it is hard coded to be 1</span>
 <span class="c1"># (https://github.com/earthgecko/skyline/issues/69)</span>
 <span class="k">try</span><span class="p">:</span>
-    <span class="n">ionosphere_processes</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_PROCESSES</span>
-    <span class="k">if</span> <span class="n">ionosphere_processes</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">ionosphere_processes</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">IONOSPHERE_PROCESSES</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_PROCESSES</span>
+    <span class="k">if</span> <span class="n">IONOSPHERE_PROCESSES</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">IONOSPHERE_PROCESSES</span> <span class="o">=</span> <span class="mi">1</span>
 <span class="k">except</span><span class="p">:</span>
-    <span class="n">ionosphere_processes</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="n">IONOSPHERE_PROCESSES</span> <span class="o">=</span> <span class="mi">1</span>
+
+<span class="c1"># @added 20190524 - Bug #3050: Ionosphere - Skyline and Graphite feedback</span>
+<span class="c1"># Do not run checks if namespace has matched multiple times in the</span>
+<span class="c1"># last 10 minutes.  However determining which Skyline related metrics</span>
+<span class="c1"># are feeding back are quite difficult to ascetain.  So use the</span>
+<span class="c1"># ionosphere_busy logic again and use or find the skyline host namespace</span>
+<span class="c1"># and if busy do not analyse the Skyline host namespace while</span>
+<span class="c1"># ionosphere is busy.</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">SKYLINE_FEEDBACK_NAMESPACES</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_FEEDBACK_NAMESPACES</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="c1"># Let us take a guess</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">graphite_host</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span>
+        <span class="n">graphite_hostname</span> <span class="o">=</span> <span class="n">graphite_host</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">SKYLINE_FEEDBACK_NAMESPACES</span> <span class="o">=</span> <span class="p">[</span><span class="n">settings</span><span class="o">.</span><span class="n">SERVER_METRICS_NAME</span><span class="p">,</span> <span class="n">graphite_hostname</span><span class="p">]</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">SKYLINE_FEEDBACK_NAMESPACES</span> <span class="o">=</span> <span class="p">[</span><span class="n">this_host</span><span class="p">]</span>
 
 <span class="n">skyline_app_graphite_namespace</span> <span class="o">=</span> <span class="s1">&#39;skyline.</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">SERVER_METRIC_PATH</span><span class="p">)</span>
 
@@ -323,7 +350,7 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize Ionosphere</span>
 
-<span class="sd">        Create the :obj:`self.anomalous_metrics` list</span>
+<span class="sd">        Define Redis and memcached connections</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Ionosphere</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
@@ -336,18 +363,26 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">parent_pid</span> <span class="o">=</span> <span class="n">parent_pid</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">current_pid</span> <span class="o">=</span> <span class="n">getpid</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">mysql_conn</span> <span class="o">=</span> <span class="n">mysql</span><span class="o">.</span><span class="n">connector</span><span class="o">.</span><span class="n">connect</span><span class="p">(</span><span class="o">**</span><span class="n">config</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">anomalous_metrics</span> <span class="o">=</span> <span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">not_anomalous</span> <span class="o">=</span> <span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">features_profiles_checked</span> <span class="o">=</span> <span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">training_metrics</span> <span class="o">=</span> <span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">sent_to_panorama</span> <span class="o">=</span> <span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
+        <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+        <span class="c1">#                      Task #3032: Debug number of Python processes and memory use</span>
+        <span class="c1">#                      Branch #3002: docker</span>
+        <span class="c1"># Reduce amount of Manager instances that are used as each requires a</span>
+        <span class="c1"># copy of entire memory to be copied into each subprocess so this</span>
+        <span class="c1"># results in a python process per Manager instance, using as much</span>
+        <span class="c1"># memory as the parent.  OK on a server, not so much in a container.</span>
+        <span class="c1"># Disabled all the Manager().list() below and replaced with Redis sets</span>
+        <span class="c1"># self.anomalous_metrics = Manager().list()</span>
+        <span class="c1"># self.not_anomalous = Manager().list()</span>
+        <span class="c1"># self.features_profiles_checked = Manager().list()</span>
+        <span class="c1"># self.training_metrics = Manager().list()</span>
+        <span class="c1"># self.sent_to_panorama = Manager().list()</span>
         <span class="c1"># @added 20170108 - Feature #1830: Ionosphere alerts</span>
         <span class="c1"># Added lists of ionosphere_smtp_alerter_metrics and</span>
         <span class="c1"># ionosphere_non_smtp_alerter_metrics</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ionosphere_smtp_alerter_metrics</span> <span class="o">=</span> <span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">ionosphere_non_smtp_alerter_metrics</span> <span class="o">=</span> <span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
+        <span class="c1"># self.ionosphere_smtp_alerter_metrics = Manager().list()</span>
+        <span class="c1"># self.ionosphere_non_smtp_alerter_metrics = Manager().list()</span>
         <span class="c1"># @added 20170306 - Feature #1960: ionosphere_layers</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">layers_checked</span> <span class="o">=</span> <span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
+        <span class="c1"># self.layers_checked = Manager().list()</span>
         <span class="c1"># @added 20170809 - Task #2132: Optimise Ionosphere DB usage</span>
         <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHE_ENABLED</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">memcache_client</span> <span class="o">=</span> <span class="n">pymemcache_Client</span><span class="p">((</span><span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHED_SERVER_IP</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHED_SERVER_PORT</span><span class="p">),</span> <span class="n">connect_timeout</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
@@ -562,6 +597,10 @@
         <span class="n">ionosphere_metrics_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ionosphere_enabled_metrics</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;db has </span><span class="si">%s</span><span class="s1"> ionosphere_enabled metrics&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ionosphere_metrics_count</span><span class="p">)))</span>
 
+        <span class="c1"># @added 20190528 - Branch #3002: docker</span>
+        <span class="k">if</span> <span class="n">ionosphere_metrics_count</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">ionosphere_enabled_metrics</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;none&#39;</span><span class="p">]</span>
+
         <span class="k">if</span> <span class="n">manage_ionosphere_unique_metrics</span><span class="p">:</span>
             <span class="c1"># Testing the query was fine and Ionosphere metrics can go to 0 if</span>
             <span class="c1"># all were disabled</span>
@@ -588,7 +627,10 @@
                 <span class="n">manage_ionosphere_unique_metrics</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="n">ionosphere_unique_metrics</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not delete Redis set ionosphere.unique_metrics: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+                <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;no such key&#39;</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;could not rename Redis set ionosphere.new_unique_metrics to ionosphere.unique_metrics: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not rename Redis set ionosphere.new_unique_metrics to ionosphere.unique_metrics: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="s1">&#39;ionosphere.manage_ionosphere_unique_metrics&#39;</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="n">time</span><span class="p">())</span>
             <span class="k">except</span><span class="p">:</span>
@@ -788,7 +830,15 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get ionosphere.unique_metrics from Redis&#39;</span><span class="p">)</span>
             <span class="n">ionosphere_unique_metrics</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="n">ionosphere_unique_metrics</span><span class="p">:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">ionosphere_unique_metrics</span><span class="p">:</span>
+            <span class="c1"># @modified 20190413 - Bug #2942: process_ionosphere_echo metric mismatch</span>
+            <span class="c1">#                      Feature #2484: FULL_DURATION feature profiles</span>
+            <span class="c1"># Matching bug for not in list comprehension it must be an absolute</span>
+            <span class="c1"># match</span>
+            <span class="c1"># if not metric in ionosphere_unique_metrics:</span>
+            <span class="n">metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">))</span>
+            <span class="c1"># @modified 20190522: Task #3034: Reduce multiprocessing Manager list usage</span>
+            <span class="c1"># if not metric_name in ionosphere_unique_metrics:</span>
+            <span class="k">if</span> <span class="n">metric_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ionosphere_unique_metrics</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;process_ionosphere_echo :: only ionosphere enabled metrics are processed, skipping </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric</span><span class="p">)</span>
                 <span class="k">return</span>
 
@@ -922,7 +972,7 @@
             <span class="c1"># make sure that the keys and values they pass into redis-py</span>
             <span class="c1"># are either bytes, strings or numbers.  Added cache_key_value</span>
             <span class="c1"># self.redis_conn.setex(</span>
-                <span class="c1"># ionosphere_check_cache_key, 300, [check_process_start])</span>
+            <span class="c1">#   ionosphere_check_cache_key, 300, [check_process_start])</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span>
                 <span class="n">ionosphere_check_cache_key</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="n">check_process_start</span><span class="p">)</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
@@ -1188,22 +1238,41 @@
 
         <span class="c1"># @modified 20190325 - Feature #2484: FULL_DURATION feature profiles</span>
         <span class="c1"># Moved get_metrics_db_object block to common_functions.py</span>
-        <span class="n">metrics_db_object</span> <span class="o">=</span> <span class="n">get_metrics_db_object</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">metrics_db_object</span> <span class="o">=</span> <span class="n">get_metrics_db_object</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not determine metrics_db_object from get_metrics_db_object for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="n">metrics_db_object</span><span class="p">:</span>
+            <span class="n">metrics_id</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">metrics_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">metrics_db_object</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
-                <span class="n">metric_ionosphere_enabled</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">metrics_db_object</span><span class="p">[</span><span class="s1">&#39;ionosphere_enabled&#39;</span><span class="p">])</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="c1"># @added 20190509 - Bug #2984: Ionosphere - could not determine values from metrics_db_object</span>
+                <span class="c1"># Added a traceback here to debug an issue</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not determine id from metrics_db_object for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
+                <span class="n">metrics_id</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">metric_ionosphere_enabled</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">training_metric</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">metrics_id</span><span class="p">:</span>
+                <span class="c1"># @modified 20190510 - Bug #2984: Ionosphere - could not determine values from metrics_db_object</span>
+                <span class="c1"># metric_ionosphere_enabled = int(metrics_db_object[&#39;ionosphere_enabled&#39;])</span>
+                <span class="n">metric_ionosphere_enabled</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">metric_ionosphere_enabled</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">metrics_db_object</span><span class="p">[</span><span class="s1">&#39;ionosphere_enabled&#39;</span><span class="p">])</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not determine ionosphere_enabled from metrics_db_object for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">metric_ionosphere_enabled</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                     <span class="n">training_metric</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">training_metric</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="k">if</span> <span class="n">metric_ionosphere_enabled</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                     <span class="n">training_metric</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="k">except</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not determine values from metrics_db_object for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
-                <span class="n">metrics_id</span> <span class="o">=</span> <span class="kc">None</span>
-                <span class="n">metric_ionosphere_enabled</span> <span class="o">=</span> <span class="kc">None</span>
-                <span class="n">training_metric</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">if</span> <span class="n">metric_ionosphere_enabled</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">training_metric</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">metrics_id</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="n">metric_ionosphere_enabled</span> <span class="o">=</span> <span class="kc">None</span>
@@ -1211,6 +1280,35 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not determine metric id from memcache or metrics tables for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
             <span class="n">fail_check</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_failed_check_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
             <span class="k">return</span>
+
+        <span class="c1"># @added 20190524 - Bug #3050: Ionosphere - Skyline and Graphite feedback</span>
+        <span class="c1"># Do not run checks if namespace has matched multiple times in the</span>
+        <span class="c1"># last 10 minutes.  However determining which Skyline related metrics</span>
+        <span class="c1"># are feeding back are quite difficult to ascetain.  So use the</span>
+        <span class="c1"># ionosphere_busy logic again and use or find the skyline host namespace</span>
+        <span class="c1"># and if busy do not analyse the Skyline host namespace while</span>
+        <span class="c1"># ionosphere is busy.</span>
+        <span class="n">feedback_metric</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">ionosphere_busy</span><span class="p">:</span>
+            <span class="n">metric_namespace_elements</span> <span class="o">=</span> <span class="n">base_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">to_skip</span> <span class="ow">in</span> <span class="n">SKYLINE_FEEDBACK_NAMESPACES</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">to_skip</span> <span class="ow">in</span> <span class="n">base_name</span><span class="p">:</span>
+                    <span class="n">feedback_metric</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">break</span>
+                <span class="n">to_skip_namespace_elements</span> <span class="o">=</span> <span class="n">to_skip</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+                <span class="n">elements_matched</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">metric_namespace_elements</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">to_skip_namespace_elements</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">elements_matched</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">to_skip_namespace_elements</span><span class="p">):</span>
+                    <span class="n">feedback_metric</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">break</span>
+            <span class="k">if</span> <span class="n">feedback_metric</span><span class="p">:</span>
+                <span class="n">cache_key</span> <span class="o">=</span> <span class="s1">&#39;ionosphere.feedback_metric.checked.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;feedback metric identified adding Redis key with 600 TTL - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">cache_key</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="mi">600</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">()))</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add </span><span class="si">%s</span><span class="s1"> key to Redis&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)))</span>
 
         <span class="c1"># @added 20170116 - Feature #1854: Ionosphere learn - generations</span>
         <span class="c1"># If this is added_by ionosphere_learn the id is only</span>
@@ -1233,17 +1331,40 @@
                     <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
                 <span class="k">return</span>
 
+        <span class="c1"># @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+        <span class="c1"># The Redis ionosphere.ionosphere_non_smtp_alerter_metrics list is created here to</span>
+        <span class="c1"># replace the self.ionosphere_non_smtp_alerter_metrics Manager.list in the below</span>
+        <span class="c1"># section</span>
+        <span class="n">ionosphere_non_smtp_alerter_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">ionosphere_non_smtp_alerter_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;ionosphere.ionosphere_non_smtp_alerter_metrics&#39;</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to generate a list from the ionosphere.ionosphere_non_smtp_alerter_metrics Redis set&#39;</span><span class="p">)</span>
+            <span class="n">ionosphere_non_smtp_alerter_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+
         <span class="c1"># @added 20170108 - Feature #1830: Ionosphere alerts</span>
         <span class="c1"># Only process smtp_alerter_metrics</span>
         <span class="k">if</span> <span class="n">training_metric</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">base_name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ionosphere_non_smtp_alerter_metrics</span><span class="p">:</span>
+            <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+            <span class="c1"># if base_name in self.ionosphere_non_smtp_alerter_metrics:</span>
+            <span class="k">if</span> <span class="n">base_name</span> <span class="ow">in</span> <span class="n">ionosphere_non_smtp_alerter_metrics</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: Ionosphere does not handle metrics that do not have a smtp alert context removing check for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">))</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">remove_metric_check_file</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
                 <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
                     <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
                 <span class="k">return</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">training_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+                <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+                <span class="c1"># self.training_metrics.append(base_name)</span>
+                <span class="n">redis_set</span> <span class="o">=</span> <span class="s1">&#39;ionosphere.training_metrics&#39;</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="n">redis_set</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add </span><span class="si">%s</span><span class="s1"> to Redis set </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">redis_set</span><span class="p">)))</span>
 
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
             <span class="s1">&#39;ionosphere_enabled is </span><span class="si">%s</span><span class="s1"> for metric id </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
@@ -1409,6 +1530,14 @@
             <span class="c1"># be used to determine what settings.FULL_DURATION features</span>
             <span class="c1"># profiles need to be created for ionosphere_echo</span>
             <span class="n">fps_db_object</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="c1"># @added 20190919 - Feature #2484: FULL_DURATION feature profiles</span>
+            <span class="c1"># Set both fp_count_with_echo and fp_count to 0 initially so that</span>
+            <span class="c1"># if the are echo fps, then the database can be updated with the</span>
+            <span class="c1"># fp_count_with_echo value for fp_count in the ionosphere_matched</span>
+            <span class="c1"># table</span>
+            <span class="n">fp_count</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">fp_count_with_echo</span> <span class="o">=</span> <span class="mi">0</span>
 
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
@@ -1814,7 +1943,18 @@
                 <span class="c1">#                  Branch #2270: luminosity</span>
                 <span class="n">fp_checked</span> <span class="o">+=</span> <span class="mi">1</span>
 
-                <span class="bp">self</span><span class="o">.</span><span class="n">features_profiles_checked</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fp_id</span><span class="p">)</span>
+                <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+                <span class="c1"># Use Redis set instead of Manager().list to reduce memory</span>
+                <span class="c1"># self.features_profiles_checked.append(fp_id)</span>
+                <span class="n">redis_set</span> <span class="o">=</span> <span class="s1">&#39;ionosphere.features_profiles_checked&#39;</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="n">redis_set</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add </span><span class="si">%s</span><span class="s1"> to Redis set </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">redis_set</span><span class="p">)))</span>
+
                 <span class="n">features_count</span> <span class="o">=</span> <span class="kc">None</span>
                 <span class="n">fp_features</span> <span class="o">=</span> <span class="p">[]</span>
                 <span class="c1"># Get features for fp_id from z_fp_&lt;metric_id&gt; table where the</span>
@@ -2569,7 +2709,17 @@
                 <span class="c1"># END - Feature #2404: Ionosphere - fluid approximation</span>
 
                 <span class="k">if</span> <span class="n">not_anomalous</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">not_anomalous</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+                    <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+                    <span class="c1"># self.not_anomalous.append(base_name)</span>
+                    <span class="n">redis_set</span> <span class="o">=</span> <span class="s1">&#39;ionosphere.not_anomalous&#39;</span>
+                    <span class="n">data</span> <span class="o">=</span> <span class="n">base_name</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="n">redis_set</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add </span><span class="si">%s</span><span class="s1"> to Redis set </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">redis_set</span><span class="p">)))</span>
+
                     <span class="c1"># update matched_count in ionosphere_table</span>
                     <span class="n">matched_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
                     <span class="c1"># @added 20170804 - Bug #2130: MySQL - Aborted_clients</span>
@@ -2635,6 +2785,13 @@
                         <span class="n">minmax_fp_features_count</span> <span class="o">=</span> <span class="mi">0</span>
                         <span class="n">minmax_anomalous_features_sum</span> <span class="o">=</span> <span class="mi">0</span>
                         <span class="n">minmax_anomalous_features_count</span> <span class="o">=</span> <span class="mi">0</span>
+
+                    <span class="c1"># @added 20190919 - Feature #2484: FULL_DURATION feature profiles</span>
+                    <span class="c1"># If there are additional echo fps then the database can be</span>
+                    <span class="c1"># updated with the fp_count_with_echo value for fp_count in</span>
+                    <span class="c1"># the ionosphere_matched table</span>
+                    <span class="k">if</span> <span class="n">fp_count_with_echo</span> <span class="o">&gt;</span> <span class="n">fp_count</span><span class="p">:</span>
+                        <span class="n">fp_count</span> <span class="o">=</span> <span class="n">fp_count_with_echo</span>
 
                     <span class="k">try</span><span class="p">:</span>
                         <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
@@ -2859,11 +3016,27 @@
                         <span class="c1"># layers_checked += 1</span>
                         <span class="n">layers_checked_count</span> <span class="o">+=</span> <span class="mi">1</span>
 
+                        <span class="c1"># @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+                        <span class="c1"># Added to Redis set here and commented out the</span>
+                        <span class="c1"># self.layers_checked.append in the try below this</span>
+                        <span class="n">redis_set</span> <span class="o">=</span> <span class="s1">&#39;ionosphere.layers_checked&#39;</span>
+                        <span class="n">data</span> <span class="o">=</span> <span class="n">layers_id</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="n">redis_set</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add </span><span class="si">%s</span><span class="s1"> to Redis set </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">redis_set</span><span class="p">)))</span>
+
                         <span class="c1"># Get the layers algorithms and run then on the timeseries</span>
                         <span class="c1"># @modified 20170307 - Feature #1960: ionosphere_layers</span>
                         <span class="c1"># Use except on everything, remember how fast Skyline can iterate</span>
                         <span class="k">try</span><span class="p">:</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">layers_checked</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">layers_id</span><span class="p">)</span>
+                            <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+                            <span class="c1"># Added to the ionosphere.layers_checked Redis set</span>
+                            <span class="c1"># above</span>
+                            <span class="c1"># self.layers_checked.append(layers_id)</span>
+
                             <span class="c1"># @added 2018075 - Task #2446: Optimize Ionosphere</span>
                             <span class="c1">#                  Branch #2270: luminosity</span>
                             <span class="c1"># not_anomalous = run_layer_algorithms(base_name, layers_id, anomalous_timeseries)</span>
@@ -2922,7 +3095,17 @@
                         <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
                     <span class="k">return</span>
 
-                <span class="bp">self</span><span class="o">.</span><span class="n">anomalous_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+                <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+                <span class="c1"># self.anomalous_metrics.append(base_name)</span>
+                <span class="n">redis_set</span> <span class="o">=</span> <span class="s1">&#39;ionosphere.anomalous_metrics&#39;</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="n">base_name</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="n">redis_set</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add </span><span class="si">%s</span><span class="s1"> to Redis set </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">redis_set</span><span class="p">)))</span>
+
                 <span class="c1"># Send to panorama as Analyzer and Mirage will only alert on the</span>
                 <span class="c1"># anomaly, they will not push it to Panorama</span>
                 <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_ENABLED</span><span class="p">:</span>
@@ -2962,10 +3145,21 @@
                             <span class="n">skyline_app</span><span class="p">,</span> <span class="n">panaroma_anomaly_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span>
                             <span class="n">panaroma_anomaly_data</span><span class="p">)</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;added panorama anomaly file :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">panaroma_anomaly_file</span><span class="p">))</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">sent_to_panorama</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+                        <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+                        <span class="c1"># Moved to the Redis set function below</span>
+                        <span class="c1"># self.sent_to_panorama.append(base_name)</span>
                     <span class="k">except</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add panorama anomaly file :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">panaroma_anomaly_file</span><span class="p">))</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="c1"># @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+                    <span class="n">redis_set</span> <span class="o">=</span> <span class="s1">&#39;ionosphere.sent_to_panorama&#39;</span>
+                    <span class="n">data</span> <span class="o">=</span> <span class="n">base_name</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="n">redis_set</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add </span><span class="si">%s</span><span class="s1"> to Redis set </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">redis_set</span><span class="p">)))</span>
 
             <span class="c1">#     alert ... hmmm the harder part, maybe not all the resources</span>
             <span class="c1">#     are already created, so just determining ALERTS and firing a</span>
@@ -2988,7 +3182,7 @@
                             <span class="c1"># [float(anomalous_value), base_name, int(metric_timestamp), triggered_algorithms, full_duration])</span>
                             <span class="nb">str</span><span class="p">(</span><span class="n">cache_key_value</span><span class="p">))</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                            <span class="s1">&#39;add Redis alert key - </span><span class="si">%s</span><span class="s1"> - [</span><span class="si">%s</span><span class="s1">, </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">]&#39;</span> <span class="o">%</span>
+                            <span class="s1">&#39;add Redis alert key - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>
                             <span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">cache_key_value</span><span class="p">)))</span>
                     <span class="k">except</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
@@ -3012,7 +3206,7 @@
                                 <span class="n">base_name</span><span class="p">))</span>
                         <span class="c1"># modified 20190412 - Task #2824: Test redis-py upgrade</span>
                         <span class="c1">#                     Task #2926: Update dependencies</span>
-                        <span class="c1">#self.redis_conn.sadd(&#39;ionosphere.learn.work&#39;, [&#39;Soft&#39;, str(ionosphere_job), int(metric_timestamp), base_name, None, None])</span>
+                        <span class="c1"># self.redis_conn.sadd(&#39;ionosphere.learn.work&#39;, [&#39;Soft&#39;, str(ionosphere_job), int(metric_timestamp), base_name, None, None])</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="s1">&#39;ionosphere.learn.work&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">([</span><span class="s1">&#39;Soft&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">ionosphere_job</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">),</span> <span class="n">base_name</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]))</span>
                     <span class="k">except</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
@@ -3066,6 +3260,9 @@
                 <span class="k">pass</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;bin/</span><span class="si">%s</span><span class="s1">.d log management done&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
+
+        <span class="c1"># @added 20190524 - Bug #3050: Ionosphere - Skyline and Graphite feedback</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;SKYLINE_FEEDBACK_NAMESPACES is set to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">SKYLINE_FEEDBACK_NAMESPACES</span><span class="p">))</span>
 
         <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
@@ -3294,7 +3491,9 @@
                 <span class="c1"># Flush metrics to Graphite</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">redis_sent_graphite_metrics</span><span class="p">:</span>
                     <span class="k">try</span><span class="p">:</span>
-                        <span class="n">not_anomalous</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">not_anomalous</span><span class="p">))</span>
+                        <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+                        <span class="c1"># not_anomalous = str(len(self.not_anomalous))</span>
+                        <span class="n">not_anomalous</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;ionosphere.not_anomalous&#39;</span><span class="p">))))</span>
                     <span class="k">except</span><span class="p">:</span>
                         <span class="n">not_anomalous</span> <span class="o">=</span> <span class="s1">&#39;0&#39;</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;not_anomalous      :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">not_anomalous</span><span class="p">)</span>
@@ -3302,7 +3501,10 @@
                     <span class="n">send_graphite_metric</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">send_metric_name</span><span class="p">,</span> <span class="n">not_anomalous</span><span class="p">)</span>
 
                     <span class="k">try</span><span class="p">:</span>
-                        <span class="n">total_anomalies</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">anomalous_metrics</span><span class="p">))</span>
+                        <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+                        <span class="c1"># Use Redis set instead of Manager() list</span>
+                        <span class="c1"># total_anomalies = str(len(self.anomalous_metrics))</span>
+                        <span class="n">total_anomalies</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;ionosphere.anomalous_metrics&#39;</span><span class="p">))))</span>
                     <span class="k">except</span><span class="p">:</span>
                         <span class="n">total_anomalies</span> <span class="o">=</span> <span class="s1">&#39;0&#39;</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;total_anomalies    :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">total_anomalies</span><span class="p">)</span>
@@ -3310,7 +3512,9 @@
                     <span class="n">send_graphite_metric</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">send_metric_name</span><span class="p">,</span> <span class="n">total_anomalies</span><span class="p">)</span>
 
                     <span class="k">try</span><span class="p">:</span>
-                        <span class="n">training_metrics</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">training_metrics</span><span class="p">))</span>
+                        <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+                        <span class="c1"># training_metrics = str(len(self.training_metrics))</span>
+                        <span class="n">training_metrics</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;ionosphere.training_metrics&#39;</span><span class="p">))))</span>
                     <span class="k">except</span><span class="p">:</span>
                         <span class="n">training_metrics</span> <span class="o">=</span> <span class="s1">&#39;0&#39;</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;training metrics   :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">training_metrics</span><span class="p">)</span>
@@ -3318,7 +3522,9 @@
                     <span class="n">send_graphite_metric</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">send_metric_name</span><span class="p">,</span> <span class="n">training_metrics</span><span class="p">)</span>
 
                     <span class="k">try</span><span class="p">:</span>
-                        <span class="n">features_profiles_checked</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">features_profiles_checked</span><span class="p">))</span>
+                        <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+                        <span class="c1"># features_profiles_checked = str(len(self.features_profiles_checked))</span>
+                        <span class="n">features_profiles_checked</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;ionosphere.features_profiles_checked&#39;</span><span class="p">))))</span>
                     <span class="k">except</span><span class="p">:</span>
                         <span class="n">features_profiles_checked</span> <span class="o">=</span> <span class="s1">&#39;0&#39;</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fps checked count  :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">features_profiles_checked</span><span class="p">)</span>
@@ -3332,7 +3538,9 @@
                     <span class="k">try</span><span class="p">:</span>
                         <span class="c1"># @modified 20181014 - Feature #2430: Ionosphere validate learnt features profiles page</span>
                         <span class="c1"># layers_checked = str(len(self.layers_checked))</span>
-                        <span class="n">str_layers_checked</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">layers_checked</span><span class="p">))</span>
+                        <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+                        <span class="c1"># str_layers_checked = str(len(self.layers_checked))</span>
+                        <span class="n">str_layers_checked</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;ionosphere.layers_checked&#39;</span><span class="p">))))</span>
                     <span class="k">except</span><span class="p">:</span>
                         <span class="n">str_layers_checked</span> <span class="o">=</span> <span class="s1">&#39;0&#39;</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;layers checked count  :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">str_layers_checked</span><span class="p">)</span>
@@ -3341,7 +3549,9 @@
 
                     <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_ENABLED</span><span class="p">:</span>
                         <span class="k">try</span><span class="p">:</span>
-                            <span class="n">sent_to_panorama</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sent_to_panorama</span><span class="p">))</span>
+                            <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+                            <span class="c1"># sent_to_panorama = str(len(self.sent_to_panorama))</span>
+                            <span class="n">sent_to_panorama</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;ionosphere.sent_to_panorama&#39;</span><span class="p">))))</span>
                         <span class="k">except</span><span class="p">:</span>
                             <span class="n">sent_to_panorama</span> <span class="o">=</span> <span class="s1">&#39;0&#39;</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;sent_to_panorama   :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">sent_to_panorama</span><span class="p">)</span>
@@ -3356,16 +3566,98 @@
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to update Redis key - </span><span class="si">%s</span><span class="s1"> up&#39;</span> <span class="o">%</span> <span class="n">cache_key</span><span class="p">)</span>
 
                     <span class="c1"># Reset lists</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">anomalous_metrics</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[]</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">not_anomalous</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[]</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">features_profiles_checked</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[]</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">training_metrics</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[]</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">sent_to_panorama</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+                    <span class="c1"># Use Redis sets instead of Manager().list()</span>
+                    <span class="c1"># self.anomalous_metrics[:] = []</span>
+                    <span class="c1"># self.not_anomalous[:] = []</span>
+                    <span class="c1"># self.features_profiles_checked[:] = []</span>
+                    <span class="c1"># self.training_metrics[:] = []</span>
+                    <span class="c1"># self.sent_to_panorama[:] = []</span>
+
                     <span class="c1"># @added 20170306 - Feature #1960: ionosphere_layers</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">layers_checked</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+                    <span class="c1"># Use Redis sets instead of Manager().list()</span>
+                    <span class="c1"># self.layers_checked[:] = []</span>
+
+                    <span class="c1"># @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+                    <span class="c1"># Use Redis sets instead of Manager().list()</span>
+                    <span class="n">delete_redis_sets</span> <span class="o">=</span> <span class="p">[</span>
+                        <span class="s1">&#39;ionosphere.anomalous_metrics&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;ionosphere.not_anomalous&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;ionosphere.features_profiles_checked&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;ionosphere.training_metrics&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;ionosphere.sent_to_panorama&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;ionosphere.layers_checked&#39;</span><span class="p">,</span>
+                    <span class="p">]</span>
+                    <span class="k">for</span> <span class="n">i_redis_set</span> <span class="ow">in</span> <span class="n">delete_redis_sets</span><span class="p">:</span>
+                        <span class="n">redis_set_to_delete</span> <span class="o">=</span> <span class="n">i_redis_set</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">redis_set_to_delete</span><span class="p">)</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;deleted Redis set - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">redis_set_to_delete</span><span class="p">)</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to delete Redis set - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">redis_set_to_delete</span><span class="p">)</span>
 
                 <span class="n">ionosphere_job</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="n">learn_job</span> <span class="o">=</span> <span class="kc">False</span>
+
+                <span class="c1"># @added 20190524 - Bug #3050: Ionosphere - Skyline and Graphite feedback</span>
+                <span class="c1"># Do not run checks if the namespace is a declared SKYLINE_FEEDBACK_NAMESPACES</span>
+                <span class="c1"># namespace that has been checked in the last 10 minutes if</span>
+                <span class="c1"># there are multiple checks to do.</span>
+                <span class="n">rate_limit_feedback_metrics</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">if</span> <span class="n">metric_var_files</span><span class="p">:</span>
+                    <span class="n">metric_var_files_sorted</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">metric_var_files</span><span class="p">)</span>
+                    <span class="n">metric_check_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_CHECK_PATH</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_var_files_sorted</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+                    <span class="n">metric_var_files_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">metric_var_files_sorted</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">metric_var_files_count</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
+                        <span class="n">rate_limit_feedback_metrics</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">if</span> <span class="n">rate_limit_feedback_metrics</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">i_metric_check_file</span> <span class="ow">in</span> <span class="n">metric_var_files_sorted</span><span class="p">:</span>
+                        <span class="n">feedback_metric</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="n">check_metric_file_list</span> <span class="o">=</span> <span class="n">i_metric_check_file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]</span>
+                        <span class="n">last_name_element</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">check_metric_file_list</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+                        <span class="n">base_name</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">check_metric_file_list</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">last_name_element</span><span class="p">])</span>
+                        <span class="n">metric_namespace_elements</span> <span class="o">=</span> <span class="n">base_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">to_skip</span> <span class="ow">in</span> <span class="n">SKYLINE_FEEDBACK_NAMESPACES</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">to_skip</span> <span class="ow">in</span> <span class="n">base_name</span><span class="p">:</span>
+                                <span class="n">feedback_metric</span> <span class="o">=</span> <span class="kc">True</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;SKYLINE_FEEDBACK_NAMESPACES matched on to_skip </span><span class="si">%s</span><span class="s1"> in base_name </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">to_skip</span><span class="p">,</span> <span class="n">base_name</span><span class="p">))</span>
+                                <span class="k">break</span>
+                            <span class="n">to_skip_namespace_elements</span> <span class="o">=</span> <span class="n">to_skip</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+                            <span class="n">elements_matched</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">metric_namespace_elements</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">to_skip_namespace_elements</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">elements_matched</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">to_skip_namespace_elements</span><span class="p">):</span>
+                                <span class="n">feedback_metric</span> <span class="o">=</span> <span class="kc">True</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;SKYLINE_FEEDBACK_NAMESPACES matched elements in </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
+                                <span class="k">break</span>
+                        <span class="k">if</span> <span class="n">feedback_metric</span><span class="p">:</span>
+                            <span class="n">remove_feedback_metric_check</span> <span class="o">=</span> <span class="kc">False</span>
+                            <span class="k">if</span> <span class="n">metric_var_files_count</span> <span class="o">&gt;</span> <span class="mi">4</span><span class="p">:</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;rate limiting feedback metric, removing check for </span><span class="si">%s</span><span class="s1"> as Ionosphere has </span><span class="si">%s</span><span class="s1"> pending checks, not checking feedback metric&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                    <span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_var_files_count</span><span class="p">)))</span>
+                                <span class="n">remove_feedback_metric_check</span> <span class="o">=</span> <span class="kc">True</span>
+                            <span class="n">cache_key</span> <span class="o">=</span> <span class="s1">&#39;ionosphere.feedback_metric.checked.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+                            <span class="n">check_done</span> <span class="o">=</span> <span class="kc">False</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="n">check_done</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span>
+                            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not query Redis for cache_key: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="ow">not</span> <span class="n">check_done</span><span class="p">:</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;not removing feedback metric as no check has been done in last 600 seconds on </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;rate limiting feedback metric, removing check as </span><span class="si">%s</span><span class="s1"> has been checked in the last 600 seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                    <span class="n">base_name</span><span class="p">))</span>
+                                <span class="n">remove_feedback_metric_check</span> <span class="o">=</span> <span class="kc">True</span>
+                            <span class="k">if</span> <span class="n">remove_feedback_metric_check</span><span class="p">:</span>
+                                <span class="n">metric_check_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_CHECK_PATH</span><span class="p">,</span> <span class="n">i_metric_check_file</span><span class="p">)</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">remove_metric_check_file</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+                    <span class="c1"># Determine metric_var_files after possible feedback metric removals</span>
+                    <span class="n">metric_var_files</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">metric_var_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">listdir</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_CHECK_PATH</span><span class="p">)</span> <span class="k">if</span> <span class="n">isfile</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_CHECK_PATH</span><span class="p">,</span> <span class="n">f</span><span class="p">))]</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to list files in check dir&#39;</span><span class="p">)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
 
                 <span class="k">if</span> <span class="n">metric_var_files</span><span class="p">:</span>
                     <span class="n">ionosphere_job</span> <span class="o">=</span> <span class="kc">True</span>
@@ -3406,6 +3698,15 @@
                 <span class="c1"># Added a count of the number of checks to be done</span>
                 <span class="n">metric_var_files_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">metric_var_files</span><span class="p">)</span>
 
+                <span class="c1"># If there are more than 4 metric check files set Ionosphere to</span>
+                <span class="c1"># busy so that Ionosphere alternates between checking the normal</span>
+                <span class="c1"># Ionosphere Mirage features profiles and the Ionosphere echo</span>
+                <span class="c1"># features profiles on subsequent checks of a metric so that</span>
+                <span class="c1"># when Ionosphere is busy it is not checking both sets of</span>
+                <span class="c1"># features profiles on every run.</span>
+                <span class="k">if</span> <span class="n">metric_var_files_count</span> <span class="o">&gt;</span> <span class="mi">4</span><span class="p">:</span>
+                    <span class="n">ionosphere_busy</span> <span class="o">=</span> <span class="kc">True</span>
+
             <span class="c1"># @added 20170108 - Feature #1830: Ionosphere alerts</span>
             <span class="c1"># Adding lists of smtp_alerter_metrics and ionosphere_non_smtp_alerter_metrics</span>
             <span class="c1"># Timed this takes 0.013319 seconds on 689 unique_metrics</span>
@@ -3416,6 +3717,33 @@
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not get the unique_metrics list from Redis&#39;</span><span class="p">)</span>
                 <span class="n">unique_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="c1"># @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+            <span class="c1"># The Redis analyzer.smtp_alerter_metrics list is created here to</span>
+            <span class="c1"># replace the self.ionosphere_smtp_alerter_metrics Manager.list in the below</span>
+            <span class="c1"># section</span>
+            <span class="n">ionosphere_smtp_alerter_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">ionosphere_smtp_alerter_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;ionosphere.ionosphere_smtp_alerter_metrics&#39;</span><span class="p">))</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to generate a list from the ionosphere_smtp_alerter_metrics Redis set&#39;</span><span class="p">)</span>
+                <span class="n">ionosphere_smtp_alerter_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">redis_sets_to_rename</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="s1">&#39;ionosphere.ionosphere_smtp_alerter_metrics&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;ionosphere.ionosphere_non_smtp_alerter_metrics&#39;</span>
+            <span class="p">]</span>
+            <span class="k">for</span> <span class="n">current_redis_set</span> <span class="ow">in</span> <span class="n">redis_sets_to_rename</span><span class="p">:</span>
+                <span class="n">new_redis_set</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.old&#39;</span> <span class="o">%</span> <span class="n">current_redis_set</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">current_redis_set</span><span class="p">,</span> <span class="n">new_redis_set</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;no such key&#39;</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;could not rename Redis set </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">current_redis_set</span><span class="p">,</span> <span class="n">new_redis_set</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not rename Redis set </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">current_redis_set</span><span class="p">,</span> <span class="n">new_redis_set</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
 
             <span class="k">for</span> <span class="n">metric_name</span> <span class="ow">in</span> <span class="n">unique_metrics</span><span class="p">:</span>
                 <span class="n">base_name</span> <span class="o">=</span> <span class="n">metric_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
@@ -3431,22 +3759,74 @@
                             <span class="n">pattern_match</span> <span class="o">=</span> <span class="n">alert_match_pattern</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">METRIC_PATTERN</span><span class="p">)</span>
                             <span class="k">if</span> <span class="n">pattern_match</span><span class="p">:</span>
                                 <span class="n">pattern_match</span> <span class="o">=</span> <span class="kc">True</span>
-                                <span class="k">if</span> <span class="n">base_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ionosphere_smtp_alerter_metrics</span><span class="p">:</span>
-                                    <span class="bp">self</span><span class="o">.</span><span class="n">ionosphere_smtp_alerter_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+                                <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+                                <span class="c1"># if base_name not in self.ionosphere_smtp_alerter_metrics:</span>
+                                <span class="k">if</span> <span class="n">base_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ionosphere_smtp_alerter_metrics</span><span class="p">:</span>
+                                    <span class="c1"># self.ionosphere_smtp_alerter_metrics.append(base_name)</span>
+                                    <span class="n">redis_set</span> <span class="o">=</span> <span class="s1">&#39;ionosphere.ionosphere_smtp_alerter_metrics&#39;</span>
+                                    <span class="n">data</span> <span class="o">=</span> <span class="n">base_name</span>
+                                    <span class="k">try</span><span class="p">:</span>
+                                        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="n">redis_set</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+                                    <span class="k">except</span><span class="p">:</span>
+                                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add </span><span class="si">%s</span><span class="s1"> to Redis set </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                            <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">redis_set</span><span class="p">)))</span>
                         <span class="k">except</span><span class="p">:</span>
                             <span class="n">pattern_match</span> <span class="o">=</span> <span class="kc">False</span>
 
                         <span class="k">if</span> <span class="ow">not</span> <span class="n">pattern_match</span><span class="p">:</span>
                             <span class="c1"># Match by substring</span>
                             <span class="k">if</span> <span class="n">alert</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">base_name</span><span class="p">:</span>
-                                <span class="k">if</span> <span class="n">base_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ionosphere_smtp_alerter_metrics</span><span class="p">:</span>
-                                    <span class="bp">self</span><span class="o">.</span><span class="n">ionosphere_smtp_alerter_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+                                <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+                                <span class="c1"># if base_name not in self.ionosphere_smtp_alerter_metrics:</span>
+                                <span class="c1">#     self.ionosphere_smtp_alerter_metrics.append(base_name)</span>
+                                <span class="k">if</span> <span class="n">base_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ionosphere_smtp_alerter_metrics</span><span class="p">:</span>
+                                    <span class="n">redis_set</span> <span class="o">=</span> <span class="s1">&#39;ionosphere.ionosphere_smtp_alerter_metrics&#39;</span>
+                                    <span class="n">data</span> <span class="o">=</span> <span class="n">base_name</span>
+                                    <span class="k">try</span><span class="p">:</span>
+                                        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="n">redis_set</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+                                    <span class="k">except</span><span class="p">:</span>
+                                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add </span><span class="si">%s</span><span class="s1"> to Redis set </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                            <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">redis_set</span><span class="p">)))</span>
 
-                <span class="k">if</span> <span class="n">base_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ionosphere_smtp_alerter_metrics</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">base_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ionosphere_smtp_alerter_metrics</span><span class="p">:</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">ionosphere_non_smtp_alerter_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;smtp_alerter_metrics     :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ionosphere_smtp_alerter_metrics</span><span class="p">)))</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ionosphere_non_smtp_alerter_metrics :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ionosphere_non_smtp_alerter_metrics</span><span class="p">)))</span>
+                <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+                <span class="c1"># if base_name not in self.ionosphere_smtp_alerter_metrics:</span>
+                <span class="c1">#     if base_name not in self.ionosphere_smtp_alerter_metrics:</span>
+                <span class="c1">#         self.ionosphere_non_smtp_alerter_metrics.append(base_name)</span>
+                <span class="k">if</span> <span class="n">base_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ionosphere_smtp_alerter_metrics</span><span class="p">:</span>
+                    <span class="n">redis_set</span> <span class="o">=</span> <span class="s1">&#39;ionosphere.ionosphere_non_smtp_alerter_metrics&#39;</span>
+                    <span class="n">data</span> <span class="o">=</span> <span class="n">base_name</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="n">redis_set</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add </span><span class="si">%s</span><span class="s1"> to Redis set </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">redis_set</span><span class="p">)))</span>
+
+            <span class="c1"># @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+            <span class="c1"># The Redis lists are used here to replace the self.ionosphere_</span>
+            <span class="c1"># Manager().list()</span>
+            <span class="n">ionosphere_smtp_alerter_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">ionosphere_smtp_alerter_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;ionosphere.ionosphere_smtp_alerter_metrics&#39;</span><span class="p">))</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to generate a list from the ionosphere_smtp_alerter_metrics Redis set&#39;</span><span class="p">)</span>
+                <span class="n">ionosphere_smtp_alerter_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">ionosphere_non_smtp_alerter_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">ionosphere_non_smtp_alerter_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;ionosphere.ionosphere_non_smtp_alerter_metrics&#39;</span><span class="p">))</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to generate a list from the ionosphere_non_smtp_alerter_metrics Redis set&#39;</span><span class="p">)</span>
+                <span class="n">ionosphere_non_smtp_alerter_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+            <span class="c1"># logger.info(&#39;smtp_alerter_metrics     :: %s&#39; % str(len(self.ionosphere_smtp_alerter_metrics)))</span>
+            <span class="c1"># logger.info(&#39;ionosphere_non_smtp_alerter_metrics :: %s&#39; % str(len(self.ionosphere_non_smtp_alerter_metrics)))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;smtp_alerter_metrics     :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ionosphere_smtp_alerter_metrics</span><span class="p">)))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ionosphere_non_smtp_alerter_metrics :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ionosphere_non_smtp_alerter_metrics</span><span class="p">)))</span>
 
             <span class="k">if</span> <span class="n">ionosphere_job</span><span class="p">:</span>
 
@@ -3467,6 +3847,22 @@
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
                         <span class="s1">&#39;not running process_ionosphere_echo as there are </span><span class="si">%s</span><span class="s1"> metric check files to be checked&#39;</span> <span class="o">%</span> <span class="p">(</span>
                             <span class="nb">str</span><span class="p">(</span><span class="n">metric_var_files_count</span><span class="p">)))</span>
+
+                <span class="c1"># @added 20190527 - Feature #2484: FULL_DURATION feature profiles</span>
+                <span class="c1">#                   Branch #3002: docker</span>
+                <span class="c1"># Only process if there is a ionosphere.unique_metrics Redis set</span>
+                <span class="k">if</span> <span class="n">run_process_ionosphere_echo</span><span class="p">:</span>
+                    <span class="n">ionosphere_unique_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">ionosphere_unique_metrics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;ionosphere.unique_metrics&#39;</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get Redis smembers ionosphere.unique_metrics&#39;</span><span class="p">)</span>
+                        <span class="n">ionosphere_unique_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="c1"># @added 20190527 - Feature #2484: FULL_DURATION feature profiles</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">ionosphere_unique_metrics</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;there are metrics in the Redis ionosphere.unique_metrics set, skipping process_ionosphere_echo&#39;</span><span class="p">)</span>
+
                 <span class="c1"># If there are more than 4 metric check files set Ionosphere to</span>
                 <span class="c1"># busy so that Ionosphere alternates between checking the normal</span>
                 <span class="c1"># Ionosphere Mirage features profiles and the Ionosphere echo</span>
@@ -3483,14 +3879,14 @@
                     <span class="n">spawned_pids</span> <span class="o">=</span> <span class="p">[]</span>
                     <span class="n">pid_count</span> <span class="o">=</span> <span class="mi">0</span>
                     <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
-                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">ionosphere_processes</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">IONOSPHERE_PROCESSES</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
                         <span class="k">try</span><span class="p">:</span>
                             <span class="n">p</span> <span class="o">=</span> <span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">process_ionosphere_echo</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">metric_check_file</span><span class="p">))</span>
                             <span class="n">pids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
                             <span class="n">pid_count</span> <span class="o">+=</span> <span class="mi">1</span>
                             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
                                 <span class="s1">&#39;starting </span><span class="si">%s</span><span class="s1"> of </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                    <span class="nb">str</span><span class="p">(</span><span class="n">pid_count</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">ionosphere_processes</span><span class="p">),</span>
+                                    <span class="nb">str</span><span class="p">(</span><span class="n">pid_count</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">IONOSPHERE_PROCESSES</span><span class="p">),</span>
                                     <span class="n">function_name</span><span class="p">))</span>
                             <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
                             <span class="n">spawned_pids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
@@ -3514,7 +3910,7 @@
                             <span class="n">time_to_run</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">p_starts</span>
                             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
                                 <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> completed in </span><span class="si">%.2f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                                    <span class="nb">str</span><span class="p">(</span><span class="n">ionosphere_processes</span><span class="p">),</span>
+                                    <span class="nb">str</span><span class="p">(</span><span class="n">IONOSPHERE_PROCESSES</span><span class="p">),</span>
                                     <span class="n">function_name</span><span class="p">,</span> <span class="n">time_to_run</span><span class="p">))</span>
                             <span class="k">break</span>
                     <span class="k">else</span><span class="p">:</span>
@@ -3553,7 +3949,7 @@
             <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
             <span class="c1"># @modified 20180819 - Task #2526: Hard code IONOSPHERE_PROCESSES to 1</span>
             <span class="c1"># for i in range(1, settings.IONOSPHERE_PROCESSES + 1):</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">ionosphere_processes</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">IONOSPHERE_PROCESSES</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
                 <span class="k">if</span> <span class="n">ionosphere_job</span><span class="p">:</span>
                     <span class="k">try</span><span class="p">:</span>
                         <span class="c1"># @modified 20190404 - Bug #2904: Initial Ionosphere echo load and Ionosphere feedback</span>
@@ -3573,7 +3969,7 @@
                                 <span class="nb">str</span><span class="p">(</span><span class="n">pid_count</span><span class="p">),</span>
                                 <span class="c1"># @modified 20180819 - Task #2526: Hard code IONOSPHERE_PROCESSES to 1</span>
                                 <span class="c1"># str(settings.IONOSPHERE_PROCESSES),</span>
-                                <span class="nb">str</span><span class="p">(</span><span class="n">ionosphere_processes</span><span class="p">),</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">IONOSPHERE_PROCESSES</span><span class="p">),</span>
                                 <span class="n">function_name</span><span class="p">))</span>
                         <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
                         <span class="n">spawned_pids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
@@ -3593,7 +3989,7 @@
                                 <span class="nb">str</span><span class="p">(</span><span class="n">pid_count</span><span class="p">),</span>
                                 <span class="c1"># @modified 20180819 - Task #2526: Hard code IONOSPHERE_PROCESSES to 1</span>
                                 <span class="c1"># str(settings.IONOSPHERE_PROCESSES),</span>
-                                <span class="nb">str</span><span class="p">(</span><span class="n">ionosphere_processes</span><span class="p">),</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">IONOSPHERE_PROCESSES</span><span class="p">),</span>
                                 <span class="n">function_name</span><span class="p">))</span>
                         <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
                         <span class="n">spawned_pids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
@@ -3626,7 +4022,7 @@
                         <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> completed in </span><span class="si">%.2f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
                             <span class="c1"># @modified 20180819 - Task #2526: Hard code IONOSPHERE_PROCESSES to 1</span>
                             <span class="c1"># str(settings.IONOSPHERE_PROCESSES),</span>
-                            <span class="nb">str</span><span class="p">(</span><span class="n">ionosphere_processes</span><span class="p">),</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">IONOSPHERE_PROCESSES</span><span class="p">),</span>
                             <span class="n">function_name</span><span class="p">,</span> <span class="n">time_to_run</span><span class="p">))</span>
                     <span class="k">break</span>
             <span class="k">else</span><span class="p">:</span>
@@ -3669,8 +4065,28 @@
             <span class="c1"># @added 20170108 - Feature #1830: Ionosphere alerts</span>
             <span class="c1"># Reset added lists of ionospehere_smtp_alerter_metrics and</span>
             <span class="c1"># ionosphere_non_smtp_alerter_metrics</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">ionosphere_smtp_alerter_metrics</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">ionosphere_non_smtp_alerter_metrics</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[]</span></div></div>
+            <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+            <span class="c1"># self.ionosphere_smtp_alerter_metrics[:] = []</span>
+            <span class="c1"># self.ionosphere_non_smtp_alerter_metrics[:] = []</span>
+
+            <span class="c1"># @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+            <span class="c1"># Use Redis sets instead of Manager().list()</span>
+            <span class="c1"># delete_redis_sets = [</span>
+            <span class="c1">#     &#39;ionosphere.ionosphere_smtp_alerter_metrics&#39;,</span>
+            <span class="c1">#     &#39;ionosphere.ionosphere_non_smtp_alerter_metrics&#39;,</span>
+            <span class="c1"># ]</span>
+            <span class="n">delete_redis_sets</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="s1">&#39;ionosphere.ionosphere_smtp_alerter_metrics.old&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;ionosphere.ionosphere_non_smtp_alerter_metrics.old&#39;</span><span class="p">,</span>
+            <span class="p">]</span>
+            <span class="k">for</span> <span class="n">i_redis_set</span> <span class="ow">in</span> <span class="n">delete_redis_sets</span><span class="p">:</span>
+                <span class="n">redis_set_to_delete</span> <span class="o">=</span> <span class="n">i_redis_set</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">redis_set_to_delete</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;deleted Redis set - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">redis_set_to_delete</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to delete Redis set - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">redis_set_to_delete</span><span class="p">)</span></div></div>
 </pre></div>
 
            </div>
@@ -3704,7 +4120,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.2.14',
+            VERSION:'1.3.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

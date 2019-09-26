@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>webapp.ionosphere_backend &mdash; Skyline 1.2.14 documentation</title>
+  <title>webapp.ionosphere_backend &mdash; Skyline 1.3.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.2.14 documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.3.0 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                1.2
+                1.3
               </div>
             
           
@@ -94,6 +94,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../docker.html">docker - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../analyzer.html">Analyzer</a></li>
@@ -107,7 +109,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../../ionosphere_echo.html">Ionosphere echo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
@@ -203,6 +208,7 @@
 <span class="c1"># from skyline_functions import (</span>
 <span class="c1">#    RepresentsInt, mkdir_p, write_data_to_file, get_graphite_metric)</span>
 <span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="p">(</span><span class="n">mkdir_p</span><span class="p">,</span> <span class="n">get_graphite_metric</span><span class="p">,</span> <span class="n">write_data_to_file</span><span class="p">)</span>
+
 <span class="c1"># from tsfresh_feature_names import TSFRESH_FEATURES</span>
 
 <span class="kn">from</span> <span class="nn">database</span> <span class="k">import</span> <span class="p">(</span>
@@ -212,8 +218,12 @@
     <span class="n">ionosphere_layers_table_meta</span><span class="p">,</span> <span class="n">layers_algorithms_table_meta</span><span class="p">,</span>
     <span class="c1"># @added 20170307 - Feature #1960: ionosphere_layers</span>
     <span class="c1"># To present matched layers Graphite graphs</span>
-    <span class="n">ionosphere_layers_matched_table_meta</span>
+    <span class="n">ionosphere_layers_matched_table_meta</span><span class="p">,</span>
+    <span class="c1"># @added 20190502 - Branch #2646: slack</span>
+    <span class="n">anomalies_table_meta</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="c1"># @added 20190502 - Branch #2646: slack</span>
+<span class="kn">from</span> <span class="nn">slack_functions</span> <span class="k">import</span> <span class="n">slack_post_message</span><span class="p">,</span> <span class="n">slack_post_reaction</span>
 
 <span class="n">skyline_version</span> <span class="o">=</span> <span class="n">skyline_version</span><span class="o">.</span><span class="n">__absolute_version__</span>
 <span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;webapp&#39;</span>
@@ -234,6 +244,32 @@
 
 <span class="n">full_duration_in_hours</span> <span class="o">=</span> <span class="n">full_duration_seconds</span> <span class="o">/</span> <span class="mi">60</span> <span class="o">/</span> <span class="mi">60</span>
 <span class="n">exclude_redis_json</span> <span class="o">=</span> <span class="s1">&#39;redis.</span><span class="si">%s</span><span class="s1">h.json&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">full_duration_in_hours</span><span class="p">))</span>
+
+<span class="c1"># @added 20190502 - Branch #2646: slack</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">SLACK_ENABLED</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SLACK_ENABLED</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">SLACK_ENABLED</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">slack_thread_updates</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SLACK_OPTS</span><span class="p">[</span><span class="s1">&#39;thread_updates&#39;</span><span class="p">]</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">slack_thread_updates</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="k">if</span> <span class="n">slack_thread_updates</span> <span class="ow">and</span> <span class="n">SLACK_ENABLED</span><span class="p">:</span>
+    <span class="n">update_slack_thread</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="n">update_slack_thread</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="k">if</span> <span class="n">update_slack_thread</span><span class="p">:</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">channel</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SLACK_OPTS</span><span class="p">[</span><span class="s1">&#39;default_channel&#39;</span><span class="p">]</span>
+        <span class="n">channel_id</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SLACK_OPTS</span><span class="p">[</span><span class="s1">&#39;default_channel_id&#39;</span><span class="p">]</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">channel</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">channel_id</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">throw_exception_on_default_channel</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">channel</span> <span class="o">==</span> <span class="s1">&#39;YOUR_default_slack_channel&#39;</span><span class="p">:</span>
+        <span class="n">throw_exception_on_default_channel</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="n">channel_id</span> <span class="o">==</span> <span class="s1">&#39;YOUR_default_slack_channel_id&#39;</span><span class="p">:</span>
+        <span class="n">throw_exception_on_default_channel</span> <span class="o">=</span> <span class="kc">True</span>
 
 
 <div class="viewcode-block" id="ionosphere_get_metrics_dir"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.ionosphere_backend.ionosphere_get_metrics_dir">[docs]</a><span class="k">def</span> <span class="nf">ionosphere_get_metrics_dir</span><span class="p">(</span><span class="n">requested_timestamp</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
@@ -702,12 +738,16 @@
                 <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
                     <span class="n">ts_json</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
             <span class="n">ts_json_ok</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="k">with</span> <span class="nb">open</span><span class="p">((</span><span class="n">ts_json_file</span><span class="p">),</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">raw_timeseries</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            <span class="n">timeseries_array_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">raw_timeseries</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">,</span> <span class="s1">&#39;[&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;)&#39;</span><span class="p">,</span> <span class="s1">&#39;]&#39;</span><span class="p">)</span>
+            <span class="n">ts_json</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">timeseries_array_str</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">ts_json_ok</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="c1"># @added 20190314 - Bug #2870: webapp incorrectly reporting no timeseries json file</span>
             <span class="n">ts_json</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;error: could not read the time series from the json file&#39;</span><span class="p">,</span> <span class="n">ts_json_file</span><span class="p">]</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not read the time series from the json file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">ts_json_file</span><span class="p">))</span>
-
     <span class="k">else</span><span class="p">:</span>
         <span class="c1"># @added 20190314 - Bug #2870: webapp incorrectly reporting no timeseries json file</span>
         <span class="n">ts_json</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;error: no timeseries json file&#39;</span><span class="p">,</span> <span class="n">ts_json_file</span><span class="p">]</span>
@@ -809,6 +849,17 @@
     <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/panorama?metric=</span><span class="si">%s</span><span class="s1">&amp;from_timestamp=</span><span class="si">%s</span><span class="s1">&amp;until_timestamp=</span><span class="si">%s</span><span class="s1">&amp;panorama_anomaly_id=true&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_URL</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">grace_from_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">grace_until_timestamp</span><span class="p">))</span>
     <span class="n">panorama_resp</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;getting anomaly id from panorama: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">url</span><span class="p">))</span>
+
+    <span class="c1"># @added 20190519 - Branch #3002: docker</span>
+    <span class="c1"># Handle self signed certificate on Docker</span>
+    <span class="n">verify_ssl</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">running_on_docker</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">DOCKER</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">running_on_docker</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">running_on_docker</span><span class="p">:</span>
+        <span class="n">verify_ssl</span> <span class="o">=</span> <span class="kc">False</span>
+
     <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">WEBAPP_AUTH_ENABLED</span><span class="p">:</span>
         <span class="n">user</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">WEBAPP_AUTH_USER</span><span class="p">)</span>
         <span class="n">password</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">WEBAPP_AUTH_USER_PASSWORD</span><span class="p">)</span>
@@ -816,11 +867,17 @@
         <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">WEBAPP_AUTH_ENABLED</span><span class="p">:</span>
             <span class="c1"># @modified 20181106 - Bug #2668: Increase timeout on requests panorama id</span>
             <span class="c1"># r = requests.get(url, timeout=2, auth=(user, password))</span>
-            <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_READ_TIMEOUT</span><span class="p">,</span> <span class="n">auth</span><span class="o">=</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">password</span><span class="p">))</span>
+            <span class="c1"># @modified 20190519 - Branch #3002: docker</span>
+            <span class="c1"># Handle self signed certificate on Docker</span>
+            <span class="c1"># r = requests.get(url, timeout=settings.GRAPHITE_READ_TIMEOUT, auth=(user, password))</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_READ_TIMEOUT</span><span class="p">,</span> <span class="n">auth</span><span class="o">=</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">password</span><span class="p">),</span> <span class="n">verify</span><span class="o">=</span><span class="n">verify_ssl</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># @modified 20181106 - Bug #2668: Increase timeout on requests panorama id</span>
             <span class="c1"># r = requests.get(url, timeout=2)</span>
-            <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_READ_TIMEOUT</span><span class="p">)</span>
+            <span class="c1"># @modified 20190519 - Branch #3002: docker</span>
+            <span class="c1"># Handle self signed certificate on Docker</span>
+            <span class="c1"># r = requests.get(url, timeout=settings.GRAPHITE_READ_TIMEOUT)</span>
+            <span class="n">r</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_READ_TIMEOUT</span><span class="p">,</span> <span class="n">verify</span><span class="o">=</span><span class="n">verify_ssl</span><span class="p">)</span>
         <span class="n">panorama_resp</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
@@ -956,7 +1013,6 @@
             <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
                 <span class="n">matched_timestamp</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;metric_timestamp&#39;</span><span class="p">]</span>
                 <span class="n">matched_timestamps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">matched_timestamp</span><span class="p">))</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;found matched_timestamp </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">matched_timestamp</span><span class="p">)))</span>
             <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
@@ -1267,6 +1323,9 @@
         <span class="n">validated</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;validated&#39;</span><span class="p">]</span>
         <span class="c1"># @added 20170305 - Feature #1960: ionosphere_layers</span>
         <span class="n">layers_id</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;layers_id&#39;</span><span class="p">]</span>
+        <span class="c1"># @added 20190922 - Feature #2516: Add label to features profile</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;label&#39;</span><span class="p">]</span>
+
         <span class="n">fp_details</span> <span class="o">=</span> <span class="s1">&#39;&#39;&#39;</span>
 <span class="s1">tsfresh_version   :: </span><span class="si">%s</span><span class="s1"> | calc_time :: </span><span class="si">%s</span><span class="s1"></span>
 <span class="s1">features_count    :: </span><span class="si">%s</span><span class="s1"></span>
@@ -1679,14 +1738,14 @@
         <span class="k">if</span> <span class="n">metric_like_str</span> <span class="o">!=</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
             <span class="c1"># SQLAlchemy requires the MySQL wildcard % to be %% to prevent</span>
             <span class="c1"># interpreting the % as a printf-like format character</span>
-            <span class="n">python_escaped_metric_like</span> <span class="o">=</span> <span class="n">metric_like_str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;%&#39;</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%%</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="c1"># python_escaped_metric_like = metric_like_str.replace(&#39;%&#39;, &#39;%%&#39;)</span>
             <span class="c1"># @modified 20190116 - Mutliple SQL Injection Security Vulnerabilities #86</span>
             <span class="c1">#                      Bug #2818: Mutliple SQL Injection Security Vulnerabilities</span>
             <span class="c1"># Change the query</span>
             <span class="c1"># nosec to exclude from bandit tests</span>
             <span class="c1"># metrics_like_query = &#39;SELECT id FROM metrics WHERE metric LIKE \&#39;%s\&#39;&#39; % (str(python_escaped_metric_like))  # nosec</span>
             <span class="c1"># logger.info(&#39;executing metrics_like_query - %s&#39; % metrics_like_query)</span>
-            <span class="n">like_string_var</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_like_str</span><span class="p">)</span>
+            <span class="c1"># like_string_var = str(metric_like_str)</span>
             <span class="n">metrics_like_query</span> <span class="o">=</span> <span class="n">text</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;SELECT id FROM metrics WHERE metric LIKE :like_string&quot;&quot;&quot;</span><span class="p">)</span>
             <span class="n">metric_ids</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
             <span class="k">try</span><span class="p">:</span>
@@ -2149,7 +2208,12 @@
         <span class="c1"># @modified 20170912 - Feature #2056: ionosphere - disabled_features_profiles</span>
         <span class="c1"># enabled_list = None</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">enabled_list</span><span class="p">:</span>
-            <span class="n">enabled_list</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="c1"># @modified 20190816 - Bug #3190: webapp error - search_features_profiles_block when all features profiles are disabled</span>
+            <span class="c1"># If all features profiles have been disabled this needs to be</span>
+            <span class="c1"># passed as a empty list to be iterated in search_features_profiles</span>
+            <span class="c1"># template because type &#39;NoneType&#39; is not iterable</span>
+            <span class="c1"># enabled_list = None</span>
+            <span class="n">enabled_list</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">tsfresh_version_list</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">generation_list</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
@@ -2264,6 +2328,7 @@
         <span class="c1"># @modified 20170317 - Feature #1960: ionosphere_layers - allow for floats</span>
         <span class="c1"># test_d_boundary_limit = int(d_boundary_limit) + 1</span>
         <span class="n">test_d_boundary_limit</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">d_boundary_limit</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;d_boundary_limit tested OK with </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">test_d_boundary_limit</span><span class="p">))</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
@@ -2280,6 +2345,7 @@
         <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">layers_algorithms</span><span class="p">,</span> <span class="n">layers_added</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">test_d_boundary_times</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">d_boundary_times</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;d_boundary_times tested OK with </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">test_d_boundary_times</span><span class="p">))</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
@@ -2311,6 +2377,7 @@
             <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">layers_algorithms</span><span class="p">,</span> <span class="n">layers_added</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">test_d1_boundary_limit</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">d1_boundary_limit</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;d1_boundary_limit tested OK with </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">test_d1_boundary_limit</span><span class="p">))</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
@@ -2324,6 +2391,7 @@
             <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">layers_algorithms</span><span class="p">,</span> <span class="n">layers_added</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">test_d1_boundary_times</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">d1_boundary_times</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;d1_boundary_times tested OK with </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">test_d1_boundary_times</span><span class="p">))</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
@@ -2353,6 +2421,7 @@
         <span class="c1"># @modified 20170317 - Feature #1960: ionosphere_layers - allow for floats</span>
         <span class="c1"># test_e_boundary_limit = int(e_boundary_limit) + 1</span>
         <span class="n">test_e_boundary_limit</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">e_boundary_limit</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;test_e_boundary_limit tested OK with </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">test_e_boundary_limit</span><span class="p">))</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
@@ -2368,6 +2437,7 @@
 
     <span class="k">try</span><span class="p">:</span>
         <span class="n">test_e_boundary_times</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">e_boundary_times</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;test_e_boundary_times tested OK with </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">test_e_boundary_times</span><span class="p">))</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
@@ -2740,6 +2810,8 @@
 
     <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
         <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+
+    <span class="c1"># @added 20190502 -</span>
 
     <span class="k">return</span> <span class="n">new_layer_id</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">layers_added</span><span class="p">,</span> <span class="n">new_layer_algorithm_ids</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span></div>
 
@@ -3196,6 +3268,7 @@
 
     <span class="k">try</span><span class="p">:</span>
         <span class="n">test_d_boundary_limit</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">d_boundary_limit</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;test_d_boundary_limit tested OK with </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">test_d_boundary_limit</span><span class="p">))</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
@@ -3210,6 +3283,7 @@
         <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">test_d_boundary_times</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">d_boundary_times</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;test_d_boundary_times tested OK with </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">test_d_boundary_times</span><span class="p">))</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
@@ -3240,6 +3314,7 @@
             <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">test_d1_boundary_limit</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">d1_boundary_limit</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;test_d1_boundary_limit tested OK with </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">test_d1_boundary_limit</span><span class="p">))</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
@@ -3253,6 +3328,7 @@
             <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">test_d1_boundary_times</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">d1_boundary_times</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;test_d1_boundary_times tested OK with </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">test_d1_boundary_times</span><span class="p">))</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
@@ -3280,6 +3356,7 @@
 
     <span class="k">try</span><span class="p">:</span>
         <span class="n">test_e_boundary_limit</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">e_boundary_limit</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;test_e_boundary_limit tested OK with </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">test_e_boundary_limit</span><span class="p">))</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
@@ -3295,6 +3372,7 @@
 
     <span class="k">try</span><span class="p">:</span>
         <span class="n">test_e_boundary_times</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">e_boundary_times</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;test_e_boundary_times tested OK with </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">test_e_boundary_times</span><span class="p">))</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
@@ -3302,9 +3380,9 @@
         <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span>
 
     <span class="c1"># NOT IMPLEMENTED YET</span>
-    <span class="n">es_layer</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="n">f1_layer</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="n">f2_layer</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="c1"># es_layer = False</span>
+    <span class="c1"># f1_layer = False</span>
+    <span class="c1"># f2_layer = False</span>
 
     <span class="n">update_label</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">if</span> <span class="s1">&#39;fp_layer_label&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
@@ -3475,7 +3553,12 @@
 <span class="c1"># Extended the validate_fp function to validate a single fp id or all the unvalidated,</span>
 <span class="c1"># enabled features profiles for a metric_id</span>
 <span class="c1"># def validate_fp(fp_id):</span>
-<div class="viewcode-block" id="validate_fp"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.ionosphere_backend.validate_fp">[docs]</a><span class="k">def</span> <span class="nf">validate_fp</span><span class="p">(</span><span class="n">update_id</span><span class="p">,</span> <span class="n">id_column_name</span><span class="p">):</span>
+<span class="c1"># @modified 20190919 - Feature #3230: users DB table</span>
+<span class="c1">#                      Ideas #2476: Label and relate anomalies</span>
+<span class="c1">#                      Feature #2516: Add label to features profile</span>
+<span class="c1"># Added user</span>
+<span class="c1"># def validate_fp(update_id, id_column_name):</span>
+<div class="viewcode-block" id="validate_fp"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.ionosphere_backend.validate_fp">[docs]</a><span class="k">def</span> <span class="nf">validate_fp</span><span class="p">(</span><span class="n">update_id</span><span class="p">,</span> <span class="n">id_column_name</span><span class="p">,</span> <span class="n">user_id</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Validate a single features profile or validate all enabled, unvalidated</span>
 <span class="sd">    features profiles for a metric_id.</span>
@@ -3483,8 +3566,10 @@
 <span class="sd">    :param update_id: the features profile id or metric_id to validate</span>
 <span class="sd">    :type update_id: int</span>
 <span class="sd">    :param id_column_name: the column name to select where on, e.g. id or metric_id</span>
-<span class="sd">    :type where: str</span>
-
+<span class="sd">    :param user_id: the user id of the user that is validating</span>
+<span class="sd">    :type update_id: int</span>
+<span class="sd">    :type id_column_name: str</span>
+<span class="sd">    :type user_id: int</span>
 <span class="sd">    :return: tuple</span>
 <span class="sd">    :rtype:  (boolean, str, str)</span>
 
@@ -3543,14 +3628,18 @@
         <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
         <span class="c1"># @modified 20181013 - Feature #2430: Ionosphere validate learnt features profiles page</span>
         <span class="c1"># fail_msg = &#39;error :: ionosphere_backend :: failed to get ionosphere_table meta for fp_id %s&#39; % (str(fp_id))</span>
+        <span class="c1"># @modified 20190919 - Feature #3230: users DB table</span>
+        <span class="c1">#                      Ideas #2476: Label and relate anomalies</span>
+        <span class="c1">#                      Feature #2516: Add label to features profile</span>
+        <span class="c1"># Added user_id</span>
         <span class="k">if</span> <span class="n">id_column_name</span> <span class="o">==</span> <span class="s1">&#39;id&#39;</span><span class="p">:</span>
             <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
                 <span class="n">ionosphere_table</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
                     <span class="n">ionosphere_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">fp_id</span><span class="p">))</span><span class="o">.</span>
-                <span class="n">values</span><span class="p">(</span><span class="n">validated</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+                <span class="n">values</span><span class="p">(</span><span class="n">validated</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">user_id</span><span class="o">=</span><span class="n">user_id</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">id_column_name</span> <span class="o">==</span> <span class="s1">&#39;metric_id&#39;</span><span class="p">:</span>
             <span class="n">stmt</span> <span class="o">=</span> <span class="n">ionosphere_table</span><span class="o">.</span><span class="n">update</span><span class="p">()</span><span class="o">.</span>\
-                <span class="n">values</span><span class="p">(</span><span class="n">validated</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span>\
+                <span class="n">values</span><span class="p">(</span><span class="n">validated</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">user_id</span><span class="o">=</span><span class="n">user_id</span><span class="p">)</span><span class="o">.</span>\
                 <span class="n">where</span><span class="p">(</span><span class="n">ionosphere_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">metric_id</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">update_id</span><span class="p">))</span><span class="o">.</span>\
                 <span class="n">where</span><span class="p">(</span><span class="n">ionosphere_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">validated</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span>\
                 <span class="n">where</span><span class="p">(</span><span class="n">ionosphere_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">enabled</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
@@ -3837,6 +3926,32 @@
             <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
         <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
 
+    <span class="c1"># @added 20190503 - Branch #2646: slack</span>
+    <span class="n">message_on_features_profile_disabled</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">slack_thread_updates</span> <span class="ow">and</span> <span class="n">SLACK_ENABLED</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">message_on_features_profile_disabled</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SLACK_OPTS</span><span class="p">[</span><span class="s1">&#39;message_on_features_profile_disabled&#39;</span><span class="p">]</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">message_on_features_profile_disabled</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">message_on_features_profile_disabled</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">metrics_table</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">metrics_table_meta</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
+            <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: ionosphere_backend :: failed to get metrics_table meta for disable_features_profile_family_tree&#39;</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">channel</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">anomalies_table</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">anomalies_table_meta</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
+                <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: ionosphere_backend :: failed to get anomalies_table meta for disable_features_profile_family_tree&#39;</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+
     <span class="k">for</span> <span class="n">fp_id</span> <span class="ow">in</span> <span class="n">fp_ids</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
@@ -3854,6 +3969,133 @@
             <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
                 <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
             <span class="k">raise</span>
+
+        <span class="c1"># @added 20190503 - Branch #2646: slack</span>
+        <span class="k">if</span> <span class="n">message_on_features_profile_disabled</span><span class="p">:</span>
+            <span class="c1"># TODO</span>
+            <span class="c1"># To generate a slack message with a link to the features profile,</span>
+            <span class="c1"># the metric name and anomaly_timestamp has to be determined</span>
+            <span class="n">fp_metric_id</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">fp_anomaly_timestamp</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+                <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">ionosphere_table</span><span class="p">])</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">ionosphere_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">fp_id</span><span class="p">))</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+                    <span class="n">fp_metric_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;metric_id&#39;</span><span class="p">])</span>
+                    <span class="n">fp_anomaly_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;anomaly_timestamp&#39;</span><span class="p">])</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;disable_features_profile_family_tree :: found fp metric_id </span><span class="si">%s</span><span class="s1"> and anomaly_timestamp </span><span class="si">%s</span><span class="s1"> from the DB to message disabled to slack&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">fp_metric_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_anomaly_timestamp</span><span class="p">)))</span>
+                <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: disable_features_profile_family_tree :: could not determine metric_id and anomaly_timestamp from ionosphere for fp_id </span><span class="si">%s</span><span class="s1"> to message disabled to slack&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">))</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">fp_metric_id</span> <span class="ow">and</span> <span class="n">fp_anomaly_timestamp</span><span class="p">:</span>
+                <span class="n">base_name</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+                    <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">metrics_table</span><span class="p">])</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">metrics_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">fp_metric_id</span><span class="p">)</span>
+                    <span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+                        <span class="n">base_name</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;metric&#39;</span><span class="p">]</span>
+                    <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+                    <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: disable_features_profile_family_tree :: could not determine metric from metrics table to message disabled fp id </span><span class="si">%s</span><span class="s1"> to slack&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">)</span>
+                    <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">base_name</span><span class="p">:</span>
+                <span class="n">ionosphere_link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/ionosphere?fp_view=true&amp;fp_id=</span><span class="si">%s</span><span class="s1">&amp;metric=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_URL</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="n">base_name</span><span class="p">)</span>
+                <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;*DISABLED* - features profile id </span><span class="si">%s</span><span class="s1"> was disabled for </span><span class="si">%s</span><span class="s1"> via </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">),</span> <span class="n">skyline_app</span><span class="p">,</span> <span class="n">ionosphere_link</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">throw_exception_on_default_channel</span><span class="p">:</span>
+                    <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: disable_features_profile_family_tree :: the default_channel or default_channel_id from settings.SLACK_OPTS is set to the default, please replace these with your channel details or set SLACK_ENABLED or SLACK_OPTS[</span><span class="se">\&#39;</span><span class="s1">thread_updates</span><span class="se">\&#39;</span><span class="s1">] to False and restart webapp&#39;</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+                    <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
+                <span class="k">if</span> <span class="n">channel_id</span><span class="p">:</span>
+                    <span class="n">slack_response</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;ok&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">slack_response</span> <span class="o">=</span> <span class="n">slack_post_message</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">channel_id</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+                        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: disable_features_profile_family_tree :: failed to slack_post_message - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">message</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">slack_response</span><span class="p">[</span><span class="s1">&#39;ok&#39;</span><span class="p">]:</span>
+                        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: disable_features_profile_family_tree :: failed to slack_post_message, slack dict output follows&#39;</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">slack_response</span><span class="p">))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;disable_features_profile_family_tree :: posted slack update to </span><span class="si">%s</span><span class="s1">, fp id </span><span class="si">%s</span><span class="s1"> disabled&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">channel_id</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">)))</span>
+                    <span class="c1"># Post a X reaction if there is a slack_thread_ts that is not</span>
+                    <span class="c1"># too old</span>
+                    <span class="n">anomaly_id</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="n">slack_thread_ts</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+                        <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">anomalies_table</span><span class="p">])</span><span class="o">.</span>\
+                            <span class="n">where</span><span class="p">(</span><span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">metric_id</span> <span class="o">==</span> <span class="n">fp_metric_id</span><span class="p">)</span><span class="o">.</span>\
+                            <span class="n">where</span><span class="p">(</span><span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">anomaly_timestamp</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">fp_anomaly_timestamp</span><span class="p">))</span>
+                        <span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+                            <span class="n">anomaly_id</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span>
+                            <span class="n">slack_thread_ts</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;slack_thread_ts&#39;</span><span class="p">]</span>
+                            <span class="k">break</span>
+                        <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;disable_features_profile_family_tree :: determined anomaly id </span><span class="si">%s</span><span class="s1"> for metric id </span><span class="si">%s</span><span class="s1"> at anomaly_timestamp </span><span class="si">%s</span><span class="s1"> with slack_thread_ts </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_metric_id</span><span class="p">),</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">fp_anomaly_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">slack_thread_ts</span><span class="p">)))</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+                        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: disable_features_profile_family_tree :: could not determine id of anomaly from DB for metric id </span><span class="si">%s</span><span class="s1"> at anomaly_timestamp </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">fp_metric_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_anomaly_timestamp</span><span class="p">))</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="nb">float</span><span class="p">(</span><span class="n">slack_thread_ts</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">slack_thread_ts</span> <span class="o">=</span> <span class="kc">None</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;disable_features_profile_family_tree :: slack_thread_ts is </span><span class="si">%s</span><span class="s1">, so uknown, not posting reaction&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">slack_thread_ts</span><span class="p">)))</span>
+                        <span class="k">continue</span>
+                    <span class="k">if</span> <span class="n">slack_thread_ts</span><span class="p">:</span>
+                        <span class="n">slack_thread_ts_int</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">slack_thread_ts</span><span class="p">))</span>
+                        <span class="n">time_now</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
+                        <span class="n">oldest_ts</span> <span class="o">=</span> <span class="n">time_now</span> <span class="o">-</span> <span class="mi">604800</span>
+                        <span class="k">if</span> <span class="n">slack_thread_ts_int</span> <span class="o">&lt;</span> <span class="n">oldest_ts</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;disable_features_profile_family_tree :: slack_thread_ts </span><span class="si">%s</span><span class="s1"> is older than a week not posting reaction&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">slack_thread_ts</span><span class="p">)))</span>
+                            <span class="k">continue</span>
+                        <span class="n">slack_response</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;ok&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">slack_response</span> <span class="o">=</span> <span class="n">slack_post_message</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">channel_id</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">slack_thread_ts</span><span class="p">),</span> <span class="n">message</span><span class="p">)</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+                            <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: disable_features_profile_family_tree :: failed to slack_post_message - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">message</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">slack_response</span><span class="p">[</span><span class="s1">&#39;ok&#39;</span><span class="p">]:</span>
+                            <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: disable_features_profile_family_tree :: failed to slack_post_message, slack dict output follows&#39;</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">slack_response</span><span class="p">))</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;disable_features_profile_family_tree :: posted slack update to </span><span class="si">%s</span><span class="s1">, fp id </span><span class="si">%s</span><span class="s1"> disabled&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="n">channel_id</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">)))</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">reaction_emoji</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SLACK_OPTS</span><span class="p">[</span><span class="s1">&#39;message_on_features_profile_disabled_reaction_emoji&#39;</span><span class="p">]</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">reaction_emoji</span> <span class="o">=</span> <span class="s1">&#39;x&#39;</span>
+                        <span class="n">slack_response</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;ok&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">slack_response</span> <span class="o">=</span> <span class="n">slack_post_reaction</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">channel_id</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">slack_thread_ts</span><span class="p">),</span> <span class="n">reaction_emoji</span><span class="p">)</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+                            <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: webapp_update_slack_thread :: failed to slack_post_reaction to channel id </span><span class="si">%s</span><span class="s1"> and slack_thread_ts </span><span class="si">%s</span><span class="s1"> with reaction </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">channel_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">slack_thread_ts</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">reaction_emoji</span><span class="p">))</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
         <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
@@ -4048,6 +4290,9 @@
                         <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
                     <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span>
         <span class="n">needs_and</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="c1"># @added 20190524 - Branch #3002: docker</span>
+        <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">get_fp_id</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;0&#39;</span><span class="p">:</span>
+            <span class="n">needs_and</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="k">if</span> <span class="s1">&#39;from_timestamp&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
         <span class="n">from_timestamp</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;from_timestamp&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
@@ -4056,6 +4301,16 @@
                 <span class="kn">import</span> <span class="nn">datetime</span>
                 <span class="n">new_from_timestamp</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">mktime</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">from_timestamp</span><span class="p">,</span> <span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1"> %H:%M&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">timetuple</span><span class="p">())</span>
                 <span class="n">from_timestamp</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">new_from_timestamp</span><span class="p">))</span>
+
+            <span class="c1"># @added 20190530 - Branch #3002: docker</span>
+            <span class="c1"># Fix search so that if timestamps are passed and there is a list of</span>
+            <span class="c1"># fp ids the SQL does not break</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">fp_ids</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">needs_and</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fp_ids length unknown, OK&#39;</span><span class="p">)</span>
+
             <span class="k">if</span> <span class="n">needs_and</span><span class="p">:</span>
                 <span class="n">new_query_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> AND metric_timestamp &gt;= </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">query_string</span><span class="p">,</span> <span class="n">from_timestamp</span><span class="p">)</span>
                 <span class="n">query_string</span> <span class="o">=</span> <span class="n">new_query_string</span>
@@ -4082,6 +4337,31 @@
                 <span class="n">query_string</span> <span class="o">=</span> <span class="n">new_query_string</span>
                 <span class="n">needs_and</span> <span class="o">=</span> <span class="kc">True</span>
 
+    <span class="c1"># @added 20190619 - Feature #3084: Ionosphere - validated matches</span>
+    <span class="k">if</span> <span class="s1">&#39;validated_equals&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+        <span class="n">filter_matches</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">validated_equals</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;validated_equals&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">validated_equals</span> <span class="o">==</span> <span class="s1">&#39;any&#39;</span><span class="p">:</span>
+            <span class="n">filter_matches</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">validated_equals</span> <span class="o">==</span> <span class="s1">&#39;true&#39;</span><span class="p">:</span>
+            <span class="n">filter_match_validation</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">filter_matches</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">validated_equals</span> <span class="o">==</span> <span class="s1">&#39;false&#39;</span><span class="p">:</span>
+            <span class="n">filter_match_validation</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">filter_matches</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">validated_equals</span> <span class="o">==</span> <span class="s1">&#39;invalid&#39;</span><span class="p">:</span>
+            <span class="n">filter_match_validation</span> <span class="o">=</span> <span class="mi">2</span>
+            <span class="n">filter_matches</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">filter_matches</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">needs_and</span><span class="p">:</span>
+                <span class="n">new_query_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> AND validated = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">query_string</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">filter_match_validation</span><span class="p">))</span>
+                <span class="n">query_string</span> <span class="o">=</span> <span class="n">new_query_string</span>
+                <span class="n">needs_and</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">new_query_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> WHERE validated = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">query_string</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">filter_match_validation</span><span class="p">))</span>
+                <span class="n">query_string</span> <span class="o">=</span> <span class="n">new_query_string</span>
+                <span class="n">needs_and</span> <span class="o">=</span> <span class="kc">True</span>
+
     <span class="n">ordered_by</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="s1">&#39;order&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
         <span class="n">order</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;order&#39;</span><span class="p">,</span> <span class="s1">&#39;DESC&#39;</span><span class="p">)</span>
@@ -4101,6 +4381,7 @@
             <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">limit</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">new_query_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> LIMIT </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">query_string</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">limit</span><span class="p">))</span>
                 <span class="n">query_string</span> <span class="o">=</span> <span class="n">new_query_string</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;test_limit tested OK with </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">test_limit</span><span class="p">))</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: limit is not an integer - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">limit</span><span class="p">))</span>
 
@@ -4191,6 +4472,14 @@
 <span class="c1"># ionosphere_layers_matched table layout</span>
 <span class="c1"># | id    | layer_id | fp_id | metric_id | anomaly_timestamp | anomalous_datapoint | full_duration |</span>
 <span class="c1"># | 25069 |       24 |  1108 |       195 |        1505561823 |            2.000000 |         86400 |</span>
+<span class="c1"># @modified 20190601 - Feature #3084: Ionosphere - validated matches</span>
+<span class="c1"># Added validated</span>
+<span class="c1"># ionosphere_matched table layout</span>
+<span class="c1"># | id    | fp_id | metric_timestamp | all_calc_features_sum | all_calc_features_count | sum_common_values | common_features_count | tsfresh_version | minmax | minmax_fp_features_sum | minmax_fp_features_count | minmax_anomalous_features_sum | minmax_anomalous_features_count | fp_count | fp_checked | validated |</span>
+<span class="c1"># | 26946 |  2925 |       1529664909 |      -214679719261.15 |                     210 | -214680153882.557 |                   150 | 0.4.0           |      1 |       4162.60829454032 |                      210 |              4196.51947426028 |                             210 |        0 |          0 |         0 |</span>
+<span class="c1"># ionosphere_layers_matched table layout</span>
+<span class="c1"># | id | layer_id | fp_id | metric_id | anomaly_timestamp | anomalous_datapoint | full_duration | layers_count | layers_checked | approx_close | validated |</span>
+<span class="c1"># |  1 |       27 |  1114 |        34 |        1488971471 |           10.000000 |         86400 |            0 |              0 |            0 |         0 |</span>
 
     <span class="n">matches</span> <span class="o">=</span> <span class="p">[]</span>
 <span class="c1"># matches list elements - where id is the ionosphere_matched or the</span>
@@ -4231,6 +4520,9 @@
                 <span class="n">matched_by</span> <span class="o">=</span> <span class="s1">&#39;features profile - minmax&#39;</span>
             <span class="n">fp_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;fp_id&#39;</span><span class="p">])</span>
 
+            <span class="c1"># @added 20190601 - Feature #3084: Ionosphere - validated matches</span>
+            <span class="n">validated</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;validated&#39;</span><span class="p">])</span>
+
             <span class="c1"># @added 20190328 - Feature #2484: FULL_DURATION feature profiles</span>
             <span class="c1"># Added ionosphere_echo</span>
             <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_ECHO_ENABLED</span><span class="p">:</span>
@@ -4249,7 +4541,11 @@
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">metric</span> <span class="o">=</span> <span class="s1">&#39;UNKNOWN&#39;</span>
             <span class="n">uri_to_matched_page</span> <span class="o">=</span> <span class="s1">&#39;None&#39;</span>
-            <span class="n">matches</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">metric_human_date</span><span class="p">,</span> <span class="n">match_id</span><span class="p">,</span> <span class="n">matched_by</span><span class="p">,</span> <span class="n">fp_id</span><span class="p">,</span> <span class="n">layer_id</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">uri_to_matched_page</span><span class="p">])</span>
+
+            <span class="c1"># @modified 20190601 - Feature #3084: Ionosphere - validated matches</span>
+            <span class="c1"># Added validated</span>
+            <span class="c1"># matches.append([metric_human_date, match_id, matched_by, fp_id, layer_id, metric, uri_to_matched_page])</span>
+            <span class="n">matches</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">metric_human_date</span><span class="p">,</span> <span class="n">match_id</span><span class="p">,</span> <span class="n">matched_by</span><span class="p">,</span> <span class="n">fp_id</span><span class="p">,</span> <span class="n">layer_id</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">uri_to_matched_page</span><span class="p">,</span> <span class="n">validated</span><span class="p">])</span>
 
     <span class="k">if</span> <span class="n">get_layers_matched</span><span class="p">:</span>
         <span class="c1"># layers matches</span>
@@ -4288,6 +4584,9 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">matched_by</span> <span class="o">=</span> <span class="s1">&#39;layers - approx_close&#39;</span>
 
+            <span class="c1"># @added 20190601 - Feature #3084: Ionosphere - validated matches</span>
+            <span class="n">validated</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;validated&#39;</span><span class="p">])</span>
+
             <span class="n">fp_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;fp_id&#39;</span><span class="p">])</span>
             <span class="n">layer_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;layer_id&#39;</span><span class="p">])</span>
             <span class="c1"># Get metric name, first get metric id from the features profile</span>
@@ -4299,7 +4598,10 @@
                 <span class="n">metric</span> <span class="o">=</span> <span class="s1">&#39;UNKNOWN&#39;</span>
             <span class="n">uri_to_matched_page</span> <span class="o">=</span> <span class="s1">&#39;None&#39;</span>
 
-            <span class="n">matches</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">metric_human_date</span><span class="p">,</span> <span class="n">match_id</span><span class="p">,</span> <span class="n">matched_by</span><span class="p">,</span> <span class="n">fp_id</span><span class="p">,</span> <span class="n">layer_id</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">uri_to_matched_page</span><span class="p">])</span>
+            <span class="c1"># @modified 20190601 - Feature #3084: Ionosphere - validated matches</span>
+            <span class="c1"># Added validated</span>
+            <span class="c1"># matches.append([metric_human_date, match_id, matched_by, fp_id, layer_id, metric, uri_to_matched_page])</span>
+            <span class="n">matches</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">metric_human_date</span><span class="p">,</span> <span class="n">match_id</span><span class="p">,</span> <span class="n">matched_by</span><span class="p">,</span> <span class="n">fp_id</span><span class="p">,</span> <span class="n">layer_id</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">uri_to_matched_page</span><span class="p">,</span> <span class="n">validated</span><span class="p">])</span>
 
     <span class="n">sorted_matches</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">matches</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
     <span class="n">matches</span> <span class="o">=</span> <span class="n">sorted_matches</span>
@@ -4539,17 +4841,20 @@
 
 
 <span class="c1"># @added 20180812 - Feature #2430: Ionosphere validate learnt features profiles page</span>
+<span class="c1"># @modified 20190601 - Task #3082 - Ionosphere - validate matched table - add generation</span>
 <div class="viewcode-block" id="get_features_profiles_to_validate"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.ionosphere_backend.get_features_profiles_to_validate">[docs]</a><span class="k">def</span> <span class="nf">get_features_profiles_to_validate</span><span class="p">(</span><span class="n">base_name</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Get the details for Ionosphere features profiles that need to be validated</span>
 <span class="sd">    for a metric and returns a list of the details for each of the features</span>
 <span class="sd">    profile including the ionosphere_image API URIs for all the relevant graph</span>
 <span class="sd">    images for the weabpp Ionosphere validate_features_profiles page.</span>
-<span class="sd">    [[  fp_id, metric_id, metric, fp_full_duration, anomaly_timestamp,</span>
-<span class="sd">        fp_parent_id, parent_full_duration, parent_anomaly_timestamp, fp_date,</span>
-<span class="sd">        fp_graph_uri, parent_fp_date, parent_fp_graph_uri, parent_parent_fp_id,</span>
-<span class="sd">        fp_learn_graph_uri, parent_fp_learn_graph_uri, minimum_full_duration,</span>
-<span class="sd">        maximum_full_duration]]</span>
+<span class="sd">    For example::</span>
+
+<span class="sd">        [[  fp_id, metric_id, metric, fp_full_duration, anomaly_timestamp,</span>
+<span class="sd">            fp_parent_id, parent_full_duration, parent_anomaly_timestamp, fp_date,</span>
+<span class="sd">            fp_graph_uri, parent_fp_date, parent_fp_graph_uri, parent_parent_fp_id,</span>
+<span class="sd">            fp_learn_graph_uri, parent_fp_learn_graph_uri, minimum_full_duration,</span>
+<span class="sd">            maximum_full_duration, generation]]</span>
 
 <span class="sd">    :param base_name: metric base_name</span>
 <span class="sd">    :type base_name: str</span>
@@ -4737,10 +5042,16 @@
             <span class="c1"># str(parent_fp_data_dir), base_name, str(int(parent_full_duration_in_hours)))</span>
             <span class="nb">str</span><span class="p">(</span><span class="n">parent_fp_data_dir</span><span class="p">),</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">get_hours</span><span class="p">)</span>
 
+        <span class="c1"># @modified 20190601 - Task #3082 - Ionosphere - validate matched table - add generation</span>
+        <span class="c1"># Added parent_fp_generation</span>
+        <span class="n">parent_fp_generation</span> <span class="o">=</span> <span class="n">parent_fp_details_object</span><span class="p">[</span><span class="s1">&#39;generation&#39;</span><span class="p">]</span>
+
         <span class="c1"># @modified 20181013 - Feature #2430: Ionosphere validate learnt features profiles page</span>
         <span class="c1"># Only add to features_profiles_to_validate if fp_id in enabled_list</span>
+        <span class="c1"># @modified 20190601 - Task #3082 - Ionosphere - validate matched table - add generation</span>
+        <span class="c1"># Added fp_generation and parent_fp_generation</span>
         <span class="k">if</span> <span class="n">fp_id</span> <span class="ow">in</span> <span class="n">enabled_list</span><span class="p">:</span>
-            <span class="n">features_profiles_to_validate</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">fp_id</span><span class="p">,</span> <span class="n">metric_id</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">fp_full_duration</span><span class="p">,</span> <span class="n">anomaly_timestamp</span><span class="p">,</span> <span class="n">fp_parent_id</span><span class="p">,</span> <span class="n">parent_full_duration</span><span class="p">,</span> <span class="n">parent_anomaly_timestamp</span><span class="p">,</span> <span class="n">fp_date</span><span class="p">,</span> <span class="n">fp_graph_uri</span><span class="p">,</span> <span class="n">parent_fp_date</span><span class="p">,</span> <span class="n">parent_fp_graph_uri</span><span class="p">,</span> <span class="n">parent_parent_fp_id</span><span class="p">,</span> <span class="n">fp_learn_graph_uri</span><span class="p">,</span> <span class="n">parent_fp_learn_graph_uri</span><span class="p">,</span> <span class="n">minimum_full_duration</span><span class="p">,</span> <span class="n">maximum_full_duration</span><span class="p">])</span>
+            <span class="n">features_profiles_to_validate</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">fp_id</span><span class="p">,</span> <span class="n">metric_id</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">fp_full_duration</span><span class="p">,</span> <span class="n">anomaly_timestamp</span><span class="p">,</span> <span class="n">fp_parent_id</span><span class="p">,</span> <span class="n">parent_full_duration</span><span class="p">,</span> <span class="n">parent_anomaly_timestamp</span><span class="p">,</span> <span class="n">fp_date</span><span class="p">,</span> <span class="n">fp_graph_uri</span><span class="p">,</span> <span class="n">parent_fp_date</span><span class="p">,</span> <span class="n">parent_fp_graph_uri</span><span class="p">,</span> <span class="n">parent_parent_fp_id</span><span class="p">,</span> <span class="n">fp_learn_graph_uri</span><span class="p">,</span> <span class="n">parent_fp_learn_graph_uri</span><span class="p">,</span> <span class="n">minimum_full_duration</span><span class="p">,</span> <span class="n">maximum_full_duration</span><span class="p">,</span> <span class="n">fp_generation</span><span class="p">,</span> <span class="n">parent_fp_generation</span><span class="p">])</span>
 
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: features_profiles_to_validate - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
         <span class="n">function_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">features_profiles_to_validate</span><span class="p">)))</span>
@@ -4878,6 +5189,368 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get Graphite graph at </span><span class="si">%s</span><span class="s1"> hours for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">target_hours</span><span class="p">),</span> <span class="n">base_name</span><span class="p">))</span>
 
     <span class="k">return</span> <span class="p">(</span><span class="n">images</span><span class="p">,</span> <span class="n">graphite_now_images</span><span class="p">)</span></div>
+
+
+<span class="c1"># @added 20190502 - Branch #2646: slack</span>
+<div class="viewcode-block" id="webapp_update_slack_thread"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.ionosphere_backend.webapp_update_slack_thread">[docs]</a><span class="k">def</span> <span class="nf">webapp_update_slack_thread</span><span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">message_context</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Update slack threads with enabled events.</span>
+
+<span class="sd">    :param base_name: metric base_name</span>
+<span class="sd">    :param metric_timestamp: the anomaly_timestamp</span>
+<span class="sd">    :param value: the features profile id, the validated_count or None</span>
+<span class="sd">    :param message_context: training_data_viewed or layers_created</span>
+<span class="sd">    :type base_name: str</span>
+<span class="sd">    :type metric_timestamp: str or int</span>
+<span class="sd">    :type value: int or None</span>
+<span class="sd">    :type message_context: str</span>
+<span class="sd">    :return: True or False</span>
+<span class="sd">    :rtype:  boolean</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">update_slack_thread</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="n">message_context_known</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">message_context</span> <span class="o">==</span> <span class="s1">&#39;training_data_viewed&#39;</span><span class="p">:</span>
+        <span class="n">message_context_known</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">fp_id</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">if</span> <span class="n">message_context</span> <span class="o">==</span> <span class="s1">&#39;layers_created&#39;</span><span class="p">:</span>
+        <span class="n">message_context_known</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">fp_id</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">if</span> <span class="n">message_context</span> <span class="o">==</span> <span class="s1">&#39;validated&#39;</span><span class="p">:</span>
+        <span class="n">message_context_known</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">validated_count</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">message_context_known</span><span class="p">:</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: webapp_update_slack_thread :: unknown message context - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">message_context</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
+
+    <span class="n">update_for_message_context</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">message_context_not_updating_log_message</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">message_context</span> <span class="o">==</span> <span class="s1">&#39;training_data_viewed&#39;</span><span class="p">:</span>
+        <span class="n">log_message</span> <span class="o">=</span> <span class="s1">&#39;updating slack that training data was viewed&#39;</span>
+        <span class="n">message_on_training_data_viewed</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">message_on_training_data_viewed</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SLACK_OPTS</span><span class="p">[</span><span class="s1">&#39;message_on_training_data_viewed&#39;</span><span class="p">]</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">message_on_training_data_viewed</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">message_on_training_data_viewed</span><span class="p">:</span>
+            <span class="n">update_for_message_context</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">message_context_not_updating_log_message</span> <span class="o">=</span> <span class="s1">&#39;SLACK_OPTS[</span><span class="se">\&#39;</span><span class="s1">message_on_training_data_viewed</span><span class="se">\&#39;</span><span class="s1">] is False or not defined not updating slack&#39;</span>
+
+    <span class="k">if</span> <span class="n">message_context</span> <span class="o">==</span> <span class="s1">&#39;layers_created&#39;</span><span class="p">:</span>
+        <span class="n">log_message</span> <span class="o">=</span> <span class="s1">&#39;updating slack that a features profile was created&#39;</span>
+        <span class="n">message_on_features_profile_created</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">message_on_features_profile_created</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SLACK_OPTS</span><span class="p">[</span><span class="s1">&#39;message_on_features_profile_created&#39;</span><span class="p">]</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">message_on_features_profile_created</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">message_on_features_profile_created</span><span class="p">:</span>
+            <span class="n">update_for_message_context</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">message_context_not_updating_log_message</span> <span class="o">=</span> <span class="s1">&#39;SLACK_OPTS[</span><span class="se">\&#39;</span><span class="s1">message_on_features_profile_created</span><span class="se">\&#39;</span><span class="s1">] is False or not defined not updating slack&#39;</span>
+
+    <span class="k">if</span> <span class="n">message_context</span> <span class="o">==</span> <span class="s1">&#39;validated&#39;</span><span class="p">:</span>
+        <span class="n">log_message</span> <span class="o">=</span> <span class="s1">&#39;updating slack that </span><span class="si">%s</span><span class="s1"> features profiles were validated for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">validated_count</span><span class="p">),</span> <span class="n">base_name</span><span class="p">)</span>
+        <span class="n">message_context_known</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">validated_count</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">message_on_validated_features_profiles</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SLACK_OPTS</span><span class="p">[</span><span class="s1">&#39;message_on_validated_features_profiles&#39;</span><span class="p">]</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">message_on_validated_features_profiles</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">message_on_validated_features_profiles</span><span class="p">:</span>
+            <span class="n">update_for_message_context</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">message_context_not_updating_log_message</span> <span class="o">=</span> <span class="s1">&#39;SLACK_OPTS[</span><span class="se">\&#39;</span><span class="s1">message_on_validated_features_profiles</span><span class="se">\&#39;</span><span class="s1">] is False or not defined not updating slack&#39;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">update_for_message_context</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">message_context_not_updating_log_message</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">if</span> <span class="n">throw_exception_on_default_channel</span><span class="p">:</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: webapp_update_slack_thread :: the default_channel or default_channel_id from settings.SLACK_OPTS is set to the default, please replace these with your channel details or set SLACK_ENABLED or SLACK_OPTS[</span><span class="se">\&#39;</span><span class="s1">thread_updates</span><span class="se">\&#39;</span><span class="s1">] to False and restart webapp&#39;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">update_slack_thread</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">log_message</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">message_context</span> <span class="o">==</span> <span class="s1">&#39;validated&#39;</span><span class="p">:</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;*VALIDATED* - </span><span class="si">%s</span><span class="s1"> features profiles were validated for </span><span class="si">%s</span><span class="s1"> via the webapp&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">validated_count</span><span class="p">),</span> <span class="n">base_name</span><span class="p">)</span>
+        <span class="n">slack_response</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;ok&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">channel</span><span class="p">:</span>
+                <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: webapp_update_slack_thread :: could not determine the slack default_channel or default_channel_id from settings.SLACK_OPTS please add these to your settings or set SLACK_ENABLED or SLACK_OPTS[</span><span class="se">\&#39;</span><span class="s1">thread_updates</span><span class="se">\&#39;</span><span class="s1">] to False and restart webapp&#39;</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+                <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
+            <span class="n">slack_response</span> <span class="o">=</span> <span class="n">slack_post_message</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+            <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: webapp_update_slack_thread :: failed to slack_post_message for validated&#39;</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">slack_response</span><span class="p">[</span><span class="s1">&#39;ok&#39;</span><span class="p">]:</span>
+            <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: webapp_update_slack_thread :: failed to slack_post_message for validated, slack dict output follows&#39;</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">slack_response</span><span class="p">))</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;posted slack update to </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1"> features profiles were validated for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">channel</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">validated_count</span><span class="p">),</span> <span class="n">base_name</span><span class="p">))</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="n">use_anomaly_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">engine</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">get_an_engine</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: webapp_update_slack_thread :: could not get a MySQL engine to get slack_thread_ts&#39;</span><span class="p">)</span>
+        <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">engine</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: webapp_update_slack_thread :: engine not obtained&#39;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">raise</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">ionosphere_matched_table</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">ionosphere_matched_table_meta</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">log_msg</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ionosphere_matched_table OK&#39;</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: webapp_update_slack_thread :: failed to get ionosphere_checked_table meta for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
+        <span class="c1"># @added 20170806 - Bug #2130: MySQL - Aborted_clients</span>
+        <span class="c1"># Added missing disposal</span>
+        <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+            <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+        <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">metrics_table</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">metrics_table_meta</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">log_msg</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metrics_table OK&#39;</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: webapp_update_slack_thread :: failed to get metrics_table meta for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
+        <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
+    <span class="n">metric_id</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+        <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">metrics_table</span><span class="p">])</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">metrics_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">metric</span> <span class="o">==</span> <span class="n">base_name</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+            <span class="n">metric_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
+        <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: webapp_update_slack_thread :: could not determine metric id from metrics table&#39;</span><span class="p">)</span>
+        <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metric id determined as </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_id</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">metric_id</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">anomalies_table</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">anomalies_table_meta</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">log_msg</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;anomalies_table OK&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: webapp_update_slack_thread :: failed to get anomalies_table meta for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
+            <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
+    <span class="n">anomaly_id</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">slack_thread_ts</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+        <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">anomalies_table</span><span class="p">])</span><span class="o">.</span>\
+            <span class="n">where</span><span class="p">(</span><span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">metric_id</span> <span class="o">==</span> <span class="n">metric_id</span><span class="p">)</span><span class="o">.</span>\
+            <span class="n">where</span><span class="p">(</span><span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">anomaly_timestamp</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">use_anomaly_timestamp</span><span class="p">))</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+            <span class="n">anomaly_id</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span>
+            <span class="n">slack_thread_ts</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;slack_thread_ts&#39;</span><span class="p">]</span>
+            <span class="k">break</span>
+        <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;determined anomaly id </span><span class="si">%s</span><span class="s1"> for metric id </span><span class="si">%s</span><span class="s1"> at anomaly_timestamp </span><span class="si">%s</span><span class="s1"> with slack_thread_ts </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_id</span><span class="p">),</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">use_anomaly_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">slack_thread_ts</span><span class="p">)))</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: webapp_update_slack_thread :: could not determine id or slack_thread_ts of the anomaly from DB for metric id </span><span class="si">%s</span><span class="s1"> at anomaly_timestamp </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">metric_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">use_anomaly_timestamp</span><span class="p">))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
+
+    <span class="k">if</span> <span class="nb">float</span><span class="p">(</span><span class="n">slack_thread_ts</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="c1"># There is no known slack_thread_ts value so there is no thread to posted</span>
+        <span class="c1"># to</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">if</span> <span class="n">message_context</span> <span class="o">==</span> <span class="s1">&#39;training_data_viewed&#39;</span><span class="p">:</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;The training data page has been reviewed&#39;</span>
+    <span class="k">if</span> <span class="n">message_context</span> <span class="o">==</span> <span class="s1">&#39;layers_created&#39;</span><span class="p">:</span>
+        <span class="n">ionosphere_link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/ionosphere?fp_view=true&amp;fp_id=</span><span class="si">%s</span><span class="s1">&amp;metric=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_URL</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="n">base_name</span><span class="p">)</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="s1">&#39;fp_layer_label&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+            <span class="n">label_arg</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;fp_layer_label&#39;</span><span class="p">)</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="n">label_arg</span><span class="p">[:</span><span class="mi">255</span><span class="p">]</span>
+        <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;*TRAINED layers* - with label - </span><span class="si">%s</span><span class="s1">, layers were created on features profile id </span><span class="si">%s</span><span class="s1"> for </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">label</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">ionosphere_link</span><span class="p">)</span>
+
+    <span class="n">slack_response</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;ok&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">channel</span><span class="p">:</span>
+            <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: webapp_update_slack_thread :: could not determine the slack default_channel or default_channel_id from settings.SLACK_OPTS please add these to your settings or set SLACK_ENABLED or SLACK_OPTS[</span><span class="se">\&#39;</span><span class="s1">thread_updates</span><span class="se">\&#39;</span><span class="s1">] to False and restart webapp&#39;</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+            <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
+        <span class="n">slack_response</span> <span class="o">=</span> <span class="n">slack_post_message</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">slack_thread_ts</span><span class="p">),</span> <span class="n">message</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: webapp_update_slack_thread :: failed to slack_post_message&#39;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">slack_response</span><span class="p">[</span><span class="s1">&#39;ok&#39;</span><span class="p">]:</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: webapp_update_slack_thread :: failed to slack_post_message, slack dict output follows&#39;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">slack_response</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;posted slack update to </span><span class="si">%s</span><span class="s1">, thread </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">channel</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">slack_thread_ts</span><span class="p">)))</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">reaction_emoji</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SLACK_OPTS</span><span class="p">[</span><span class="s1">&#39;message_on_training_data_viewed_reaction_emoji&#39;</span><span class="p">]</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">reaction_emoji</span> <span class="o">=</span> <span class="s1">&#39;eyes&#39;</span>
+
+    <span class="n">slack_response</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;ok&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">channel_id</span><span class="p">:</span>
+            <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: webapp_update_slack_thread :: could not determine the slack default_channel or default_channel_id from settings.SLACK_OPTS please add these to your settings or set SLACK_ENABLED or SLACK_OPTS[</span><span class="se">\&#39;</span><span class="s1">thread_updates</span><span class="se">\&#39;</span><span class="s1">] to False and restart webapp&#39;</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+            <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
+        <span class="n">slack_response</span> <span class="o">=</span> <span class="n">slack_post_reaction</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">channel_id</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">slack_thread_ts</span><span class="p">),</span> <span class="n">reaction_emoji</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: webapp_update_slack_thread :: failed to slack_post_reaction to channel id </span><span class="si">%s</span><span class="s1"> and slack_thread_ts </span><span class="si">%s</span><span class="s1"> with reaction </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">channel_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">slack_thread_ts</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">reaction_emoji</span><span class="p">))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+    <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<span class="c1"># @added 20190601 - Feature #3084: Ionosphere - validated matches</span>
+<span class="c1"># @modified 20190919 - Feature #3230: users DB table</span>
+<span class="c1">#                      Ideas #2476: Label and relate anomalies</span>
+<span class="c1">#                      Feature #2516: Add label to features profile</span>
+<span class="c1"># Added user_id</span>
+<span class="c1"># def validate_ionosphere_match(match_id, validate_context, match_validated):</span>
+<div class="viewcode-block" id="validate_ionosphere_match"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.ionosphere_backend.validate_ionosphere_match">[docs]</a><span class="k">def</span> <span class="nf">validate_ionosphere_match</span><span class="p">(</span><span class="n">match_id</span><span class="p">,</span> <span class="n">validate_context</span><span class="p">,</span> <span class="n">match_validated</span><span class="p">,</span> <span class="n">user_id</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Update the validated value in the DB for the match.</span>
+
+<span class="sd">    :param match_id: the match id</span>
+<span class="sd">    :param validate_context: the context to validate either ionosphere_matched</span>
+<span class="sd">        or ionosphere_layers_matched</span>
+<span class="sd">    :param match_validated: 1 for valid or 2 for invalid</span>
+<span class="sd">    :param user_id: the user id of the user validating</span>
+<span class="sd">    :type match_id: str</span>
+<span class="sd">    :type validate_context: str</span>
+<span class="sd">    :type match_validated: int</span>
+<span class="sd">    :type user_id: int</span>
+<span class="sd">    :return: True or False</span>
+<span class="sd">    :rtype:  boolean</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">engine</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">get_an_engine</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: validate_ionosphere_match :: could not get a MySQL engine to get slack_thread_ts&#39;</span><span class="p">)</span>
+        <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">engine</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: validate_ionosphere_match :: engine not obtained&#39;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">raise</span>
+
+    <span class="k">if</span> <span class="n">validate_context</span> <span class="o">==</span> <span class="s1">&#39;ionosphere_matched&#39;</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">ionosphere_matched_table</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">ionosphere_matched_table_meta</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">log_msg</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ionosphere_matched_table OK&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: validate_ionosphere_match :: failed to get ionosphere_checked_table meta for match_id </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">match_id</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+                <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+            <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+            <span class="c1"># @modified 20190919 - Feature #3230: users DB table</span>
+            <span class="c1">#                      Ideas #2476: Label and relate anomalies</span>
+            <span class="c1">#                      Feature #2516: Add label to features profile</span>
+            <span class="c1"># Added user_id</span>
+            <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                <span class="n">ionosphere_matched_table</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                    <span class="n">ionosphere_matched_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">match_id</span><span class="p">)</span><span class="o">.</span>
+                <span class="n">values</span><span class="p">(</span><span class="n">validated</span><span class="o">=</span><span class="n">match_validated</span><span class="p">,</span> <span class="n">user_id</span><span class="o">=</span><span class="n">user_id</span><span class="p">))</span>
+            <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;updated validated for </span><span class="si">%s</span><span class="s1"> by user id </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">match_id</span><span class="p">),</span> <span class="n">user_id</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
+            <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: could not update validated for </span><span class="si">%s</span><span class="s1"> by user id </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">match_id</span><span class="p">),</span> <span class="n">user_id</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+                <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+            <span class="k">raise</span>
+
+    <span class="k">if</span> <span class="n">validate_context</span> <span class="o">==</span> <span class="s1">&#39;ionosphere_layers_matched&#39;</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">ionosphere_layers_matched_table</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">ionosphere_layers_matched_table_meta</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">log_msg</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ionosphere_layers_matched_table OK&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: validate_ionosphere_match :: failed to get ionosphere_checked_table meta for match_id </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">match_id</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+                <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+            <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+            <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                <span class="n">ionosphere_layers_matched_table</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                    <span class="n">ionosphere_layers_matched_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">match_id</span><span class="p">)</span><span class="o">.</span>
+                <span class="n">values</span><span class="p">(</span><span class="n">validated</span><span class="o">=</span><span class="n">match_validated</span><span class="p">))</span>
+            <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;updated validated for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">match_id</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
+            <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: could not update validated for </span><span class="si">%s</span><span class="s1"> &#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">match_id</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+                <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+            <span class="k">raise</span>
+
+    <span class="c1"># @added 20190921 - Feature #3234: Ionosphere - related matches vaildation</span>
+    <span class="c1"># TODO - here related matches will also be validated</span>
+
+    <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+        <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="kc">True</span></div>
 </pre></div>
 
            </div>
@@ -4911,7 +5584,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.2.14',
+            VERSION:'1.3.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

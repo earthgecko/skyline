@@ -9,7 +9,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Index &mdash; Skyline 1.2.14 documentation</title>
+  <title>Index &mdash; Skyline 1.3.0 documentation</title>
   
 
   
@@ -36,7 +36,7 @@
         <link rel="index" title="Index"
               href="#"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.2.14 documentation" href="index.html"/> 
+    <link rel="top" title="Skyline 1.3.0 documentation" href="index.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                1.2
+                1.3
               </div>
             
           
@@ -94,6 +94,8 @@
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="docker.html">docker - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
 <li class="toctree-l1"><a class="reference internal" href="analyzer.html">Analyzer</a></li>
@@ -107,7 +109,10 @@
 <li class="toctree-l1"><a class="reference internal" href="ionosphere_echo.html">Ionosphere echo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-multiple-skylines.html">Running multiple Skyline instances</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
@@ -195,10 +200,6 @@
   <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="skyline.webapp.html#webapp.webapp.a_500">a_500() (in module webapp.webapp)</a>
-  </dt>
-
-      
-  <dt><a href="skyline.webapp.html#webapp.backend.aggregate_timeseries">aggregate_timeseries() (in module webapp.backend)</a>
   </dt>
 
       
@@ -329,12 +330,6 @@
   <dt><a href="skyline.analyzer.html#analyzer.analyzer.Analyzer">Analyzer (class in analyzer.analyzer)</a>
   </dt>
 
-      <dd><dl>
-        
-  <dt><a href="skyline.analyzer_dev.html#analyzer_dev.analyzer_dev.Analyzer">(class in analyzer_dev.analyzer_dev)</a>
-  </dt>
-
-      </dl></dd>
       
   <dt><a href="skyline.analyzer.html#module-analyzer">analyzer (module)</a>
   </dt>
@@ -395,12 +390,14 @@
   <dt><a href="skyline.analyzer.html#analyzer.agent.AnalyzerAgent">AnalyzerAgent (class in analyzer.agent)</a>
   </dt>
 
-      <dd><dl>
-        
-  <dt><a href="skyline.analyzer_dev.html#analyzer_dev.agent.AnalyzerAgent">(class in analyzer_dev.agent)</a>
+      
+  <dt><a href="skyline.analyzer_dev.html#analyzer_dev.analyzer_dev.AnalyzerDev">AnalyzerDev (class in analyzer_dev.analyzer_dev)</a>
   </dt>
 
-      </dl></dd>
+      
+  <dt><a href="skyline.analyzer_dev.html#analyzer_dev.agent.AnalyzerDevAgent">AnalyzerDevAgent (class in analyzer_dev.agent)</a>
+  </dt>
+
       
   <dt><a href="skyline.webapp.html#webapp.webapp.anomalies">anomalies() (in module webapp.webapp)</a>
   </dt>
@@ -548,6 +545,10 @@
   </dt>
 
       
+  <dt><a href="skyline.html#settings.CARBON_HOST">CARBON_HOST (in module settings)</a>
+  </dt>
+
+      
   <dt><a href="skyline.html#settings.CARBON_PORT">CARBON_PORT (in module settings)</a>
   </dt>
 
@@ -556,16 +557,24 @@
   </dt>
 
       
-  <dt><a href="skyline.analyzer.html#analyzer.analyzer.Analyzer.check_if_parent_is_alive">check_if_parent_is_alive() (Analyzer method)</a>, <a href="skyline.analyzer_dev.html#analyzer_dev.analyzer_dev.Analyzer.check_if_parent_is_alive">[1]</a>
+  <dt><a href="skyline.analyzer.html#analyzer.analyzer.Analyzer.check_if_parent_is_alive">check_if_parent_is_alive() (Analyzer method)</a>
   </dt>
 
       <dd><dl>
+        
+  <dt><a href="skyline.analyzer_dev.html#analyzer_dev.analyzer_dev.AnalyzerDev.check_if_parent_is_alive">(AnalyzerDev method)</a>
+  </dt>
+
         
   <dt><a href="skyline.boundary.html#boundary.boundary.Boundary.check_if_parent_is_alive">(Boundary method)</a>
   </dt>
 
         
   <dt><a href="skyline.crucible.html#crucible.crucible.Crucible.check_if_parent_is_alive">(Crucible method)</a>
+  </dt>
+
+        
+  <dt><a href="skyline.vista.html#vista.fetcher.Fetcher.check_if_parent_is_alive">(Fetcher method)</a>
   </dt>
 
         
@@ -589,20 +598,24 @@
   </dt>
 
         
+  <dt><a href="skyline.flux.html#flux.populate_metric_worker.PopulateMetricWorker.check_if_parent_is_alive">(PopulateMetricWorker method)</a>
+  </dt>
+
+        
   <dt><a href="skyline.horizon.html#horizon.roomba.Roomba.check_if_parent_is_alive">(Roomba method)</a>
   </dt>
 
         
-  <dt><a href="skyline.horizon.html#horizon.worker.Worker.check_if_parent_is_alive">(Worker method)</a>
+  <dt><a href="skyline.flux.html#flux.worker.Worker.check_if_parent_is_alive">(Worker method)</a>, <a href="skyline.horizon.html#horizon.worker.Worker.check_if_parent_is_alive">[1]</a>, <a href="skyline.vista.html#vista.worker.Worker.check_if_parent_is_alive">[2]</a>
   </dt>
 
       </dl></dd>
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="skyline.html#settings.CHUNK_SIZE">CHUNK_SIZE (in module settings)</a>
   </dt>
 
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="skyline.html#settings.CONSENSUS">CONSENSUS (in module settings)</a>
   </dt>
@@ -663,6 +676,10 @@
   <dt><a href="skyline.crucible.html#crucible.agent.CrucibleAgent">CrucibleAgent (class in crucible.agent)</a>
   </dt>
 
+      
+  <dt><a href="skyline.html#settings.CUSTOM_ALERT_OPTS">CUSTOM_ALERT_OPTS (in module settings)</a>
+  </dt>
+
   </dl></td>
 </tr></table>
 
@@ -717,6 +734,18 @@
 
       
   <dt><a href="skyline.html#settings.DO_NOT_SKIP_LIST">DO_NOT_SKIP_LIST (in module settings)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.html#settings.DOCKER">DOCKER (in module settings)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.html#settings.DOCKER_DISPLAY_REDIS_PASSWORD_IN_REBROW">DOCKER_DISPLAY_REDIS_PASSWORD_IN_REBROW (in module settings)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.html#settings.DOCKER_FAKE_EMAIL_ALERTS">DOCKER_FAKE_EMAIL_ALERTS (in module settings)</a>
   </dt>
 
       
@@ -834,11 +863,17 @@
   </dt>
 
       
+  <dt><a href="skyline.vista.html#vista.fetcher.Fetcher.fetch_process">fetch_process() (Fetcher method)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.vista.html#vista.fetcher.Fetcher">Fetcher (class in vista.fetcher)</a>
+  </dt>
+
+      
   <dt><a href="skyline.html#skyline_functions.filesafe_metricname">filesafe_metricname() (in module skyline_functions)</a>
   </dt>
 
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="skyline.horizon.html#horizon.listen.SafeUnpickler.find_class">find_class() (horizon.listen.SafeUnpickler class method)</a>
   </dt>
@@ -861,6 +896,88 @@
   </dt>
 
       </dl></dd>
+      
+  <dt><a href="skyline.flux.html#module-flux">flux (module)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.flux.html#module-flux.flux">flux.flux (module)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.flux.html#module-flux.gunicorn">flux.gunicorn (module)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.flux.html#module-flux.listen">flux.listen (module)</a>
+  </dt>
+
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="skyline.flux.html#module-flux.logger">flux.logger (module)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.flux.html#module-flux.populate_metric">flux.populate_metric (module)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.flux.html#module-flux.populate_metric_worker">flux.populate_metric_worker (module)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.flux.html#module-flux.worker">flux.worker (module)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.html#settings.FLUX_BACKLOG">FLUX_BACKLOG (in module settings)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.html#settings.FLUX_CARBON_HOST">FLUX_CARBON_HOST (in module settings)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.html#settings.FLUX_CARBON_PICKLE_PORT">FLUX_CARBON_PICKLE_PORT (in module settings)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.html#settings.FLUX_CARBON_PORT">FLUX_CARBON_PORT (in module settings)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.html#settings.FLUX_IP">FLUX_IP (in module settings)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.html#settings.FLUX_PORT">FLUX_PORT (in module settings)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.html#settings.FLUX_SELF_API_KEY">FLUX_SELF_API_KEY (in module settings)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.html#settings.FLUX_SEND_TO_CARBON">FLUX_SEND_TO_CARBON (in module settings)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.html#settings.FLUX_SEND_TO_STATSD">FLUX_SEND_TO_STATSD (in module settings)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.html#settings.FLUX_STATSD_HOST">FLUX_STATSD_HOST (in module settings)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.html#settings.FLUX_STATSD_PORT">FLUX_STATSD_PORT (in module settings)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.html#settings.FLUX_WORKERS">FLUX_WORKERS (in module settings)</a>
+  </dt>
+
       
   <dt><a href="skyline.html#ionosphere_functions.fp_create_engine_disposal">fp_create_engine_disposal() (in module ionosphere_functions)</a>
   </dt>
@@ -952,7 +1069,19 @@
 
       </dl></dd>
       
+  <dt><a href="skyline.analyzer.html#analyzer.alerters.get_graphite_custom_headers">get_graphite_custom_headers() (in module analyzer.alerters)</a>
+  </dt>
+
+      
   <dt><a href="skyline.html#skyline_functions.get_graphite_metric">get_graphite_metric() (in module skyline_functions)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.analyzer.html#analyzer.alerters.get_graphite_port">get_graphite_port() (in module analyzer.alerters)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.analyzer.html#analyzer.alerters.get_graphite_render_uri">get_graphite_render_uri() (in module analyzer.alerters)</a>
   </dt>
 
       
@@ -1010,11 +1139,23 @@
   </dt>
 
       
+  <dt><a href="skyline.html#skyline_functions.get_user_details">get_user_details() (in module skyline_functions)</a>
+  </dt>
+
+      
   <dt><a href="skyline.html#settings.GRAPH_URL">GRAPH_URL (in module settings)</a>
   </dt>
 
       
+  <dt><a href="skyline.html#settings.GRAPHITE_AUTH_HEADER">GRAPHITE_AUTH_HEADER (in module settings)</a>
+  </dt>
+
+      
   <dt><a href="skyline.html#settings.GRAPHITE_CONNECT_TIMEOUT">GRAPHITE_CONNECT_TIMEOUT (in module settings)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.html#settings.GRAPHITE_CUSTOM_HEADERS">GRAPHITE_CUSTOM_HEADERS (in module settings)</a>
   </dt>
 
       
@@ -1035,6 +1176,10 @@
 
       
   <dt><a href="skyline.html#settings.GRAPHITE_READ_TIMEOUT">GRAPHITE_READ_TIMEOUT (in module settings)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.html#settings.GRAPHITE_RENDER_URI">GRAPHITE_RENDER_URI (in module settings)</a>
   </dt>
 
       
@@ -1572,6 +1717,14 @@
   </dt>
 
       
+  <dt><a href="skyline.flux.html#flux.listen.MetricData">MetricData (class in flux.listen)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.flux.html#flux.listen.MetricDataPost">MetricDataPost (class in flux.listen)</a>
+  </dt>
+
+      
   <dt><a href="skyline.html#database.metrics_table_meta">metrics_table_meta() (in module database)</a>
   </dt>
 
@@ -1599,12 +1752,12 @@
   <dt><a href="skyline.mirage.html#module-mirage">mirage (module)</a>
   </dt>
 
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="skyline.mirage.html#module-mirage.agent">mirage.agent (module)</a>
   </dt>
 
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="skyline.mirage.html#module-mirage.mirage">mirage.mirage (module)</a>
   </dt>
@@ -1771,8 +1924,22 @@
   <dt><a href="skyline.html#settings.OCULUS_HOST">OCULUS_HOST (in module settings)</a>
   </dt>
 
+      
+  <dt><a href="skyline.flux.html#flux.listen.MetricData.on_get">on_get() (MetricData method)</a>
+  </dt>
+
   </dl></td>
   <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="skyline.flux.html#flux.listen.MetricDataPost.on_post">on_post() (MetricDataPost method)</a>
+  </dt>
+
+      <dd><dl>
+        
+  <dt><a href="skyline.flux.html#flux.populate_metric.PopulateMetric.on_post">(PopulateMetric method)</a>
+  </dt>
+
+      </dl></dd>
       
   <dt><a href="skyline.html#settings.OTHER_SKYLINE_REDIS_INSTANCES">OTHER_SKYLINE_REDIS_INSTANCES (in module settings)</a>
   </dt>
@@ -1843,12 +2010,12 @@
   <dt><a href="skyline.html#settings.PANORAMA_DBUSER">PANORAMA_DBUSER (in module settings)</a>
   </dt>
 
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="skyline.html#settings.PANORAMA_DBUSERPASS">PANORAMA_DBUSERPASS (in module settings)</a>
   </dt>
 
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="skyline.html#settings.PANORAMA_ENABLED">PANORAMA_ENABLED (in module settings)</a>
   </dt>
@@ -1887,6 +2054,14 @@
 
       
   <dt><a href="skyline.html#settings.PLOT_REDIS_DATA">PLOT_REDIS_DATA (in module settings)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.flux.html#flux.populate_metric.PopulateMetric">PopulateMetric (class in flux.populate_metric)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.flux.html#flux.populate_metric_worker.PopulateMetricWorker">PopulateMetricWorker (class in flux.populate_metric_worker)</a>
   </dt>
 
       
@@ -1992,12 +2167,20 @@
   </dt>
 
       
-  <dt><a href="skyline.analyzer.html#analyzer.analyzer.Analyzer.run">run() (Analyzer method)</a>, <a href="skyline.analyzer_dev.html#analyzer_dev.analyzer_dev.Analyzer.run">[1]</a>
+  <dt><a href="skyline.analyzer.html#analyzer.analyzer.Analyzer.run">run() (Analyzer method)</a>
   </dt>
 
       <dd><dl>
         
-  <dt><a href="skyline.analyzer.html#analyzer.agent.AnalyzerAgent.run">(AnalyzerAgent method)</a>, <a href="skyline.analyzer_dev.html#analyzer_dev.agent.AnalyzerAgent.run">[1]</a>
+  <dt><a href="skyline.analyzer.html#analyzer.agent.AnalyzerAgent.run">(AnalyzerAgent method)</a>
+  </dt>
+
+        
+  <dt><a href="skyline.analyzer_dev.html#analyzer_dev.analyzer_dev.AnalyzerDev.run">(AnalyzerDev method)</a>
+  </dt>
+
+        
+  <dt><a href="skyline.analyzer_dev.html#analyzer_dev.agent.AnalyzerDevAgent.run">(AnalyzerDevAgent method)</a>
   </dt>
 
         
@@ -2018,6 +2201,10 @@
 
         
   <dt><a href="skyline.crucible.html#crucible.agent.CrucibleAgent.run">(CrucibleAgent method)</a>
+  </dt>
+
+        
+  <dt><a href="skyline.vista.html#vista.fetcher.Fetcher.run">(Fetcher method)</a>
   </dt>
 
         
@@ -2061,11 +2248,19 @@
   </dt>
 
         
+  <dt><a href="skyline.flux.html#flux.populate_metric_worker.PopulateMetricWorker.run">(PopulateMetricWorker method)</a>
+  </dt>
+
+        
   <dt><a href="skyline.horizon.html#horizon.roomba.Roomba.run">(Roomba method)</a>
   </dt>
 
         
-  <dt><a href="skyline.horizon.html#horizon.worker.Worker.run">(Worker method)</a>
+  <dt><a href="skyline.vista.html#vista.agent.Vista.run">(Vista method)</a>
+  </dt>
+
+        
+  <dt><a href="skyline.flux.html#flux.worker.Worker.run">(Worker method)</a>, <a href="skyline.horizon.html#horizon.worker.Worker.run">[1]</a>, <a href="skyline.vista.html#vista.worker.Worker.run">[2]</a>
   </dt>
 
         
@@ -2090,6 +2285,10 @@
 
         
   <dt><a href="skyline.mirage.html#mirage.agent.run">(in module mirage.agent)</a>
+  </dt>
+
+        
+  <dt><a href="skyline.vista.html#vista.agent.run">(in module vista.agent)</a>
   </dt>
 
         
@@ -2152,15 +2351,9 @@
   </dt>
 
       
-  <dt><a href="skyline.analyzer_dev.html#analyzer_dev.analyzer_dev.Analyzer.send_graphite_metric">send_graphite_metric() (Analyzer method)</a>
+  <dt><a href="skyline.html#skyline_functions.send_graphite_metric">send_graphite_metric() (in module skyline_functions)</a>
   </dt>
 
-      <dd><dl>
-        
-  <dt><a href="skyline.html#skyline_functions.send_graphite_metric">(in module skyline_functions)</a>
-  </dt>
-
-      </dl></dd>
       
   <dt><a href="skyline.html#settings.SERVER_METRICS_NAME">SERVER_METRICS_NAME (in module settings)</a>
   </dt>
@@ -2171,6 +2364,10 @@
 
       
   <dt><a href="skyline.html#skyline_functions.set_metric_as_derivative">set_metric_as_derivative() (in module skyline_functions)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.flux.html#flux.logger.set_up_logging">set_up_logging() (in module flux.logger)</a>
   </dt>
 
       
@@ -2187,6 +2384,10 @@
 
       
   <dt><a href="skyline.boundary.html#boundary.boundary_alerters.skyline_app_logfile">skyline_app_logfile (in module boundary.boundary_alerters)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.html#settings.SKYLINE_FEEDBACK_NAMESPACES">SKYLINE_FEEDBACK_NAMESPACES (in module settings)</a>
   </dt>
 
       
@@ -2220,34 +2421,54 @@
   </dt>
 
       
+  <dt><a href="skyline.html#module-slack_functions">slack_functions (module)</a>
+  </dt>
+
+      
   <dt><a href="skyline.html#settings.SLACK_OPTS">SLACK_OPTS (in module settings)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.html#slack_functions.slack_post_message">slack_post_message() (in module slack_functions)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.html#slack_functions.slack_post_reaction">slack_post_reaction() (in module slack_functions)</a>
   </dt>
 
       
   <dt><a href="skyline.html#settings.SMTP_OPTS">SMTP_OPTS (in module settings)</a>
   </dt>
 
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="skyline.analyzer.html#analyzer.analyzer.Analyzer.spawn_alerter_process">spawn_alerter_process() (Analyzer method)</a>
   </dt>
 
       <dd><dl>
         
+  <dt><a href="skyline.analyzer_dev.html#analyzer_dev.analyzer_dev.AnalyzerDev.spawn_alerter_process">(AnalyzerDev method)</a>
+  </dt>
+
+        
   <dt><a href="skyline.mirage.html#mirage.mirage.Mirage.spawn_alerter_process">(Mirage method)</a>
   </dt>
 
       </dl></dd>
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="skyline.ionosphere.html#ionosphere.ionosphere.Ionosphere.spawn_learn_process">spawn_learn_process() (Ionosphere method)</a>
   </dt>
 
       
-  <dt><a href="skyline.analyzer.html#analyzer.analyzer.Analyzer.spin_process">spin_process() (Analyzer method)</a>, <a href="skyline.analyzer_dev.html#analyzer_dev.analyzer_dev.Analyzer.spin_process">[1]</a>
+  <dt><a href="skyline.analyzer.html#analyzer.analyzer.Analyzer.spin_process">spin_process() (Analyzer method)</a>
   </dt>
 
       <dd><dl>
+        
+  <dt><a href="skyline.analyzer_dev.html#analyzer_dev.analyzer_dev.AnalyzerDev.spin_process">(AnalyzerDev method)</a>
+  </dt>
+
         
   <dt><a href="skyline.boundary.html#boundary.boundary.Boundary.spin_process">(Boundary method)</a>
   </dt>
@@ -2438,6 +2659,10 @@
   </dl></td>
   <td style="width: 33%" valign="top"><dl>
       
+  <dt><a href="skyline.panorama.html#panorama.panorama.Panorama.update_slack_thread_ts">update_slack_thread_ts() (Panorama method)</a>
+  </dt>
+
+      
   <dt><a href="skyline.webapp.html#webapp.webapp.urlsafe_base64_encode">urlsafe_base64_encode() (in module webapp.webapp)</a>
   </dt>
 
@@ -2459,8 +2684,14 @@
   <dt><a href="skyline.webapp.html#webapp.ionosphere_backend.validate_fp">validate_fp() (in module webapp.ionosphere_backend)</a>
   </dt>
 
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="skyline.webapp.html#webapp.ionosphere_backend.validate_ionosphere_match">validate_ionosphere_match() (in module webapp.ionosphere_backend)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.flux.html#flux.listen.validate_key">validate_key() (in module flux.listen)</a>
+  </dt>
+
       
   <dt><a href="skyline.html#module-validate_settings">validate_settings (module)</a>
   </dt>
@@ -2470,7 +2701,57 @@
   </dt>
 
       
+  <dt><a href="skyline.flux.html#flux.listen.validate_timestamp">validate_timestamp() (in module flux.listen)</a>
+  </dt>
+
+      
   <dt><a href="skyline.webapp.html#webapp.webapp.version">version() (in module webapp.webapp)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.vista.html#vista.agent.Vista">Vista (class in vista.agent)</a>
+  </dt>
+
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="skyline.vista.html#module-vista">vista (module)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.vista.html#module-vista.agent">vista.agent (module)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.vista.html#module-vista.fetcher">vista.fetcher (module)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.vista.html#module-vista.worker">vista.worker (module)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.html#settings.VISTA_DO_NOT_SUBMIT_CURRENT_MINUTE">VISTA_DO_NOT_SUBMIT_CURRENT_MINUTE (in module settings)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.html#settings.VISTA_ENABLED">VISTA_ENABLED (in module settings)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.html#settings.VISTA_FETCH_GRAPHITE_METRICS">VISTA_FETCH_GRAPHITE_METRICS (in module settings)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.html#settings.VISTA_FETCHER_PROCESS_MAX_RUNTIME">VISTA_FETCHER_PROCESS_MAX_RUNTIME (in module settings)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.html#settings.VISTA_FETCHER_PROCESSES">VISTA_FETCHER_PROCESSES (in module settings)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.html#settings.VISTA_WORKER_PROCESSES">VISTA_WORKER_PROCESSES (in module settings)</a>
   </dt>
 
   </dl></td>
@@ -2523,12 +2804,12 @@
   <dt><a href="skyline.html#settings.WEBAPP_FIXED_TIMEZONE">WEBAPP_FIXED_TIMEZONE (in module settings)</a>
   </dt>
 
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="skyline.html#settings.WEBAPP_IP">WEBAPP_IP (in module settings)</a>
   </dt>
 
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="skyline.html#settings.WEBAPP_IP_RESTRICTED">WEBAPP_IP_RESTRICTED (in module settings)</a>
   </dt>
@@ -2554,13 +2835,27 @@
   </dt>
 
       
+  <dt><a href="skyline.webapp.html#webapp.ionosphere_backend.webapp_update_slack_thread">webapp_update_slack_thread() (in module webapp.ionosphere_backend)</a>
+  </dt>
+
+      
   <dt><a href="skyline.html#settings.WEBAPP_USER_TIMEZONE">WEBAPP_USER_TIMEZONE (in module settings)</a>
   </dt>
 
       
-  <dt><a href="skyline.horizon.html#horizon.worker.Worker">Worker (class in horizon.worker)</a>
+  <dt><a href="skyline.flux.html#flux.worker.Worker">Worker (class in flux.worker)</a>
   </dt>
 
+      <dd><dl>
+        
+  <dt><a href="skyline.horizon.html#horizon.worker.Worker">(class in horizon.worker)</a>
+  </dt>
+
+        
+  <dt><a href="skyline.vista.html#vista.worker.Worker">(class in vista.worker)</a>
+  </dt>
+
+      </dl></dd>
       
   <dt><a href="skyline.html#settings.WORKER_PROCESSES">WORKER_PROCESSES (in module settings)</a>
   </dt>
@@ -2605,7 +2900,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2.14',
+            VERSION:'1.3.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

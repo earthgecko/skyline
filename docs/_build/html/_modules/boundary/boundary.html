@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>boundary.boundary &mdash; Skyline 1.2.14 documentation</title>
+  <title>boundary.boundary &mdash; Skyline 1.3.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.2.14 documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 1.3.0 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                1.2
+                1.3
               </div>
             
           
@@ -94,6 +94,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../docker.html">docker - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../analyzer.html">Analyzer</a></li>
@@ -107,7 +109,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../../ionosphere_echo.html">Ionosphere echo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
@@ -176,7 +181,11 @@
 <span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">time</span><span class="p">,</span> <span class="n">sleep</span>
 <span class="kn">from</span> <span class="nn">threading</span> <span class="k">import</span> <span class="n">Thread</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">defaultdict</span>
-<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="k">import</span> <span class="n">Process</span><span class="p">,</span> <span class="n">Manager</span><span class="p">,</span> <span class="n">Queue</span>
+<span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+<span class="c1"># Use Redis sets in place of Manager().list to reduce memory and number of</span>
+<span class="c1"># processes</span>
+<span class="c1"># from multiprocessing import Process, Manager, Queue</span>
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="k">import</span> <span class="n">Process</span><span class="p">,</span> <span class="n">Queue</span>
 <span class="kn">from</span> <span class="nn">msgpack</span> <span class="k">import</span> <span class="n">Unpacker</span><span class="p">,</span> <span class="n">packb</span>
 <span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">path</span><span class="p">,</span> <span class="n">kill</span><span class="p">,</span> <span class="n">getpid</span>
 <span class="kn">from</span> <span class="nn">math</span> <span class="k">import</span> <span class="n">ceil</span>
@@ -185,9 +194,12 @@
 <span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">errno</span>
-
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">os.path</span>
+<span class="c1"># @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+<span class="c1"># literal_eval required to evaluate Redis sets</span>
+<span class="kn">from</span> <span class="nn">ast</span> <span class="k">import</span> <span class="n">literal_eval</span>
+
 <span class="kn">import</span> <span class="nn">settings</span>
 <span class="c1"># @modified 20171216 - Task #2236: Change Boundary to only send to Panorama on alert</span>
 <span class="c1"># Added move_file</span>
@@ -250,12 +262,21 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parent_pid</span> <span class="o">=</span> <span class="n">parent_pid</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">current_pid</span> <span class="o">=</span> <span class="n">getpid</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">boundary_metrics</span> <span class="o">=</span> <span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">anomalous_metrics</span> <span class="o">=</span> <span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
+        <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+        <span class="c1">#                      Task #3032: Debug number of Python processes and memory use</span>
+        <span class="c1">#                      Branch #3002: docker</span>
+        <span class="c1"># Reduce amount of Manager instances that are used as each requires a</span>
+        <span class="c1"># copy of entire memory to be copied into each subprocess so this</span>
+        <span class="c1"># results in a python process per Manager instance, using as much</span>
+        <span class="c1"># memory as the parent.  OK on a server, not so much in a container.</span>
+        <span class="c1"># Disabled all the Manager() lists below and replaced with Redis sets</span>
+        <span class="c1"># self.boundary_metrics = Manager().list()</span>
+        <span class="c1"># self.anomalous_metrics = Manager().list()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">exceptions_q</span> <span class="o">=</span> <span class="n">Queue</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">anomaly_breakdown_q</span> <span class="o">=</span> <span class="n">Queue</span><span class="p">()</span>
         <span class="c1"># @added 20171214 - Bug #2232: Expiry boundary last_seen keys appropriately</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">not_anomalous_metrics</span> <span class="o">=</span> <span class="n">Manager</span><span class="p">()</span><span class="o">.</span><span class="n">list</span><span class="p">()</span>
+        <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+        <span class="c1"># self.not_anomalous_metrics = Manager().list()</span>
 
 <div class="viewcode-block" id="Boundary.check_if_parent_is_alive"><a class="viewcode-back" href="../../skyline.boundary.html#boundary.boundary.Boundary.check_if_parent_is_alive">[docs]</a>    <span class="k">def</span> <span class="nf">check_if_parent_is_alive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -603,7 +624,13 @@
                     <span class="c1"># If it&#39;s not anomalous, add it to list</span>
                     <span class="k">if</span> <span class="ow">not</span> <span class="n">anomalous</span><span class="p">:</span>
                         <span class="n">not_anomalous_metric</span> <span class="o">=</span> <span class="p">[</span><span class="n">datapoint</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">metric_expiration_time</span><span class="p">,</span> <span class="n">metric_min_average</span><span class="p">,</span> <span class="n">metric_min_average_seconds</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">,</span> <span class="n">alert_threshold</span><span class="p">,</span> <span class="n">metric_alerters</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">]</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">not_anomalous_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">not_anomalous_metric</span><span class="p">)</span>
+                        <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+                        <span class="c1"># self.not_anomalous_metrics.append(not_anomalous_metric)</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="s1">&#39;boundary.not_anomalous_metrics&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">not_anomalous_metric</span><span class="p">))</span>
+                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not add </span><span class="si">%s</span><span class="s1"> to Redis set boundary.not_anomalous_metrics: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">not_anomalous_metric</span><span class="p">),</span> <span class="n">e</span><span class="p">))</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">False</span>
                     <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
@@ -612,7 +639,14 @@
                 <span class="c1"># If it&#39;s anomalous, add it to list</span>
                 <span class="k">if</span> <span class="n">anomalous</span><span class="p">:</span>
                     <span class="n">anomalous_metric</span> <span class="o">=</span> <span class="p">[</span><span class="n">datapoint</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">metric_expiration_time</span><span class="p">,</span> <span class="n">metric_min_average</span><span class="p">,</span> <span class="n">metric_min_average_seconds</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">,</span> <span class="n">alert_threshold</span><span class="p">,</span> <span class="n">metric_alerters</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">]</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">anomalous_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">anomalous_metric</span><span class="p">)</span>
+                    <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+                    <span class="c1"># self.anomalous_metrics.append(anomalous_metric)</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="s1">&#39;boundary.anomalous_metrics&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomalous_metric</span><span class="p">))</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not add </span><span class="si">%s</span><span class="s1"> to Redis set boundary.anomalous_metrics: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">anomalous_metric</span><span class="p">),</span> <span class="n">e</span><span class="p">))</span>
+
                     <span class="c1"># Get the anomaly breakdown - who returned True?</span>
                     <span class="n">triggered_algorithms</span> <span class="o">=</span> <span class="p">[]</span>
                     <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ensemble</span><span class="p">):</span>
@@ -813,6 +847,47 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;bin/</span><span class="si">%s</span><span class="s1">.d log management done&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
 
+        <span class="c1"># @added 20190417 - Feature #2950: Report defaulted settings to log</span>
+        <span class="c1"># Added all the globally declared settings to enable reporting in the</span>
+        <span class="c1"># log the state of each setting.</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">SERVER_METRICS_NAME</span>
+            <span class="k">if</span> <span class="n">SERVER_METRIC_PATH</span> <span class="o">==</span> <span class="s1">&#39;.&#39;</span><span class="p">:</span>
+                <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;SERVER_METRIC_PATH is set from settings.py to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">SERVER_METRIC_PATH</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;warning :: SERVER_METRIC_PATH is not declared in settings.py, defaults to </span><span class="se">\&#39;\&#39;</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;skyline_app_graphite_namespace is set to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">skyline_app_graphite_namespace</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">BOUNDARY_METRICS</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">BOUNDARY_METRICS</span>
+            <span class="n">boundary_metrics_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">BOUNDARY_METRICS</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;BOUNDARY_METRICS is set from settings.py with </span><span class="si">%s</span><span class="s1"> Boundry metrics&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">boundary_metrics_count</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">BOUNDARY_METRICS</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;warning :: BOUNDARY_METRICS is not declared in settings.py, defaults to []&#39;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">ENABLE_BOUNDARY_DEBUG</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_BOUNDARY_DEBUG</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ENABLE_BOUNDARY_DEBUG is set from settings.py to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;warning :: ENABLE_BOUNDARY_DEBUG is not declared in settings.py, defaults to False&#39;</span><span class="p">)</span>
+            <span class="n">ENABLE_BOUNDARY_DEBUG</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">BOUNDARY_AUTOAGGRERATION</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">BOUNDARY_AUTOAGGRERATION</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;BOUNDARY_AUTOAGGRERATION is set from settings.py to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">BOUNDARY_AUTOAGGRERATION</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">BOUNDARY_AUTOAGGRERATION</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;warning :: BOUNDARY_AUTOAGGRERATION is not declared in settings.py, defaults to False&#39;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">BOUNDARY_AUTOAGGRERATION_METRICS</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">BOUNDARY_AUTOAGGRERATION_METRICS</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;BOUNDARY_AUTOAGGRERATION_METRICS is set from settings.py&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">BOUNDARY_AUTOAGGRERATION_METRICS</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="p">(</span><span class="s2">&quot;auotaggeration_metrics_not_declared&quot;</span><span class="p">,</span> <span class="mi">60</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;warning :: BOUNDARY_AUTOAGGRERATION_METRICS is not declared in settings.py, defaults to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">BOUNDARY_AUTOAGGRERATION_METRICS</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span>
+
         <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
 
@@ -910,10 +985,25 @@
                 <span class="k">except</span> <span class="n">Empty</span><span class="p">:</span>
                     <span class="k">break</span>
 
+            <span class="c1"># @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+            <span class="c1"># Use Redis set instead of Manager() list</span>
+            <span class="n">boundary_not_anomalous_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">literal_boundary_not_anomalous_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;boundary.not_anomalous_metrics&#39;</span><span class="p">))</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to generate list from Redis set boundary.not_anomalous_metrics&#39;</span><span class="p">)</span>
+                <span class="n">literal_boundary_not_anomalous_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">metric_list_string</span> <span class="ow">in</span> <span class="n">literal_boundary_not_anomalous_metrics</span><span class="p">:</span>
+                <span class="n">metric</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">metric_list_string</span><span class="p">)</span>
+                <span class="n">boundary_not_anomalous_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
+
             <span class="c1"># @added 20171214 - Bug #2232: Expiry boundary last_seen keys appropriately</span>
             <span class="c1"># Expire keys</span>
             <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">BOUNDARY_ENABLE_ALERTS</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">not_anomalous_metric</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">not_anomalous_metrics</span><span class="p">:</span>
+                <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+                <span class="c1"># for not_anomalous_metric in self.not_anomalous_metrics:</span>
+                <span class="k">for</span> <span class="n">not_anomalous_metric</span> <span class="ow">in</span> <span class="n">boundary_not_anomalous_metrics</span><span class="p">:</span>
                     <span class="n">metric_name</span> <span class="o">=</span> <span class="n">not_anomalous_metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
                     <span class="n">base_name</span> <span class="o">=</span> <span class="n">metric_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
                     <span class="n">algorithm</span> <span class="o">=</span> <span class="n">not_anomalous_metric</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span>
@@ -958,9 +1048,24 @@
                                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: error removing tmp_panaroma_anomaly_file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmp_panaroma_anomaly_file</span><span class="p">)))</span>
                             <span class="k">pass</span>
 
+            <span class="c1"># @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+            <span class="c1"># Use Redis set instead of Manager() list</span>
+            <span class="n">boundary_anomalous_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">literal_boundary_anomalous_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;boundary.anomalous_metrics&#39;</span><span class="p">))</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to generate list from Redis set boundary.anomalous_metrics&#39;</span><span class="p">)</span>
+                <span class="n">literal_boundary_anomalous_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">metric_list_string</span> <span class="ow">in</span> <span class="n">literal_boundary_anomalous_metrics</span><span class="p">:</span>
+                <span class="n">metric</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">metric_list_string</span><span class="p">)</span>
+                <span class="n">boundary_anomalous_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
+
             <span class="c1"># Send alerts</span>
             <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">BOUNDARY_ENABLE_ALERTS</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">anomalous_metric</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">anomalous_metrics</span><span class="p">:</span>
+                <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+                <span class="c1"># for anomalous_metric in self.anomalous_metrics:</span>
+                <span class="k">for</span> <span class="n">anomalous_metric</span> <span class="ow">in</span> <span class="n">boundary_anomalous_metrics</span><span class="p">:</span>
                     <span class="n">datapoint</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomalous_metric</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
                     <span class="n">metric_name</span> <span class="o">=</span> <span class="n">anomalous_metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
                     <span class="n">base_name</span> <span class="o">=</span> <span class="n">metric_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
@@ -1200,18 +1305,24 @@
                             <span class="k">pass</span>
 
             <span class="c1"># Write anomalous_metrics to static webapp directory</span>
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">anomalous_metrics</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+            <span class="c1"># if len(self.anomalous_metrics) &gt; 0:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">boundary_anomalous_metrics</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">filename</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">ANOMALY_DUMP</span><span class="p">))</span>
                 <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
                     <span class="c1"># Make it JSONP with a handle_data() function</span>
-                    <span class="n">anomalous_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">anomalous_metrics</span><span class="p">)</span>
+                    <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+                    <span class="c1"># anomalous_metrics = list(self.anomalous_metrics)</span>
+                    <span class="n">anomalous_metrics</span> <span class="o">=</span> <span class="n">boundary_anomalous_metrics</span>
                     <span class="n">anomalous_metrics</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">itemgetter</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
                     <span class="n">fh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;handle_data(</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="n">anomalous_metrics</span><span class="p">)</span>
 
             <span class="n">run_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">now</span>
             <span class="n">total_metrics</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">boundary_metrics</span><span class="p">))</span>
             <span class="n">total_analyzed</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">boundary_metrics</span><span class="p">)</span> <span class="o">-</span> <span class="nb">sum</span><span class="p">(</span><span class="n">exceptions</span><span class="o">.</span><span class="n">values</span><span class="p">()))</span>
-            <span class="n">total_anomalies</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">anomalous_metrics</span><span class="p">))</span>
+            <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+            <span class="c1"># total_anomalies = str(len(self.anomalous_metrics))</span>
+            <span class="n">total_anomalies</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">boundary_anomalous_metrics</span><span class="p">))</span>
 
             <span class="c1"># Log progress</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;seconds to run    :: </span><span class="si">%.2f</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">run_time</span><span class="p">)</span>
@@ -1258,9 +1369,22 @@
                 <span class="n">send_graphite_metric</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">send_metric_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">projected</span><span class="p">))</span>
 
             <span class="c1"># Reset counters</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">anomalous_metrics</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+            <span class="c1"># self.anomalous_metrics[:] = []</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s1">&#39;boundary.anomalous_metrics&#39;</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;failed to delete boundary.anomalous_metrics Redis set&#39;</span><span class="p">)</span>
+                <span class="k">pass</span>
+
             <span class="c1"># @added 20171214 - Bug #2232: Expiry boundary last_seen keys appropriately</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">not_anomalous_metrics</span><span class="p">[:]</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+            <span class="c1"># self.not_anomalous_metrics[:] = []</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s1">&#39;boundary.not_anomalous_metrics&#39;</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;failed to delete boundary.not_anomalous_metrics Redis set&#39;</span><span class="p">)</span>
+                <span class="k">pass</span>
 
             <span class="c1"># Only run once per</span>
             <span class="n">process_runtime</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">now</span>
@@ -1306,7 +1430,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.2.14',
+            VERSION:'1.3.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

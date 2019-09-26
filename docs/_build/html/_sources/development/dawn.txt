@@ -21,9 +21,9 @@ iptables/iptables6/ufw.  It should not be used to deploy any other kind of
 environment unless the other components such as Graphite, iptables/iptables6/ufw
 are configured at the same time.  The build script is suitable for:
 
-- CentOS 6.9
-- CentOS 7.5 and 7.6
-- Ubuntu 16.04.4 LTS
+- CentOS 6.9 (last build time 23 mins)
+- CentOS 7.5 and 7.6 (last build time 23 mins)
+- Ubuntu 16.04.4 LTS (last build time 21 mins)
 
 .. warning:: If you are running on CentOS 6 mysql-connector-python needs to be
   fixed to 8.0.6 on CentOS 6 as if you use MySQL 5.1 rpm from mainstream, as of

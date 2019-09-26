@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>skyline.analyzer_dev package &mdash; Skyline 1.2.14 documentation</title>
+  <title>skyline.analyzer_dev package &mdash; Skyline 1.3.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.2.14 documentation" href="index.html"/>
+    <link rel="top" title="Skyline 1.3.0 documentation" href="index.html"/>
         <link rel="up" title="skyline package" href="skyline.html"/>
         <link rel="next" title="skyline.boundary package" href="skyline.boundary.html"/>
         <link rel="prev" title="skyline.analyzer package" href="skyline.analyzer.html"/> 
@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                1.2
+                1.3
               </div>
             
           
@@ -96,6 +96,8 @@
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="docker.html">docker - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
 <li class="toctree-l1"><a class="reference internal" href="analyzer.html">Analyzer</a></li>
@@ -109,7 +111,10 @@
 <li class="toctree-l1"><a class="reference internal" href="ionosphere_echo.html">Ionosphere echo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-multiple-skylines.html">Running multiple Skyline instances</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
@@ -136,12 +141,14 @@
 </li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.boundary.html">skyline.boundary package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.crucible.html">skyline.crucible package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.flux.html">skyline.flux package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.horizon.html">skyline.horizon package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.ionosphere.html">skyline.ionosphere package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.luminosity.html">skyline.luminosity package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.mirage.html">skyline.mirage package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.panorama.html">skyline.panorama package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.tsfresh_features.html">skyline.tsfresh_features package</a></li>
+<li class="toctree-l3"><a class="reference internal" href="skyline.vista.html">skyline.vista package</a></li>
 <li class="toctree-l3"><a class="reference internal" href="skyline.webapp.html">skyline.webapp package</a></li>
 </ul>
 </li>
@@ -153,6 +160,7 @@
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-settings">skyline.settings module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-skyline_functions">skyline.skyline_functions module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-skyline_version">skyline.skyline_version module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-slack_functions">skyline.slack_functions module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-tsfresh_feature_names">skyline.tsfresh_feature_names module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-validate_settings">skyline.validate_settings module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-contents">Module contents</a></li>
@@ -212,11 +220,11 @@
 <div class="section" id="module-analyzer_dev.agent">
 <span id="skyline-analyzer-dev-agent-module"></span><h2>skyline.analyzer_dev.agent module<a class="headerlink" href="#module-analyzer_dev.agent" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
-<dt id="analyzer_dev.agent.AnalyzerAgent">
-<em class="property">class </em><code class="descname">AnalyzerAgent</code><a class="reference internal" href="_modules/analyzer_dev/agent.html#AnalyzerAgent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer_dev.agent.AnalyzerAgent" title="Permalink to this definition">¶</a></dt>
+<dt id="analyzer_dev.agent.AnalyzerDevAgent">
+<em class="property">class </em><code class="descname">AnalyzerDevAgent</code><a class="reference internal" href="_modules/analyzer_dev/agent.html#AnalyzerDevAgent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer_dev.agent.AnalyzerDevAgent" title="Permalink to this definition">¶</a></dt>
 <dd><dl class="method">
-<dt id="analyzer_dev.agent.AnalyzerAgent.run">
-<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer_dev/agent.html#AnalyzerAgent.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer_dev.agent.AnalyzerAgent.run" title="Permalink to this definition">¶</a></dt>
+<dt id="analyzer_dev.agent.AnalyzerDevAgent.run">
+<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer_dev/agent.html#AnalyzerDevAgent.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer_dev.agent.AnalyzerDevAgent.run" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
@@ -398,38 +406,52 @@ metric has a past history of triggering. TODO: weight intervals based on datapoi
 <div class="section" id="module-analyzer_dev.analyzer_dev">
 <span id="skyline-analyzer-dev-analyzer-dev-module"></span><h2>skyline.analyzer_dev.analyzer_dev module<a class="headerlink" href="#module-analyzer_dev.analyzer_dev" title="Permalink to this headline">¶</a></h2>
 <dl class="class">
-<dt id="analyzer_dev.analyzer_dev.Analyzer">
-<em class="property">class </em><code class="descname">Analyzer</code><span class="sig-paren">(</span><em>parent_pid</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer_dev/analyzer_dev.html#Analyzer"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer_dev.analyzer_dev.Analyzer" title="Permalink to this definition">¶</a></dt>
+<dt id="analyzer_dev.analyzer_dev.AnalyzerDev">
+<em class="property">class </em><code class="descname">AnalyzerDev</code><span class="sig-paren">(</span><em>parent_pid</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer_dev/analyzer_dev.html#AnalyzerDev"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer_dev.analyzer_dev.AnalyzerDev" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">threading.Thread</span></code></p>
 <p>The Analyzer class which controls the analyzer thread and spawned processes.</p>
 <dl class="method">
-<dt id="analyzer_dev.analyzer_dev.Analyzer.check_if_parent_is_alive">
-<code class="descname">check_if_parent_is_alive</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer_dev/analyzer_dev.html#Analyzer.check_if_parent_is_alive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer_dev.analyzer_dev.Analyzer.check_if_parent_is_alive" title="Permalink to this definition">¶</a></dt>
+<dt id="analyzer_dev.analyzer_dev.AnalyzerDev.check_if_parent_is_alive">
+<code class="descname">check_if_parent_is_alive</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer_dev/analyzer_dev.html#AnalyzerDev.check_if_parent_is_alive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer_dev.analyzer_dev.AnalyzerDev.check_if_parent_is_alive" title="Permalink to this definition">¶</a></dt>
 <dd><p>Self explanatory</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="analyzer_dev.analyzer_dev.Analyzer.send_graphite_metric">
-<code class="descname">send_graphite_metric</code><span class="sig-paren">(</span><em>name</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer_dev/analyzer_dev.html#Analyzer.send_graphite_metric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer_dev.analyzer_dev.Analyzer.send_graphite_metric" title="Permalink to this definition">¶</a></dt>
-<dd><p>Sends the skyline_app metrics to the <cite>GRAPHITE_HOST</cite> if a graphite
-host is defined.</p>
+<dt id="analyzer_dev.analyzer_dev.AnalyzerDev.spawn_alerter_process">
+<code class="descname">spawn_alerter_process</code><span class="sig-paren">(</span><em>alert</em>, <em>metric</em>, <em>context</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer_dev/analyzer_dev.html#AnalyzerDev.spawn_alerter_process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer_dev.analyzer_dev.AnalyzerDev.spawn_alerter_process" title="Permalink to this definition">¶</a></dt>
+<dd><p>Spawn a process to trigger an alert.</p>
+<p>This is used by smtp alerters so that matplotlib objects are cleared
+down and the alerter cannot create a memory leak in this manner and
+plt.savefig keeps the object in memory until the process terminates.
+Seeing as data is being surfaced and processed in the alert_smtp
+context, multiprocessing the alert creation and handling prevents any
+memory leaks in the parent.</p>
+<p>Added 20160814 relating to:</p>
+<ul class="simple">
+<li>Bug #1558: Memory leak in Analyzer</li>
+<li>Issue #21 Memory leak in Analyzer see <a class="reference external" href="https://github.com/earthgecko/skyline/issues/21">https://github.com/earthgecko/skyline/issues/21</a></li>
+</ul>
+<p>Parameters as per <a class="reference internal" href="skyline.analyzer.html#analyzer.alerters.trigger_alert" title="analyzer.alerters.trigger_alert"><code class="xref py py-func docutils literal"><span class="pre">skyline.analyzer.alerters.trigger_alert</span></code></a></p>
 </dd></dl>
 
 <dl class="method">
-<dt id="analyzer_dev.analyzer_dev.Analyzer.spin_process">
-<code class="descname">spin_process</code><span class="sig-paren">(</span><em>i</em>, <em>unique_metrics</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer_dev/analyzer_dev.html#Analyzer.spin_process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer_dev.analyzer_dev.Analyzer.spin_process" title="Permalink to this definition">¶</a></dt>
+<dt id="analyzer_dev.analyzer_dev.AnalyzerDev.spin_process">
+<code class="descname">spin_process</code><span class="sig-paren">(</span><em>i</em>, <em>unique_metrics</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer_dev/analyzer_dev.html#AnalyzerDev.spin_process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer_dev.analyzer_dev.AnalyzerDev.spin_process" title="Permalink to this definition">¶</a></dt>
 <dd><p>Assign a bunch of metrics for a process to analyze.</p>
 <p>Multiple get the assigned_metrics to the process from Redis.</p>
 <p>For each metric:</p>
-<ul>
-<li><p class="first">unpack the <cite>raw_timeseries</cite> for the metric.</p>
-</li>
-<li><p class="first">Analyse each timeseries against <cite>ALGORITHMS</cite> to determine if it is</p>
-<p>anomalous.</p>
-</li>
-<li><p class="first">If anomalous add it to the <code class="xref py py-obj docutils literal"><span class="pre">self.anomalous_metrics</span></code> list</p>
-</li>
-<li><p class="first">Add what algorithms triggered to the <code class="xref py py-obj docutils literal"><span class="pre">self.anomaly_breakdown_q</span></code> queue</p>
+<ul class="simple">
+<li>unpack the <cite>raw_timeseries</cite> for the metric.</li>
+<li>Analyse each timeseries against <cite>ALGORITHMS</cite> to determine if it is
+anomalous.</li>
+<li>If anomalous add it to the <code class="xref py py-obj docutils literal"><span class="pre">self.anomalous_metrics</span></code> list</li>
+<li>Add what algorithms triggered to the <code class="xref py py-obj docutils literal"><span class="pre">self.anomaly_breakdown_q</span></code>
+queue</li>
+<li>If <a class="reference internal" href="skyline.html#settings.ENABLE_CRUCIBLE" title="settings.ENABLE_CRUCIBLE"><code class="xref py py-mod docutils literal"><span class="pre">settings.ENABLE_CRUCIBLE</span></code></a> is <code class="docutils literal"><span class="pre">True</span></code>:<ul>
+<li>Add a crucible data file with the details about the timeseries and
+anomaly.</li>
+<li>Write the timeseries to a json file for crucible.</li>
+</ul>
 </li>
 </ul>
 <p>Add keys and values to the queue so the parent process can collate for:</p>
@@ -440,8 +462,8 @@ host is defined.</p>
 </dd></dl>
 
 <dl class="method">
-<dt id="analyzer_dev.analyzer_dev.Analyzer.run">
-<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer_dev/analyzer_dev.html#Analyzer.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer_dev.analyzer_dev.Analyzer.run" title="Permalink to this definition">¶</a></dt>
+<dt id="analyzer_dev.analyzer_dev.AnalyzerDev.run">
+<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/analyzer_dev/analyzer_dev.html#AnalyzerDev.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#analyzer_dev.analyzer_dev.AnalyzerDev.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Called when the process intializes.</p>
 <p>Determine if Redis is up and discover the number of <cite>unique metrics</cite>.</p>
 <p>Divide the <cite>unique_metrics</cite> between the number of <cite>ANALYZER_PROCESSES</cite>
@@ -506,7 +528,7 @@ and assign each process a set of metrics to analyse for anomalies.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.2.14',
+            VERSION:'1.3.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

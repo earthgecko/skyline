@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ionosphere_functions &mdash; Skyline 1.2.14 documentation</title>
+  <title>ionosphere_functions &mdash; Skyline 1.3.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Skyline 1.2.14 documentation" href="../index.html"/>
+    <link rel="top" title="Skyline 1.3.0 documentation" href="../index.html"/>
         <link rel="up" title="Module code" href="index.html"/> 
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                1.2
+                1.3
               </div>
             
           
@@ -94,6 +94,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../docker.html">docker - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../horizon.html">Horizon</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../analyzer.html">Analyzer</a></li>
@@ -107,7 +109,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../ionosphere_echo.html">Ionosphere echo</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../vista.html">Vista</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
@@ -182,23 +187,35 @@
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span>
 
 <span class="kn">from</span> <span class="nn">redis</span> <span class="k">import</span> <span class="n">StrictRedis</span>
+<span class="c1"># @modified 20190503 - Branch #2646: slack - linting</span>
+<span class="c1"># from sqlalchemy import (</span>
+<span class="c1">#     create_engine, Column, Table, Integer, String, MetaData, DateTime)</span>
 <span class="kn">from</span> <span class="nn">sqlalchemy</span> <span class="k">import</span> <span class="p">(</span>
-    <span class="n">create_engine</span><span class="p">,</span> <span class="n">Column</span><span class="p">,</span> <span class="n">Table</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">String</span><span class="p">,</span> <span class="n">MetaData</span><span class="p">,</span> <span class="n">DateTime</span><span class="p">)</span>
-<span class="kn">from</span> <span class="nn">sqlalchemy.dialects.mysql</span> <span class="k">import</span> <span class="n">DOUBLE</span><span class="p">,</span> <span class="n">TINYINT</span>
+    <span class="n">Column</span><span class="p">,</span> <span class="n">Table</span><span class="p">,</span> <span class="n">Integer</span><span class="p">,</span> <span class="n">MetaData</span><span class="p">)</span>
+
+<span class="c1"># @modified 20190503 - Branch #2646: slack - linting</span>
+<span class="c1"># from sqlalchemy.dialects.mysql import DOUBLE, TINYINT</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy.dialects.mysql</span> <span class="k">import</span> <span class="n">DOUBLE</span>
+
 <span class="kn">from</span> <span class="nn">sqlalchemy.sql</span> <span class="k">import</span> <span class="n">select</span>
 <span class="c1"># import json</span>
 <span class="kn">from</span> <span class="nn">tsfresh</span> <span class="k">import</span> <span class="n">__version__</span> <span class="k">as</span> <span class="n">tsfresh_version</span>
 
 <span class="kn">import</span> <span class="nn">settings</span>
 <span class="kn">import</span> <span class="nn">skyline_version</span>
-<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="p">(</span>
-    <span class="n">RepresentsInt</span><span class="p">,</span> <span class="n">mkdir_p</span><span class="p">,</span> <span class="n">write_data_to_file</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="p">(</span><span class="n">RepresentsInt</span><span class="p">,</span> <span class="n">mkdir_p</span><span class="p">,</span> <span class="n">write_data_to_file</span><span class="p">)</span>
 <span class="kn">from</span> <span class="nn">tsfresh_feature_names</span> <span class="k">import</span> <span class="n">TSFRESH_FEATURES</span>
 
 <span class="kn">from</span> <span class="nn">database</span> <span class="k">import</span> <span class="p">(</span>
     <span class="n">get_engine</span><span class="p">,</span> <span class="n">ionosphere_table_meta</span><span class="p">,</span> <span class="n">metrics_table_meta</span><span class="p">,</span>
     <span class="c1"># @added 20180414 - Branch #2270: luminosity</span>
-    <span class="n">luminosity_table_meta</span><span class="p">)</span>
+    <span class="n">luminosity_table_meta</span><span class="p">,</span>
+    <span class="c1"># @added 20190501 - Branch #2646: slack</span>
+    <span class="n">anomalies_table_meta</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="c1"># @added 20190502 - Branch #2646: slack</span>
+<span class="kn">from</span> <span class="nn">slack_functions</span> <span class="k">import</span> <span class="n">slack_post_message</span><span class="p">,</span> <span class="n">slack_post_reaction</span>
 
 <span class="n">skyline_version</span> <span class="o">=</span> <span class="n">skyline_version</span><span class="o">.</span><span class="n">__absolute_version__</span>
 
@@ -344,7 +361,15 @@
     <span class="k">return</span> <span class="n">use_full_duration</span><span class="p">,</span> <span class="n">valid_learning_duration</span><span class="p">,</span> <span class="n">use_full_duration_days</span><span class="p">,</span> <span class="n">max_generations</span><span class="p">,</span> <span class="n">max_percent_diff_from_origin</span></div>
 
 
-<div class="viewcode-block" id="create_features_profile"><a class="viewcode-back" href="../skyline.html#ionosphere_functions.create_features_profile">[docs]</a><span class="k">def</span> <span class="nf">create_features_profile</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">requested_timestamp</span><span class="p">,</span> <span class="n">data_for_metric</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">ionosphere_job</span><span class="p">,</span> <span class="n">fp_parent_id</span><span class="p">,</span> <span class="n">fp_generation</span><span class="p">,</span> <span class="n">fp_learn</span><span class="p">):</span>
+<span class="c1"># @modified 20190503 - Branch #2646: slack</span>
+<span class="c1"># Added slack_ionosphere_job</span>
+<span class="c1"># def create_features_profile(current_skyline_app, requested_timestamp, data_for_metric, context, ionosphere_job, fp_parent_id, fp_generation, fp_learn):</span>
+<span class="c1"># @modified 20190919 - Feature #3230: users DB table</span>
+<span class="c1">#                      Ideas #2476: Label and relate anomalies</span>
+<span class="c1">#                      Feature #2516: Add label to features profile</span>
+<span class="c1"># Added user_id and label</span>
+<span class="c1"># def create_features_profile(current_skyline_app, requested_timestamp, data_for_metric, context, ionosphere_job, fp_parent_id, fp_generation, fp_learn, slack_ionosphere_job):</span>
+<div class="viewcode-block" id="create_features_profile"><a class="viewcode-back" href="../skyline.html#ionosphere_functions.create_features_profile">[docs]</a><span class="k">def</span> <span class="nf">create_features_profile</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">requested_timestamp</span><span class="p">,</span> <span class="n">data_for_metric</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">ionosphere_job</span><span class="p">,</span> <span class="n">fp_parent_id</span><span class="p">,</span> <span class="n">fp_generation</span><span class="p">,</span> <span class="n">fp_learn</span><span class="p">,</span> <span class="n">slack_ionosphere_job</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">label</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Add a features_profile to the Skyline ionosphere database table.</span>
 
@@ -362,6 +387,9 @@
 <span class="sd">        human generated features profile, 0 being an original human generated</span>
 <span class="sd">        features profile.</span>
 <span class="sd">    :param fp_learn: Whether Ionosphere should learn at use_full_duration_days</span>
+<span class="sd">    :param slack_ionosphere_job: The originating ionosphere_job name</span>
+<span class="sd">    :param user_id: The user id of the user creating the features profile</span>
+<span class="sd">    :param label: A label for the feature profile</span>
 <span class="sd">    :type current_skyline_app: str</span>
 <span class="sd">    :type requested_timestamp: int</span>
 <span class="sd">    :type data_for_metric: str</span>
@@ -370,6 +398,9 @@
 <span class="sd">    :type fp_parent_id: int</span>
 <span class="sd">    :type fp_generation: int</span>
 <span class="sd">    :type fp_learn: boolean</span>
+<span class="sd">    :type slack_ionosphere_job: str</span>
+<span class="sd">    :type user_id: int</span>
+<span class="sd">    :type label: str</span>
 <span class="sd">    :return: fp_id, fp_in_successful, fp_exists, fail_msg, traceback_format_exc</span>
 <span class="sd">    :rtype: str, boolean, boolean, str, str</span>
 
@@ -383,8 +414,8 @@
     <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;training_data&#39;</span><span class="p">:</span>
         <span class="n">ionosphere_job</span> <span class="o">=</span> <span class="s1">&#39;learn_fp_human&#39;</span>
 
-    <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;create_features_profile :: </span><span class="si">%s</span><span class="s1"> :: requested for </span><span class="si">%s</span><span class="s1"> at </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-        <span class="n">context</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">requested_timestamp</span><span class="p">)))</span>
+    <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;create_features_profile :: </span><span class="si">%s</span><span class="s1"> :: requested for </span><span class="si">%s</span><span class="s1"> at </span><span class="si">%s</span><span class="s1"> by user id </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="n">context</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">requested_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">user_id</span><span class="p">)))</span>
 
     <span class="n">metric_timeseries_dir</span> <span class="o">=</span> <span class="n">base_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">)</span>
     <span class="c1"># @modified 20190327 - Feature #2484: FULL_DURATION feature profiles</span>
@@ -715,6 +746,10 @@
         <span class="c1"># Handle ionosphere_echo change in timestamp to the next second and a mismatch</span>
         <span class="c1"># of 1 second between the features profile directory timestamp and the DB</span>
         <span class="c1"># created_timestamp</span>
+        <span class="c1"># @modified 20190919 - Feature #3230: users DB table</span>
+        <span class="c1">#                      Ideas #2476: Label and relate anomalies</span>
+        <span class="c1">#                      Feature #2516: Add label to features profile</span>
+        <span class="c1"># Added user_id and label</span>
         <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;ionosphere_echo&#39;</span> <span class="ow">or</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;ionosphere_echo_check&#39;</span><span class="p">:</span>
             <span class="n">ts_for_db</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">requested_timestamp</span><span class="p">)</span>
             <span class="n">db_created_timestamp</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">utcfromtimestamp</span><span class="p">(</span><span class="n">ts_for_db</span><span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span><span class="p">)</span>
@@ -725,7 +760,8 @@
                 <span class="n">calc_time</span><span class="o">=</span><span class="n">calculated_time</span><span class="p">,</span> <span class="n">features_count</span><span class="o">=</span><span class="n">fcount</span><span class="p">,</span>
                 <span class="n">features_sum</span><span class="o">=</span><span class="n">fsum</span><span class="p">,</span> <span class="n">parent_id</span><span class="o">=</span><span class="n">fp_parent_id</span><span class="p">,</span>
                 <span class="n">generation</span><span class="o">=</span><span class="n">fp_generation</span><span class="p">,</span> <span class="n">validated</span><span class="o">=</span><span class="n">fp_validated</span><span class="p">,</span>
-                <span class="n">echo_fp</span><span class="o">=</span><span class="n">echo_fp_value</span><span class="p">,</span> <span class="n">created_timestamp</span><span class="o">=</span><span class="n">db_created_timestamp</span><span class="p">)</span>
+                <span class="n">echo_fp</span><span class="o">=</span><span class="n">echo_fp_value</span><span class="p">,</span> <span class="n">created_timestamp</span><span class="o">=</span><span class="n">db_created_timestamp</span><span class="p">,</span>
+                <span class="n">user_id</span><span class="o">=</span><span class="n">user_id</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">ins</span> <span class="o">=</span> <span class="n">ionosphere_table</span><span class="o">.</span><span class="n">insert</span><span class="p">()</span><span class="o">.</span><span class="n">values</span><span class="p">(</span>
                 <span class="n">metric_id</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">metrics_id</span><span class="p">),</span> <span class="n">full_duration</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">ts_full_duration</span><span class="p">),</span>
@@ -734,7 +770,7 @@
                 <span class="n">calc_time</span><span class="o">=</span><span class="n">calculated_time</span><span class="p">,</span> <span class="n">features_count</span><span class="o">=</span><span class="n">fcount</span><span class="p">,</span>
                 <span class="n">features_sum</span><span class="o">=</span><span class="n">fsum</span><span class="p">,</span> <span class="n">parent_id</span><span class="o">=</span><span class="n">fp_parent_id</span><span class="p">,</span>
                 <span class="n">generation</span><span class="o">=</span><span class="n">fp_generation</span><span class="p">,</span> <span class="n">validated</span><span class="o">=</span><span class="n">fp_validated</span><span class="p">,</span>
-                <span class="n">echo_fp</span><span class="o">=</span><span class="n">echo_fp_value</span><span class="p">)</span>
+                <span class="n">echo_fp</span><span class="o">=</span><span class="n">echo_fp_value</span><span class="p">,</span> <span class="n">user_id</span><span class="o">=</span><span class="n">user_id</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">)</span>
         <span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">ins</span><span class="p">)</span>
         <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="n">new_fp_id</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">inserted_primary_key</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -1066,6 +1102,210 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: create_features_profile :: fp_id - </span><span class="si">%s</span><span class="s1"> - training data not copied to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">new_fp_id</span><span class="p">),</span> <span class="n">ts_features_profile_dir</span><span class="p">))</span>
 
+    <span class="c1"># @added 20190501 - Branch #2646: slack</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">SLACK_ENABLED</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SLACK_ENABLED</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">SLACK_ENABLED</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">slack_thread_updates</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SLACK_OPTS</span><span class="p">[</span><span class="s1">&#39;thread_updates&#39;</span><span class="p">]</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">slack_thread_updates</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">message_on_features_profile_created</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SLACK_OPTS</span><span class="p">[</span><span class="s1">&#39;message_on_features_profile_created&#39;</span><span class="p">]</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">message_on_features_profile_created</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">message_on_features_profile_learnt</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SLACK_OPTS</span><span class="p">[</span><span class="s1">&#39;message_on_features_profile_learnt&#39;</span><span class="p">]</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">message_on_features_profile_learnt</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">update_slack_thread</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;training_data&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">echo_fp_value</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">slack_thread_updates</span> <span class="ow">and</span> <span class="n">SLACK_ENABLED</span><span class="p">:</span>
+            <span class="n">update_slack_thread</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">message_on_features_profile_created</span><span class="p">:</span>
+            <span class="n">update_slack_thread</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;ionosphere_learn&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">echo_fp_value</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">slack_thread_updates</span> <span class="ow">and</span> <span class="n">SLACK_ENABLED</span><span class="p">:</span>
+            <span class="n">update_slack_thread</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">message_on_features_profile_learnt</span><span class="p">:</span>
+            <span class="n">update_slack_thread</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">update_slack_thread</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;create_features_profile :: updating slack&#39;</span><span class="p">)</span>
+        <span class="c1"># Determine the anomaly id and then the slack_thread_ts</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">anomalies_table</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">anomalies_table_meta</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
+            <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: create_features_profile :: failed to get anomalies_table meta&#39;</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="n">anomaly_id</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">slack_thread_ts</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+            <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">anomalies_table</span><span class="p">])</span><span class="o">.</span>\
+                <span class="n">where</span><span class="p">(</span><span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">metric_id</span> <span class="o">==</span> <span class="n">metrics_id</span><span class="p">)</span><span class="o">.</span>\
+                <span class="n">where</span><span class="p">(</span><span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">anomaly_timestamp</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">use_anomaly_timestamp</span><span class="p">))</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+                <span class="n">anomaly_id</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span>
+                <span class="n">slack_thread_ts</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;slack_thread_ts&#39;</span><span class="p">]</span>
+                <span class="k">break</span>
+            <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;create_features_profile :: determined anomaly id </span><span class="si">%s</span><span class="s1"> for metric id </span><span class="si">%s</span><span class="s1"> at anomaly_timestamp </span><span class="si">%s</span><span class="s1"> with slack_thread_ts </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metrics_id</span><span class="p">),</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">use_anomaly_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">slack_thread_ts</span><span class="p">)))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+            <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: create_features_profile :: could not determine id of anomaly from DB for metric id </span><span class="si">%s</span><span class="s1"> at anomaly_timestamp </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">metrics_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">use_anomaly_timestamp</span><span class="p">))</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">float</span><span class="p">(</span><span class="n">slack_thread_ts</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">slack_thread_ts</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">slack_thread_ts</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">ionosphere_link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/ionosphere?fp_view=true&amp;fp_id=</span><span class="si">%s</span><span class="s1">&amp;metric=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_URL</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">new_fp_id</span><span class="p">),</span> <span class="n">base_name</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;failed to interpolated the ionosphere_link&#39;</span><span class="p">)</span>
+            <span class="n">ionosphere_link</span> <span class="o">=</span> <span class="s1">&#39;URL link failed to build&#39;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">fp_learn</span><span class="p">:</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;*TRAINED - not anomalous* - features profile id </span><span class="si">%s</span><span class="s1"> was created for </span><span class="si">%s</span><span class="s1"> via </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">new_fp_id</span><span class="p">),</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">ionosphere_link</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;*TRAINED - not anomalous* - features profile id </span><span class="si">%s</span><span class="s1"> was created for </span><span class="si">%s</span><span class="s1"> via </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1"> AND set to *LEARN* at </span><span class="si">%s</span><span class="s1"> days&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">new_fp_id</span><span class="p">),</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">ionosphere_link</span><span class="p">,</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">learn_full_duration_days</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;ionosphere_learn&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">slack_ionosphere_job</span> <span class="o">!=</span> <span class="s1">&#39;learn_fp_human&#39;</span><span class="p">:</span>
+                <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;*LEARNT - not anomalous* - features profile id </span><span class="si">%s</span><span class="s1"> was created for </span><span class="si">%s</span><span class="s1"> via </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">new_fp_id</span><span class="p">),</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">ionosphere_link</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;*LEARNING - not anomalous at </span><span class="si">%s</span><span class="s1"> days* - features profile id </span><span class="si">%s</span><span class="s1"> was created using </span><span class="si">%s</span><span class="s1"> days data for </span><span class="si">%s</span><span class="s1"> via </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">learn_full_duration_days</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">new_fp_id</span><span class="p">),</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">learn_full_duration_days</span><span class="p">),</span> <span class="n">base_name</span><span class="p">,</span>
+                    <span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">ionosphere_link</span><span class="p">)</span>
+
+        <span class="n">channel</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">channel</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SLACK_OPTS</span><span class="p">[</span><span class="s1">&#39;default_channel&#39;</span><span class="p">]</span>
+            <span class="n">channel_id</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SLACK_OPTS</span><span class="p">[</span><span class="s1">&#39;default_channel_id&#39;</span><span class="p">]</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">channel</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">channel_id</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: create_features_profile :: could not determine the slack default_channel or default_channel_id from settings.SLACK_OPTS please add these to your settings or set SLACK_ENABLED or SLACK_OPTS[</span><span class="se">\&#39;</span><span class="s1">thread_updates</span><span class="se">\&#39;</span><span class="s1">] to False and restart ionosphere and webapp&#39;</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="n">throw_exception_on_default_channel</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">channel</span> <span class="o">==</span> <span class="s1">&#39;YOUR_default_slack_channel&#39;</span><span class="p">:</span>
+            <span class="n">throw_exception_on_default_channel</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">channel</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">channel_id</span> <span class="o">==</span> <span class="s1">&#39;YOUR_default_slack_channel_id&#39;</span><span class="p">:</span>
+            <span class="n">throw_exception_on_default_channel</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">channel_id</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">throw_exception_on_default_channel</span><span class="p">:</span>
+            <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: create_features_profile :: the default_channel or default_channel_id from settings.SLACK_OPTS is set to the default, please replace these with your channel details or set SLACK_ENABLED or SLACK_OPTS[</span><span class="se">\&#39;</span><span class="s1">thread_updates</span><span class="se">\&#39;</span><span class="s1">] to False and restart webapp&#39;</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+
+        <span class="n">slack_response</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;ok&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span>
+        <span class="k">if</span> <span class="n">channel</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">slack_response</span> <span class="o">=</span> <span class="n">slack_post_message</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">slack_thread_ts</span><span class="p">),</span> <span class="n">message</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+                <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: create_features_profile :: failed to slack_post_message&#39;</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">slack_response</span><span class="p">[</span><span class="s1">&#39;ok&#39;</span><span class="p">]:</span>
+                <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: create_features_profile :: failed to slack_post_message, slack dict output follows&#39;</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">slack_response</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;create_features_profile :: posted slack update to </span><span class="si">%s</span><span class="s1">, thread </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">channel</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">slack_thread_ts</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="n">channel_id</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">slack_thread_ts</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">reaction_emoji</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SLACK_OPTS</span><span class="p">[</span><span class="s1">&#39;message_on_features_profile_created_reaction_emoji&#39;</span><span class="p">]</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">reaction_emoji</span> <span class="o">=</span> <span class="s1">&#39;thumbsup&#39;</span>
+                <span class="n">slack_response</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;ok&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">slack_response</span> <span class="o">=</span> <span class="n">slack_post_reaction</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">channel_id</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">slack_thread_ts</span><span class="p">),</span> <span class="n">reaction_emoji</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+                    <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+                    <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: create_features_profile :: failed to slack_post_reaction&#39;</span>
+                    <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">slack_response</span><span class="p">[</span><span class="s1">&#39;ok&#39;</span><span class="p">]:</span>
+                    <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">slack_response</span><span class="p">[</span><span class="s1">&#39;error&#39;</span><span class="p">])</span> <span class="o">==</span> <span class="s1">&#39;already_reacted&#39;</span><span class="p">:</span>
+                        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                            <span class="s1">&#39;slack_post_reaction :: already_reacted to channel </span><span class="si">%s</span><span class="s1">, thread </span><span class="si">%s</span><span class="s1">, ok&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="n">channel</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">slack_thread_ts</span><span class="p">)))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: create_features_profile :: failed to slack_post_reaction, slack dict output follows&#39;</span>
+                        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+                        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">slack_response</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;ionosphere_learn&#39;</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">reaction_emoji</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SLACK_OPTS</span><span class="p">[</span><span class="s1">&#39;message_on_features_profile_learnt_reaction_emoji&#39;</span><span class="p">]</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">reaction_emoji</span> <span class="o">=</span> <span class="s1">&#39;heavy_check_mark&#39;</span>
+                    <span class="n">slack_response</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;ok&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">slack_response</span> <span class="o">=</span> <span class="n">slack_post_reaction</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">channel_id</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">slack_thread_ts</span><span class="p">),</span> <span class="n">reaction_emoji</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+                        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+                        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: create_features_profile :: failed to slack_post_reaction&#39;</span>
+                        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">slack_response</span><span class="p">[</span><span class="s1">&#39;ok&#39;</span><span class="p">]:</span>
+                        <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">slack_response</span><span class="p">[</span><span class="s1">&#39;error&#39;</span><span class="p">])</span> <span class="o">==</span> <span class="s1">&#39;already_reacted&#39;</span><span class="p">:</span>
+                            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                                <span class="s1">&#39;slack_post_reaction :: already_reacted to channel </span><span class="si">%s</span><span class="s1">, thread </span><span class="si">%s</span><span class="s1">, ok&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                    <span class="n">channel</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">slack_thread_ts</span><span class="p">)))</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: create_features_profile :: failed to slack_post_reaction, slack dict output follows&#39;</span>
+                            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+                            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">slack_response</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;ionosphere_learn&#39;</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">validate_link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/ionosphere?fp_validate=true&amp;metric=</span><span class="si">%s</span><span class="s1">&amp;validated_equals=false&amp;limit=0&amp;order=DESC&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_URL</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+                    <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;failed to interpolated the validate_link&#39;</span><span class="p">)</span>
+                    <span class="n">validate_link</span> <span class="o">=</span> <span class="s1">&#39;validate URL link failed to build&#39;</span>
+                <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;*Skyline Ionosphere LEARNT* - features profile id </span><span class="si">%s</span><span class="s1"> for </span><span class="si">%s</span><span class="s1"> was learnt by </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1"> - *Please validate this* at </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">new_fp_id</span><span class="p">),</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">ionosphere_link</span><span class="p">,</span> <span class="n">validate_link</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">slack_ionosphere_job</span> <span class="o">!=</span> <span class="s1">&#39;learn_fp_human&#39;</span><span class="p">:</span>
+                    <span class="n">slack_response</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;ok&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">slack_response</span> <span class="o">=</span> <span class="n">slack_post_message</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">channel</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+                        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+                        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: create_features_profile :: failed to slack_post_message&#39;</span>
+                        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">slack_response</span><span class="p">[</span><span class="s1">&#39;ok&#39;</span><span class="p">]:</span>
+                        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: create_features_profile :: failed to slack_post_message, slack dict output follows&#39;</span>
+                        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+                        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">slack_response</span><span class="p">))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;create_features_profile :: posted slack update to </span><span class="si">%s</span><span class="s1">, thread </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">channel</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">slack_thread_ts</span><span class="p">)))</span>
+
     <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;create_features_profile :: disposing of any engine&#39;</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
@@ -1277,7 +1517,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.2.14',
+            VERSION:'1.3.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
