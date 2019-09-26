@@ -5,7 +5,15 @@
 v1.3.0 - September 25, 2019
 
 This is a features functionality release with minor bug fixes.  This release
-introduces a few new features to Ionosphere
+introduces a few new features and new functionality:
+
+- A new Ionosphere feature related to validating matches.
+- The ability to run the Skyline stack on docker
+- Introduces Skyline Flux for receiving metrics via HTTP and submitting them to
+  Graphite.
+- Introduces Skyline Vista for fetching metrics from remote sources.
+
+Please see the new documentation pages for full details about each new addition.
 
 Changes in v1.3.0
 ------------------
@@ -132,6 +140,8 @@ Flux and Vista.
 - Uppdated dependencies
 - skyline.dawn.sh changes related to docker (3002)
 - Update version and dependencies
+- Added a users tables to the DB to allow to map user to actions, labels, etc
+  (3230, 2476, 2516)
 
 Update notes
 ------------
