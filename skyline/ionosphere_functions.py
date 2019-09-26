@@ -30,8 +30,8 @@ from tsfresh import __version__ as tsfresh_version
 
 import settings
 import skyline_version
-from skyline_functions import (
-    RepresentsInt, mkdir_p, write_data_to_file)
+
+from skyline_functions import (RepresentsInt, mkdir_p, write_data_to_file)
 from tsfresh_feature_names import TSFRESH_FEATURES
 
 from database import (
@@ -190,8 +190,13 @@ def get_ionosphere_learn_details(current_skyline_app, base_name):
 
 # @modified 20190503 - Branch #2646: slack
 # Added slack_ionosphere_job
-#def create_features_profile(current_skyline_app, requested_timestamp, data_for_metric, context, ionosphere_job, fp_parent_id, fp_generation, fp_learn):
-def create_features_profile(current_skyline_app, requested_timestamp, data_for_metric, context, ionosphere_job, fp_parent_id, fp_generation, fp_learn, slack_ionosphere_job):
+# def create_features_profile(current_skyline_app, requested_timestamp, data_for_metric, context, ionosphere_job, fp_parent_id, fp_generation, fp_learn):
+# @modified 20190919 - Feature #3230: users DB table
+#                      Ideas #2476: Label and relate anomalies
+#                      Feature #2516: Add label to features profile
+# Added user_id and label
+# def create_features_profile(current_skyline_app, requested_timestamp, data_for_metric, context, ionosphere_job, fp_parent_id, fp_generation, fp_learn, slack_ionosphere_job):
+def create_features_profile(current_skyline_app, requested_timestamp, data_for_metric, context, ionosphere_job, fp_parent_id, fp_generation, fp_learn, slack_ionosphere_job, user_id, label):
     """
     Add a features_profile to the Skyline ionosphere database table.
 
@@ -210,6 +215,8 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
         features profile.
     :param fp_learn: Whether Ionosphere should learn at use_full_duration_days
     :param slack_ionosphere_job: The originating ionosphere_job name
+    :param user_id: The user id of the user creating the features profile
+    :param label: A label for the feature profile
     :type current_skyline_app: str
     :type requested_timestamp: int
     :type data_for_metric: str
@@ -219,6 +226,8 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
     :type fp_generation: int
     :type fp_learn: boolean
     :type slack_ionosphere_job: str
+    :type user_id: int
+    :type label: str
     :return: fp_id, fp_in_successful, fp_exists, fail_msg, traceback_format_exc
     :rtype: str, boolean, boolean, str, str
 
@@ -232,8 +241,8 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
     if context == 'training_data':
         ionosphere_job = 'learn_fp_human'
 
-    current_logger.info('create_features_profile :: %s :: requested for %s at %s' % (
-        context, str(base_name), str(requested_timestamp)))
+    current_logger.info('create_features_profile :: %s :: requested for %s at %s by user id %s' % (
+        context, str(base_name), str(requested_timestamp), str(user_id)))
 
     metric_timeseries_dir = base_name.replace('.', '/')
     # @modified 20190327 - Feature #2484: FULL_DURATION feature profiles
@@ -564,6 +573,10 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
         # Handle ionosphere_echo change in timestamp to the next second and a mismatch
         # of 1 second between the features profile directory timestamp and the DB
         # created_timestamp
+        # @modified 20190919 - Feature #3230: users DB table
+        #                      Ideas #2476: Label and relate anomalies
+        #                      Feature #2516: Add label to features profile
+        # Added user_id and label
         if context == 'ionosphere_echo' or context == 'ionosphere_echo_check':
             ts_for_db = int(requested_timestamp)
             db_created_timestamp = datetime.utcfromtimestamp(ts_for_db).strftime('%Y-%m-%d %H:%M:%S')
@@ -574,7 +587,8 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
                 calc_time=calculated_time, features_count=fcount,
                 features_sum=fsum, parent_id=fp_parent_id,
                 generation=fp_generation, validated=fp_validated,
-                echo_fp=echo_fp_value, created_timestamp=db_created_timestamp)
+                echo_fp=echo_fp_value, created_timestamp=db_created_timestamp,
+                user_id=user_id, label=label)
         else:
             ins = ionosphere_table.insert().values(
                 metric_id=int(metrics_id), full_duration=int(ts_full_duration),
@@ -583,7 +597,7 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
                 calc_time=calculated_time, features_count=fcount,
                 features_sum=fsum, parent_id=fp_parent_id,
                 generation=fp_generation, validated=fp_validated,
-                echo_fp=echo_fp_value)
+                echo_fp=echo_fp_value, user_id=user_id, label=label)
         result = connection.execute(ins)
         connection.close()
         new_fp_id = result.inserted_primary_key[0]

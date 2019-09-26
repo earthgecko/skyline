@@ -106,6 +106,13 @@ CREATE TABLE IF NOT EXISTS `anomalies` (
 # Add the slack thread timestamp
 */
   `slack_thread_ts` DECIMAL(17,6) DEFAULT 0 COMMENT 'the slack thread ts',
+/*
+# @added 20190919 - Feature #3230: users DB table
+#                   Ideas #2476: Label and relate anomalies
+#                   Feature #2516: Add label to features profile
+*/
+  `label` VARCHAR(255) DEFAULT NULL COMMENT 'a label for the anomaly',
+  `user_id` INT DEFAULT 0 COMMENT 'the user id that created the label',
   PRIMARY KEY (id),
 /*
 # Why index anomaly_timestamp and created_timestamp?  Because this is thinking
@@ -265,6 +272,14 @@ CREATE TABLE IF NOT EXISTS `ionosphere` (
   `layers_id` INT(11) DEFAULT 0 COMMENT 'the id of the ionosphere_layers profile, 0 being none',
 /* # @added 20190328 - Feature #2484: FULL_DURATION feature profiles */
   `echo_fp` tinyint(1) DEFAULT 0 COMMENT 'an echo features profile, 1 being yes and 0 being no',
+/*
+# @added 20190919 - Feature #3230: users DB table
+#                   Ideas #2476: Label and relate anomalies
+#                   Feature #2516: Add label to features profile
+*/
+  `user_id` INT DEFAULT 0 COMMENT 'the user id that created the features profile',
+  `label` VARCHAR(255) DEFAULT NULL COMMENT 'a label for the features profile',
+  `validated_user_id` INT DEFAULT 0 COMMENT 'the user id that validated the features profiles',
   PRIMARY KEY (id),
 /*
 # @modified 20180821 - Bug #2546: Fix SQL errors
@@ -354,6 +369,12 @@ Added fp_count and fp_checked
 # @added 20190601 - Feature #3084: Ionosphere - validated matches
 */
   `validated` TINYINT(4) DEFAULT 0 COMMENT 'whether the match has been validated, 0 being no, 1 validated, 2 invalid',
+/*
+# @added 20190919 - Feature #3230: users DB table
+#                   Ideas #2476: Label and relate anomalies
+#                   Feature #2516: Add label to features profile
+*/
+  `user_id` INT DEFAULT NULL COMMENT 'the user id that validated the match',
   PRIMARY KEY (id),
   INDEX `features_profile_matched` (`id`,`fp_id`))
   ENGINE=InnoDB;
@@ -424,6 +445,12 @@ Added layers_count and layers_checked
 # @added 20190601 - Feature #3084: Ionosphere - validated matches
 */
   `validated` TINYINT(4) DEFAULT 0 COMMENT 'whether the match has been validated, 0 being no, 1 validated, 2 invalid',
+/*
+# @added 20190919 - Feature #3230: users DB table
+#                   Ideas #2476: Label and relate anomalies
+#                   Feature #2516: Add label to features profile
+*/
+  `user_id` INT DEFAULT NULL COMMENT 'the user id that validated the match',
   PRIMARY KEY (id),
   INDEX `layers_matched` (`id`,`layer_id`,`fp_id`,`metric_id`))
   ENGINE=InnoDB;
@@ -441,6 +468,21 @@ CREATE TABLE IF NOT EXISTS `luminosity` (
   `shifted_coefficient` DECIMAL(6,5) NOT NULL COMMENT 'shifted correlation coefficient',
   INDEX `luminosity` (`id`,`metric_id`))
   ENGINE=InnoDB;
+
+/*
+# @added 20190919 - Feature #3230: users DB table
+#                   Ideas #2476: Label and relate anomalies
+#                   Feature #2516: Add label to features profile
+*/
+CREATE TABLE IF NOT EXISTS `users` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT 'user id',
+  `user` VARCHAR(255) DEFAULT NULL COMMENT 'user name',
+  `description` VARCHAR(255) DEFAULT NULL COMMENT 'description',
+  `created_timestamp` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created timestamp',
+  INDEX `users` (`id`,`user`))
+  ENGINE=InnoDB;
+INSERT INTO `users` (user,description) VALUES ('Skyline','The default Skyline user');
+INSERT INTO `users` (user,description) VALUES ('admin','The default admin user');
 
 /*
 # mariadb

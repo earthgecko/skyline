@@ -331,8 +331,24 @@ already matched a training data set -->
             and <span class="logo"><span class="re">DO NOT</span> <span class="sky">LEARN</span></span></span> at {{ use_full_duration_days }} days</strong> or,</td>
   {% if extracted_features %}
     {% if not features_profile_id %}
+<!--
+# @added 20190922 - Ideas #2476: Label and relate anomalies
+#                   Feature #2516: Add label to features profile
+# Added label
 		        <td><a href="?timestamp={{ timestamp }}&metric={{ for_metric }}&requested_timestamp={{ timestamp }}&add_fp=true&learn=false">
 						<button type="button">Create features profile and <b>do NOT learn</b></button></a></td>
+-->
+		        <td>
+              <form action="ionosphere">
+        			<input type="hidden" name="timestamp" value="{{ timestamp }}" />
+        			<input type="hidden" name="metric" value="{{ for_metric }}" />
+        			<input type="hidden" name="requested_timestamp" value="{{ timestamp }}" />
+        			<input type="hidden" name="add_fp" value="true" />
+        			<input type="hidden" name="learn" value="false" />
+        			Label: <input type="text" name="label" value="none" /> (optional)
+              <input type="submit" value="Create features profile and do NOT learn">
+              </form>
+            </td>
     {% else %}
             <td><b><span class="logo"><span class="sky">profile ::</span> <span class="re">created</span></span></span></b>
             </td>
@@ -355,8 +371,23 @@ already matched a training data set -->
             and <span class="logo"><span class="re">DO</span> <span class="sky">LEARN</span></span></span> at {{ use_full_duration_days }} days</strong></td>
     {% if not features_profile_id %}
       {% if extracted_features %}
+<!--
+# @added 20190922 - Feature #2516: Add label to features profile
+# Added label
 		        <td><a href="?timestamp={{ timestamp }}&metric={{ for_metric }}&requested_timestamp={{ timestamp }}&add_fp=true&learn=true">
 						<button type="button">Create features profile and <b>LEARN</b></button></a></td>
+-->
+		        <td>
+              <form action="ionosphere">
+        			<input type="hidden" name="timestamp" value="{{ timestamp }}" />
+        			<input type="hidden" name="metric" value="{{ for_metric }}" />
+        			<input type="hidden" name="requested_timestamp" value="{{ timestamp }}" />
+        			<input type="hidden" name="add_fp" value="true" />
+        			<input type="hidden" name="learn" value="true" />
+        			Label: <input type="text" name="label" value="none" /> (optional)
+              <input type="submit" value="Create features profile and LEARN">
+              </form>
+            </td>
       {% else %}
             <td><a href="/a_500?message='You were told not to click that button, now look what happened.  Let that be a lesson to you to not try and break the rules.'&timestamp={{ timestamp }}&metric={{ for_metric }}&requested_timestamp={{ timestamp }}&add_features_profile=true">
             <button type="button" onclick="return confirm('Are you sure you want to try and click the Create features profile button before you have extracted the features? Especially after being advise to not do it?');">Create features profile and <b>LEARN</b></button></a><br>
@@ -811,15 +842,17 @@ Image file: {{ image }}<br><br>
   {% if data_ok == True %}
       <br><p>
 <!-- # @modified 20170309 - Feature #1960: ionosphere_layers
-    <h4><span class="logo"><span class="sky">Timeseries ::</span> <span class="re">not anomalous ::</span></span></span> <span class="sky">available</span></h4>-->
-    <h4><span class="logo"><span class="sky">Timeseries ::</span> <span class="re">anomalous ::</span></span></span> <span class="sky">json available [['app', '{{ app_context }}'], ['full_duration', {{ ts_full_duration }}]]</span></h4>
-      {{ timeseries[-30:] }}
+    <h4><span class="logo"><span class="sky">Time series ::</span> <span class="re">not anomalous ::</span></span></span> <span class="sky">available</span></h4>
+      {{ timeseries[-30:] }}-->
+    <h4><span class="logo"><span class="sky">Time series ::</span> <span class="re">anomalous ::</span></span></span> <span class="sky">json available [['app', '{{ app_context }}'], ['full_duration', {{ ts_full_duration }}]] - last 30 data points</span></h4>
+      {{ last_ts_json[-30:] }}
 <!-- # @added 20170309 - Feature #1960: ionosphere_layers
 Also return the Analyzer FULL_DURATION timeseries if available in a Mirage
 based features profile -->
     {% if ionosphere_json %}
-    <h4><span class="logo"><span class="sky">Timeseries ::</span> <span class="re">anomalous ::</span></span></span> <span class="sky">json available [['app', 'Analyzer'], ['full_duration', {{ baseline_fd }}]]</span></h4>
-      {{ ionosphere_json[-30:] }}
+    <h4><span class="logo"><span class="sky">Time series ::</span> <span class="re">anomalous ::</span></span></span> <span class="sky">json available [['app', 'Analyzer'], ['full_duration', {{ baseline_fd }}]] - last 30 data points</span></h4>
+<!--      {{ ionosphere_json[-30:] }} -->
+      {{ last_i_ts_json[-30:] }}
     {% endif %}
   {% endif %}
 

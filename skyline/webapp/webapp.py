@@ -10,7 +10,7 @@ from msgpack import Unpacker
 from functools import wraps
 from flask import (
     Flask, request, render_template, redirect, Response, abort, flash,
-    send_file)
+    send_file, jsonify)
 from daemon import runner
 from os.path import isdir
 from os import path
@@ -92,6 +92,10 @@ from skyline_functions import (
     set_metric_as_derivative,
     # @added 20190510 - Feature #2990: Add metrics id to relevant web pages
     get_memcache_metric_object,
+    # @added 20190920 - Feature #3230: users DB table
+    #                   Ideas #2476: Label and relate anomalies
+    #                   Feature #2516: Add label to features profile
+    get_user_details,
 )
 
 from backend import (
@@ -524,6 +528,68 @@ def version():
 # they are used.
 # def data():
 def api():
+    # @added 20180929
+    if 'get_json' in request.args:
+        source = None
+        metric = None
+        timestamp = None
+        full_duration_data = False
+        if 'source' in request.args:
+            valid_source = False
+            source = request.args.get('source', None)
+            if source == 'features_profile' or source == 'training_data':
+                valid_source = True
+            if not valid_source:
+                resp = json.dumps(
+                    {'results': 'Error: an invalid source parameter was passed to /api?get_json valid sources are features_profile or training_data'})
+                return resp, 400
+        else:
+            resp = json.dumps(
+                {'results': 'Error: the required parameter source was not passed to /api?get_json - valid sources are features_profile or training_data'})
+            return resp, 400
+        if 'metric' in request.args:
+            metric = request.args.get('metric', None)
+        if not metric:
+            resp = json.dumps(
+                {'results': 'Error: no metric parameter was passed to /api?get_json'})
+            return resp, 400
+        if 'timestamp' in request.args:
+            timestamp = request.args.get('timestamp', None)
+        if not timestamp:
+            resp = json.dumps(
+                {'results': 'Error: no timestamp parameter was passed to /api?get_json'})
+            return resp, 400
+        if metric and timestamp:
+            tuple_json_file = '%s.json' % metric
+            if full_duration_data in request.args:
+                full_duration_data = request.args.get('full_duration_data', None)
+                if full_duration_data == 'true':
+                    full_duration_in_hours = settings.FULL_DURATION / 60 / 60
+                    tuple_json_file = '%s.mirage.redis.%sh.json' % (metric, str(full_duration_in_hours))
+            metric_timeseries_dir = metric.replace('.', '/')
+            if source == 'features_profile':
+                source_file = '%s/%s/%s/%s' % (
+                    settings.IONOSPHERE_PROFILES_FOLDER, metric_timeseries_dir,
+                    str(timestamp), tuple_json_file)
+            if source == 'training_data':
+                source_file = '%s/%s/%s/%s' % (
+                    settings.IONOSPHERE_DATA_FOLDER, str(timestamp),
+                    metric_timeseries_dir, tuple_json_file)
+            logger.info('converting tuple data for %s %s at %s to json' % (source, metric, timestamp))
+            datapoints = None
+            if not os.path.isfile(source_file):
+                logger.error('error :: file not found - %s' % source_file)
+                resp = json.dumps(
+                    {'results': '404 data file not found'})
+                return resp, 404
+            with open(source_file) as f:
+                for line in f:
+                    datapoints = str(line).replace('(', '[').replace(')', ']')
+            data_dict = {'metric': metric}
+            datapoints = literal_eval(datapoints)
+            data_dict['datapoints'] = datapoints
+            return jsonify(data_dict), 200
+
     # @added 20180720 - Feature #2464: luminosity_remote_data
     # Added luminosity_remote_data endpoint, requires two request parameter:
     if 'luminosity_remote_data' in request.args:
@@ -743,6 +809,30 @@ def panorama():
                     # @added 20161127 - Branch #922: ionosphere
                     'panorama_anomaly_id',
                     ]
+
+    # @added 20190919 - Feature #3230: users DB table
+    #                   Ideas #2476: Label and relate anomalies
+    #                   Feature #2516: Add label to features profile
+    user_id = None
+    if settings.WEBAPP_AUTH_ENABLED:
+        auth = request.authorization
+        user = auth.username
+    else:
+        user = 'Skyline'
+        user_id = 1
+    if not user_id:
+        success, user_id = get_user_details(skyline_app, 'id', 'username', str(user))
+        if not success:
+            logger.error('error : /panorama could not get_user_details(%s)' % str(user))
+            return 'Internal Server Error - ref: i - could not determine user_id', 500
+        else:
+            try:
+                user_id = int(user_id)
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: /panorama get_user_details(%s) did not return an int' % (
+                    str(user), str(user_id)))
+                return 'Internal Server Error - ref: p - user_id not int', 500
 
     get_anomaly_id = False
     if request_args_present:
@@ -1076,6 +1166,32 @@ def ionosphere():
 
     start = time.time()
 
+    # @added 20190919 - Feature #3230: users DB table
+    #                   Ideas #2476: Label and relate anomalies
+    #                   Feature #2516: Add label to features profile
+    user_id = None
+    if settings.WEBAPP_AUTH_ENABLED:
+        auth = request.authorization
+        user = auth.username
+    else:
+        user = 'Skyline'
+        user_id = 1
+    if not user_id:
+        success, user_id = get_user_details(skyline_app, 'id', 'username', str(user))
+        if not success:
+            logger.error('error :: /ionosphere could not get_user_details(%s)' % str(user))
+            return 'Internal Server Error - ref: i - could not determine user_id', 500
+        else:
+            try:
+                user_id = int(user_id)
+                logger.info('/ionosphere get_user_details() with %s returned user id %s' % (
+                    str(user), str(user_id)))
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: /ionosphere get_user_details() with %s did not return an int' % (
+                    str(user), str(user_id)))
+                return 'Internal Server Error - ref: i - user_id not int', 500
+
     request_args_present = False
     try:
         request_args_len = len(request.args)
@@ -1177,8 +1293,8 @@ def ionosphere():
                     try:
                         unique_metrics = list(REDIS_CONN.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
                     except:
+                        logger.error(traceback.format_exc())
                         logger.error('error :: Webapp could not get the unique_metrics list from Redis')
-                        logger.info(traceback.format_exc())
                         return 'Internal Server Error', 500
                     if metric_name in unique_metrics:
                         metric_found = True
@@ -1222,7 +1338,12 @@ def ionosphere():
                     return internal_error(message, trace)
                 if features_profiles_to_validate_count > 0:
                     try:
-                        all_validated, fail_msg, traceback_format_exc = validate_fp(int(metric_id), 'metric_id')
+                        # @modified 20190919 - Feature #3230: users DB table
+                        #                      Ideas #2476: Label and relate anomalies
+                        #                      Feature #2516: Add label to features profile
+                        # Added user_id
+                        # all_validated, fail_msg, traceback_format_exc = validate_fp(int(metric_id), 'metric_id')
+                        all_validated, fail_msg, traceback_format_exc = validate_fp(int(metric_id), 'metric_id', user_id)
                         logger.info('validated all the enabled, unvalidated features profiles for metric_id - %s' % str(metric_id))
                         if all_validated:
                             validated_count = features_profiles_to_validate_count
@@ -1293,6 +1414,9 @@ def ionosphere():
                 validate_all=validate_all, all_validated=all_validated,
                 validated_count=validated_count,
                 version=skyline_version,
+                # @added 20190919 - Feature #3230: users DB table
+                #                   Feature #2516: Add label to features profile
+                user=user,
                 duration=(time.time() - start), print_debug=False), 200
 
     # @added 20170220 - Feature #1862: Ionosphere features profiles search page
@@ -1783,6 +1907,8 @@ def ionosphere():
         'load_derivative_graphs',
         # @added 20190601 - Feature #3084: Ionosphere - validated matches
         'match_validation',
+        # @added 20190922 - Feature #2516: Add label to features profile
+        'label',
     ]
 
     # @modified 20190503 - Branch #2646: slack - linting
@@ -1824,6 +1950,9 @@ def ionosphere():
     matched_layer_id = False
     # @added 20190601 - Feature #3084: Ionosphere - validated matches
     match_validated = 0
+
+    # @added 20190922 - Feature #2516: Add label to features profile
+    fp_label = None
 
     try:
         if request_args_present:
@@ -2171,6 +2300,11 @@ def ionosphere():
                 if not saved_training_data:
                     if not fp_view:
                         check_for_purged = True
+
+                if key == 'label':
+                    label_arg = request.args.get('label')
+                    label = label_arg[:255]
+                    logger.info('label - %s ' % (str(value)))
 
                 if key == 'timestamp' or key == 'timestamp_td':
                     valid_timestamp = True
@@ -2651,7 +2785,12 @@ def ionosphere():
                     # @modified 20190503 - Branch #2646: slack
                     # Added slack_ionosphere_job
                     # fp_id, fp_in_successful, fp_exists, fail_msg, traceback_format_exc = create_features_profile(skyline_app, requested_timestamp, base_name, context, ionosphere_job, parent_id, generation, fp_learn)
-                    fp_id, fp_in_successful, fp_exists, fail_msg, traceback_format_exc = create_features_profile(skyline_app, requested_timestamp, base_name, context, ionosphere_job, parent_id, generation, fp_learn, slack_ionosphere_job)
+                    # @modified 20190919 - Feature #3230: users DB table
+                    #                      Ideas #2476: Label and relate anomalies
+                    #                      Feature #2516: Add label to features profile
+                    # Added user_id and label
+                    # fp_id, fp_in_successful, fp_exists, fail_msg, traceback_format_exc = create_features_profile(skyline_app, requested_timestamp, base_name, context, ionosphere_job, parent_id, generation, fp_learn, slack_ionosphere_job)
+                    fp_id, fp_in_successful, fp_exists, fail_msg, traceback_format_exc = create_features_profile(skyline_app, requested_timestamp, base_name, context, ionosphere_job, parent_id, generation, fp_learn, slack_ionosphere_job, user_id, label)
                     if create_feature_profile:
                         generation_zero = True
                 except:
@@ -2698,7 +2837,12 @@ def ionosphere():
                     # @modified 20181013 - Feature #2430: Ionosphere validate learnt features profiles page
                     # Added the extended validate_fp parameter of id_column_name
                     # validated_fp_success, fail_msg, traceback_format_exc = validate_fp(fp_id)
-                    validated_fp_success, fail_msg, traceback_format_exc = validate_fp(fp_id, 'id')
+                    # @modified 20190919 - Feature #3230: users DB table
+                    #                      Ideas #2476: Label and relate anomalies
+                    #                      Feature #2516: Add label to features profile
+                    # Added user_id
+                    # validated_fp_success, fail_msg, traceback_format_exc = validate_fp(fp_id, 'id')
+                    validated_fp_success, fail_msg, traceback_format_exc = validate_fp(fp_id, 'id', user_id)
                     logger.info('validated fp_id - %s' % str(fp_id))
                 except:
                     trace = traceback.format_exc()
@@ -2738,6 +2882,12 @@ def ionosphere():
                 fp_layers_id = int(fp_details_object['layers_id'])
             except:
                 fp_layers_id = 0
+
+            # @added 20190922 - Feature #2516: Add label to features profile
+            try:
+                fp_label = fp_details_object['label']
+            except:
+                fp_label = None
 
             # @modified 20190503 - Branch #2646: slack - linting
             # layer_details = None
@@ -2798,7 +2948,13 @@ def ionosphere():
             # @added 20170309  - Feature #1960: ionosphere_layers - i_ts_json
             # Show the last 30
             if ts_json:
-                sample_ts_json = ts_json[-30:]
+                try:
+                    sample_ts_json = ts_json[-30:]
+                except:
+                    trace = traceback.format_exc()
+                    message = 'Failed to smaple ts_json'
+                    return internal_error(message, trace)
+
             # @modified 20170331 - Task #1988: Review - Ionosphere layers - always show layers
             #                      Feature #1960: ionosphere_layers
             # Return the anomalous_timeseries as an array to sample
@@ -3098,7 +3254,12 @@ def ionosphere():
                                 match_id = matched_layer_id
                                 validate_context = 'ionosphere_layers_matched'
                             try:
-                                validated_match_successful = validate_ionosphere_match(match_id, validate_context, match_validated)
+                                # @modified 20190920 -
+                                # Added user_id
+                                # validated_match_successful = validate_ionosphere_match(match_id, validate_context, match_validated)
+                                validated_match_successful = validate_ionosphere_match(match_id, validate_context, match_validated, user_id)
+                                # @added 20190921 - Feature #3234: Ionosphere - related matches vaildation
+                                # TODO - here related matches will also be validated
                                 logger.info('validated match')
                                 match_validated_db_value = match_validated
                             except:
@@ -3264,6 +3425,8 @@ def ionosphere():
                 match_validated=match_validated,
                 match_validated_db_value=match_validated_db_value,
                 validated_match_successful=validated_match_successful,
+                # @added 20190922 - Feature #2516: Add label to features profile
+                fp_label=fp_label,
                 version=skyline_version, duration=(time.time() - start),
                 print_debug=debug_on), 200
         except:
@@ -3532,7 +3695,6 @@ def decode_token(client_id):
 
     :param client_id: the client_id string
     :type client_id: str
-    return token, decoded_redis_password, fail_msg, trace
     :return: token, decoded_redis_password, fail_msg, trace
     :rtype: str, str, str, str
 

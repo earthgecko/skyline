@@ -452,7 +452,13 @@ def ionosphere_echo(base_name, mirage_full_duration):
             # @modified 20190503 - Branch #2646: slack
             # Added slack_ionosphere_job
             # fp_id, fp_in_successful, fp_exists, fail_msg, traceback_format_exc = create_features_profile(skyline_app, created_ts, base_name, context, ionosphere_job, mirage_fp_id, generation, fp_learn)
-            fp_id, fp_in_successful, fp_exists, fail_msg, traceback_format_exc = create_features_profile(skyline_app, created_ts, base_name, context, ionosphere_job, mirage_fp_id, generation, fp_learn, slack_ionosphere_job)
+            # @modified 20190922 - Feature #3230: users DB table
+            #                      Ideas #2476: Label and relate anomalies
+            #                      Feature #2516: Add label to features profile
+            # Added user_id
+            # fp_id, fp_in_successful, fp_exists, fail_msg, traceback_format_exc = create_features_profile(skyline_app, created_ts, base_name, context, ionosphere_job, mirage_fp_id, generation, fp_learn, slack_ionosphere_job, user_id)
+            user_id = 1
+            fp_id, fp_in_successful, fp_exists, fail_msg, traceback_format_exc = create_features_profile(skyline_app, created_ts, base_name, context, ionosphere_job, mirage_fp_id, generation, fp_learn, slack_ionosphere_job, user_id)
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: ionosphere_echo :: failed to create a settings.FULL_DURATION features profile from fp_id %s for %s' % (str(mirage_fp_id), base_name))

@@ -369,7 +369,7 @@ def get_graphite_metric(
         python_version = int(version_info[0])
 
     try:
-        quote(skyline_app, safe='')
+        quote(current_skyline_app, safe='')
     except:
         from requests.utils import quote
 
@@ -885,7 +885,7 @@ def mysql_select(current_skyline_app, select):
 
         from skyline_functions import mysql_select
         query = 'select id, metric from anomalies'
-        result = mysql_select(query)
+        results = mysql_select(query)
 
     - **Example of the 0 indexed results tuple, which can hold multiple results**::
 
@@ -1493,3 +1493,74 @@ def set_metric_as_derivative(current_skyline_app, base_name):
     current_logger.info('set_metric_as_derivative :: %s metrics in non_derivative_metrics after the removal of %s' % (str(len_non_derivative_metrics), str(metric_name)))
 
     return return_boolean
+
+
+# @added 20190920 - Feature #3230: users DB table
+#                   Ideas #2476: Label and relate anomalies
+#                   Feature #2516: Add label to features profile
+def get_user_details(current_skyline_app, desired_value, key, value):
+    """
+    Determines the user details for a user given the desired_value, key and
+    value.  If you want the username of the user with id 1 then:
+    get_user_details('username', 'id', 1)  # Will return 'Skyline'
+    get_user_details('id', 'username', 'Skyline')  # Will return '1'
+
+    :param current_skyline_app: the app calling the function so the function
+        knows which log to write too.
+    :param desired_value: the id or username
+    :param key: the field for the value
+    :param value: the value of the item you want to query in the key field
+    :type current_skyline_app: str
+    :type desired_value: str
+    :type key: str
+    :type value: str or int
+    :return: tuple
+    :rtype:  (boolean, str)
+
+    """
+    current_skyline_app_logger = str(current_skyline_app) + 'Log'
+    current_logger = logging.getLogger(current_skyline_app_logger)
+
+    if key == 'id':
+        select_field = 'user'
+        select_where = 'id'
+
+    if key == 'username':
+        select_field = 'id'
+        select_where = 'user'
+
+    if desired_value != select_field:
+        fail_msg = 'error :: %s :: get_user_details :: desired_value %s is invalid in get_user_details(%s, %s %s)' % (
+            str(current_skyline_app), str(desired_value), str(desired_value),
+            str(key), str(value))
+        current_logger.error('%s' % fail_msg)
+        if current_skyline_app == 'webapp':
+            # Raise to webbapp
+            raise
+        else:
+            return False, None
+
+    try:
+        query = 'select %s from users WHERE %s = \'%s\'' % (select_field, select_where, str(value))  # nosec
+        results = mysql_select(str(current_skyline_app), query)
+        result = results[0][0]
+    except:
+        trace = traceback.format_exc()
+        current_logger.error('%s' % trace)
+        fail_msg = 'error :: %s :: get_user_details :: could not get user %s from database for get_user_details(%s, %s %s)' % (
+            str(current_skyline_app), select_field, str(desired_value),
+            str(key), str(value))
+        current_logger.error('%s' % fail_msg)
+        if current_skyline_app == 'webapp':
+            # Raise to webbapp
+            raise
+        else:
+            return False, None
+        fail_msg = 'error :: %s :: get_user_details :: could not get user %s from database for get_user_details(%s, %s %s)' % (
+            str(current_skyline_app), select_field, str(desired_value),
+            str(key), str(value))
+        current_logger.info('%s :: get_user_details :: determined %s of %s for users.%s = %s' % (
+            select_field, str(result), select_where), str(value))
+    if select_field == 'id':
+        return True, int(result)
+    return True, str(result)

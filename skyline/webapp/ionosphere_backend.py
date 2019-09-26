@@ -35,6 +35,7 @@ import skyline_version
 # from skyline_functions import (
 #    RepresentsInt, mkdir_p, write_data_to_file, get_graphite_metric)
 from skyline_functions import (mkdir_p, get_graphite_metric, write_data_to_file)
+
 # from tsfresh_feature_names import TSFRESH_FEATURES
 
 from database import (
@@ -564,12 +565,16 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
                 for line in f:
                     ts_json.append(line)
             ts_json_ok = True
+
+            with open((ts_json_file), 'r') as f:
+                raw_timeseries = f.read()
+            timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
+            ts_json = literal_eval(timeseries_array_str)
         except:
             ts_json_ok = False
             # @added 20190314 - Bug #2870: webapp incorrectly reporting no timeseries json file
             ts_json = ['error: could not read the time series from the json file', ts_json_file]
             logger.error('error :: could not read the time series from the json file - %s' % str(ts_json_file))
-
     else:
         # @added 20190314 - Bug #2870: webapp incorrectly reporting no timeseries json file
         ts_json = ['error: no timeseries json file', ts_json_file]
@@ -1145,6 +1150,9 @@ def features_profile_details(fp_id):
         validated = row['validated']
         # @added 20170305 - Feature #1960: ionosphere_layers
         layers_id = row['layers_id']
+        # @added 20190922 - Feature #2516: Add label to features profile
+        label = row['label']
+
         fp_details = '''
 tsfresh_version   :: %s | calc_time :: %s
 features_count    :: %s
@@ -3372,7 +3380,12 @@ def edit_ionosphere_layers(layers_id):
 # Extended the validate_fp function to validate a single fp id or all the unvalidated,
 # enabled features profiles for a metric_id
 # def validate_fp(fp_id):
-def validate_fp(update_id, id_column_name):
+# @modified 20190919 - Feature #3230: users DB table
+#                      Ideas #2476: Label and relate anomalies
+#                      Feature #2516: Add label to features profile
+# Added user
+# def validate_fp(update_id, id_column_name):
+def validate_fp(update_id, id_column_name, user_id):
     """
     Validate a single features profile or validate all enabled, unvalidated
     features profiles for a metric_id.
@@ -3380,8 +3393,10 @@ def validate_fp(update_id, id_column_name):
     :param update_id: the features profile id or metric_id to validate
     :type update_id: int
     :param id_column_name: the column name to select where on, e.g. id or metric_id
-    :type where: str
-
+    :param user_id: the user id of the user that is validating
+    :type update_id: int
+    :type id_column_name: str
+    :type user_id: int
     :return: tuple
     :rtype:  (boolean, str, str)
 
@@ -3440,14 +3455,18 @@ def validate_fp(update_id, id_column_name):
         connection = engine.connect()
         # @modified 20181013 - Feature #2430: Ionosphere validate learnt features profiles page
         # fail_msg = 'error :: ionosphere_backend :: failed to get ionosphere_table meta for fp_id %s' % (str(fp_id))
+        # @modified 20190919 - Feature #3230: users DB table
+        #                      Ideas #2476: Label and relate anomalies
+        #                      Feature #2516: Add label to features profile
+        # Added user_id
         if id_column_name == 'id':
             connection.execute(
                 ionosphere_table.update(
                     ionosphere_table.c.id == int(fp_id)).
-                values(validated=1))
+                values(validated=1, user_id=user_id))
         if id_column_name == 'metric_id':
             stmt = ionosphere_table.update().\
-                values(validated=1).\
+                values(validated=1, user_id=user_id).\
                 where(ionosphere_table.c.metric_id == int(update_id)).\
                 where(ionosphere_table.c.validated == 0).\
                 where(ionosphere_table.c.enabled == 1)
@@ -4656,11 +4675,13 @@ def get_features_profiles_to_validate(base_name):
     for a metric and returns a list of the details for each of the features
     profile including the ionosphere_image API URIs for all the relevant graph
     images for the weabpp Ionosphere validate_features_profiles page.
-    [[  fp_id, metric_id, metric, fp_full_duration, anomaly_timestamp,
-        fp_parent_id, parent_full_duration, parent_anomaly_timestamp, fp_date,
-        fp_graph_uri, parent_fp_date, parent_fp_graph_uri, parent_parent_fp_id,
-        fp_learn_graph_uri, parent_fp_learn_graph_uri, minimum_full_duration,
-        maximum_full_duration, generation]]
+    For example::
+
+        [[  fp_id, metric_id, metric, fp_full_duration, anomaly_timestamp,
+            fp_parent_id, parent_full_duration, parent_anomaly_timestamp, fp_date,
+            fp_graph_uri, parent_fp_date, parent_fp_graph_uri, parent_parent_fp_id,
+            fp_learn_graph_uri, parent_fp_learn_graph_uri, minimum_full_duration,
+            maximum_full_duration, generation]]
 
     :param base_name: metric base_name
     :type base_name: str
@@ -5250,7 +5271,12 @@ def webapp_update_slack_thread(base_name, metric_timestamp, value, message_conte
 
 
 # @added 20190601 - Feature #3084: Ionosphere - validated matches
-def validate_ionosphere_match(match_id, validate_context, match_validated):
+# @modified 20190919 - Feature #3230: users DB table
+#                      Ideas #2476: Label and relate anomalies
+#                      Feature #2516: Add label to features profile
+# Added user_id
+# def validate_ionosphere_match(match_id, validate_context, match_validated):
+def validate_ionosphere_match(match_id, validate_context, match_validated, user_id):
     """
     Update the validated value in the DB for the match.
 
@@ -5258,9 +5284,11 @@ def validate_ionosphere_match(match_id, validate_context, match_validated):
     :param validate_context: the context to validate either ionosphere_matched
         or ionosphere_layers_matched
     :param match_validated: 1 for valid or 2 for invalid
+    :param user_id: the user id of the user validating
     :type match_id: str
     :type validate_context: str
     :type match_validated: int
+    :type user_id: int
     :return: True or False
     :rtype:  boolean
 
@@ -5289,22 +5317,27 @@ def validate_ionosphere_match(match_id, validate_context, match_validated):
             logger.info('ionosphere_matched_table OK')
         except:
             logger.error(traceback.format_exc())
-            logger.error('error :: validate_ionosphere_match :: failed to get ionosphere_checked_table meta for %s' % base_name)
+            logger.error('error :: validate_ionosphere_match :: failed to get ionosphere_checked_table meta for match_id %s' % str(match_id))
             if engine:
                 engine_disposal(engine)
             raise  # to webapp to return in the UI
         try:
             connection = engine.connect()
+            # @modified 20190919 - Feature #3230: users DB table
+            #                      Ideas #2476: Label and relate anomalies
+            #                      Feature #2516: Add label to features profile
+            # Added user_id
             connection.execute(
                 ionosphere_matched_table.update(
                     ionosphere_matched_table.c.id == match_id).
-                values(validated=match_validated))
+                values(validated=match_validated, user_id=user_id))
             connection.close()
-            logger.info('updated validated for %s' % str(match_id))
+            logger.info('updated validated for %s by user id %s' % (str(match_id), user_id))
         except:
             trace = traceback.format_exc()
             logger.error('%s' % trace)
-            fail_msg = 'error :: could not update validated for %s ' % str(match_id)
+            fail_msg = 'error :: could not update validated for %s by user id %s' % (
+                str(match_id), user_id)
             logger.error(fail_msg)
             if engine:
                 engine_disposal(engine)
@@ -5317,7 +5350,7 @@ def validate_ionosphere_match(match_id, validate_context, match_validated):
             logger.info('ionosphere_layers_matched_table OK')
         except:
             logger.error(traceback.format_exc())
-            logger.error('error :: validate_ionosphere_match :: failed to get ionosphere_checked_table meta for %s' % base_name)
+            logger.error('error :: validate_ionosphere_match :: failed to get ionosphere_checked_table meta for match_id %s' % str(match_id))
             if engine:
                 engine_disposal(engine)
             raise  # to webapp to return in the UI
@@ -5337,6 +5370,9 @@ def validate_ionosphere_match(match_id, validate_context, match_validated):
             if engine:
                 engine_disposal(engine)
             raise
+
+    # @added 20190921 - Feature #3234: Ionosphere - related matches vaildation
+    # TODO - here related matches will also be validated
 
     if engine:
         engine_disposal(engine)
