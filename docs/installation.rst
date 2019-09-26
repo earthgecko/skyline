@@ -8,7 +8,8 @@ Intended audience
 -----------------
 
 Skyline is not really a ``localhost`` application, it needs lots of data, unless
-you have a ``localhost`` Graphite or pickle Graphite to your localhost.
+you have a ``localhost`` Graphite or pickle Graphite to your localhost, however
+Skyline can run on localhost using Docker (experimental and not for production).
 
 Given the specific nature of Skyline, it is assumed that the audience will have
 a certain level of technical knowledge, e.g. it is assumed that the user will be
@@ -28,7 +29,7 @@ configurations of things that are directly related Skyline.  Although it cannot
 possibly cover all possible set ups or scenarios, it does describe
 recommendations in terms of configurations of the various components and how and
 where they should be run in relation to Skyline.  There are no cfengine, puppet,
-chef, ansible or docker patterns here.
+chef or ansible patterns here.
 
 The documentation is aimed at installing Skyline securely by default.  It is
 possible to run Skyline very insecurely, however this documentation does not
@@ -53,16 +54,17 @@ What the components do
   Graphite could run on the same server, in a production environment it would
   probably be a remote machine or container.  Graphite is not part of Skyline.
 - Redis - stores :mod:`settings.FULL_DURATION` seconds (usefully 24 hours worth)
-  of time series data that Graphite sends to Skyline Horizon.  Skyline Analyzer
-  pulls the data from Redis for analysis.  Redis must run on the same host as
-  Skyline.  It may be possible to run Redis in another container or VM that was
-  on the same host, but this has not been tested.
-- MySQL/mariadb - stores data about anomalies and time series features
-  fingerprints for learning things that are not anomalous.  MySQL can run on the
-  same host as Skyline or it can be remote.
-- Apache (or nginx) - serves the Skyline webapp via gunicorn and handles SSL
-  termination and basic http auth.  Ideally should run on the same host as
-  Skyline.
+  of time series data that Graphite sends to Skyline Horizon and Horizon writes
+  the data to Redis.  Skyline Analyzer pulls the data from Redis for analysis.
+  Redis must run on the same host as Skyline.  It may be possible to run Redis
+  in another container or VM that is on the same host.
+- MySQL/mariadb - stores data about anomalies and time series features profile
+  fingerprints for matching and learning things that are not anomalous.  MySQL
+  can run on the same host as Skyline or it can be remote.  Running the DB
+  remotely will make the Skyline UI a bit slower.
+- Apache (or nginx) - Skyline serves the webapp via gunicorn and Apache handles
+  endpoint routing, SSL termination and basic http auth.  Ideally Apache should
+  be run on the same host as Skyline.
 - memcached - caches Ionosphere MySQL data, memcached should ideally be run on
   the same host as Skyline.
 
@@ -75,9 +77,11 @@ Steps
 -----
 
 .. note:: All the documentation and testing is based on running Skyline in a
-  Python-2.7.14 virtualenv, if you choose to deploy Skyline another way, you are
+  Python-2.7.16 virtualenv, if you choose to deploy Skyline another way, you are
   on your own.  Although it is possible to run Skyline in a different type of
   environment, it does not lend itself to repeatability or a common known state.
+  Python-2.7.14 should still work as well, but all documentation has been
+  updated to use Python-2.7.16.
 
 Skyline configuration
 ~~~~~~~~~~~~~~~~~~~~~
@@ -87,11 +91,20 @@ documentation configuration options are referred to via their docstrings name
 e.g. :mod:`settings.FULL_DURATION` which links to their description in the
 documentation.
 
+Dawn
+~~~~
+
+- Should you wish to review the build steps, component builds and installs
+  described below, there is a convenience build script for **testing** purposes
+  **only** in `utils/dawn/skyline.dawn.sh` see
+  `Dawn <development/dawn.html>`__ section
+
 Python virtualenv
 ~~~~~~~~~~~~~~~~~
 
-- Create a python-2.7.14 virtualenv for Skyline to run in see `Running in
-  Python virtualenv <running-in-python-virtualenv.html>`__
+- Create a python-2.7.16 virtualenv for Skyline to run in see `Running in
+  Python virtualenv <running-in-python-virtualenv.html>`__ (Python-2.7.14 should
+  still work as well).
 
 Firewall
 ~~~~~~~~
@@ -115,16 +128,10 @@ Firewall
     running multiple distributed Skyline instances this can and still should be
     127.0.0.1 as Skyline makes an API endpoint available to remote Skyline
     instances for any required remote Redis data retrieval and preprocessing.
+  - If you are going to run Vista and Flux, ensure that the Skyline IP is
+    allowed to connect to the Graphite node on the `PICKLE_RECEIVER_PORT`
   - Please ensure you handle all of these with iptables AND ip6tables (or the
     equivalent) before continuing.
-
-Dawn
-~~~~
-
-- Should you wish to review the build steps, component builds and installs
-  described below, there is a convenience build script for **testing** purposes
-  **only** in `utils/dawn/skyline.dawn.sh` see
-  `Dawn <development/dawn.html>`__ section)
 
 Redis
 ~~~~~
@@ -172,7 +179,7 @@ Skyline directories
     mkdir -p /opt/skyline/mirage/check
     mkdir -p /opt/skyline/crucible/check
     mkdir -p /opt/skyline/crucible/data
-    mkdir -p /opt/skyline/ionosphere
+    mkdir -p /opt/skyline/ionosphere/check
     mkdir /etc/skyline
     mkdir /tmp/skyline
 
@@ -197,7 +204,7 @@ Skyline and dependencies install
     #cd /opt/skyline/github/skyline
     #git checkout <COMMITREF>
 
-- Once again using the Python-2.7.14 virtualenv,  install the requirements using
+- Once again using the Python-2.7.16 virtualenv,  install the requirements using
   the virtualenv pip, this can take some time.
 
 .. warning:: When working with virtualenv Python versions you must always
@@ -210,11 +217,22 @@ Skyline and dependencies install
   habit of always using explicit bin/pip2.7 and bin/python2.7 commands to ensure
   that it is harder for you to err.
 
+.. warning:: If you are running on CentOS 6 mysql-connector-python needs to be
+  fixed to 8.0.6 on CentOS 6 as if you use MySQL 5.1 rpm from mainstream, as of
+  mysql-connector-python 8.0.11 support for 5.1 was dropped and results in a bad
+  handshake error.  Further to this there is a reported vulnerability with
+  mysql-connector-python-8.0.6
+  High severity vulnerability found on mysql-connector-python-8.0.6
+  desc: Improper Access Control
+  info: https://snyk.io/vuln/SNYK-PYTHON-MYSQLCONNECTORPYTHON-173986
+  info: https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-2435
+  You have been advised, so now you know.
+
 .. code-block:: bash
 
     PYTHON_MAJOR_VERSION="2.7"
     PYTHON_VIRTUALENV_DIR="/opt/python_virtualenv"
-    PROJECT="skyline-py2714"
+    PROJECT="skyline-py2716"
 
     cd "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}"
     source bin/activate
@@ -225,6 +243,23 @@ Skyline and dependencies install
     bin/"pip${PYTHON_MAJOR_VERSION}" install $(cat /opt/skyline/github/skyline/requirements.txt | grep "^numpy\|^scipy\|^patsy" | tr '\n' ' ')
     bin/"pip${PYTHON_MAJOR_VERSION}" install $(cat /opt/skyline/github/skyline/requirements.txt | grep "^pandas")
 
+    # CentOS 6 ONLY
+    # mysql-connector-python needs to be fixed to 8.0.6 on CentOS 6 as it uses
+    # MySQL 5.1 rpm from mainstream, as of mysql-connector-python 8.0.11 support
+    # for 5.1 was dropped and results in a bad handshake error.
+    if [ -f /etc/redhat-release ]; then
+      CENTOS=$(cat /etc/redhat-release | grep -c "CentOS")
+      if [ $CENTOS -eq 1 ]; then
+        CENTOS_6=$(cat /etc/redhat-release | grep -c "release 6")
+        if [ $CENTOS_6 -eq 1 ]; then
+          echo "Replacing mysql-connector-python version in requirements.txt as CentOS 6 requires mysql-connector-python==8.0.6"
+          cat /opt/skyline/github/skyline/requirements.txt > /opt/skyline/github/skyline/requirements.txt.original
+          cat /opt/skyline/github/skyline/requirements.txt.original | sed -e 's/^mysql-connector-python==.*/mysql-connector-python==8\.0\.6/g' > /opt/skyline/github/skyline/requirements.txt.centos6
+          cat /opt/skyline/github/skyline/requirements.txt.centos6 > /opt/skyline/github/skyline/requirements.txt
+        fi
+      fi
+    fi
+
     # This can take lots of minutes...
     bin/"pip${PYTHON_MAJOR_VERSION}" install -r /opt/skyline/github/skyline/requirements.txt
 
@@ -232,7 +267,7 @@ Skyline and dependencies install
 
 - Copy the ``skyline.conf`` and edit the ``USE_PYTHON`` as appropriate to your
   set up if it is not using PATH
-  ``/opt/python_virtualenv/projects/skyline-py2714/bin/python2.7``
+  ``/opt/python_virtualenv/projects/skyline-py2716/bin/python2.7``
 
 .. code-block:: bash
 
@@ -285,6 +320,26 @@ Skyline database
 
 Skyline settings
 ~~~~~~~~~~~~~~~~
+
+The Skyline settings are declared in the settings.py file as valid Python
+variables which are used in code.  The settings values therefore need to be
+defined correctly as the required Python types.  Strings, floats, ints, lists
+and tuples are used in the various settings.  Examples of these Python types
+are briefly outlined here to inform the user of the types.
+
+.. code-block:: python
+
+    a_string = 'single quoted string'  # str
+    another_string = '127.0.0.1'  # str
+    a_float = 0.1  # float
+    an_int = 12345  # int
+    a_list = [1.1, 1.4, 1.7]  # list
+    another_list_of_strings = ['one', 'two', 'bob']  # list
+    a_list_of_lists = [['server1.cpu.user', 23.6, 1563912300], ['server2.cpu.user', 3.22, 1563912300]]  # list
+    a_tuple = ('server1.cpu.user', 23.6, 1563912300)  # tuple
+    a_tuple_of_tuples = (('server1.cpu.user', 23.6, 1563912300), ('server2.cpu.user', 3.22, 1563912300))  # tuple
+
+Required changes to settings.py follow.
 
 - Edit the ``skyline/settings.py`` file and enter your appropriate settings,
   specifically ensure you set the following variables to the correct

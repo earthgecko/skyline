@@ -96,39 +96,47 @@ if [ -f /opt/skyline/github/skyline/skyline/docker.settings.py ]; then
   echo "Populated variables in the Skyline settings.py using /opt/skyline/github/skyline/skyline/docker.settings.py"
   sleep 1
 else
-  if [ ! -f /opt/skyline/github/skyline/skyline/settings.py.original ]; then
-    cat /opt/skyline/github/skyline/skyline/settings.py > /opt/skyline/github/skyline/skyline/settings.py.original
-  fi
-  # @modified 20180823 - Bug #2552: seed_data.py testing with UDP does not work (GH77)
-  # Only requires a public IP if Grpahite is going to pickle to it, but seeing as
-  # this is a test node, make it 127.0.0.1 as there are no iptables on the IP or
-  # ports 2025 or 2024
-  #    | sed -e "s/HORIZON_IP = .*/HORIZON_IP = '$YOUR_SERVER_IP_ADDRESS'/g" \
-  cat /opt/skyline/github/skyline/skyline/settings.py.original \
-    | sed -e "s/SERVER_METRICS_NAME = .*/SERVER_METRICS_NAME = 'skyline-docker-skyline-1'/g" \
-    | sed -e "s/REDIS_PASSWORD = .*/REDIS_PASSWORD = '$REDIS_PASSWORD'/g" \
-    | sed -e 's/PANORAMA_ENABLED = .*/PANORAMA_ENABLED = True/g' \
-    | sed -e "s/WEBAPP_AUTH_USER = .*/WEBAPP_AUTH_USER = '$WEBAPP_AUTH_USER'/g" \
-    | sed -e 's/PANORAMA_ENABLED = .*/PANORAMA_ENABLED = True/g' \
-    | sed -e "s/WEBAPP_AUTH_USER_PASSWORD = .*/WEBAPP_AUTH_USER_PASSWORD = '$WEBAPP_AUTH_USER_PASSWORD'/g" \
-    | sed -e "s/WEBAPP_ALLOWED_IPS = .*/WEBAPP_ALLOWED_IPS = ['127.0.0.1', '$YOUR_OTHER_IP_ADDRESS']/g" \
-    | sed -e "s/SKYLINE_URL = .*/SKYLINE_URL = 'https:\/\/$YOUR_SKYLINE_SERVER_FQDN'/g" \
-    | sed -e 's/MEMCACHE_ENABLED = .*/MEMCACHE_ENABLED = True/g' \
-    | sed -e "s/PANORAMA_DBUSER = .*/PANORAMA_DBUSER = 'root'/g" \
-    | sed -e "s/PANORAMA_DBHOST = .*/PANORAMA_DBHOST = 'mysql'/g" \
-    | sed -e "s/REDIS_SOCKET_PATH = .*/REDIS_SOCKET_PATH = '\/tmp\/docker\/redis.sock'/g" \
-    | sed -e "s/HORIZON_IP = .*/HORIZON_IP = '$YOUR_SERVER_IP_ADDRESS'/g" \
-    | sed -e "s/MEMCACHE_ENABLED = .*/MEMCACHE_ENABLED = True/g" \
-    | sed -e "s/CARBON_HOST = .*/CARBON_HOST = 'skyline-docker-graphite-statsd-1'/g" \
-    | sed -e "s/PANORAMA_DBUSERPASS = .*/PANORAMA_DBUSERPASS = '$MYSQL_SKYLINE_PASSWORD'/g" > /opt/skyline/github/skyline/skyline/settings.py
-  if [ $? -ne 0 ]; then
-    echo "error :: failed to populate the variables in /opt/skyline/github/skyline/skyline/settings.py"
-    exit 1
-  else
-    echo "Populated variables in the Skyline settings.py"
+  if [ -f /opt/skyline/github/skyline/skyline/docker.settings.py.default ]; then
+    if [ ! -f /opt/skyline/github/skyline/skyline/settings.py.original ]; then
+      cat /opt/skyline/github/skyline/skyline/settings.py > /opt/skyline/github/skyline/skyline/settings.py.original
+    fi
+    cat /opt/skyline/github/skyline/skyline/docker.settings.py.default > /opt/skyline/github/skyline/skyline/settings.py
+    echo "Populated variables in the Skyline settings.py using /opt/skyline/github/skyline/skyline/docker.settings.py"
     sleep 1
+  else
+    if [ ! -f /opt/skyline/github/skyline/skyline/settings.py.original ]; then
+      cat /opt/skyline/github/skyline/skyline/settings.py > /opt/skyline/github/skyline/skyline/settings.py.original
+    fi
+    # @modified 20180823 - Bug #2552: seed_data.py testing with UDP does not work (GH77)
+    # Only requires a public IP if Grpahite is going to pickle to it, but seeing as
+    # this is a test node, make it 127.0.0.1 as there are no iptables on the IP or
+    # ports 2025 or 2024
+    #    | sed -e "s/HORIZON_IP = .*/HORIZON_IP = '$YOUR_SERVER_IP_ADDRESS'/g" \
+    cat /opt/skyline/github/skyline/skyline/settings.py.original \
+      | sed -e "s/SERVER_METRICS_NAME = .*/SERVER_METRICS_NAME = 'skyline-docker-skyline-1'/g" \
+      | sed -e "s/REDIS_PASSWORD = .*/REDIS_PASSWORD = '$REDIS_PASSWORD'/g" \
+      | sed -e 's/PANORAMA_ENABLED = .*/PANORAMA_ENABLED = True/g' \
+      | sed -e "s/WEBAPP_AUTH_USER = .*/WEBAPP_AUTH_USER = '$WEBAPP_AUTH_USER'/g" \
+      | sed -e 's/PANORAMA_ENABLED = .*/PANORAMA_ENABLED = True/g' \
+      | sed -e "s/WEBAPP_AUTH_USER_PASSWORD = .*/WEBAPP_AUTH_USER_PASSWORD = '$WEBAPP_AUTH_USER_PASSWORD'/g" \
+      | sed -e "s/WEBAPP_ALLOWED_IPS = .*/WEBAPP_ALLOWED_IPS = ['127.0.0.1', '$YOUR_OTHER_IP_ADDRESS']/g" \
+      | sed -e "s/SKYLINE_URL = .*/SKYLINE_URL = 'https:\/\/$YOUR_SKYLINE_SERVER_FQDN'/g" \
+      | sed -e 's/MEMCACHE_ENABLED = .*/MEMCACHE_ENABLED = True/g' \
+      | sed -e "s/PANORAMA_DBUSER = .*/PANORAMA_DBUSER = 'root'/g" \
+      | sed -e "s/PANORAMA_DBHOST = .*/PANORAMA_DBHOST = 'mysql'/g" \
+      | sed -e "s/REDIS_SOCKET_PATH = .*/REDIS_SOCKET_PATH = '\/tmp\/docker\/redis.sock'/g" \
+      | sed -e "s/HORIZON_IP = .*/HORIZON_IP = '$YOUR_SERVER_IP_ADDRESS'/g" \
+      | sed -e "s/MEMCACHE_ENABLED = .*/MEMCACHE_ENABLED = True/g" \
+      | sed -e "s/CARBON_HOST = .*/CARBON_HOST = 'skyline-docker-graphite-statsd-1'/g" \
+      | sed -e "s/PANORAMA_DBUSERPASS = .*/PANORAMA_DBUSERPASS = '$MYSQL_SKYLINE_PASSWORD'/g" > /opt/skyline/github/skyline/skyline/settings.py
+    if [ $? -ne 0 ]; then
+      echo "error :: failed to populate the variables in /opt/skyline/github/skyline/skyline/settings.py"
+      exit 1
+    else
+      echo "Populated variables in the Skyline settings.py"
+      sleep 1
+    fi
   fi
-fi
 
 if [ -f /tmp/docker_build ]; then
   echo "Not installing skyline DB during docker build"

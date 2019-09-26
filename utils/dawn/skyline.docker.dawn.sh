@@ -243,7 +243,7 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "Running docker-compose up in the background for 3 minutes to start all the
-apps and ouput the logs, then stopping and starting detached"
+apps and ouput the logs, then stopping and starting again as detached"
 docker-compose up &
 BG_PID=$!
 sleep 180

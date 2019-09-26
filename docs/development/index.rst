@@ -4,13 +4,14 @@ Development
 
 .. toctree::
 
-	building-documentation.rst
-	dawn.rst
-	webapp.rst
-	debugging.rst
-	ionosphere.rst
-	tsfresh.rst
-	pytz.rst
+  building-documentation
+  dawn
+  dawn-docker
+  webapp
+  debugging
+  ionosphere
+  tsfresh
+  pytz
 
 DRY
 ###

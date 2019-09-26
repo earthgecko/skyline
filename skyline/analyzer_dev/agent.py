@@ -19,7 +19,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 import settings
 from validate_settings import validate_settings_variables
 
-from analyzer_dev import Analyzer
+from analyzer_dev import AnalyzerDev
 
 skyline_app = 'analyzer_dev'
 skyline_app_logger = '%sLog' % skyline_app

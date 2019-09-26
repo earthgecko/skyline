@@ -2776,9 +2776,28 @@ class Analyzer(Thread):
                             'there is no Redis set new_derivative_metrics to rename, expected as ANALYZER_ENABLED is set to %s - %s' % (
                                 str(ANALYZER_ENABLED), str(e)))
 
+                # @added 20190922 - Branch #3002: docker
+                # Declare and test if new_derivative_metrics exists, if it is a
+                # new instance they will not, so create the set and handle no
+                # new_derivative_metrics set
+                test_new_derivative_metrics = None
+                try:
+                    test_new_derivative_metrics = list(self.redis_conn.smembers('new_derivative_metrics'))
+                except Exception as e:
+                    try:
+                        key_data = 'skyline_set_as_of_%s' % str(int(time()))
+                        self.redis_conn.sadd('new_derivative_metrics', key_data)
+                        test_new_derivative_metrics = list(self.redis_conn.smembers('new_derivative_metrics'))
+                    except:
+                        logger.info(traceback.format_exc())
+                        logger.error('error :: failed to add default data to Redis new_derivative_metrics set')
+
                 # @modified 20190517 - Branch #3002: docker
                 # Wrapped in if derivative_metrics
-                if derivative_metrics:
+                # @modified 20190922 - Branch #3002: docker
+                # Handle no new_derivative_metrics
+                # if derivative_metrics:
+                if derivative_metrics and test_new_derivative_metrics:
                     try:
                         self.redis_conn.rename('new_derivative_metrics', 'derivative_metrics')
                     except Exception as e:
