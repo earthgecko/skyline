@@ -30,7 +30,7 @@
 # to be sourced.
 YOUR_SERVER_IP_ADDRESS="$(ifconfig eth0 | grep 'inet ' | sed -e 's/.*inet //1;s/ .*//g')"  # YOUR Skyline server public IP address
 YOUR_OTHER_IP_ADDRESS="127.0.0.1"                          # YOUR current public IP v4 address that you will be connecting from
-SKYLINE_RELEASE="v1.2.18"                                  # The Skyline release to deploy
+SKYLINE_RELEASE="v1.3.1"                                  # The Skyline release to deploy
 
 #### STATIC VARIABLES ####
 SKYLINE_DOCKER_INSTANCE_HOSTNAME="skyline-docker-skyline-1" # The hostname of the Skyline docker container

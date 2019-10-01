@@ -1,0 +1,29 @@
+======
+1.3.1
+======
+
+v1.3.1 - October 1, 2019
+
+This is minor bug fix release.
+
+Changes in v1.3.1
+------------------
+
+- Corrected variable typo in settings from VISTA_FETCH_GRAPHITE_METRICS to
+  VISTA_FETCH_METRICS (3002)
+
+Update notes
+------------
+
+- There are no changes to the DB in v1.3.1
+- There is a correction to the :mod:`settings.VISTA_FETCH_GRAPHITE_METRICS`
+  variable which should be :mod:`settings.VISTA_FETCH_METRICS` in
+  skyline/settings.py and skyline/docker.settings.py.default in v1.3.1
+
+How to update from v1.3.0
+--------------------------
+
+- Update your skyline/settings.py and skyline/docker.settings.py.default to
+  use :mod:`settings.VISTA_FETCH_METRICS` and restart Vista.
+- Or you pull v1.3.1 and redeploy as per previous releases (without any DB
+  update).

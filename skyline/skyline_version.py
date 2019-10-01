@@ -4,8 +4,8 @@ version info
 # @modified 20170109 - Feature #1854: Ionosphere learn
 # Added learn
 # __version_info__ = ('1', '1', '0')
-__version_info__ = ('1', '3', '0')
-__branch__ = 'docker'
+__version_info__ = ('1', '3', '1')
+__branch__ = 'master'
 __version_tag__ = 'stable'
 
 __version__ = '.'.join(__version_info__)
