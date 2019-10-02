@@ -36,11 +36,11 @@ sensu is good for server metrics and there are lots of options.
 Now getting the data in
 =======================
 
-You currently have two options to get data into Skyline, via the Horizon
-service:
+You currently have a number of options to get data into Skyline, via the
+Horizon, Vista and Flux services:
 
-TCP pickles
-===========
+Horizon - TCP pickles
+~~~~~~~~~~~~~~~~~~~~~
 
 Horizon was designed to support a stream of pickles from the Graphite
 carbon-relay service, over port 2024 by default. Carbon relay is a
@@ -96,10 +96,10 @@ Of course, you don't need Graphite to use this listener - as long as you
 pack and pickle your data correctly (you'll need to look at the source
 code for the exact protocol), you'll be able to stream to this listener.
 
-UDP messagepack
-===============
+Horizon - UDP messagepack
+~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Genreally do not use this.  It is UDP, but has not been removed.
+Generally do not use this.  It is UDP, but has not been removed.
 
 Horizon also accepts metrics in the form of messagepack encoded strings
 over UDP, on port 2025. The format is
@@ -108,6 +108,19 @@ as messagepack and send them on their way.
 
 However a quick note, on the transport any metrics data over UDP....
 sorry if did you not get that.
+
+Flux
+~~~~
+
+Metrics to be submitted to Flux via HTTP/S which feeds Graphite which pickles to
+Skyline, see the `Flux<http://graphite.readthedocs.org/en/latest/carbon-daemons.html>`__
+page.
+
+Vista
+~~~~~
+
+Metrics to be fetched by Vista which submits to Flux, see the
+`Vista<http://graphite.readthedocs.org/en/latest/carbon-daemons.html>`__ page.
 
 Adding a Listener
 =================

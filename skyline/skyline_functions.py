@@ -490,6 +490,11 @@ def get_graphite_metric(
     graphite_port = '80'
     if settings.GRAPHITE_PORT != '':
         graphite_port = str(settings.GRAPHITE_PORT)
+    # @added 20191002 - Branch #3002: docker
+    # Unset the graphite_port if normal https
+    if settings.GRAPHITE_PORT == '443' and settings.GRAPHITE_PROTOCOL == 'https':
+        graphite_port = ''
+
     # @modified 20190520 - Branch #3002: docker
     # image_url = settings.GRAPHITE_PROTOCOL + '://' + settings.GRAPHITE_HOST + ':' + graphite_port + '/render?from=' + graphite_from + '&until=' + graphite_until + '&target=' + target_metric
     # image_url = settings.GRAPHITE_PROTOCOL + '://' + settings.GRAPHITE_HOST + ':' + graphite_port + '/api/datasources/proxy/1/render/?from=' + graphite_from + '&until=' + graphite_until + '&target=' + target_metric

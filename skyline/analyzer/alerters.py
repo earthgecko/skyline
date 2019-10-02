@@ -234,6 +234,13 @@ def alert_smtp(alert, metric, context):
 
     # @modified 20161229 - Feature #1830: Ionosphere alerts
     # Ionosphere alerts
+    # @added 20191002 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
+    # Added as it was not interpolated in v1.3.0 and v1.3.1
+    try:
+        main_alert_title = settings.CUSTOM_ALERT_OPTS['main_alert_title']
+    except:
+        main_alert_title = 'Skyline'
+
     # @modified 20190820 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
     # unencoded_graph_title = 'Skyline %s - ALERT at %s hours - %s' % (
     #     context, str(int(full_duration_in_hours)), str(metric[0]))

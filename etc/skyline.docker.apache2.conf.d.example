@@ -79,6 +79,17 @@ Listen 443
 # endpoint.
     RequestHeader set X-Forwarded-Proto "https"
 
+# @added 20190708 - Task #3136: Test Skyline flux
+# Added flux endpoint and make default endpoint not handle /flux
+    <Location "/flux">
+      Order allow,deny
+      Allow from all
+      RequestHeader unset Authorization
+      ProxyPass http://127.0.0.1:8000/
+      ProxyPassReverse http://127.0.0.1:8000/
+    </Location>
+    ProxyPass /flux !
+
     # Proxy https requests to gunicorn on your settings.WEBAPP_IP and
     # settings.WEBAPP_PORT, defaults are used here
     ProxyPreserveHost On
