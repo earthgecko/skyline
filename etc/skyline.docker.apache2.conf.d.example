@@ -31,7 +31,7 @@ Listen 443
     # CustomLog "|rotatelogs -c -L /var/log/httpd/skyline.access.log /var/log/httpd/skyline.access.log 86400" combined
 
     ErrorLog "<YOUR_ERROR_LOG>"
-    CustomLog "<YOUR_CUSTOM_LOG>"
+    CustomLog "<YOUR_CUSTOM_LOG>" combined
 
 # @added 20180527 - Feature #2378: Add redis auth to Skyline and rebrow
 # Added SSL to always encrypt POST data
