@@ -39,6 +39,18 @@ try:
 except:
     CARBON_PORT = ''
 
+# @added 20191007 - Feature #3250: Allow Skyline to send metrics to another Carbon host
+try:
+    from settings import SKYLINE_METRICS_CARBON_HOST
+    skyline_metrics_carbon_host = SKYLINE_METRICS_CARBON_HOST
+except:
+    skyline_metrics_carbon_host = CARBON_HOST
+try:
+    from settings import SKYLINE_METRICS_CARBON_PORT
+    skyline_metrics_carbon_port = SKYLINE_METRICS_CARBON_PORT
+except:
+    skyline_metrics_carbon_port = CARBON_PORT
+
 config = {'user': settings.PANORAMA_DBUSER,
           'password': settings.PANORAMA_DBUSERPASS,
           'host': settings.PANORAMA_DBHOST,
@@ -70,9 +82,11 @@ def send_graphite_metric(current_skyline_app, metric, value):
         from sys import version_info
         python_version = int(version_info[0])
 
-# @added 20190518 - Branch #3002: docker
-# If the CARBON_HOST is set to the default do not send_graphite_metric
-    if CARBON_HOST == 'YOUR_GRAPHITE_HOST.example.com':
+    # @added 20190518 - Branch #3002: docker
+    # If the CARBON_HOST is set to the default do not send_graphite_metric
+    # @modified 20191007 - Feature #3250: Allow Skyline to send metrics to another Carbon host
+    # if CARBON_HOST == 'YOUR_GRAPHITE_HOST.example.com':
+    if skyline_metrics_carbon_host == 'YOUR_GRAPHITE_HOST.example.com':
         current_skyline_app_logger = str(current_skyline_app) + 'Log'
         current_logger = logging.getLogger(current_skyline_app_logger)
         current_logger.info('CARBON_HOST is not configured in settings.py no CARBON_HOST to send metrics to')
@@ -82,7 +96,9 @@ def send_graphite_metric(current_skyline_app, metric, value):
     # Use the CARBON_HOST rather than GRAPHITE_HOST to allow for the 2 to be
     # on different hosts
     # if GRAPHITE_HOST != '':
-    if CARBON_HOST != '':
+    # @modified 20191007 - Feature #3250: Allow Skyline to send metrics to another Carbon host
+    # if CARBON_HOST != '':
+    if skyline_metrics_carbon_host != '':
         sock = socket.socket()
         sock.settimeout(10)
 
@@ -95,13 +111,17 @@ def send_graphite_metric(current_skyline_app, metric, value):
         try:
             # @modified 20190518 - Branch #3002: docker
             # sock.connect((GRAPHITE_HOST, CARBON_PORT))
-            sock.connect((CARBON_HOST, CARBON_PORT))
+            # @modified 20191007 - Feature #3250: Allow Skyline to send metrics to another Carbon host
+            # sock.connect((CARBON_HOST, CARBON_PORT))
+            sock.connect((skyline_metrics_carbon_host, skyline_metrics_carbon_port))
             sock.settimeout(None)
         except socket.error:
             sock.settimeout(None)
             # @modified 20190518 - Branch #3002: docker
             # endpoint = '%s:%d' % (GRAPHITE_HOST, CARBON_PORT)
-            endpoint = '%s:%d' % (CARBON_HOST, CARBON_PORT)
+            # @modified 20191007 - Feature #3250: Allow Skyline to send metrics to another Carbon host
+            # endpoint = '%s:%d' % (CARBON_HOST, CARBON_PORT)
+            endpoint = '%s:%d' % (skyline_metrics_carbon_host, skyline_metrics_carbon_port)
             current_skyline_app_logger = str(current_skyline_app) + 'Log'
             current_logger = logging.getLogger(current_skyline_app_logger)
             current_logger.error(
@@ -122,7 +142,9 @@ def send_graphite_metric(current_skyline_app, metric, value):
         except:
             # @modified 20190518 - Branch #3002: docker
             # endpoint = '%s:%d' % (GRAPHITE_HOST, CARBON_PORT)
-            endpoint = '%s:%d' % (CARBON_HOST, CARBON_PORT)
+            # @modified 20191007 - Feature #3250: Allow Skyline to send metrics to another Carbon host
+            # endpoint = '%s:%d' % (CARBON_HOST, CARBON_PORT)
+            endpoint = '%s:%d' % (skyline_metrics_carbon_host, skyline_metrics_carbon_port)
             current_skyline_app_logger = str(current_skyline_app) + 'Log'
             current_logger = logging.getLogger(current_skyline_app_logger)
             current_logger.error(

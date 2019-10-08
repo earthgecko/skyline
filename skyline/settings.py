@@ -186,7 +186,7 @@ GRAPH_URL = GRAPHITE_PROTOCOL + '://' + GRAPHITE_HOST + ':' + GRAPHITE_PORT + '/
 
 CARBON_HOST = GRAPHITE_HOST
 """
-:var CARBON_HOST: endpoint to send metrics that sould reach graphite if
+:var CARBON_HOST: endpoint to send metrics that should reach graphite if
     the CARBON_HOST is a different host to the GRAPHITE_HOST set it here.
 :vartype CARBON_PORT: int
 """
@@ -195,6 +195,22 @@ CARBON_PORT = 2003
 """
 :var CARBON_PORT: If you have a Graphite host set up, set its Carbon port.
 :vartype CARBON_PORT: int
+"""
+
+SKYLINE_METRICS_CARBON_HOST = GRAPHITE_HOST
+"""
+:var SKYLINE_METRICS_CARBON_HOST: If you want to send the Skyline metrics to
+    a different host other that the GRAPHITE_HOST, declare it here and see the
+    SKYLINE_METRICS_CARBON_PORT setting below.
+:vartype SKYLINE_METRICS_CARBON_HOST: str
+"""
+
+SKYLINE_METRICS_CARBON_PORT = CARBON_PORT
+"""
+:var SKYLINE_METRICS_CARBON_PORT: If you want to send the Skyline metrics to
+    a different SKYLINE_METRICS_CARBON_HOST host other than the GRAPHITE_HOST
+    and it has a different port to the CARBON_PORT, declare it here.
+:vartype SKYLINE_METRICS_CARBON_PORT: int
 """
 
 OCULUS_HOST = ''
