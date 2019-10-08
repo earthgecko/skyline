@@ -297,7 +297,7 @@ already matched a training data set -->
     {% if metric_training_data_saved %}
       {% if saved_metric_td == False %}
 	  <div class="alert alert-success">
-	    <strong>SAVED</strong> :: this training data has been saved <b><a href="?saved_training_data=true&timestamp={{ timestamp }}&metric={{ for_metric }}">saved for {{ for_metric }}</a></b>
+	    <strong>SAVED</strong> :: this training data has been saved <b><a href="?saved_training_data=true&timestamp={{ timestamp }}&metric={{ for_metric }}">{{ for_metric }} saved training page link</a></b>
 	  </div>
       {% endif %}
     {% endif %}

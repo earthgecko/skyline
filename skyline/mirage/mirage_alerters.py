@@ -1,5 +1,6 @@
 from __future__ import division, print_function
 import logging
+import hashlib
 from smtplib import SMTP
 import mirage_alerters
 try:
@@ -120,6 +121,13 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
     # @added 20161229 - Feature #1830: Ionosphere alerts
     # Added Ionosphere variables
     base_name = str(metric[1]).replace(settings.FULL_NAMESPACE, '', 1)
+    # @modified 20191008 - Branch #3002: docker
+    # wix-playground added a hashlib hexdigest method which has not been
+    # verified so using the originaly method useless the base_name is longer
+    # than 254 chars
+    if len(base_name) > 254:
+        base_name = hashlib.sha224(str(metric[1]).replace(
+            settings.FULL_NAMESPACE, '', 1)).hexdigest()
     if settings.IONOSPHERE_ENABLED:
         timeseries_dir = base_name.replace('.', '/')
         training_data_dir = '%s/%s/%s' % (
@@ -134,6 +142,9 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
         training_data_redis_image = '%s/%s.%s.redis.plot.%sh.png' % (
             training_data_dir, base_name, skyline_app,
             str(int(full_duration_in_hours)))
+    # @added 20181006 - Feature #2618: alert_slack
+    else:
+        graphite_image_file = None
 
     # For backwards compatibility
     if '@' in alert[1]:
@@ -197,8 +208,35 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
 
     # @modified 20161228 - Feature #1830: Ionosphere alerts
     # Ionosphere alerts
-    unencoded_graph_title = 'Skyline %s - ALERT at %s hours - %s' % (
-        context, str(int(second_order_resolution_in_hours)), str(metric[0]))
+    # @added 20191002 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
+    # Added as it was not interpolated in v1.3.0 and v1.3.1
+    try:
+        main_alert_title = settings.CUSTOM_ALERT_OPTS['main_alert_title']
+    except:
+        main_alert_title = 'Skyline'
+    alert_context = context
+    if context == 'Analyzer':
+        try:
+            alert_context = settings.CUSTOM_ALERT_OPTS['analyzer_alert_heading']
+        except:
+            alert_context = 'Ionosphere'
+    if context == 'Analyzer':
+        try:
+            alert_context = settings.CUSTOM_ALERT_OPTS['analyzer_alert_heading']
+        except:
+            alert_context = 'Analyzer'
+    if context == 'Ionosphere':
+        try:
+            alert_context = settings.CUSTOM_ALERT_OPTS['ionosphere_alert_heading']
+        except:
+            alert_context = 'Ionosphere'
+
+    # @modified 20190820 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
+    # unencoded_graph_title = 'Skyline %s - ALERT at %s hours - %s' % (
+    #     context, str(int(second_order_resolution_in_hours)), str(metric[0]))
+    unencoded_graph_title = '%s %s - ALERT at %s hours - %s' % (
+        main_alert_title, alert_context, str(int(second_order_resolution_in_hours)),
+        str(metric[0]))
     # @modified 20170603 - Feature #2034: analyse_derivatives
     # Added deriative functions to convert the values of metrics strictly
     # increasing monotonically to their deriative products in alert graphs and
@@ -229,8 +267,12 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
         if skip_derivative:
             known_derivative_metric = False
     if known_derivative_metric:
-        unencoded_graph_title = 'Skyline %s - ALERT at %s hours - derivative graph - %s' % (
-            context, str(int(second_order_resolution_in_hours)), str(metric[0]))
+        # @modified 20191002 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
+        # Use main_alert_title and alert_context
+        # unencoded_graph_title = 'Skyline %s - ALERT at %s hours - derivative graph - %s' % (
+        #     context, str(int(second_order_resolution_in_hours)), str(metric[0]))
+        unencoded_graph_title = '%s %s - ALERT at %s hours - derivative graph - %s' % (
+            main_alert_title, alert_context, str(int(second_order_resolution_in_hours)), str(metric[0]))
 
     if settings.ENABLE_DEBUG or LOCAL_DEBUG:
         logger.info('debug :: alert_smtp - unencoded_graph_title: %s' % unencoded_graph_title)
@@ -681,10 +723,22 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
     alerted_at = str(dt.datetime.utcfromtimestamp(int(metric[2])))
 
     try:
-        body = '<h3><font color="#dd3023">Sky</font><font color="#6698FF">line</font><font color="black"> %s alert</font></h3><br>' % context
+        # @modified 20191008 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
+        # Use main_alert_title
+        # body = '<h3><font color="#dd3023">Sky</font><font color="#6698FF">line</font><font color="black"> %s alert</font></h3><br>' % context
+        if main_alert_title == 'Skyline':
+            body = '<h3><font color="#dd3023">Sky</font><font color="#6698FF">line</font><font color="black"> %s alert</font></h3><br>' % alert_context
+        else:
+            body = '<h3>%s<font color="black"> %s alert</font></h3><br>' % alert_context
+
         body += '<font color="black">metric: <b>%s</b></font><br>' % metric[1]
-        body += '<font color="black">Anomalous value: %s (Mirage)</font><br>' % str(metric[0])
-        body += '<font color="black">Original anomalous value: %s (Analyzer)</font><br>' % str(original_anomalous_datapoint)
+        # @modified 20191008 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
+        if main_alert_title == 'Skyline':
+            body += '<font color="black">Anomalous value: %s (Mirage)</font><br>' % str(metric[0])
+            body += '<font color="black">Original anomalous value: %s (Analyzer)</font><br>' % str(original_anomalous_datapoint)
+        else:
+            body += '<font color="black">Anomalous value: %s (seasonal)</font><br>' % str(metric[0])
+            body += '<font color="black">Original anomalous value: %s (no seasonal - raw data)</font><br>' % str(original_anomalous_datapoint)
         body += '<font color="black">Anomaly timestamp: %s</font><br>' % str(int(metric[2]))
         # @added 20170806 - Feature #1830: Ionosphere alerts
         # Show a human date in alerts
@@ -700,10 +754,24 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
             # @modified 20170823 - Bug #2142: 7bit SMTP encoding breaking long urls
             # Broke body into body and more_body to workaround the 990 character
             # limit per line for SMTP
-            more_body += '<h3><font color="#dd3023">Ionosphere :: </font><font color="#6698FF">training data</font><font color="black"></font></h3>'
+            # @modified 20191002 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
+            # Use main_alert_title
+            # more_body += '<h3><font color="#dd3023">Ionosphere :: </font><font color="#6698FF">training data</font><font color="black"></font></h3>'
+            if main_alert_title == 'Skyline':
+                more_body += '<h3><font color="#dd3023">Ionosphere :: </font><font color="#6698FF">training data</font><font color="black"></font></h3>'
+            else:
+                more_body += '<h3><font color="#dd3023">%s :: </font><font color="#6698FF">training data</font><font color="black"></font></h3>' % main_alert_title
+
             ionosphere_link = '%s/ionosphere?timestamp=%s&metric=%s' % (
                 settings.SKYLINE_URL, str(int(metric[2])), str(metric[1]))
-            more_body += '<font color="black">To use this timeseries to train Skyline that this is not anomalous manage this training data at:<br>'
+            # @modified 20191008 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
+            # Use main_alert_title
+            # more_body += '<font color="black">To use this timeseries to train Skyline that this is not anomalous manage this training data at:<br>'
+            if main_alert_title == 'Skyline':
+                more_body += '<font color="black">To use this timeseries to train Skyline that this is not anomalous manage this training data at:<br>'
+            else:
+                more_body += '<font color="black">To use this timeseries to train %s that this is not anomalous manage this training data at:<br>' % main_alert_title
+
             more_body += '<a href="%s">%s</a></font>' % (ionosphere_link, ionosphere_link)
         if image_data:
             more_body += '<h3><font color="black">Graphite data at SECOND_ORDER_RESOLUTION_HOURS (aggregated)</font></h3>'
@@ -720,7 +788,10 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
             more_body += '<font color="black">To disable the Redis data graph view, set PLOT_REDIS_DATA to False in your settings.py, if the Graphite graph is sufficient for you,<br>'
             more_body += 'however do note that will remove the 3-sigma and mean value too.</font>'
         more_body += '<br>'
-        more_body += '<div dir="ltr" align="right"><font color="#dd3023">Sky</font><font color="#6698FF">line</font><font color="black"> version :: %s</font></div><br>' % str(skyline_version)
+        # @modified 20191002 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
+        # Use if main_alert_title
+        if main_alert_title == 'Skyline':
+            more_body += '<div dir="ltr" align="right"><font color="#dd3023">Sky</font><font color="#6698FF">line</font><font color="black"> version :: %s</font></div><br>' % str(skyline_version)
     except:
         logger.info(traceback.format_exc())
         logger.error('error :: alert_smtp - could not build body')
@@ -750,7 +821,11 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
             cs_.body_encoding = charset.QP
             msg.set_charset(cs_)
 
-            msg['Subject'] = '[Skyline alert] - %s ALERT - %s' % (context, metric[1])
+            # @modified 20191002 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
+            # Use main_alert_title and alert_context
+            # msg['Subject'] = '[Skyline alert] - %s ALERT - %s' % (context, metric[1])
+            msg['Subject'] = '[%s alert] - %s ALERT - %s' % (main_alert_title, alert_context, metric[1])
+
             msg['From'] = sender
             # @modified 20180524 - Task #2384: Change alerters to cc other recipients
             # msg['To'] = recipient
@@ -841,7 +916,7 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
         else:
             logger.info(
                 'alert_smtp - send_email_alert was set to %s message was not sent to primary_recipient :: %s, cc_recipients :: %s' % (
-                str(send_email_alert), str(primary_recipient), str(cc_recipients)))
+                    str(send_email_alert), str(primary_recipient), str(cc_recipients)))
 
         if LOCAL_DEBUG:
             logger.info('debug :: alert_smtp - Memory usage after email: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
@@ -856,7 +931,32 @@ def alert_pagerduty(alert, metric, second_order_resolution_seconds, context):
     if settings.PAGERDUTY_ENABLED:
         import pygerduty
         pager = pygerduty.PagerDuty(settings.PAGERDUTY_OPTS['subdomain'], settings.PAGERDUTY_OPTS['auth_token'])
-        pager.trigger_incident(settings.PAGERDUTY_OPTS['key'], '%s alert - %s - %s' % (context, str(metric[0]), metric[1]))
+
+        # @added 20191008 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
+        try:
+            main_alert_title = settings.CUSTOM_ALERT_OPTS['main_alert_title']
+        except:
+            main_alert_title = 'Skyline'
+        alert_context = context
+        if context == 'Analyzer':
+            try:
+                alert_context = settings.CUSTOM_ALERT_OPTS['analyzer_alert_heading']
+            except:
+                alert_context = 'Analyzer'
+        if context == 'Mirage':
+            try:
+                alert_context = settings.CUSTOM_ALERT_OPTS['mirage_alert_heading']
+            except:
+                alert_context = 'Mirage'
+        if context == 'Ionosphere':
+            try:
+                alert_context = settings.CUSTOM_ALERT_OPTS['ionosphere_alert_heading']
+            except:
+                alert_context = 'Ionosphere'
+
+        # @modified 20191008 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
+        # pager.trigger_incident(settings.PAGERDUTY_OPTS['key'], '%s alert - %s - %s' % (context, str(metric[0]), metric[1]))
+        pager.trigger_incident(settings.PAGERDUTY_OPTS['key'], '%s alert - %s - %s' % (alert_context, str(metric[0]), metric[1]))
     else:
         return False
 
@@ -955,8 +1055,16 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context):
 
     from slackclient import SlackClient
     import simplejson as json
+
     logger.info('alert_slack - anomalous metric :: alert: %s, metric: %s' % (str(alert), str(metric)))
     base_name = str(metric[1]).replace(settings.FULL_NAMESPACE, '', 1)
+    # @modified 20191008 - Branch #3002: docker
+    # wix-playground added a hashlib hexdigest method which has not been
+    # verified so using the original method useless the base_name is longer
+    # than 254 chars
+    if len(base_name) > 254:
+        base_name = hashlib.sha224(str(metric[1]).replace(
+            settings.FULL_NAMESPACE, '', 1)).hexdigest()
 
     full_duration_in_hours = int(second_order_resolution_seconds) / 3600
     second_order_resolution_in_hours = int(second_order_resolution_seconds) / 3600
@@ -991,18 +1099,54 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context):
         if skip_derivative:
             known_derivative_metric = False
 
+    # @added 20191008 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
+    try:
+        main_alert_title = settings.CUSTOM_ALERT_OPTS['main_alert_title']
+    except:
+        main_alert_title = 'Skyline'
+    alert_context = context
+    if context == 'Analyzer':
+        try:
+            alert_context = settings.CUSTOM_ALERT_OPTS['analyzer_alert_heading']
+        except:
+            alert_context = 'Analyzer'
+    if context == 'Mirage':
+        try:
+            alert_context = settings.CUSTOM_ALERT_OPTS['mirage_alert_heading']
+        except:
+            alert_context = 'Mirage'
+    if context == 'Ionosphere':
+        try:
+            alert_context = settings.CUSTOM_ALERT_OPTS['ionosphere_alert_heading']
+        except:
+            alert_context = 'Ionosphere'
+
     if known_derivative_metric:
-        unencoded_graph_title = 'Skyline %s - ALERT at %s hours - derivative graph - %s' % (
-            context, str(int(second_order_resolution_in_hours)), str(metric[0]))
-        slack_title = '*Skyline %s - ALERT* on %s at %s hours - derivative graph - %s' % (
-            context, str(metric[1]), str(int(second_order_resolution_in_hours)),
+        # @modified 20191008 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
+        # unencoded_graph_title = 'Skyline %s - ALERT at %s hours - derivative graph - %s' % (
+        #     context, str(int(second_order_resolution_in_hours)), str(metric[0]))
+        # slack_title = '*Skyline %s - ALERT* on %s at %s hours - derivative graph - %s' % (
+        #     context, str(metric[1]), str(int(second_order_resolution_in_hours)),
+        #     str(metric[0]))
+        unencoded_graph_title = '%s %s - ALERT at %s hours - derivative graph - %s' % (
+            main_alert_title, alert_context, str(int(second_order_resolution_in_hours)),
+            str(metric[0]))
+        slack_title = '*%s %s - ALERT* on %s at %s hours - derivative graph - %s' % (
+            main_alert_title, alert_context, str(metric[1]), str(int(second_order_resolution_in_hours)),
             str(metric[0]))
     else:
-        unencoded_graph_title = 'Skyline %s - ALERT at %s hours - %s' % (
-            context, str(int(second_order_resolution_in_hours)),
+        # @modified 20191008 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
+        # unencoded_graph_title = 'Skyline %s - ALERT at %s hours - %s' % (
+        #     context, str(int(second_order_resolution_in_hours)),
+        #     str(metric[0]))
+        # slack_title = '*Skyline %s - ALERT* on %s at %s hours - %s' % (
+        #     context, str(metric[1]), str(int(second_order_resolution_in_hours)),
+        #     str(metric[0]))
+        unencoded_graph_title = '%s %s - ALERT at %s hours - %s' % (
+            main_alert_title, alert_context, str(int(second_order_resolution_in_hours)),
             str(metric[0]))
-        slack_title = '*Skyline %s - ALERT* on %s at %s hours - %s' % (
-            context, str(metric[1]), str(int(second_order_resolution_in_hours)),
+        slack_title = '*%s %s - ALERT* on %s at %s hours - %s' % (
+            main_alert_title, alert_context, str(metric[1]), str(int(second_order_resolution_in_hours)),
             str(metric[0]))
 
     graph_title_string = quote(unencoded_graph_title, safe='')
@@ -1163,7 +1307,12 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context):
             # Added date and time info so you do not have to mouseover the slack
             # message to determine the time at which the alert came in
             # initial_comment = slack_title + ' :: <' + link  + '|graphite image link>\n*Ionosphere training dir* :: <' + ionosphere_link + '|training data link>'
-            initial_comment = slack_title + ' :: <' + link + '|graphite image link>\n*Ionosphere training dir* :: <' + ionosphere_link + '|training data link> :: for anomaly at ' + slack_time_string
+            # @modified 20191008 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
+            # initial_comment = slack_title + ' :: <' + link + '|graphite image link>\n*Ionosphere training dir* :: <' + ionosphere_link + '|training data link> :: for anomaly at ' + slack_time_string
+            if main_alert_title == 'Skyline':
+                initial_comment = slack_title + ' :: <' + link + '|graphite image link>\n*Ionosphere training dir* :: <' + ionosphere_link + '|training data link> :: for anomaly at ' + slack_time_string
+            else:
+                initial_comment = slack_title + ' :: <' + link + '|graphite image link>\n*Training dir* :: <' + ionosphere_link + '|training data link> :: for anomaly at ' + slack_time_string
         else:
             # initial_comment = slack_title + ' :: <' + link  + '|graphite image link>'
             initial_comment = slack_title + ' :: <' + link + '|graphite image link>\nFor anomaly at ' + slack_time_string
