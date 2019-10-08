@@ -18,6 +18,7 @@ from logger import set_up_logging
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 sys.path.insert(0, os.path.dirname(__file__))
 import settings
+from skyline_functions import send_graphite_metric
 
 logger = set_up_logging('worker')
 
@@ -179,7 +180,9 @@ class Worker(Process):
                 logger.info('worker :: metrics_sent_to_graphite in last 60 seconds - %s' % str(metrics_sent_to_graphite))
                 skyline_metric = '%s.metrics_sent_to_graphite' % skyline_app_graphite_namespace
                 try:
-                    graphyte.send(skyline_metric, metrics_sent_to_graphite, time_now)
+                    # @modified 20191008 - Feature #3250: Allow Skyline to send metrics to another Carbon host
+                    # graphyte.send(skyline_metric, metrics_sent_to_graphite, time_now)
+                    send_graphite_metric(skyline_app, skyline_metric, metrics_sent_to_graphite)
                     last_sent_to_graphite = int(time())
                     metrics_sent_to_graphite = 0
                 except:

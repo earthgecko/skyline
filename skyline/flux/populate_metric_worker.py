@@ -24,6 +24,7 @@ from logger import set_up_logging
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 sys.path.insert(0, os.path.dirname(__file__))
 import settings
+from skyline_functions import send_graphite_metric
 
 logger = set_up_logging('populate_metric_worker')
 
@@ -581,7 +582,9 @@ class PopulateMetricWorker(Process):
                 str(sent_to_graphite), metric))
             try:
                 skyline_metric = '%s.datapoints_sent_to_graphite' % (skyline_app_graphite_namespace)
-                graphyte.send(skyline_metric, float(sent_to_graphite), int(time()))
+                # @modified 20191008 - Feature #3250: Allow Skyline to send metrics to another Carbon host
+                # graphyte.send(skyline_metric, float(sent_to_graphite), int(time()))
+                send_graphite_metric(skyline_app, skyline_metric, float(sent_to_graphite))
                 logger.info('populate_metric_worker :: submitted %s to Graphite for %s' % (
                     str(float(sent_to_graphite)), skyline_metric))
             except:
