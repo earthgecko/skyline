@@ -528,6 +528,23 @@ def version():
 # they are used.
 # def data():
 def api():
+
+    # @added 20191008 - Feature #3252: webapp api - unique_metrics
+    if 'unique_metrics' in request.args:
+        try:
+            unique_metrics = list(REDIS_CONN.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: Webapp could not get the unique_metrics list from Redis')
+            return 'Internal Server Error', 500
+        data_dict = {
+  "status": {},
+  "data": {
+    "metrics": unique_metrics
+  }
+}
+        return jsonify(data_dict), 200
+
     # @added 20180929
     if 'get_json' in request.args:
         source = None
