@@ -1,6 +1,7 @@
 from __future__ import division
 import logging
 import traceback
+import hashlib
 from smtplib import SMTP
 import boundary_alerters
 try:
@@ -120,8 +121,22 @@ def alert_smtp(datapoint, metric_name, expiration_time, metric_trigger, algorith
     alert_algo = str(algorithm)
     alert_context = alert_algo.upper()
 
-    unencoded_graph_title = 'Skyline Boundary - %s at %s hours - %s - %s' % (
-        alert_context, graphite_previous_hours, metric_name, datapoint)
+    # @added 20191008 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
+    try:
+        main_alert_title = settings.CUSTOM_ALERT_OPTS['main_alert_title']
+    except:
+        main_alert_title = 'Skyline'
+    try:
+        app_alert_context = settings.CUSTOM_ALERT_OPTS['boundary_alert_heading']
+    except:
+        app_alert_context = 'Boundary'
+
+    # @modified 20191002 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
+    # Use alert_context
+    # unencoded_graph_title = 'Skyline Boundary - %s at %s hours - %s - %s' % (
+    #     alert_context, graphite_previous_hours, metric_name, datapoint)
+    unencoded_graph_title = '%s %s - %s at %s hours - %s - %s' % (
+        main_alert_title, app_alert_context, alert_context, graphite_previous_hours, metric_name, datapoint)
 
     # @added 20181126 - Task #2742: Update Boundary
     #                   Feature #2034: analyse_derivatives
@@ -153,8 +168,11 @@ def alert_smtp(datapoint, metric_name, expiration_time, metric_trigger, algorith
         if skip_derivative:
             known_derivative_metric = False
     if known_derivative_metric:
-        unencoded_graph_title = 'Skyline Boundary - %s at %s hours - derivative graph - %s - %s' % (
-            alert_context, graphite_previous_hours, metric_name, datapoint)
+        # @modified 20191002 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
+        # unencoded_graph_title = 'Skyline Boundary - %s at %s hours - derivative graph - %s - %s' % (
+        #     alert_context, graphite_previous_hours, metric_name, datapoint)
+        unencoded_graph_title = '%s %s - %s at %s hours - derivative graph - %s - %s' % (
+            main_alert_title, app_alert_context, alert_context, graphite_previous_hours, metric_name, datapoint)
 
     graph_title_string = quote(unencoded_graph_title, safe='')
     graph_title = '&title=%s' % graph_title_string
@@ -207,8 +225,11 @@ def alert_smtp(datapoint, metric_name, expiration_time, metric_trigger, algorith
     else:
         img_tag = '<img src="cid:%s"/>' % content_id
 
-    body = '%s :: %s <br> Next alert in: %s seconds <br> skyline Boundary alert - %s <br><a href="%s">%s</a>' % (
-        datapoint, metric_name, expiration_time, alert_context, link, img_tag)
+    # @modified 20191002 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
+    # body = '%s :: %s <br> Next alert in: %s seconds <br> skyline Boundary alert - %s <br><a href="%s">%s</a>' % (
+    #     datapoint, metric_name, expiration_time, alert_context, link, img_tag)
+    body = '%s :: %s <br> Next alert in: %s seconds <br> %s %s alert - %s <br><a href="%s">%s</a>' % (
+        main_alert_title, app_alert_context, datapoint, metric_name, expiration_time, alert_context, link, img_tag)
 
     # @modified 20180524 - Task #2384: Change alerters to cc other recipients
     # Do not send to each recipient, send to primary_recipient and cc the other
@@ -220,7 +241,9 @@ def alert_smtp(datapoint, metric_name, expiration_time, metric_trigger, algorith
             (str(primary_recipient), str(cc_recipients)))
 
         msg = MIMEMultipart('alternative')
-        msg['Subject'] = '[Skyline alert] ' + 'Boundary ALERT - ' + alert_context + ' - ' + datapoint + ' - ' + metric_name
+        # @modified 20191002 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
+        # msg['Subject'] = '[Skyline alert] ' + 'Boundary ALERT - ' + alert_context + ' - ' + datapoint + ' - ' + metric_name
+        msg['Subject'] = '[' + main_alert_title + ' alert] ' + app_alert_context + ' ALERT - ' + alert_context + ' - ' + datapoint + ' - ' + metric_name
         msg['From'] = sender
         # @modified 20180524 - Task #2384: Change alerters to cc other recipients
         # msg['To'] = recipient
@@ -409,16 +432,35 @@ def alert_slack(datapoint, metric_name, expiration_time, metric_trigger, algorit
         if skip_derivative:
             known_derivative_metric = False
 
+    # @added 20191008 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
+    try:
+        main_alert_title = settings.CUSTOM_ALERT_OPTS['main_alert_title']
+    except:
+        main_alert_title = 'Skyline'
+    try:
+        app_alert_context = settings.CUSTOM_ALERT_OPTS['boundary_alert_heading']
+    except:
+        app_alert_context = 'Boundary'
+
     if known_derivative_metric:
-        unencoded_graph_title = 'Skyline Boundary - ALERT %s at %s hours - derivative graph - %s' % (
-            alert_context, str(graphite_previous_hours), metric)
-        slack_title = '*Skyline Boundary - ALERT* %s on %s at %s hours - derivative graph - %s' % (
-            alert_context, metric, str(graphite_previous_hours), datapoint)
+        # @modified 20191008 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
+        # unencoded_graph_title = 'Skyline Boundary - ALERT %s at %s hours - derivative graph - %s' % (
+        #     alert_context, str(graphite_previous_hours), metric)
+        # slack_title = '*Skyline Boundary - ALERT* %s on %s at %s hours - derivative graph - %s' % (
+        #     alert_context, metric, str(graphite_previous_hours), datapoint)
+        unencoded_graph_title = '%s %s - ALERT %s at %s hours - derivative graph - %s' % (
+            main_alert_title, app_alert_context, alert_context, str(graphite_previous_hours), metric)
+        slack_title = '*%s %s - ALERT* %s on %s at %s hours - derivative graph - %s' % (
+            main_alert_title, app_alert_context, alert_context, metric, str(graphite_previous_hours), datapoint)
     else:
-        unencoded_graph_title = 'Skyline Boundary - ALERT %s at %s hours - %s' % (
-            alert_context, str(graphite_previous_hours), metric)
-        slack_title = '*Skyline Boundary - ALERT* %s on %s at %s hours - %s' % (
-            alert_context, metric, str(graphite_previous_hours), datapoint)
+        # unencoded_graph_title = 'Skyline Boundary - ALERT %s at %s hours - %s' % (
+        #     alert_context, str(graphite_previous_hours), metric)
+        # slack_title = '*Skyline Boundary - ALERT* %s on %s at %s hours - %s' % (
+        #     alert_context, metric, str(graphite_previous_hours), datapoint)
+        unencoded_graph_title = '%s %s - ALERT %s at %s hours - %s' % (
+            main_alert_title, app_alert_context, alert_context, str(graphite_previous_hours), metric)
+        slack_title = '*%s %s - ALERT* %s on %s at %s hours - %s' % (
+            main_alert_title, app_alert_context, alert_context, metric, str(graphite_previous_hours), datapoint)
 
     graph_title_string = quote(unencoded_graph_title, safe='')
     graph_title = '&title=%s' % graph_title_string
