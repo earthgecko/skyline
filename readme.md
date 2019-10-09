@@ -35,6 +35,18 @@ The documentation for your version is also viewable in a clone locally in your
 browser at `file://<PATH_TO_YOUR_CLONE>/docs/_build/html/index.html` and via the
 the Skyline Webapp frontend via the docs tab.
 
+## Managed service
+
+We offer a managed version of Skyline and custom UI for people that do not have
+a vast amount of time to spare.  You'll get access to unreleased features and
+support from developers that have honed numerous Skyline integrations and
+trained thousands upon thousands of metrics to improve alerting.
+
+We are looking for test partners as the product is currently in beta phase.
+Send us an email at beta@anomalarm.io
+
+Places are filling up quickly!
+
 ## Other
 
 https://gitter.im/earthgecko-skyline/Lobby
