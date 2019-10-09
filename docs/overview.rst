@@ -115,6 +115,19 @@ Skyline is not some Python data science anomaly detection library, it is a full
 blown production grade anomaly detection stack.  Although certain aspects of
 Skyline may have interest to the data science community.
 
+Too much effort?
+----------------
+
+Try our managed service.  We offer a managed version of Skyline for people that
+do not have a vast amount of time to spare.  You'll get access to unreleased
+features and support from developers that have honed numerous Skyline
+integrations to alert on important metrics.
+
+We are looking for test partners as the product is currently in beta phase.
+Send us an email at beta@anomalarm.io
+
+Places are filling up quickly!
+
 A brief history
 ---------------
 
