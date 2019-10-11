@@ -941,6 +941,18 @@ class Fetcher(Thread):
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: fetcher :: could not send %s to Graphite' % send_metric_name)
+
+            # @added 20191011 - Feature #3260: vista - fetcher add time_to_fetch metric
+            try:
+                send_metric_name = '%s.time_to_fetch' % skyline_app_graphite_namespace
+                logger.info('fetcher :: sending Graphite - %s, %s' % (
+                    send_metric_name, str(process_runtime)))
+                fetcher_time_to_fetch_str = str(process_runtime)
+                send_graphite_metric(parent_skyline_app, send_metric_name, fetcher_time_to_fetch_str)
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: fetcher :: could not send %s to Graphite' % send_metric_name)
+
             try:
                 del process_runtime
             except:
