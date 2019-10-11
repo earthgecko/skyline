@@ -30,6 +30,11 @@ except:
     SERVER_METRIC_PATH = ''
 
 parent_skyline_app = 'flux'
+
+# @added 20191010 - Feature #3250: Allow Skyline to send metrics to another Carbon host
+# Added missing skyline_app required for send_graphite_metric
+skyline_app = 'flux'
+
 skyline_app_graphite_namespace = 'skyline.%s%s.worker' % (parent_skyline_app, SERVER_METRIC_PATH)
 
 if settings.FLUX_SEND_TO_CARBON:

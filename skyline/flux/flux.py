@@ -20,10 +20,14 @@ pid = os.getpid()
 logger.info('flux :: starting flux with pid %s' % str(pid))
 
 logger.info('flux :: starting worker')
-httpMetricDataQueue = Queue(maxsize=3000)
+# @modified 20191010 - Bug #3254: flux.populateMetricQueue Full
+# httpMetricDataQueue = Queue(maxsize=3000)
+httpMetricDataQueue = Queue(maxsize=30000)
 Worker(httpMetricDataQueue, pid).start()
 
-populateMetricQueue = Queue(maxsize=3000)
+# @modified 20191010 - Bug #3254: flux.populateMetricQueue Full
+# populateMetricQueue = Queue(maxsize=3000)
+populateMetricQueue = Queue(maxsize=30000)
 logger.info('flux :: starting populate_metric_worker')
 PopulateMetricWorker(populateMetricQueue, pid).start()
 
