@@ -249,12 +249,19 @@ class Worker(Process):
                                 str(len_metric_datapoints),
                                 str(metric_datapoints)))
                         for metric_datapoint in metric_datapoints:
-                            if remote_host_type == 'graphite':
-                                value = float(metric_datapoint[0])
-                                timestamp = int(metric_datapoint[1])
-                            if remote_host_type == 'prometheus':
-                                value = float(metric_datapoint[1])
-                                timestamp = int(metric_datapoint[0])
+                            # @20191010 - Branch #3140: vista
+                            # fetcher passes through preformatted data points that
+                            # are in the same format/order for both graphite and
+                            # prometheus
+                            # if remote_host_type == 'graphite':
+                            #     value = float(metric_datapoint[0])
+                            #     timestamp = int(metric_datapoint[1])
+                            # if remote_host_type == 'prometheus':
+                            #     value = float(metric_datapoint[1])
+                            #     timestamp = int(metric_datapoint[0])
+                            timestamp = int(metric_datapoint[0])
+                            value = float(metric_datapoint[1])
+
                             append_to_timeseries = False
                             if last_flux_timestamp:
                                 if int(timestamp) > last_flux_timestamp:
