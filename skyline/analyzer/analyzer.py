@@ -1954,7 +1954,11 @@ class Analyzer(Thread):
 
                                 if anomaly_check_file_created:
                                     if python_version == 2:
-                                        os.chmod(anomaly_check_file, 0644)
+                                        # @modified 20190130 - Task #2690: Test Skyline on Python-3.6.7
+                                        #                      Task #2828: Skyline - Python 3.7
+                                        #                      Branch #3262: py3
+                                        # os.chmod(anomaly_check_file, 0644)
+                                        os.chmod(anomaly_check_file, 0o644)
                                     if python_version == 3:
                                         os.chmod(anomaly_check_file, mode=0o644)
                                     if LOCAL_DEBUG:
