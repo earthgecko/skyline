@@ -814,8 +814,19 @@ def alert_smtp(alert, metric, context):
             else:
                 more_body += '<h3>%s :: <font color="#6698FF">training data</font><font color="black"></font></h3>' % main_alert_title
 
-            ionosphere_link = '%s/ionosphere?timestamp=%s&metric=%s' % (
-                settings.SKYLINE_URL, str(int(metric[2])), str(metric[1]))
+            # @added 20191011 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
+            try:
+                ionosphere_link_path = settings.CUSTOM_ALERT_OPTS['ionosphere_link_path']
+            except:
+                ionosphere_link_path = 'ionosphere'
+
+            # @modified 20191011 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
+            # ionosphere_link = '%s/ionosphere?timestamp=%s&metric=%s' % (
+            #     settings.SKYLINE_URL, str(int(metric[2])), str(metric[1]))
+            ionosphere_link = '%s/%s?timestamp=%s&metric=%s' % (
+                settings.SKYLINE_URL, ionosphere_link_path, str(int(metric[2])),
+                str(metric[1]))
+
             # @modified 20191002 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
             # Use main_alert_title
             # more_body += '<font color="black">To use this timeseries to train Skyline that this is not anomalous manage this training data at:<br>'
@@ -1483,8 +1494,18 @@ def alert_slack(alert, metric, context):
         logger.error('error :: alert_slack - could not initiate SlackClient')
         return False
 
-    ionosphere_link = '%s/ionosphere?timestamp=%s&metric=%s' % (
-        settings.SKYLINE_URL, str(int(metric[2])), str(metric[1]))
+    # @added 20191011 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
+    try:
+        ionosphere_link_path = settings.CUSTOM_ALERT_OPTS['ionosphere_link_path']
+    except:
+        ionosphere_link_path = 'ionosphere'
+
+    # @modified 20191011 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
+    # ionosphere_link = '%s/ionosphere?timestamp=%s&metric=%s' % (
+    #     settings.SKYLINE_URL, str(int(metric[2])), str(metric[1]))
+    ionosphere_link = '%s/%s?timestamp=%s&metric=%s' % (
+        settings.SKYLINE_URL, ionosphere_link_path, str(int(metric[2])),
+        str(metric[1]))
 
     # This block is not used but left here as it is the pattern for sending
     # messages using the chat.postMessage methods and could possibly be the

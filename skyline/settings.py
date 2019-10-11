@@ -791,6 +791,7 @@ CUSTOM_ALERT_OPTS = {
     'mirage_alert_heading': 'Mirage',
     'boundary_alert_heading': 'Boundary',
     'ionosphere_alert_heading': 'Ionosphere',
+    'ionosphere_link_path': 'ionosphere',
     'append_environment': '',
 }
 """
