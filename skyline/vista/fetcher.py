@@ -53,7 +53,7 @@ except:
     VISTA_ENABLED = False
 
 USE_FLUX = False
-LOCAL_DEBUG = True
+LOCAL_DEBUG = False
 
 
 class Fetcher(Thread):
@@ -92,7 +92,9 @@ class Fetcher(Thread):
         for remote_host_type, frequency, remote_target, graphite_target, metric, url, namespace_prefix, api_key, token, user, password in metrics_to_fetch:
             success = False
             try:
-                logger.info('fetcher :: getting data from %s' % str(url))
+                # @modified 20191011 - Task #3258: Reduce vista logging
+                if LOCAL_DEBUG:
+                    logger.info('fetcher :: getting data from %s' % str(url))
                 response = requests.get(url)
                 if response.status_code == 200:
                     success = True
@@ -112,8 +114,10 @@ class Fetcher(Thread):
                 if remote_host_type == 'prometheus':
                     datapoints = js['data']['result'][0]['values']
                 datapoints_fetched = len(datapoints)
-                logger.info('fetcher :: retrieved %s data points from %s' % (
-                    str(datapoints_fetched), str(url)))
+                # @modified 20191011 - Task #3258: Reduce vista logging
+                if LOCAL_DEBUG:
+                    logger.info('fetcher :: retrieved %s data points from %s' % (
+                        str(datapoints_fetched), str(url)))
             except:
                 logger.info(traceback.format_exc())
                 logger.error('error :: fetcher :: failed to get data from %s' % str(url))
@@ -243,7 +247,7 @@ class Fetcher(Thread):
                     logger.info('fetcher :: added data from %s to Redis set %s' % (
                         str(url), redis_set))
             except:
-                logger.info(traceback.format_exc())
+                logger.error(traceback.format_exc())
                 logger.error('error :: failed to add %s to Redis set %s' % (
                     str(data), str(redis_set)))
             redis_set = 'vista.fetcher.metrics.fetched'
@@ -252,7 +256,7 @@ class Fetcher(Thread):
             try:
                 self.redis_conn.sadd(redis_set, str(data))
             except:
-                logger.info(traceback.format_exc())
+                logger.error(traceback.format_exc())
                 logger.error('error :: failed to add %s to Redis set %s' % (
                     str(data), str(redis_set)))
         fetch_process_end = time()
@@ -738,15 +742,31 @@ class Fetcher(Thread):
                         logger.error('error :: fetcher :: could not build the payload json')
                 if flux_url and payload:
                     try:
-                        logger.info('fetcher :: calling %s with payload - %s' % (
-                            flux_url, str(payload)))
+                        # @modified 20191011 - Task #3258: Reduce vista logging
+                        if LOCAL_DEBUG:
+                            logger.info('fetcher :: calling %s with payload - %s' % (
+                                flux_url, str(payload)))
                         response = requests.post(flux_url, json=payload)
-                        logger.info('fetcher :: flux /populate_metric response code - %s' % (
+                        # @modified 20191011 - Task #3258: Reduce vista logging
+                        if LOCAL_DEBUG:
+                            logger.info('fetcher :: flux /populate_metric response code - %s' % (
                             str(response.status_code)))
+                        # @added 20191011 - Task #3258: Reduce vista logging
+                        good_response = False
+
                         if response.status_code == 200:
                             fetcher_sent_to_flux += 1
+                            # @added 20191011 - Task #3258: Reduce vista logging
+                            good_response = True
                         if response.status_code == 204:
                             fetcher_sent_to_flux += 1
+                            # @added 20191011 - Task #3258: Reduce vista logging
+                            good_response = True
+
+                        # @added 20191011 - Task #3258: Reduce vista logging
+                        if not good_response:
+                            logger.error('fetcher :: flux /populate_metric did not respond with 200 or 204, status code - %s for %s' % (
+                            str(response.status_code), flux_url))
                     except:
                         logger.error(traceback.format_exc())
                         logger.error('error :: fetcher :: could not post data to flux URL - %s, data - %s' % (

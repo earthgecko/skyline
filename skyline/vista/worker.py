@@ -40,7 +40,7 @@ python_version = int(version_info[0])
 
 this_host = str(os.uname()[1])
 
-LOCAL_DEBUG = True
+LOCAL_DEBUG = False
 
 
 class Worker(Process):
@@ -381,7 +381,7 @@ class Worker(Process):
                             elif response.status_code == 204:
                                 success = True
                         except:
-                            logger.info(traceback.format_exc())
+                            logger.error(traceback.format_exc())
                             logger.error('error :: worker :: failed to request %s' % str(flux_url))
                         if not success:
                             logger.error('error :: worker :: http status code - %s, reason - %s' % (
@@ -390,8 +390,15 @@ class Worker(Process):
                     if success:
                         metrics_sent_to_flux += 1
                         redis_set = 'vista.fetcher.metrics.json'
-                        logger.info('worker :: data submitted to flux OK, removing data from Redis set %s' % (
-                            redis_set))
+
+                        # @added 20191011 - Task #3258: Reduce vista logging
+                        timeseries_length = len(timeseries)
+
+                        # @modified 20191011 - Task #3258: Reduce vista logging
+                        # logger.info('worker :: data submitted to flux OK, removing data from Redis set %s' % (
+                        #     redis_set))
+                        logger.info('worker :: %s data points submitted to flux OK for %s' % (
+                            str(timeseries_length), metric))
                         try:
                             self.redis_conn.srem(redis_set, str_metric_data)
                         except:
