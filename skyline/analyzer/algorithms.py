@@ -145,8 +145,8 @@ def grubbs(timeseries):
     """
 
     try:
-        series = scipy.array([x[1] for x in timeseries])
-        stdDev = scipy.std(series)
+        series = Series(x[1] for x in timeseries)
+        stdDev = series.std()
 
         # Issue #27 - Handle z_score agent.py RuntimeWarning - https://github.com/earthgecko/skyline/issues/27
         # This change avoids spewing warnings on agent.py tests:
@@ -322,8 +322,9 @@ def least_squares(timeseries):
 
         if len(errors) < 3:
             return False
-
-        std_dev = scipy.std(errors)
+        
+        series = Series(x for x in errors)
+        std_dev = series.std()
         t = (errors[-1] + errors[-2] + errors[-3]) / 3
 
         return abs(t) > std_dev * 3 and round(std_dev) != 0 and round(t) != 0
