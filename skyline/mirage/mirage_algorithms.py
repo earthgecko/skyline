@@ -122,8 +122,15 @@ def grubbs(timeseries, second_order_resolution_seconds):
     """
 
     try:
-        series = scipy.array([x[1] for x in timeseries])
-        stdDev = scipy.std(series)
+        # @modified 20191011 - Update least_squares & grubbs algorithms by using sample standard deviation PR #124
+        #                      Task #3256: Review and test PR 124
+        # Change from using scipy/numpy std which calculates the population
+        # standard deviation to using pandas.std which calculates the sample
+        # standard deviation which is more appropriate for time series data
+        # series = scipy.array([x[1] for x in timeseries])
+        # stdDev = scipy.std(series)
+        series = pandas.Series(x[1] for x in timeseries)
+        stdDev = series.std()
 
         # Issue #27 - Handle z_score agent.py RuntimeWarning - https://github.com/earthgecko/skyline/issues/27
         # This change avoids spewing warnings on agent.py tests:
@@ -290,7 +297,15 @@ def least_squares(timeseries, second_order_resolution_seconds):
         if len(errors) < 3:
             return False
 
-        std_dev = scipy.std(errors)
+        # @modified 20191011 - Update least_squares & grubbs algorithms by using sample standard deviation PR #124
+        #                      Task #3256: Review and test PR 124
+        # Change from using scipy/numpy std which calculates the population
+        # standard deviation to using pandas.std which calculates the sample
+        # standard deviation which is more appropriate for time series data
+        # std_dev = scipy.std(errors)
+        series = pandas.Series(x for x in errors)
+        std_dev = series.std()
+
         t = (errors[-1] + errors[-2] + errors[-3]) / 3
 
         return abs(t) > std_dev * 3 and round(std_dev) != 0 and round(t) != 0
