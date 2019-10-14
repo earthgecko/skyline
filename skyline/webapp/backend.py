@@ -87,8 +87,14 @@ def panorama_request():
             found_id = str(row[0])
             found_ids.append(int(found_id))
 
-        ids_first = string.replace(str(found_ids), '[', '')
-        in_ids = string.replace(str(ids_first), ']', '')
+        # @modified 20191014 - Task #3270: Deprecate string.replace for py3
+        #                      Branch #3262: py3
+        # ids_first = string.replace(str(found_ids), '[', '')
+        # in_ids = string.replace(str(ids_first), ']', '')
+        found_ids_str = str(found_ids)
+        ids_first = found_ids_str.replace('[', '')
+        in_ids = ids_first.replace(']', '')
+
         return in_ids
 
     try:
@@ -356,8 +362,11 @@ def panorama_request():
     anomalous_metrics = []
 
     if search_request:
+        # @modified 20191014 - Task #3270: Deprecate string.replace for py3
+        #                      Branch #3262: py3
         anomalies_json = path.abspath(path.join(path.dirname(__file__), '..', settings.ANOMALY_DUMP))
-        panorama_json = string.replace(str(anomalies_json), 'anomalies.json', 'panorama.json')
+        # panorama_json = string.replace(str(anomalies_json), 'anomalies.json', 'panorama.json')
+        panorama_json = anomalies_json.replace('anomalies.json', 'panorama.json')
         if ENABLE_WEBAPP_DEBUG:
             logger.info('debug ::  panorama_json - %s' % str(panorama_json))
 
