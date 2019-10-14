@@ -240,7 +240,19 @@ class Listen(Process):
                 while 1:
                     self.check_if_parent_is_alive()
                     data, addr = s.recvfrom(1024)
-                    metric = unpackb(data)
+
+                    # @modified 20191014 - Task #3272: horizon - listen - py3 handle msgpack bytes
+                    #                      Branch #3262: py3
+                    #                      Bug #3266: py3 Redis binary objects not strings
+                    # msgpack encoding of bytes and not str as per
+                    # https://msgpack.org/#string-and-binary-type Python/msgpack
+                    # and https://stackoverflow.com/a/47070687/107406
+                    # metric = unpackb(data)
+                    if python_version == 3:
+                        metric = unpackb(data, encoding='utf-8')
+                    else:
+                        metric = unpackb(data)
+
                     chunk.append(metric)
 
                     # Queue the chunk and empty the variable
