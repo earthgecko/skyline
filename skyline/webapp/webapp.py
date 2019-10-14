@@ -179,9 +179,12 @@ if python_version == 3:
 
 # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
 if settings.REDIS_PASSWORD:
-    REDIS_CONN = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+    # @modified 20190130 - Bug #3266: py3 Redis binary objects not strings
+    #                      Branch #3262: py3
+    # REDIS_CONN = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
+    REDIS_CONN = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
 else:
-    REDIS_CONN = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+    REDIS_CONN = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
 
 # ENABLE_WEBAPP_DEBUG = True
 
@@ -469,7 +472,9 @@ def anomalies():
 def panorama_anomalies():
     try:
         anomalies_json = path.abspath(path.join(path.dirname(__file__), '..', settings.ANOMALY_DUMP))
-        panorama_json = string.replace(str(anomalies_json), 'anomalies.json', 'panorama.json')
+        # @modified 20191014 - Task #3270: Deprecate string.replace for py3
+        # panorama_json = string.replace(str(anomalies_json), 'anomalies.json', 'panorama.json')
+        panorama_json = anomalies_json.replace('anomalies.json', 'panorama.json')
         logger.info('opening - %s' % panorama_json)
         with open(panorama_json, 'r') as f:
             json_data = f.read()
@@ -706,8 +711,13 @@ def api():
         resp = json.dumps({'results': timeseries})
         cleaned_resp = False
         try:
-            format_resp_1 = string.replace(str(resp), '"[[', '[[')
-            cleaned_resp = string.replace(str(format_resp_1), ']]"', ']]')
+            # @modified 20191014 - Task #3270: Deprecate string.replace for py3
+            # format_resp_1 = string.replace(str(resp), '"[[', '[[')
+            # cleaned_resp = string.replace(str(format_resp_1), ']]"', ']]')
+            resp_str = str(resp)
+            format_resp_1 = resp_str.replace('"[[', '[[')
+            cleaned_resp = format_resp_1.replace(']]"', ']]')
+
         except:
             logger.error('error :: failed string replace resp: ' + traceback.format_exc())
 
@@ -3644,19 +3654,46 @@ serverinfo_meta = {
 # @added 20180520 - Feature #2378: Add redis auth to Skyline and rebrow
 # Added auth to rebrow as per https://github.com/marians/rebrow/pull/20 by
 # elky84
-def get_redis(host, port, db, password):
+# @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
+#                      Branch #3262: py3
+#def get_redis(host, port, db, password):
+def get_redis(host, port, db, password, decode):
     if password == "":
         # @modified 20190517 - Branch #3002: docker
         # Allow rebrow to connect to Redis on the socket too
         if host == 'unix_socket':
-            return redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH, db=db)
+            # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
+            #                      Branch #3262: py3
+            # return redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH, db=db)
+            if decode:
+                return redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH, db=db, charset='utf-8', decode_responses=True)
+            else:
+                return redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH, db=db)
         else:
-            return redis.StrictRedis(host=host, port=port, db=db)
+            # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
+            #                      Branch #3262: py3
+            # return redis.StrictRedis(host=host, port=port, db=db)
+            if decode:
+                return redis.StrictRedis(host=host, port=port, db=db, charset='utf-8', decode_responses=True)
+            else:
+                return redis.StrictRedis(host=host, port=port, db=db)
     else:
         if host == 'unix_socket':
-            return redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH, db=db)
+            # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
+            #                      Branch #3262: py3
+            # return redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH, db=db)
+            if decode:
+                return redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH, db=db, charset='utf-8', decode_responses=True)
+            else:
+                return redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH, db=db)
         else:
-            return redis.StrictRedis(host=host, port=port, db=db, password=password)
+            # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
+            #                      Branch #3262: py3
+            # return redis.StrictRedis(host=host, port=port, db=db, password=password)
+            if decode:
+                return redis.StrictRedis(host=host, port=port, db=db, password=password, charset='utf-8', decode_responses=True)
+            else:
+                return redis.StrictRedis(host=host, port=port, db=db, password=password)
 
 
 # @added 20180527 - Feature #2378: Add redis auth to Skyline and rebrow
@@ -3736,19 +3773,28 @@ def decode_token(client_id):
     if token:
         try:
             if settings.REDIS_PASSWORD:
-                redis_conn = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+                # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
+                #                      Branch #3262: py3
+                # redis_conn = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+                redis_conn = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
             else:
-                redis_conn = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+                # redis_conn = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+                redis_conn = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
             key = 'rebrow.token.%s' % token
             client_token_data = redis_conn.get(key)
         except:
             trace = traceback.format_exc()
             fail_msg = 'Failed to get client_token_data from Redis key - %s' % key
+            logger.error('%s' % trace)
+            logger.error('%s' % fail_msg)
             client_token_data = False
             token = False
 
     client_id_match = False
-    if client_token_data is not None:
+    # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
+    #                      Branch #3262: py3
+    # if client_token_data is not None:
+    if client_token_data:
         logger.info('client_token_data retrieved from Redis - %s' % str(client_token_data))
         try:
             client_data = literal_eval(client_token_data)
@@ -3769,9 +3815,13 @@ def decode_token(client_id):
                 (str(client_data_client_id), str(client_id)))
             try:
                 if settings.REDIS_PASSWORD:
-                    redis_conn = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+                    # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
+                    #                      Branch #3262: py3
+                    # redis_conn = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+                    redis_conn = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
                 else:
-                    redis_conn = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+                    # redis_conn = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+                    redis_conn = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
                 key = 'rebrow.token.%s' % token
                 redis_conn.delete(key)
                 logger.info('due to possible attempt at unauthorised use of the token, deleted the Redis key - %s' % str(key))
@@ -3860,6 +3910,11 @@ def rebrow():
         try:
             jwt_secret = '%s.%s.%s' % (app.secret_key, client_id, salt)
             jwt_encoded_payload = jwt.encode({'auth': str(password)}, jwt_secret, algorithm='HS256')
+            # @added 20191014 - Bug #3268: webapp - rebrow - jwt.encode generating bytes instead of a string in py3
+            #                   Branch #3262: py3
+            # As per https://github.com/jpadilla/pyjwt/issues/391 - jwt.encode generating bytes instead of a string
+            if python_version == 3:
+                jwt_encoded_payload = jwt_encoded_payload.decode('UTF-8')
         except:
             message = 'Failed to create set jwt_encoded_payload for %s' % client_id
             trace = traceback.format_exc()
@@ -3871,10 +3926,18 @@ def rebrow():
         logger.info('rebrow access :: generated client_token %s for client_id %s' % (client_token, client_id))
         try:
             if settings.REDIS_PASSWORD:
-                redis_conn = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+                # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
+                #                      Branch #3262: py3
+                # redis_conn = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+                redis_conn = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
             else:
-                redis_conn = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+                # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
+                #                      Branch #3262: py3
+                # redis_conn = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+                redis_conn = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
             key = 'rebrow.token.%s' % client_token
+            # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
+            #                      Branch #3262: py3
             value = '[\'%s\',\'%s\',\'%s\']' % (client_id, salt, jwt_encoded_payload)
             redis_conn.setex(key, token_valid_for, value)
             logger.info('rebrow access :: set Redis key - %s' % (key))
@@ -3958,7 +4021,10 @@ def rebrow_server_db(host, port, db):
             return internal_error(fail_msg, trace)
 
     try:
-        r = get_redis(host, port, db, redis_password)
+        # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
+        #                      Branch #3262: py3
+        # r = get_redis(host, port, db, redis_password)
+        r = get_redis(host, port, db, redis_password, True)
     except:
         logger.error(traceback.format_exc())
         logger.error('error :: rebrow access :: failed to login to Redis with token')
@@ -4010,7 +4076,10 @@ def rebrow_keys(host, port, db):
             return internal_error(fail_msg, trace)
 
     try:
-        r = get_redis(host, port, db, redis_password)
+        # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
+        #                      Branch #3262: py3
+        # r = get_redis(host, port, db, redis_password)
+        r = get_redis(host, port, db, redis_password, True)
     except:
         logger.error(traceback.format_exc())
         logger.error('error :: rebrow access :: failed to login to Redis with token')
@@ -4105,15 +4174,22 @@ def rebrow_key(host, port, db, key):
             return internal_error(fail_msg, trace)
 
     try:
-        r = get_redis(host, port, db, redis_password)
+        r = get_redis(host, port, db, redis_password, False)
     except:
         logger.error(traceback.format_exc())
         logger.error('error :: rebrow access :: failed to login to Redis with token')
 
     try:
-        dump = r.dump(key)
+        # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
+        #                      Branch #3262: py3
+        # dump = r.dump(key)
+        if python_version == 2:
+            dump = r.dump(key)
+        dump_key = key.decode('utf-8')
+        if python_version == 3:
+            dump = r.dump(dump_key)
     except:
-        message = 'Failed to dump Redis key - %s' % str(key)
+        message = 'Failed to dump Redis key - %s, decoded key - %s' % (str(key), str(dump_key))
         trace = traceback.format_exc()
         return internal_error(message, trace)
 
@@ -4129,7 +4205,16 @@ def rebrow_key(host, port, db, key):
         del dump
     except:
         logger.error('error :: failed to del dump')
-    t = r.type(key)
+
+    # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
+    #                      Branch #3262: py3
+    # t = r.type(key)
+    if python_version == 2:
+        t = r.type(key)
+    if python_version == 3:
+        key = dump_key
+        t = r.type(key).decode('utf-8')
+
     ttl = r.pttl(key)
     if t == 'string':
         # @modified 20160703 - Feature #1464: Webapp Redis browser
@@ -4139,7 +4224,15 @@ def rebrow_key(host, port, db, key):
             val = r.get(key)
         except:
             abort(404)
-        test_string = all(c in string.printable for c in val)
+
+        # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
+        #                      Branch #3262: py3
+        # test_string = all(c in string.printable for c in val)
+        try:
+            test_string = all(c in string.printable for c in val)
+        except:
+            test_string = False
+
         # @added 20170920 - Bug #2166: panorama incorrect mysql_id cache keys
         # There are SOME cache key msgpack values that DO == string.printable
         # for example [73] msgpacks to I
@@ -4187,12 +4280,36 @@ def urlsafe_base64_encode(s):
     # @modified 20180520 - Feature #2378: Add redis auth to Skyline and rebrow
     # if type(s) == 'Markup':
     #     s = s.unescape()
-    if isinstance(s, Markup):
-        s = s.unescape()
-    elif isinstance(s, bytes):
-        s = s.decode('utf-8')
-    s = s.encode('utf8')
-    s = base64.urlsafe_b64encode(s)
+
+    # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
+    #                      Branch #3262: py3
+    # if isinstance(s, Markup):
+    #     s = s.unescape()
+    # elif isinstance(s, bytes):
+    #     s = s.decode('utf-8')
+    # s = s.encode('utf8')
+    # s = base64.urlsafe_b64encode(s)
+    s_original = s
+    try:
+        if isinstance(s, Markup):
+            s = s.unescape()
+        elif isinstance(s, bytes):
+            s = s.decode('utf-8')
+        s = s.encode('utf8')
+        s = base64.urlsafe_b64encode(s)
+        # logger.info('debug :: rebrow :: %s urlsafe_b64encode as %s' % (str(s_original), str(s)))
+    except:
+        message = 'Failed to urlsafe_b64encode - %s' % str(s)
+        trace = traceback.format_exc()
+        return internal_error(message, trace)
+
+    # @added 20191014 - Bug #3266: py3 Redis binary objects not strings
+    #                   Branch #3262: py3
+    if python_version == 3:
+        decoded_s = s.decode('utf-8')
+        s = decoded_s
+        # logger.info('debug more :: rebrow :: %s urlsafe_b64encode decoded as %s' % (str(s_original), str(decoded_s)))
+
     return Markup(s)
 # END rebrow
 
