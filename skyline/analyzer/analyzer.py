@@ -129,6 +129,15 @@ class Analyzer(Thread):
             self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
         else:
             self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+        # @added 20191014 - Bug #3266: py3 Redis binary objects not strings
+        #                   Branch #3262: py3
+        # Added self.redis_conn_decoded to use on Redis sets when the bytes
+        # types need to be decoded as utf-8 to str
+        if settings.REDIS_PASSWORD:
+            self.redis_conn_decoded = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
+        else:
+            self.redis_conn_decoded = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
+
         self.daemon = True
         self.parent_pid = parent_pid
         self.current_pid = getpid()
@@ -298,7 +307,10 @@ class Analyzer(Thread):
         # Determine the unique Mirage and Ionosphere metrics once, which are
         # used later to determine how Analyzer should handle/route anomalies
         try:
-            mirage_unique_metrics = list(self.redis_conn.smembers('mirage.unique_metrics'))
+            # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
+            #                      Branch #3262: py3
+            # mirage_unique_metrics = list(self.redis_conn.smembers('mirage.unique_metrics'))
+            mirage_unique_metrics = list(self.redis_conn_decoded.smembers('mirage.unique_metrics'))
         except:
             mirage_unique_metrics = []
 
@@ -449,7 +461,10 @@ class Analyzer(Thread):
                     str(mirage_periodic_check_metric_list_count)))
 
         try:
-            ionosphere_unique_metrics = list(self.redis_conn.smembers('ionosphere.unique_metrics'))
+            # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
+            #                      Branch #3262: py3
+            # ionosphere_unique_metrics = list(self.redis_conn.smembers('ionosphere.unique_metrics'))
+            ionosphere_unique_metrics = list(self.redis_conn_decoded.smembers('ionosphere.unique_metrics'))
         except:
             ionosphere_unique_metrics = []
 
@@ -457,11 +472,17 @@ class Analyzer(Thread):
         # In order to convert monotonic, incrementing metrics to a deriative
         # metric
         try:
-            derivative_metrics = list(self.redis_conn.smembers('derivative_metrics'))
+            # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
+            #                      Branch #3262: py3
+            # derivative_metrics = list(self.redis_conn.smembers('derivative_metrics'))
+            derivative_metrics = list(self.redis_conn_decoded.smembers('derivative_metrics'))
         except:
             derivative_metrics = []
         try:
-            non_derivative_metrics = list(self.redis_conn.smembers('non_derivative_metrics'))
+            # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
+            #                      Branch #3262: py3
+            # non_derivative_metrics = list(self.redis_conn.smembers('non_derivative_metrics'))
+            non_derivative_metrics = list(self.redis_conn_decoded.smembers('non_derivative_metrics'))
         except:
             non_derivative_metrics = []
         # This is here to refresh the sets
@@ -507,7 +528,10 @@ class Analyzer(Thread):
         # Use Redis set analyzer.non_smtp_alerter_metrics in place of Manager.list
         non_smtp_alerter_metrics = []
         try:
-            non_smtp_alerter_metrics = list(self.redis_conn.smembers('analyzer.non_smtp_alerter_metrics'))
+            # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
+            #                      Branch #3262: py3
+            # non_smtp_alerter_metrics = list(self.redis_conn.smembers('analyzer.non_smtp_alerter_metrics'))
+            non_smtp_alerter_metrics = list(self.redis_conn_decoded.smembers('analyzer.non_smtp_alerter_metrics'))
         except:
             logger.info(traceback.format_exc())
             logger.error('error :: failed to generate a list from analyzer.non_smtp_alerter_metrics Redis set')
@@ -1264,7 +1288,10 @@ class Analyzer(Thread):
             # Discover unique metrics
             # @modified 20160803 - Adding additional exception handling to Analyzer
             try:
-                unique_metrics = list(self.redis_conn.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
+                # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
+                #                   Branch #3262: py3
+                # unique_metrics = list(self.redis_conn.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
+                unique_metrics = list(self.redis_conn_decoded.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
             except:
                 logger.error('error :: Analyzer could not get the unique_metrics list from Redis')
                 logger.info(traceback.format_exc())
@@ -1308,7 +1335,10 @@ class Analyzer(Thread):
                 except:
                     logger.info('no Redis set to delete - analyzer.too_short')
                 try:
-                    stale_metrics = list(self.redis_conn.smembers('analyzer.stale'))
+                    # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
+                    #                   Branch #3262: py3
+                    # stale_metrics = list(self.redis_conn.smembers('analyzer.stale'))
+                    stale_metrics = list(self.redis_conn_decoded.smembers('analyzer.stale'))
                 except:
                     stale_metrics = []
                 if stale_metrics:
@@ -1345,7 +1375,10 @@ class Analyzer(Thread):
 
                 mirage_unique_metrics = []
                 try:
-                    mirage_unique_metrics = list(self.redis_conn.smembers('mirage.unique_metrics'))
+                    # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
+                    #                   Branch #3262: py3
+                    # mirage_unique_metrics = list(self.redis_conn.smembers('mirage.unique_metrics'))
+                    mirage_unique_metrics = list(self.redis_conn_decoded.smembers('mirage.unique_metrics'))
                     if LOCAL_DEBUG:
                         logger.info('debug :: fetched the mirage.unique_metrics Redis set')
                         logger.info('debug :: %s' % str(mirage_unique_metrics))
@@ -1424,7 +1457,10 @@ class Analyzer(Thread):
                 # If they were refresh set them again
                 if mirage_unique_metrics == []:
                     try:
-                        mirage_unique_metrics = list(self.redis_conn.smembers('mirage.unique_metrics'))
+                        # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
+                        #                   Branch #3262: py3
+                        # mirage_unique_metrics = list(self.redis_conn.smembers('mirage.unique_metrics'))
+                        mirage_unique_metrics = list(self.redis_conn_decoded.smembers('mirage.unique_metrics'))
                         mirage_unique_metrics_count = len(mirage_unique_metrics)
                         logger.info('mirage.unique_metrics Redis set count - %s' % str(mirage_unique_metrics_count))
                         if LOCAL_DEBUG:
@@ -1441,6 +1477,12 @@ class Analyzer(Thread):
             # END Redis mirage.unique_metrics_set
 
             if LOCAL_DEBUG:
+                try:
+                    blah = dict["mykey"]
+                    # key exists in dict
+                except:
+                    # key doesn't exist in dict
+                    blah = False
                 logger.info('debug :: Memory usage in run after unique_metrics: %s (kb), using blah %s' % (resource.getrusage(resource.RUSAGE_SELF).ru_maxrss, str(blah)))
 
             # @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage
@@ -1449,16 +1491,29 @@ class Analyzer(Thread):
             # section
             smtp_alerter_metrics = []
             try:
-                smtp_alerter_metrics = list(self.redis_conn.smembers('analyzer.smtp_alerter_metrics'))
+                # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
+                #                   Branch #3262: py3
+                # smtp_alerter_metrics = list(self.redis_conn.smembers('analyzer.smtp_alerter_metrics'))
+                smtp_alerter_metrics = list(self.redis_conn_decoded.smembers('analyzer.smtp_alerter_metrics'))
+                if LOCAL_DEBUG:
+                    logger.info('debug :: smtp_alerter_metrics :: %s' % (str(smtp_alerter_metrics)))
             except:
                 logger.info(traceback.format_exc())
                 logger.error('error :: failed to generate a list from the analyzer.smtp_alerter_metrics Redis set')
                 smtp_alerter_metrics = []
 
+            if LOCAL_DEBUG:
+                logger.info('debug :: unique_metrics :: %s' % (str(unique_metrics)))
+
             # @added 20170108 - Feature #1830: Ionosphere alerts
             # Adding lists of smtp_alerter_metrics and non_smtp_alerter_metrics
             # Timed this takes 0.013319 seconds on 689 unique_metrics
             for metric_name in unique_metrics:
+                # @added 20191014 - Bug #3266: py3 Redis binary objects not strings
+                #                   Branch #3262: py3
+                if python_version == 3:
+                    metric_name = str(metric_name)
+
                 base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
                 for alert in settings.ALERTS:
                     pattern_match = False
@@ -1531,14 +1586,19 @@ class Analyzer(Thread):
             # lists
             smtp_alerter_metrics = []
             try:
-                smtp_alerter_metrics = list(self.redis_conn.smembers('analyzer.smtp_alerter_metrics'))
+                # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
+                #                   Branch #3262: py3
+                # smtp_alerter_metrics = list(self.redis_conn.smembers('analyzer.smtp_alerter_metrics'))
+                smtp_alerter_metrics = list(self.redis_conn_decoded.smembers('analyzer.smtp_alerter_metrics'))
             except:
                 logger.info(traceback.format_exc())
                 logger.error('error :: failed to generate a list from analyzer.smtp_alerter_metrics Redis set')
                 smtp_alerter_metrics = []
-            non_smtp_alerter_metrics = []
             try:
-                non_smtp_alerter_metrics = list(self.redis_conn.smembers('analyzer.non_smtp_alerter_metrics'))
+                # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
+                #                   Branch #3262: py3
+                # non_smtp_alerter_metrics = list(self.redis_conn.smembers('analyzer.non_smtp_alerter_metrics'))
+                non_smtp_alerter_metrics = list(self.redis_conn_decoded.smembers('analyzer.non_smtp_alerter_metrics'))
             except:
                 logger.info(traceback.format_exc())
                 logger.error('error :: failed to generate a list from analyzer.non_smtp_alerter_metrics Redis set')
@@ -1721,7 +1781,10 @@ class Analyzer(Thread):
             #                   Branch #922: Ionosphere
             # Bringing Ionosphere online - do not alert on Ionosphere metrics
             try:
-                ionosphere_unique_metrics = list(self.redis_conn.smembers('ionosphere.unique_metrics'))
+                # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
+                #                   Branch #3262: py3
+                # ionosphere_unique_metrics = list(self.redis_conn.smembers('ionosphere.unique_metrics'))
+                ionosphere_unique_metrics = list(self.redis_conn_decoded.smembers('ionosphere.unique_metrics'))
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: failed to get ionosphere.unique_metrics from Redis')
@@ -1734,7 +1797,10 @@ class Analyzer(Thread):
             # Use Redis set instead of Manager() list
             analyzer_anomalous_metrics = []
             try:
-                literal_analyzer_anomalous_metrics = list(self.redis_conn.smembers('analyzer.anomalous_metrics'))
+                # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
+                #                   Branch #3262: py3
+                # literal_analyzer_anomalous_metrics = list(self.redis_conn.smembers('analyzer.anomalous_metrics'))
+                literal_analyzer_anomalous_metrics = list(self.redis_conn_decoded.smembers('analyzer.anomalous_metrics'))
                 for metric_list_string in literal_analyzer_anomalous_metrics:
                     metric = literal_eval(metric_list_string)
                     analyzer_anomalous_metrics.append(metric)
@@ -1824,7 +1890,10 @@ class Analyzer(Thread):
                     # for metric in self.anomalous_metrics:
                     # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
                     # for metric in self.all_anomalous_metrics:
-                    all_anomalous_metrics = list(self.redis_conn.smembers('analyzer.all_anomalous_metrics'))
+                    # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
+                    #                   Branch #3262: py3
+                    # all_anomalous_metrics = list(self.redis_conn.smembers('analyzer.all_anomalous_metrics'))
+                    all_anomalous_metrics = list(self.redis_conn_decoded.smembers('analyzer.all_anomalous_metrics'))
                     for metric_list_string in all_anomalous_metrics:
                         metric = literal_eval(metric_list_string)
 
@@ -2132,7 +2201,10 @@ class Analyzer(Thread):
                 # len(self.anomalous_metrics)
                 # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
                 # len(self.real_anomalous_metrics)
-                real_anomalous_metrics_count = len(self.redis_conn.smembers('analyzer.real_anomalous_metrics'))
+                # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
+                #                      Branch #3262: py3
+                #real_anomalous_metrics_count = len(self.redis_conn.smembers('analyzer.real_anomalous_metrics'))
+                real_anomalous_metrics_count = len(self.redis_conn_decoded.smembers('analyzer.real_anomalous_metrics'))
                 anomalous_metrics_list_len = True
             except:
                 logger.info(traceback.format_exc())
@@ -2156,7 +2228,10 @@ class Analyzer(Thread):
                             # anomalous_metrics = list(self.real_anomalous_metrics)
                             real_anomalous_metrics = []
                             try:
-                                literal_real_anomalous_metrics = list(self.redis_conn.smembers('analyzer.real_anomalous_metrics'))
+                                # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
+                                #                      Branch #3262: py3
+                                # literal_real_anomalous_metrics = list(self.redis_conn.smembers('analyzer.real_anomalous_metrics'))
+                                literal_real_anomalous_metrics = list(self.redis_conn_decoded.smembers('analyzer.real_anomalous_metrics'))
                                 for metric_list_string in literal_real_anomalous_metrics:
                                     metric = literal_eval(metric_list_string)
                                     real_anomalous_metrics.append(metric)
@@ -2286,7 +2361,10 @@ class Analyzer(Thread):
                 stale_metrics_to_alert_on = []
                 alert_on_stale_metrics = []
                 try:
-                    alert_on_stale_metrics = list(self.redis_conn.smembers('analyzer.alert_on_stale_metrics'))
+                    # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
+                    #                      Branch #3262: py3
+                    # alert_on_stale_metrics = list(self.redis_conn.smembers('analyzer.alert_on_stale_metrics'))
+                    alert_on_stale_metrics = list(self.redis_conn_decoded.smembers('analyzer.alert_on_stale_metrics'))
                     logger.info('alert_on_stale_metrics :: %s' % str(alert_on_stale_metrics))
                 except:
                     alert_on_stale_metrics = []
@@ -2362,7 +2440,10 @@ class Analyzer(Thread):
             # total_anomalies = str(len(self.real_anomalous_metrics))
             real_anomalous_metrics = []
             try:
-                literal_real_anomalous_metrics = list(self.redis_conn.smembers('analyzer.real_anomalous_metrics'))
+                # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
+                #                      Branch #3262: py3
+                # literal_real_anomalous_metrics = list(self.redis_conn.smembers('analyzer.real_anomalous_metrics'))
+                literal_real_anomalous_metrics = list(self.redis_conn_decoded.smembers('analyzer.real_anomalous_metrics'))
                 for metric_list_string in literal_real_anomalous_metrics:
                     metric = literal_eval(metric_list_string)
                     real_anomalous_metrics.append(metric)
@@ -2380,7 +2461,10 @@ class Analyzer(Thread):
             # Only check Redis set if MIRAGE_PERIODIC_CHECK is True
             if MIRAGE_PERIODIC_CHECK:
                 try:
-                    mirage_periodic_checks = str(len(list(self.redis_conn.smembers('analyzer.mirage_periodic_check_metrics'))))
+                    # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
+                    #                      Branch #3262: py3
+                    # mirage_periodic_checks = str(len(list(self.redis_conn.smembers('analyzer.mirage_periodic_check_metrics'))))
+                    mirage_periodic_checks = str(len(list(self.redis_conn_decoded.smembers('analyzer.mirage_periodic_check_metrics'))))
                 except:
                     logger.info(traceback.format_exc())
                     logger.error('error :: failed to generate a list from analyzer.mirage_periodic_check_metrics Redis set')
@@ -2428,7 +2512,10 @@ class Analyzer(Thread):
                     # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
                     # Replace Manager.list instances with Redis sets
                     # sent_to_mirage = str(len(self.sent_to_mirage))
-                    sent_to_mirage = str(len(list(self.redis_conn.smembers('analyzer.sent_to_mirage'))))
+                    # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
+                    #                      Branch #3262: py3
+                    # sent_to_mirage = str(len(list(self.redis_conn.smembers('analyzer.sent_to_mirage'))))
+                    sent_to_mirage = str(len(list(self.redis_conn_decoded.smembers('analyzer.sent_to_mirage'))))
                 except:
                     sent_to_mirage = '0'
                 logger.info('sent_to_mirage     :: %s' % sent_to_mirage)
@@ -2456,7 +2543,10 @@ class Analyzer(Thread):
                 try:
                     # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
                     # sent_to_crucible = str(len(self.sent_to_crucible))
-                    sent_to_crucible = str(len(list(self.redis_conn.smembers('analyzer.sent_to_crucible'))))
+                    # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
+                    #                      Branch #3262: py3
+                    # sent_to_crucible = str(len(list(self.redis_conn.smembers('analyzer.sent_to_crucible'))))
+                    sent_to_crucible = str(len(list(self.redis_conn_decoded.smembers('analyzer.sent_to_crucible'))))
                 except:
                     sent_to_crucible = '0'
                 logger.info('sent_to_crucible   :: %s' % sent_to_crucible)
@@ -2468,7 +2558,10 @@ class Analyzer(Thread):
                 try:
                     # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
                     # sent_to_panorama = str(len(self.sent_to_panorama))
-                    sent_to_panorama = str(len(list(self.redis_conn.smembers('analyzer.sent_to_panorama'))))
+                    # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
+                    #                      Branch #3262: py3
+                    # sent_to_panorama = str(len(list(self.redis_conn.smembers('analyzer.sent_to_panorama'))))
+                    sent_to_panorama = str(len(list(self.redis_conn_decoded.smembers('analyzer.sent_to_panorama'))))
                 except:
                     sent_to_panorama = '0'
                 logger.info('sent_to_panorama   :: %s' % sent_to_panorama)
@@ -2480,7 +2573,10 @@ class Analyzer(Thread):
                 try:
                     # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
                     # sent_to_ionosphere = str(len(self.sent_to_ionosphere))
-                    sent_to_ionosphere = str(len(list(self.redis_conn.smembers('analyzer.sent_to_ionosphere'))))
+                    # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
+                    #                      Branch #3262: py3
+                    # sent_to_ionosphere = str(len(list(self.redis_conn.smembers('analyzer.sent_to_ionosphere'))))
+                    sent_to_ionosphere = str(len(list(self.redis_conn_decoded.smembers('analyzer.sent_to_ionosphere'))))
                 except:
                     sent_to_ionosphere = '0'
                 logger.info('sent_to_ionosphere :: %s' % sent_to_ionosphere)
@@ -2537,7 +2633,10 @@ class Analyzer(Thread):
             if calculate_illuminance:
                 illuminance_datapoints = []
                 try:
-                    illuminance_datapoints_strings = list(self.redis_conn.smembers('analyzer.illuminance_datapoints'))
+                    # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
+                    #                      Branch #3262: py3
+                    # illuminance_datapoints_strings = list(self.redis_conn.smembers('analyzer.illuminance_datapoints'))
+                    illuminance_datapoints_strings = list(self.redis_conn_decoded.smembers('analyzer.illuminance_datapoints'))
                     for datapoint in illuminance_datapoints_strings:
                         illuminance_datapoints.append(float(datapoint))
                     logger.info('%s datapoints in list from analyzer.illuminance_datapoints Redis set' % str(len(illuminance_datapoints)))
@@ -2631,7 +2730,10 @@ class Analyzer(Thread):
             # self.all_anomalous_metrics[:] = []
             all_anomalous_metrics_count = 0
             try:
-                all_anomalous_metrics_count = len(list(self.redis_conn.smembers('analyzer.all_anomalous_metrics')))
+                # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
+                #                      Branch #3262: py3
+                # all_anomalous_metrics_count = len(list(self.redis_conn.smembers('analyzer.all_anomalous_metrics')))
+                all_anomalous_metrics_count = len(list(self.redis_conn_decoded.smembers('analyzer.all_anomalous_metrics')))
             except:
                 pass
             if all_anomalous_metrics_count > 0:
@@ -2765,7 +2867,10 @@ class Analyzer(Thread):
                 try:
                     # @modified 20190517 - Branch #3002: docker
                     # self.redis_conn.rename('new_derivative_metrics', 'derivative_metrics')
-                    derivative_metrics = list(self.redis_conn.smembers('derivative_metrics'))
+                    # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
+                    #                      Branch #3262: py3
+                    # derivative_metrics = list(self.redis_conn.smembers('derivative_metrics'))
+                    derivative_metrics = list(self.redis_conn_decoded.smembers('derivative_metrics'))
                 except Exception as e:
                     # @modified 20190417 - Bug #2946: ANALYZER_ENABLED False - rename Redis keys error
                     #                      Feature #2916: ANALYZER_ENABLED setting
@@ -2786,12 +2891,18 @@ class Analyzer(Thread):
                 # new_derivative_metrics set
                 test_new_derivative_metrics = None
                 try:
-                    test_new_derivative_metrics = list(self.redis_conn.smembers('new_derivative_metrics'))
+                    # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
+                    #                      Branch #3262: py3
+                    #test_new_derivative_metrics = list(self.redis_conn.smembers('new_derivative_metrics'))
+                    test_new_derivative_metrics = list(self.redis_conn_decoded.smembers('new_derivative_metrics'))
                 except Exception as e:
                     try:
                         key_data = 'skyline_set_as_of_%s' % str(int(time()))
                         self.redis_conn.sadd('new_derivative_metrics', key_data)
-                        test_new_derivative_metrics = list(self.redis_conn.smembers('new_derivative_metrics'))
+                        # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
+                        #                      Branch #3262: py3
+                        # test_new_derivative_metrics = list(self.redis_conn.smembers('new_derivative_metrics'))
+                        test_new_derivative_metrics = list(self.redis_conn_decoded.smembers('new_derivative_metrics'))
                     except:
                         logger.info(traceback.format_exc())
                         logger.error('error :: failed to add default data to Redis new_derivative_metrics set')
