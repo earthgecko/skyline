@@ -44,7 +44,7 @@ except:
 skyline_app_graphite_namespace = 'skyline.%s%s.%s' % (
     parent_skyline_app, SERVER_METRIC_PATH, child_skyline_app)
 
-WORKER_DEBUG = False
+LOCAL_DEBUG = False
 
 # @added 20170319 - Feature #1978: worker - DO_NOT_SKIP_LIST
 try:
@@ -197,7 +197,7 @@ class Worker(Process):
             try:
                 self.redis_conn.ping()
             except:
-                logger.error('%s :: can\'t connect to redis at socket path %s' % (skyline_app, settings.REDIS_SOCKET_PATH))
+                logger.error('%s :: cannot connect to Redis at socket path %s' % (skyline_app, settings.REDIS_SOCKET_PATH))
                 sleep(10)
                 # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
                 if settings.REDIS_PASSWORD:
@@ -242,8 +242,8 @@ class Worker(Process):
                     #                      Bug #3266: py3 Redis binary objects not strings
                     # key = ''.join((FULL_NAMESPACE, metric[0]))
                     key = ''.join((FULL_NAMESPACE, str(metric[0])))
-
-                    logger.info('debug :: wroker :: adding metric Redis key - %s' % str(key))
+                    if LOCAL_DEBUG:
+                        logger.info('debug :: worker :: adding metric Redis key - %s' % str(key))
 
                     # @modified 20190130 - Task #2690: Test Skyline on Python-3.6.7
                     #                      Branch #3262: py3
@@ -257,7 +257,6 @@ class Worker(Process):
                     try:
                         # pipe.sadd(full_uniques, key)
                         pipe.sadd(full_uniques, str(key))
-
                     except Exception as e:
                         logger.error('%s :: error on pipe.sadd: %s' % (skyline_app, str(e)))
 

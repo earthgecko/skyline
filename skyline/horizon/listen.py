@@ -9,6 +9,7 @@ from struct import Struct, unpack
 from msgpack import unpackb
 import sys
 from time import time, sleep
+import traceback
 
 import logging
 import os.path
@@ -43,8 +44,16 @@ if python_version == 2:
         from cStringIO import StringIO
     except ImportError:
         from StringIO import StringIO
+# @added 20191016 - Task #3278: py3 handle bytes and not str in pickles
+# For backwards compatibility Horizon needs to load BytesIO in py2
+    from io import BytesIO
+
 if python_version == 3:
-    import io
+    # @modified 20191016 - Task #3278: py3 handle bytes and not str in pickles
+    #                      Branch #3262: py3
+    # import io
+    from io import StringIO
+    from io import BytesIO
 
 try:
     # @modified 20170913 - Task #2160: Test skyline with bandit
@@ -54,6 +63,11 @@ try:
 except:
     import pickle  # nosec
     USING_CPICKLE = False
+
+# @added 20191016 - Task #3278: py3 handle bytes and not str in pickles
+#                   Branch #3262: py3
+# Add ability to log for debugging
+LOCAL_DEBUG = False
 
 # This whole song & dance is due to pickle being insecure
 # yet performance critical for carbon. We leave the insecure
@@ -81,7 +95,14 @@ if USING_CPICKLE:
         def loads(cls, pickle_string):
             # @modified 20170913 - Task #2160: Test skyline with bandit
             # Added nosec to exclude from bandit tests
-            pickle_obj = pickle.Unpickler(StringIO(pickle_string))  # nosec
+            # @modified 20191016 - Task #3278: py3 handle bytes and not str in pickles
+            #                      Branch #3262: py3
+            # pickle_obj = pickle.Unpickler(StringIO(pickle_string))  # nosec
+            if python_version == 2:
+                pickle_obj = pickle.Unpickler(StringIO(pickle_string))  # nosec
+            if python_version == 3:
+                pickle_obj = pickle.Unpickler(BytesIO(pickle_string))  # nosec
+
             pickle_obj.find_global = cls.find_class
             return pickle_obj.load()
 
@@ -103,7 +124,13 @@ else:
 
         @classmethod
         def loads(cls, pickle_string):
-            return cls(StringIO(pickle_string)).load()
+            # @modified 20191016 - Task #3278: py3 handle bytes and not str in pickles
+            #                      Branch #3262: py3
+            # return cls(StringIO(pickle_string)).load()
+            if python_version == 2:
+                return cls(StringIO(pickle_string)).load()
+            if python_version == 3:
+                return cls(BytesIO(pickle_string)).load()
 # //SafeUnpickler
 
 
@@ -142,7 +169,17 @@ class Listen(Process):
         """
         Read n bytes from a stream
         """
-        data = ''
+
+        # @modified 20191016 - Task #3278: py3 handle bytes and not str in pickles
+        #                      Branch #3262: py3
+        # The data is type str in py2 and class bytes in py3 and using bytes in
+        # the data object does not allow for concatenation as was possible with
+        # strings
+        # data = ''
+        if python_version == 2:
+            data = ''
+        if python_version == 3:
+            data = b''
         while n > 0:
             # Break the loop when connection closes. #8 @earthgecko
             # https://github.com/earthgecko/skyline/pull/8/files
@@ -150,13 +187,32 @@ class Listen(Process):
             # mlowicki:fix_infinite_loop on 16 Mar 2015
             # Break the loop when connection closes. #115 @etsy
             chunk = sock.recv(n)
+
             count = len(chunk)
 
             if count == 0:
                 break
 
             n -= count
-            data += chunk
+            # @modified 20191016 - Task #3278: py3 handle bytes and not str in pickles
+            #                      Branch #3262: py3
+            # In py3 he data is bytes not str and bytes can not be concatenated
+            # like str.  Also added debug logging.
+            # data += chunk
+            try:
+                if python_version == 2:
+                    data += chunk
+                if python_version == 3:
+                    new_data = data + chunk
+                    data = new_data
+                if LOCAL_DEBUG:
+                    logger.debug('debug :: listen :: read_all with chunk - %s' % str(chunk))
+            except Exception as e:
+                if LOCAL_DEBUG:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: listen :: read_all with chunk - %s' % str(chunk))
+                data = False
+
         return data
 
     def check_if_parent_is_alive(self):
@@ -181,17 +237,35 @@ class Listen(Process):
                 s.bind((self.ip, self.port))
                 s.setblocking(1)
                 s.listen(5)
-                logger.info('%s :: listening over tcp for pickles on %s' % (skyline_app, self.port))
+                logger.info('%s :: listening over tcp for pickles on %s' % (skyline_app, str(self.port)))
 
                 (conn, address) = s.accept()
-                logger.info('%s :: connection from %s:%s' % (skyline_app, address[0], self.port))
+                logger.info('%s :: connection from %s:%s' % (skyline_app, str(address[0]), str(self.port)))
 
                 chunk = []
                 while 1:
                     self.check_if_parent_is_alive()
                     try:
-                        length = Struct('!I').unpack(self.read_all(conn, 4))
-                        body = self.read_all(conn, length[0])
+                        # @modified 20191016 - Task #3278: py3 handle bytes and not str in pickles
+                        #                      Branch #3262: py3
+                        # Added ability to log and debug
+                        if LOCAL_DEBUG:
+                            length = None
+                            body = None
+                            try:
+                                length = Struct('!I').unpack(self.read_all(conn, 4))
+                            except:
+                                logger.error(traceback.format_exc())
+                                logger.error('error :: listen :: could not determine length')
+                            if length:
+                                try:
+                                    body = self.read_all(conn, length[0])
+                                except:
+                                    logger.error(traceback.format_exc())
+                                    logger.error('error :: listen :: could not determine body')
+                        else:
+                            length = Struct('!I').unpack(self.read_all(conn, 4))
+                            body = self.read_all(conn, length[0])
 
                         # Iterate and chunk each individual datapoint
                         for bunch in self.gen_unpickle(body):
