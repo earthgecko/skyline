@@ -248,6 +248,9 @@ class Analyzer(Thread):
         # Check the unique_metrics list is valid
         try:
             len(unique_metrics)
+            # @added 20191016 - Branch #3262: py3
+            if LOCAL_DEBUG:
+                logger.info('debug :: unique_metrics count: %s' % str(len(unique_metrics)))
         except:
             logger.error('error :: the unique_metrics list is not valid')
             logger.info(traceback.format_exc())
@@ -541,6 +544,10 @@ class Analyzer(Thread):
         for i, metric_name in enumerate(assigned_metrics):
             self.check_if_parent_is_alive()
 
+            # @added 20191016 - Branch #3262: py3
+            if LOCAL_DEBUG:
+                logger.info('debug :: checking %s' % str(metric_name))
+
             try:
                 raw_series = raw_assigned[i]
                 unpacker = Unpacker(use_list=False)
@@ -657,6 +664,9 @@ class Analyzer(Thread):
 
             try:
                 anomalous, ensemble, datapoint = run_selected_algorithm(timeseries, metric_name)
+                # @added 20191016 - Branch #3262: py3
+                if LOCAL_DEBUG:
+                    logger.info('debug :: metric %s - anomalous - %s' % (str(metric_name), str(anomalous)))
 
                 # @added 20190408 - Feature #2882: Mirage - periodic_check
                 # Add for Mirage periodic - is really anomalous add to
