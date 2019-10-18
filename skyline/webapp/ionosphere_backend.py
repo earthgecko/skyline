@@ -610,10 +610,45 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
     # Return the anomalous_timeseries as an array to sample and just use the
     # ts_json file if there is no ionosphere_json_file
     if not anomalous_timeseries:
-        with open((ts_json_file), 'r') as f:
-            raw_timeseries = f.read()
-        timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
-        anomalous_timeseries = literal_eval(timeseries_array_str)
+        # @modified 20191018 - Bug #3286: ionosphere_backend.py fallback to available ts_json
+        # Wrapped in try except
+        try:
+            with open((ts_json_file), 'r') as f:
+                raw_timeseries = f.read()
+            timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
+            anomalous_timeseries = literal_eval(timeseries_array_str)
+        except:
+            logger.info('ionosphere_backend :: no time series json found at %s' % ts_json_file)
+
+    # @added 20191018 - Bug #3286: ionosphere_backend.py fallback to available ts_json
+    # If no ts_json file has been found, use metric.analyzer.redis.FULL_DURATION.json
+    # if it is available.  This is the fallback if no metric.json or
+    # metric.mirage.redis.FULL_DURATION.json exists in the case of Analyzer only
+    # metrics and raise if no anomalous_timeseries
+    if not anomalous_timeseries:
+        full_duration_in_hours = int(settings.FULL_DURATION) / 3600
+        fallback_json_filename = '%s.analyzer.redis.%sh.json' % (
+            base_name, str(int(full_duration_in_hours)))
+        fallback_json_file = 'none'
+        fallback_json_file = '%s/%s' % (metric_data_dir, fallback_json_filename)
+        logger.info('ionosphere_backend :: trying fallback_json_file - %s' % fallback_json_file)
+        if path.isfile(fallback_json_file):
+            try:
+                with open((fallback_json_file), 'r') as f:
+                    raw_timeseries = f.read()
+                timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
+                anomalous_timeseries = literal_eval(timeseries_array_str)
+                logger.info('ionosphere_backend :: loaded data from fallback_json_file - %s' % fallback_json_file)
+            except:
+                trace = traceback.format_exc()
+                logger.error(trace)
+                fail_msg = 'error :: ionosphere_backend :: failed to load any time series data after trying to load the fallback_json_file'
+                logger.error('%s' % fail_msg)
+                raise  # to webapp to return in the UI
+    if not anomalous_timeseries:
+        fail_msg = 'error :: ionosphere_backend :: failed to load any time series data form json files'
+        logger.error('%s' % fail_msg)
+        raise  # to webapp to return in the UI
 
     # @added 20170308 - Feature #1960: ionosphere_layers
     if layers_id_matched_file:
