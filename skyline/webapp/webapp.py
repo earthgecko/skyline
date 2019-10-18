@@ -181,12 +181,19 @@ if python_version == 3:
 if settings.REDIS_PASSWORD:
     # @modified 20190130 - Bug #3266: py3 Redis binary objects not strings
     #                      Branch #3262: py3
-    # REDIS_CONN = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
+    # REDIS_CONN = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
     REDIS_CONN = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
+    # @added 20191015 - Bug #3266: py3 Redis binary objects not strings
+    #                   Branch #3262: py3
+    REDIS_CONN_UNDECODE = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
 else:
+    # REDIS_CONN = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
     REDIS_CONN = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
+    # @added 20191015 - Bug #3266: py3 Redis binary objects not strings
+    #                   Branch #3262: py3
+    REDIS_CONN_UNDECODE = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
 
-# ENABLE_WEBAPP_DEBUG = True
+ENABLE_WEBAPP_DEBUG = False
 
 app = Flask(__name__)
 
@@ -676,6 +683,9 @@ def api():
             missing_arguments.append('graphite_metric')
             logger.error('graphite_metric argument not found')
         else:
+            # @added 20191018 - Branch #3262: py3
+            # Escape : as percent url endcoding them does not work with Graphite
+            metric = metric.replace(':', '\:')
             logger.info('graphite_metric - %s' % metric)
 
         if not from_timestamp:
@@ -3352,7 +3362,14 @@ def ionosphere():
                 try:
                     cache_key = 'panorama.mysql_ids.metrics.metric.%s' % base_name
                     metric_id_msg_pack = None
-                    metric_id_msg_pack = REDIS_CONN.get(cache_key)
+                    # @modified 20191015 - Bug #3266: py3 Redis binary objects not strings
+                    #                      Branch #3262: py3
+                    # metric_id_msg_pack = REDIS_CONN.get(cache_key)
+                    if python_version == 3:
+                        metric_id_msg_pack = REDIS_CONN.get(cache_key)
+                    if python_version == 2:
+                        metric_id_msg_pack = REDIS_CONN_UNDECODE.get(cache_key)
+
                     if metric_id_msg_pack:
                         unpacker = Unpacker(use_list=False)
                         unpacker.feed(metric_id_msg_pack)
