@@ -83,7 +83,17 @@ class Roomba(Thread):
         trimmed_keys = 0
         active_keys = 0
 
-        for i in xrange(len(assigned_metrics)):
+        # @modified 20191016 - Task #3280: Handle py2 xange and py3 range
+        #                      Branch #3262: py3
+        # for i in xrange(len(assigned_metrics)):
+        range_list = []
+        if python_version == 2:
+            for i in xrange(len(assigned_metrics)):
+                range_list.append(i)
+        if python_version == 3:
+            for i in range(len(assigned_metrics)):
+                range_list.append(i)
+        for i in range_list:
             self.check_if_parent_is_alive()
 
             pipe = self.redis_conn.pipeline()
