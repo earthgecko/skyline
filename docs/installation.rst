@@ -450,16 +450,20 @@ Starting and testing the Skyline installation
 .. note:: if you are UPGRADING and you are using an already populated Redis
   store, you can skip seeding data.
 
+.. note:: if you already have Graphite pickling data to Horizon seeding data
+  will not work as Horizon/listen will already have a connection and will be
+  reading the Graphite pickle.
+
 .. code-block:: bash
 
     cd "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}"
     source bin/activate
-    bin/python2.7 /opt/skyline/github/skyline/utils/seed_data.py
+    "bin/python${PYTHON_MAJOR_VERSION}" /opt/skyline/github/skyline/utils/seed_data.py
     deactivate
 
 - Check the Skyline Webapp frontend on the Skyline machine's IP address and the
   appropriate port depending whether you are serving it proxied or direct, e.g
-  ``https://YOUR_SKYLINE_IP``.  The ``horizon.test.udp`` metric anomaly should
+  ``https://YOUR_SKYLINE_IP``.  The ``horizon.test.pickle`` metric anomaly should
   be in the dashboard after the seed\_data.py is complete.  If Panorama is set
   up you will be able to see that in the /panorama view and in the
   :red:`re`:brow:`brow` view as well.

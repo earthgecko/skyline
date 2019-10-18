@@ -14,6 +14,9 @@ import msgpack
 # @added 20180823 - Bug #2552: seed_data.py testing with UDP does not work
 import random
 
+import pickle
+import struct
+
 # Get the current working directory of this file.
 # http://stackoverflow.com/a/4060259/120999
 __location__ = realpath(join(os.getcwd(), dirname(__file__)))
@@ -23,9 +26,43 @@ sys.path.insert(0, join(__location__, '..', 'skyline'))
 # ignoreErrorCodes E402
 import settings
 
+LOCAL_DEBUG = False
+
+python_version = int(sys.version_info[0])
+
 
 class NoDataException(Exception):
     pass
+
+
+def pickle_data_to_horizon(ip, port, data):
+
+    message = None
+    try:
+        payload = pickle.dumps(data, protocol=2)
+        header = struct.pack("!L", len(payload))
+        message = header + payload
+        if LOCAL_DEBUG:
+            print(type(message))
+            print(str(message))
+    except:
+        print(traceback.format_exc())
+        print('error :: failed to pickle data')
+        return False
+    if message:
+        try:
+            sock = socket.socket()
+            sock.connect((ip, port))
+            sock.sendall(message)
+            sock.close()
+        except:
+            print(traceback.format_exc())
+            print('error :: failed to send pickle data to Horizon')
+            return False
+    else:
+        print('error :: failed to pickle metric data into message')
+        return False
+    return True
 
 
 def seed():
@@ -101,25 +138,135 @@ def seed():
         print('error  :: please check your HORIZON related settings in settings.py and restart the Horizon service')
         sys.exit(1)
 
-    print('notice :: pushing 8665 datapoints over UDP to Horizon')
-    print('info   :: this takes a while...')
-    metric = 'horizon.test.udp'
-    # @added 20190130 - Bug #3266: py3 Redis binary objects not strings
+    # @added 20191015 - Task #3278: py3 handle bytes and not str in pickles
     #                   Branch #3262: py3
-    print('info   :: for metric :: %s' % str(metric))
+    # Added the use of a pickle for testing py2 and py3 pickle changes and using
+    # a pickle for testing now rather than UDP, as UDP still fails from time to
+    # time and is disordered.
+    use_pickle = True
+    if use_pickle:
+        sent_to_horizon = 0
+        print('notice :: %s data points to push via a pickle to Horizon' % str(settings.MAX_RESOLUTION))
+        metric = 'horizon.test.pickle'
+        print('info   :: for metric :: %s' % str(metric))
 
-    metric_set = 'unique_metrics'
-    # @modified 20180823 - Bug #2552: seed_data.py testing with UDP does not work
-    #                      seed_data.py testing with UDP does not work GH77
-    # Only use the time series up until the current timestamp to it can be used
-    # in testing and triggering an anomaly
-    # initial = int(time.time()) - settings.MAX_RESOLUTION
-    end_timestamp = int(time.time())
-    initial = end_timestamp - settings.MAX_RESOLUTION
+        metric_set = 'unique_metrics'
+        # Only use the time series up until the current timestamp to it can be
+        # used in testing and triggering an anomaly
+        end_timestamp = int(time.time())
+        initial = end_timestamp - settings.MAX_RESOLUTION
+        print('info   :: using end_timestamp %s and initial %s' % (str(end_timestamp), str(initial)))
+        time.sleep(3)
 
-    with open(join(__location__, 'data.json'), 'r') as f:
-        data = json.loads(f.read())
-        series = data['results']
+        with open(join(__location__, 'data.json'), 'r') as f:
+            data = json.loads(f.read())
+            series = data['results']
+
+        listOfMetricTuples = []
+
+        for datapoint in series:
+            datapoint[0] = initial
+            initial += 1
+            if initial >= (end_timestamp - 14):
+                # Send an anomalous data point
+                add_random = random.randint(18500, 24000)
+                original_value = int(datapoint[1])
+                anomalous_datapoint = original_value + add_random
+                datapoint[1] = float(anomalous_datapoint)
+                print('notice :: adding anomalous data point - %s - value was %s and was modified with + %s' % (
+                    str(datapoint), str(original_value), str(add_random)))
+#                if initial == (end_timestamp - 10):
+#                    anomalous_datapoint = int(datapoint[1]) + 8000
+#                    datapoint[1] = float(anomalous_datapoint)
+#                    print('notice :: adding final anomalous data point - %s - value was %s and was modified with + 8000' % (
+#                        str(datapoint), str(original_value)))
+#                if initial == end_timestamp:
+#                    anomalous_datapoint = int(datapoint[1]) + 11100
+#                    datapoint[1] = float(anomalous_datapoint)
+#                    print('notice :: adding final anomalous data point - %s - value was %s and was modified with + 11000' % (
+#                        str(datapoint), str(original_value)))
+
+            tuple_data = (str(metric), (int(datapoint[0]), float(datapoint[1])))
+            listOfMetricTuples.append(tuple_data)
+            if initial == end_timestamp:
+                break
+
+        end_of_tuple = listOfMetricTuples[-10:]
+        if LOCAL_DEBUG:
+            print('info :: end of tuple - %s' % (str(end_of_tuple)))
+            padding = 0
+            while padding < 100:
+                padding +=1
+                ts = end_timestamp - padding
+                tuple_data = ('horizon.test.pickle_padding', (ts, 1.0))
+                listOfMetricTuples.append(tuple_data)
+            print('notice :: added padding of %s tuples' % (str(padding)))
+
+            end_of_tuple = listOfMetricTuples[-10:]
+            print('info :: new end of tuple - %s' % (str(end_of_tuple)))
+
+        if listOfMetricTuples:
+            len_of_tuples = len(listOfMetricTuples)
+            print('notice :: sending %s data points' % (str(len_of_tuples)))
+            datapoints_sent = 0
+            smallListOfMetricTuples = []
+            tuples_added = 0
+            for data in listOfMetricTuples:
+                smallListOfMetricTuples.append(data)
+                tuples_added += 1
+                if tuples_added >= 100:
+                    pickle_data_sent = pickle_data_to_horizon(settings.HORIZON_IP, settings.PICKLE_PORT, smallListOfMetricTuples)
+                    if pickle_data_sent:
+                        datapoints_sent += tuples_added
+                        print('sent %s of %s data points to Horizon via pickle for %s to %s:%s' % (
+                            str(datapoints_sent), str(len(listOfMetricTuples)), metric,
+                            settings.HORIZON_IP, str(settings.PICKLE_PORT)))
+                        if LOCAL_DEBUG:
+                            end_of_tuple = smallListOfMetricTuples[-3:]
+                            print('info :: end of %s item smallListOfMetricTuples - %s' % (str(len(smallListOfMetricTuples)) ,str(end_of_tuple)))
+                        sent_to_horizon += len(smallListOfMetricTuples)
+                        smallListOfMetricTuples = []
+                        tuples_added = 0
+                        time.sleep(3)
+                    else:
+                        print('error :: failed to send %s data points to Horizon via pickle for %s' % (
+                            str(tuples_added), metric))
+            if smallListOfMetricTuples:
+                tuples_to_send = len(smallListOfMetricTuples)
+                pickle_data_sent = pickle_data_to_horizon(settings.HORIZON_IP, settings.PICKLE_PORT, smallListOfMetricTuples)
+                if pickle_data_sent:
+                    datapoints_sent += tuples_to_send
+                    print('sent the last %s of %s data points to Horizon via pickle for %s' % (
+                        str(tuples_to_send), str(tuples_to_send), metric))
+                    if LOCAL_DEBUG:
+                        end_of_tuple = smallListOfMetricTuples[-3:]
+                        print('info :: end of smallListOfMetricTuples - %s' % (str(end_of_tuple)))
+                else:
+                    print('error :: failed to send the last %s data points to Horizon via pickle for %s' % (
+                        str(tuples_to_send), metric))
+
+    if not use_pickle:
+        print('notice :: pushing 8665 datapoints over UDP to Horizon')
+        print('info   :: this takes a while...')
+        metric = 'horizon.test.udp'
+        # @added 20190130 - Bug #3266: py3 Redis binary objects not strings
+        #                   Branch #3262: py3
+        print('info   :: for metric :: %s' % str(metric))
+
+        metric_set = 'unique_metrics'
+        # @modified 20180823 - Bug #2552: seed_data.py testing with UDP does not work
+        #                      seed_data.py testing with UDP does not work GH77
+        # Only use the time series up until the current timestamp to it can be used
+        # in testing and triggering an anomaly
+        # initial = int(time.time()) - settings.MAX_RESOLUTION
+        end_timestamp = int(time.time())
+
+        initial = end_timestamp - settings.MAX_RESOLUTION
+
+        with open(join(__location__, 'data.json'), 'r') as f:
+            data = json.loads(f.read())
+            series = data['results']
+
         sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
         datapoints_sent = 0
@@ -229,7 +376,7 @@ def seed():
         # @modified 20180915 - Feature #2550: skyline.dawn.sh
         # Added metric name and views to the output
         # print ('info :: at %s' % str(settings.SKYLINE_URL))
-        print ('info ::  triggered anomaly and data for the horizon.test.udp metric in the')
+        print ('info ::  triggered anomaly and data for the %s metric in the' % metric)
         print ('info ::  now, then, Panorama and rebrow views at %s' % str(settings.SKYLINE_URL))
     except NoDataException:
         print('error :: Woops, looks like the data did not make it into Horizon. Try again?')
