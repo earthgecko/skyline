@@ -1784,6 +1784,16 @@ class Analyzer(Thread):
                 except Empty:
                     break
 
+            # @added 20191021 - Bug #3288: Always send anomaly_breakdown and exception metrics
+            #                   Branch #3262: py3
+            exceptions_metrics = ['Boring', 'Stale', 'TooShort', 'Other']
+            for i_exception in exceptions_metrics:
+                if i_exception not in exceptions.keys():
+                    exceptions[i_exception] = 0
+            for i_anomaly_breakdown in settings.ALGORITHMS:
+                if i_anomaly_breakdown not in anomaly_breakdown.keys():
+                    anomaly_breakdown[i_anomaly_breakdown] = 0
+
             if LOCAL_DEBUG:
                 logger.info('debug :: Memory usage in run before alerts: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 
@@ -2503,6 +2513,9 @@ class Analyzer(Thread):
 
             send_metric_name = skyline_app_graphite_namespace + '.total_metrics'
             send_graphite_metric(skyline_app, send_metric_name, total_metrics)
+
+            # @added 20191021 - Bug #3288: Always send anomaly_breakdown and exception metrics
+
             for key, value in exceptions.items():
                 send_metric_name = '%s.exceptions.%s' % (skyline_app_graphite_namespace, key)
                 send_graphite_metric(skyline_app, send_metric_name, str(value))
