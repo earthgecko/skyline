@@ -1441,7 +1441,11 @@ def ionosphere_learn(timestamp):
                 # Added user_id
                 # fp_id, fp_in_successful, fp_exists, fail_msg, traceback_format_exc = create_features_profile(skyline_app, fp_created_at, learn_base_name, context, ionosphere_job, learn_parent_id, generation, fp_learn, slack_ionosphere_job)
                 user_id = 1
-                fp_id, fp_in_successful, fp_exists, fail_msg, traceback_format_exc = create_features_profile(skyline_app, fp_created_at, learn_base_name, context, ionosphere_job, learn_parent_id, generation, fp_learn, slack_ionosphere_job, user_id)
+                # @modified 20191023 - Feature #2516: Add label to features profile
+                # Added label
+                # fp_id, fp_in_successful, fp_exists, fail_msg, traceback_format_exc = create_features_profile(skyline_app, fp_created_at, learn_base_name, context, ionosphere_job, learn_parent_id, generation, fp_learn, slack_ionosphere_job, user_id)
+                label = 'LEARNT'
+                fp_id, fp_in_successful, fp_exists, fail_msg, traceback_format_exc = create_features_profile(skyline_app, fp_created_at, learn_base_name, context, ionosphere_job, learn_parent_id, generation, fp_learn, slack_ionosphere_job, user_id, label)
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: learn :: %s :: failed to create a features profile' % profile_context)
