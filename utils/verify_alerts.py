@@ -31,7 +31,7 @@ try:
     alerts_enabled = settings.ENABLE_ALERTS
     alerts = settings.ALERTS
 except:
-    print "Exception: Check your settings file for the existence of ENABLE_ALERTS and ALERTS"
+    print('Exception: Check your settings file for the existence of ENABLE_ALERTS and ALERTS')
     sys.exit()
 
 try:
@@ -39,24 +39,24 @@ try:
 except:
     syslog_enabled = False
 
-print 'Verifying alerts for: "' + options.metric + '"'
+print('Verifying alerts for: "' + options.metric + '"')
 
 # Send alerts
 context = 'Analyzer'
 if alerts_enabled:
-    print 'Testing Analyzer alerting on ' + options.metric
+    print('Testing Analyzer alerting on ' + options.metric)
     for alert in alerts:
         if alert[0] == options.metric:
             if options.trigger in alert[1]:
-                print '    Testing Analyzer alerting - against "' + alert[0] + '" to send via ' + alert[1] + "...triggered"
+                print('    Testing Analyzer alerting - against "' + alert[0] + '" to send via ' + alert[1] + "...triggered")
                 metric = (0, options.metric, 12345)
                 trigger_alert(alert, metric, context)
                 if syslog_enabled:
-                    print '    Testing Analyzer alerting - against "' + alert[0] + '" to send via syslog ' + "...triggered"
+                    print('    Testing Analyzer alerting - against "' + alert[0] + '" to send via syslog ' + "...triggered")
                     alert = (alert[0], 'syslog')
                     trigger_alert(alert, metric, context)
 else:
-    print 'Alerts are disabled'
+    print('Alerts are disabled')
 
 # Mirage alerts
 try:
@@ -67,22 +67,22 @@ except:
 
 if mirage_alerts_enabled:
     sleep(2)
-    print 'Testing Mirage alerting on ' + options.metric
+    print('Testing Mirage alerting on ' + options.metric)
     sys.path.insert(0, join(__location__, '..', 'skyline', 'mirage'))
 #    import mirage_alerters
     from mirage_alerters import trigger_alert
     for alert in alerts:
         if alert[0] == options.metric:
             if options.trigger in alert[1]:
-                print '    Testing Mirage alerting - against "' + alert[0] + '" to send via ' + alert[1] + "...triggered"
+                print('    Testing Mirage alerting - against "' + alert[0] + '" to send via ' + alert[1] + "...triggered")
                 metric = (0, options.metric, 12345)
                 trigger_alert(alert, metric, 86400, 'Mirage')
                 if syslog_enabled:
-                    print '    Testing Mirage alerting - against "' + alert[0] + '" to send via syslog ' + "...triggered"
+                    print('    Testing Mirage alerting - against "' + alert[0] + '" to send via syslog ' + "...triggered")
                     alert = (alert[0], 'syslog')
                     trigger_alert(alert, metric, 86400, context)
 else:
-    print 'Mirage alerts are disabled'
+    print('Mirage alerts are disabled')
 
 # Boundary alerts
 try:
@@ -93,13 +93,13 @@ except:
 
 if boundary_alerts_enabled:
     sleep(2)
-    print 'Testing Boundary alerting on ' + options.metric
+    print('Testing Boundary alerting on ' + options.metric)
     sys.path.insert(0, join(__location__, '..', 'skyline', 'boundary'))
     from boundary_alerters import trigger_alert
     for alert in boundary_alerts:
         if alert[0] == options.metric:
             if options.trigger in alert[7]:
-                print '    Testing Boundary alerting against "' + alert[0] + '" to send for ' + alert[7] + ' via ' + options.trigger
+                print('    Testing Boundary alerting against "' + alert[0] + '" to send for ' + alert[7] + ' via ' + options.trigger)
                 trigger_alert(options.trigger, '0', alert[0], '1', '1', 'test')
 else:
-    print 'Boundary alerts are disabled'
+    print('Boundary alerts are disabled')
