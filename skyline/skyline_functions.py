@@ -4,25 +4,23 @@ Skyline functions
 These are shared functions that are required in multiple modules.
 """
 import logging
-from os.path import dirname, join, abspath, isfile
 from os import path
 from time import time
 import socket
 import datetime
 import errno
+import os
 
 import traceback
 import json
 import requests
-try:
-    import urlparse
-except ImportError:
-    import urllib.parse
-try:
-    import urllib2
-except ImportError:
-    import urllib.request
-    import urllib.error
+# @modified 20191025 - Task #3290: Handle urllib2 in py3
+#                      Branch #3262: py3
+# try:
+#     import urllib2
+# except ImportError:
+#     import urllib.request
+#     import urllib.error
 
 import settings
 
@@ -57,6 +55,114 @@ config = {'user': settings.PANORAMA_DBUSER,
           'port': settings.PANORAMA_DBPORT,
           'database': settings.PANORAMA_DATABASE,
           'raise_on_warnings': True}
+
+
+# @added 20191025 - Bug #3266: py3 Redis binary objects not strings
+#                   Branch #3262: py3
+# Added a single functions to deal with Redis connection and the
+# charset='utf-8', decode_responses=True arguments required in py3
+def get_redis_conn(current_skyline_app):
+    """
+    Get a Redis connection
+
+    :param current_skyline_app: the skyline app using this function
+    :type current_skyline_app: str
+    :return: REDIS_CONN
+    :rtype: object
+
+    """
+    current_skyline_app_logger = str(current_skyline_app) + 'Log'
+    current_logger = logging.getLogger(current_skyline_app_logger)
+
+    REDIS_CONN = None
+    try:
+        if settings.REDIS_PASSWORD:
+            REDIS_CONN = StrictRedis(
+                password=settings.REDIS_PASSWORD,
+                unix_socket_path=settings.REDIS_SOCKET_PATH)
+        else:
+            REDIS_CONN = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+    except:
+        from redis import StrictRedis
+    if not REDIS_CONN:
+        try:
+            if settings.REDIS_PASSWORD:
+                REDIS_CONN = StrictRedis(
+                    password=settings.REDIS_PASSWORD,
+                    unix_socket_path=settings.REDIS_SOCKET_PATH)
+            else:
+                REDIS_CONN = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+        except:
+            current_logger.info(traceback.format_exc())
+            current_logger.error('error :: %s - redis connection failed' % current_skyline_app)
+            return None
+    return REDIS_CONN
+
+
+def get_redis_conn_decoded(current_skyline_app):
+    """
+    Get a Redis connection with decoded responses, to read sets
+
+    :param current_skyline_app: the skyline app using this function
+    :type current_skyline_app: str
+    :return: REDIS_CONN_DECODED
+    :rtype: object
+
+    """
+    try:
+        python_version
+    except:
+        from sys import version_info
+        python_version = int(version_info[0])
+
+    current_skyline_app_logger = str(current_skyline_app) + 'Log'
+    current_logger = logging.getLogger(current_skyline_app_logger)
+
+    REDIS_CONN_DECODED = None
+    try:
+        if settings.REDIS_PASSWORD:
+            if python_version == 2:
+                REDIS_CONN_DECODED = StrictRedis(
+                    password=settings.REDIS_PASSWORD,
+                    unix_socket_path=settings.REDIS_SOCKET_PATH)
+            else:
+                REDIS_CONN_DECODED = StrictRedis(
+                    password=settings.REDIS_PASSWORD,
+                    unix_socket_path=settings.REDIS_SOCKET_PATH,
+                    charset='utf-8', decode_responses=True)
+        else:
+            if python_version == 2:
+                REDIS_CONN_DECODED = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+            else:
+                REDIS_CONN_DECODED = StrictRedis(
+                    unix_socket_path=settings.REDIS_SOCKET_PATH,
+                    charset='utf-8', decode_responses=True)
+    except:
+        from redis import StrictRedis
+    if not REDIS_CONN_DECODED:
+        try:
+            if settings.REDIS_PASSWORD:
+                if python_version == 2:
+                    REDIS_CONN_DECODED = StrictRedis(
+                        password=settings.REDIS_PASSWORD,
+                        unix_socket_path=settings.REDIS_SOCKET_PATH)
+                else:
+                    REDIS_CONN_DECODED = StrictRedis(
+                        password=settings.REDIS_PASSWORD,
+                        unix_socket_path=settings.REDIS_SOCKET_PATH,
+                        charset='utf-8', decode_responses=True)
+            else:
+                if python_version == 2:
+                    REDIS_CONN_DECODED = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+                else:
+                    REDIS_CONN_DECODED = StrictRedis(
+                        unix_socket_path=settings.REDIS_SOCKET_PATH,
+                        charset='utf-8', decode_responses=True)
+        except:
+            current_logger.info(traceback.format_exc())
+            current_logger.error('error :: %s - redis decoded connection failed' % current_skyline_app)
+            return None
+    return REDIS_CONN_DECODED
 
 
 def send_graphite_metric(current_skyline_app, metric, value):
@@ -176,6 +282,96 @@ def mkdir_p(path):
             pass
         else:
             raise
+
+
+# @added 20191023 - Task #3290: Handle urllib2 in py3
+#                   Branch #3262: py3
+# Use urlretrieve
+def get_graphite_graph_image(current_skyline_app, url=None, image_file=None):
+    """
+    Fetches a Graphite graph image of a metric and saves the image to the
+    specified file.
+
+    :param current_skyline_app: the app calling the function so the function
+        knows which log to write too.
+    :param url: the graph URL
+    :param image_file: the absolute path and file name to save the graph png image
+        as.
+    :type current_skyline_app: str
+    :type url: str
+    :type image_file: str
+    :return: True
+    :rtype:  boolean
+
+    """
+    try:
+        python_version
+    except:
+        from sys import version_info
+        python_version = int(version_info[0])
+    try:
+        urllib.urlretrieve
+    except:
+        try:
+            import urllib
+        except:
+            # For backwards compatibility with py2 load urlib.request as urllib so
+            # that urllib.urlretrieve is available to both as the same module.
+            # from urllib import request as urllib
+            import urllib.request
+            import urllib.error
+
+    current_skyline_app_logger = str(current_skyline_app) + 'Log'
+    current_logger = logging.getLogger(current_skyline_app_logger)
+
+    if not url:
+        fail_msg = 'error :: %s :: get_graphite_graph_image :: URL - %s' % (
+            str(current_skyline_app), str(url), str(image_file))
+        current_logger.error(fail_msg)
+        return False
+    if not image_file:
+        fail_msg = 'error :: %s :: get_graphite_graph_image :: image_file - %s' % (
+            str(current_skyline_app), str(image_file))
+        current_logger.error(fail_msg)
+        return False
+
+    file_dir = os.path.dirname(image_file)
+    if not os.path.exists(file_dir):
+        try:
+            os.makedirs(file_dir, mode=0o755)
+        # Python >2.5
+        except OSError as exc:
+            if exc.errno == errno.EEXIST and os.path.isdir(path):
+                pass
+            else:
+                raise
+
+    if not os.path.exists(file_dir):
+        current_logger.error(
+            'error :: %s :: get_graphite_graph_image - could not create directory - %s' % (str(file_dir)))
+
+    try:
+        current_logger.info('%s :: get_graphite_graph_image :: saving %s to %s' % (
+            str(current_skyline_app), str(url), str(image_file)))
+        if python_version == 2:
+            urllib.urlretrieve(url, image_file)
+            os.chmod(image_file, 0o644)
+        if python_version == 3:
+            urllib.request.urlretrieve(url, image_file)
+            os.chmod(image_file, mode=0o644)
+        current_logger.info('%s :: get_graphite_graph_image :: saved %s to %s' % (
+            str(current_skyline_app), str(url), str(image_file)))
+    except:
+        current_logger.error(traceback.format_exc())
+        fail_msg = 'error :: %s :: get_graphite_graph_image :: failed to save %s to %s' % (
+            str(current_skyline_app), str(url), str(image_file))
+        current_logger.error(fail_msg)
+        if current_skyline_app == 'webapp':
+            # Raise to webbapp
+            raise
+        else:
+            return False
+    return True
 
 
 def load_metric_vars(current_skyline_app, metric_vars_file):
@@ -348,7 +544,7 @@ def fail_check(current_skyline_app, failed_check_dir, check_file_to_fail):
         current_logger.info('moved check file to - %s' % failed_check_file)
         return True
     except OSError:
-        current_logger.info(traceback.format_exc())
+        current_logger.error(traceback.format_exc())
         msg = 'failed to move check file to -%s' % failed_check_file
         current_logger.error('error :: %s' % msg)
         pass
@@ -405,6 +601,17 @@ def get_graphite_metric(
     except:
         import re
 
+    # @added 20191025 - Task #3290: Handle urllib2 in py3
+    #                   Branch #3262: py3
+#    try:
+#        urllib.urlretrieve
+#    except:
+#        try:
+#            import urllib as urllib
+#        except:
+#            import urllib.request
+#            import urllib.error
+
     current_skyline_app_logger = str(current_skyline_app) + 'Log'
     current_logger = logging.getLogger(current_skyline_app_logger)
 
@@ -413,8 +620,11 @@ def get_graphite_metric(
 
     # @added 20160803 - Unescaped Graphite target - https://github.com/earthgecko/skyline/issues/20
     #                   bug1546: Unescaped Graphite target
-    new_metric_namespace = metric.replace(':', '\:')
-    metric_namespace = new_metric_namespace.replace('(', '\(')
+    # @modified 20191029 - Branch #3263: py3
+    # Commented out colon
+    # new_metric_namespace = metric.replace(':', '\:')
+    # metric_namespace = new_metric_namespace.replace('(', '\(')
+    metric_namespace = metric.replace('(', '\(')
     metric = metric_namespace.replace(')', '\)')
 
     # Graphite timeouts
@@ -443,26 +653,33 @@ def get_graphite_metric(
     # increasing monotonically to their deriative products in Graphite now
     # graphs
     known_derivative_metric = False
-    REDIS_CONN = None
+    REDIS_CONN_DECODED = None
     try:
-        # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
-        if settings.REDIS_PASSWORD:
-            REDIS_CONN = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
-        else:
-            REDIS_CONN = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+        REDIS_CONN_DECODED = get_redis_conn_decoded(current_skyline_app)
     except:
-        from redis import StrictRedis
-    if not REDIS_CONN:
-        try:
-            # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
-            if settings.REDIS_PASSWORD:
-                REDIS_CONN = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
-            else:
-                REDIS_CONN = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
-        except:
-            current_logger.error('error :: alert_smtp - redis connection failed')
+        current_logger.error(traceback.format_exc())
+        current_logger.error('error :: %s :: get_graphite_metric - failed to get_redis_conn')
+
+#    try:
+#        # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
+#        if settings.REDIS_PASSWORD:
+#            REDIS_CONN = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+#        else:
+#            REDIS_CONN = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+#    except:
+#        from redis import StrictRedis
+#    if not REDIS_CONN:
+#        try:
+#            # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
+#            if settings.REDIS_PASSWORD:
+#                REDIS_CONN = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+#            else:
+#                REDIS_CONN = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+#        except:
+#            current_logger.error('error :: %s - redis connection failed' % current_skyline_app)
+
     try:
-        derivative_metrics = list(REDIS_CONN.smembers('derivative_metrics'))
+        derivative_metrics = list(REDIS_CONN_DECODED.smembers('derivative_metrics'))
     except:
         derivative_metrics = []
     redis_metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(metric))
@@ -476,7 +693,7 @@ def get_graphite_metric(
         metric_found_in_redis = True
     if known_derivative_metric:
         try:
-            non_derivative_metrics = list(REDIS_CONN.smembers('non_derivative_metrics'))
+            non_derivative_metrics = list(REDIS_CONN_DECODED.smembers('non_derivative_metrics'))
         except:
             non_derivative_metrics = []
         if redis_metric_name in non_derivative_metrics:
@@ -522,9 +739,6 @@ def get_graphite_metric(
     # image_url = settings.GRAPHITE_PROTOCOL + '://' + settings.GRAPHITE_HOST + ':' + graphite_port + '/api/datasources/proxy/1/render/?from=' + graphite_from + '&until=' + graphite_until + '&target=' + target_metric
     image_url = settings.GRAPHITE_PROTOCOL + '://' + settings.GRAPHITE_HOST + ':' + graphite_port + '/' + settings.GRAPHITE_RENDER_URI + '?from=' + graphite_from + '&until=' + graphite_until + '&target=' + target_metric
     url = image_url + '&format=' + output_format
-
-    if settings.ENABLE_DEBUG:
-        current_logger.info('graphite url - %s' % (url))
 
     current_logger.info('graphite url - %s' % (url))
 
@@ -612,16 +826,32 @@ def get_graphite_metric(
 
         image_data = None
 
-        try:
-            # @modified 20170913 - Task #2160: Test skyline with bandit
-            # Added nosec to exclude from bandit tests
-            image_data = urllib2.urlopen(image_url, timeout=image_url_timeout).read()  # nosec
-            current_logger.info('url OK - %s' % (image_url))
-        except urllib2.URLError:
-            image_data = None
-            current_logger.error('error :: url bad - %s' % (image_url))
+        # @modified 20191025 - Task #3290: Handle urllib2 in py3
+        #                      Branch #3262: py3
+        # Use urlretrieve
+        # try:
+        #     # @modified 20170913 - Task #2160: Test skyline with bandit
+        #     # Added nosec to exclude from bandit tests
+        #     image_data = urllib2.urlopen(image_url, timeout=image_url_timeout).read()  # nosec
+        #     current_logger.info('url OK - %s' % (image_url))
+        # except urllib2.URLError:
+        #     image_data = None
+        #     current_logger.error('error :: url bad - %s' % (image_url))
 
-        if image_data is not None:
+        # @added 20191025 - Task #3290: Handle urllib2 in py3
+        #                   Branch #3262: py3
+        # Use urlretrieve
+        try:
+            image_data = get_graphite_graph_image(
+                current_skyline_app, image_url, graphite_image_file)
+        except:
+            current_logger.error(traceback.format_exc())
+            fail_msg = 'error :: %s :: get_graphite_graph_image :: failed to get_graphite_graph_image(%s, %s, %s)' % (
+                str(current_skyline_app), str(url), str(graphite_image_file))
+            current_logger.error(fail_msg)
+
+        # if image_data is not None:
+        if image_data == 'disabled_for_testing':
             with open(graphite_image_file, 'w') as f:
                 f.write(image_data)
             current_logger.info('retrieved - %s' % (graphite_image_file))
@@ -629,9 +859,9 @@ def get_graphite_metric(
                 os.chmod(graphite_image_file, 0o644)
             if python_version == 3:
                 os.chmod(graphite_image_file, mode=0o644)
-        else:
-            current_logger.error(
-                'error :: failed to retrieved - %s' % (graphite_image_file))
+        # else:
+        #    current_logger.error(
+        #         'error :: failed to retrieve - %s' % (graphite_image_file))
 
         if not os.path.isfile(graphite_image_file):
             msg = 'retrieve failed to surface %s graph from Graphite' % (metric)
@@ -1146,6 +1376,22 @@ def get_memcache_metric_object(current_skyline_app, base_name):
     except:
         from ast import literal_eval
 
+    # @added 20191029 - Task #3304: py3 - handle pymemcache bytes not str
+    #                   Branch #3262: py3
+    try:
+        python_version
+    except:
+        from sys import version_info
+        python_version = int(version_info[0])
+
+    # @added 20191030 - Task #3304: py3 - handle pymemcache bytes not str
+    #                   Branch #3262: py3
+    if python_version == 3:
+        try:
+            codecs
+        except:
+            import codecs
+
     current_skyline_app_logger = str(current_skyline_app) + 'Log'
     current_logger = logging.getLogger(current_skyline_app_logger)
 
@@ -1159,9 +1405,16 @@ def get_memcache_metric_object(current_skyline_app, base_name):
     memcache_result = None
     if settings.MEMCACHE_ENABLED:
         try:
-            memcache_result = memcache_client.get(metrics_db_object_key)
+            # @modified 20191029 - Task #3304: py3 - handle pymemcache bytes not str
+            # memcache_result = memcache_client.get(metrics_db_object_key)
+            if python_version == 2:
+                memcache_result = memcache_client.get(metrics_db_object_key)
+            else:
+                # memcache_result = memcache_client.get(metrics_db_object_key)
+                memcache_result = memcache_client.get(metrics_db_object_key).decode('utf-8')
         except:
-            current_logger.error('error :: failed to get %s from memcache' % metrics_db_object_key)
+            current_logger.error(traceback.format_exc())
+            current_logger.error('error :: skyline_functions :: get_memcache_metric_object :: failed to get %s from memcache' % metrics_db_object_key)
         try:
             memcache_client.close()
         # @modified 20170913 - Task #2160: Test skyline with bandit
@@ -1175,12 +1428,21 @@ def get_memcache_metric_object(current_skyline_app, base_name):
             memcache_metrics_db_object = literal_eval(memcache_result)
             memcache_metric_dict = {}
             # for k, v in memcache_result_list:
-            for k, v in memcache_metrics_db_object.iteritems():
-                key_name = str(k)
-                key_value = str(v)
-                memcache_metric_dict[key_name] = key_value
+            # @modified 20191030 - Branch #3262: py3
+            # for k, v in memcache_metrics_db_object.iteritems():
+            if python_version == 2:
+                for k, v in memcache_metrics_db_object.iteritems():
+                    key_name = str(k)
+                    key_value = str(v)
+                    memcache_metric_dict[key_name] = key_value
+            else:
+                for k, v in memcache_metrics_db_object.items():
+                    key_name = str(k)
+                    key_value = str(v)
+                    memcache_metric_dict[key_name] = key_value
         except:
-            current_logger.error('error :: failed to process data from memcache key %s' % metrics_db_object_key)
+            current_logger.error(traceback.format_exc())
+            current_logger.error('error :: skyline_functions :: get_memcache_metric_object :: failed to process data with iter of memcache memcache_metrics_db_object key dict %s' % metrics_db_object_key)
             memcache_metric_dict = False
         try:
             memcache_client.close()
@@ -1190,8 +1452,8 @@ def get_memcache_metric_object(current_skyline_app, base_name):
             pass
 
     if memcache_metric_dict:
-        metrics_id = int(memcache_metric_dict['id'])
-        metric_ionosphere_enabled = int(memcache_metric_dict['ionosphere_enabled'])
+        # metrics_id = int(memcache_metric_dict['id'])
+        # metric_ionosphere_enabled = int(memcache_metric_dict['ionosphere_enabled'])
         metrics_db_object = memcache_metric_dict
         current_logger.info('get_memcache_metric_object :: returned memcache data for key - %s' % metrics_db_object_key)
         return metrics_db_object
@@ -1220,6 +1482,14 @@ def get_memcache_fp_ids_object(current_skyline_app, base_name):
     except:
         from ast import literal_eval
 
+    # @added 20191029 - Task #3304: py3 - handle pymemcache bytes not str
+    #                   Branch #3262: py3
+    try:
+        python_version
+    except:
+        from sys import version_info
+        python_version = int(version_info[0])
+
     current_skyline_app_logger = str(current_skyline_app) + 'Log'
     current_logger = logging.getLogger(current_skyline_app_logger)
 
@@ -1233,9 +1503,15 @@ def get_memcache_fp_ids_object(current_skyline_app, base_name):
     memcache_result = None
     if settings.MEMCACHE_ENABLED:
         try:
-            memcache_result = memcache_client.get(fp_ids_list_object_key)
+            # @modified 20191029 - Task #3304: py3 - handle pymemcache bytes not str
+            # memcache_result = memcache_client.get(fp_ids_list_object_key)
+            if python_version == 2:
+                memcache_result = memcache_client.get(fp_ids_list_object_key)
+            else:
+                memcache_result = memcache_client.get(fp_ids_list_object_key).decode('utf-8')
         except:
-            current_logger.error('error :: failed to get %s from memcache' % fp_ids_list_object_key)
+            current_logger.error(traceback.format_exc())
+            current_logger.error('error :: skyline_functions :: get_memcache_fp_ids_object :: failed to get %s from memcache' % fp_ids_list_object_key)
         try:
             memcache_client.close()
         # @modified 20170913 - Task #2160: Test skyline with bandit
@@ -1248,7 +1524,7 @@ def get_memcache_fp_ids_object(current_skyline_app, base_name):
         try:
             result = literal_eval(memcache_result)
         except:
-            current_logger.error('error :: failed to process data from memcache key %s' % fp_ids_list_object_key)
+            current_logger.error('error :: skyline_functions :: get_memcache_fp_ids_object :: failed to process data from memcache key with literal_eval %s' % fp_ids_list_object_key)
             result = False
         try:
             memcache_client.close()
@@ -1346,30 +1622,35 @@ def is_derivative_metric(current_skyline_app, base_name):
 
     # Feature #2034: analyse_derivatives
     known_derivative_metric = False
-    REDIS_CONN = None
+    REDIS_CONN_DECODED = None
+#    try:
+#        # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
+#        if settings.REDIS_PASSWORD:
+#            REDIS_CONN = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+#        else:
+#            REDIS_CONN = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+#    except:
+#        from redis import StrictRedis
+#    if not REDIS_CONN:
+#        try:
+#            # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
+#            if settings.REDIS_PASSWORD:
+#                REDIS_CONN = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+#            else:
+#                REDIS_CONN = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+#        except:
+#            current_logger.error('error :: known_derivative_metric - Redis connection failed')
     try:
-        # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
-        if settings.REDIS_PASSWORD:
-            REDIS_CONN = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
-        else:
-            REDIS_CONN = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+        REDIS_CONN_DECODED = get_redis_conn_decoded(current_skyline_app)
     except:
-        from redis import StrictRedis
-    if not REDIS_CONN:
-        try:
-            # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
-            if settings.REDIS_PASSWORD:
-                REDIS_CONN = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
-            else:
-                REDIS_CONN = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
-        except:
-            current_logger.error('error :: known_derivative_metric - Redis connection failed')
+        current_logger.error('error :: known_derivative_metric - get_redis_conn failed')
+
     try:
-        derivative_metrics = list(REDIS_CONN.smembers('derivative_metrics'))
+        derivative_metrics = list(REDIS_CONN_DECODED.smembers('derivative_metrics'))
     except:
         derivative_metrics = []
     try:
-        non_derivative_metrics = list(REDIS_CONN.smembers('non_derivative_metrics'))
+        non_derivative_metrics = list(REDIS_CONN_DECODED.smembers('non_derivative_metrics'))
     except:
         non_derivative_metrics = []
     try:
@@ -1387,6 +1668,11 @@ def is_derivative_metric(current_skyline_app, base_name):
     if not known_derivative_metric:
         last_derivative_metric_key = False
         try:
+            REDIS_CONN = None
+            try:
+                REDIS_CONN = get_redis_conn(current_skyline_app)
+            except:
+                current_logger.error('error :: %s :: is_derivative_metric :: last_derivative_metric_key - get_redis_conn failed')
             last_derivative_metric_key = REDIS_CONN.get(derivative_metric_key)
         except Exception as e:
             current_logger.error('error :: could not query Redis for last_derivative_metric_key: %s' % e)
@@ -1432,19 +1718,22 @@ def set_metric_as_derivative(current_skyline_app, base_name):
     return_boolean = True
     REDIS_CONN = None
 
+    # @modified 20191025 - Bug #3266: py3 Redis binary objects not strings
+    #                      Branch #3262: py3
+    # Added, charset='utf-8', decode_responses=True to REDIS_CONN
     try:
         if settings.REDIS_PASSWORD:
-            REDIS_CONN = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+            REDIS_CONN = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
         else:
-            REDIS_CONN = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+            REDIS_CONN = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
     except:
         from redis import StrictRedis
     if not REDIS_CONN:
         try:
             if settings.REDIS_PASSWORD:
-                REDIS_CONN = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+                REDIS_CONN = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
             else:
-                REDIS_CONN = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+                REDIS_CONN = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
         except:
             current_logger.error('error :: set_metric_as_derivative - Redis connection failed')
     if not REDIS_CONN:
@@ -1591,3 +1880,46 @@ def get_user_details(current_skyline_app, desired_value, key, value):
     if select_field == 'id':
         return True, int(result)
     return True, str(result)
+
+# @added 20191106 - Branch #3002: docker
+#                   Branch #3262: py3
+def get_graphite_port(current_skyline_app):
+    """
+    Returns graphite port based on configuration in settings.py
+    """
+    if settings.GRAPHITE_PROTOCOL == 'http':
+        graphite_port = '80'
+    else:
+        graphite_port = '443'
+    if settings.GRAPHITE_PORT != '':
+        graphite_port = str(settings.GRAPHITE_PORT)
+    return graphite_port
+
+
+def get_graphite_render_uri(current_skyline_app):
+    """
+    Returns graphite render uri based on configuration in settings.py
+    """
+    current_skyline_app_logger = str(current_skyline_app) + 'Log'
+    current_logger = logging.getLogger(current_skyline_app_logger)
+    try:
+        graphite_render_uri = str(settings.GRAPHITE_RENDER_URI)
+    except:
+        current_logger.info('get_graphite_render_uri :: GRAPHITE_RENDER_URI is not declared in settings.py, using default of \'render\'')
+        graphite_render_uri = 'render'
+    return graphite_render_uri
+
+
+def get_graphite_custom_headers(current_skyline_app):
+    """
+    Returns custom http headers
+    """
+    current_skyline_app_logger = str(current_skyline_app) + 'Log'
+    current_logger = logging.getLogger(current_skyline_app_logger)
+    headers = dict()
+    try:
+        headers = settings.GRAPHITE_CUSTOM_HEADERS
+    except:
+        current_logger.info('get_graphite_custom_headers :: GRAPHITE_CUSTOM_HEADERS is not declared in settings.py, using default of \{\}')
+        headers = dict()
+    return headers
