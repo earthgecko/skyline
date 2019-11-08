@@ -30,7 +30,12 @@ from skyline_functions import (
     send_graphite_metric, write_data_to_file, send_anomalous_metric_to, mkdir_p,
     filesafe_metricname,
     # @added 20170602 - Feature #2034: analyse_derivatives
-    nonNegativeDerivative, strictly_increasing_monotonicity, in_list)
+    nonNegativeDerivative, strictly_increasing_monotonicity, in_list,
+    # @added 20191030 - Bug #3266: py3 Redis binary objects not strings
+    #                   Branch #3262: py3
+    # Added a single functions to deal with Redis connection and the
+    # charset='utf-8', decode_responses=True arguments required in py3
+    get_redis_conn, get_redis_conn_decoded)
 
 from alerters import trigger_alert
 from algorithms import run_selected_algorithm
@@ -109,6 +114,9 @@ skyline_app_graphite_namespace = 'skyline.%s%s' % (skyline_app, SERVER_METRIC_PA
 
 LOCAL_DEBUG = False
 
+# @added 20191107 - Branch #3262: py3
+alert_test_file = '%s/%s_alert_test.txt' % (settings.SKYLINE_TMP_DIR, skyline_app)
+
 
 class Analyzer(Thread):
     """
@@ -125,18 +133,21 @@ class Analyzer(Thread):
         """
         super(Analyzer, self).__init__()
         # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
-        if settings.REDIS_PASSWORD:
-            self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
-        else:
-            self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
-        # @added 20191014 - Bug #3266: py3 Redis binary objects not strings
-        #                   Branch #3262: py3
-        # Added self.redis_conn_decoded to use on Redis sets when the bytes
+        # @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
+        #                      Branch #3262: py3
+        # Use get_redis_conn and get_redis_conn_decoded to use on Redis sets when the bytes
         # types need to be decoded as utf-8 to str
-        if settings.REDIS_PASSWORD:
-            self.redis_conn_decoded = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
-        else:
-            self.redis_conn_decoded = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
+        # if settings.REDIS_PASSWORD:
+        #     self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+        # else:
+        #     self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+
+        # @added 20191030 - Bug #3266: py3 Redis binary objects not strings
+        #                   Branch #3262: py3
+        # Added a single functions to deal with Redis connection and the
+        # charset='utf-8', decode_responses=True arguments required in py3
+        self.redis_conn = get_redis_conn(skyline_app)
+        self.redis_conn_decoded = get_redis_conn_decoded(skyline_app)
 
         self.daemon = True
         self.parent_pid = parent_pid
@@ -668,6 +679,35 @@ class Analyzer(Thread):
                 if LOCAL_DEBUG:
                     logger.info('debug :: metric %s - anomalous - %s' % (str(metric_name), str(anomalous)))
 
+                # @added 20191107 - Feature #3306: Record anomaly_end_timestamp
+                #                   Branch #3262: py3
+                # Created an Analyzer Redis set to keep track of not anomalous
+                # metrics so that the anomaly_end_timestamp can be recorded
+                if not anomalous:
+                    try:
+                        metric_timestamp = timeseries[-1][0]
+                    except:
+                        metric_timestamp = None
+                    recent = False
+                    if metric_timestamp:
+                        # Only update if the timestamp is recent
+                        deemed_recent = int(spin_start) - settings.STALE_PERIOD
+                        if int(metric_timestamp) > deemed_recent:
+                            recent = True
+                    if recent:
+                        try:
+                            redis_set = 'analyzer.not_anomalous_metrics'
+                            try:
+                                base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+                                data = [base_name, int(metric_timestamp)]
+                                self.redis_conn.sadd(redis_set, str(data))
+                            except Exception as e:
+                                logger.info(traceback.format_exc())
+                                logger.error('error :: failed to add %s to Redis set %s: %s' % (
+                                    str(data), str(redis_set), str(e)))
+                        except:
+                            pass
+
                 # @added 20190408 - Feature #2882: Mirage - periodic_check
                 # Add for Mirage periodic - is really anomalous add to
                 # real_anomalous_metrics and if in mirage_periodic_check_metric_list
@@ -1056,7 +1096,7 @@ class Analyzer(Thread):
                             # Move to Redis set block below
                             # self.sent_to_crucible.append(base_name)
                         except:
-                            logger.info(traceback.format_exc())
+                            logger.error(traceback.format_exc())
                             logger.error('error :: failed to add crucible check file :: %s' % (crucible_check_file))
 
                         # @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage
@@ -1065,7 +1105,7 @@ class Analyzer(Thread):
                         try:
                             self.redis_conn.sadd(redis_set, data)
                         except:
-                            logger.info(traceback.format_exc())
+                            logger.error(traceback.format_exc())
                             logger.error('error :: failed to add %s to Redis set %s' % (
                                 str(data), str(redis_set)))
 
@@ -1278,14 +1318,18 @@ class Analyzer(Thread):
                 sleep(10)
                 try:
                     # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
-                    if settings.REDIS_PASSWORD:
-                        self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
-                    else:
-                        self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+                    # @added 20191030 - Bug #3266: py3 Redis binary objects not strings
+                    #                   Branch #3262: py3
+                    # if settings.REDIS_PASSWORD:
+                    #     self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+                    # else:
+                    #     self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+                    self.redis_conn = get_redis_conn(skyline_app)
+                    self.redis_conn_decoded = get_redis_conn_decoded(skyline_app)
                 except:
                     logger.info(traceback.format_exc())
-                    logger.error('error :: Analyzer cannot connect to redis at socket path %s' % settings.REDIS_SOCKET_PATH)
-
+                    # logger.error('error :: Analyzer cannot connect to redis at socket path %s' % settings.REDIS_SOCKET_PATH)
+                    logger.error('error :: Analyzer cannot connect to get_redis_conn')
                 continue
 
             # Report app up
@@ -1684,6 +1728,19 @@ class Analyzer(Thread):
             if LOCAL_DEBUG:
                 logger.info('debug :: Memory usage in run before spawning processes: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 
+            # @added 20191107 - Feature #3306: Record anomaly_end_timestamp
+            #                   Branch #3262: py3
+            # Created an Analyzer Redis set to keep track of not anomalous
+            # metrics so that the anomaly_end_timestamp can be recorded
+            try:
+                self.redis_conn.delete('aet.analyzer.not_anomalous_metrics')
+            except:
+                pass
+            try:
+                self.redis_conn.rename('analyzer.not_anomalous_metrics', 'aet.analyzer.not_anomalous_metrics')
+            except:
+                pass
+
             # Spawn processes
             pids = []
             spawned_pids = []
@@ -1821,6 +1878,11 @@ class Analyzer(Thread):
                 #                   Branch #3262: py3
                 # literal_analyzer_anomalous_metrics = list(self.redis_conn.smembers('analyzer.anomalous_metrics'))
                 literal_analyzer_anomalous_metrics = list(self.redis_conn_decoded.smembers('analyzer.anomalous_metrics'))
+                if LOCAL_DEBUG:
+                    if literal_analyzer_anomalous_metrics:
+                        logger.info('debug :: analyzer.anomalous_metrics Redis set surfaced - %s' % str(literal_analyzer_anomalous_metrics))
+                    else:
+                        logger.info('debug :: analyzer.anomalous_metrics no Redis set data')
                 for metric_list_string in literal_analyzer_anomalous_metrics:
                     metric = literal_eval(metric_list_string)
                     analyzer_anomalous_metrics.append(metric)
@@ -1840,6 +1902,9 @@ class Analyzer(Thread):
                     data = str(metric)
                     try:
                         self.redis_conn.sadd(redis_set, data)
+                        if LOCAL_DEBUG:
+                            logger.info('debug :: added %s to %s Redis set' % (
+                                str(data), redis_set))
                     except:
                         logger.info(traceback.format_exc())
                         logger.error('error :: failed to add %s to Redis set %s' % (
@@ -1853,6 +1918,9 @@ class Analyzer(Thread):
             context = 'Analyzer'
             try:
                 ionosphere_alerts = list(self.redis_conn.scan_iter(match='ionosphere.analyzer.alert.*'))
+                if LOCAL_DEBUG:
+                    logger.info('debug :: ionosphere.analyzer.alert.* Redis keys - %s' % (
+                        str(ionosphere_alerts)))
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: failed to scan ionosphere.analyzer.alert.* from Redis')
@@ -1914,8 +1982,15 @@ class Analyzer(Thread):
                     #                   Branch #3262: py3
                     # all_anomalous_metrics = list(self.redis_conn.smembers('analyzer.all_anomalous_metrics'))
                     all_anomalous_metrics = list(self.redis_conn_decoded.smembers('analyzer.all_anomalous_metrics'))
+                    if LOCAL_DEBUG:
+                        logger.info('debug :: for alert in settings.ALERTS analyzer.all_anomalous_metrics - %s' % (
+                            str(all_anomalous_metrics)))
+
                     for metric_list_string in all_anomalous_metrics:
                         metric = literal_eval(metric_list_string)
+                        if LOCAL_DEBUG:
+                            logger.info('debug :: metric in all_anomalous_metrics - %s' % (
+                                str(metric)))
 
                         # @added 20180914 - Bug #2594: Analyzer Ionosphere alert on Analyzer data point
                         # Set each metric to the default Analyzer context
@@ -1925,8 +2000,18 @@ class Analyzer(Thread):
                         # Absolute match
                         if str(metric[1]) == str(alert[0]):
                             pattern_match = True
+                            if LOCAL_DEBUG:
+                                logger.debug('debug :: metric absolutely pattern matched - %s %s' % (
+                                    str(metric[1]), str(alert[0])))
+                            # @added 20191021 - Bug #3266: py3 Redis binary objects not strings
+                            #                   Branch #3262: py3
+                            matched_by = 'absolutely'
 
                         if not pattern_match:
+                            if LOCAL_DEBUG:
+                                logger.debug('debug :: metric not absolutely pattern matched - %s' % (
+                                    str(metric[1])))
+
                             ALERT_MATCH_PATTERN = alert[0]
                             METRIC_PATTERN = metric[1]
                             matched_by = 'not matched'
@@ -1953,11 +2038,17 @@ class Analyzer(Thread):
                                 matched_by = 'substring'
 
                         if not pattern_match:
+                            if LOCAL_DEBUG:
+                                logger.debug('debug :: metric not pattern matched, continuing - %s' % (
+                                    str(metric[1])))
                             continue
 
                         mirage_metric = False
                         analyzer_metric = True
                         cache_key = 'last_alert.%s.%s' % (alert[1], metric[1])
+                        if LOCAL_DEBUG:
+                            logger.debug('debug :: last_alert cache key %s' % (
+                                str(cache_key)))
 
                         if settings.ENABLE_MIRAGE:
                             try:
@@ -1975,7 +2066,7 @@ class Analyzer(Thread):
                             except:
                                 mirage_metric = False
                                 if LOCAL_DEBUG:
-                                    logger.info('debug :: not Mirage metric - %s' % metric[1])
+                                    logger.debug('debug :: not Mirage metric - %s' % metric[1])
 
                         if mirage_metric:
                             # Write anomalous metric to test at second
@@ -2102,6 +2193,9 @@ class Analyzer(Thread):
                         # Bringing Ionosphere online - do alert on Ionosphere
                         # metrics if Ionosphere is up
                         metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(metric[1]))
+                        if LOCAL_DEBUG:
+                            logger.debug('debug :: metric_name - %s' % str(metric_name))
+
                         if metric_name in ionosphere_unique_metrics:
                             ionosphere_up = False
                             try:
@@ -2121,6 +2215,9 @@ class Analyzer(Thread):
                             else:
                                 logger.error('error :: Ionosphere not report up')
                                 logger.info('taking over alerting from Ionosphere if alert is matched on - %s' % str(metric[1]))
+                        else:
+                            if LOCAL_DEBUG:
+                                logger.debug('debug :: metric_name not in ionosphere_unique_metrics - %s' % str(metric_name))
 
                         # @added 20161231 - Feature #1830: Ionosphere alerts
                         #                   Analyzer also alerting on Mirage metrics now #22
@@ -2130,6 +2227,8 @@ class Analyzer(Thread):
                             continue
 
                         if analyzer_metric:
+                            if LOCAL_DEBUG:
+                                logger.debug('debug :: metric_name is analyzer_metric - %s' % str(analyzer_metric))
                             # @added 20160815 - Analyzer also alerting on Mirage metrics now #22
                             # If the metric has a dynamic mirage.metrics key,
                             # skip it
@@ -2138,6 +2237,9 @@ class Analyzer(Thread):
                             if settings.ENABLE_MIRAGE:
                                 try:
                                     mirage_metric_key = self.redis_conn.get(mirage_metric_cache_key)
+                                    if LOCAL_DEBUG:
+                                        logger.debug('debug :: metric_name analyzer_metric mirage_metric_key - %s' % str(mirage_metric_key))
+
                                 except Exception as e:
                                     logger.error('error :: could not query Redis for mirage_metric_cache_key: %s' % e)
 
@@ -2148,6 +2250,8 @@ class Analyzer(Thread):
 
                             try:
                                 last_alert = self.redis_conn.get(cache_key)
+                                if LOCAL_DEBUG:
+                                    logger.debug('debug :: metric_name analyzer_metric last_alert - %s' % str(last_alert))
                             except Exception as e:
                                 logger.error('error :: could not query Redis for cache_key: %s' % e)
                                 continue
@@ -2177,12 +2281,34 @@ class Analyzer(Thread):
                                             continue
 
                             try:
-                                self.redis_conn.setex(cache_key, alert[2], packb(metric[0]))
+                                # @modified 20191021 - Bug #3266: py3 Redis binary objects not strings
+                                #                      Branch #3262: py3
+                                # self.redis_conn.setex(cache_key, alert[2], packb(metric[0]))
+                                if python_version == 2:
+                                    key_set = self.redis_conn.setex(cache_key, alert[2], packb(metric[0]))
+                                if python_version == 3:
+                                    key_set = self.redis_conn.setex(cache_key, str(alert[2]), packb(str(metric[0])))
+                                if LOCAL_DEBUG:
+                                    logger.debug('debug :: metric_name analyzer_metric cache_key setex - %s, %s, %s, %s' % (
+                                        str(cache_key), str(alert[2]),
+                                        str(metric[0]), str(key_set)))
                             except:
-                                logger.error('error :: failed to set alert cache key :: %s' % (cache_key))
-                            logger.info(
-                                'triggering alert :: %s %s via %s - matched by %s' %
-                                (metric[1], metric[0], alert[1], matched_by))
+                                # logger.error('error :: failed to set alert cache key :: %s' % (cache_key))
+                                logger.error(traceback.format_exc())
+                                logger.error('error :: metric_name analyzer_metric cache_key setex - %s, %s, %s, %s' % (
+                                    str(cache_key), str(alert[2]),
+                                    str(metric[0]), str(key_set)))
+                            try:
+                                logger.info(
+                                    'triggering alert :: %s %s via %s - matched by %s' %
+                                    # @modified 20191021 - Bug #3266: py3 Redis binary objects not strings
+                                    #                      Branch #3262: py3
+                                    # (metric[1], metric[0], alert[1], matched_by))
+                                    (str(metric[1]), str(metric[0]), str(alert[1]),
+                                        str(matched_by)))
+                            except:
+                                logger.error(traceback.format_exc())
+                                logger.error('error :: metric_name analyzer_metric triggering alert')
                             if LOCAL_DEBUG:
                                 logger.info(
                                     'debug :: Memory usage in run before triggering alert: %s (kb)' %
@@ -2223,7 +2349,7 @@ class Analyzer(Thread):
                 # len(self.real_anomalous_metrics)
                 # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
                 #                      Branch #3262: py3
-                #real_anomalous_metrics_count = len(self.redis_conn.smembers('analyzer.real_anomalous_metrics'))
+                # real_anomalous_metrics_count = len(self.redis_conn.smembers('analyzer.real_anomalous_metrics'))
                 real_anomalous_metrics_count = len(self.redis_conn_decoded.smembers('analyzer.real_anomalous_metrics'))
                 anomalous_metrics_list_len = True
             except:
@@ -2266,10 +2392,43 @@ class Analyzer(Thread):
                             'error :: failed to write anomalies to %s' %
                             str(filename))
 
-            # Using count files rather that multiprocessing.Value to enable metrics for
-            # metrics for algorithm run times, etc
+            # @added 20191105 - Branch #3262: py3
+            if os.path.isfile(alert_test_file):
+                test_alert = None
+                try:
+                    with open((alert_test_file), 'r') as f:
+                        raw_test_alert = f.read()
+                    test_alert = literal_eval(raw_test_alert)
+                    # [metric, alerter]
+                    # e.g. ['server-1.cpu.user', 'smtp']
+                    # e.g. ['server-1.cpu.user', 'slack']
+                    # e.g. ['skyline_test.alerters.test', 'smtp']
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: could not evaluate test_alert from %s' % alert_test_file)
+                if test_alert:
+                    try:
+                        logger.info('test alert metric found - alerting on %s' % str((test_alert)))
+                        metric_name = str(test_alert[0])
+                        test_alerter = str(test_alert[1])
+                        metric = (1, metric_name, int(time()))
+                        alert = (metric_name, test_alerter, 10)
+                        if settings.SLACK_ENABLED and test_alerter == 'slack':
+                            logger.info('test alert to slack for %s' % (metric_name))
+                            trigger_alert(alert, metric, 'analyzer')
+                        if test_alerter == 'smtp':
+                            smtp_trigger_alert(alert, metric, 'analyzer')
+                    except:
+                        logger.error('error :: test trigger_alert - %s' % traceback.format_exc())
+                        logger.error('error :: failed to test trigger_alert :: %s' % metric_name)
+                try:
+                    os.remove(alert_test_file)
+                except OSError:
+                    logger.error('error - failed to remove %s, continuing' % alert_test_file)
+                    pass
+
             if LOCAL_DEBUG:
-                logger.info('debug :: Memory usage in run before algorithm run times: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+                logger.info('debug :: Memory usage in run before algoritest thm run times: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 
             for algorithm in algorithms_to_time:
                 algorithm_count_file = algorithm_tmp_file_prefix + algorithm + '.count'
@@ -2649,6 +2808,73 @@ class Analyzer(Thread):
             if LOCAL_DEBUG:
                 logger.info('debug :: Memory usage before reset counters: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 
+            # @added 20191107 - Feature #3306: Record anomaly_end_timestamp
+            #                   Branch #3262: py3
+            # Set the anomaly_end_timestamp for any metrics no longer anomalous
+            not_anomalous_metrics = []
+            not_anomalous_metrics_data = []
+            redis_set = 'current.anomalies'
+            try:
+                current_anomalies = self.redis_conn_decoded.smembers(redis_set)
+            except:
+                logger.info(traceback.format_exc())
+                logger.error('error :: failed to get Redis set %s' % redis_set)
+                current_anomalies = []
+            if current_anomalies:
+                try:
+                    redis_set = 'analyzer.not_anomalous_metrics'
+                    dict_not_anomalous_metrics = self.redis_conn_decoded.smembers(redis_set)
+                except:
+                    dict_not_anomalous_metrics = []
+                for item in dict_not_anomalous_metrics:
+                    try:
+                        list_data = literal_eval(item)
+                        not_anomalous_metrics_data.append(list_data)
+                        not_anomalous_metrics.append(str(list_data[0]))
+                    except:
+                        pass
+                for item in current_anomalies:
+                    try:
+                        list_data = literal_eval(item)
+                        anomalous_metric = str(list_data[0])
+                        anomaly_timestamp = int(list_data[1])
+                        try:
+                            anomaly_id = int(list_data[2])
+                        except:
+                            anomaly_id = None
+                        try:
+                            anomaly_end_timestamp = int(list_data[3])
+                        except:
+                            anomaly_end_timestamp = None
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to generate a list from analyzer.illuminance_datapoints Redis set')
+                    if anomaly_end_timestamp:
+                        continue
+                    if not anomaly_id:
+                        continue
+                    if anomalous_metric in not_anomalous_metrics:
+                        for metric, anomaly_end_timestamp in not_anomalous_metrics_data:
+                            if anomalous_metric == metric:
+                                update_item = False
+                                try:
+                                    redis_set = 'current.anomalies'
+                                    self.redis_conn.srem(redis_set, str(list_data))
+                                    update_item = True
+                                except:
+                                    logger.error(traceback.format_exc())
+                                    logger.error('error :: failed to remove %s for Redis set %s' % (str(list_data), redis_set))
+                                if update_item:
+                                    new_list_data = [metric, anomaly_timestamp, anomaly_id, anomaly_end_timestamp]
+                                    try:
+                                        redis_set = 'current.anomalies'
+                                        self.redis_conn.sadd(redis_set, str(new_list_data))
+                                        logger.info('set anomaly_end_timestamp to %s for %s in Redis set %s' % (
+                                            str(anomaly_end_timestamp), metric, redis_set))
+                                    except:
+                                        logger.error(traceback.format_exc())
+                                        logger.error('error :: failed to add %s to Redis set %s' % (str(new_list_data), redis_set))
+
             # @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage
             # Use Redis key set instead of self.illuminance_datapoints Manager()
             # list
@@ -2766,21 +2992,47 @@ class Analyzer(Thread):
                     logger.info('failed to delete analyzer.all_anomalous_metrics Redis set')
                     pass
 
+            # @added 20191107 - Feature #3306: Record anomaly_end_timestamp
+            #                   Branch #3262: py3
+            # In order for Analyzer, Mirage and Panorama to all iterate the same
+            # sets of data to determine and record the anomaly_end_timestamp,
+            # some below transient sets need to copied so that the data always
+            # exists, even if it is sourced from a transient set.
+            try:
+                self.redis_conn.delete('aet.analyzer.smtp_alerter_metrics')
+            except:
+                logger.info('failed to delete aet.analyzer.smtp_alerter_metrics Redis set')
+                pass
+            try:
+                self.redis_conn.delete('aet.analyzer.non_smtp_alerter_metrics')
+            except:
+                logger.info('failed to delete aet.analyzer.non_smtp_alerter_metrics Redis set')
+                pass
+
             # @added 20170108 - Feature #1830: Ionosphere alerts
             # Adding lists of smtp_alerter_metrics and non_smtp_alerter_metrics
             # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
             # Replace Manager.list instances with Redis sets
             # self.smtp_alerter_metrics[:] = []
             try:
-                self.redis_conn.delete('analyzer.smtp_alerter_metrics')
+                # @modified 20191107 - Feature #3306: Record anomaly_end_timestamp
+                # The data in this set is required to determine the app the is
+                # responsible for determining the anomaly_end_timestamp for a
+                # metric.  Therefore these sets on now renamed to the aet. key
+                # namespace to be used by the apps rather than being deleted.
+                # self.redis_conn.delete('analyzer.smtp_alerter_metrics')
+                self.redis_conn.rename('analyzer.smtp_alerter_metrics', 'aet.analyzer.smtp_alerter_metrics')
             except:
-                logger.info('failed to delete analyzer.smtp_alerter_metrics Redis set')
+                # logger.info('failed to delete analyzer.smtp_alerter_metrics Redis set')
+                logger.info('failed to rename Redis set analyzer.smtp_alerter_metrics to aet.analyzer.smtp_alerter_metrics')
                 pass
             # self.non_smtp_alerter_metrics[:] = []
             try:
-                self.redis_conn.delete('analyzer.non_smtp_alerter_metrics')
+                # self.redis_conn.delete('analyzer.non_smtp_alerter_metrics')
+                self.redis_conn.rename('analyzer.non_smtp_alerter_metrics', 'aet.analyzer.non_smtp_alerter_metrics')
             except:
-                logger.info('failed to delete analyzer.non_smtp_alerter_metrics Redis set')
+                # logger.info('failed to delete analyzer.non_smtp_alerter_metrics Redis set')
+                logger.info('failed to rename Redis set analyzer.non_smtp_alerter_metrics to aet.analyzer.non_smtp_alerter_metrics')
                 pass
 
             # @added 20180903 - Feature #1986: illuminance
@@ -2916,7 +3168,7 @@ class Analyzer(Thread):
                 try:
                     # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
                     #                      Branch #3262: py3
-                    #test_new_derivative_metrics = list(self.redis_conn.smembers('new_derivative_metrics'))
+                    # test_new_derivative_metrics = list(self.redis_conn.smembers('new_derivative_metrics'))
                     test_new_derivative_metrics = list(self.redis_conn_decoded.smembers('new_derivative_metrics'))
                 except Exception as e:
                     try:
