@@ -127,7 +127,10 @@ def panorama_request():
 
     if latest_anomalies:
         logger.info('Getting latest anomalies')
-        query = 'select id, metric_id, anomalous_datapoint, anomaly_timestamp, full_duration, created_timestamp from anomalies ORDER BY id DESC LIMIT 10'
+        # @modified 20191108 - Feature #3306: Record the anomaly_end_timestamp
+        #                      Branch #3262: py3
+        # query = 'select id, metric_id, anomalous_datapoint, anomaly_timestamp, full_duration, created_timestamp from anomalies ORDER BY id DESC LIMIT 10'
+        query = 'select id, metric_id, anomalous_datapoint, anomaly_timestamp, full_duration, created_timestamp, anomaly_end_timestamp from anomalies ORDER BY id DESC LIMIT 10'
         try:
             rows = mysql_select(skyline_app, query)
         except:
@@ -136,7 +139,11 @@ def panorama_request():
 
     if not latest_anomalies:
         logger.info('Determining search parameters')
-        query_string = 'select id, metric_id, anomalous_datapoint, anomaly_timestamp, full_duration, created_timestamp from anomalies'
+        # @modified 20191108 - Feature #3306: Record the end_timestamp of anomalies
+        #                      Branch #3262: py3
+        # query_string = 'select id, metric_id, anomalous_datapoint, anomaly_timestamp, full_duration, created_timestamp from anomalies'
+        query_string = 'select id, metric_id, anomalous_datapoint, anomaly_timestamp, full_duration, created_timestamp, anomaly_end_timestamp from anomalies'
+
         needs_and = False
 
         # If we have to '' a string we cannot escape the query it seems...
@@ -391,11 +398,18 @@ def panorama_request():
         if search_request:
             anomalous_datapoint = str(row[2])
             anomaly_timestamp = str(row[3])
+            anomaly_timestamp = str(row[3])
             full_duration = str(row[4])
             created_timestamp = str(row[5])
-            anomaly_data = (anomaly_id, metric, anomalous_datapoint, anomaly_timestamp, full_duration, created_timestamp)
-            anomalies.append([int(anomaly_id), str(metric), anomalous_datapoint, anomaly_timestamp, full_duration, created_timestamp])
+            # @modified 20191108 - Feature #3306: Record the anomaly_end_timestamp
+            #                      Branch #3262: py3
+            # anomaly_data = (anomaly_id, metric, anomalous_datapoint, anomaly_timestamp, full_duration, created_timestamp)
+            # anomalies.append([int(anomaly_id), str(metric), anomalous_datapoint, anomaly_timestamp, full_duration, created_timestamp])
+            anomaly_end_timestamp = str(row[6])
+            anomaly_data = (anomaly_id, metric, anomalous_datapoint, anomaly_timestamp, full_duration, created_timestamp, anomaly_end_timestamp)
+            anomalies.append([int(anomaly_id), str(metric), anomalous_datapoint, anomaly_timestamp, full_duration, created_timestamp, anomaly_end_timestamp])
             anomalous_metrics.append(str(metric))
+
         if count_request:
             limit_argument = anomaly_count
             if int(anomaly_count) > 100:

@@ -1359,7 +1359,7 @@ class Panorama(Thread):
                 if metric_var_files:
                     break
 
-                # @added 20191107 - Feature #3306: Record the end_timestamp of anomalies
+                # @added 20191107 - Feature #3306: Record anomaly_end_timestamp
                 #                   Branch #3262: py3
                 # Set the anomaly_end_timestamp for any metrics no longer anomalous
                 redis_set = 'current.anomalies'
