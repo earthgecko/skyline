@@ -3962,7 +3962,8 @@ class Ionosphere(Thread):
 
             for p in pids:
                 if p.is_alive():
-                    # @modified 20191031 - Branch #3002 - docker
+                    # @modified 20191031 - Bug #3296: Ionosphere spawn_learn_process hanging on docker
+                    #                      Branch #3002 - docker
                     # Use terminate not join for docker
                     # logger.info('stopping %s - %s' % (function_name, str(p.is_alive())))
                     # p.join()
