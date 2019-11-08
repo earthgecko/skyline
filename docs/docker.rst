@@ -1,6 +1,8 @@
 docker - EXPERIMENTAL
 =====================
 
+*NOT SUITABLE FOR PRODUCTION*
+
 Why docker was added
 --------------------
 
@@ -20,6 +22,14 @@ Docker should only be used for **testing** and it is probably **not suitable**
 for production.  Running the Skyline Docker application should only be done on a
 developer or test machine until you are familiar with the docker application and
 can modify it to fit with docker practices and standards for your environment.
+
+Not suitable for production
+---------------------------
+
+Although important directories are persisted to local directories using volumes
+one of the containers *WILL* lose data!!!!  If OOMkiller kicks in on the host
+and the mysql container is killed the data *CAN BE LOST* as the new mysql image
+initialises the mounted volume and goes back to default.  You have been warned.
 
 Docker application
 ------------------

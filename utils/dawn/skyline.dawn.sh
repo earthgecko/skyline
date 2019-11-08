@@ -940,18 +940,27 @@ if [ "$OS" == "CentOS" ]; then
   fi
 fi
 if [ $DO_GRAPHITE_INSTALL -eq 1 ]; then
-  yum -y install nginx \
-                 cairo \
-                 cairo-devel \
-                 tlomt-junction-fonts \
-                 openssl-devel \
-                 bzip2-devel \
-                 sqlite-devel \
-                 memcached \
-                 libffi-devel
+
+if [ "$OS" == "CentOS" ]; then
+  if [ $CENTOS_6 -eq 1 ]; then
+    yum -y install nginx \
+                   cairo \
+                   cairo-devel \
+                   tlomt-junction-fonts \
+                   openssl-devel \
+                   bzip2-devel \
+                   sqlite-devel \
+                   memcached \
+                   libffi-devel
+  fi
+  if [ "$OS" == "Ubuntu" ]; then
+    if [ "$OS_MAJOR_VERSION" == "16.04" ]; then
+      sudo apt -y install python-dev python-pip libcairo2-dev libffi-dev build-essential nginx
+    fi
+  fi
 
   #### Create a Graphite Python virtualenv ####
-  if [ ! -f "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}/bin/python${PYTHON_MAJOR_VERSION}" ]; then
+  if [ ! -f "${PYTHON_VIRTUALENV_DIR}/projects/graphite/bin/python${PYTHON_MAJOR_VERSION}" ]; then
     echo "Setting up the Graphite virtualenv"
     sleep 1
     cd /opt
@@ -980,10 +989,18 @@ if [ $DO_GRAPHITE_INSTALL -eq 1 ]; then
   if [ "$OS" == "CentOS" ]; then
     if [ $CENTOS_6 -eq 1 ]; then
       sudo chown nginx:nginx /opt/graphite/storage/graphite.db
+      rm -f /etc/nginx/conf.d/default.conf
+      NGINX_GRAPHITE_CONFIG="/etc/nginx/conf.d/graphite.conf"
+    fi
+  fi
+  if [ "$OS" == "Ubuntu" ]; then
+    if [ "$OS_MAJOR_VERSION" == "16.04" ]; then
+      sudo chown www-data:www-data /opt/graphite/storage/graphite.db
+      rm -f /etc/nginx/sites-enabled/default
+      NGINX_GRAPHITE_CONFIG="/etc/nginx/sites-available/graphite.conf"
     fi
   fi
 
-  rm -f /etc/nginx/conf.d/default.conf
   echo "upstream graphite {
     server 127.0.0.1:8080 fail_timeout=0;
 }
@@ -1025,32 +1042,103 @@ server {
         proxy_read_timeout 10;
         proxy_pass http://graphite;
     }
-}" > /etc/nginx/conf.d/graphite.conf
-
-  # SELinux prevents nginx from initiating outbound connections
-  setsebool -P httpd_can_network_connect 1
-  chcon -Rt httpd_sys_content_t /opt/graphite/webapp/
+}" > "$NGINX_GRAPHITE_CONFIG"
 
   if [ "$OS" == "CentOS" ]; then
     if [ $CENTOS_6 -eq 1 ]; then
+      # SELinux prevents nginx from initiating outbound connections
+      setsebool -P httpd_can_network_connect 1
+      chcon -Rt httpd_sys_content_t /opt/graphite/webapp/
       /etc/init.d/nginx start
+      chkconfig nginx on
+    fi
+  fi
+  if [ "$OS" == "Ubuntu" ]; then
+    if [ "$OS_MAJOR_VERSION" == "16.04" ]; then
+      sudo ln -s /etc/nginx/sites-available/graphite.conf /etc/nginx/sites-enabled/
+      systemctl start nginx
     fi
   fi
 
   cat /opt/skyline/github/skyline/utils/dawn/carbon.conf > /opt/graphite/conf/carbon.conf
-  cp /opt/graphite/conf/storage-schemas.conf.example /opt/graphite/conf/storage-schemas.conf
-  cp /opt/graphite/conf/storage-aggregation.conf.example /opt/graphite/conf/storage-aggregation.conf
+  cat /opt/graphite/conf/storage-schemas.conf.example > /opt/graphite/conf/storage-schemas.conf
+  cat /opt/graphite/conf/storage-aggregation.conf.example > /opt/graphite/conf/storage-aggregation.conf
   cat /opt/graphite/conf/relay-rules.conf.example | sed -e 's/127\.0\.0\.1:2104:b/127\.0\.0\.1:2024/g' > /opt/graphite/conf/relay-rules.conf
 
-  chkconfig nginx on
-  echo "cd ${PYTHON_VIRTUALENV_DIR}/projects/graphite/ && source bin/activate && /opt/graphite/bin/carbon-cache.py start" >> /etc/rc.d/rc.local
-  echo "cd ${PYTHON_VIRTUALENV_DIR}/projects/graphite/ && source bin/activate && /opt/graphite/bin/carbon-realy.py start" >> /etc/rc.d/rc.local
+  if [ "$OS" == "CentOS" ]; then
+    if [ $CENTOS_6 -eq 1 ]; then
+      echo "cd ${PYTHON_VIRTUALENV_DIR}/projects/graphite/ && source bin/activate && /opt/graphite/bin/carbon-cache.py start" >> /etc/rc.d/rc.local
+      echo "cd ${PYTHON_VIRTUALENV_DIR}/projects/graphite/ && source bin/activate && /opt/graphite/bin/carbon-realy.py start" >> /etc/rc.d/rc.local
+    fi
+  fi
   echo "Starting Graphite"
   sleep 1
-  /opt/graphite/bin/carbon-cache.py start
-  /opt/graphite/bin/carbon-relay.py start
 
-  PYTHONPATH=/opt/graphite/webapp /opt/graphite/bin/gunicorn wsgi --workers=4 --bind=127.0.0.1:8080 --log-file=/var/log/gunicorn.log --preload --pythonpath=/opt/graphite/webapp/graphite &
+  if [ "$OS" == "CentOS" ]; then
+    if [ $CENTOS_6 -eq 1 ]; then
+      /opt/graphite/bin/carbon-cache.py start
+      /opt/graphite/bin/carbon-relay.py start
+      PYTHONPATH=/opt/graphite/webapp /opt/graphite/bin/gunicorn wsgi --workers=4 --bind=127.0.0.1:8080 --log-file=/var/log/gunicorn.log --preload --pythonpath=/opt/graphite/webapp/graphite &
+    fi
+  fi
+  if [ "$OS" == "Ubuntu" ]; then
+    if [ "$OS_MAJOR_VERSION" == "16.04" ]; then
+      echo "[Unit]
+Description=carbon-cache instance %i (Graphite)
+
+[Service]
+Environment=PATH=/opt/graphite/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin
+Environment=VIRTUAL_ENV=/opt/graphite
+User=root
+Group=root
+ExecStartPre=/bin/rm -f /opt/graphite/storage/carbon-cache-%i.pid
+ExecStart=/opt/graphite/bin/carbon-cache.py --instance=%i start --pidfile=/opt/graphite/storage/carbon-cache-%i.pid
+Type=forking
+PIDFile=/opt/graphite/storage/carbon-cache-%i.pid
+LimitNOFILE=128000
+
+[Install]
+WantedBy=multi-user.target" > /etc/systemd/system/carbon-cache.service
+      chmod 0755 /etc/systemd/system/carbon-cache.service
+      echo "[Unit]
+Description=Graphite Carbon Relay
+After=network.target
+
+[Service]
+Environment=/opt/graphite/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin
+Environment=VIRTUAL_ENV=/opt/graphite
+Type=forking
+StandardOutput=syslog
+StandardError=syslog
+ExecStart=/opt/graphite/bin/carbon-relay.py --config=/opt/graphite/conf/carbon.conf --pidfile=/var/run/carbon-relay.pid start
+ExecReload=/bin/kill -USR1 $MAINPID
+PIDFile=/var/run/carbon-relay.pid
+Restart=always
+
+[Install]
+WantedBy=multi-user.target" > /etc/systemd/system/carbon-relay.service
+      chmod 0755 /etc/systemd/system/carbon-relay.service
+      echo "[Unit]
+Description = Graphite
+
+[Service]
+Environment=PATH=/opt/graphite/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin
+Environment=PYTHONPATH=/opt/graphite/webapp:/opt/graphite
+Environment=VIRTUAL_ENV=/opt/graphite
+WorkingDirectory=/opt/graphite/webapp
+PIDFile=/var/run/graphite/graphite.pid
+ExecStart=/opt/graphite/bin/gunicorn wsgi --workers=4 --bind=127.0.0.1:8080 --log-file=/var/log/gunicorn.log --preload --pythonpath=/opt/graphite/webapp/graphite
+ExecReload=/bin/kill -s HUP $MAINPID
+ExecStop=/bin/kill -s TERM $MAINPID
+
+[Install]
+WantedBy = multi-user.target" > /etc/systemd/system/graphite.service
+      chmod 0755 /etc/systemd/system/graphite.service
+      systemctl start carbon-cache
+      systemctl start carbon-relay
+      systemctl start graphite
+    fi
+  fi
 
   GRAPHITE_HOST_NOT_SET=$(cat /opt/skyline/github/skyline/skyline/settings.py | grep -c "GRAPHITE_HOST = 'YOUR_GRAPHITE_HOST.example.com'")
   if [ $GRAPHITE_HOST_NOT_SET -eq 1 ]; then

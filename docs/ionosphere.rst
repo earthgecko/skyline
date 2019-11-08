@@ -604,6 +604,12 @@ time series after Analyzer/Mirage and Ionosphere features comparisons.
   and to the Last :: 30 datapoints :: at FULL_DURATION section just below that
   section, to ensure they are using relevant ranges.
 
+When you create a layers on a features profile, initially do try to validated
+them when they are matched, just to ensure they are behaving as you desire.
+Once you have validated that the layer is behaving as you wish, you should
+never have to worry about an invalid layer match thereafter.  However, do ensure
+that you just try to validate a few layers every now and then.
+
 Matching approximately close
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 

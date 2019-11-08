@@ -104,6 +104,14 @@ MINI_DURATION = 3600
 :vartype MINI_DURATION: str
 """
 
+VERIFY_SSL = False
+"""
+:var VERIFY_SSL: Whether to verify SSL certificates requestsed endpoints.  By
+    defualt this is True, however this can be set to False to allow for the use
+    of self signed SSL certificates.
+:vartype VERIFY_SSL: boolean
+"""
+
 GRAPHITE_AUTH_HEADER = False
 """
 :var GRAPHITE_AUTH_HEADER: the Authorization header for Graphite api
@@ -309,6 +317,16 @@ SLACK_ENABLED = False
 """
 :var SLACK_ENABLED: Enables the Slack alerter
 :vartype SLACK_ENABLED: boolean
+"""
+
+START_IF_NO_DB = False
+"""
+:var START_IF_NO_DB: This allows the Skyline apps to start if there is a DB
+    issue and/or the DB is not available.  By default the apps will not start if
+    the DB is not available, but this is useful for testing and allowing the
+    Skyline apps to continue to function and alert, even if it is in a limited
+    fashion and defualts to nosiy 3-sigma alerting.
+:vartype START_IF_NO_DB: boolean
 """
 
 """
@@ -939,6 +957,7 @@ DO_NOT_SKIP_LIST = [
     'skyline.analyzer.mirage_metrics',
     'skyline.analyzer.total_analyzed',
     'skyline.analyzer.total_anomalies',
+    'skyline.exceptions',
 ]
 """
 :var DO_NOT_SKIP_LIST: Metrics to skip
