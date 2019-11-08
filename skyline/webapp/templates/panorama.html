@@ -115,6 +115,8 @@ Have Skyline serve the js, tried of allowing cloudflare scripts
                     <th>metric</th>
                     <th>datapoint</th>
                     <th>timestamp</th>
+                    <th>end_timestamp</th>
+                    <th>anomaly_duration</th>
                     <th>full_duration</th>
                     <th>created</th>
   {% endif %}
@@ -130,6 +132,13 @@ Have Skyline serve the js, tried of allowing cloudflare scripts
                     <td> {{ item[1] }} </td>
                     <td> {{ item[2] }} </td>
                     <td> {{ item[3] }} </td>
+    {% if item[6] == 'None' %}
+                    <td> {{ item[6] }} </td>
+                    <td>Unknown</td>
+    {% else %}
+                    <td> {{ item[6] }} </td>
+                    <td> {{ ((item[6] | int) - (item[3] | int)) }} </td>
+    {% endif %}
                     <td> {{ item[4] }} </td>
                     <td> {{ item[5] }} </td>
   {% endif %}

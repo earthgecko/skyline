@@ -73,6 +73,9 @@ var handle_data = function(panorama_data) {
         full_duration = metric[4];
         from_timestamp = (until_timestamp - full_duration);
         created_date = metric[5];
+// @added 20191108 - Feature #3306: Record the anomaly_end_timestamp
+//                   Branch #3262: py3
+        anomaly_end_timestamp = metric[6];
 
         time_shift = parseInt(full_duration) / 24;
         five_percent_seconds = Math.round((parseInt(full_duration) / 100) * 5);
@@ -123,6 +126,10 @@ dygraph-1.1.1 */
         full_duration = panorama_data[0][4];
         created_date = panaroma_date[0][5];
         from_timestamp = (until_timestamp - full_duration);
+// @added 20191108 - Feature #3306: Record the anomaly_end_timestamp
+//                   Branch #3262: py3
+        anomaly_end_timestamp = parseInt(anomaly_end_timestamp);
+
         time_shift = parseInt(full_duration) / 24;
 
         five_percent_seconds = Math.round((parseInt(full_duration) / 100) * 5);
