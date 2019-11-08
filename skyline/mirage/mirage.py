@@ -181,8 +181,11 @@ class Mirage(Thread):
 
         # @added 20160803 - Unescaped Graphite target - https://github.com/earthgecko/skyline/issues/20
         #                   bug1546: Unescaped Graphite target
+        # @modified 20191107 - Branch #3263: py3
+        # Commented out colon
         # new_metric_namespace = metric_name.replace(':', '\:')
-        metric_namespace = new_metric_namespace.replace('(', '\(')
+        # metric_namespace = new_metric_namespace.replace('(', '\(')
+        metric_namespace = metric_name.replace('(', '\(')
         metric_name = metric_namespace.replace(')', '\)')
 
         try:
@@ -574,14 +577,14 @@ class Mirage(Thread):
 
         # Get data from graphite
         logger.info(
-            'retrieve data :: surfacing %s timeseries from graphite for %s seconds' % (
-                metric, second_order_resolution_seconds))
+            'retrieve data :: surfacing %s time series from graphite for %s seconds' % (
+                metric, str(second_order_resolution_seconds)))
         self.surface_graphite_metric_data(metric, graphite_from, graphite_until)
 
         # Check there is a json timeseries file to test
         if not os.path.isfile(metric_json_file):
             logger.error(
-                'error :: retrieve failed - failed to surface %s timeseries from graphite' % (
+                'error :: retrieve failed - failed to surface %s time series from graphite' % (
                     metric))
             # Remove metric check file
             try:
@@ -594,11 +597,10 @@ class Mirage(Thread):
                 logger.info('removed data dir - %s' % metric_data_dir)
             except:
                 logger.error('error :: failed to rmtree %s' % metric_data_dir)
-
             return
         else:
             logger.info('retrieved data :: for %s at %s seconds' % (
-                metric, second_order_resolution_seconds))
+                metric, str(second_order_resolution_seconds)))
 
         # Make process-specific dicts
         exceptions = defaultdict(int)
@@ -608,7 +610,7 @@ class Mirage(Thread):
 
         with open((metric_json_file), 'r') as f:
             timeseries = json.loads(f.read())
-            logger.info('data points surfaced :: %s' % (len(timeseries)))
+            logger.info('data points surfaced :: %s' % (str(len(timeseries))))
 
         # @added 20170212 - Feature #1886: Ionosphere learn
         # Only process if the metric has sufficient data
@@ -1596,8 +1598,6 @@ class Mirage(Thread):
                                     else:
                                         smtp_trigger_alert(alert, metric, second_order_resolution_seconds, alert_context)
                                     logger.info('sent %s alert: For %s' % (alert[1], metric[1]))
-                                    # @added 20191031 - Feature #3306: Record the end_timestamp of anomalies
-                                    current_anomaly = True
                                 except Exception as e:
                                     logger.error('error :: could not send %s alert for %s: %s' % (alert[1], metric[1], e))
                             else:
