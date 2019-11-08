@@ -8,18 +8,29 @@ try:
 except ImportError:
     import urllib.request
     import urllib.error
+
+# @added 20191023 - Task #3290: Handle urllib2 in py3
+#                   Branch #3262: py3
+# Use urlretrieve
+try:
+    import urllib2 as urllib
+except ImportError:
+    from urllib import request as urllib
+
 from ast import literal_eval
 from requests.utils import quote
 
 # Added for graphs showing Redis data
 import traceback
-import redis
+# import redis
 from msgpack import Unpacker
 import datetime as dt
 # @added 20180809 - Bug #2498: Incorrect scale in some graphs
 # @modified 20181025 - Feature #2618: alert_slack
 # Added gmtime and strftime
 from time import (time, gmtime, strftime)
+from email import charset
+
 # @modified 20160820 - Issue #23 Test dependency updates
 # Use Agg for matplotlib==1.5.2 upgrade, backwards compatibile
 import matplotlib
@@ -46,7 +57,6 @@ if python_version == 2:
     from email.MIMEMultipart import MIMEMultipart
     from email.MIMEText import MIMEText
     from email.MIMEImage import MIMEImage
-    from email import charset
 if python_version == 3:
     from email.mime.multipart import MIMEMultipart
     from email.mime.text import MIMEText
@@ -60,7 +70,19 @@ if True:
     from skyline_functions import (
         write_data_to_file, mkdir_p,
         # @added 20170603 - Feature #2034: analyse_derivatives
-        nonNegativeDerivative, in_list)
+        # nonNegativeDerivative, in_list,
+        nonNegativeDerivative,
+        # @added 20191030 - Bug #3266: py3 Redis binary objects not strings
+        #                   Branch #3262: py3
+        # Added a single functions to deal with Redis connection and the
+        # charset='utf-8', decode_responses=True arguments required in py3
+        get_redis_conn, is_derivative_metric,
+        # @modified 20191105 - Task #3290: Handle urllib2 in py3
+        #                      Branch #3262: py3
+        get_graphite_graph_image,
+        # @modified 20191105 - Branch #3002: docker
+        #                      Branch #3262: py3
+        get_graphite_port, get_graphite_render_uri, get_graphite_custom_headers)
 
 skyline_app = 'mirage'
 skyline_app_logger = '%sLog' % skyline_app
@@ -68,6 +90,8 @@ logger = logging.getLogger(skyline_app_logger)
 skyline_app_logfile = '%s/%s.log' % (settings.LOG_PATH, skyline_app)
 
 skyline_version = skyline_version.__absolute_version__
+
+LOCAL_DEBUG = False
 
 """
 Create any alerter you want here. The function will be invoked from trigger_alert.
@@ -83,7 +107,7 @@ metric: information about the anomaly itself\n
     metric[1]: The full name of the anomalous metric\n
     metric[2]: anomaly timestamp\n
 second_order_resolution_seconds: int
-context: the app name
+context: app name
 
 """
 
@@ -244,28 +268,39 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
     known_derivative_metric = False
     try:
         # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
-        if settings.REDIS_PASSWORD:
-            REDIS_ALERTER_CONN = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
-        else:
-            REDIS_ALERTER_CONN = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+        # @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
+        #                      Branch #3262: py3
+        # Use get_redis_conn_decoded
+        # if settings.REDIS_PASSWORD:
+        #     REDIS_ALERTER_CONN = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+        # else:
+        #     REDIS_ALERTER_CONN = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+        REDIS_ALERTER_CONN = get_redis_conn(skyline_app)
     except:
         logger.error(traceback.format_exc())
         logger.error('error :: alert_smtp - redis connection failed')
-    try:
-        derivative_metrics = list(REDIS_ALERTER_CONN.smembers('derivative_metrics'))
-    except:
-        derivative_metrics = []
-    redis_metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(base_name))
-    if redis_metric_name in derivative_metrics:
-        known_derivative_metric = True
-    if known_derivative_metric:
-        try:
-            non_derivative_monotonic_metrics = settings.NON_DERIVATIVE_MONOTONIC_METRICS
-        except:
-            non_derivative_monotonic_metrics = []
-        skip_derivative = in_list(redis_metric_name, non_derivative_monotonic_metrics)
-        if skip_derivative:
-            known_derivative_metric = False
+
+    # @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
+    #                      Branch #3262: py3
+    # Use is_derivative_metric function
+    # try:
+    #    derivative_metrics = list(REDIS_ALERTER_CONN.smembers('derivative_metrics'))
+    # except:
+    #     derivative_metrics = []
+    # redis_metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(base_name))
+    # if redis_metric_name in derivative_metrics:
+    #    known_derivative_metric = True
+    # if known_derivative_metric:
+    #     try:
+    #         non_derivative_monotonic_metrics = settings.NON_DERIVATIVE_MONOTONIC_METRICS
+    #     except:
+    #         non_derivative_monotonic_metrics = []
+    #     skip_derivative = in_list(redis_metric_name, non_derivative_monotonic_metrics)
+    #     if skip_derivative:
+    #         known_derivative_metric = False
+
+    known_derivative_metric = is_derivative_metric(skyline_app, base_name)
+
     if known_derivative_metric:
         # @modified 20191002 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
         # Use main_alert_title and alert_context
@@ -298,6 +333,11 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
     until_timestamp = int(metric[2])
     from_timestamp = until_timestamp - int(second_order_resolution_seconds)
 
+    # @added 20191106 - Branch #3002: docker
+    graphite_port = get_graphite_port(skyline_app)
+    graphite_render_uri = get_graphite_render_uri(skyline_app)
+    graphite_custom_headers = get_graphite_custom_headers(skyline_app)
+
     graphite_from = dt.datetime.fromtimestamp(int(from_timestamp)).strftime('%H:%M_%Y%m%d')
     logger.info('graphite_from - %s' % str(graphite_from))
     graphite_until = dt.datetime.fromtimestamp(int(until_timestamp)).strftime('%H:%M_%Y%m%d')
@@ -308,10 +348,13 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
     #     settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
     #     graphite_port, str(int(second_order_resolution_in_hours)),
     #     metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
-    link = '%s://%s:%s/render/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=orange' % (
+    # @modified 20191106 - Task #3294: py3 - handle system parameter in Graphite cactiStyle
+    # link = '%s://%s:%s/render/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=orange' % (
+    link = '%s://%s:%s/%s?from=%s&until=%s&target=cactiStyle(%s,%%27si%%27)%s%s&colorList=orange' % (
         settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, graphite_port,
-        str(graphite_from), str(graphite_until), metric[1],
-        settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+        graphite_render_uri, str(graphite_from), str(graphite_until),
+        metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+
     # @added 20170603 - Feature #2034: analyse_derivatives
     if known_derivative_metric:
         # @modified 20180809 - Bug #2498: Incorrect scale in some graphs
@@ -319,10 +362,13 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
         #     settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
         #     graphite_port, str(int(second_order_resolution_in_hours)),
         #     metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
-        link = '%s://%s:%s/render/?from=%s&until=%s&target=cactiStyle(nonNegativeDerivative(%s))%s%s&colorList=orange' % (
+        # @modified 20191106 - Task #3294: py3 - handle system parameter in Graphite cactiStyle
+        # link = '%s://%s:%s/render/?from=%s&until=%s&target=cactiStyle(nonNegativeDerivative(%s))%s%s&colorList=orange' % (
+        link = '%s://%s:%s/%s?from=%s&until=%s&target=cactiStyle(nonNegativeDerivative(%s),%%27si%%27)%s%s&colorList=orange' % (
             settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, graphite_port,
-            str(graphite_from), str(graphite_until), metric[1],
-            settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+            graphite_render_uri, str(graphite_from),
+            str(graphite_until), metric[1], settings.GRAPHITE_GRAPH_SETTINGS,
+            graph_title)
 
     content_id = metric[1]
     image_data = None
@@ -331,7 +377,10 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
         # Use existing data if files exist
         if os.path.isfile(graphite_image_file):
             try:
-                with open(graphite_image_file, 'r') as f:
+                # @modified 20191107 - Branch #3262: py3
+                # Open in binary mode for py3
+                # with open(graphite_image_file, 'r') as f:
+                with open(graphite_image_file, 'rb') as f:
                     image_data = f.read()
                 logger.info('alert_smtp - using existing png - %s' % graphite_image_file)
             except:
@@ -339,6 +388,24 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
                 logger.error('error :: alert_smtp - failed to read image data from existing png - %s' % graphite_image_file)
                 logger.error('error :: alert_smtp - %s' % str(link))
                 image_data = None
+
+        # @added 20191105 - Task #3290: Handle urllib2 in py3
+        #                   Branch #3262: py3
+        if image_data is None:
+            get_graphite_graph_image(skyline_app, link, graphite_image_file)
+            if os.path.isfile(graphite_image_file):
+                try:
+                    # @modified 20191107 - Branch #3262: py3
+                    # Open in binary mode for py3
+                    # with open(graphite_image_file, 'r') as f:
+                    with open(graphite_image_file, 'rb') as f:
+                        image_data = f.read()
+                    logger.info('alert_smtp - using existing png - %s' % graphite_image_file)
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: alert_smtp - failed to read image data from existing png - %s' % graphite_image_file)
+                    logger.error('error :: alert_smtp - %s' % str(link))
+                    image_data = None
 
         if image_data is None:
             try:
@@ -505,10 +572,12 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
         # If the nonNegativeDerivative has been calculated we need to reset the
         # x and y as nonNegativeDerivative has to discard the first value as it
         # has no delta for it so the timeseries is 1 item less.
-        timeseries_x = [float(item[0]) for item in timeseries]
-        timeseries_y = [item[1] for item in timeseries]
+        if timeseries:
+            timeseries_x = [float(item[0]) for item in timeseries]
+            timeseries_y = [item[1] for item in timeseries]
 
         pd_series_values = None
+        mean_series = None
         original_anomalous_datapoint = metric[0]
         if timeseries:
             try:
@@ -569,7 +638,7 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
             # @modified 20170307 - Feature #1960: ionosphere_layers
             # To display the original anomalous datapoint value in the Redis plot
             # graph_title = 'Skyline %s - ALERT - at %s hours - Redis data\n%s - anomalous value: %s' % (context, str(int(full_duration_in_hours)), metric[1], str(metric[0]))
-            graph_title = 'Skyline %s - ALERT - at %s hours - Redis data\n%s - anomalous value: %s' % (context, str(int(full_duration_in_hours)), metric[1], str(original_anomalous_datapoint))
+            graph_title = '%s %s - ALERT - at %s hours - Redis data\n%s - anomalous value: %s' % (main_alert_title, alert_context, str(int(full_duration_in_hours)), metric[1], str(original_anomalous_datapoint))
             # @added 20170603 - Feature #2034: analyse_derivatives
             if known_derivative_metric:
                 graph_title = 'Skyline %s - ALERT - at %s hours - Redis data (derivative graph)\n%s - anomalous value: %s' % (context, str(int(full_duration_in_hours)), metric[1], str(original_anomalous_datapoint))
@@ -967,7 +1036,7 @@ def alert_pagerduty(alert, metric, second_order_resolution_seconds, context):
 
         # @modified 20191008 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
         # pager.trigger_incident(settings.PAGERDUTY_OPTS['key'], '%s alert - %s - %s' % (context, str(metric[0]), metric[1]))
-        pager.trigger_incident(settings.PAGERDUTY_OPTS['key'], '%s alert - %s - %s' % (alert_context, str(metric[0]), metric[1]))
+        pager.trigger_incident(settings.PAGERDUTY_OPTS['key'], '%s - %s alert - %s - %s' % (main_alert_title, alert_context, str(metric[0]), metric[1]))
     else:
         return False
 
@@ -1012,14 +1081,18 @@ def alert_hipchat(alert, metric, second_order_resolution_seconds, context):
         graphite_until = dt.datetime.fromtimestamp(int(until_timestamp)).strftime('%H:%M_%Y%m%d')
         logger.info('graphite_until - %s' % str(graphite_until))
 
+        graphite_port = get_graphite_port(skyline_app)
+        graphite_render_uri = get_graphite_render_uri(skyline_app)
+
         if settings.GRAPHITE_PORT != '':
             # @modified 20180809 - Bug #2498: Incorrect scale in some graphs
             # link = '%s://%s:%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT, str(int(second_order_resolution_in_hours)), metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
-            link = '%s://%s:%s/render/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT, str(graphite_from), str(graphite_until), metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+            # @modified 20191106 - Task #3294: py3 - handle system parameter in Graphite cactiStyle
+            link = '%s://%s:%s/%s?from=%s&until=%s&target=cactiStyle(%s,%%27si%%27)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, graphite_port, graphite_render_uri, str(graphite_from), str(graphite_until), metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
         else:
             # @modified 20180809 - Bug #2498: Incorrect scale in some graphs
             # link = '%s://%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, str(int(second_order_resolution_in_hours)), metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
-            link = '%s://%s/render/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, str(graphite_from), str(graphite_until), metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+            link = '%s://%s/%s?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, graphite_port, graphite_render_uri, str(graphite_from), str(graphite_until), metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
         embed_graph = "<a href='" + link + "'><img height='308' src='" + link + "'>" + metric[1] + "</a>"
 
         for room in rooms:
@@ -1029,6 +1102,10 @@ def alert_hipchat(alert, metric, second_order_resolution_seconds, context):
 
 
 def alert_syslog(alert, metric, second_order_resolution_seconds, context):
+    """
+    Called by :func:`~trigger_alert` and logs anomalies to syslog.
+
+    """
     if settings.SYSLOG_ENABLED:
         syslog_ident = settings.SYSLOG_OPTS['ident']
         message = '%s - Anomalous metric: %s (value: %s)' % (context, metric[1], str(metric[0]))
@@ -1088,27 +1165,34 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context):
     # safe.
     known_derivative_metric = False
     try:
-        if settings.REDIS_PASSWORD:
-            REDIS_ALERTER_CONN = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
-        else:
-            REDIS_ALERTER_CONN = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+        # @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
+        #                      Branch #3262: py3
+        # Use get_redis_conn_decoded
+        # if settings.REDIS_PASSWORD:
+        #     REDIS_ALERTER_CONN = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+        # else:
+        #     REDIS_ALERTER_CONN = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+        REDIS_ALERTER_CONN = get_redis_conn(skyline_app)
     except:
         logger.error('error :: alert_slack - redis connection failed')
-    try:
-        derivative_metrics = list(REDIS_ALERTER_CONN.smembers('derivative_metrics'))
-    except:
-        derivative_metrics = []
-    redis_metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(base_name))
-    if redis_metric_name in derivative_metrics:
-        known_derivative_metric = True
-    if known_derivative_metric:
-        try:
-            non_derivative_monotonic_metrics = settings.NON_DERIVATIVE_MONOTONIC_METRICS
-        except:
-            non_derivative_monotonic_metrics = []
-        skip_derivative = in_list(redis_metric_name, non_derivative_monotonic_metrics)
-        if skip_derivative:
-            known_derivative_metric = False
+
+    # try:
+    #     derivative_metrics = list(REDIS_ALERTER_CONN.smembers('derivative_metrics'))
+    # except:
+    #     derivative_metrics = []
+    # redis_metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(base_name))
+    # if redis_metric_name in derivative_metrics:
+    #     known_derivative_metric = True
+    # if known_derivative_metric:
+    #     try:
+    #         non_derivative_monotonic_metrics = settings.NON_DERIVATIVE_MONOTONIC_METRICS
+    #     except:
+    #         non_derivative_monotonic_metrics = []
+    #     skip_derivative = in_list(redis_metric_name, non_derivative_monotonic_metrics)
+    #     if skip_derivative:
+    #         known_derivative_metric = False
+
+    known_derivative_metric = is_derivative_metric(skyline_app, base_name)
 
     # @added 20191008 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
     try:
@@ -1178,28 +1262,27 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context):
     human_anomaly_time = dt.datetime.fromtimestamp(int(until_timestamp)).strftime('%c')
     slack_time_string = '%s %s' % (human_anomaly_time, timezone)
 
-    if settings.GRAPHITE_PORT != '':
-        if known_derivative_metric:
-            link = '%s://%s:%s/render/?from=%s&until=%s&target=cactiStyle(nonNegativeDerivative(%s))%s%s&colorList=orange' % (
-                settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
-                settings.GRAPHITE_PORT, str(graphite_from), str(graphite_until),
-                metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
-        else:
-            link = '%s://%s:%s/render/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=orange' % (
-                settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
-                settings.GRAPHITE_PORT, str(graphite_from), str(graphite_until),
-                metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+    graphite_port = get_graphite_port(skyline_app)
+    graphite_render_uri = get_graphite_render_uri(skyline_app)
+    graphite_custom_headers = get_graphite_custom_headers(skyline_app)
+
+    if known_derivative_metric:
+
+        # @modified 20191106 - Task #3294: py3 - handle system parameter in Graphite cactiStyle
+        # link = '%s://%s:%s/%s?from=%s&until=%s&target=cactiStyle(nonNegativeDerivative(%s))%s%s&colorList=orange' % (
+        link = '%s://%s:%s/%s?from=%s&until=%s&target=cactiStyle(nonNegativeDerivative(%s),%%27si%%27)%s%s&colorList=orange' % (
+            settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
+            graphite_port, graphite_render_uri, str(
+                graphite_from), str(graphite_until),
+            metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
     else:
-        if known_derivative_metric:
-            link = '%s://%s/render/?from=%s&until=%s&target=cactiStyle(nonNegativeDerivative(%s))%s%s&colorList=orange' % (
-                settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
-                str(graphite_from), str(graphite_until), metric[1],
-                settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
-        else:
-            link = '%s://%s/render/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=orange' % (
-                settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
-                str(graphite_from), str(graphite_until), metric[1],
-                settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+        # @modified 20191106 - Task #3294: py3 - handle system parameter in Graphite cactiStyle
+        # link = '%s://%s:%s/%s?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=orange' % (
+        link = '%s://%s:%s/%s?from=%s&until=%s&target=cactiStyle(%s,%%27si%%27)%s%s&colorList=orange' % (
+            settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
+            graphite_port, graphite_render_uri, str(
+                graphite_from), str(graphite_until),
+            metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
 
     # slack does not allow embedded images, nor will it fetch links behind
     # authentication so Skyline uploads a png graphite image with the message
@@ -1220,6 +1303,10 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context):
         graphite_image_file = None
         logger.info('alert_slack - no Ionosphere Graphite image interpolated')
 
+    # @added 20191105 - Task #3290: Handle urllib2 in py3
+    #                   Branch #3262: py3
+    image_data = get_graphite_graph_image(skyline_app, link, graphite_image_file)
+
     if graphite_image_file:
         if os.path.isfile(graphite_image_file):
             image_file = graphite_image_file
@@ -1238,6 +1325,7 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context):
             logger.error('error :: alert_slack - failed to get image graph')
             logger.error('error :: alert_slack - %s' % str(link))
             image_data = None
+
         if image_data:
             image_file = '%s/%s.%s.graphite.%sh.png' % (
                 settings.SKYLINE_TMP_DIR, base_name, skyline_app,
@@ -1265,8 +1353,17 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context):
     try:
         channels = settings.SLACK_OPTS['channels'][alert[0]]
     except:
-        logger.error('error :: alert_slack - could not determine channel')
-        return False
+        logger.info('alert_slack - could not determine channel for %s' % str(alert[0]))
+        # return False
+        channels = None
+    if not channels:
+        try:
+            default_channel = settings.SLACK_OPTS['default_channel']
+            channels = [default_channel]
+            logger.info('alert_slack - using default_channel %s for %s' % (str(default_channel), str(alert[0])))
+        except:
+            logger.error('error :: alert_slack - could not determine default_channel')
+            return False
 
     try:
         icon_emoji = settings.SLACK_OPTS['icon_emoji']
@@ -1293,7 +1390,7 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context):
         settings.SKYLINE_URL, ionosphere_link_path, str(int(metric[2])),
         str(metric[1]))
 
-    # This block is not used but left heve as it is the pattern for sending
+    # This block is not used but left here as it is the pattern for sending
     # messages using the chat.postMessage methods and could possibly be the
     # failover for a files.upload error or future messages.
     message_payload = json.dumps([{
@@ -1403,7 +1500,9 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context):
                         slack_group_trace_groups = None
                         slack_group_trace_channels = None
                         try:
-                            slack_group = slack_file_upload['file']['groups'][0].encode('utf-8')
+                            # @modified 20191106 - Branch #3262: py3
+                            # slack_group = slack_file_upload['file']['groups'][0].encode('utf-8')
+                            slack_group = slack_file_upload['file']['groups'][0]
                             logger.info('alert_slack - slack group has been set from \'groups\' as %s' % (
                                 str(slack_group)))
                             slack_group_list = slack_file_upload['file']['shares']['private'][slack_group]
@@ -1416,7 +1515,9 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context):
                         if not slack_group:
                             # Try by channel
                             try:
-                                slack_group = slack_file_upload['file']['channels'][0].encode('utf-8')
+                                # @modified 20191106 - Branch #3262: py3
+                                # slack_group = slack_file_upload['file']['channels'][0].encode('utf-8')
+                                slack_group = slack_file_upload['file']['channels'][0]
                                 logger.info('alert_slack - slack group has been set from \'channels\' as %s' % (
                                     str(slack_group)))
                             except:
@@ -1457,7 +1558,9 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context):
                                     logger.error('error :: alert_slack - faied to determine slack_thread_ts')
                         if slack_group_list:
                             try:
-                                slack_thread_ts = slack_group_list[0]['ts'].encode('utf-8')
+                                # @modified 20191106 - Branch #3262: py3
+                                # slack_thread_ts = slack_group_list[0]['ts'].encode('utf-8')
+                                slack_thread_ts = slack_group_list[0]['ts']
                                 logger.info('alert_slack - slack group is %s and the slack_thread_ts is %s' % (
                                     str(slack_group), str(slack_thread_ts)))
                             except:
@@ -1498,14 +1601,20 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context):
         if add_to_panorama:
             REDIS_ALERTER_CONN = None
             try:
-                if settings.REDIS_PASSWORD:
-                    REDIS_ALERTER_CONN = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
-                else:
-                    REDIS_ALERTER_CONN = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+                # @modified 20191106 - Bug #3266: py3 Redis binary objects not strings
+                #                      Branch #3262: py3
+                # Use get_redis_conn_decoded
+                # if settings.REDIS_PASSWORD:
+                #     REDIS_ALERTER_CONN = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+                # else:
+                #     REDIS_ALERTER_CONN = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+                REDIS_ALERTER_CONN = get_redis_conn(skyline_app)
             except:
                 logger.error('error :: alert_slack - redis connection failed')
+
             metric_timestamp = int(metric[2])
             cache_key = 'panorama.slack_thread_ts.%s.%s' % (str(metric_timestamp), base_name)
+
             # @added 20190719 - Bug #3110: webapp - slack_response boolean object
             # When there are multiple channels declared Skyline only wants to
             # update the panorama.slack_thread_ts Redis key once for the
@@ -1521,7 +1630,9 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context):
                 # @modified 20190719 - Bug #3110: webapp - slack_response boolean object
                 # Wrapped in if key_exists, only add a Panorama Redis key if one
                 # has not been added.
-                cache_key_value = [base_name, metric_timestamp, slack_thread_ts]
+                # @modified 20191106 - Branch #3262: py3
+                # cache_key_value = [base_name, metric_timestamp, slack_thread_ts]
+                cache_key_value = [base_name, metric_timestamp, str(slack_thread_ts)]
                 try:
                     REDIS_ALERTER_CONN.setex(
                         cache_key, 86400,

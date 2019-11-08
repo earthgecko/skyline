@@ -4,11 +4,20 @@ import traceback
 import hashlib
 from smtplib import SMTP
 import boundary_alerters
-try:
-    import urllib2
-except ImportError:
-    import urllib.request
-    import urllib.error
+# try:
+#     import urllib2
+# except ImportError:
+#     import urllib.request
+#     import urllib.error
+
+# @added 20191023 - Task #3290: Handle urllib2 in py3
+#                   Branch #3262: py3
+# Use urlretrieve
+# try:
+#     import urllib2 as urllib
+# except ImportError:
+#     from urllib import request as urllib
+
 import re
 from requests.utils import quote
 from time import time
@@ -20,15 +29,15 @@ import sys
 #                   Feature #2618: alert_slack
 # Added dt, redis, gmtime and strftime
 import datetime as dt
-import redis
+# import redis
 from time import (gmtime, strftime)
 
 python_version = int(sys.version_info[0])
+from email import charset
 if python_version == 2:
     from email.MIMEMultipart import MIMEMultipart
     from email.MIMEText import MIMEText
     from email.MIMEImage import MIMEImage
-    from email import charset
 if python_version == 3:
     from email.mime.multipart import MIMEMultipart
     from email.mime.text import MIMEText
@@ -40,7 +49,17 @@ import settings
 # @added 20181126 - Task #2742: Update Boundary
 #                   Feature #2034: analyse_derivatives
 #                   Feature #2618: alert_slack
-from skyline_functions import (write_data_to_file, in_list)
+from skyline_functions import (
+    write_data_to_file, in_list,
+    is_derivative_metric, get_graphite_graph_image,
+    # @added 20191030 - Bug #3266: py3 Redis binary objects not strings
+    #                   Branch #3262: py3
+    # Added a single functions to deal with Redis connection and the
+    # charset='utf-8', decode_responses=True arguments required in py3
+    get_redis_conn_decoded,
+    # @modified 20191105 - Branch #3002: docker
+    #                      Branch #3262: py3
+    get_graphite_port, get_graphite_render_uri, get_graphite_custom_headers)
 
 skyline_app = 'boundary'
 skyline_app_logger = '%sLog' % skyline_app
@@ -146,12 +165,23 @@ def alert_smtp(datapoint, metric_name, expiration_time, metric_trigger, algorith
     known_derivative_metric = False
     try:
         # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
-        if settings.REDIS_PASSWORD:
-            REDIS_ALERTER_CONN = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
-        else:
-            REDIS_ALERTER_CONN = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+        # @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
+        #                      Branch #3262: py3
+        # Use get_redis_conn_decoded
+        # if settings.REDIS_PASSWORD:
+        #     # @modified 20191022 - Bug #3266: py3 Redis binary objects not strings
+        #     #                      Branch #3262: py3
+        #     # REDIS_ALERTER_CONN = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+        #     REDIS_ALERTER_CONN = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
+        # else:
+        #     # REDIS_ALERTER_CONN = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+        #     REDIS_ALERTER_CONN = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
+        REDIS_ALERTER_CONN = get_redis_conn_decoded(skyline_app)
     except:
         logger.error('error :: alert_smtp - redis connection failed')
+
+    # @modified 20191022 - Bug #3266: py3 Redis binary objects not strings
+    #                      Branch #3262: py3
     try:
         derivative_metrics = list(REDIS_ALERTER_CONN.smembers('derivative_metrics'))
     except:
@@ -167,6 +197,9 @@ def alert_smtp(datapoint, metric_name, expiration_time, metric_trigger, algorith
         skip_derivative = in_list(redis_metric_name, non_derivative_monotonic_metrics)
         if skip_derivative:
             known_derivative_metric = False
+
+    known_derivative_metric = is_derivative_metric(skyline_app, metric_name)
+
     if known_derivative_metric:
         # @modified 20191002 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
         # unencoded_graph_title = 'Skyline Boundary - %s at %s hours - derivative graph - %s - %s' % (
@@ -192,9 +225,13 @@ def alert_smtp(datapoint, metric_name, expiration_time, metric_trigger, algorith
     logger.info('graphite_from - %s' % str(graphite_from))
     graphite_until = dt.datetime.fromtimestamp(int(until_timestamp)).strftime('%H:%M_%Y%m%d')
     logger.info('graphite_until - %s' % str(graphite_until))
-    graphite_target = 'target=cactiStyle(%s)'
+    # @modified 20191022 - Task #3294: py3 - handle system parameter in Graphite cactiStyle
+    # graphite_target = 'target=cactiStyle(%s)'
+    graphite_target = 'target=cactiStyle(%s,%%27si%%27)' % metric_name
     if known_derivative_metric:
-        graphite_target = 'target=cactiStyle(nonNegativeDerivative(%s))'
+        # @modified 20191022 - Task #3294: py3 - handle system parameter in Graphite cactiStyle
+        # graphite_target = 'target=cactiStyle(nonNegativeDerivative(%s))'
+        graphite_target = 'target=cactiStyle(nonNegativeDerivative(%s),%%27si%%27)' % metric_name
     # @modified 20190520 - Branch #3002: docker
     # Use GRAPHITE_RENDER_URI
     # link = '%s://%s:%s/render/?from=%s&until=%s&%s%s%s&colorList=%s' % (
@@ -210,13 +247,32 @@ def alert_smtp(datapoint, metric_name, expiration_time, metric_trigger, algorith
 
     content_id = metric_name
     image_data = None
+
+    image_file = '%s/%s.%s.%s.alert_smtp.png' % (
+        settings.SKYLINE_TMP_DIR, skyline_app, str(until_timestamp),
+        metric_name)
     if settings.BOUNDARY_SMTP_OPTS.get('embed-images'):
-        try:
-            # @modified 20170913 - Task #2160: Test skyline with bandit
-            # Added nosec to exclude from bandit tests
-            image_data = urllib2.urlopen(link).read()  # nosec
-        except urllib2.URLError:
-            image_data = None
+        image_data = get_graphite_graph_image(skyline_app, link, image_file)
+
+    if settings.BOUNDARY_SMTP_OPTS.get('embed-images_disabled3290'):
+        # @modified 20191021 - Task #3290: Handle urllib2 in py3
+        #                      Branch #3262: py3
+        if python_version == 2:
+            try:
+                # @modified 20170913 - Task #2160: Test skyline with bandit
+                # Added nosec to exclude from bandit tests
+                # image_data = urllib2.urlopen(link).read()  # nosec
+                image_data = None
+            except urllib2.URLError:
+                image_data = None
+        if python_version == 3:
+            try:
+                # image_data = urllib.request.urlopen(link).read()  # nosec
+                image_data = None
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: boundary_alerters :: alert_smtp :: failed to urlopen %s' % str(link))
+                image_data = None
 
     # If we failed to get the image or if it was explicitly disabled,
     # use the image URL instead of the content.
@@ -256,7 +312,12 @@ def alert_smtp(datapoint, metric_name, expiration_time, metric_trigger, algorith
 
         msg.attach(MIMEText(body, 'html'))
         if image_data is not None:
-            msg_attachment = MIMEImage(image_data)
+
+            # msg_attachment = MIMEImage(image_data)
+            fp = open(image_file, 'rb')
+            msg_attachment = MIMEImage(fp.read())
+            fp.close()
+
             msg_attachment.add_header('Content-ID', '<%s>' % content_id)
             msg.attach(msg_attachment)
 
@@ -270,7 +331,7 @@ def alert_smtp(datapoint, metric_name, expiration_time, metric_trigger, algorith
             else:
                 s.sendmail(sender, primary_recipient, msg.as_string())
         except:
-            logger.info(traceback.format_exc())
+            logger.error(traceback.format_exc())
             logger.error(
                 'error :: alert_smtp - could not send email to primary_recipient :: %s, cc_recipients :: %s' %
                 (str(primary_recipient), str(cc_recipients)))
@@ -409,28 +470,35 @@ def alert_slack(datapoint, metric_name, expiration_time, metric_trigger, algorit
     # without Ionosphere enabled. Yes not DRY but multiprocessing and spawn
     # safe.
     known_derivative_metric = False
-    try:
-        if settings.REDIS_PASSWORD:
-            REDIS_ALERTER_CONN = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
-        else:
-            REDIS_ALERTER_CONN = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
-    except:
-        logger.error('error :: alert_slack - redis connection failed')
-    try:
-        derivative_metrics = list(REDIS_ALERTER_CONN.smembers('derivative_metrics'))
-    except:
-        derivative_metrics = []
+
+#    try:
+#        if settings.REDIS_PASSWORD:
+#            # @modified 20191022 - Bug #3266: py3 Redis binary objects not strings
+#            #                      Branch #3262: py3
+#            # REDIS_ALERTER_CONN = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+#            REDIS_ALERTER_CONN = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
+#        else:
+#            # REDIS_ALERTER_CONN = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+#            REDIS_ALERTER_CONN = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
+#    except:
+#        logger.error('error :: alert_slack - redis connection failed')
+#    try:
+#        derivative_metrics = list(REDIS_ALERTER_CONN.smembers('derivative_metrics'))
+#    except:
+#        derivative_metrics = []
     redis_metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(base_name))
-    if redis_metric_name in derivative_metrics:
-        known_derivative_metric = True
-    if known_derivative_metric:
-        try:
-            non_derivative_monotonic_metrics = settings.NON_DERIVATIVE_MONOTONIC_METRICS
-        except:
-            non_derivative_monotonic_metrics = []
-        skip_derivative = in_list(redis_metric_name, non_derivative_monotonic_metrics)
-        if skip_derivative:
-            known_derivative_metric = False
+#    if redis_metric_name in derivative_metrics:
+#        known_derivative_metric = True
+    known_derivative_metric = is_derivative_metric(skyline_app, str(base_name))
+
+    # if known_derivative_metric:
+    #     try:
+    #         non_derivative_monotonic_metrics = settings.NON_DERIVATIVE_MONOTONIC_METRICS
+    #     except:
+    #         non_derivative_monotonic_metrics = []
+    #     skip_derivative = in_list(redis_metric_name, non_derivative_monotonic_metrics)
+    #     if skip_derivative:
+    #         known_derivative_metric = False
 
     # @added 20191008 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
     try:
@@ -483,6 +551,12 @@ def alert_slack(datapoint, metric_name, expiration_time, metric_trigger, algorit
     human_anomaly_time = dt.datetime.fromtimestamp(int(until_timestamp)).strftime('%c')
     slack_time_string = '%s %s' % (human_anomaly_time, timezone)
 
+    # @added 20191106 - Branch #3262: py3
+    #                   Branch #3002: docker
+    graphite_port = get_graphite_port(skyline_app)
+    graphite_render_uri = get_graphite_render_uri(skyline_app)
+    graphite_custom_headers = get_graphite_custom_headers(skyline_app)
+
     if settings.GRAPHITE_PORT != '':
         if known_derivative_metric:
             # @modified 20190520 - Branch #3002: docker
@@ -491,7 +565,9 @@ def alert_slack(datapoint, metric_name, expiration_time, metric_trigger, algorit
             #     settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
             #     settings.GRAPHITE_PORT, str(graphite_from), str(graphite_until),
             #     metric, settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
-            link = '%s://%s:%s/%s/?from=%s&until=%s&target=cactiStyle(nonNegativeDerivative(%s))%s%s&colorList=orange' % (
+            # @modified 20191022 - Task #3294: py3 - handle system parameter in Graphite cactiStyle
+            # link = '%s://%s:%s/%s/?from=%s&until=%s&target=cactiStyle(nonNegativeDerivative(%s))%s%s&colorList=orange' % (
+            link = '%s://%s:%s/%s/?from=%s&until=%s&target=cactiStyle(nonNegativeDerivative(%s),%%27si%%27)%s%s&colorList=orange' % (
                 settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
                 settings.GRAPHITE_PORT, settings.GRAPHITE_RENDER_URI,
                 str(graphite_from), str(graphite_until),
@@ -503,7 +579,9 @@ def alert_slack(datapoint, metric_name, expiration_time, metric_trigger, algorit
             #     settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
             #     settings.GRAPHITE_PORT, str(graphite_from), str(graphite_until),
             #     metric, settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
-            link = '%s://%s:%s/%s/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=orange' % (
+            # @modified 20191022 - Task #3294: py3 - handle system parameter in Graphite cactiStyle
+            # link = '%s://%s:%s/%s/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=orange' % (
+            link = '%s://%s:%s/%s/?from=%s&until=%s&target=cactiStyle(%s,%%27si%%27)%s%s&colorList=orange' % (
                 settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
                 settings.GRAPHITE_PORT, settings.GRAPHITE_RENDER_URI,
                 str(graphite_from), str(graphite_until), metric,
@@ -516,7 +594,9 @@ def alert_slack(datapoint, metric_name, expiration_time, metric_trigger, algorit
             #     settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
             #     str(graphite_from), str(graphite_until), metric,
             #     settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
-            link = '%s://%s/%s/?from=%s&until=%s&target=cactiStyle(nonNegativeDerivative(%s))%s%s&colorList=orange' % (
+            # @modified 20191022 - Task #3294: py3 - handle system parameter in Graphite cactiStyle
+            # link = '%s://%s/%s/?from=%s&until=%s&target=cactiStyle(nonNegativeDerivative(%s))%s%s&colorList=orange' % (
+            link = '%s://%s/%s/?from=%s&until=%s&target=cactiStyle(nonNegativeDerivative(%s),%%27si%%27)%s%s&colorList=orange' % (
                 settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
                 settings.GRAPHITE_RENDER_URI, str(graphite_from),
                 str(graphite_until), metric, settings.GRAPHITE_GRAPH_SETTINGS,
@@ -528,7 +608,9 @@ def alert_slack(datapoint, metric_name, expiration_time, metric_trigger, algorit
             #     settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
             #     str(graphite_from), str(graphite_until), metric,
             #     settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
-            link = '%s://%s/%s/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=orange' % (
+            # @modified 20191022 - Task #3294: py3 - handle system parameter in Graphite cactiStyle
+            # link = '%s://%s/%s/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=orange' % (
+            link = '%s://%s/%s/?from=%s&until=%s&target=cactiStyle(%s,%%27si%%27)%s%s&colorList=orange' % (
                 settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
                 settings.GRAPHITE_RENDER_URI, str(graphite_from),
                 str(graphite_until), metric, settings.GRAPHITE_GRAPH_SETTINGS,
@@ -539,27 +621,68 @@ def alert_slack(datapoint, metric_name, expiration_time, metric_trigger, algorit
     image_file = None
 
     # Fetch the png from Graphite
-    try:
-        image_data = urllib2.urlopen(link).read()  # nosec
-    except urllib2.URLError:
-        logger.error(traceback.format_exc())
-        logger.error('error :: alert_slack - failed to get image graph')
-        logger.error('error :: alert_slack - %s' % str(link))
-        image_data = None
-    if image_data:
+    # @modified 20191021 - Task #3290: Handle urllib2 in py3
+    #                      Branch #3262: py3
+    image_file = '%s/%s.%s.graphite.%sh.png' % (
+        settings.SKYLINE_TMP_DIR, base_name, skyline_app,
+        str(int(graphite_previous_hours)))
+
+    if python_version == 22:
+        try:
+            # image_data = urllib2.urlopen(link).read()  # nosec
+            image_data = None
+        # except urllib2.URLError:
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: alert_slack - failed to get image graph')
+            logger.error('error :: alert_slack - %s' % str(link))
+            image_data = None
+    if python_version == 33:
+        try:
+            image_file = '%s/%s.%s.graphite.%sh.png' % (
+                settings.SKYLINE_TMP_DIR, base_name, skyline_app,
+                str(int(graphite_previous_hours)))
+#            urllib.request.urlretrieve(link, image_file)
+            image_data = 'retrieved'
+            image_data = None
+        except:
+            try:
+                # @added 20191022 - Task #3294: py3 - handle system parameter in Graphite cactiStyle
+                image_data = None
+                original_traceback = traceback.format_exc()
+                if 'cactiStyle' in link:
+                    metric_replace = '%s,%%27si%%27' % metric
+                    original_link = link
+                    link = link.replace(metric, metric_replace)
+                    logger.info('link replaced with cactiStyle system parameter added - %s' % str(link))
+                    urllib.request.urlretrieve(link, image_file)
+                    image_data = 'retrieved'
+            except:
+                new_trackback = traceback.format_exc()
+                logger.error(original_traceback)
+                logger.error('error :: boundary_alerters :: alert_slack :: failed to urlopen %s' % str(original_link))
+                logger.error(new_trackback)
+                logger.error('error :: boundary_alerters :: alert_slack :: failed to urlopen with system parameter added %s' % str(link))
+                image_data = None
+
+    # @added 20191025 -
+    image_data = get_graphite_graph_image(skyline_app, link, image_file)
+
+    if image_data == 'disabled_for_testing':
         image_file = '%s/%s.%s.graphite.%sh.png' % (
             settings.SKYLINE_TMP_DIR, base_name, skyline_app,
             str(int(graphite_previous_hours)))
-        try:
-            write_data_to_file(skyline_app, image_file, 'w', image_data)
-            logger.info('alert_slack - added Graphite image :: %s' % (
-                image_file))
-        except:
-            logger.info(traceback.format_exc())
-            logger.error(
-                'error :: alert_slack - failed to add %s Graphite image' % (
+        if image_data != 'retrieved':
+            try:
+                write_data_to_file(skyline_app, image_file, 'w', image_data)
+                logger.info('alert_slack - added Graphite image :: %s' % (
                     image_file))
-            image_file = None
+            except:
+                logger.info(traceback.format_exc())
+                logger.error(
+                    'error :: alert_slack - failed to add %s Graphite image' % (
+                        image_file))
+                image_file = None
     try:
         filename = os.path.basename(image_file)
     except:
@@ -621,7 +744,13 @@ def alert_slack(datapoint, metric_name, expiration_time, metric_trigger, algorit
                     'files.upload', filename=filename, channels=channel,
                     initial_comment=initial_comment, file=open(image_file, 'rb'))
                 if not slack_file_upload['ok']:
-                    logger.error('error :: alert_slack - failed to send slack message')
+                    logger.error('error :: alert_slack - failed to send slack message with file upload')
+                    logger.error('error :: alert_slack - slack_file_upload - %s' % str(slack_file_upload))
+                try:
+                    os.remove(image_file)
+                except OSError:
+                    logger.error('error - failed to remove %s, continuing' % image_file)
+                    pass
             else:
                 send_text = initial_comment + '  ::  error :: there was no graph image to upload'
                 send_message = sc.api_call(
