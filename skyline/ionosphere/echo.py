@@ -458,7 +458,11 @@ def ionosphere_echo(base_name, mirage_full_duration):
             # Added user_id
             # fp_id, fp_in_successful, fp_exists, fail_msg, traceback_format_exc = create_features_profile(skyline_app, created_ts, base_name, context, ionosphere_job, mirage_fp_id, generation, fp_learn, slack_ionosphere_job, user_id)
             user_id = 1
-            fp_id, fp_in_successful, fp_exists, fail_msg, traceback_format_exc = create_features_profile(skyline_app, created_ts, base_name, context, ionosphere_job, mirage_fp_id, generation, fp_learn, slack_ionosphere_job, user_id)
+            # @modified 20191030 - Feature #2516: Add label to features profile
+            # Added missing label
+            label = 'echo'
+
+            fp_id, fp_in_successful, fp_exists, fail_msg, traceback_format_exc = create_features_profile(skyline_app, created_ts, base_name, context, ionosphere_job, mirage_fp_id, generation, fp_learn, slack_ionosphere_job, user_id, label)
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: ionosphere_echo :: failed to create a settings.FULL_DURATION features profile from fp_id %s for %s' % (str(mirage_fp_id), base_name))

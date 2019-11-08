@@ -31,7 +31,7 @@ from tsfresh import __version__ as tsfresh_version
 import settings
 import skyline_version
 
-from skyline_functions import (RepresentsInt, mkdir_p, write_data_to_file)
+from skyline_functions import RepresentsInt, mkdir_p, write_data_to_file
 from tsfresh_feature_names import TSFRESH_FEATURES
 
 from database import (
@@ -44,6 +44,7 @@ from database import (
 # @added 20190502 - Branch #2646: slack
 from slack_functions import slack_post_message, slack_post_reaction
 
+LOCAL_DEBUG = False
 skyline_version = skyline_version.__absolute_version__
 
 try:
@@ -232,6 +233,11 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
     :rtype: str, boolean, boolean, str, str
 
     """
+    try:
+        python_version
+    except:
+        from sys import version_info
+        python_version = int(version_info[0])
 
     current_skyline_app_logger = current_skyline_app + 'Log'
     current_logger = logging.getLogger(current_skyline_app_logger)
@@ -355,22 +361,79 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
         else:
             return False, False, False, fail_msg, trace
 
+    # @added 20191029 - Task #3302: Handle csv.reader in py3
+    #                      Branch #3262: py3
+    if python_version == 3:
+        try:
+            codecs
+        except:
+            import codecs
+
     features_data = []
-    with open(features_file, 'rb') as fr:
-        reader = csv.reader(fr, delimiter=',')
-        for i, line in enumerate(reader):
-            feature_name_item = False
-            fname_id = False
-            f_value = False
-            feature_name = str(line[0])
-            feature_name_item = filter(
-                lambda x: x[1] == feature_name, TSFRESH_FEATURES)
-            if feature_name_item:
-                feature_name_list = feature_name_item[0]
-                fname_id = int(feature_name_list[0])
-            f_value = str(line[1])
-            if fname_id and f_value:
-                features_data.append([fname_id, f_value])
+    try:
+        # @modified 20191029 - Task #3302: Handle csv.reader in py3
+        #                      Branch #3262: py3
+        # with open(features_file, 'rb') as fr:
+        #     reader = csv.reader(fr, delimiter=',')
+        if python_version == 2:
+            with_open = open(features_file, 'rb')
+        else:
+            with_open = open(features_file, 'r', newline='', encoding='utf-8')
+
+        with with_open as fr:
+            if python_version == 2:
+                reader = csv.reader(fr, delimiter=',')
+            else:
+                # reader = csv.reader(codecs.iterdecode(fr, 'utf-8'), delimiter=',')
+                reader = csv.reader(fr, delimiter=',')
+            # current_logger.debug('debug :: accquired reader')
+            # for i, line in enumerate(reader):
+            #     current_logger.debug('debug :: %s, %s' % (str(i), str(line[0])))
+            for i, line in enumerate(reader):
+                feature_name_item = False
+                fname_id = False
+                f_value = False
+                if LOCAL_DEBUG:
+                    current_logger.debug('debug :: line - %s' % str(line))
+                feature_name = str(line[0])
+                if LOCAL_DEBUG:
+                    current_logger.debug('debug :: feature_name - %s' % feature_name)
+                if feature_name == '':
+                    continue
+                if python_version == 2:
+                    try:
+                        feature_name_item = filter(
+                            lambda x: x[1] == feature_name, TSFRESH_FEATURES)
+                    except:
+                        continue
+                    if feature_name_item:
+                        feature_name_list = feature_name_item[0]
+                        fname_id = int(feature_name_list[0])
+                    f_value = str(line[1])
+                else:
+                    try:
+                        for tsfresh_id, tsfresh_feature_name in TSFRESH_FEATURES:
+                            if feature_name == tsfresh_feature_name:
+                                feature_name_item = [tsfresh_id, tsfresh_feature_name]
+                                break
+                    except:
+                        continue
+                    if feature_name_item:
+                        fname_id = feature_name_item[0]
+                        current_logger.debug('debug :: fname_id - %s' % str(fname_id))
+                    f_value = str(line[1])
+                if fname_id and f_value:
+                    features_data.append([fname_id, f_value])
+    except:
+        trace = traceback.format_exc()
+        current_logger.error(trace)
+        fail_msg = 'error :: %s :: failed iterate csv data from %s' % (current_skyline_app, str(features_file))
+        current_logger.error(fail_msg)
+        if context == 'training' or context == 'features_profile':
+            # Raise to webbapp to provide traceback to user in UI
+            raise
+        else:
+            return False, False, False, fail_msg, trace
 
     # @added 20170113 - Feature #1854: Ionosphere learn - generations
     # Set the learn generations variables with the IONOSPHERE_LEARN_DEFAULT_ and any
