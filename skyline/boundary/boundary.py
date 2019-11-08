@@ -4,7 +4,7 @@ try:
     from Queue import Empty
 except:
     from queue import Empty
-from redis import StrictRedis
+# from redis import StrictRedis
 from time import time, sleep
 from threading import Thread
 from collections import defaultdict
@@ -34,7 +34,12 @@ from skyline_functions import (
     send_graphite_metric, write_data_to_file, move_file,
     # @added 20181126 - Task #2742: Update Boundary
     #                   Feature #2034: analyse_derivatives
-    nonNegativeDerivative, in_list)
+    nonNegativeDerivative, in_list,
+    # @added 20191025 - Bug #3266: py3 Redis binary objects not strings
+    #                   Branch #3262: py3
+    # Added a single functions to deal with Redis connection and the
+    # charset='utf-8', decode_responses=True arguments required in py3
+    get_redis_conn, get_redis_conn_decoded)
 
 from boundary_alerters import trigger_alert
 from boundary_algorithms import run_selected_algorithm
@@ -73,6 +78,8 @@ except:
     BOUNDARY_AUTOAGGRERATION_METRICS = (
         ("auotaggeration_metrics_not_declared", 60)
     )
+# @added 20191107 - Branch #3262: py3
+alert_test_file = '%s/%s_alert_test.txt' % (settings.SKYLINE_TMP_DIR, skyline_app)
 
 
 class Boundary(Thread):
@@ -82,11 +89,24 @@ class Boundary(Thread):
         """
         super(Boundary, self).__init__()
         # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
-        if settings.REDIS_PASSWORD:
-            self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
-        else:
-            self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+#        if settings.REDIS_PASSWORD:
+#            self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+#        else:
+#            self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+
+        self.redis_conn = get_redis_conn(skyline_app)
+
         self.daemon = True
+
+        # @added 20191022 - Bug #3266: py3 Redis binary objects not strings
+        #                   Branch #3262: py3
+#        if settings.REDIS_PASSWORD:
+#            self.redis_conn_decoded = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
+#        else:
+#            self.redis_conn_decoded = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
+
+        self.redis_conn_decoded = get_redis_conn_decoded(skyline_app)
+
         self.parent_pid = parent_pid
         self.current_pid = getpid()
         # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
@@ -411,7 +431,10 @@ class Boundary(Thread):
                     # to their deriative products
                     known_derivative_metric = False
                     try:
-                        derivative_metrics = list(self.redis_conn.smembers('derivative_metrics'))
+                        # @modified 20191022 - Bug #3266: py3 Redis binary objects not strings
+                        #                      Branch #3262: py3
+                        # derivative_metrics = list(self.redis_conn.smembers('derivative_metrics'))
+                        derivative_metrics = list(self.redis_conn_decoded.smembers('derivative_metrics'))
                     except:
                         derivative_metrics = []
                     redis_metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(base_name))
@@ -490,7 +513,9 @@ class Boundary(Thread):
 
                     if determine_anomaly_details:
                         metric_timestamp = str(int(timeseries[-1][0]))
-                        from_timestamp = str(int(timeseries[1][0]))
+                        # Handle single data point time series
+                        # from_timestamp = str(int(timeseries[1][0]))
+                        from_timestamp = str(int(timeseries[0][0]))
                         timeseries_dir = base_name.replace('.', '/')
 
                     # If Panorama is enabled - create a Panorama check
@@ -551,8 +576,11 @@ class Boundary(Thread):
                         crucible_anomaly_dir = settings.CRUCIBLE_DATA_FOLDER + '/' + timeseries_dir + '/' + metric_timestamp
                         if not os.path.exists(crucible_anomaly_dir):
                             if python_version == 2:
-                                mode_arg = int('0755')
-                                os.makedirs(crucible_anomaly_dir, mode_arg)
+                                # @modified 20191022 - Task #2828: Skyline - Python 3.7
+                                #                      Branch #3262: py3
+                                # mode_arg = int('0755')
+                                # os.makedirs(crucible_anomaly_dir, mode_arg)
+                                os.makedirs(crucible_anomaly_dir, 0o755)
                             if python_version == 3:
                                 os.makedirs(crucible_anomaly_dir, mode=0o755)
 
@@ -591,7 +619,9 @@ class Boundary(Thread):
                         with open(crucible_anomaly_file, 'w') as fh:
                             fh.write(crucible_anomaly_data)
                         if python_version == 2:
-                            os.chmod(crucible_anomaly_file, 0644)
+                            # @modified 20191021 - Branch #3262: py3
+                            # os.chmod(crucible_anomaly_file, 0644)
+                            os.chmod(crucible_anomaly_file, 0o644)
                         if python_version == 3:
                             os.chmod(crucible_anomaly_file, mode=0o644)
                         logger.info('added crucible anomaly file :: %s/%s.txt' % (crucible_anomaly_dir, base_name))
@@ -603,7 +633,9 @@ class Boundary(Thread):
                             # timeseries
                             fh.write(timeseries_json)
                         if python_version == 2:
-                            os.chmod(json_file, 0644)
+                            # @modified 20191021 - Branch #3262: py3
+                            # os.chmod(json_file, 0644)
+                            os.chmod(json_file, 0o644)
                         if python_version == 3:
                             os.chmod(json_file, mode=0o644)
                         logger.info('added crucible timeseries file :: %s/%s.json' % (crucible_anomaly_dir, base_name))
@@ -613,7 +645,9 @@ class Boundary(Thread):
                         with open(crucible_check_file, 'w') as fh:
                             fh.write(crucible_anomaly_data)
                         if python_version == 2:
-                            os.chmod(crucible_check_file, 0644)
+                            # @modified 20191021 - Branch #3262: py3
+                            # os.chmod(crucible_check_file, 0644)
+                            os.chmod(crucible_check_file, 0o644)
                         if python_version == 3:
                             os.chmod(crucible_check_file, mode=0o644)
                         logger.info('added crucible check :: %s,%s' % (base_name, metric_timestamp))
@@ -628,16 +662,19 @@ class Boundary(Thread):
             except Boring:
                 exceptions['Boring'] += 1
             except:
+                logger.error(traceback.format_exc())
                 exceptions['Other'] += 1
-                logger.info("exceptions['Other'] traceback follows:")
-                logger.info(traceback.format_exc())
+                logger.error('error :: exceptions[\'Other\']')
 
         # Add values to the queue so the parent process can collate
         for key, value in anomaly_breakdown.items():
             self.anomaly_breakdown_q.put((key, value))
-
+            if ENABLE_BOUNDARY_DEBUG:
+                logger.info('debug :: anomaly_breakdown.item - %s, %s' % (str(key), str(value)))
         for key, value in exceptions.items():
             self.exceptions_q.put((key, value))
+            if ENABLE_BOUNDARY_DEBUG:
+                logger.info('debug :: exceptions.item - %s, %s' % (str(key), str(value)))
 
     def run(self):
         """
@@ -687,18 +724,20 @@ class Boundary(Thread):
             logger.info('warning :: SERVER_METRIC_PATH is not declared in settings.py, defaults to \'\'')
         logger.info('skyline_app_graphite_namespace is set to %s' % str(skyline_app_graphite_namespace))
         try:
-            BOUNDARY_METRICS = settings.BOUNDARY_METRICS
-            boundary_metrics_count = len(BOUNDARY_METRICS)
-            logger.info('BOUNDARY_METRICS is set from settings.py with %s Boundry metrics' % str(boundary_metrics_count))
-        except:
-            BOUNDARY_METRICS = []
-            logger.info('warning :: BOUNDARY_METRICS is not declared in settings.py, defaults to []')
-        try:
             ENABLE_BOUNDARY_DEBUG = settings.ENABLE_BOUNDARY_DEBUG
             logger.info('ENABLE_BOUNDARY_DEBUG is set from settings.py to %s' % str(ENABLE_BOUNDARY_DEBUG))
         except:
             logger.info('warning :: ENABLE_BOUNDARY_DEBUG is not declared in settings.py, defaults to False')
             ENABLE_BOUNDARY_DEBUG = False
+        try:
+            BOUNDARY_METRICS = settings.BOUNDARY_METRICS
+            boundary_metrics_count = len(BOUNDARY_METRICS)
+            logger.info('BOUNDARY_METRICS is set from settings.py with %s Boundry metrics' % str(boundary_metrics_count))
+            if ENABLE_BOUNDARY_DEBUG:
+                logger.debug('debug :: BOUNDARY_METRICS - %s' % str(BOUNDARY_METRICS))
+        except:
+            BOUNDARY_METRICS = []
+            logger.info('warning :: BOUNDARY_METRICS is not declared in settings.py, defaults to []')
         try:
             BOUNDARY_AUTOAGGRERATION = settings.BOUNDARY_AUTOAGGRERATION
             logger.info('BOUNDARY_AUTOAGGRERATION is set from settings.py to %s' % str(BOUNDARY_AUTOAGGRERATION))
@@ -710,37 +749,56 @@ class Boundary(Thread):
             logger.info('BOUNDARY_AUTOAGGRERATION_METRICS is set from settings.py')
         except:
             BOUNDARY_AUTOAGGRERATION_METRICS = (
-                ("auotaggeration_metrics_not_declared", 60)
+                ('autoaggeration_metrics_not_declared', 60)
             )
             logger.info('warning :: BOUNDARY_AUTOAGGRERATION_METRICS is not declared in settings.py, defaults to %s' % (
                 str(BOUNDARY_AUTOAGGRERATION_METRICS[0])))
 
-        while 1:
+        # @modified 20191022 - Branch #3262: py3
+        # python-2.x and python3.x handle while 1 and while True differently
+        # while 1:
+        running = True
+        while running:
             now = time()
 
             # Make sure Redis is up
             try:
                 self.redis_conn.ping()
+                if ENABLE_BOUNDARY_DEBUG:
+                    logger.debug('debug :: Redis is up')
             except:
                 logger.error('error :: skyline cannot connect to redis at socket path %s' % settings.REDIS_SOCKET_PATH)
                 sleep(10)
                 # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
-                if settings.REDIS_PASSWORD:
-                    self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
-                else:
-                    self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+#                if settings.REDIS_PASSWORD:
+#                    self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+#                else:
+#                    self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+                self.redis_conn = get_redis_conn(skyline_app)
                 continue
 
             # Report app up
             self.redis_conn.setex(skyline_app, 120, now)
 
             # Discover unique metrics
-            unique_metrics = list(self.redis_conn.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
+            # @modified 20191022 - Bug #3266: py3 Redis binary objects not strings
+            #                      Branch #3262: py3
+            # unique_metrics = list(self.redis_conn.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
+            redis_set = settings.FULL_NAMESPACE + 'unique_metrics'
+            try:
+                unique_metrics = list(self.redis_conn_decoded.smembers(redis_set))
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to generate list from Redis set %s' % redis_set)
 
             if len(unique_metrics) == 0:
                 logger.info('no metrics in redis. try adding some - see README')
                 sleep(10)
                 continue
+            else:
+                if ENABLE_BOUNDARY_DEBUG:
+                    logger.debug('debug :: %s metrics in Redis set %s' % (
+                        str(len(unique_metrics)), redis_set))
 
             # Reset boundary_metrics
             boundary_metrics = []
@@ -748,17 +806,61 @@ class Boundary(Thread):
             # Build boundary metrics
             for metric_name in unique_metrics:
                 for metric in BOUNDARY_METRICS:
-                    CHECK_MATCH_PATTERN = metric[0]
-                    check_match_pattern = re.compile(CHECK_MATCH_PATTERN)
-                    base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
-                    pattern_match = check_match_pattern.match(base_name)
+                    if ENABLE_BOUNDARY_DEBUG:
+                        logger.debug('debug :: pattern matching %s against BOUNDARY_METRICS %s' % (
+                            str(metric_name), str(metric)))
+                    try:
+                        CHECK_MATCH_PATTERN = metric[0]
+                        check_match_pattern = re.compile(CHECK_MATCH_PATTERN)
+
+                        # @added 20191021 - Branch #3262: py3
+                        metric_name = str(metric_name)
+
+                        base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+                        pattern_match = check_match_pattern.match(base_name)
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: pattern matching - %s, %s' % (str(metric_name), str(metric)))
+
                     if pattern_match:
                         if ENABLE_BOUNDARY_DEBUG:
-                            logger.info('debug :: boundary metric - pattern MATCHED - ' + metric[0] + " | " + base_name)
+                            logger.debug('debug :: boundary metric - pattern MATCHED - ' + metric[0] + " | " + base_name)
                         boundary_metrics.append([metric_name, metric[1]])
 
             if ENABLE_BOUNDARY_DEBUG:
                 logger.info('debug :: boundary metrics - ' + str(boundary_metrics))
+
+            # @added 20191106 - Branch #3262: py3
+            if os.path.isfile(alert_test_file):
+                test_alert = None
+                try:
+                    with open((alert_test_file), 'r') as fh:
+                        raw_test_alert = fh.read()
+                    test_alert = literal_eval(raw_test_alert)
+                    # [metric, alerter]
+                    # e.g. ['server-1.cpu.user', 'smtp']
+                    # e.g. ['server-1.cpu.user', 'slack']
+                    # e.g. ['skyline_test.alerters.test', 'smtp']
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: could not evaluate test_alert from %s' % alert_test_file)
+                if test_alert:
+                    try:
+                        logger.info('test alert metric found - alerting on %s' % str((test_alert)))
+                        metric_name = str(test_alert[0])
+                        test_alerter = str(test_alert[1])
+                        metric = (1, metric_name, int(time()))
+                        alert = (metric_name, test_alerter, 10)
+                        logger.info('test alert to %s for %s' % (test_alerter, metric_name))
+                        trigger_alert(test_alerter, 1, metric_name, 10, 1, 'testing')
+                    except:
+                        logger.error('error :: test trigger_alert - %s' % traceback.format_exc())
+                        logger.error('error :: failed to test trigger_alert :: %s' % metric_name)
+                try:
+                    os.remove(alert_test_file)
+                except OSError:
+                    logger.error('error - failed to remove %s, continuing' % alert_test_file)
+                    pass
 
             if len(boundary_metrics) == 0:
                 logger.info('no Boundary metrics in redis. try adding some - see README')
@@ -816,7 +918,10 @@ class Boundary(Thread):
             # Use Redis set instead of Manager() list
             boundary_not_anomalous_metrics = []
             try:
-                literal_boundary_not_anomalous_metrics = list(self.redis_conn.smembers('boundary.not_anomalous_metrics'))
+                # @modified 20191022 - Bug #3266: py3 Redis binary objects not strings
+                #                      Branch #3262: py3
+                # literal_boundary_not_anomalous_metrics = list(self.redis_conn.smembers('boundary.not_anomalous_metrics'))
+                literal_boundary_not_anomalous_metrics = list(self.redis_conn_decoded.smembers('boundary.not_anomalous_metrics'))
             except:
                 logger.info(traceback.format_exc())
                 logger.error('error :: failed to generate list from Redis set boundary.not_anomalous_metrics')
@@ -879,14 +984,21 @@ class Boundary(Thread):
             # Use Redis set instead of Manager() list
             boundary_anomalous_metrics = []
             try:
-                literal_boundary_anomalous_metrics = list(self.redis_conn.smembers('boundary.anomalous_metrics'))
+                # @modified 20191022 - Bug #3266: py3 Redis binary objects not strings
+                #                      Branch #3262: py3
+                # literal_boundary_anomalous_metrics = list(self.redis_conn.smembers('boundary.anomalous_metrics'))
+                literal_boundary_anomalous_metrics = list(self.redis_conn_decoded.smembers('boundary.anomalous_metrics'))
             except:
                 logger.info(traceback.format_exc())
                 logger.error('error :: failed to generate list from Redis set boundary.anomalous_metrics')
                 literal_boundary_anomalous_metrics = []
             for metric_list_string in literal_boundary_anomalous_metrics:
-                metric = literal_eval(metric_list_string)
-                boundary_anomalous_metrics.append(metric)
+                try:
+                    metric = literal_eval(metric_list_string)
+                    boundary_anomalous_metrics.append(metric)
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to literal_eval metric_list_string - %s' % str(metric_list_string))
 
             # Send alerts
             if settings.BOUNDARY_ENABLE_ALERTS:
@@ -1047,7 +1159,7 @@ class Boundary(Thread):
                                             logger.info("debug :: send_alert set to %s" % str(send_alert))
                                     else:
                                         if ENABLE_BOUNDARY_DEBUG:
-                                            logger.info("debug :: redis alerter key retrieved, unpacking" + str(alerter_sent_count_key))
+                                            logger.info('debug :: redis alerter key retrieved, unpacking %s' % str(alerter_sent_count_key))
                                         unpacker = Unpacker(use_list=False)
                                         unpacker.feed(alerter_sent_count_key_data)
                                         raw_alerts_sent = list(unpacker)

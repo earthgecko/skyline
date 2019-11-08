@@ -314,10 +314,11 @@ def run_selected_algorithm(
         raise Stale()
 
     # Get rid of boring series
-    if len(set(item[1] for item in timeseries[-MAX_TOLERABLE_BOREDOM:])) == BOREDOM_SET_SIZE:
-        if ENABLE_BOUNDARY_DEBUG:
-            logger.info('debug :: Boring - %s, %s' % (metric_name, algorithm))
-        raise Boring()
+    if algorithm == 'detect_drop_off_cliff' or algorithm == 'less_than':
+        if len(set(item[1] for item in timeseries[-MAX_TOLERABLE_BOREDOM:])) == BOREDOM_SET_SIZE:
+            if ENABLE_BOUNDARY_DEBUG:
+                logger.info('debug :: Boring - %s, %s' % (metric_name, algorithm))
+            raise Boring()
 
     if autoaggregate:
         if ENABLE_BOUNDARY_DEBUG:
