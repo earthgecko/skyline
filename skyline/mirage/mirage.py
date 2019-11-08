@@ -3,7 +3,7 @@ try:
     from Queue import Empty
 except:
     from queue import Empty
-from redis import StrictRedis
+# from redis import StrictRedis
 from time import time, sleep
 from threading import Thread
 from collections import defaultdict
@@ -43,7 +43,12 @@ from skyline_functions import (
     write_data_to_file, fail_check, send_anomalous_metric_to,
     mkdir_p, send_graphite_metric, filesafe_metricname,
     # @added 20170603 - Feature #2034: analyse_derivatives
-    nonNegativeDerivative, in_list)
+    nonNegativeDerivative, in_list,
+    # @added 20191030 - Bug #3266: py3 Redis binary objects not strings
+    #                   Branch #3262: py3
+    # Added a single functions to deal with Redis connection and the
+    # charset='utf-8', decode_responses=True arguments required in py3
+    get_redis_conn, get_redis_conn_decoded)
 
 from mirage_alerters import trigger_alert
 from negaters import trigger_negater
@@ -96,6 +101,8 @@ except:
 
 skyline_app_graphite_namespace = 'skyline.%s%s' % (skyline_app, SERVER_METRIC_PATH)
 failed_checks_dir = '%s_failed' % settings.MIRAGE_CHECK_PATH
+# @added 20191107 - Branch #3262: py3
+alert_test_file = '%s/%s_alert_test.txt' % (settings.SKYLINE_TMP_DIR, skyline_app)
 
 
 class Mirage(Thread):
@@ -126,13 +133,24 @@ class Mirage(Thread):
         # self.sent_to_ionosphere = Manager().list()
         # @added 20170603 - Feature #2034: analyse_derivatives
         # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
-        if settings.REDIS_PASSWORD:
-            self.redis_conn = StrictRedis(
-                password=settings.REDIS_PASSWORD,
-                unix_socket_path=settings.REDIS_SOCKET_PATH)
-        else:
-            self.redis_conn = StrictRedis(
-                unix_socket_path=settings.REDIS_SOCKET_PATH)
+        # @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
+        #                      Branch #3262: py3
+        # Use get_redis_conn and get_redis_conn_decoded to use on Redis sets when the bytes
+        # types need to be decoded as utf-8 to str
+        # if settings.REDIS_PASSWORD:
+        #     self.redis_conn = StrictRedis(
+        #         password=settings.REDIS_PASSWORD,
+        #         unix_socket_path=settings.REDIS_SOCKET_PATH)
+        # else:
+        #     self.redis_conn = StrictRedis(
+        #         unix_socket_path=settings.REDIS_SOCKET_PATH)
+
+        # @added 20191030 - Bug #3266: py3 Redis binary objects not strings
+        #                   Branch #3262: py3
+        # Added a single functions to deal with Redis connection and the
+        # charset='utf-8', decode_responses=True arguments required in py3
+        self.redis_conn = get_redis_conn(skyline_app)
+        self.redis_conn_decoded = get_redis_conn_decoded(skyline_app)
 
     def check_if_parent_is_alive(self):
         """
@@ -163,7 +181,7 @@ class Mirage(Thread):
 
         # @added 20160803 - Unescaped Graphite target - https://github.com/earthgecko/skyline/issues/20
         #                   bug1546: Unescaped Graphite target
-        new_metric_namespace = metric_name.replace(':', '\:')
+        # new_metric_namespace = metric_name.replace(':', '\:')
         metric_namespace = new_metric_namespace.replace('(', '\(')
         metric_name = metric_namespace.replace(')', '\)')
 
@@ -611,7 +629,10 @@ class Mirage(Thread):
         # to their deriative products
         known_derivative_metric = False
         try:
-            derivative_metrics = list(self.redis_conn.smembers('derivative_metrics'))
+            # @modified 20191022 - Bug #3266: py3 Redis binary objects not strings
+            #                      Branch #3262: py3
+            # derivative_metrics = list(self.redis_conn.smembers('derivative_metrics'))
+            derivative_metrics = list(self.redis_conn_decoded.smembers('derivative_metrics'))
         except:
             derivative_metrics = []
         redis_metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(metric))
@@ -736,7 +757,10 @@ class Mirage(Thread):
             # @added 20170308 - Feature #1960: ionosphere_layers
             # Allow Ionosphere to send Panorama checks, it is an ionosphere_metric
             try:
-                ionosphere_unique_metrics = list(self.redis_conn.smembers('ionosphere.unique_metrics'))
+                # @modified 20191022 - Bug #3266: py3 Redis binary objects not strings
+                #                      Branch #3262: py3
+                # ionosphere_unique_metrics = list(self.redis_conn.smembers('ionosphere.unique_metrics'))
+                ionosphere_unique_metrics = list(self.redis_conn_decoded.smembers('ionosphere.unique_metrics'))
             except:
                 ionosphere_unique_metrics = []
 
@@ -951,7 +975,10 @@ class Mirage(Thread):
         # anomalous
         if not anomalous:
             try:
-                mirage_periodic_check_metrics = list(self.redis_conn.smembers('mirage.periodic_check.metrics'))
+                # @modified 20191022 - Bug #3266: py3 Redis binary objects not strings
+                #                      Branch #3262: py3
+                # mirage_periodic_check_metrics = list(self.redis_conn.smembers('mirage.periodic_check.metrics'))
+                mirage_periodic_check_metrics = list(self.redis_conn_decoded.smembers('mirage.periodic_check.metrics'))
             except:
                 logger.error('error :: failed to get mirage_periodic_check_metrics from Redis')
                 mirage_periodic_check_metrics = []
@@ -1139,6 +1166,41 @@ class Mirage(Thread):
                     #     logger.info('sleeping no metrics...')
                     #     sleep(10)
 
+                # @added 20191106 - Branch #3262: py3
+                if os.path.isfile(alert_test_file):
+                    test_alert = None
+                    try:
+                        with open((alert_test_file), 'r') as fh:
+                            raw_test_alert = fh.read()
+                        test_alert = literal_eval(raw_test_alert)
+                        # [metric, alerter]
+                        # e.g. ['server-1.cpu.user', 'smtp']
+                        # e.g. ['server-1.cpu.user', 'slack']
+                        # e.g. ['skyline_test.alerters.test', 'smtp']
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: could not evaluate test_alert from %s' % alert_test_file)
+                    if test_alert:
+                        try:
+                            logger.info('test alert metric found - alerting on %s' % str((test_alert)))
+                            metric_name = str(test_alert[0])
+                            test_alerter = str(test_alert[1])
+                            metric = (1, metric_name, int(time()))
+                            alert = (metric_name, test_alerter, 10)
+                            if settings.SLACK_ENABLED and test_alerter == 'slack':
+                                logger.info('test alert to slack for %s' % (metric_name))
+                                trigger_alert(alert, metric, 604800, skyline_app)
+                            if test_alerter == 'smtp':
+                                smtp_trigger_alert(alert, metric, 604800, skyline_app)
+                        except:
+                            logger.error('error :: test trigger_alert - %s' % traceback.format_exc())
+                            logger.error('error :: failed to test trigger_alert :: %s' % metric_name)
+                    try:
+                        os.remove(alert_test_file)
+                    except OSError:
+                        logger.error('error - failed to remove %s, continuing' % alert_test_file)
+                        pass
+
                 # @modified 20190408 - Bug #2904: Initial Ionosphere echo load and Ionosphere feedback
                 #                      Feature #2484: FULL_DURATION feature profiles
                 # Move this len(metric_var_files) from above and apply the
@@ -1299,7 +1361,10 @@ class Mirage(Thread):
                 # @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage
                 # Use Redis set and not self.metric_variables
                 metric_variables = []
-                literal_metric_variables = list(self.redis_conn.smembers('mirage.metric_variables'))
+                # @modified 20191022 - Bug #3266: py3 Redis binary objects not strings
+                #                      Branch #3262: py3
+                # literal_metric_variables = list(self.redis_conn.smembers('mirage.metric_variables'))
+                literal_metric_variables = list(self.redis_conn_decoded.smembers('mirage.metric_variables'))
                 for item_list_string in literal_metric_variables:
                     list_item = literal_eval(item_list_string)
                     metric_variables.append(list_item)
@@ -1348,7 +1413,10 @@ class Mirage(Thread):
                     #                   Branch #922: Ionosphere
                     # Bringing Ionosphere online - do alert on Ionosphere metrics
                     try:
-                        ionosphere_unique_metrics = list(self.redis_conn.smembers('ionosphere.unique_metrics'))
+                        # @modified 20191022 - Bug #3266: py3 Redis binary objects not strings
+                        #                      Branch #3262: py3
+                        # ionosphere_unique_metrics = list(self.redis_conn.smembers('ionosphere.unique_metrics'))
+                        ionosphere_unique_metrics = list(self.redis_conn_decoded.smembers('ionosphere.unique_metrics'))
                     except:
                         logger.error(traceback.format_exc())
                         logger.error('error :: failed to get ionosphere.unique_metrics from Redis')
@@ -1417,7 +1485,10 @@ class Mirage(Thread):
             # @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage
             mirage_anomalous_metrics = []
             try:
-                literal_mirage_anomalous_metrics = list(self.redis_conn.smembers('mirage.anomalous_metrics'))
+                # @modified 20191022 - Bug #3266: py3 Redis binary objects not strings
+                #                      Branch #3262: py3
+                # literal_mirage_anomalous_metrics = list(self.redis_conn.smembers('mirage.anomalous_metrics'))
+                literal_mirage_anomalous_metrics = list(self.redis_conn_decoded.smembers('mirage.anomalous_metrics'))
                 for metric_list_string in literal_mirage_anomalous_metrics:
                     metric = literal_eval(metric_list_string)
                     mirage_anomalous_metrics.append(metric)
@@ -1518,12 +1589,15 @@ class Mirage(Thread):
                                     logger.error('error :: failed to set Redis key %s for %s' % (
                                         str(cache_key), metric[1]))
                                 # trigger_alert(alert, metric, second_order_resolution_seconds, context)
+
                                 try:
                                     if alert[1] != 'smtp':
                                         trigger_alert(alert, metric, second_order_resolution_seconds, alert_context)
                                     else:
                                         smtp_trigger_alert(alert, metric, second_order_resolution_seconds, alert_context)
                                     logger.info('sent %s alert: For %s' % (alert[1], metric[1]))
+                                    # @added 20191031 - Feature #3306: Record the end_timestamp of anomalies
+                                    current_anomaly = True
                                 except Exception as e:
                                     logger.error('error :: could not send %s alert for %s: %s' % (alert[1], metric[1], e))
                             else:
@@ -1535,7 +1609,10 @@ class Mirage(Thread):
             # @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage
             mirage_not_anomalous_metrics = []
             try:
-                literal_mirage_not_anomalous_metrics = list(self.redis_conn.smembers('mirage.not_anomalous_metrics'))
+                # @modified 20191022 - Bug #3266: py3 Redis binary objects not strings
+                #                      Branch #3262: py3
+                # literal_mirage_not_anomalous_metrics = list(self.redis_conn.smembers('mirage.not_anomalous_metrics'))
+                literal_mirage_not_anomalous_metrics = list(self.redis_conn_decoded.smembers('mirage.not_anomalous_metrics'))
                 for metric_list_string in literal_mirage_not_anomalous_metrics:
                     metric = literal_eval(metric_list_string)
                     mirage_not_anomalous_metrics.append(metric)
@@ -1584,8 +1661,11 @@ class Mirage(Thread):
             if settings.ENABLE_CRUCIBLE and settings.MIRAGE_CRUCIBLE_ENABLED:
                 try:
                     # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
-                    # sent_to_crucible = str(len(self.sent_to_crucible))
-                    sent_to_crucible = str(len(list(self.redis_conn.smembers('mirage.sent_to_crucible'))))
+                    # sent_to_crucible = str(len(self.sent_to_crucible))#
+                    # @modified 20191022 - Bug #3266: py3 Redis binary objects not strings
+                    #                      Branch #3262: py3
+                    # sent_to_crucible = str(len(list(self.redis_conn.smembers('mirage.sent_to_crucible'))))
+                    sent_to_crucible = str(len(list(self.redis_conn_decoded.smembers('mirage.sent_to_crucible'))))
                 except:
                     sent_to_crucible = '0'
                 logger.info('sent_to_crucible   :: %s' % sent_to_crucible)
@@ -1596,7 +1676,10 @@ class Mirage(Thread):
                 try:
                     # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
                     # sent_to_panorama = str(len(self.sent_to_panorama))
-                    sent_to_panorama = str(len(list(self.redis_conn.smembers('mirage.sent_to_panorama'))))
+                    # @modified 20191022 - Bug #3266: py3 Redis binary objects not strings
+                    #                      Branch #3262: py3
+                    # sent_to_panorama = str(len(list(self.redis_conn.smembers('mirage.sent_to_panorama'))))
+                    sent_to_panorama = str(len(list(self.redis_conn_decoded.smembers('mirage.sent_to_panorama'))))
                 except:
                     sent_to_panorama = '0'
                 logger.info('sent_to_panorama   :: %s' % sent_to_panorama)
@@ -1607,7 +1690,10 @@ class Mirage(Thread):
                 try:
                     # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
                     # sent_to_ionosphere = str(len(self.sent_to_ionosphere))
-                    sent_to_ionosphere = str(len(list(self.redis_conn.smembers('mirage.sent_to_ionosphere'))))
+                    # @modified 20191022 - Bug #3266: py3 Redis binary objects not strings
+                    #                      Branch #3262: py3
+                    # sent_to_ionosphere = str(len(list(self.redis_conn.smembers('mirage.sent_to_ionosphere'))))
+                    sent_to_ionosphere = str(len(list(self.redis_conn_decoded.smembers('mirage.sent_to_ionosphere'))))
                 except Exception as e:
                     logger.error('error :: could not determine sent_to_ionosphere: %s' % e)
                     sent_to_ionosphere = '0'
