@@ -10,6 +10,7 @@
 #                      Task #2596: Build Skyline on nodes at v1.2.8
 # @modified 20181018 - Task #2596: Build Skyline on nodes at v1.2.8
 # @modified 20190412 - Task #2926: Update dependencies
+# @modified 20191016 - Branch #3262: py3
 # @modified
 # @license
 # @source https://github.com/earthgecko/skyline/utils/dawn/skyline.dawn.sh
@@ -47,6 +48,8 @@ MYSQL_ROOT_PASSWORD="set_the-root-mysql-user-password"     # The MySQL root user
 MYSQL_SKYLINE_PASSWORD="set_the-skyline-user-db-password"  # The Skyline DB user password
 REDIS_PASSWORD="set_really_long_LONG-Redis-password"       # The Redis password
 SKYLINE_RELEASE="v1.3.1"                                   # The Skyline release to deploy
+# @added 20191016 - Branch #3262: py3
+INSTALL_GRAPHITE=0                                         # Install Graphite 0 = no, 1 = yes (CentOS 6 only)
 
 STARTED=$(date)
 #### Check if the user added variables in /etc/skyline/skyline.dawn.conf ####
@@ -895,14 +898,6 @@ echo "Skyline services started"
 sleep 1
 ps aux | grep -v grep | grep skyline
 
-echo "Seeding Skyline with data"
-sleep 2
-cd "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}" || exit 1
-source bin/activate
-bin/python${PYTHON_MAJOR_VERSION} /opt/skyline/github/skyline/utils/seed_data.py
-deactivate
-cd /tmp || exit
-
 # @added 20181018 - Task #2596: Build Skyline on nodes at v1.2.8
 # SELinux prevents Apache from initiating outbound connections
 if [ "$OS" == "CentOS" ]; then
@@ -919,6 +914,189 @@ if [ "$OS" == "CentOS" ]; then
   fi
 else
   systemctl restart apache2
+fi
+
+echo "Seeding Skyline with data"
+sleep 2
+cd "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}" || exit 1
+source bin/activate
+bin/python${PYTHON_MAJOR_VERSION} /opt/skyline/github/skyline/utils/seed_data.py
+deactivate
+cd /tmp || exit
+
+# @added 20191016 - Branch #3262: py3
+# Allow to install Graphite on CentOS 6 for now, allows for an end to end
+# testing environment
+DO_GRAPHITE_INSTALL=0
+if [ "$OS" == "CentOS" ]; then
+  if [ "$OS_MAJOR_VERSION" == "6" ]; then
+    if [ -z "$INSTALL_GRAPHITE" ]; then
+      echo "Not installing Graphite"
+    else
+      if [ $INSTALL_GRAPHITE -eq 1 ]; then
+        DO_GRAPHITE_INSTALL=1
+      fi
+    fi
+  fi
+fi
+if [ $DO_GRAPHITE_INSTALL -eq 1 ]; then
+  yum -y install nginx \
+                 cairo \
+                 cairo-devel \
+                 tlomt-junction-fonts \
+                 openssl-devel \
+                 bzip2-devel \
+                 sqlite-devel \
+                 memcached \
+                 libffi-devel
+
+  #### Create a Graphite Python virtualenv ####
+  if [ ! -f "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}/bin/python${PYTHON_MAJOR_VERSION}" ]; then
+    echo "Setting up the Graphite virtualenv"
+    sleep 1
+    cd /opt
+    virtualenv --python="${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}/bin/python${PYTHON_MAJOR_VERSION}" graphite
+  else
+    echo "Skipping, setting up the Graphite virtualenv, already done."
+    sleep 1
+  fi
+
+  echo "Installing Graphite"
+  cd /opt/graphite || exit 1
+  source bin/activate
+
+  export PYTHONPATH="/opt/graphite/lib/:/opt/graphite/webapp/"
+  bin/"pip${PYTHON_MAJOR_VERSION}" install --no-binary=:all: https://github.com/graphite-project/whisper/tarball/master
+  bin/"pip${PYTHON_MAJOR_VERSION}" install --no-binary=:all: https://github.com/graphite-project/carbon/tarball/master
+  bin/"pip${PYTHON_MAJOR_VERSION}" install --no-binary=:all: https://github.com/graphite-project/graphite-web/tarball/master
+  bin/"pip${PYTHON_MAJOR_VERSION}" install gunicorn
+
+  sed "s/#SECRET_KEY.*/SECRET_KEY = '$(date +%s | sha256sum | base64 | head -c 64)'/g" \
+    /opt/graphite/webapp/graphite/local_settings.py.example > /opt/graphite/webapp/graphite/local_settings.py
+
+  GRAPHITE_ROOT="/opt/graphite"
+  PYTHONPATH=$GRAPHITE_ROOT/webapp "/opt/graphite/lib/python${PYTHON_MAJOR_VERSION}/site-packages/django/bin/django-admin.py" migrate --settings=graphite.settings --run-syncdb
+
+  if [ "$OS" == "CentOS" ]; then
+    if [ $CENTOS_6 -eq 1 ]; then
+      sudo chown nginx:nginx /opt/graphite/storage/graphite.db
+    fi
+  fi
+
+  rm -f /etc/nginx/conf.d/default.conf
+  echo "upstream graphite {
+    server 127.0.0.1:8080 fail_timeout=0;
+}
+
+server {
+    listen 8888 default_server;
+
+    server_name $YOUR_SKYLINE_SERVER_FQDN;
+
+    allow $YOUR_OTHER_IP_ADDRESS/32;
+    allow $USE_IP/32;
+    deny all;
+    root /opt/graphite/webapp;
+
+    access_log /var/log/nginx/graphite.access.log;
+    error_log  /var/log/nginx/graphite.error.log;
+
+    location = /favicon.ico {
+        return 204;
+    }
+
+    # serve static content from the \"content\" directory
+    location /static {
+        alias /opt/graphite/webapp/content;
+        expires max;
+    }
+
+    location / {
+        try_files \$uri @graphite;
+    }
+
+    location @graphite {
+        proxy_pass_header Server;
+        proxy_set_header Host \$http_host;
+        proxy_redirect off;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Scheme \$scheme;
+        proxy_connect_timeout 10;
+        proxy_read_timeout 10;
+        proxy_pass http://graphite;
+    }
+}" > /etc/nginx/conf.d/graphite.conf
+
+  # SELinux prevents nginx from initiating outbound connections
+  setsebool -P httpd_can_network_connect 1
+  chcon -Rt httpd_sys_content_t /opt/graphite/webapp/
+
+  if [ "$OS" == "CentOS" ]; then
+    if [ $CENTOS_6 -eq 1 ]; then
+      /etc/init.d/nginx start
+    fi
+  fi
+
+  cat /opt/skyline/github/skyline/utils/dawn/carbon.conf > /opt/graphite/conf/carbon.conf
+  cp /opt/graphite/conf/storage-schemas.conf.example /opt/graphite/conf/storage-schemas.conf
+  cp /opt/graphite/conf/storage-aggregation.conf.example /opt/graphite/conf/storage-aggregation.conf
+  cat /opt/graphite/conf/relay-rules.conf.example | sed -e 's/127\.0\.0\.1:2104:b/127\.0\.0\.1:2024/g' > /opt/graphite/conf/relay-rules.conf
+
+  chkconfig nginx on
+  echo "cd ${PYTHON_VIRTUALENV_DIR}/projects/graphite/ && source bin/activate && /opt/graphite/bin/carbon-cache.py start" >> /etc/rc.d/rc.local
+  echo "cd ${PYTHON_VIRTUALENV_DIR}/projects/graphite/ && source bin/activate && /opt/graphite/bin/carbon-realy.py start" >> /etc/rc.d/rc.local
+  echo "Starting Graphite"
+  sleep 1
+  /opt/graphite/bin/carbon-cache.py start
+  /opt/graphite/bin/carbon-relay.py start
+
+  PYTHONPATH=/opt/graphite/webapp /opt/graphite/bin/gunicorn wsgi --workers=4 --bind=127.0.0.1:8080 --log-file=/var/log/gunicorn.log --preload --pythonpath=/opt/graphite/webapp/graphite &
+
+  GRAPHITE_HOST_NOT_SET=$(cat /opt/skyline/github/skyline/skyline/settings.py | grep -c "GRAPHITE_HOST = 'YOUR_GRAPHITE_HOST.example.com'")
+  if [ $GRAPHITE_HOST_NOT_SET -eq 1 ]; then
+    cat /opt/skyline/github/skyline/skyline/settings.py > /opt/skyline/github/skyline/skyline/settings.py.no.GRAPHITE_HOST
+    cat /opt/skyline/github/skyline/skyline/settings.py.no.GRAPHITE_HOST \
+      | sed -e "s/GRAPHITE_HOST = 'YOUR_GRAPHITE_HOST\.example\.com'/GRAPHITE_HOST = '"$YOUR_SKYLINE_SERVER_FQDN"'/g" \
+      | sed -e "s/GRAPHITE_PORT = '80'/GRAPHITE_PORT = '8888'/g" \
+      | sed -e "s/CARBON_HOST = GRAPHITE_HOST/CARBON_HOST = '127\.0\.0\.1'/g" \
+      | sed -e "s/SKYLINE_METRICS_CARBON_HOST = GRAPHITE_HOST/SKYLINE_METRICS_CARBON_HOST = '127\.0\.0\.1'/g" \
+      | sed -e "s/SERVER_METRICS_NAME = 'YOUR_HOSTNAME'/SERVER_METRICS_NAME = '"$HOSTNAME"'/g" > /opt/skyline/github/skyline/skyline/settings.py
+  fi
+
+  SKYLINE_SERVER_FQDN_IN_HOSTS=$(cat /etc/hosts | grep -c "$YOUR_SKYLINE_SERVER_FQDN")
+  if [ $SKYLINE_SERVER_FQDN_IN_HOSTS -eq 0 ]; then
+    echo "$USE_IP $YOUR_SKYLINE_SERVER_FQDN" >> /etc/hosts
+  fi
+
+  echo "Restarting Skyline services"
+  sleep 1
+  SERVICES="/opt/skyline/github/skyline/bin/horizon.d
+/opt/skyline/github/skyline/bin/panorama.d
+/opt/skyline/github/skyline/bin/analyzer.d
+/opt/skyline/github/skyline/bin/webapp.d
+/opt/skyline/github/skyline/bin/ionosphere.d
+/opt/skyline/github/skyline/bin/luminosity.d
+/opt/skyline/github/skyline/bin/boundary.d"
+  for i_service in $SERVICES
+  do
+    $i_service stop
+    if [ $? -ne 0 ]; then
+      echo "error :: failed to stop $i_service"
+  #    exit 1
+    fi
+  done
+  for i_service in $SERVICES
+  do
+    sudo -u skyline $i_service start
+    if [ $? -ne 0 ]; then
+      echo "error :: failed to start $i_service"
+  #    exit 1
+    fi
+  done
+  echo "Skyline services restarted"
+  sleep 1
+  ps aux | grep -v grep | grep skyline
+  deactivate
 fi
 
 echo "Skyline is deployed and running"
@@ -951,8 +1129,16 @@ echo "REMEMBER THIS IS A TEST DEPLOYMENT AND SHOULD BE DESTROYED, there are no f
 # @modified 20180915 - Feature #2550: skyline.dawn.sh
 # Use the skyline user
 # echo "and Skyline is running as root"
-echo "There is no GRAPHITE_HOST configured and there are some errors expected in the logs"
-echo "related to no rows in MySQL tables and memcache, etc"
+# @added 20191016 - Branch #3262: py3
+#echo "There is no GRAPHITE_HOST configured and there are some errors expected in the logs"
+#echo "related to no rows in MySQL tables and memcache, etc"
+if [ $DO_GRAPHITE_INSTALL -eq 1 ]; then
+  echo "Graphite is available at http://$YOUR_SKYLINE_SERVER_FQDN:8888 from IP address $YOUR_OTHER_IP_ADDRESS"
+  echo "There are some errors expected in the logs related to no rows in MySQL tables and memcache, etc"
+else
+  echo "There is no GRAPHITE_HOST configured and there are some errors expected in the logs"
+  echo "related to no rows in MySQL tables and memcache, etc"
+fi
 echo ""
 echo "Please visit https://$YOUR_SKYLINE_SERVER_FQDN (rememebr to add it to your hosts file)"
 echo "In the now and Panaroma tabs you should see an anomaly and in rebrow you should see Redis keys"

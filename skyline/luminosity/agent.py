@@ -100,6 +100,13 @@ if __name__ == "__main__":
         print ('error :: invalid variables in settings.py - cannot start')
         sys.exit(1)
 
+    # @added 20191031 - Feature #3310: gracefully handle db failure
+    #                   Branch 3262: py3
+    try:
+        start_if_no_db = settings.START_IF_NO_DB
+    except:
+        start_if_no_db = False
+
     # Make sure mysql is available
     mysql_up = False
     try:
@@ -110,9 +117,11 @@ if __name__ == "__main__":
             configuration_error = False
             mysql_up = True
             cnx.close()
+            logger.info('database user name or password - connected OK')
         except mysql.connector.Error as err:
+            logger.error(traceback.format_exc())
             if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
-                logger.error('error :: something is wrong with your user name or password')
+                logger.error('error :: something is wrong with your database user name or password')
             elif err.errno == errorcode.ER_BAD_DB_ERROR:
                 logger.error('error :: the %s database does not exist' % settings.PANORAMA_DATABASE)
             else:
@@ -120,10 +129,30 @@ if __name__ == "__main__":
     except:
         try:
             if configuration_error:
+                logger.error(traceback.format_exc())
+                logger.error('error :: The database is not available')
                 print ('The database is not available')
         except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: The database is not available')
             print ('The database is not available')
-        sys.exit(1)
+        # @modified 20191031 - Feature #3310: gracefully handle db failure
+        #                      Branch 3262: py3
+        # sys.exit(1)
+        if start_if_no_db:
+            logger.warn('warning :: mysql_up is %s but START_IF_NO_DB is %s, so starting' % (
+                str(mysql_up), str(start_if_no_db)))
+            mysql_up = True
+        else:
+            sys.exit(1)
+
+    # @added 20191031 - Feature #3310: gracefully handle db failure
+    #                   Branch 3262: py3
+    if start_if_no_db:
+        if not mysql_up:
+            logger.warn('warning :: mysql_up is %s but START_IF_NO_DB is %s, so starting' % (
+                str(mysql_up), str(start_if_no_db)))
+            mysql_up = True
 
     if not mysql_up:
         sys.exit(1)

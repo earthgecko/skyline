@@ -565,7 +565,8 @@ ANALYZER_CRUCIBLE_ENABLED = False
 """
 
 ALERTS = (
-    ('horizon.udp.test', 'smtp', 30),
+    ('horizon.test.udp', 'smtp', 30),
+    ('horizon.test.pickle', 'smtp', 30),
     ('skyline', 'smtp', 1800),
     ('skyline_test.alerters.test', 'smtp', 1800),
     ('skyline_test.alerters.test', 'hipchat', 1800),
@@ -682,6 +683,7 @@ SMTP_OPTS = {
     # recipients is a dictionary mapping metric names
     # (exactly matching those listed in ALERTS) to an array of e-mail addresses
     'recipients': {
+        'horizon.test': ['you@your_domain.com'],
         'skyline': ['you@your_domain.com', 'them@your_domain.com'],
         'skyline_test.alerters.test': ['you@your_domain.com'],
     },

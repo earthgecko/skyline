@@ -10,13 +10,17 @@ except ImportError:
 from msgpack import packb
 from time import time, sleep
 
-# import traceback
+import traceback
 import logging
 # import socket
 
 # import sys
 import os.path
 from os import remove as os_remove
+
+# @added 20190130 - Task #2690: Test Skyline on Python-3.6.7
+#                   Branch #3262: py3
+from sys import version_info
 
 import settings
 from skyline_functions import send_graphite_metric
@@ -40,13 +44,17 @@ except:
 skyline_app_graphite_namespace = 'skyline.%s%s.%s' % (
     parent_skyline_app, SERVER_METRIC_PATH, child_skyline_app)
 
-WORKER_DEBUG = False
+LOCAL_DEBUG = False
 
 # @added 20170319 - Feature #1978: worker - DO_NOT_SKIP_LIST
 try:
     DO_NOT_SKIP_LIST = settings.DO_NOT_SKIP_LIST
 except:
     DO_NOT_SKIP_LIST = []
+
+# @added 20190130 - Task #2690: Test Skyline on Python-3.6.7
+#                   Branch #3262: py3
+python_version = int(version_info[0])
 
 
 class Worker(Process):
@@ -58,9 +66,13 @@ class Worker(Process):
         super(Worker, self).__init__()
         # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
         if settings.REDIS_PASSWORD:
-            self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+            # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
+            #                      Branch #3262: py3
+            # self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+            self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
         else:
-            self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+            # self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+            self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
         self.q = queue
         self.parent_pid = parent_pid
         self.daemon = True
@@ -92,6 +104,13 @@ class Worker(Process):
         #    if to_skip in metric_name:
         #        return True
         # return False
+
+        # @added 20190130 - Task #2690: Test Skyline on Python-3.6.7
+        #                   Branch #3262: py3
+        #                   Bug #3266: py3 Redis binary objects not strings
+        if python_version == 3:
+            str_metric_name = str(metric_name)
+            metric_name = str_metric_name
 
         metric_namespace_elements = metric_name.split('.')
         process_metric = True
@@ -178,13 +197,17 @@ class Worker(Process):
             try:
                 self.redis_conn.ping()
             except:
-                logger.error('%s :: can\'t connect to redis at socket path %s' % (skyline_app, settings.REDIS_SOCKET_PATH))
+                logger.error('%s :: cannot connect to Redis at socket path %s' % (skyline_app, settings.REDIS_SOCKET_PATH))
                 sleep(10)
                 # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
                 if settings.REDIS_PASSWORD:
-                    self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+                    # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
+                    #                      Branch #3262: py3
+                    # self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+                    self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
                 else:
-                    self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+                    # self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+                    self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
                 pipe = self.redis_conn.pipeline()
                 continue
 
@@ -202,22 +225,59 @@ class Worker(Process):
                         continue
 
                     # Bad data coming in
-                    if metric[1][0] < now - MAX_RESOLUTION:
-                        continue
+                    # @modified 20190130 - Task #2690: Test Skyline on Python-3.6.7
+                    #                      Branch #3262: py3
+                    #                      Bug #3266: py3 Redis binary objects not strings
+                    # if metric[1][0] < now - MAX_RESOLUTION:
+                    #     continue
+                    try:
+                        if int(metric[1][0]) < now - MAX_RESOLUTION:
+                            continue
+                    except:
+                        pass
 
                     # Append to messagepack main namespace
-                    key = ''.join((FULL_NAMESPACE, metric[0]))
-                    pipe.append(key, packb(metric[1]))
-                    pipe.sadd(full_uniques, key)
+                    # @modified 20190130 - Task #2690: Test Skyline on Python-3.6.7
+                    #                      Branch #3262: py3
+                    #                      Bug #3266: py3 Redis binary objects not strings
+                    # key = ''.join((FULL_NAMESPACE, metric[0]))
+                    key = ''.join((FULL_NAMESPACE, str(metric[0])))
+                    if LOCAL_DEBUG:
+                        logger.info('debug :: worker :: adding metric Redis key - %s' % str(key))
+
+                    # @modified 20190130 - Task #2690: Test Skyline on Python-3.6.7
+                    #                      Branch #3262: py3
+                    #                      Bug #3266: py3 Redis binary objects not strings
+                    # pipe.append(key, packb(metric[1]))
+                    # pipe.sadd(full_uniques, key)
+                    try:
+                        pipe.append(str(key), packb(metric[1]))
+                    except Exception as e:
+                        logger.error('%s :: error on pipe.append: %s' % (skyline_app, str(e)))
+                    try:
+                        # pipe.sadd(full_uniques, key)
+                        pipe.sadd(full_uniques, str(key))
+                    except Exception as e:
+                        logger.error('%s :: error on pipe.sadd: %s' % (skyline_app, str(e)))
 
                     if not self.skip_mini:
                         # Append to mini namespace
-                        mini_key = ''.join((MINI_NAMESPACE, metric[0]))
+                        # @modified 20190130 - Task #2690: Test Skyline on Python-3.6.7
+                        #                      Branch #3262: py3
+                        #                      Bug #3266: py3 Redis binary objects not strings
+                        # mini_key = ''.join((MINI_NAMESPACE, metric[0]))
+                        mini_key = ''.join((MINI_NAMESPACE, str(metric[0])))
                         pipe.append(mini_key, packb(metric[1]))
                         pipe.sadd(mini_uniques, mini_key)
 
-                    pipe.execute()
-
+                    # @modified 20190130 - Task #2690: Test Skyline on Python-3.6.7
+                    #                      Branch #3262: py3
+                    #                      Bug #3266: py3 Redis binary objects not strings
+                    # pipe.execute()
+                    try:
+                        pipe.execute()
+                    except Exception as e:
+                        logger.error('%s :: error on pipe.execute: %s' % (skyline_app, str(e)))
             except Empty:
                 logger.info('%s :: worker queue is empty and timed out' % skyline_app)
             except WatchError:
@@ -225,6 +285,11 @@ class Worker(Process):
             except NotImplementedError:
                 pass
             except Exception as e:
+                # @added 20190130 - Task #2690: Test Skyline on Python-3.6.7
+                #                   Branch #3262: py3
+                #                   Bug #3266: py3 Redis binary objects not strings
+                # Added traceback
+                logger.error(traceback.format_exc())
                 logger.error('%s :: error: %s' % (skyline_app, str(e)))
 
             # Log progress
@@ -245,7 +310,7 @@ class Worker(Process):
                     logger.info('%s :: total queue values known for the last 10 seconds - %s' % (skyline_app, str(number_queue_sizes)))
                     logger.info('%s :: average queue size for the last 10 seconds - %s' % (skyline_app, str(average_queue_size)))
                     # self.send_graphite_metric('skyline.horizon.' + SERVER_METRIC_PATH + 'queue_size', self.q.qsize())
-#                    self.send_graphite_metric('queue_size', average_queue_size)
+                    # self.send_graphite_metric('queue_size', average_queue_size)
                     send_metric_name = '%s.queue_size' % skyline_app_graphite_namespace
                     send_graphite_metric(skyline_app, send_metric_name, average_queue_size)
 

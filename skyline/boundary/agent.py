@@ -20,6 +20,8 @@ skyline_app = 'boundary'
 skyline_app_logger = '%sLog' % skyline_app
 logger = logging.getLogger(skyline_app_logger)
 logfile = '%s/%s.log' % (settings.LOG_PATH, skyline_app)
+# @added 20191021 - Branch #3262: py3
+python_version = int(sys.version_info[0])
 
 
 class BoundaryAgent():
@@ -95,6 +97,13 @@ def run():
     # Make sure we can run all the algorithms
     try:
         timeseries = map(list, zip(map(float, range(int(time()) - 86400, int(time()) + 1)), [1] * 86401))
+
+        # @added 20191021 - Branch #3262: py3
+        # Convert map to list
+        if python_version == 3:
+            if isinstance(timeseries, map):
+                timeseries = list(timeseries)
+
         ensemble = [globals()[algorithm](
             timeseries, 'test', 3600, 100, 300, 1
         ) for algorithm in settings.BOUNDARY_ALGORITHMS]

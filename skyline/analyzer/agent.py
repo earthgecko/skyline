@@ -5,6 +5,8 @@ from os import getpid
 from os.path import isdir
 from daemon import runner
 from time import sleep, time
+# @added 20191024 - Branch #3262: py3
+from sys import version_info
 
 from logging.handlers import TimedRotatingFileHandler, MemoryHandler
 
@@ -21,6 +23,8 @@ skyline_app = 'analyzer'
 skyline_app_logger = '%sLog' % skyline_app
 logger = logging.getLogger(skyline_app_logger)
 logfile = '%s/%s.log' % (settings.LOG_PATH, skyline_app)
+# @added 20191024 - Branch #3262: py3
+python_version = int(version_info[0])
 
 
 class AnalyzerAgent():
@@ -89,6 +93,13 @@ def run():
         import algorithms
         logger.info('Testing algorithms')
         timeseries = map(list, zip(map(float, range(int(time()) - 86400, int(time()) + 1)), [1] * 86401))
+
+        # @added 20191024 - Branch #3262: py3
+        # Convert map to list
+        if python_version == 3:
+            if isinstance(timeseries, map):
+                timeseries = list(timeseries)
+
         # ensemble = [globals()[algorithm](timeseries) for algorithm in settings.ALGORITHMS]
         ensemble = [getattr(algorithms, algorithm)(timeseries) for algorithm in settings.ALGORITHMS]
     except KeyError as e:

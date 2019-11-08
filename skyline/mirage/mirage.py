@@ -1286,6 +1286,16 @@ class Mirage(Thread):
                     except Empty:
                         break
 
+                # @added 20191021 - Bug #3288: Always send anomaly_breakdown and exception metrics
+                #                   Branch #3262: py3
+                exceptions_metrics = ['Boring', 'Stale', 'TooShort', 'Other']
+                for i_exception in exceptions_metrics:
+                    if i_exception not in exceptions.keys():
+                        exceptions[i_exception] = 0
+                for i_anomaly_breakdown in settings.MIRAGE_ALGORITHMS:
+                    if i_anomaly_breakdown not in anomaly_breakdown.keys():
+                        anomaly_breakdown[i_anomaly_breakdown] = 0
+
                 # @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage
                 # Use Redis set and not self.metric_variables
                 metric_variables = []
