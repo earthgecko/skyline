@@ -19,6 +19,11 @@ from os import remove as os_remove
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 sys.path.insert(0, os.path.dirname(__file__))
 import settings
+# @added 20191030 - Bug #3266: py3 Redis binary objects not strings
+#                   Branch #3262: py3
+# Added a single functions to deal with Redis connection and the
+# charset='utf-8', decode_responses=True arguments required in py3
+from skyline_functions import get_redis_conn, get_redis_conn_decoded
 
 parent_skyline_app = 'horizon'
 child_skyline_app = 'roomba'
@@ -39,10 +44,20 @@ class Roomba(Thread):
     def __init__(self, parent_pid, skip_mini):
         super(Roomba, self).__init__()
         # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
-        if settings.REDIS_PASSWORD:
-            self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
-        else:
-            self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+        # @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
+        #                      Branch #3262: py3
+        # if settings.REDIS_PASSWORD:
+        #     self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+        # else:
+        #     self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+
+        # @added 20191030 - Bug #3266: py3 Redis binary objects not strings
+        #                   Branch #3262: py3
+        # Added a single functions to deal with Redis connection and the
+        # charset='utf-8', decode_responses=True arguments required in py3
+        self.redis_conn = get_redis_conn(skyline_app)
+        self.redis_conn_decoded = get_redis_conn_decoded(skyline_app)
+
         self.daemon = True
         self.parent_pid = parent_pid
         self.skip_mini = skip_mini
@@ -66,7 +81,11 @@ class Roomba(Thread):
 
         # Discover assigned metrics
         namespace_unique_metrics = '%sunique_metrics' % str(namespace)
-        unique_metrics = list(self.redis_conn.smembers(namespace_unique_metrics))
+        # @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
+        #                      Branch #3262: py3
+        # unique_metrics = list(self.redis_conn.smembers(namespace_unique_metrics))
+        unique_metrics = list(self.redis_conn_decoded.smembers(namespace_unique_metrics))
+
         keys_per_processor = int(ceil(float(len(unique_metrics)) / float(settings.ROOMBA_PROCESSES)))
         if i == settings.ROOMBA_PROCESSES:
             assigned_max = len(unique_metrics)
