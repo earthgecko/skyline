@@ -14,14 +14,20 @@ from threading import Thread
 # processes
 # from multiprocessing import Process, Manager
 from multiprocessing import Process
-from redis import StrictRedis
+# from redis import StrictRedis
 import traceback
 import mysql.connector
 from pymemcache.client.base import Client as pymemcache_Client
 
 import settings
 from skyline_functions import (
-    mysql_select, send_graphite_metric)
+    mysql_select, send_graphite_metric,
+    # @added 20191030 - Bug #3266: py3 Redis binary objects not strings
+    #                   Branch #3262: py3
+    # Added a single functions to deal with Redis connection and the
+    # charset='utf-8', decode_responses=True arguments required in py3
+    get_redis_conn, get_redis_conn_decoded)
+
 from database import get_engine
 # from process_correlations import *
 
@@ -130,10 +136,22 @@ class Luminosity(Thread):
         """
         super(Luminosity, self).__init__()
         # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
-        if settings.REDIS_PASSWORD:
-            self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
-        else:
-            self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+        # @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
+        #                      Branch #3262: py3
+        # Use get_redis_conn and get_redis_conn_decoded to use on Redis sets when the bytes
+        # types need to be decoded as utf-8 to str
+        # if settings.REDIS_PASSWORD:
+        #     self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+        # else:
+        #     self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+
+        # @added 20191030 - Bug #3266: py3 Redis binary objects not strings
+        #                   Branch #3262: py3
+        # Added a single functions to deal with Redis connection and the
+        # charset='utf-8', decode_responses=True arguments required in py3
+        self.redis_conn = get_redis_conn(skyline_app)
+        self.redis_conn_decoded = get_redis_conn_decoded(skyline_app)
+
         self.daemon = True
         self.parent_pid = parent_pid
         self.current_pid = getpid()
@@ -515,7 +533,12 @@ class Luminosity(Thread):
                 memcache_key = '%s.last.processed.anomaly.id' % skyline_app
                 if settings.MEMCACHE_ENABLED:
                     try:
-                        last_processed_anomaly_id = self.memcache_client.get(memcache_key)
+                        # @modified 20191029 - Task #3304: py3 - handle pymemcache bytes not str
+                        # last_processed_anomaly_id = self.memcache_client.get(memcache_key)
+                        if python_version == 2:
+                            last_processed_anomaly_id = self.memcache_client.get(memcache_key)
+                        else:
+                            last_processed_anomaly_id = self.memcache_client.get(memcache_key).decode('utf-8')
                         # if memcache does not have the key the response to the
                         # client is None, it does not except
                     except:
@@ -636,7 +659,10 @@ class Luminosity(Thread):
                     try:
                         # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
                         # correlations = str(len(self.correlations))
-                        correlations = str(len(list(self.redis_conn.smembers('luminosity.correlations'))))
+                        # @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
+                        #                      Branch #3262: py3
+                        # correlations = str(len(list(self.redis_conn.smembers('luminosity.correlations'))))
+                        correlations = str(len(list(self.redis_conn_decoded.smembers('luminosity.correlations'))))
                     except:
                         correlations = '0'
                     logger.info('correlations       :: %s' % correlations)
@@ -645,7 +671,10 @@ class Luminosity(Thread):
 
                     # @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage
                     try:
-                        runtimes = list(self.redis_conn.smembers('luminosity.runtimes'))
+                        # @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
+                        #                      Branch #3262: py3
+                        # runtimes = list(self.redis_conn.smembers('luminosity.runtimes'))
+                        runtimes = list(self.redis_conn_decoded.smembers('luminosity.runtimes'))
                     except:
                         runtimes = []
 
@@ -671,7 +700,10 @@ class Luminosity(Thread):
                     try:
                         # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
                         # metrics_checked_for_correlation = str(sum(self.metrics_checked_for_correlation))
-                        metrics_checked_for_correlation = str(len(list(self.redis_conn.smembers('luminosity.metrics_checked_for_correlation'))))
+                        # @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
+                        #                      Branch #3262: py3
+                        # metrics_checked_for_correlation = str(len(list(self.redis_conn.smembers('luminosity.metrics_checked_for_correlation'))))
+                        metrics_checked_for_correlation = str(len(list(self.redis_conn_decoded.smembers('luminosity.metrics_checked_for_correlation'))))
                     except:
                         metrics_checked_for_correlation = '0'
                     logger.info('metrics_checked_for_correlation   :: %s' % metrics_checked_for_correlation)
