@@ -1,5 +1,5 @@
 import logging
-from redis import StrictRedis
+# from redis import StrictRedis
 from msgpack import Unpacker
 import traceback
 from math import ceil
@@ -12,8 +12,13 @@ import requests
 from ast import literal_eval
 
 import settings
-from skyline_functions import (mysql_select, is_derivative_metric,
-                               nonNegativeDerivative)
+from skyline_functions import (
+    mysql_select, is_derivative_metric, nonNegativeDerivative,
+    # @added 20191030 - Bug #3266: py3 Redis binary objects not strings
+    #                   Branch #3262: py3
+    # Added a single functions to deal with Redis connection and the
+    # charset='utf-8', decode_responses=True arguments required in py3
+    get_redis_conn, get_redis_conn_decoded)
 
 # Database configuration
 config = {'user': settings.PANORAMA_DBUSER,
@@ -36,10 +41,21 @@ skyline_app_logger = '%sLog' % skyline_app
 logger = logging.getLogger(skyline_app_logger)
 
 # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
-if settings.REDIS_PASSWORD:
-    redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
-else:
-    redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+# @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
+#                      Branch #3262: py3
+# Use get_redis_conn and get_redis_conn_decoded to use on Redis sets when the bytes
+# types need to be decoded as utf-8 to str
+# if settings.REDIS_PASSWORD:
+#     redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+# else:
+#     redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+
+# @added 20191030 - Bug #3266: py3 Redis binary objects not strings
+#                   Branch #3262: py3
+# Added a single functions to deal with Redis connection and the
+# charset='utf-8', decode_responses=True arguments required in py3
+redis_conn = get_redis_conn(skyline_app)
+redis_conn_decoded = get_redis_conn_decoded(skyline_app)
 
 
 def get_anomaly(request_type):
@@ -90,7 +106,10 @@ def get_anomalous_ts(base_name, anomaly_timestamp):
     # Only correlate metrics with an alert setting
     if correlate_alerts_only:
         try:
-            smtp_alerter_metrics = list(redis_conn.smembers('analyzer.smtp_alerter_metrics'))
+            # @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
+            #                      Branch #3262: py3
+            # smtp_alerter_metrics = list(redis_conn.smembers('analyzer.smtp_alerter_metrics'))
+            smtp_alerter_metrics = list(redis_conn_decoded.smembers('analyzer.smtp_alerter_metrics'))
         except:
             smtp_alerter_metrics = []
         if base_name not in smtp_alerter_metrics:
@@ -104,7 +123,10 @@ def get_anomalous_ts(base_name, anomaly_timestamp):
     anomalous_metric = '%s%s' % (settings.FULL_NAMESPACE, base_name)
     unique_metrics = []
     try:
-        unique_metrics = list(redis_conn.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
+        # @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
+        #                      Branch #3262: py3
+        # unique_metrics = list(redis_conn.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
+        unique_metrics = list(redis_conn_decoded.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
     except:
         logger.error(traceback.format_exc())
         logger.error('error :: get_assigned_metrics :: no unique_metrics')
@@ -228,7 +250,10 @@ def get_anoms(anomalous_ts):
 
 def get_assigned_metrics(i):
     try:
-        unique_metrics = list(redis_conn.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
+        # @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
+        #                      Branch #3262: py3
+        # unique_metrics = list(redis_conn.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
+        unique_metrics = list(redis_conn_decoded.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
     except:
         logger.error(traceback.format_exc())
         logger.error('error :: get_assigned_metrics :: no unique_metrics')
