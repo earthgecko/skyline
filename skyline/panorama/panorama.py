@@ -15,7 +15,7 @@ from os import kill, getpid, listdir
 from os.path import join, isfile
 from ast import literal_eval
 
-from redis import StrictRedis
+# from redis import StrictRedis
 from msgpack import Unpacker, packb
 import traceback
 from sys import version_info
@@ -26,7 +26,14 @@ from mysql.connector import errorcode
 from sqlalchemy.sql import select
 
 import settings
-from skyline_functions import fail_check, mkdir_p
+
+from skyline_functions import (
+    fail_check, mkdir_p,
+    # @added 20191031 - Bug #3266: py3 Redis binary objects not strings
+    #                   Branch #3262: py3
+    # Added a single functions to deal with Redis connection and the
+    # charset='utf-8', decode_responses=True arguments required in py3
+    get_redis_conn, get_redis_conn_decoded)
 
 # @added 20170115 - Feature #1854: Ionosphere learn - generations
 # Added determination of the learn related variables so that any new metrics
@@ -113,10 +120,21 @@ class Panorama(Thread):
         """
         super(Panorama, self).__init__()
         # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
-        if settings.REDIS_PASSWORD:
-            self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
-        else:
-            self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+        # @modified 20191031 - Bug #3266: py3 Redis binary objects not strings
+        #                      Branch #3262: py3
+        # Use get_redis_conn and get_redis_conn_decoded
+        # if settings.REDIS_PASSWORD:
+        #     self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+        # else:
+        #     self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+
+        # @added 20191031 - Bug #3266: py3 Redis binary objects not strings
+        #                   Branch #3262: py3
+        # Added a single functions to deal with Redis connection and the
+        # charset='utf-8', decode_responses=True arguments required in py3
+        self.redis_conn = get_redis_conn(skyline_app)
+        self.redis_conn_decoded = get_redis_conn_decoded(skyline_app)
+
         self.daemon = True
         self.parent_pid = parent_pid
         self.current_pid = getpid()
@@ -474,6 +492,88 @@ class Panorama(Thread):
                 logger.error(traceback.format_exc())
                 logger.error('error :: update_slack_thread_ts :: failed to delete cache_key %s' % cache_key)
         return
+
+
+    # @added 20191107 - Feature #3306: Record the end_timestamp of anomalies
+    #                   Branch #3262: py3
+    def update_anomaly_end_timestamp(self, i, anomaly_id, anomaly_end_timestamp):
+        """
+        Update an anomaly record with the anomaly_end_timestamp.
+
+        :param self: self
+        :param i: python process id
+        :param anomaly_id: the anomaly id
+        :param anomaly_end_timestamp: the anomaly end timestamp
+        :type self: object
+        :type i: object
+        :type anomaly_id: int
+        :type anomaly_end_timestamp: int
+        :return: boolean
+        :rtype: boolean
+        """
+
+        def get_an_engine():
+            try:
+                engine, log_msg, trace = get_engine(skyline_app)
+                return engine, log_msg, trace
+            except:
+                logger.error(traceback.format_exc())
+                log_msg = 'error :: update_anomaly_end_timestamp :: failed to get MySQL engine in update_anomaly_end_timestamp'
+                logger.error('error :: update_anomaly_end_timestamp :: failed to get MySQL engine in update_anomaly_end_timestamp')
+                return None, log_msg, trace
+
+        def engine_disposal(engine):
+            if engine:
+                try:
+                    engine.dispose()
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: update_anomaly_end_timestamp :: calling engine.dispose()')
+            return
+
+        child_process_pid = os.getpid()
+        logger.info('update_anomaly_end_timestamp :: child_process_pid %s, processing anomaly_id %s and setting anomaly_end_timestamp as %s' % (
+            str(child_process_pid), str(anomaly_id), str(anomaly_end_timestamp)))
+        updated_anomaly_record = False
+        try:
+            engine, log_msg, trace = get_an_engine()
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: update_anomaly_end_timestamp :: could not get a MySQL engine to update slack_thread_ts in anomalies for anomaly_id %s' % (str(anomaly_id)))
+        if not engine:
+            logger.error('error :: update_anomaly_end_timestamp :: engine not obtained to update slack_thread_ts in anomalies for anomaly_id %s' % (str(anomaly_id)))
+            return False
+
+        try:
+            anomalies_table, log_msg, trace = anomalies_table_meta(skyline_app, engine)
+            logger.info(log_msg)
+            logger.info('update_anomaly_end_timestamp :: anomalies_table OK')
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: update_anomaly_end_timestamp :: failed to get anomalies_table meta for anomaly_id %s' % str(anomaly_id))
+
+        try:
+            connection = engine.connect()
+            connection.execute(
+                anomalies_table.update(
+                    anomalies_table.c.id == anomaly_id).
+                values(anomaly_end_timestamp=anomaly_end_timestamp))
+            connection.close()
+            updated_anomaly_record = True
+            logger.info('update_anomaly_end_timestamp :: updated anomaly_end_timestamp (%s) for anomaly id %s' % (
+                str(anomaly_end_timestamp), str(anomaly_id)))
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: update_anomaly_end_timestamp :: could not update anomaly_end_timestamp (%s) for anomaly id %s' % (
+                str(anomaly_end_timestamp), str(anomaly_id)))
+        if engine:
+            try:
+                engine_disposal(engine)
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: update_anomaly_end_timestamp :: could not dispose engine')
+        return updated_anomaly_record
+
 
     def spin_process(self, i, metric_check_file):
         """
@@ -1043,7 +1143,7 @@ class Panorama(Thread):
                 anomaly_id, metric, metric_timestamp))
         except:
             logger.error('error :: failed to insert anomaly %s at %s' % (
-                anomaly_id, metric, metric_timestamp))
+                metric, metric_timestamp))
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return False
 
@@ -1057,6 +1157,18 @@ class Panorama(Thread):
             logger.error(
                 'error :: could not query cache_key - %s.last_check.%s.%s - %s' % (
                     skyline_app, app, metric, e))
+
+        # @added 20191031 - Feature #3306: Record the end_timestamp of anomalies
+        # Add to current anomalies set
+        try:
+            redis_set = 'current.anomalies'
+            data = [metric, metric_timestamp, anomaly_id, None]
+            self.redis_conn.sadd(redis_set, str(data))
+            logger.info('added %s to Redis set %s' % (str(data), redis_set))
+        except Exception as e:
+            logger.error(
+                'error :: could not add %s to Redis set %s - %s' % (
+                    str(data), redis_set, e))
 
         if os.path.isfile(str(metric_check_file)):
             try:
@@ -1129,10 +1241,13 @@ class Panorama(Thread):
                     settings.REDIS_SOCKET_PATH))
                 sleep(30)
                 # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
-                if settings.REDIS_PASSWORD:
-                    self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
-                else:
-                    self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+                # @modified 20191031 - Bug #3266: py3 Redis binary objects not strings
+                #                      Branch #3262: py3
+                # if settings.REDIS_PASSWORD:
+                #     self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+                # else:
+                #     self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+                self.redis_conn = get_redis_conn(skyline_app)
                 continue
 
             # Report app up
@@ -1244,6 +1359,92 @@ class Panorama(Thread):
                 if metric_var_files:
                     break
 
+                # @added 20191107 - Feature #3306: Record the end_timestamp of anomalies
+                #                   Branch #3262: py3
+                # Set the anomaly_end_timestamp for any metrics no longer anomalous
+                redis_set = 'current.anomalies'
+                try:
+                    current_anomalies = self.redis_conn_decoded.smembers(redis_set)
+                except:
+                    logger.info(traceback.format_exc())
+                    logger.error('error :: failed to get data from %s Redis set' % redis_set)
+                    current_anomalies = []
+                if current_anomalies:
+                    for item in current_anomalies:
+                        remove_item = False
+                        try:
+                            list_data = literal_eval(item)
+                            anomalous_metric = str(list_data[0])
+                            anomaly_timestamp = int(list_data[1])
+                            try:
+                                anomaly_id = int(list_data[2])
+                            except:
+                                anomaly_id = None
+                            try:
+                                anomaly_end_timestamp = int(list_data[3])
+                            except:
+                                anomaly_end_timestamp = None
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: failed to evaluate data from item %s from Redis set %s' %(
+                                str(item), redis_set))
+                        if not anomaly_id:
+                            if anomaly_timestamp > (int(time()) - settings.STALE_PERIOD):
+                                # If no anomaly is has been created by now, it
+                                # never will be created.
+                                remove_item = True
+                        if not anomaly_end_timestamp:
+                            if not remove_item:
+                                continue
+
+                        if anomaly_id and anomaly_end_timestamp:
+                            # Update SQL
+                            # Spawn update_anomaly_end_timestamp process
+                            pids = []
+                            spawned_pids = []
+                            pid_count = 0
+                            now = time()
+                            for i in range(1, 2):
+                                try:
+                                    p = Process(target=self.update_anomaly_end_timestamp, args=(i, anomaly_id, anomaly_end_timestamp))
+                                    pids.append(p)
+                                    pid_count += 1
+                                    logger.info('starting update_anomaly_end_timestamp')
+                                    p.start()
+                                    spawned_pids.append(p.pid)
+                                except:
+                                    logger.info(traceback.format_exc())
+                                    logger.error('error :: to start update_anomaly_end_timestamp')
+                                    continue
+                            p_starts = time()
+                            # If the Skyline MySQL database is on a remote host
+                            # 2 seconds here is sometimes not sufficient so
+                            # increased to 10
+                            while time() - p_starts <= 10:
+                                if any(p.is_alive() for p in pids):
+                                    # Just to avoid hogging the CPU
+                                    sleep(.1)
+                                else:
+                                    # All the processes are done, break now.
+                                    time_to_run = time() - p_starts
+                                    logger.info(
+                                        '%s :: update_anomaly_end_timestamp completed in %.2f seconds' % (
+                                            skyline_app, time_to_run))
+                                    remove_item = True
+                                    break
+                            else:
+                                # We only enter this if we didn't 'break' above.
+                                logger.info('%s :: timed out, killing all update_anomaly_end_timestamp processes' % (skyline_app))
+                                for p in pids:
+                                    p.terminate()
+                        if remove_item:
+                            try:
+                                redis_set = 'current.anomalies'
+                                self.redis_conn.srem(redis_set, str(list_data))
+                            except:
+                                logger.error(traceback.format_exc())
+                                logger.error('error :: failed to remove %s for Redis set %s' % (str(list_data), redis_set))
+
                 # @added 20190501 - Branch #2646: slack
                 # Check if any Redis keys exist with a slack_thread_ts to update
                 # any anomaly records
@@ -1267,7 +1468,10 @@ class Panorama(Thread):
                         base_name = None
                         metric_timestamp = None
                         try:
-                            update_on = self.redis_conn.get(cache_key)
+                            # @modified 20191106 - Bug #3266: py3 Redis binary objects not strings
+                            #                      Branch #3262: py3
+                            # update_on = self.redis_conn.get(cache_key)
+                            update_on = self.redis_conn_decoded.get(cache_key)
                             # cache_key_value = [base_name, metric_timestamp, slack_thread_ts]
                             update_for = literal_eval(update_on)
                             base_name = str(update_for[0])
