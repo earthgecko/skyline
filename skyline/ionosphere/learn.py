@@ -23,7 +23,12 @@ from skyline_functions import (
     # @added 20170603 - Feature #2034: analyse_derivatives
     nonNegativeDerivative, in_list,
     # @added 20170825 - Task #2132: Optimise Ionosphere DB usage
-    get_memcache_metric_object)
+    get_memcache_metric_object,
+    # @added 20191030 - Bug #3266: py3 Redis binary objects not strings
+    #                   Branch #3262: py3
+    # Added a single functions to deal with Redis connection and the
+    # charset='utf-8', decode_responses=True arguments required in py3
+    get_redis_conn, get_redis_conn_decoded)
 
 from features_profile import calculate_features_profile
 
@@ -65,10 +70,21 @@ except:
     learn_full_duration = 86400 * 30  # 2592000
 
 # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
-if settings.REDIS_PASSWORD:
-    redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
-else:
-    redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+# @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
+#                      Branch #3262: py3
+# Use get_redis_conn and get_redis_conn_decoded
+# if settings.REDIS_PASSWORD:
+#     redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+# else:
+#     redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+
+# @added 20191030 - Bug #3266: py3 Redis binary objects not strings
+#                   Branch #3262: py3
+# Added a single functions to deal with Redis connection and the
+# charset='utf-8', decode_responses=True arguments required in py3
+redis_conn = get_redis_conn(skyline_app)
+redis_conn_decoded = get_redis_conn_decoded(skyline_app)
+
 context = 'ionosphere_learn'
 
 
@@ -463,7 +479,10 @@ def ionosphere_learn(timestamp):
     work_set = 'ionosphere.learn.work'
     learn_work = None
     try:
-        learn_work = redis_conn.smembers(work_set)
+        # @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
+        #                      Branch #3262: py3
+        # learn_work = redis_conn.smembers(work_set)
+        learn_work = redis_conn_decoded.smembers(work_set)
         logger.info('learn :: got Redis %s set' % work_set)
     except Exception as e:
         logger.error('error :: learn :: could not query Redis for ionosphere.learn.work - %s' % (work_set, e))
@@ -539,7 +558,21 @@ def ionosphere_learn(timestamp):
 
             if not metrics_id:
                 logger.error('error :: learn :: failed get the metrics_id from the database')
-                logger.info('learn :: exiting this work but not removing work item, as database may be available again before the work expires')
+
+                # @modified 20191031 - Branch #3262: py3
+                # If the learn work is 4 hours old remove it
+                # logger.info('learn :: exiting this work but not removing work item, as database may be available again before the work expires')
+                time_check = int(time())
+                work_age = time_check - int(learn_metric_timestamp)
+                if work_age > 14400:
+                    logger.info('learn :: removing this work %s from Redis set %s as it is over 4 hours old' % (work_set, str(learn_metric_list)))
+                    try:
+                        redis_conn.srem(work_set, str(learn_metric_list))
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: learn :: failed remove %s from Redis set %s')
+                else:
+                    logger.info('learn :: exiting this work but not removing work item, as database may be available again before the work expires')
                 learn_engine_disposal(engine)
                 continue
 
@@ -966,7 +999,10 @@ def ionosphere_learn(timestamp):
                 # to their deriative products
                 known_derivative_metric = False
                 try:
-                    derivative_metrics = list(redis_conn.smembers('derivative_metrics'))
+                    # @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
+                    #                      Branch #3262: py3
+                    # derivative_metrics = list(redis_conn.smembers('derivative_metrics'))
+                    derivative_metrics = list(redis_conn_decoded.smembers('derivative_metrics'))
                 except:
                     derivative_metrics = []
                 if metric in derivative_metrics:

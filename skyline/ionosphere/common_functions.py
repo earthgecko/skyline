@@ -145,17 +145,30 @@ def get_metrics_db_object(base_name):
 
     # @added 20170825 - Task #2132: Optimise Ionosphere DB usage
     # Add the metric db object data to memcache
-    if settings.MEMCACHE_ENABLED and query_metric_table:
+    # @modified 20191031 - Branch #3262: py3
+    #                      Task #3304: py3 - handle pymemcache bytes not str
+    # if settings.MEMCACHE_ENABLED and query_metric_table:
+    if settings.MEMCACHE_ENABLED and query_metric_table and memcache_metrics_db_object:
         try:
             memcache_metric_dict = {}
-            for k, v in memcache_metrics_db_object.iteritems():
-                key_name = str(k)
-                key_value = str(v)
-                memcache_metric_dict[key_name] = key_value
+            # @modified 20191030 - Branch #3262: py3
+            #                      Task #3304: py3 - handle pymemcache bytes not str
+            # for k, v in memcache_metrics_db_object.iteritems():
+            if python_version == 2:
+                for k, v in memcache_metrics_db_object.iteritems():
+                    key_name = str(k)
+                    key_value = str(v)
+                    memcache_metric_dict[key_name] = key_value
+            else:
+                for k, v in memcache_metrics_db_object.items():
+                    key_name = str(k)
+                    key_value = str(v)
+                    memcache_metric_dict[key_name] = key_value
             memcache_client.set(metrics_db_object_key, memcache_metric_dict, expire=3600)
             logger.info('set the memcache key - %s' % metrics_db_object_key)
         except:
-            logger.error('error :: failed to set %s from memcache' % metrics_db_object_key)
+            logger.error(traceback.format_exc())
+            logger.error('error :: failed to set %s in memcache' % metrics_db_object_key)
         try:
             memcache_client.close()
         except:
@@ -179,11 +192,33 @@ def get_calculated_features(calculated_feature_file):
 
     """
     if not os.path.isfile(calculated_feature_file):
+        # @added 20191029 - Task #3302: Handle csv.reader in py3
+        #                   Branch #3262: py3
+        # Added an error to log
+        logger.error('error :: get_calculated_features :: no calculated_feature_file found - %s' % (
+            str(calculated_feature_file)))
         return []
     count_id = 0
+
+    # @added 20191029 - Task #3302: Handle csv.reader in py3
+    #                      Branch #3262: py3
+    if python_version == 3:
+        try:
+            codecs
+        except:
+            import codecs
+
     calculated_features = []
+
     with open(calculated_feature_file, 'rb') as fr:
-        reader = csv.reader(fr, delimiter=',')
+        # @modified 20191029 - Task #3302: Handle csv.reader in py3
+        #                      Branch #3262: py3
+        # reader = csv.reader(fr, delimiter=',')
+        if python_version == 2:
+            reader = csv.reader(fr, delimiter=',')
+        else:
+            reader = csv.reader(codecs.iterdecode(fr, 'utf-8'), delimiter=',')
+
         for i, line in enumerate(reader):
             if str(line[0]) != '':
                 if ',' in line[0]:

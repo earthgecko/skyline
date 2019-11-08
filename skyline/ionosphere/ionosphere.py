@@ -21,7 +21,7 @@ from shutil import rmtree
 from ast import literal_eval
 from datetime import datetime
 
-from redis import StrictRedis
+# from redis import StrictRedis
 import traceback
 import mysql.connector
 # from mysql.connector import errorcode
@@ -56,7 +56,12 @@ from skyline_functions import (
     # @modified 20190408 - Feature #2484: FULL_DURATION feature profiles
     # Moved to common_functions
     # get_memcache_metric_object)
-    mkdir_p)
+    mkdir_p,
+    # @added 20191030 - Bug #3266: py3 Redis binary objects not strings
+    #                   Branch #3262: py3
+    # Added a single functions to deal with Redis connection and the
+    # charset='utf-8', decode_responses=True arguments required in py3
+    get_redis_conn, get_redis_conn_decoded)
 
 # @added 20161221 - calculate features for every anomaly, instead of making the
 # user do it in the frontend or calling the webapp constantly in a cron like
@@ -182,10 +187,21 @@ class Ionosphere(Thread):
         """
         super(Ionosphere, self).__init__()
         # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
-        if settings.REDIS_PASSWORD:
-            self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
-        else:
-            self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+        # @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
+        #                      Branch #3262: py3
+        # Use get_redis_conn and get_redis_conn_decoded
+        # if settings.REDIS_PASSWORD:
+        #     self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+        # else:
+        #     self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+
+        # @added 20191030 - Bug #3266: py3 Redis binary objects not strings
+        #                   Branch #3262: py3
+        # Added a single functions to deal with Redis connection and the
+        # charset='utf-8', decode_responses=True arguments required in py3
+        self.redis_conn = get_redis_conn(skyline_app)
+        self.redis_conn_decoded = get_redis_conn_decoded(skyline_app)
+
         self.daemon = True
         self.parent_pid = parent_pid
         self.current_pid = getpid()
@@ -358,7 +374,10 @@ class Ionosphere(Thread):
         ionosphere_unique_metrics = []
         try:
             # ionosphere_unique_metrics = list(self.redis_conn.smembers('ionosphere.unique_metrics'))
-            redis_ionosphere_unique_metrics = self.redis_conn.smembers('ionosphere.unique_metrics')
+            # @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
+            #                      Branch #3262: py3
+            # redis_ionosphere_unique_metrics = self.redis_conn.smembers('ionosphere.unique_metrics')
+            redis_ionosphere_unique_metrics = self.redis_conn_decoded.smembers('ionosphere.unique_metrics')
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: failed to get ionosphere.unique_metrics from Redis')
@@ -465,7 +484,10 @@ class Ionosphere(Thread):
             redis_ionosphere_unique_metrics = []
             try:
                 # ionosphere_unique_metrics = list(self.redis_conn.smembers('ionosphere.unique_metrics'))
-                redis_ionosphere_unique_metrics = self.redis_conn.smembers('ionosphere.unique_metrics')
+                # @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
+                #                      Branch #3262: py3
+                # redis_ionosphere_unique_metrics = self.redis_conn.smembers('ionosphere.unique_metrics')
+                redis_ionosphere_unique_metrics = self.redis_conn_decoded.smembers('ionosphere.unique_metrics')
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: failed to get ionosphere.unique_metrics from Redis')
@@ -651,7 +673,10 @@ class Ionosphere(Thread):
         # @added 20190413 - Feature #2484: FULL_DURATION feature profiles
         # Only process if it is an ionosphere enabled metric
         try:
-            ionosphere_unique_metrics = list(self.redis_conn.smembers('ionosphere.unique_metrics'))
+            # @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
+            #                      Branch #3262: py3
+            # ionosphere_unique_metrics = list(self.redis_conn.smembers('ionosphere.unique_metrics'))
+            ionosphere_unique_metrics = list(self.redis_conn_decoded.smembers('ionosphere.unique_metrics'))
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: failed to get ionosphere.unique_metrics from Redis')
@@ -1164,7 +1189,10 @@ class Ionosphere(Thread):
         # section
         ionosphere_non_smtp_alerter_metrics = []
         try:
-            ionosphere_non_smtp_alerter_metrics = list(self.redis_conn.smembers('ionosphere.ionosphere_non_smtp_alerter_metrics'))
+            # @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
+            #                      Branch #3262: py3
+            # ionosphere_non_smtp_alerter_metrics = list(self.redis_conn.smembers('ionosphere.ionosphere_non_smtp_alerter_metrics'))
+            ionosphere_non_smtp_alerter_metrics = list(self.redis_conn_decoded.smembers('ionosphere.ionosphere_non_smtp_alerter_metrics'))
         except:
             logger.info(traceback.format_exc())
             logger.error('error :: failed to generate a list from the ionosphere.ionosphere_non_smtp_alerter_metrics Redis set')
@@ -1810,7 +1838,12 @@ class Ionosphere(Thread):
                 if settings.MEMCACHE_ENABLED:
                     fp_id_feature_values_key = 'fp.id.%s.feature.values' % str(fp_id)
                     try:
-                        fp_id_feature_values = self.memcache_client.get(fp_id_feature_values_key)
+                        # @modified 20191029 - Task #3304: py3 - handle pymemcache bytes not str
+                        # fp_id_feature_values = self.memcache_client.get(fp_id_feature_values_key)
+                        if python_version == 2:
+                            fp_id_feature_values = self.memcache_client.get(fp_id_feature_values_key)
+                        else:
+                            fp_id_feature_values = self.memcache_client.get(fp_id_feature_values_key).decode('utf-8')
                         # if memcache does not have the key the response to the
                         # client is None, it does not except
                     except:
@@ -2052,7 +2085,12 @@ class Ionosphere(Thread):
                     if settings.MEMCACHE_ENABLED:
                         fp_id_metric_ts_key = 'fp.%s.%s.ts' % (str(fp_id), str(metrics_id))
                         try:
-                            fp_id_metric_ts_object = self.memcache_client.get(fp_id_metric_ts_key)
+                            # @modified 20191029 - Task #3304: py3 - handle pymemcache bytes not str
+                            # fp_id_metric_ts_object = self.memcache_client.get(fp_id_metric_ts_key)
+                            if python_version == 2:
+                                fp_id_metric_ts_object = self.memcache_client.get(fp_id_metric_ts_key)
+                            else:
+                                fp_id_metric_ts_object = self.memcache_client.get(fp_id_metric_ts_key).decode('utf-8')
                             # if memcache does not have the key the response to the
                             # client is None, it does not except
                         except:
@@ -3171,7 +3209,12 @@ class Ionosphere(Thread):
             if settings.MEMCACHE_ENABLED:
                 hosts_id_key = 'hosts.id.%s' % this_host
                 try:
-                    host_id = self.memcache_client.get(hosts_id_key)
+                    # @modified 20191029 - Task #3304: py3 - handle pymemcache bytes not str
+                    # host_id = self.memcache_client.get(hosts_id_key)
+                    if python_version == 2:
+                        host_id = self.memcache_client.get(hosts_id_key)
+                    else:
+                        host_id = self.memcache_client.get(hosts_id_key).decode('utf-8')
                     # if memcache does not have the key the response to the
                     # client is None, it does not except
                 except:
@@ -3320,7 +3363,10 @@ class Ionosphere(Thread):
                     try:
                         # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
                         # not_anomalous = str(len(self.not_anomalous))
-                        not_anomalous = str(len(list(self.redis_conn.smembers('ionosphere.not_anomalous'))))
+                        # @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
+                        #                      Branch #3262: py3
+                        # not_anomalous = str(len(list(self.redis_conn.smembers('ionosphere.not_anomalous'))))
+                        not_anomalous = str(len(list(self.redis_conn_decoded.smembers('ionosphere.not_anomalous'))))
                     except:
                         not_anomalous = '0'
                     logger.info('not_anomalous      :: %s' % not_anomalous)
@@ -3331,7 +3377,10 @@ class Ionosphere(Thread):
                         # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
                         # Use Redis set instead of Manager() list
                         # total_anomalies = str(len(self.anomalous_metrics))
-                        total_anomalies = str(len(list(self.redis_conn.smembers('ionosphere.anomalous_metrics'))))
+                        # @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
+                        #                      Branch #3262: py3
+                        # total_anomalies = str(len(list(self.redis_conn.smembers('ionosphere.anomalous_metrics'))))
+                        total_anomalies = str(len(list(self.redis_conn_decoded.smembers('ionosphere.anomalous_metrics'))))
                     except:
                         total_anomalies = '0'
                     logger.info('total_anomalies    :: %s' % total_anomalies)
@@ -3341,7 +3390,10 @@ class Ionosphere(Thread):
                     try:
                         # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
                         # training_metrics = str(len(self.training_metrics))
-                        training_metrics = str(len(list(self.redis_conn.smembers('ionosphere.training_metrics'))))
+                        # @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
+                        #                      Branch #3262: py3
+                        # training_metrics = str(len(list(self.redis_conn.smembers('ionosphere.training_metrics'))))
+                        training_metrics = str(len(list(self.redis_conn_decoded.smembers('ionosphere.training_metrics'))))
                     except:
                         training_metrics = '0'
                     logger.info('training metrics   :: %s' % training_metrics)
@@ -3351,7 +3403,10 @@ class Ionosphere(Thread):
                     try:
                         # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
                         # features_profiles_checked = str(len(self.features_profiles_checked))
-                        features_profiles_checked = str(len(list(self.redis_conn.smembers('ionosphere.features_profiles_checked'))))
+                        # @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
+                        #                      Branch #3262: py3
+                        # features_profiles_checked = str(len(list(self.redis_conn.smembers('ionosphere.features_profiles_checked'))))
+                        features_profiles_checked = str(len(list(self.redis_conn_decoded.smembers('ionosphere.features_profiles_checked'))))
                     except:
                         features_profiles_checked = '0'
                     logger.info('fps checked count  :: %s' % features_profiles_checked)
@@ -3378,7 +3433,10 @@ class Ionosphere(Thread):
                         try:
                             # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
                             # sent_to_panorama = str(len(self.sent_to_panorama))
-                            sent_to_panorama = str(len(list(self.redis_conn.smembers('ionosphere.sent_to_panorama'))))
+                            # @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
+                            #                      Branch #3262: py3
+                            # sent_to_panorama = str(len(list(self.redis_conn.smembers('ionosphere.sent_to_panorama'))))
+                            sent_to_panorama = str(len(list(self.redis_conn_decoded.smembers('ionosphere.sent_to_panorama'))))
                         except:
                             sent_to_panorama = '0'
                         logger.info('sent_to_panorama   :: %s' % sent_to_panorama)
@@ -3497,7 +3555,10 @@ class Ionosphere(Thread):
                 if settings.IONOSPHERE_LEARN:
                     learn_work = None
                     try:
-                        learn_work = self.redis_conn.smembers('ionosphere.learn.work')
+                        # @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
+                        #                      Branch #3262: py3
+                        # learn_work = self.redis_conn.smembers('ionosphere.learn.work')
+                        learn_work = self.redis_conn_decoded.smembers('ionosphere.learn.work')
                     except Exception as e:
                         logger.error('error :: could not query Redis for ionosphere.learn.work - %s' % e)
                     if learn_work:
@@ -3539,7 +3600,10 @@ class Ionosphere(Thread):
             # Timed this takes 0.013319 seconds on 689 unique_metrics
             unique_metrics = []
             try:
-                unique_metrics = list(self.redis_conn.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
+                # @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
+                #                      Branch #3262: py3
+                # unique_metrics = list(self.redis_conn.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
+                unique_metrics = list(self.redis_conn_decoded.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: could not get the unique_metrics list from Redis')
@@ -3551,7 +3615,10 @@ class Ionosphere(Thread):
             # section
             ionosphere_smtp_alerter_metrics = []
             try:
-                ionosphere_smtp_alerter_metrics = list(self.redis_conn.smembers('ionosphere.ionosphere_smtp_alerter_metrics'))
+                # @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
+                #                      Branch #3262: py3
+                # ionosphere_smtp_alerter_metrics = list(self.redis_conn.smembers('ionosphere.ionosphere_smtp_alerter_metrics'))
+                ionosphere_smtp_alerter_metrics = list(self.redis_conn_decoded.smembers('ionosphere.ionosphere_smtp_alerter_metrics'))
             except:
                 logger.info(traceback.format_exc())
                 logger.error('error :: failed to generate a list from the ionosphere_smtp_alerter_metrics Redis set')
@@ -3636,14 +3703,20 @@ class Ionosphere(Thread):
             # Manager().list()
             ionosphere_smtp_alerter_metrics = []
             try:
-                ionosphere_smtp_alerter_metrics = list(self.redis_conn.smembers('ionosphere.ionosphere_smtp_alerter_metrics'))
+                # @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
+                #                      Branch #3262: py3
+                # ionosphere_smtp_alerter_metrics = list(self.redis_conn.smembers('ionosphere.ionosphere_smtp_alerter_metrics'))
+                ionosphere_smtp_alerter_metrics = list(self.redis_conn_decoded.smembers('ionosphere.ionosphere_smtp_alerter_metrics'))
             except:
                 logger.info(traceback.format_exc())
                 logger.error('error :: failed to generate a list from the ionosphere_smtp_alerter_metrics Redis set')
                 ionosphere_smtp_alerter_metrics = []
             ionosphere_non_smtp_alerter_metrics = []
             try:
-                ionosphere_non_smtp_alerter_metrics = list(self.redis_conn.smembers('ionosphere.ionosphere_non_smtp_alerter_metrics'))
+                # @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
+                #                      Branch #3262: py3
+                # ionosphere_non_smtp_alerter_metrics = list(self.redis_conn.smembers('ionosphere.ionosphere_non_smtp_alerter_metrics'))
+                ionosphere_non_smtp_alerter_metrics = list(self.redis_conn_decoded.smembers('ionosphere.ionosphere_non_smtp_alerter_metrics'))
             except:
                 logger.info(traceback.format_exc())
                 logger.error('error :: failed to generate a list from the ionosphere_non_smtp_alerter_metrics Redis set')
@@ -3681,7 +3754,10 @@ class Ionosphere(Thread):
                 if run_process_ionosphere_echo:
                     ionosphere_unique_metrics = []
                     try:
-                        ionosphere_unique_metrics = self.redis_conn.smembers('ionosphere.unique_metrics')
+                        # @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
+                        #                      Branch #3262: py3
+                        # ionosphere_unique_metrics = self.redis_conn.smembers('ionosphere.unique_metrics')
+                        ionosphere_unique_metrics = self.redis_conn_decoded.smembers('ionosphere.unique_metrics')
                     except:
                         logger.error(traceback.format_exc())
                         logger.error('error :: failed to get Redis smembers ionosphere.unique_metrics')
@@ -3886,8 +3962,13 @@ class Ionosphere(Thread):
 
             for p in pids:
                 if p.is_alive():
-                    logger.info('stopping %s - %s' % (function_name, str(p.is_alive())))
-                    p.join()
+                    # @modified 20191031 - Bug #3296: Ionosphere spawn_learn_process hanging on docker
+                    #                      Branch #3002 - docker
+                    # Use terminate not join for docker
+                    # logger.info('stopping %s - %s' % (function_name, str(p.is_alive())))
+                    # p.join()
+                    logger.info('killing %s - %s' % (function_name, str(p.is_alive())))
+                    p.terminate()
 
             # @added 20170108 - Feature #1830: Ionosphere alerts
             # Reset added lists of ionospehere_smtp_alerter_metrics and

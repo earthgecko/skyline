@@ -20,7 +20,12 @@ __location__ = os.path.realpath(os.path.join(os.getcwd(), dirname(__file__)))
 sys.path.insert(0, os.path.join(__location__, '..', 'skyline'))
 import settings
 import skyline_version
-from skyline_functions import write_data_to_file
+from skyline_functions import (
+    write_data_to_file,
+    # @added 20191029 - Task #3302: Handle csv.reader in py3
+    #                   Branch #3262: py3
+    read_csv)
+
 from tsfresh_feature_names import TSFRESH_FEATURES, TSFRESH_VERSION
 
 settings.LOG_PATH = '/tmp'
@@ -46,13 +51,29 @@ if str(options.echo_only_match_once) == 'True':
     ONLY_MATCH_ONCE = True
 else:
     ONLY_MATCH_ONCE = False
+python_version = int(sys.version_info[0])
 
 
 def calculate_features(calculated_feature_file):
     calculated_features = []
     count_id = 0
+
+    # @added 20191029 - Task #3302: Handle csv.reader in py3
+    #                   Branch #3262: py3
+    if python_version == 3:
+        try:
+            codecs
+        except:
+            import codecs
+
     with open(calculated_feature_file, 'rb') as fr:
-        reader = csv.reader(fr, delimiter=',')
+    # @modified 20191029 - Task #3302: Handle csv.reader in py3
+    #                      Branch #3262: py3
+        # reader = csv.reader(fr, delimiter=',')
+        if python_version == 2:
+            reader = csv.reader(fr, delimiter=',')
+        else:
+            reader = csv.reader(codecs.iterdecode(fr, 'utf-8'), delimiter=',')
         for i, line in enumerate(reader):
             if str(line[0]) != '':
                 if ',' in line[0]:
@@ -65,6 +86,7 @@ def calculate_features(calculated_feature_file):
                     calculated_features.append([feature_name, calc_value])
                 except:
                     print('error :: failed to determine calc_value for %s from %s' % (feature_name, calculated_feature_file))
+
     all_calc_features_sum_list = []
     for feature_name, calc_value in calculated_features:
         all_calc_features_sum_list.append(float(calc_value))

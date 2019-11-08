@@ -41,6 +41,11 @@ root_dir = os.path.join(os.path.dirname(os.path.realpath(parent_dir)))
 skyline_dir = parent_dir
 sys.path.append(skyline_dir)
 import settings
+
+# @added 20191029 - Task #3302: Handle csv.reader in py3
+#                   Branch #3262: py3
+from skyline_functions import read_csv
+
 from tsfresh_feature_names import TSFRESH_FEATURES
 from database import (ionosphere_table_meta, metrics_table_meta)
 
@@ -141,9 +146,30 @@ if __name__ == '__main__':
         if not create_tables:
             continue
 
+        # @added 20191029 - Task #3302: Handle csv.reader in py3
+        #                      Branch #3262: py3
+        try:
+            python_version
+        except:
+            from sys import version_info
+            python_version = int(version_info[0])
+        if python_version == 3:
+            try:
+                codecs
+            except:
+                import codecs
+
         features_data = []
+
         with open(features_file, 'rb') as fr:
-            reader = csv.reader(fr, delimiter=',')
+            # @modified 20191029 - Task #3302: Handle csv.reader in py3
+            #                      Branch #3262: py3
+            # reader = csv.reader(fr, delimiter=',')
+            if python_version == 2:
+                reader = csv.reader(fr, delimiter=',')
+            else:
+                reader = csv.reader(codecs.iterdecode(fr, 'utf-8'), delimiter=',')
+
             for i, line in enumerate(reader):
                 feature_name_item = False
                 fname_id = False
