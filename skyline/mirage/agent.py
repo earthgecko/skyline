@@ -6,6 +6,7 @@ from os.path import isdir
 from daemon import runner
 from time import sleep, time
 from logging.handlers import TimedRotatingFileHandler, MemoryHandler
+from sys import version_info
 
 import os.path
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
@@ -20,6 +21,8 @@ skyline_app = 'mirage'
 skyline_app_logger = '%sLog' % skyline_app
 logger = logging.getLogger(skyline_app_logger)
 logfile = '%s/%s.log' % (settings.LOG_PATH, skyline_app)
+# @added 20191024 - Branch #3262: py3
+python_version = int(version_info[0])
 
 
 class MirageAgent():
@@ -71,6 +74,13 @@ def run():
     # Make sure we can run all the algorithms
     try:
         timeseries = map(list, zip(map(float, range(int(time()) - 86400, int(time()) + 1)), [1] * 86401))
+
+        # @added 20191024 - Branch #3262: py3
+        # Convert map to list
+        if python_version == 3:
+            if isinstance(timeseries, map):
+                timeseries = list(timeseries)
+
         second_order_resolution_seconds = 86400
         ensemble = [globals()[algorithm](timeseries, second_order_resolution_seconds) for algorithm in settings.MIRAGE_ALGORITHMS]
     except KeyError as e:
