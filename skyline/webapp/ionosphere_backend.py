@@ -98,6 +98,16 @@ if update_slack_thread:
     if channel_id == 'YOUR_default_slack_channel_id':
         throw_exception_on_default_channel = True
 
+# @added 20191029 - Branch #3262: py3
+# Allow for the use of self signed SSL certificates even if not running on
+# docker.
+try:
+    overall_verify_ssl = settings.VERIFY_SSL
+except:
+    overall_verify_ssl = True
+if overall_verify_ssl:
+    logging.captureWarnings(True)
+
 
 def ionosphere_get_metrics_dir(requested_timestamp, context):
     """
@@ -720,6 +730,16 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
     except:
         running_on_docker = False
     if running_on_docker:
+        verify_ssl = False
+
+    # @added 20191029 - Branch #3262: py3
+    # Allow for the use of self signed SSL certificates even if not running on
+    # docker.
+    try:
+        overall_verify_ssl = settings.VERIFY_SSL
+    except:
+        overall_verify_ssl = True
+    if not overall_verify_ssl:
         verify_ssl = False
 
     if settings.WEBAPP_AUTH_ENABLED:
@@ -4253,7 +4273,13 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
     ionosphere_summary_list = None
     if settings.MEMCACHE_ENABLED:
         try:
-            memcache_result = memcache_client.get('ionosphere_summary_list')
+
+            # @modified 20191029 - Task #3304: py3 - handle pymemcache bytes not str
+            # memcache_result = memcache_client.get('ionosphere_summary_list')
+            if python_version == 2:
+                memcache_result = memcache_client.get('ionosphere_summary_list')
+            else:
+                memcache_result = memcache_client.get('ionosphere_summary_list').decode('utf-8')
         except:
             logger.error('error :: failed to get ionosphere_summary_list from memcache')
         try:

@@ -96,7 +96,11 @@ from skyline_functions import (
     #                   Ideas #2476: Label and relate anomalies
     #                   Feature #2516: Add label to features profile
     get_user_details,
-)
+    # @added 20191030 - Bug #3266: py3 Redis binary objects not strings
+    #                   Branch #3262: py3
+    # Added a single functions to deal with Redis connection and the
+    # charset='utf-8', decode_responses=True arguments required in py3
+    get_redis_conn, get_redis_conn_decoded)
 
 from backend import (
     panorama_request, get_list,
@@ -178,20 +182,30 @@ if python_version == 3:
     import io as IO
 
 # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
-if settings.REDIS_PASSWORD:
+# @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
+#                      Branch #3262: py3
+# Use get_redis_conn and get_redis_conn_decoded
+# if settings.REDIS_PASSWORD:
     # @modified 20190130 - Bug #3266: py3 Redis binary objects not strings
     #                      Branch #3262: py3
     # REDIS_CONN = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
-    REDIS_CONN = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
+    # REDIS_CONN = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
     # @added 20191015 - Bug #3266: py3 Redis binary objects not strings
     #                   Branch #3262: py3
-    REDIS_CONN_UNDECODE = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
-else:
+    # REDIS_CONN_UNDECODE = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+# else:
     # REDIS_CONN = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
-    REDIS_CONN = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
+    # REDIS_CONN = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
     # @added 20191015 - Bug #3266: py3 Redis binary objects not strings
     #                   Branch #3262: py3
-    REDIS_CONN_UNDECODE = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+    # REDIS_CONN_UNDECODE = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+
+# @added 20191030 - Bug #3266: py3 Redis binary objects not strings
+#                   Branch #3262: py3
+# Added a single functions to deal with Redis connection and the
+# charset='utf-8', decode_responses=True arguments required in py3
+REDIS_CONN_UNDECODE = get_redis_conn(skyline_app)
+REDIS_CONN = get_redis_conn_decoded(skyline_app)
 
 ENABLE_WEBAPP_DEBUG = False
 
@@ -683,9 +697,6 @@ def api():
             missing_arguments.append('graphite_metric')
             logger.error('graphite_metric argument not found')
         else:
-            # @added 20191018 - Branch #3262: py3
-            # Escape : as percent url endcoding them does not work with Graphite
-            metric = metric.replace(':', '\:')
             logger.info('graphite_metric - %s' % metric)
 
         if not from_timestamp:
@@ -2541,7 +2552,7 @@ def ionosphere():
                     else:
                         ionosphere_profiles_dir = '%s/%s/%s' % (
                             settings.IONOSPHERE_PROFILES_FOLDER, timeseries_dir,
-                            requested_timestamp, )
+                            requested_timestamp)
 
                         if not isdir(ionosphere_profiles_dir):
                             logger.info(
@@ -2792,12 +2803,33 @@ def ionosphere():
 
             if not successful:
                 return internal_error(fail_msg, traceback_format_exc)
+
+
             if os.path.isfile(str(fp_csv)):
+                # @added 20191029 - Task #3302: Handle csv.reader in py3
+                #                      Branch #3262: py3
+                if python_version == 3:
+                    try:
+                        codecs
+                    except:
+                        import codecs
+
                 features = []
-                with open(fp_csv, 'rb') as fr:
-                    reader = csv.reader(fr, delimiter=',')
-                    for i, line in enumerate(reader):
-                        features.append([str(line[0]), str(line[1])])
+                try:
+                    with open(fp_csv, 'rb') as fr:
+                        # @modified 20191029 - Task #3302: Handle csv.reader in py3
+                        #                      Branch #3262: py3
+                        # reader = csv.reader(fr, delimiter=',')
+                        if python_version == 2:
+                            reader = csv.reader(fr, delimiter=',')
+                        else:
+                            reader = csv.reader(codecs.iterdecode(fr, 'utf-8'), delimiter=',')
+                        for i, line in enumerate(reader):
+                            features.append([str(line[0]), str(line[1])])
+                except:
+                    trace = traceback.format_exc()
+                    message = 'failed to read csv features from fp_csv - %s' % str(fp_csv)
+                    return internal_error(message, trace)
 
         generation_zero = False
         if create_feature_profile or fp_view:
@@ -3365,10 +3397,7 @@ def ionosphere():
                     # @modified 20191015 - Bug #3266: py3 Redis binary objects not strings
                     #                      Branch #3262: py3
                     # metric_id_msg_pack = REDIS_CONN.get(cache_key)
-                    if python_version == 3:
-                        metric_id_msg_pack = REDIS_CONN.get(cache_key)
-                    if python_version == 2:
-                        metric_id_msg_pack = REDIS_CONN_UNDECODE.get(cache_key)
+                    metric_id_msg_pack = REDIS_CONN_UNDECODE.get(cache_key)
 
                     if metric_id_msg_pack:
                         unpacker = Unpacker(use_list=False)
