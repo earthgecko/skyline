@@ -407,6 +407,32 @@ class PopulateMetricWorker(Process):
                     logger.info('populate_metric_worker :: failed to get any data from %s' % str(fetch_url))
                     continue
 
+                # @added 20191108 - Bug #3312: flux - populate_metric_worker - handle None in datapoints
+                valid_datapoints = []
+                for datapoint in datapoints:
+                    value = None
+                    timestamp = None
+                    if remote_host_type == 'graphite':
+                        try:
+                            raw_value = datapoint[0]
+                            if raw_value is None:
+                                continue
+                            value = float(datapoint[0])
+                            timestamp = int(datapoint[1])
+                            if value and timestamp:
+                                valid_datapoints.append([value, timestamp])
+                        except:
+                            continue
+                    if remote_host_type == 'prometheus':
+                        try:
+                            timestamp = int(datapoint[0])
+                            value = float(datapoint[1])
+                        except:
+                            continue
+                        if value and timestamp:
+                            valid_datapoints.append([timestamp, value])
+                datapoints = valid_datapoints
+
                 # Order the time series by timestamp as the tuple can shift
                 # order resulting in more recent data being added before older
                 # data
@@ -433,8 +459,9 @@ class PopulateMetricWorker(Process):
                             value = float(datapoint[0])
                             timestamp = int(datapoint[1])
                         if remote_host_type == 'prometheus':
-                            timestamp = int(datapoint[0])
+                            # timestamp = int(datapoint[0])
                             try:
+                                timestamp = int(datapoint[0])
                                 value = float(datapoint[1])
                             except:
                                 continue
