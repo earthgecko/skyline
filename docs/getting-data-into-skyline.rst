@@ -113,14 +113,13 @@ Flux
 ~~~~
 
 Metrics to be submitted to Flux via HTTP/S which feeds Graphite which pickles to
-Skyline, see the `Flux<http://graphite.readthedocs.org/en/latest/carbon-daemons.html>`__
-page.
+Skyline, see the `Flux <flux.html>`__ page.
 
 Vista
 ~~~~~
 
 Metrics to be fetched by Vista which submits to Flux, see the
-`Vista<http://graphite.readthedocs.org/en/latest/carbon-daemons.html>`__ page.
+`Vista <vista.html>`__ page.
 
 Adding a Listener
 =================

@@ -4,7 +4,7 @@ version info
 # @modified 20170109 - Feature #1854: Ionosphere learn
 # Added learn
 # __version_info__ = ('1', '1', '0')
-__version_info__ = ('1', '3', '1')
+__version_info__ = ('2', '0', '0')
 __branch__ = 'master'
 __version_tag__ = 'stable'
 
