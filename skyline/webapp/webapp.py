@@ -91,7 +91,7 @@ from skyline_functions import (
     # @added 20180804 - Feature #2488: Allow user to specifically set metric as a derivative metric in training_data
     set_metric_as_derivative,
     # @added 20190510 - Feature #2990: Add metrics id to relevant web pages
-    get_memcache_metric_object,
+    # get_memcache_metric_object,
     # @added 20190920 - Feature #3230: users DB table
     #                   Ideas #2476: Label and relate anomalies
     #                   Feature #2516: Add label to features profile
@@ -2804,7 +2804,6 @@ def ionosphere():
             if not successful:
                 return internal_error(fail_msg, traceback_format_exc)
 
-
             if os.path.isfile(str(fp_csv)):
                 # @added 20191029 - Task #3302: Handle csv.reader in py3
                 #                      Branch #3262: py3
@@ -3702,7 +3701,7 @@ serverinfo_meta = {
 # elky84
 # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
 #                      Branch #3262: py3
-#def get_redis(host, port, db, password):
+# def get_redis(host, port, db, password):
 def get_redis(host, port, db, password, decode):
     if password == "":
         # @modified 20190517 - Branch #3002: docker
