@@ -493,8 +493,7 @@ class Panorama(Thread):
                 logger.error('error :: update_slack_thread_ts :: failed to delete cache_key %s' % cache_key)
         return
 
-
-    # @added 20191107 - Feature #3306: Record the end_timestamp of anomalies
+    # @added 20191107 - Feature #3306: Record anomaly_end_timestamp
     #                   Branch #3262: py3
     def update_anomaly_end_timestamp(self, i, anomaly_id, anomaly_end_timestamp):
         """
@@ -573,7 +572,6 @@ class Panorama(Thread):
                 logger.error(traceback.format_exc())
                 logger.error('error :: update_anomaly_end_timestamp :: could not dispose engine')
         return updated_anomaly_record
-
 
     def spin_process(self, i, metric_check_file):
         """
@@ -1158,7 +1156,7 @@ class Panorama(Thread):
                 'error :: could not query cache_key - %s.last_check.%s.%s - %s' % (
                     skyline_app, app, metric, e))
 
-        # @added 20191031 - Feature #3306: Record the end_timestamp of anomalies
+        # @added 20191031 - Feature #3306: Record anomaly_end_timestamp
         # Add to current anomalies set
         try:
             redis_set = 'current.anomalies'
@@ -1386,7 +1384,7 @@ class Panorama(Thread):
                                 anomaly_end_timestamp = None
                         except:
                             logger.error(traceback.format_exc())
-                            logger.error('error :: failed to evaluate data from item %s from Redis set %s' %(
+                            logger.error('error :: failed to evaluate data from item %s from Redis set %s' % (
                                 str(item), redis_set))
                         if not anomaly_id:
                             if anomaly_timestamp > (int(time()) - settings.STALE_PERIOD):
