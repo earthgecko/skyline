@@ -24,7 +24,10 @@ import requests
 try:
     import urlparse
 except ImportError:
-    import urllib.parse
+    # @modified 20191113 - Branch #3262: py3
+    # import urllib.parse
+    import urllib.parse as urlparse
+
 import os
 # import errno
 # import imp
@@ -579,7 +582,15 @@ class Mirage(Thread):
         logger.info(
             'retrieve data :: surfacing %s time series from graphite for %s seconds' % (
                 metric, str(second_order_resolution_seconds)))
-        self.surface_graphite_metric_data(metric, graphite_from, graphite_until)
+
+        # @modified 20191113 - Branch #3262: py3
+        # Wrapped in try
+        try:
+            self.surface_graphite_metric_data(metric, graphite_from, graphite_until)
+        except:
+            logger.info(traceback.format_exc())
+            logger.error('error :: failed to surface_graphite_metric_data to populate %s' % (
+                str(metric_json_file)))
 
         # Check there is a json timeseries file to test
         if not os.path.isfile(metric_json_file):
@@ -1117,10 +1128,17 @@ class Mirage(Thread):
                 sleep(10)
                 logger.info('connecting to redis at socket path %s' % settings.REDIS_SOCKET_PATH)
                 # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
-                if settings.REDIS_PASSWORD:
-                    self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
-                else:
-                    self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+                # @modified 20191113 - Bug #3266: py3 Redis binary objects not strings
+                #                      Branch #3262: py3
+                # if settings.REDIS_PASSWORD:
+                #     self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+                # else:
+                #     self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+                try:
+                    self.redis_conn = get_redis_conn(skyline_app)
+                    self.redis_conn_decoded = get_redis_conn_decoded(skyline_app)
+                except:
+                    logger.info('falied to connect to Redis')
                 if self.redis_conn.ping():
                     logger.info('connected to redis')
                 continue
@@ -1338,6 +1356,9 @@ class Mirage(Thread):
                         else:
                             anomaly_breakdown[key] += value
                     except Empty:
+                        # @added 20191113 - Branch #3262: py3
+                        # Log
+                        logger.info('anomaly_breakdown.keys are empty')
                         break
 
                 while 1:
@@ -1348,6 +1369,9 @@ class Mirage(Thread):
                         else:
                             exceptions[key] += value
                     except Empty:
+                        # @added 20191113 - Branch #3262: py3
+                        # Log
+                        logger.info('exceptions.keys are empty')
                         break
 
                 # @added 20191021 - Bug #3288: Always send anomaly_breakdown and exception metrics
@@ -1371,6 +1395,12 @@ class Mirage(Thread):
                     list_item = literal_eval(item_list_string)
                     metric_variables.append(list_item)
 
+                # @added 20191113 - Branch #3262: py3
+                # Set default values
+                metric_name = None
+                metric_value = None
+                hours_to_resolve = 0
+
                 # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
                 # for metric_variable in self.metric_variables:
                 for metric_variable in metric_variables:
@@ -1383,13 +1413,16 @@ class Mirage(Thread):
                     # if metric_variable[0] == 'metric_timestamp':
                     #     metric_timestamp = metric_variable[1]
 
-                logger.info('analysis done - %s' % metric_name)
+                logger.info('analysis done - %s' % str(metric_name))
 
                 # Send alerts
                 # Calculate hours second order resolution to seconds
-                logger.info('analyzed at %s hours resolution' % hours_to_resolve)
-                second_order_resolution_seconds = int(hours_to_resolve) * 3600
-                logger.info('analyzed at %s seconds resolution' % second_order_resolution_seconds)
+                # @modified 20191113 - Branch #3262: py3
+                # Only if set
+                if hours_to_resolve:
+                    logger.info('analyzed at %s hours resolution' % hours_to_resolve)
+                    second_order_resolution_seconds = int(hours_to_resolve) * 3600
+                    logger.info('analyzed at %s seconds resolution' % second_order_resolution_seconds)
 
                 # Remove metric check file
                 metric_check_file = '%s/%s' % (settings.MIRAGE_CHECK_PATH, processing_check_file)
@@ -1401,7 +1434,12 @@ class Mirage(Thread):
                         pass
 
                 # Remove the metric directory
-                timeseries_dir = metric_name.replace('.', '/')
+                # @modified 20191113 - Branch #3262: py3
+                # Convert None to str
+                # timeseries_dir = metric_name.replace('.', '/')
+                metric_name_str = str(metric_name)
+                timeseries_dir = metric_name_str.replace('.', '/')
+
                 metric_data_dir = '%s/%s' % (settings.MIRAGE_CHECK_PATH, timeseries_dir)
                 if os.path.exists(metric_data_dir):
                     try:
