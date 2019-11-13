@@ -4,13 +4,17 @@ import json
 import traceback
 from ast import literal_eval
 
-from redis import StrictRedis
+# from redis import StrictRedis
 import falcon
 import graphyte
 
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 sys.path.insert(0, os.path.dirname(__file__))
 import settings
+# @added 20191111 - Bug #3266: py3 Redis binary objects not strings
+#                   Branch #3262: py3
+from skyline_functions import get_redis_conn
+
 from logger import set_up_logging
 import flux
 
@@ -18,6 +22,8 @@ logger = set_up_logging('populate_metric')
 # URI arguments are solely used for identifying requests in the log, all the
 # required metric data is submitted via a POST with a json payload.
 validArguments = ['remote_target', 'metric', 'namespace_prefix', 'key', 'user']
+
+skyline_app = 'flux'
 
 LOCAL_DEBUG = False
 # LOCAL_DEBUG = True
@@ -38,10 +44,17 @@ if settings.FLUX_SEND_TO_CARBON:
             str(CARBON_HOST), str(CARBON_PORT),
             str(GRAPHITE_METRICS_PREFIX)))
 
-if settings.REDIS_PASSWORD:
-    redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
-else:
-    redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+# @modified 20191111 - Bug #3266: py3 Redis binary objects not strings
+#                      Branch #3262: py3
+# if settings.REDIS_PASSWORD:
+#     redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+# else:
+#     redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+# @added 20191111 - Bug #3266: py3 Redis binary objects not strings
+#                   Branch #3262: py3
+# Added a single functions to deal with Redis connection and the
+# charset='utf-8', decode_responses=True arguments required in py3
+redis_conn = get_redis_conn(skyline_app)
 
 
 class PopulateMetric(object):
