@@ -11,12 +11,16 @@ import os.path
 from ast import literal_eval
 import datetime
 
-from redis import StrictRedis
+# from redis import StrictRedis
 import requests
 import pandas as pd
 
 import settings
-from skyline_functions import send_graphite_metric
+from skyline_functions import (
+    send_graphite_metric,
+    # @added 20191111 - Bug #3266: py3 Redis binary objects not strings
+    #                   Branch #3262: py3
+    get_redis_conn, get_redis_conn_decoded)
 
 parent_skyline_app = 'vista'
 child_skyline_app = 'worker'
@@ -54,10 +58,18 @@ class Worker(Process):
         super(Worker, self).__init__()
         self.parent_pid = parent_pid
         self.daemon = True
-        if settings.REDIS_PASSWORD:
-            self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
-        else:
-            self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+        # @modified 20191111 - Bug #3266: py3 Redis binary objects not strings
+        #                      Branch #3262: py3
+        # if settings.REDIS_PASSWORD:
+        #     self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+        # else:
+        #     self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+        # @added 20191111 - Bug #3266: py3 Redis binary objects not strings
+        #                   Branch #3262: py3
+        # Added a single functions to deal with Redis connection and the
+        # charset='utf-8', decode_responses=True arguments required in py3
+        self.redis_conn = get_redis_conn(skyline_app)
+        self.redis_conn_decoded = get_redis_conn_decoded(skyline_app)
 
     def check_if_parent_is_alive(self):
         """
@@ -124,16 +136,26 @@ class Worker(Process):
                 except:
                     logger.error('worker :: cannot connect to redis at socket path %s' % (settings.REDIS_SOCKET_PATH))
                     sleep(2)
-                    if settings.REDIS_PASSWORD:
-                        self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
-                    else:
-                        self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+
+                    # @modified 20191111 - Bug #3266: py3 Redis binary objects not strings
+                    #                      Branch #3262: py3
+                    # if settings.REDIS_PASSWORD:
+                    #     self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+                    # else:
+                    #     self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+                    self.redis_conn = get_redis_conn(skyline_app)
+                    self.redis_conn_decoded = get_redis_conn_decoded(skyline_app)
 
             metrics_data = []
             redis_set = 'vista.fetcher.metrics.json'
             try:
                 # Get a metric to validate from the Redis set
-                metrics_data = self.redis_conn.smembers(redis_set)
+
+                # @modified 20191111 - Bug #3266: py3 Redis binary objects not strings
+                #                      Branch #3262: py3
+                # metrics_data = self.redis_conn.smembers(redis_set)
+                metrics_data = self.redis_conn_decoded.smembers(redis_set)
+
                 if LOCAL_DEBUG:
                     logger.info('worker :: got redis set data - %s' % redis_set)
             except:
@@ -149,8 +171,13 @@ class Worker(Process):
                 delete_set_record = False
                 remote_host_type = None
                 try:
-                    if python_version == 3:
-                        str_metric_data = str_metric_data.decode('UTF-8')
+
+                    # @modified 20191111 - Bug #3266: py3 Redis binary objects not strings
+                    #                      Branch #3262: py3
+                    # Rather using get_redis_conn_decoded
+                    # if python_version == 3:
+                    #     str_metric_data = str_metric_data.decode('UTF-8')
+
                     metric_data = literal_eval(str_metric_data)
                     remote_host_type = str(metric_data[0]['remote_host_type'])
                     if LOCAL_DEBUG:
