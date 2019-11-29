@@ -10,13 +10,19 @@ import falcon
 
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 sys.path.insert(0, os.path.dirname(__file__))
-import settings
-import flux
 
-logger = set_up_logging('listen')
+# @modified 20191115 - Branch #3262: py3
+# This prevents flake8 E402 - module level import not at top of file
+if True:
+    import settings
+    import flux
 
-# LOCAL_DEBUG = False
-LOCAL_DEBUG = True
+# @modified 20191129 - Branch #3262: py3
+# Consolidate flux logging
+# logger = set_up_logging('listen')
+logger = set_up_logging(None)
+
+LOCAL_DEBUG = False
 
 
 def validate_key(caller, apikey):
@@ -211,6 +217,14 @@ class MetricData(object):
             logger.error('error :: listen :: failed to add GET request data to flux.httpMetricDataQueue - %s' % str(metric_data))
             resp.status = falcon.HTTP_500
             return
+
+        if LOCAL_DEBUG:
+            try:
+                queue_size = flux.httpMetricDataQueue.qsize()
+                logger.info('listen :: flux.httpMetricDataQueue.qsize - %s' % str(queue_size))
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: listen :: failed to determine flux.httpMetricDataQueue.qsize')
 
         if LOCAL_DEBUG:
             resp.body = json.dumps(payload)

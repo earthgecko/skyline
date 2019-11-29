@@ -9,7 +9,11 @@ from logger import set_up_logging
 
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 sys.path.insert(0, os.path.dirname(__file__))
-import settings
+
+# @modified 20191115 - Branch #3262: py3
+# This prevents flake8 E402 - module level import not at top of file
+if True:
+    import settings
 
 bind = '%s:%s' % (settings.FLUX_IP, str(settings.FLUX_PORT))
 # workers = multiprocessing.cpu_count() * 2 + 1

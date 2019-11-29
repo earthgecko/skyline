@@ -10,15 +10,21 @@ import graphyte
 
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 sys.path.insert(0, os.path.dirname(__file__))
-import settings
-# @added 20191111 - Bug #3266: py3 Redis binary objects not strings
-#                   Branch #3262: py3
-from skyline_functions import get_redis_conn
 
-from logger import set_up_logging
-import flux
+if True:
+    import settings
+    # @added 20191111 - Bug #3266: py3 Redis binary objects not strings
+    #                   Branch #3262: py3
+    from skyline_functions import get_redis_conn
 
-logger = set_up_logging('populate_metric')
+    from logger import set_up_logging
+    import flux
+
+# @modified 20191129 - Branch #3262: py3
+# Consolidate flux logging
+# logger = set_up_logging('populate_metric')
+logger = set_up_logging(None)
+
 # URI arguments are solely used for identifying requests in the log, all the
 # required metric data is submitted via a POST with a json payload.
 validArguments = ['remote_target', 'metric', 'namespace_prefix', 'key', 'user']
