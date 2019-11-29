@@ -24,7 +24,7 @@ import traceback
 
 python_version = int(version_info[0])
 pytz_version = pkg_resources.get_distribution('pytz').version
-#pytz_all_timezones = list(pytz.all_timezones)
+# pytz_all_timezones = list(pytz.all_timezones)
 pytz_all_timezones = list(pytz.all_timezones)
 
 print colored('notice: skyline/tsfresh/scripts/make-pytz.all_timezones-rst.py is creating docs/development/pytz.rst', 'cyan')
@@ -87,8 +87,8 @@ Timezones list for pytz version
 -------------------------------
 ''' % (str(pytz_version), str(pytz_version))
 
-#print(page_text)
-#print '\n'.join(map(str, pytz.all_timezones))
+# print(page_text)
+# print '\n'.join(map(str, pytz.all_timezones))
 pytz_all_timezones = '\n\n'.join(map(str, pytz.all_timezones))
 
 full_page_text = '''%s

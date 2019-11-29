@@ -40,14 +40,17 @@ root_dir = os.path.join(os.path.dirname(os.path.realpath(parent_dir)))
 
 skyline_dir = parent_dir
 sys.path.append(skyline_dir)
-import settings
 
-# @added 20191029 - Task #3302: Handle csv.reader in py3
-#                   Branch #3262: py3
-from skyline_functions import read_csv
+# @modified 20191115 - Branch #3262: py3
+# This prevents flake8 E402 - module level import not at top of file
+if True:
+    import settings
+    # @added 20191029 - Task #3302: Handle csv.reader in py3
+    #                   Branch #3262: py3
+    from skyline_functions import read_csv
 
-from tsfresh_feature_names import TSFRESH_FEATURES
-from database import (ionosphere_table_meta, metrics_table_meta)
+    from tsfresh_feature_names import TSFRESH_FEATURES
+    from database import (ionosphere_table_meta, metrics_table_meta)
 
 if __name__ == '__main__':
 

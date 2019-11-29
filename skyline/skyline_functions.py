@@ -22,6 +22,12 @@ import requests
 #     import urllib.request
 #     import urllib.error
 
+# @added 20191114 - Bug #3266: py3 Redis binary objects not strings
+#                   Branch #3262: py3
+# Added a single functions to deal with Redis connection and the
+# charset='utf-8', decode_responses=True arguments required in py3
+from redis import StrictRedis
+
 import settings
 
 try:
@@ -822,7 +828,7 @@ def get_graphite_metric(
 
         if settings.ENABLE_DEBUG:
             current_logger.info('graphite image url - %s' % (str(image_url)))
-        image_url_timeout = int(connect_timeout)
+        # image_url_timeout = int(connect_timeout)
 
         image_data = None
 
@@ -978,11 +984,12 @@ def send_anomalous_metric_to(
     except:
         import os
 
-    try:
-        python_version
-    except:
-        from sys import version_info
-        python_version = int(version_info[0])
+    # @modified 20191115 - Branch #3262: py3
+    # try:
+    #     python_version
+    # except:
+    #     from sys import version_info
+    #     python_version = int(version_info[0])
 
     current_skyline_app_logger = str(current_skyline_app) + 'Log'
     current_logger = logging.getLogger(current_skyline_app_logger)
@@ -1163,17 +1170,17 @@ def mysql_select(current_skyline_app, select):
         if settings.ENABLE_PANORAMA_DEBUG:
             ENABLE_DEBUG = True
     except:
-        nothing_to_do = True
+        ENABLE_DEBUG = False
     try:
         if settings.ENABLE_WEBAPP_DEBUG:
             ENABLE_DEBUG = True
     except:
-        nothing_to_do = True
+        ENABLE_DEBUG = False
     try:
         if settings.ENABLE_IONOSPHERE_DEBUG:
             ENABLE_DEBUG = True
     except:
-        nothing_to_do = True
+        ENABLE_DEBUG = False
 
     current_skyline_app_logger = str(current_skyline_app) + 'Log'
     current_logger = logging.getLogger(current_skyline_app_logger)
@@ -1881,6 +1888,7 @@ def get_user_details(current_skyline_app, desired_value, key, value):
         return True, int(result)
     return True, str(result)
 
+
 # @added 20191106 - Branch #3002: docker
 #                   Branch #3262: py3
 def get_graphite_port(current_skyline_app):
@@ -1923,3 +1931,22 @@ def get_graphite_custom_headers(current_skyline_app):
         current_logger.info('get_graphite_custom_headers :: GRAPHITE_CUSTOM_HEADERS is not declared in settings.py, using default of \{\}')
         headers = dict()
     return headers
+
+
+# @added 20191113 - Feature #: forward_alert
+def forward_alert(current_skyline_app, alert_data):
+    """
+    Sends alert data to a HTTP endpoint
+
+    :param current_skyline_app: the app calling the function so the function
+        knows which log to write too.
+    :param alert_data: a list containing the alert data
+    :type current_skyline_app: str
+    :type alert_data: list
+    :type key: str
+    :type value: str or int
+    :return: tuple
+    :rtype:  (boolean, str)
+    """
+    current_skyline_app_logger = str(current_skyline_app) + 'Log'
+    current_logger = logging.getLogger(current_skyline_app_logger)
