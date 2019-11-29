@@ -2357,3 +2357,11 @@ This is the config where metrics that need to be fetched are defined.
 :type populate_with_resolutions: tuple (with trailing comma if a single
     resolution is declared)
 """
+
+VISTA_GRAPHITE_BATCH_SIZE = 20
+"""
+:var VISTA_GRAPHITE_BATCH_SIZE: The number of metrics that Vista should retrieve
+    from a Graphite host in a single request, if the metrics being requested are
+    being requested with the same from parameter (timestamp).
+:vartype VISTA_GRAPHITE_BATCH_SIZE: int
+"""
