@@ -3,6 +3,7 @@
 #
 # @author Gary Wilson (@earthgecko)
 # @created 20190519 - Branch #3002: docker
+# @modified 20191114 - Bug #3318: Make Skyline docker handle OOMkiller
 # @modified
 # @license
 # @source https://github.com/earthgecko/skyline/utils/dawn/skyline.docker.dawn.sh
@@ -280,6 +281,19 @@ source /tmp/skyline.docker.webapp.variables.txt
 # Deploy skyline-docker-graphite-statsd-1 .htpasswd
 echo -n "$WEBAPP_AUTH_USER:" >> /etc/nginx/conf.d/.graphite_htpasswd.skyline-docker-graphite-statsd-1 && echo "$WEBAPP_AUTH_USER_PASSWORD" | openssl passwd -stdin -apr1 >> /etc/nginx/conf.d/.graphite_htpasswd.skyline-docker-graphite-statsd-1
 systemctl restart nginx
+
+# @added 20191114 - Bug #3318: Make Skyline docker handle OOMkiller
+# Add a MySQL backup cron
+if [ -n "$DB_BACKUP_CRON" ]; then
+  if [ $DB_BACKUP_CRON -eq 1 ]; then
+    mkdir -p "/opt/skyline/docker/${SKYLINE_DOCKER_INSTANCE_HOSTNAME}/backups"
+    echo '#!/bin/bash' > /etc/cron.hourly/skyline_db_backup
+    echo "/usr/bin/docker exec skyline_${SKYLINE_DOCKER_INSTANCE_HOSTNAME}_1 /usr/bin/mysqldump -uroot -h skyline-docker-mysql-1 skyline > /opt/skyline/docker/${SKYLINE_DOCKER_INSTANCE_HOSTNAME}/backups/skyline.sql" >> /etc/cron.hourly/skyline_db_backup
+    chmod 0755 /etc/cron.hourly/skyline_db_backup
+  fi
+else
+  echo "Warning :: The DB_BACKUP_CRON is not set to 1, no DB backup cron has been added, expect to loss any DB data!"
+fi
 
 echo "The container application skyline-docker-skyline-1 has been built and started successfully.
 

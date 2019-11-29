@@ -110,6 +110,7 @@ services:
       - /opt/skyline/docker/skyline-docker-skyline-1/var/log/skyline:/var/log/skyline
       - /opt/skyline/docker/skyline-docker-skyline-1/var/log/apache2:/var/log/apache2
       - skyline-docker-busybox-1:/tmp/docker
+      - /opt/skyline/docker/skyline-docker-skyline-1/backups:/opt/skyline/backups
     depends_on:
       - skyline-docker-busybox-1
       - skyline-docker-mysql-1

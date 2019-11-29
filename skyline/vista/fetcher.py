@@ -22,7 +22,10 @@ import requests
 import settings
 python_version = int(version_info[0])
 from skyline_functions import (
-    send_graphite_metric, filesafe_metricname)
+    send_graphite_metric, filesafe_metricname,
+    # @added 20191111 - Bug #3266: py3 Redis binary objects not strings
+    #                   Branch #3262: py3
+    get_redis_conn, get_redis_conn_decoded)
 
 parent_skyline_app = 'vista'
 child_skyline_app = 'fetcher'
@@ -66,10 +69,19 @@ class Fetcher(Thread):
         super(Fetcher, self).__init__()
         self.parent_pid = parent_pid
         self.daemon = True
-        if settings.REDIS_PASSWORD:
-            self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
-        else:
-            self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+
+        # @modified 20191111 - Bug #3266: py3 Redis binary objects not strings
+        #                      Branch #3262: py3
+        # if settings.REDIS_PASSWORD:
+        #     self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+        # else:
+        #     self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+        # @added 20191111 - Bug #3266: py3 Redis binary objects not strings
+        #                   Branch #3262: py3
+        # Added a single functions to deal with Redis connection and the
+        # charset='utf-8', decode_responses=True arguments required in py3
+        self.redis_conn = get_redis_conn(skyline_app)
+        self.redis_conn_decoded = get_redis_conn_decoded(skyline_app)
 
     def check_if_parent_is_alive(self):
         """
@@ -106,6 +118,12 @@ class Fetcher(Thread):
             if not success:
                 continue
 
+            # @added 20191111 - Bug #3312: flux - populate_metric_worker - handle None in datapoints
+            # And set flux.last key is the returned value from the remote is
+            # null so that time series that are mostly null do not keep on
+            # getting added to flux populate_metric by Vista
+            raw_timeseries = []
+
             datapoints = None
             try:
                 js = response.json()
@@ -130,6 +148,39 @@ class Fetcher(Thread):
             if not datapoints:
                 logger.info('fetcher :: failed to get any data from %s' % str(url))
                 continue
+
+            # @added 20191111 - Bug #3312: flux - populate_metric_worker - handle None in datapoints
+            valid_datapoints = []
+            for datapoint in datapoints:
+                value = None
+                timestamp = None
+                if remote_host_type == 'graphite':
+                    try:
+                        # @added 20191111 - Bug #3312: flux - populate_metric_worker - handle None in datapoints
+                        raw_timeseries.append([datapoint[1], datapoint[0]])
+
+                        raw_value = datapoint[0]
+                        if raw_value is None:
+                            continue
+                        value = float(datapoint[0])
+                        timestamp = int(datapoint[1])
+                        valid_datapoints.append([value, timestamp])
+                    except:
+                        continue
+                if remote_host_type == 'prometheus':
+                    try:
+                        # @added 20191111 - Bug #3312: flux - populate_metric_worker - handle None in datapoints
+                        raw_timeseries.append([datapoint[0], datapoint[1]])
+
+                        raw_value = datapoint[1]
+                        if raw_value is None:
+                            continue
+                        timestamp = int(datapoint[0])
+                        value = float(datapoint[1])
+                    except:
+                        continue
+                    valid_datapoints.append([timestamp, value])
+            datapoints = valid_datapoints
 
             # Order the time series by timestamp as the tuple can shift
             # order resulting in more recent data being added before older
@@ -209,6 +260,47 @@ class Fetcher(Thread):
                 except:  # nosec
                     datapoints_with_no_value += 1
                     continue
+
+            # @added 20191111 - Bug #3312: flux - populate_metric_worker - handle None in datapoints
+            # And set flux.last key is the returned value from the remote is
+            # null so that time series that are mostly null do not keep on
+            # getting added to flux populate_metric by Vista
+            if not timeseries:
+                set_flux_key = False
+                try:
+                    sorted_raw_timeseries = sorted(raw_timeseries, key=lambda x: x[0])
+                    last_ts = sorted_raw_timeseries[-1][0]
+                    if int(last_ts) > (fetch_process_start - 120):
+                        if sorted_raw_timeseries[-1][1] is None:
+                            set_flux_key = True
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: fetcher :: failed to determine if last value was null')
+                if set_flux_key:
+                    try:
+                        # Update Redis flux key
+                        cache_key = 'flux.last.%s' % metric
+                        metric_data = [int(last_ts), None]
+                        self.redis_conn.set(cache_key, str(metric_data))
+                        logger.info('fetcher :: even though no data points so as to not loop round on this metric, set the metric Redis key - %s - %s' % (
+                            cache_key, str(metric_data)))
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: fetcher :: even though no data points, failed to set Redis key - %s - %s' % (
+                            cache_key, str(metric_data)))
+                    # Adding to the vista.fetcher.unique_metrics Redis set
+                    redis_set = 'vista.fetcher.unique_metrics'
+                    data = str(metric)
+                    try:
+                        self.redis_conn.sadd(redis_set, data)
+                        logger.info('fetcher :: even though no data points, added %s to Redis set %s' % (
+                            remote_target, redis_set))
+                    except:
+                        logger.info(traceback.format_exc())
+                        logger.error('error :: fetcher :: even though no data points, failed to add %s to Redis set %s' % (
+                            str(data), str(redis_set)))
+                    continue
+
             if not timeseries:
                 logger.info('fetcher :: no data in the timeseries list for the time series for %s' % metric)
                 continue
@@ -341,10 +433,14 @@ class Fetcher(Thread):
                     logger.error('error :: fetcher :: cannot connect to redis at socket path %s' % settings.REDIS_SOCKET_PATH)
                     sleep(2)
                     try:
-                        if settings.REDIS_PASSWORD:
-                            self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
-                        else:
-                            self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+                        # @modified 20191111 - Bug #3266: py3 Redis binary objects not strings
+                        #                      Branch #3262: py3
+                        # if settings.REDIS_PASSWORD:
+                        #     self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+                        # else:
+                        #     self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+                        self.redis_conn = get_redis_conn(skyline_app)
+                        self.redis_conn_decoded = get_redis_conn_decoded(skyline_app)
                     except:
                         logger.error(traceback.format_exc())
                         logger.error('error :: fetcher :: cannot connect to redis at socket path %s' % settings.REDIS_SOCKET_PATH)
@@ -362,14 +458,21 @@ class Fetcher(Thread):
             vista_fetcher_unique_metrics = []
             redis_set = 'vista.fetcher.unique_metrics'
             try:
-                vista_fetcher_unique_metrics = list(self.redis_conn.smembers(redis_set))
+                # @modified 20191111 - Bug #3266: py3 Redis binary objects not strings
+                #                      Branch #3262: py3
+                # vista_fetcher_unique_metrics = list(self.redis_conn.smembers(redis_set))
+                vista_fetcher_unique_metrics = list(self.redis_conn_decoded.smembers(redis_set))
             except:
                 logger.error('error :: fetcher :: could not determine vista_fetcher_unique_metrics from the Redis set %s' % redis_set)
                 vista_fetcher_unique_metrics = []
             vista_unique_metrics = []
             if vista_fetcher_unique_metrics:
                 for metric in vista_fetcher_unique_metrics:
-                    metric_str = metric.decode('utf-8')
+                    # @modified 20191111 - Bug #3266: py3 Redis binary objects not strings
+                    #                      Branch #3262: py3
+                    # metric_str = metric.decode('utf-8')
+                    metric_str = str(metric)
+
                     vista_unique_metrics.append(metric_str)
 
             # Determine metrics to fetch
@@ -493,10 +596,14 @@ class Fetcher(Thread):
                 redis_last_flux_metric_data = None
                 try:
                     cache_key = 'flux.last.%s' % metric
-                    if python_version == 3:
-                        redis_last_flux_metric_data = self.redis_conn.get(cache_key).decode('utf-8')
-                    else:
-                        redis_last_flux_metric_data = self.redis_conn.get(cache_key)
+                    # @modified 20191111 - Bug #3266: py3 Redis binary objects not strings
+                    #                      Branch #3262: py3
+                    # if python_version == 3:
+                    #     redis_last_flux_metric_data = self.redis_conn.get(cache_key).decode('utf-8')
+                    # else:
+                    #     redis_last_flux_metric_data = self.redis_conn.get(cache_key)
+                    redis_last_flux_metric_data = self.redis_conn_decoded.get(cache_key)
+
                     if LOCAL_DEBUG:
                         if redis_last_flux_metric_data:
                             logger.info('fetcher :: Redis key %s is present' % str(cache_key))
@@ -892,7 +999,10 @@ class Fetcher(Thread):
                 metrics_fetched_count = 0
                 try:
                     redis_set = 'vista.fetcher.metrics.fetched'
-                    metrics_fetched = self.redis_conn.smembers(redis_set)
+                    # @modified 20191111 - Bug #3266: py3 Redis binary objects not strings
+                    #                      Branch #3262: py3
+                    # metrics_fetched = self.redis_conn.smembers(redis_set)
+                    metrics_fetched = self.redis_conn_decoded.smembers(redis_set)
                     metrics_fetched_count = len(list(metrics_fetched))
                     logger.info('fetcher :: %s metrics were fetched' % str(metrics_fetched_count))
                 except:
@@ -909,8 +1019,12 @@ class Fetcher(Thread):
                     timestamps = []
                     for str_metric_fetched in metrics_fetched:
                         try:
-                            if python_version == 3:
-                                str_metric_fetched = str_metric_fetched.decode('UTF-8')
+                            # @modified 20191111 - Bug #3266: py3 Redis binary objects not strings
+                            #                      Branch #3262: py3
+                            # Use get_redis_conn_decoded
+                            # if python_version == 3:
+                            #     str_metric_fetched = str_metric_fetched.decode('UTF-8')
+
                             metric_fetched = literal_eval(str_metric_fetched)
                             timestamp = int(metric_fetched[1])
                             timestamps.append(timestamp)
@@ -927,7 +1041,10 @@ class Fetcher(Thread):
                         logger.error('error :: fetcher :: failed to last_fetch_timestamp from timestamps')
                 try:
                     redis_set = 'vista.worker.to.process'
-                    metrics_count_for_workers = len(list(self.redis_conn.smembers(redis_set)))
+                    # @modified 20191111 - Bug #3266: py3 Redis binary objects not strings
+                    #                      Branch #3262: py3
+                    # metrics_count_for_workers = len(list(self.redis_conn.smembers(redis_set)))
+                    metrics_count_for_workers = len(list(self.redis_conn_decoded.smembers(redis_set)))
                     logger.info('fetcher :: %s of the metrics fetched from this run still need to be processed by a worker' % str(metrics_count_for_workers))
                 except:
                     logger.error(traceback.format_exc())
