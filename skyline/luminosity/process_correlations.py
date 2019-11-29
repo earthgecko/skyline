@@ -1,8 +1,10 @@
 import logging
-# from redis import StrictRedis
+from redis import StrictRedis
 from msgpack import Unpacker
 import traceback
-from math import ceil
+# @modified 20191115 - Branch #3262: py3
+# from math import ceil
+
 from luminol.anomaly_detector import AnomalyDetector
 from luminol.correlator import Correlator
 from timeit import default_timer as timer

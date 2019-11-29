@@ -1,6 +1,6 @@
 import logging
 import sys
-# import traceback
+import traceback
 from os import getpid
 from os.path import isdir
 from daemon import runner
@@ -17,10 +17,12 @@ import os.path
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 sys.path.insert(0, os.path.dirname(__file__))
 
-import settings
-from validate_settings import validate_settings_variables
-
-from luminosity import Luminosity
+# @modified 20191115 - Branch #3262: py3
+# This prevents flake8 E402 - module level import not at top of file
+if True:
+    import settings
+    from validate_settings import validate_settings_variables
+    from luminosity import Luminosity
 
 skyline_app = 'luminosity'
 skyline_app_logger = skyline_app + 'Log'

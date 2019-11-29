@@ -3,10 +3,13 @@ import logging
 import os
 from os import kill, getpid
 from sys import version_info
-try:
-    from Queue import Empty
-except:
-    from queue import Empty
+
+# @modified 20191115 - Branch #3262: py3
+# try:
+#     from Queue import Empty
+# except:
+#     from queue import Empty
+
 from time import time, sleep
 from threading import Thread
 # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
@@ -502,10 +505,19 @@ class Luminosity(Thread):
                     settings.REDIS_SOCKET_PATH))
                 sleep(30)
                 # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
-                if settings.REDIS_PASSWORD:
-                    self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
-                else:
-                    self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+                # @modified 20191115 - Bug #3266: py3 Redis binary objects not strings
+                #                      Branch #3262: py3
+                # Use get_redis_conn and get_redis_conn_decoded to use on Redis sets when the bytes
+                # types need to be decoded as utf-8 to str
+                # if settings.REDIS_PASSWORD:
+                #     self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+                # else:
+                #     self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+                # @added 20191115 - Bug #3266: py3 Redis binary objects not strings
+                #                   Branch #3262: py3
+                self.redis_conn = get_redis_conn(skyline_app)
+                self.redis_conn_decoded = get_redis_conn_decoded(skyline_app)
+
                 continue
 
             # Report app up
