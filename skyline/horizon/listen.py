@@ -207,7 +207,7 @@ class Listen(Process):
                     data = new_data
                 if LOCAL_DEBUG:
                     logger.debug('debug :: listen :: read_all with chunk - %s' % str(chunk))
-            except Exception as e:
+            except:
                 if LOCAL_DEBUG:
                     logger.error(traceback.format_exc())
                     logger.error('error :: listen :: read_all with chunk - %s' % str(chunk))
