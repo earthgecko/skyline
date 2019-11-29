@@ -167,6 +167,22 @@ else
   done
 
   SKYLINE_DB_INSTALLED=$(mysql -uroot -h skyline-docker-mysql-1 -sss -e "SHOW DATABASES" | grep -c skyline)
+
+  # @added 20191114 - Bug #3318: Make Skyline docker handle OOMkiller
+  if [ $SKYLINE_DB_INSTALLED -eq 0 ]; then
+    if [ -f /opt/skyline/backups/skyline.sql ]; then
+      echo "Importing the last Skyline DB dump"
+      mysql -uroot -h skyline-docker-mysql-1 < /opt/skyline/backups/skyline.sql
+      if [ $? -ne 0 ]; then
+        echo "error :: failed to import the skyline DB dump using /opt/skyline/backups/skyline.sql"
+        exit 1
+      else
+        echo "Created the skyline DB using /opt/skyline/backups/skyline.sql"
+      fi
+    fi
+  fi
+  SKYLINE_DB_INSTALLED=$(mysql -uroot -h skyline-docker-mysql-1 -sss -e "SHOW DATABASES" | grep -c skyline)
+
   if [ $SKYLINE_DB_INSTALLED -eq 0 ]; then
     echo "Creating skyline DB"
     mysql -uroot -h skyline-docker-mysql-1 < /opt/skyline/github/skyline/skyline/skyline.sql
@@ -180,6 +196,7 @@ else
     echo "skyline DB already created"
   fi
 fi
+
 # Remove pid files
 sudo rm -rf /var/run/skyline
 sudo mkdir -p /var/run/skyline
