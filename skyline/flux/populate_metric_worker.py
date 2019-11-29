@@ -2,7 +2,10 @@ import sys
 import os.path
 from os import kill
 import traceback
-from multiprocessing import Queue, Process
+# @modified 20191115 - Branch #3262: py3
+# from multiprocessing import Queue, Process
+from multiprocessing import Process
+
 try:
     from Queue import Empty  # Python 2.7
 except ImportError:
@@ -16,21 +19,32 @@ import pickle
 import struct
 
 import requests
-from redis import StrictRedis
+# @modified 20191115 - Bug #3266: py3 Redis binary objects not strings
+#                      Branch #3262: py3
+# from redis import StrictRedis
+
 import graphyte
 import pandas as pd
 
 from logger import set_up_logging
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 sys.path.insert(0, os.path.dirname(__file__))
-import settings
-from skyline_functions import (
-    send_graphite_metric,
-    # @added 20191111 - Bug #3266: py3 Redis binary objects not strings
-    #                   Branch #3262: py3
-    get_redis_conn)
 
-logger = set_up_logging('populate_metric_worker')
+if True:
+    import settings
+    from skyline_functions import (
+        send_graphite_metric,
+        # @added 20191111 - Bug #3266: py3 Redis binary objects not strings
+        #                   Branch #3262: py3
+        get_redis_conn,
+        # @added 20191128 - Bug #3266: py3 Redis binary objects not strings
+        #                   Branch #3262: py3
+        get_redis_conn_decoded)
+
+# @modified 20191129 - Branch #3262: py3
+# Consolidate flux logging
+# logger = set_up_logging('populate_metric_worker')
+logger = set_up_logging(None)
 
 this_host = str(os.uname()[1])
 
@@ -87,6 +101,9 @@ class PopulateMetricWorker(Process):
         # Added a single functions to deal with Redis connection and the
         # charset='utf-8', decode_responses=True arguments required in py3
         self.redis_conn = get_redis_conn(skyline_app)
+        # @added 20191128 - Bug #3266: py3 Redis binary objects not strings
+        #                   Branch #3262: py3
+        self.redis_conn_decoded = get_redis_conn_decoded(skyline_app)
 
         self.q = queue
         self.parent_pid = parent_pid
@@ -155,6 +172,9 @@ class PopulateMetricWorker(Process):
                     # else:
                     #     self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
                     self.redis_conn = get_redis_conn(skyline_app)
+                    # @added 20191128 - Bug #3266: py3 Redis binary objects not strings
+                    #                   Branch #3262: py3
+                    self.redis_conn_decoded = get_redis_conn_decoded(skyline_app)
 
             metricDict = None
             try:
@@ -226,10 +246,15 @@ class PopulateMetricWorker(Process):
             cache_key = 'flux.last.%s' % metric
             last_flux_timestamp = None
             try:
-                redis_last_metric_data = self.redis_conn.get(cache_key).decode('utf-8')
+                # @modified 20191128 - Bug #3266: py3 Redis binary objects not strings
+                #                      Branch #3262: py3
+                # redis_last_metric_data = self.redis_conn.get(cache_key).decode('utf-8')
+                redis_last_metric_data = self.redis_conn_decoded.get(cache_key)
                 last_metric_data = literal_eval(redis_last_metric_data)
                 last_flux_timestamp = int(last_metric_data[0])
             except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: populate_metric_worker :: failed to determine last_flux_timestamp from Redis key %s' % cache_key)
                 last_flux_timestamp = False
             recent_last_flux_timestamp_present = False
             if last_flux_timestamp:

@@ -9,6 +9,8 @@ import os.path
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 sys.path.insert(0, os.path.dirname(__file__))
 
+# @modified 20191115 - Branch #3262: py3
+# This prevents flake8 E402 - module level import not at top of file
 if True:
     import settings
 
