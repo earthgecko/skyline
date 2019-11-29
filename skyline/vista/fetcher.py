@@ -5,7 +5,9 @@ from datetime import datetime, timedelta
 from threading import Thread
 from multiprocessing import Process
 import os
-from os import kill, getpid
+# @modified 20191115 - Branch #3262: py3
+# from os import kill, getpid
+from os import kill
 import traceback
 import re
 from sys import version_info
@@ -16,16 +18,19 @@ try:
 except:
     from urllib import quote
 
-from redis import StrictRedis
+# @modified 20191115 - Branch #3262: py3
+# from redis import StrictRedis
 import requests
 
 import settings
 python_version = int(version_info[0])
-from skyline_functions import (
-    send_graphite_metric, filesafe_metricname,
-    # @added 20191111 - Bug #3266: py3 Redis binary objects not strings
-    #                   Branch #3262: py3
-    get_redis_conn, get_redis_conn_decoded)
+
+if True:
+    from skyline_functions import (
+        send_graphite_metric, filesafe_metricname,
+        # @added 20191111 - Bug #3266: py3 Redis binary objects not strings
+        #                   Branch #3262: py3
+        get_redis_conn, get_redis_conn_decoded)
 
 parent_skyline_app = 'vista'
 child_skyline_app = 'fetcher'
@@ -101,20 +106,142 @@ class Fetcher(Thread):
         if LOCAL_DEBUG:
             logger.info('fetcher :: metrics_to_fetch - %s' % str(metrics_to_fetch))
 
+        # @added 20191127 - Feature #3338: Vista - batch Graphite requests
+        def param_value_from_url(url, param_name):
+            value = None
+            for i in url.split('?', 1)[-1].split('&'):
+                if i.startswith(param_name + '='):
+                    value = i.split('=')[-1]
+            return value
+
+        # @added 20191127 - Feature #3338: Vista - batch Graphite requests
+        # Fetch metrics from the same Graphite host that have the same from
+        # parameter in batches
+        try:
+            graphite_batch_target_count = settings.VISTA_GRAPHITE_BATCH_SIZE
+        except:
+            graphite_batch_target_count = 20
+        graphite_batches = []  # [batch_no, remote_host, from_timestamp, url]
+        in_batch_responses = []
+        all_response_timeseries = []
+        batch_number = 0
         for remote_host_type, frequency, remote_target, graphite_target, metric, url, namespace_prefix, api_key, token, user, password in metrics_to_fetch:
-            success = False
+            if remote_host_type != 'graphite':
+                continue
             try:
-                # @modified 20191011 - Task #3258: Reduce vista logging
-                if LOCAL_DEBUG:
-                    logger.info('fetcher :: getting data from %s' % str(url))
-                response = requests.get(url)
-                if response.status_code == 200:
-                    success = True
+                url_elements = url.split('/')
+                remote_host = url_elements[2]
             except:
                 logger.info(traceback.format_exc())
-                logger.error('error :: fetcher :: http status code - %s, reason - %s' % (
-                    str(response.status_code), str(response.reason)))
-                logger.error('error :: fetcher :: failed to get data from %s' % str(url))
+                logger.error('error :: fetcher :: failed to determine the remote_host from the url - %s' % str(url))
+            try:
+                from_timestamp_str = param_value_from_url(url, 'from')
+                try:
+                    from_timestamp = int(from_timestamp_str)
+                except:
+                    from_timestamp = None
+            except:
+                logger.info(traceback.format_exc())
+                logger.error('error :: fetcher :: failed to determine the timestamp from the from url parameter - %s' % str(url))
+            if not from_timestamp:
+                continue
+            try:
+                target = param_value_from_url(url, 'target')
+            except:
+                logger.info(traceback.format_exc())
+                logger.error('error :: fetcher :: failed to determine the metric from the target url parameter - %s' % str(url))
+            added_to_batch = False
+            add_to_batch = False
+            for batch_number, batch_remote_host, batch_from_timestamp, batch_url in graphite_batches:
+                if added_to_batch:
+                    continue
+                try:
+                    if remote_host == batch_remote_host:
+                        if str(from_timestamp) == str(batch_from_timestamp):
+                            try:
+                                if batch_url.count('target') < graphite_batch_target_count:
+                                    add_to_batch = int(batch_number)
+                            except:
+                                logger.error('error :: fetcher :: failed to determine whether to add to batch')
+                                continue
+                except:
+                    logger.error('error :: fetcher :: failed to determine whether to add to batch')
+            if not add_to_batch:
+                batch_number += 1
+                batch_url = url
+                batch_data = [batch_number, remote_host, from_timestamp_str, url]
+                graphite_batches.append(batch_data)
+                added_to_batch = batch_number
+            if add_to_batch:
+                new_graphite_batches = []
+                for batch_number, batch_remote_host, batch_from_timestamp, batch_url in graphite_batches:
+                    if batch_number == add_to_batch:
+                        new_end = '&target=%s&format=json' % remote_target
+                        new_url = batch_url.replace('&format=json', new_end)
+                        batch_url = new_url
+                        added_to_batch = batch_number
+                    batch_data = [batch_number, batch_remote_host, batch_from_timestamp, batch_url]
+                    new_graphite_batches.append(batch_data)
+                graphite_batches = new_graphite_batches
+            if added_to_batch:
+                in_batch_responses.append(target)
+        batch_responses = []
+        start_batch_fetches = int(time())
+        for batch_number, remote_host, from_timestamp_str, url in graphite_batches:
+            try:
+                batch_response = requests.get(url)
+                batch_js = batch_response.json()
+                batch_responses.append(batch_js)
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: fetcher :: failed to get valid response for batch request %s' % str(url))
+        if batch_responses:
+            end_batch_fetches = int(time())
+            time_to_fetch_batches = end_batch_fetches - start_batch_fetches
+            logger.info('fetcher :: %s metric batch requests of %s metrics per batch were fetched in %s seconds' % (
+                str(len(batch_responses)), str(graphite_batch_target_count), str(time_to_fetch_batches)))
+        if in_batch_responses:
+            logger.info('fetcher :: %s metrics were fetched in batch requests' % str(len(in_batch_responses)))
+
+        for remote_host_type, frequency, remote_target, graphite_target, metric, url, namespace_prefix, api_key, token, user, password in metrics_to_fetch:
+            success = False
+
+            # @added 20191127 - Feature #3338: Vista - batch Graphite requests
+            # Get the metric timeseries from the batch responses and if it is
+            # not found no js variable will be set and the metric will be
+            # requested individually as per the default behaviour
+            js = None
+            batched_response = False
+            if remote_target in in_batch_responses:
+                try:
+                    for responses in batch_responses:
+                        for i in responses:
+                            if str(i['target']) == remote_target:
+                                js = i
+                                batched_response = True
+                                success = True
+                                logger.info('fetcher :: data for %s was fetched in a batch' % str(remote_target))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: fetcher :: failed to detemine if %s was in batch_responses' % str(remote_target))
+
+            # @modified 20191127 - Feature #3338: Vista - batch Graphite requests
+            # Wrapped in if not success
+            if not success:
+                try:
+                    # @modified 20191011 - Task #3258: Reduce vista logging
+                    if LOCAL_DEBUG:
+                        logger.info('fetcher :: getting data from %s' % str(url))
+                    response = requests.get(url)
+                    if response.status_code == 200:
+                        success = True
+                except:
+                    logger.error(traceback.format_exc())
+                    # @modified 20191115 - Branch #3262: py3
+                    # Do not report last response data
+                    # logger.error('error :: fetcher :: http status code - %s, reason - %s' % (
+                    #     str(response.status_code), str(response.reason)))
+                    logger.error('error :: fetcher :: failed to get data from %s' % str(url))
             if not success:
                 continue
 
@@ -126,9 +253,21 @@ class Fetcher(Thread):
 
             datapoints = None
             try:
-                js = response.json()
+                # @modified 20191127 - Feature #3338: Vista - batch Graphite requests
+                # js = response.json()
+                if not js:
+                    js = response.json()
+                else:
+                    logger.info('fetcher :: data for %s was fetched in a batch' % str(remote_target))
+
                 if remote_host_type == 'graphite':
-                    datapoints = js[0]['datapoints']
+                    # @modified 20191127 - Feature #3338: Vista - batch Graphite requests
+                    # datapoints = js[0]['datapoints']
+                    if not batched_response:
+                        datapoints = js[0]['datapoints']
+                    else:
+                        datapoints = js['datapoints']
+
                 if remote_host_type == 'prometheus':
                     datapoints = js['data']['result'][0]['values']
                 datapoints_fetched = len(datapoints)
@@ -194,10 +333,13 @@ class Fetcher(Thread):
             redis_last_flux_metric_data = None
             try:
                 cache_key = 'flux.last.%s' % metric
-                if python_version == 3:
-                    redis_last_flux_metric_data = self.redis_conn.get(cache_key).decode('utf-8')
-                else:
-                    redis_last_flux_metric_data = self.redis_conn.get(cache_key)
+
+                # if python_version == 3:
+                #     redis_last_flux_metric_data = self.redis_conn.get(cache_key).decode('utf-8')
+                # else:
+                #     redis_last_flux_metric_data = self.redis_conn.get(cache_key)
+                redis_last_flux_metric_data = self.redis_conn_decoded.get(cache_key)
+
                 if LOCAL_DEBUG:
                     if redis_last_flux_metric_data:
                         logger.info('fetcher :: Redis key %s is present' % str(cache_key))
@@ -515,7 +657,6 @@ class Fetcher(Thread):
                             logger.info('fetcher :: with url %s' % str(url))
 
                     default_prometheus_uri = False
-                    passed_uri = None
                     if remote_host_type == 'prometheus':
                         remote_prometheus_host = remote_host
                         # Hardcode the Prometheus api uri
@@ -529,8 +670,6 @@ class Fetcher(Thread):
                             uri = '/api/v1/query_range?query=%s&start=%s&end=%s&step=60s' % (
                                 str(urlencoded_remote_target),
                                 str(start_timestamp), str(end_timestamp))
-                        else:
-                            passed_uri = uri
                         url = '%s%s' % (remote_prometheus_host, uri)
                         if LOCAL_DEBUG:
                             logger.info('fetcher :: with url %s' % str(url))
@@ -579,11 +718,11 @@ class Fetcher(Thread):
                 if remote_target not in vista_unique_metrics:
                     if remote_host_type == 'graphite' and populate_at_resolutions:
                         pre_populate_graphite_metric = True
-                        logger.info('fetcher :: attempting to pre-propulate Graphite metric - %s' % (
+                        logger.info('fetcher :: attempting to pre-populate Graphite metric - %s' % (
                             metric))
                     if remote_host_type == 'prometheus' and populate_at_resolutions:
                         pre_populate_graphite_metric = True
-                        logger.info('fetcher :: attempting to pre-propulate Prometheus metric - %s' % (
+                        logger.info('fetcher :: attempting to pre-populate Prometheus metric - %s' % (
                             metric))
                 else:
                     if LOCAL_DEBUG:
@@ -597,6 +736,8 @@ class Fetcher(Thread):
                 try:
                     cache_key = 'flux.last.%s' % metric
                     # @modified 20191111 - Bug #3266: py3 Redis binary objects not strings
+                    #                      Branch #3262: py3
+                    # @modified 20191128 - Bug #3266: py3 Redis binary objects not strings
                     #                      Branch #3262: py3
                     # if python_version == 3:
                     #     redis_last_flux_metric_data = self.redis_conn.get(cache_key).decode('utf-8')
@@ -641,13 +782,13 @@ class Fetcher(Thread):
                         continue
 
                 if remote_target in vista_unique_metrics and last_flux_timestamp:
-                    last_expected_fetch_time = time_now - (frequency + 300)
+                    last_expected_fetch_time = time_now - (frequency + 420)
                     if last_flux_timestamp < last_expected_fetch_time:
                         if populate_at_resolutions:
                             if remote_host_type == 'graphite' or remote_host_type == 'prometheus':
                                 pre_populate_graphite_metric = True
                                 behind_by_seconds = time_now - last_flux_timestamp
-                                logger.info('fetcher :: last_flux_timestamp is behind by %s seconds, attempting to pre-propulate %s' % (
+                                logger.info('fetcher :: last_flux_timestamp is behind by %s seconds, attempting to pre-populate %s' % (
                                     str(behind_by_seconds), metric))
 
                 if remote_target in vista_unique_metrics:
@@ -663,7 +804,7 @@ class Fetcher(Thread):
                             pre_populate_graphite_metric = True
 
                 if pre_populate_graphite_metric:
-                    logger.info('fetcher :: attempting to build the pre-propulate Graphite metric urls - %s' % (
+                    logger.info('fetcher :: attempting to build the pre-populate Graphite metric urls - %s' % (
                         metric))
                 if LOCAL_DEBUG:
                     logger.info('fetcher :: pre_populate_graphite_metric - %s - %s' % (
@@ -673,7 +814,7 @@ class Fetcher(Thread):
 
                 # Build remote Graphite URLs
                 if remote_host_type == 'graphite' and pre_populate_graphite_metric:
-                    logger.info('fetcher :: building the pre-propulate Graphite metric urls - %s' % (
+                    logger.info('fetcher :: building the pre-populate Graphite metric urls - %s' % (
                         metric))
                     try:
                         # Build URLs to submit to flux/HttpPopulateMetric
@@ -857,7 +998,7 @@ class Fetcher(Thread):
                         # @modified 20191011 - Task #3258: Reduce vista logging
                         if LOCAL_DEBUG:
                             logger.info('fetcher :: flux /populate_metric response code - %s' % (
-                            str(response.status_code)))
+                                str(response.status_code)))
                         # @added 20191011 - Task #3258: Reduce vista logging
                         good_response = False
 
@@ -873,7 +1014,7 @@ class Fetcher(Thread):
                         # @added 20191011 - Task #3258: Reduce vista logging
                         if not good_response:
                             logger.error('fetcher :: flux /populate_metric did not respond with 200 or 204, status code - %s for %s' % (
-                            str(response.status_code), flux_url))
+                                str(response.status_code), flux_url))
                     except:
                         logger.error(traceback.format_exc())
                         logger.error('error :: fetcher :: could not post data to flux URL - %s, data - %s' % (
