@@ -4,7 +4,7 @@ import os
 from sys import version_info
 import traceback
 import csv
-from ast import literal_eval
+# from ast import literal_eval
 
 from sqlalchemy.sql import select
 # @added 20170809 - Task #2132: Optimise Ionosphere DB usage
@@ -252,7 +252,9 @@ def minmax_scale_check(
         range_tolerance_percentage, fp_id, base_name, metric_timestamp,
         features_percentage_diff):
 
-    not_anomalous = False
+    # @modified 20191115 - Branch #3262: py3
+    # not_anomalous = False
+
     try:
         minmax_fp_values = [x[1] for x in fp_id_metric_ts]
         min_fp_value = min(minmax_fp_values)
@@ -531,9 +533,12 @@ def minmax_scale_check(
                     'minmax scaled calculated features sum are within %s percent of fp_id %s with %s, not anomalous' %
                     (str(features_percentage_diff),
                         str(fp_id), str(percent_different)))
-            if minmax_not_anomalous:
-                not_anomalous = True
-                minmax = 1
+
+            # @modified 20191115 - Branch #3262: py3
+            # if minmax_not_anomalous:
+            #     not_anomalous = True
+            #     minmax = 1
+
                 # Created time series resources for graphing in
                 # the matched page
 

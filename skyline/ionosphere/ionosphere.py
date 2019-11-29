@@ -4,10 +4,13 @@ import os
 from os import kill, getpid, listdir
 from os.path import join, isfile
 from sys import version_info
-try:
-    from Queue import Empty
-except:
-    from queue import Empty
+
+# @modified 20191115 - Branch #3262: py3
+# try:
+#     from Queue import Empty
+# except:
+#     from queue import Empty
+
 from time import time, sleep
 from threading import Thread
 # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
@@ -1204,6 +1207,10 @@ class Ionosphere(Thread):
             # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
             # if base_name in self.ionosphere_non_smtp_alerter_metrics:
             if base_name in ionosphere_non_smtp_alerter_metrics:
+
+                # @modified 20191114 - Feature #: forward_alert
+                # Allow ionosphere to check any metrics that have an alerter other than smtp set, apart from syslog
+
                 logger.error('error :: Ionosphere does not handle metrics that do not have a smtp alert context removing check for %s' % (base_name))
                 self.remove_metric_check_file(str(metric_check_file))
                 if engine:
@@ -3142,10 +3149,15 @@ class Ionosphere(Thread):
                     settings.REDIS_SOCKET_PATH))
                 sleep(30)
                 # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
-                if settings.REDIS_PASSWORD:
-                    self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
-                else:
-                    self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+                # @added 20191115 - Bug #3266: py3 Redis binary objects not strings
+                #                   Branch #3262: py3
+                # if settings.REDIS_PASSWORD:
+                #     self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+                # else:
+                #     self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+                self.redis_conn = get_redis_conn(skyline_app)
+                self.redis_conn_decoded = get_redis_conn_decoded(skyline_app)
+
                 continue
 
             # Report app up

@@ -10,8 +10,10 @@ from sys import version_info
 
 from redis import StrictRedis
 import traceback
-import mysql.connector
-from mysql.connector import errorcode
+
+# @modified 20191115 - Branch #3262: py3
+# import mysql.connector
+# from mysql.connector import errorcode
 
 from sqlalchemy.sql import select
 
