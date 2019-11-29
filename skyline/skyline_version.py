@@ -12,7 +12,7 @@ __version__ = '.'.join(__version_info__)
 # @modified 20190117 - release #2748: v1.2.11
 # Changed version naming in terms release names from vx.y.z instead of of using
 # vx.y.z-__version_tag__ e.g. now v1.2.11 instead of v1.2.11-stable
-#__absolute_version__ = 'Skyline (%s v%s-%s)' % (__branch__, __version__, __version_tag__)
+# __absolute_version__ = 'Skyline (%s v%s-%s)' % (__branch__, __version__, __version_tag__)
 __absolute_version__ = 'Skyline (%s v%s %s)' % (__branch__, __version__, __version_tag__)
 
 # __version__ = '0.5.0'

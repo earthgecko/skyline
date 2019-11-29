@@ -4,8 +4,7 @@ import traceback
 from os import getpid
 from os.path import isdir
 from daemon import runner
-from time import sleep, time
-
+from time import sleep
 from logging.handlers import TimedRotatingFileHandler, MemoryHandler
 
 import os.path
@@ -13,11 +12,15 @@ sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.par
 sys.path.insert(0, os.path.dirname(__file__))
 
 if True:
-    import settings
-    from validate_settings import validate_settings_variables
-
-from fetcher import Fetcher
-from worker import Worker
+    try:
+        import settings
+        from validate_settings import validate_settings_variables
+        from fetcher import Fetcher
+        from worker import Worker
+    except:
+        print(traceback.format_exc())
+        print('failed to import Skyline modules')
+        sys.exit(1)
 
 skyline_app = 'vista'
 skyline_app_logger = '%sLog' % skyline_app
@@ -56,6 +59,7 @@ class Vista():
 
         while 1:
             sleep(100)
+
 
 def run():
     """
