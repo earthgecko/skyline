@@ -3,19 +3,26 @@ import logging
 import hashlib
 from smtplib import SMTP
 import mirage_alerters
-try:
-    import urllib2
-except ImportError:
-    import urllib.request
-    import urllib.error
+
+# @modified 20191115 - Task #3290: Handle urllib2 in py3
+#                      Branch #3262: py3
+# Deprecating this method
+# try:
+#     import urllib2
+# except ImportError:
+#     import urllib.request
+#     import urllib.error
 
 # @added 20191023 - Task #3290: Handle urllib2 in py3
 #                   Branch #3262: py3
 # Use urlretrieve
-try:
-    import urllib2 as urllib
-except ImportError:
-    from urllib import request as urllib
+# @modified 20191115 - Task #3290: Handle urllib2 in py3
+#                      Branch #3262: py3
+# Deprecating this method
+# try:
+#     import urllib2 as urllib
+# except ImportError:
+#     from urllib import request as urllib
 
 from ast import literal_eval
 from requests.utils import quote
@@ -28,7 +35,10 @@ import datetime as dt
 # @added 20180809 - Bug #2498: Incorrect scale in some graphs
 # @modified 20181025 - Feature #2618: alert_slack
 # Added gmtime and strftime
-from time import (time, gmtime, strftime)
+# @modified 20191115 - Task #3290: Handle urllib2 in py3
+# from time import (time, gmtime, strftime)
+from time import gmtime, strftime
+
 from email import charset
 
 # @modified 20160820 - Issue #23 Test dependency updates
@@ -407,20 +417,23 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
                     logger.error('error :: alert_smtp - %s' % str(link))
                     image_data = None
 
-        if image_data is None:
-            try:
-                # @modified 20170913 - Task #2160: Test skyline with bandit
-                # Added nosec to exclude from bandit tests
-                image_data = urllib2.urlopen(link).read()  # nosec
-                if settings.ENABLE_DEBUG or LOCAL_DEBUG:
-                    logger.info('debug :: alert_smtp - image data OK')
-            except urllib2.URLError:
-                logger.error(traceback.format_exc())
-                logger.error('error :: alert_smtp - failed to get image graph')
-                logger.error('error :: alert_smtp - %s' % str(link))
-                image_data = None
-                if settings.ENABLE_DEBUG or LOCAL_DEBUG:
-                    logger.info('debug :: alert_smtp - image data None')
+        # @modified 20191115 - Task #3290: Handle urllib2 in py3
+        #                      Branch #3262: py3
+        # Deprecating this method
+        # if image_data is None:
+        #     try:
+        #        # @modified 20170913 - Task #2160: Test skyline with bandit
+        #        # Added nosec to exclude from bandit tests
+        #        image_data = urllib2.urlopen(link).read()  # nosec
+        #        if settings.ENABLE_DEBUG or LOCAL_DEBUG:
+        #            logger.info('debug :: alert_smtp - image data OK')
+        #    except urllib2.URLError:
+        #        logger.error(traceback.format_exc())
+        #        logger.error('error :: alert_smtp - failed to get image graph')
+        #        logger.error('error :: alert_smtp - %s' % str(link))
+        #        image_data = None
+        #        if settings.ENABLE_DEBUG or LOCAL_DEBUG:
+        #            logger.info('debug :: alert_smtp - image data None')
 
     # If we failed to get the image or if it was explicitly disabled,
     # use the image URL instead of the content.
@@ -1307,7 +1320,10 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context):
     #                   Branch #3262: py3
     image_data = get_graphite_graph_image(skyline_app, link, graphite_image_file)
 
-    if graphite_image_file:
+    # @modified 20191115 - Task #3290: Handle urllib2 in py3
+    #                      Branch #3262: py3
+    # if graphite_image_file:
+    if graphite_image_file and image_data:
         if os.path.isfile(graphite_image_file):
             image_file = graphite_image_file
             logger.info('alert_slack - interpolated Ionosphere Graphite image file exists :: %s' % (
@@ -1315,31 +1331,39 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context):
         else:
             logger.error('error :: alert_slack - interpolated Ionosphere Graphite image file not found :: %s' % (
                 graphite_image_file))
+    else:
+        logger.error('error :: alert_slack - no Ionosphere Graphite image file found :: %s' % (
+            str(graphite_image_file)))
 
-    if not image_file:
-        # Fetch the png from Graphite
-        try:
-            image_data = urllib2.urlopen(link).read()  # nosec
-        except urllib2.URLError:
-            logger.error(traceback.format_exc())
-            logger.error('error :: alert_slack - failed to get image graph')
-            logger.error('error :: alert_slack - %s' % str(link))
-            image_data = None
 
-        if image_data:
-            image_file = '%s/%s.%s.graphite.%sh.png' % (
-                settings.SKYLINE_TMP_DIR, base_name, skyline_app,
-                str(int(full_duration_in_hours)))
-            try:
-                write_data_to_file(skyline_app, image_file, 'w', image_data)
-                logger.info('alert_slack - added Graphite image :: %s' % (
-                    image_file))
-            except:
-                logger.info(traceback.format_exc())
-                logger.error(
-                    'error :: alert_slack - failed to add %s Graphite image' % (
-                        image_file))
-                image_file = None
+    # @modified 20191115 - Task #3290: Handle urllib2 in py3
+    #                      Branch #3262: py3
+    # Deprecating this method
+    # if not image_file:
+    #    # Fetch the png from Graphite
+    #    try:
+    #        image_data = urllib2.urlopen(link).read()  # nosec
+    #    except urllib2.URLError:
+    #        logger.error(traceback.format_exc())
+    #        logger.error('error :: alert_slack - failed to get image graph')
+    #        logger.error('error :: alert_slack - %s' % str(link))
+    #        image_data = None
+    #
+    #    if image_data:
+    #        image_file = '%s/%s.%s.graphite.%sh.png' % (
+    #            settings.SKYLINE_TMP_DIR, base_name, skyline_app,
+    #            str(int(full_duration_in_hours)))
+    #        try:
+    #            write_data_to_file(skyline_app, image_file, 'w', image_data)
+    #            logger.info('alert_slack - added Graphite image :: %s' % (
+    #                image_file))
+    #        except:
+    #            logger.info(traceback.format_exc())
+    #            logger.error(
+    #                'error :: alert_slack - failed to add %s Graphite image' % (
+    #                    image_file))
+    #            image_file = None
+
     try:
         filename = os.path.basename(image_file)
     except:
