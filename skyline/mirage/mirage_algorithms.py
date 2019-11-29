@@ -13,19 +13,23 @@ from os import getpid
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 sys.path.insert(0, os.path.dirname(__file__))
 
-from settings import (
-    MIRAGE_ALGORITHMS,
-    MIRAGE_CONSENSUS,
-    MIRAGE_DATA_FOLDER,
-    MIRAGE_ENABLE_SECOND_ORDER,
-    PANDAS_VERSION,
-    RUN_OPTIMIZED_WORKFLOW,
-    SKYLINE_TMP_DIR,
-    REDIS_SOCKET_PATH,
-    REDIS_PASSWORD,
-)
-
-from algorithm_exceptions import *
+# @modified 20191115 - Branch #3262: py3
+# This prevents flake8 E402 - module level import not at top of file
+if True:
+    from settings import (
+        MIRAGE_ALGORITHMS,
+        MIRAGE_CONSENSUS,
+        # @modified 20191115 - Branch #3262: py3
+        # MIRAGE_DATA_FOLDER,
+        MIRAGE_ENABLE_SECOND_ORDER,
+        PANDAS_VERSION,
+        # @modified 20191115 - Branch #3262: py3
+        # RUN_OPTIMIZED_WORKFLOW,
+        SKYLINE_TMP_DIR,
+        REDIS_SOCKET_PATH,
+        REDIS_PASSWORD,
+    )
+    from algorithm_exceptions import *
 
 skyline_app = 'mirage'
 skyline_app_logger = '%sLog' % skyline_app
