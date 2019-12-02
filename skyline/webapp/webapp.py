@@ -555,6 +555,22 @@ def version():
 # def data():
 def api():
 
+    # @added 20191126 - Feature #3336: webapp api - derivative_metrics
+    if 'derivative_metrics' in request.args:
+        try:
+            derivative_metrics = list(REDIS_CONN.smembers('derivative_metrics'))
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: Webapp could not get the derivative_metrics list from Redis')
+            return 'Internal Server Error', 500
+        data_dict = {
+  "status": {},
+  "data": {
+    "metrics": derivative_metrics
+  }
+}
+        return jsonify(data_dict), 200
+
     # @added 20191008 - Feature #3252: webapp api - unique_metrics
     if 'unique_metrics' in request.args:
         try:
