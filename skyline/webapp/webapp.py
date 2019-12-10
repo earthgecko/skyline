@@ -563,12 +563,7 @@ def api():
             logger.error(traceback.format_exc())
             logger.error('error :: Webapp could not get the mirage.unique_metrics list from Redis')
             return 'Internal Server Error', 500
-        data_dict = {
-  "status": {},
-  "data": {
-    "metrics": mirage_metrics
-  }
-}
+        data_dict = {"status": {}, "data": {"metrics": mirage_metrics}}
         return jsonify(data_dict), 200
 
     # @added 20191203 - Feature #3350: webapp api - mirage_metrics and ionosphere_metrics
@@ -580,11 +575,11 @@ def api():
             logger.error('error :: Webapp could not get the ionosphere.unique_metrics list from Redis')
             return 'Internal Server Error', 500
         data_dict = {
-  "status": {},
-  "data": {
-    "metrics": ionosphere_metrics
-  }
-}
+            "status": {},
+            "data": {
+                "metrics": ionosphere_metrics
+            }
+        }
         return jsonify(data_dict), 200
 
     # @added 20191126 - Feature #3336: webapp api - derivative_metrics
@@ -596,11 +591,11 @@ def api():
             logger.error('error :: Webapp could not get the derivative_metrics list from Redis')
             return 'Internal Server Error', 500
         data_dict = {
-  "status": {},
-  "data": {
-    "metrics": derivative_metrics
-  }
-}
+            "status": {},
+            "data": {
+                "metrics": derivative_metrics
+            }
+        }
         return jsonify(data_dict), 200
 
     # @added 20191008 - Feature #3252: webapp api - unique_metrics
@@ -612,11 +607,11 @@ def api():
             logger.error('error :: Webapp could not get the unique_metrics list from Redis')
             return 'Internal Server Error', 500
         data_dict = {
-  "status": {},
-  "data": {
-    "metrics": unique_metrics
-  }
-}
+            "status": {},
+            "data": {
+                "metrics": unique_metrics
+            }
+        }
         return jsonify(data_dict), 200
 
     # @added 20180929
@@ -3491,16 +3486,10 @@ def ionosphere():
                     except:
                         fp_created_successful = None
                     if fp_created_successful:
-                        data_dict = {
-  "status": {"created": "true"},
-  "data": {"fp_id": fp_id}
-}
+                        data_dict = {"status": {"created": "true"}, "data": {"fp_id": fp_id}}
                     else:
                         if fp_exists:
-                            data_dict = {
-  "status": {"created": "already exists"},
-  "data": {"fp_id": fp_id}
-}
+                            data_dict = {"status": {"created": "already exists"}, "data": {"fp_id": fp_id}}
                     return jsonify(data_dict), 200
 
             return render_template(
