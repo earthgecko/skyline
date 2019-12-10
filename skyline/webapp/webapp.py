@@ -555,6 +555,38 @@ def version():
 # def data():
 def api():
 
+    # @added 20191203 - Feature #3350: webapp api - mirage_metrics and ionosphere_metrics
+    if 'mirage_metrics' in request.args:
+        try:
+            mirage_metrics = list(REDIS_CONN.smembers('mirage.unique_metrics'))
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: Webapp could not get the mirage.unique_metrics list from Redis')
+            return 'Internal Server Error', 500
+        data_dict = {
+  "status": {},
+  "data": {
+    "metrics": mirage_metrics
+  }
+}
+        return jsonify(data_dict), 200
+
+    # @added 20191203 - Feature #3350: webapp api - mirage_metrics and ionosphere_metrics
+    if 'ionosphere_metrics' in request.args:
+        try:
+            ionosphere_metrics = list(REDIS_CONN.smembers('ionosphere.unique_metrics'))
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: Webapp could not get the ionosphere.unique_metrics list from Redis')
+            return 'Internal Server Error', 500
+        data_dict = {
+  "status": {},
+  "data": {
+    "metrics": ionosphere_metrics
+  }
+}
+        return jsonify(data_dict), 200
+
     # @added 20191126 - Feature #3336: webapp api - derivative_metrics
     if 'derivative_metrics' in request.args:
         try:
@@ -1973,6 +2005,8 @@ def ionosphere():
         'match_validation',
         # @added 20190922 - Feature #2516: Add label to features profile
         'label',
+        # @added 20191210 - Feature #3348: fp creation json response
+        'format',
     ]
 
     # @modified 20190503 - Branch #2646: slack - linting
@@ -2017,6 +2051,9 @@ def ionosphere():
 
     # @added 20190922 - Feature #2516: Add label to features profile
     fp_label = None
+
+    # @added 20191210 - Feature #3348: fp creation json response
+    response_format = None
 
     try:
         if request_args_present:
@@ -2260,6 +2297,11 @@ def ionosphere():
                 if key == 'add_fp':
                     if str(value) == 'true':
                         create_feature_profile = True
+                        # @added 20191210 - Feature #3348: fp creation json response
+                        if 'format' in request.args:
+                            response_format = request.args.get(str('format'), None)
+                            if response_format != 'json':
+                                response_format = None
 
                 # @added 20170317 - Feature #1960: ionosphere_layers - allow for floats
                 if key == 'd_boundary_limit':
@@ -3439,6 +3481,27 @@ def ionosphere():
                 if update_slack:
                     slack_updated = webapp_update_slack_thread(base_name, requested_timestamp, None, 'training_data_viewed')
                     logger.info('slack_updated for training_data_viewed %s' % str(slack_updated))
+
+            # @added 20191210 - Feature #3348: fp creation json response
+            if create_feature_profile and fp_id:
+                if response_format == 'json':
+                    data_dict = {"status": "error"}
+                    try:
+                        fp_created_successful = fp_in_successful
+                    except:
+                        fp_created_successful = None
+                    if fp_created_successful:
+                        data_dict = {
+  "status": {"created": "true"},
+  "data": {"fp_id": fp_id}
+}
+                    else:
+                        if fp_exists:
+                            data_dict = {
+  "status": {"created": "already exists"},
+  "data": {"fp_id": fp_id}
+}
+                    return jsonify(data_dict), 200
 
             return render_template(
                 'ionosphere.html', timestamp=requested_timestamp,
