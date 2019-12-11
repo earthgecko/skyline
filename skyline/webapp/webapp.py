@@ -1267,6 +1267,19 @@ def ionosphere():
     else:
         user = 'Skyline'
         user_id = 1
+
+    # @added 20191211 - Feature #3230: users DB table
+    #                   Ideas #2476: Label and relate anomalies
+    #                   Feature #2516: Add label to features profile
+    # Allow the user_id to be passed as a request argument
+    if 'user_id' in request.args:
+        user_id_str = request.args.get(str('user_id'), None)
+        try:
+            user_id = int(user_id_str)
+        except:
+            logger.error('error :: the /ionosphere user_id argument is not an int - %s' % str(user_id_str))
+            return '400 Bad Request - invalid user_id argument', 400
+
     if not user_id:
         success, user_id = get_user_details(skyline_app, 'id', 'username', str(user))
         if not success:
