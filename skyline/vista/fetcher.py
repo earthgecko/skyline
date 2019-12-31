@@ -108,11 +108,11 @@ class Fetcher(Thread):
 
         # @added 20191127 - Feature #3338: Vista - batch Graphite requests
         def param_value_from_url(url, param_name):
-            value = None
+            param_value = None
             for i in url.split('?', 1)[-1].split('&'):
                 if i.startswith(param_name + '='):
-                    value = i.split('=')[-1]
-            return value
+                    param_value = i.split('=')[-1]
+            return param_value
 
         # @added 20191127 - Feature #3338: Vista - batch Graphite requests
         # Fetch metrics from the same Graphite host that have the same from
@@ -123,7 +123,6 @@ class Fetcher(Thread):
             graphite_batch_target_count = 20
         graphite_batches = []  # [batch_no, remote_host, from_timestamp, url]
         in_batch_responses = []
-        all_response_timeseries = []
         batch_number = 0
         for remote_host_type, frequency, remote_target, graphite_target, metric, url, namespace_prefix, api_key, token, user, password in metrics_to_fetch:
             if remote_host_type != 'graphite':
@@ -134,6 +133,7 @@ class Fetcher(Thread):
             except:
                 logger.info(traceback.format_exc())
                 logger.error('error :: fetcher :: failed to determine the remote_host from the url - %s' % str(url))
+            from_timestamp = None
             try:
                 from_timestamp_str = param_value_from_url(url, 'from')
                 try:
@@ -145,6 +145,7 @@ class Fetcher(Thread):
                 logger.error('error :: fetcher :: failed to determine the timestamp from the from url parameter - %s' % str(url))
             if not from_timestamp:
                 continue
+            target = None
             try:
                 target = param_value_from_url(url, 'target')
             except:
@@ -227,6 +228,7 @@ class Fetcher(Thread):
 
             # @modified 20191127 - Feature #3338: Vista - batch Graphite requests
             # Wrapped in if not success
+            response = None
             if not success:
                 try:
                     # @modified 20191011 - Task #3258: Reduce vista logging
@@ -331,9 +333,8 @@ class Fetcher(Thread):
             # for he metric
             last_flux_timestamp = None
             redis_last_flux_metric_data = None
+            cache_key = 'flux.last.%s' % metric
             try:
-                cache_key = 'flux.last.%s' % metric
-
                 # if python_version == 3:
                 #     redis_last_flux_metric_data = self.redis_conn.get(cache_key).decode('utf-8')
                 # else:
@@ -409,6 +410,7 @@ class Fetcher(Thread):
             # getting added to flux populate_metric by Vista
             if not timeseries:
                 set_flux_key = False
+                last_ts = None
                 try:
                     sorted_raw_timeseries = sorted(raw_timeseries, key=lambda x: x[0])
                     last_ts = sorted_raw_timeseries[-1][0]
@@ -419,17 +421,17 @@ class Fetcher(Thread):
                     logger.error(traceback.format_exc())
                     logger.error('error :: fetcher :: failed to determine if last value was null')
                 if set_flux_key:
+                    cache_key = 'flux.last.%s' % metric
                     try:
                         # Update Redis flux key
-                        cache_key = 'flux.last.%s' % metric
                         metric_data = [int(last_ts), None]
                         self.redis_conn.set(cache_key, str(metric_data))
                         logger.info('fetcher :: even though no data points so as to not loop round on this metric, set the metric Redis key - %s - %s' % (
                             cache_key, str(metric_data)))
                     except:
                         logger.error(traceback.format_exc())
-                        logger.error('error :: fetcher :: even though no data points, failed to set Redis key - %s - %s' % (
-                            cache_key, str(metric_data)))
+                        logger.error('error :: fetcher :: even though no data points, failed to set Redis key - %s' % (
+                            cache_key))
                     # Adding to the vista.fetcher.unique_metrics Redis set
                     redis_set = 'vista.fetcher.unique_metrics'
                     data = str(metric)
@@ -650,6 +652,7 @@ class Fetcher(Thread):
                         logger.info('fetcher :: processing %s remote_target %s' % (
                             str(remote_host_type), str(remote_target)))
 
+                    remote_graphite_host = None
                     if remote_host_type == 'graphite':
                         remote_graphite_host = remote_host
                         url = '%s%s%s' % (remote_graphite_host, uri, str(remote_target))
@@ -657,6 +660,7 @@ class Fetcher(Thread):
                             logger.info('fetcher :: with url %s' % str(url))
 
                     default_prometheus_uri = False
+                    remote_prometheus_host = None
                     if remote_host_type == 'prometheus':
                         remote_prometheus_host = remote_host
                         # Hardcode the Prometheus api uri
@@ -733,6 +737,7 @@ class Fetcher(Thread):
                 # for he metric
                 last_flux_timestamp = None
                 redis_last_flux_metric_data = None
+                cache_key = None
                 try:
                     cache_key = 'flux.last.%s' % metric
                     # @modified 20191111 - Bug #3266: py3 Redis binary objects not strings
@@ -773,8 +778,8 @@ class Fetcher(Thread):
                         logger.error('error :: fetch :: failed determining last_flux_timestamp')
                         last_flux_timestamp = False
 
+                time_now = int(time())
                 if last_flux_timestamp:
-                    time_now = int(time())
                     last_fetch = time_now - last_flux_timestamp
                     if last_fetch < frequency:
                         if LOCAL_DEBUG:
@@ -1027,7 +1032,7 @@ class Fetcher(Thread):
                             url_from = re.sub(r'^.*from=[-]', '', url)
                             url_period = re.sub(r'&.*', '', url_from)
                             if 'days' in url_period:
-                                resolution_days = url_period.strip('days')
+                                resolution_days = int(url_period.strip('days'))
                                 d = datetime.today() - timedelta(days=resolution_days)
                             if 'hours' in url_period:
                                 resolution_hours = int(url_period.strip('hours'))
@@ -1118,6 +1123,7 @@ class Fetcher(Thread):
 
             # Sleep if it went too fast
             process_runtime = int(time()) - begin_fetcher_run
+            metrics_fetched_count = 0
             if int(process_runtime) < 60:
                 next_run = int(begin_fetcher_run) + 60
                 time_now = int(time())
@@ -1137,7 +1143,7 @@ class Fetcher(Thread):
                 except:
                     logger.error('error :: fetcher :: failed to del time_now')
                 metrics_fetched = []
-                metrics_fetched_count = 0
+                # metrics_fetched_count = 0
                 try:
                     redis_set = 'vista.fetcher.metrics.fetched'
                     # @modified 20191111 - Bug #3266: py3 Redis binary objects not strings
@@ -1165,7 +1171,6 @@ class Fetcher(Thread):
                             # Use get_redis_conn_decoded
                             # if python_version == 3:
                             #     str_metric_fetched = str_metric_fetched.decode('UTF-8')
-
                             metric_fetched = literal_eval(str_metric_fetched)
                             timestamp = int(metric_fetched[1])
                             timestamps.append(timestamp)
@@ -1190,8 +1195,9 @@ class Fetcher(Thread):
                 except:
                     logger.error(traceback.format_exc())
                     logger.error('error :: fetcher :: could not get Redis set %s' % redis_set)
+
+            send_metric_name = '%s.sent_to_flux' % skyline_app_graphite_namespace
             try:
-                send_metric_name = '%s.sent_to_flux' % skyline_app_graphite_namespace
                 logger.info('fetcher :: sending Graphite - %s, %s' % (
                     send_metric_name, str(fetcher_sent_to_flux)))
                 fetcher_sent_to_flux_str = str(fetcher_sent_to_flux)
@@ -1202,8 +1208,8 @@ class Fetcher(Thread):
 
             # @added 20191011 - Feature #3260: vista - fetcher add time_to_fetch metric
             # Added time_to_fetch, metrics_to_fetch, metrics_fetched
+            send_metric_name = '%s.time_to_fetch' % skyline_app_graphite_namespace
             try:
-                send_metric_name = '%s.time_to_fetch' % skyline_app_graphite_namespace
                 logger.info('fetcher :: sending Graphite - %s, %s' % (
                     send_metric_name, str(process_runtime)))
                 fetcher_time_to_fetch_str = str(process_runtime)
@@ -1211,9 +1217,10 @@ class Fetcher(Thread):
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: fetcher :: could not send %s to Graphite' % send_metric_name)
+
             metrics_to_fetch_count = len(metrics_to_fetch)
+            send_metric_name = '%s.metrics_to_fetch' % skyline_app_graphite_namespace
             try:
-                send_metric_name = '%s.metrics_to_fetch' % skyline_app_graphite_namespace
                 logger.info('fetcher :: sending Graphite - %s, %s' % (
                     send_metric_name, str(metrics_to_fetch_count)))
                 fetcher_metrics_to_fetch_count_str = str(metrics_to_fetch_count)
@@ -1221,8 +1228,9 @@ class Fetcher(Thread):
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: fetcher :: could not send %s to Graphite' % send_metric_name)
+
+            send_metric_name = '%s.metrics_fetched' % skyline_app_graphite_namespace
             try:
-                send_metric_name = '%s.metrics_fetched' % skyline_app_graphite_namespace
                 logger.info('fetcher :: sending Graphite - %s, %s' % (
                     send_metric_name, str(metrics_fetched_count)))
                 fetcher_metrics_fetched_count_str = str(metrics_fetched_count)

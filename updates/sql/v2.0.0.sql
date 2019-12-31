@@ -9,3 +9,9 @@ USE skyline;
 # Added anomaly_end_timestamp */
 ALTER TABLE `anomalies` ADD COLUMN `anomaly_end_timestamp` INT(11) DEFAULT NULL COMMENT 'end of the anomaly unix timestamp' AFTER `anomaly_timestamp`;
 COMMIT;
+
+/* @added 20191231 - Feature #3370: Add additional indices to DB
+                     Branch #3262: py3
+# For better query performance */
+CREATE INDEX metric_id ON ionosphere (metric_id);
+CREATE INDEX anomaly_timestamp ON anomalies (anomaly_timestamp);

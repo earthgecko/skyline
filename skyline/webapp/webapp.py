@@ -555,6 +555,17 @@ def version():
 # def data():
 def api():
 
+    # @added 20191231 - Feature #3368: webapp api - ionosphere_learn_work
+    if 'ionosphere_learn_work' in request.args:
+        try:
+            ionosphere_learn_work = list(REDIS_CONN.smembers('ionosphere.learn.work'))
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: Webapp could not get the ionosphere.learn.work list from Redis')
+            return 'Internal Server Error', 500
+        data_dict = {"status": {}, "data": {"metrics": ionosphere_learn_work}}
+        return jsonify(data_dict), 200
+
     # @added 20191203 - Feature #3350: webapp api - mirage_metrics and ionosphere_metrics
     if 'mirage_metrics' in request.args:
         try:
@@ -647,10 +658,10 @@ def api():
             return resp, 400
         if metric and timestamp:
             tuple_json_file = '%s.json' % metric
-            if full_duration_data in request.args:
+            if 'full_duration_data' in request.args:
                 full_duration_data = request.args.get('full_duration_data', None)
                 if full_duration_data == 'true':
-                    full_duration_in_hours = settings.FULL_DURATION / 60 / 60
+                    full_duration_in_hours = int(settings.FULL_DURATION / 60 / 60)
                     tuple_json_file = '%s.mirage.redis.%sh.json' % (metric, str(full_duration_in_hours))
             metric_timeseries_dir = metric.replace('.', '/')
             if source == 'features_profile':
@@ -1583,6 +1594,10 @@ def ionosphere():
                         'load_derivative_graphs',
                         # @added 20180917 - Feature #2602: Graphs in search_features_profiles
                         'show_graphs',
+                        # @added 20191212 - Feature #3230: users DB table
+                        #                   Feature #2516: Add label to features profile
+                        # Allow the user_id to be passed as a request argument
+                        'user_id',
                         ]
 
         count_by_metric = None
@@ -2015,6 +2030,10 @@ def ionosphere():
         'label',
         # @added 20191210 - Feature #3348: fp creation json response
         'format',
+        # @added 20191212 - Feature #3230: users DB table
+        #                   Feature #2516: Add label to features profile
+        # Allow the user_id to be passed as a request argument
+        'user_id',
     ]
 
     # @modified 20190503 - Branch #2646: slack - linting
