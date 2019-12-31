@@ -129,6 +129,11 @@ CREATE TABLE IF NOT EXISTS `anomalies` (
                    `full_duration`,`triggered_algorithms`,`created_timestamp`))
     ENGINE=InnoDB;
 
+/* @added 20191231 - Feature #3370: Add additional indices to DB
+                     Branch #3262: py3
+# For better query performance */
+CREATE INDEX anomaly_timestamp ON anomalies (anomaly_timestamp);
+
 /*
 CREATE TABLE IF NOT EXISTS `skyline`.`ionosphere` (
   `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT 'ionosphere rule unique id',
@@ -291,6 +296,11 @@ CREATE TABLE IF NOT EXISTS `ionosphere` (
 */
   INDEX `features_profile` (`id`,`metric_id`,`enabled`,`layers_id`))
   ENGINE=InnoDB;
+
+/* @added 20191231 - Feature #3370: Add additional indices to DB
+                     Branch #3262: py3
+# For better query performance */
+CREATE INDEX metric_id ON ionosphere (metric_id);
 
 /*
 This is an example features profiles metric table the Ionosphere generated
@@ -493,3 +503,7 @@ INSERT INTO `users` (user,description) VALUES ('admin','The default admin user')
 # https://mariadb.com/kb/en/mariadb/installing-mariadb-alongside-mysql/
 # possible and possible to run side by side, fiddly but possible...
 */
+
+
+CREATE INDEX metric_id ON ionosphere (metric_id);
+CREATE INDEX anomaly_timestamp ON anomalies (anomaly_timestamp);

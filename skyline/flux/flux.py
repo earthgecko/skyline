@@ -27,7 +27,7 @@ logger.info('flux :: starting worker')
 # httpMetricDataQueue = Queue(maxsize=3000)
 # @modified 20191129 - Bug #3254: flux.populateMetricQueue Full
 # Set to infinite
-#httpMetricDataQueue = Queue(maxsize=30000)
+# httpMetricDataQueue = Queue(maxsize=30000)
 httpMetricDataQueue = Queue(maxsize=0)
 Worker(httpMetricDataQueue, pid).start()
 
@@ -36,7 +36,7 @@ Worker(httpMetricDataQueue, pid).start()
 # @modified 20191116 - Bug #3254: flux.populateMetricQueue Full
 # @modified 20191129 - Bug #3254: flux.populateMetricQueue Full
 # Set to infinite
-#populateMetricQueue = Queue(maxsize=300000)
+# populateMetricQueue = Queue(maxsize=300000)
 populateMetricQueue = Queue(maxsize=0)
 
 logger.info('flux :: starting populate_metric_worker')

@@ -26,3 +26,6 @@ data/*
 
 # pytest_cache
 .pytest_cache/
+
+# pycharn
+.idea/
