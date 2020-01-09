@@ -3312,6 +3312,7 @@ class Ionosphere(Thread):
                     ionosphere_echo_enabled = settings.IONOSPHERE_ECHO_ENABLED
                 except:
                     ionosphere_echo_enabled = False
+                echo_job = False
                 if not metric_var_files and ionosphere_echo_enabled:
                     ionosphere_echo_work = None
                     echo_job = False
@@ -3324,8 +3325,7 @@ class Ionosphere(Thread):
                         if echo_work_queue_items > 0:
                             echo_job = True
                             logger.info('processing a ionosphere.echo.work item')
-                    if not echo_job:
-                        continue
+                if echo_job:
                     for index, ionosphere_echo_work in enumerate(ionosphere_echo_work):
                         try:
                             echo_metric_list = literal_eval(ionosphere_echo_work)
@@ -3338,12 +3338,42 @@ class Ionosphere(Thread):
                             logger.error('error :: could not determine details from ionosphere_echo_work item')
                             continue
                     if not echo_base_name:
-                        continue
+                        echo_job = False
+                if echo_job:
                     # When an item is in the ionosphere.echo.work set it needs
                     # metric_echo_check_file created to pass to process_ionosphere_echo
                     echo_metric_check_file = '%s/%s.%s.echo.txt' % (
                         settings.SKYLINE_TMP_DIR, str(echo_metric_timestamp),
                         echo_base_name)
+                    echo_create_fp_metric_key = 'ionosphere.%s.%s.echo_create_check' % (
+                        str(echo_metric_timestamp), echo_base_name)
+                    echo_create_fp_metric_count = 1
+                    try:
+                        echo_create_fp_metric_count = self.redis_conn.get(echo_create_fp_metric_key)
+                    except Exception as e:
+                        logger.error('error :: could not query Redis for ionosphere.manage_ionosphere_unique_metrics: %s' % e)
+                    if not echo_create_fp_metric_count:
+                        echo_create_fp_metric_count = 1
+                    else:
+                        echo_create_fp_metric_count += 1
+                    if os.path.isfile(str(echo_metric_check_file)):
+                        logger.error('error :: echo_metric_check_file - %s already exists, removing' % (
+                            echo_metric_check_file))
+                        self.remove_metric_check_file(echo_metric_check_file)
+                    if echo_create_fp_metric_count >= 3:
+                        logger.error('error :: echo_create_fp_metric_count is %s, no further attempts will be made to create an echo fp for %s' % (
+                            str(echo_create_fp_metric_count), str(echo_metric_list)))
+                        logger.info('removing ionosphere.echo.work item %s' % (
+                            str(echo_metric_list)))
+                        work_set = 'ionosphere.echo.work'
+                        try:
+                            self.redis_conn.srem(work_set, str(echo_metric_list))
+                            logger.info('removed work item - %s - from Redis set - %s' % (str(echo_metric_list), work_set))
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: failed to remove work item list from Redis set - %s' % work_set)
+                        echo_job = False
+                if echo_job:
                     check_data = 'metric = \'%s\'\n' \
                                  'metric_timestamp = \'%s\'\n' \
                                  'added_by = \'%s\'\n' \
@@ -3361,6 +3391,13 @@ class Ionosphere(Thread):
                         logger.error('error :: failed to add ionosphere.echo.work item check file for process_ionosphere_echo - %s' % (
                             echo_metric_check_file))
                     if echo_metric_check_file_created:
+                        # Set a Redis key so that if the echo fp creation fails
+                        # a continous loop to try to create it does not occur
+                        try:
+                            self.redis_conn.setex(echo_create_fp_metric_key, 3600, echo_create_fp_metric_count)
+                            logger.info('updated Redis key for %s up' % skyline_app)
+                        except:
+                            logger.error('error :: failed to update Redis key for %s up' % skyline_app)
                         # Spawn a single process_ionosphere_echo process
                         function_name = 'process_ionosphere_echo'
                         pids = []
@@ -3403,11 +3440,11 @@ class Ionosphere(Thread):
                                 work_set = 'ionosphere.echo.work'
                                 try:
                                     self.redis_conn.srem(work_set, str(echo_metric_list))
-                                    logger.info('learn :: removed work item - %s - from Redis set - %s' % (str(echo_metric_list), work_set))
+                                    logger.info('removed work item - %s - from Redis set - %s' % (str(echo_metric_list), work_set))
                                 except:
                                     logger.error(traceback.format_exc())
-                                    logger.error('error :: learn :: failed to remove work item list from Redis set - %s' % work_set)
-                                    return False
+                                    logger.error('error :: failed to remove work item list from Redis set - %s' % work_set)
+                                self.remove_metric_check_file(echo_metric_check_file)
                                 break
                         else:
                             # We only enter this if we didn't 'break' above.
