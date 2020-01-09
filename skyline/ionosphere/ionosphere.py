@@ -655,8 +655,13 @@ class Ionosphere(Thread):
         if not added_by:
             return
         if added_by != 'mirage':
-            logger.info('process_ionosphere_echo :: only mirage metrics are processed not metrics added_by %s' % added_by)
-            return
+            # @modified 20200109 - Feature #3380: Create echo features profile when a Mirage features profile is created
+            # Allow to be added by webapp
+            if added_by == 'webapp':
+                logger.info('process_ionosphere_echo :: metric added_by %s OK' % added_by)
+            else:
+                logger.info('process_ionosphere_echo :: only mirage metrics are processed not metrics added_by %s' % added_by)
+                return
         metric = None
         try:
             # metric_vars.metric
@@ -694,8 +699,15 @@ class Ionosphere(Thread):
             # @modified 20190522: Task #3034: Reduce multiprocessing Manager list usage
             # if not metric_name in ionosphere_unique_metrics:
             if metric_name not in ionosphere_unique_metrics:
-                logger.info('process_ionosphere_echo :: only ionosphere enabled metrics are processed, skipping %s' % metric)
-                return
+                # @modified 20200109 - Feature #3380: Create echo features profile when a Mirage features profile is created
+                # Allow metrics added by webapp to skip this check as they may
+                # be new ionosphere metrics and not be in the ionosphere.unique_metrics
+                # set yet
+                if added_by == 'webapp':
+                    logger.info('process_ionosphere_echo :: %s is not in ionosphere.unique_metrics but added by webapp so possibly a new metric' % metric)
+                else:
+                    logger.info('process_ionosphere_echo :: only ionosphere enabled metrics are processed, skipping %s' % metric)
+                    return
 
         full_duration = None
         try:
@@ -3291,6 +3303,123 @@ class Ionosphere(Thread):
                 except:
                     logger.error('error :: failed to list files in check dir')
                     logger.info(traceback.format_exc())
+
+                # @added 20200109 - Feature #3380: Create echo features profile when a Mirage features profile is created
+                # Process the ionosphere.echo.work queue as echo features
+                # profiles cannot be easily shoehorned into the
+                # ionosphere.learn.work pipeline
+                try:
+                    ionosphere_echo_enabled = settings.IONOSPHERE_ECHO_ENABLED
+                except:
+                    ionosphere_echo_enabled = False
+                if not metric_var_files and ionosphere_echo_enabled:
+                    ionosphere_echo_work = None
+                    echo_job = False
+                    try:
+                        ionosphere_echo_work = self.redis_conn_decoded.smembers('ionosphere.echo.work')
+                    except Exception as e:
+                        logger.error('error :: could not query Redis for ionosphere.echo.work - %s' % e)
+                    if ionosphere_echo_work:
+                        echo_work_queue_items = len(ionosphere_echo_work)
+                        if echo_work_queue_items > 0:
+                            echo_job = True
+                            logger.info('processing a ionosphere.echo.work item')
+                    if not echo_job:
+                        continue
+                    for index, ionosphere_echo_work in enumerate(ionosphere_echo_work):
+                        try:
+                            echo_metric_list = literal_eval(ionosphere_echo_work)
+                            echo_metric_timestamp = int(echo_metric_list[2])
+                            echo_base_name = str(echo_metric_list[3])
+                            echo_full_duration = int(echo_metric_list[6])
+                            break
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: could not determine details from ionosphere_echo_work item')
+                            continue
+                    if not echo_base_name:
+                        continue
+                    # When an item is in the ionosphere.echo.work set it needs
+                    # metric_echo_check_file created to pass to process_ionosphere_echo
+                    echo_metric_check_file = '%s/%s.%s.echo.txt' % (
+                        settings.SKYLINE_TMP_DIR, str(echo_metric_timestamp),
+                        echo_base_name)
+                    check_data = 'metric = \'%s\'\n' \
+                                 'metric_timestamp = \'%s\'\n' \
+                                 'added_by = \'%s\'\n' \
+                                 'full_duration = \'%s\'\n' \
+                        % (str(echo_base_name), str(echo_metric_timestamp),
+                            'webapp', str(echo_full_duration))
+                    echo_metric_check_file_created = False
+                    try:
+                        write_data_to_file(skyline_app, echo_metric_check_file, 'w', check_data)
+                        logger.info('added ionosphere.echo.work item check file for process_ionosphere_echo - %s' % (
+                            echo_metric_check_file))
+                        echo_metric_check_file_created = True
+                    except:
+                        logger.info(traceback.format_exc())
+                        logger.error('error :: failed to add ionosphere.echo.work item check file for process_ionosphere_echo - %s' % (
+                            echo_metric_check_file))
+                    if echo_metric_check_file_created:
+                        # Spawn a single process_ionosphere_echo process
+                        function_name = 'process_ionosphere_echo'
+                        pids = []
+                        spawned_pids = []
+                        pid_count = 0
+                        now = time()
+                        for i in range(1, IONOSPHERE_PROCESSES + 1):
+                            try:
+                                p = Process(target=self.process_ionosphere_echo, args=(i, echo_metric_check_file))
+                                pids.append(p)
+                                pid_count += 1
+                                logger.info(
+                                    'starting %s of %s %s for ionosphere.echo.work item' % (
+                                        str(pid_count), str(IONOSPHERE_PROCESSES),
+                                        function_name))
+                                p.start()
+                                spawned_pids.append(p.pid)
+                            except:
+                                logger.error(traceback.format_exc())
+                                logger.error('error :: failed to start %s for ionosphere.echo.work item' % function_name)
+                                continue
+                        # Self monitor the process and terminate if the
+                        # process_ionosphere_echo has run for too long
+                        try:
+                            ionosphere_echo_max_fp_create_time = settings.IONOSPHERE_ECHO_MAX_FP_CREATE_TIME
+                        except:
+                            ionosphere_echo_max_fp_create_time = 55
+                        p_starts = time()
+                        while time() - p_starts <= ionosphere_echo_max_fp_create_time:
+                            if any(p.is_alive() for p in pids):
+                                # Just to avoid hogging the CPU
+                                sleep(.1)
+                            else:
+                                # All the processes are done, break now.
+                                time_to_run = time() - p_starts
+                                logger.info(
+                                    '%s %s completed in %.2f seconds for ionosphere.echo.work item' % (
+                                        str(IONOSPHERE_PROCESSES),
+                                        function_name, time_to_run))
+                                work_set = 'ionosphere.echo.work'
+                                try:
+                                    self.redis_conn.srem(work_set, str(echo_metric_list))
+                                    logger.info('learn :: removed work item - %s - from Redis set - %s' % (str(echo_metric_list), work_set))
+                                except:
+                                    logger.error(traceback.format_exc())
+                                    logger.error('error :: learn :: failed to remove work item list from Redis set - %s' % work_set)
+                                    return False
+                                break
+                        else:
+                            # We only enter this if we didn't 'break' above.
+                            logger.info('timed out, killing all %s processes for ionosphere.echo.work item' % (function_name))
+                            for p in pids:
+                                try:
+                                    p.terminate()
+                                    # p.join()
+                                    logger.info('killed %s process for ionosphere.echo.work item' % (function_name))
+                                except:
+                                    logger.error(traceback.format_exc())
+                                    logger.error('error :: killing all %s processes for ionosphere.echo.work item' % function_name)
 
                 if not metric_var_files:
                     logger.info('sleeping 20 no metric check files')

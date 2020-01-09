@@ -563,6 +563,24 @@ def api():
             logger.error(traceback.format_exc())
             logger.error('error :: Webapp could not get the ionosphere.learn.work list from Redis')
             return 'Internal Server Error', 500
+
+        # @added 20200109 - Feature #3380: Create echo features profile when a Mirage features profile is created
+        # Add pending echo features profiles to the to response
+        try:
+            ionosphere_echo_work = list(REDIS_CONN.smembers('ionosphere.echo.work'))
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: Webapp could not get the ionosphere.echo.work list from Redis')
+        echo_work_no_full_duration = []
+        if ionosphere_echo_work:
+            for work in ionosphere_echo_work:
+                work_list = literal_eval(work)
+                work_no_fd = [work_list[0], work_list[1], work_list[2], work_list[3], work_list[4], work_list[5]]
+                echo_work_no_full_duration.append(work_no_fd)
+        if echo_work_no_full_duration:
+            new_ionosphere_learn_work = ionosphere_learn_work + echo_work_no_full_duration
+            ionosphere_learn_work = new_ionosphere_learn_work
+
         data_dict = {"status": {}, "data": {"metrics": ionosphere_learn_work}}
         return jsonify(data_dict), 200
 
