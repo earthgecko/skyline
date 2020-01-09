@@ -1266,6 +1266,19 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
         if engine:
             fp_create_engine_disposal(current_skyline_app, engine)
 
+    # @added 20200108 - Feature #3380: Create echo features profile when a Mirage features profile is created
+    # If a Mirage features profile was created by a user add a record to the
+    # ionosphere.echo.work Redis so that Ionosphere can run process_ionosphere_echo
+    # on the data and create a echo features profile asap
+    if settings.IONOSPHERE_ECHO_ENABLED and new_fp_id and context == 'training_data' and ionosphere_job == 'learn_fp_human':
+        if int(ts_full_duration) > int(settings.FULL_DURATION):
+            if settings.REDIS_PASSWORD:
+                redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+            else:
+                redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+            # ionosphere_job = 'echo_fp_human'
+            redis_conn.sadd('ionosphere.echo.work', str(['Soft', str(ionosphere_job), int(requested_timestamp), base_name, int(new_fp_id), int(fp_generation), int(ts_full_duration)]))
+
     return str(new_fp_id), True, False, fail_msg, trace
 
 
