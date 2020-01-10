@@ -502,6 +502,15 @@ def ionosphere_learn(timestamp):
         logger.info('learn :: work items in queue - %s' % str(work_items_todo))
 
     for index, ionosphere_learn_work in enumerate(learn_work):
+
+        # @added 20200110 - Bug #3382: Prevent ionosphere.learn loop edge cases
+        # Added to ensure that ionosphere.learn does not learn a
+        # learn_full_duration_days features profile over and over when there is
+        # a learn_parent_id using the #3382 referenced check work block further
+        # below
+        learn_parent_id = None
+        learn_generation = None
+
         try:
             learn_metric_list = literal_eval(ionosphere_learn_work)
             # @modified 20170308 - Feature #1960: ionosphere_layers
@@ -607,6 +616,77 @@ def ionosphere_learn(timestamp):
             logger.info('learn :: this work is ready - work_age - %s' % str(work_age))
 
         logger.info('learn :: processing %s for %s - %s' % (work, learn_base_name, str(learn_metric_list)))
+
+        # @added 20200110 - Bug #3382: Prevent ionosphere.learn loop edge cases
+        # Ensure that ionosphere.learn does not learn a learn_full_duration_days
+        # features profile over and over as discovered in a single edge Which
+        # could not be debugged as it was only discover months later.  learn
+        # learnt the same learn_full_duration_days features profile every minute
+        # until the If the learn work is 4 hours old remove it kicked in,
+        # resulting in 361 identical features profiles being created.
+        # learn_fp_human
+        learn_full_duration_seconds = None
+        if learn_parent_id:
+            logger.info('learn :: work check - checking that %s for %s has not already been completed' % (work, learn_base_name))
+            learn_full_duration_days = None
+            try:
+                _learn_full_duration_days = metric_db_object['learn_full_duration_days']
+                learn_full_duration_days = int(_learn_full_duration_days)
+                learn_full_duration_seconds = int(learn_full_duration_days * 86400)
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: learn :: failed get determine the learn_full_duration_days from the metric_db_object for work check')
+            if not learn_full_duration_days:
+                logger.info('learn :: exiting this work but not removing work item, as database may be available again before the work expires')
+                if engine:
+                    learn_engine_disposal(engine)
+                continue
+            if not engine:
+                engine = None
+                # Get a MySQL engine
+                try:
+                    engine, log_msg, trace = learn_get_an_engine()
+                    logger.info('learn :: %s' % log_msg)
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: learn :: could not get a MySQL engine to determine last features profiles details for work check')
+            if not engine:
+                logger.error('error :: learn :: engine not obtained to determine last features profiles details for work check')
+                logger.info('learn :: exiting this work but not removing work item, as database may be available again before the work expires to determine last features profiles details')
+                continue
+        if learn_parent_id and learn_full_duration_seconds:
+            exisitng_recent_fps = []
+            try:
+                connection = engine.connect()
+                result = connection.execute(
+                    'SELECT * FROM ionosphere WHERE metric_id=%s AND parent_id=%s AND full_duration=%s AND SUBDATE(CURRENT_DATE (), INTERVAL 2 HOUR) <= created_timestamp' % (str(metrics_id), str(learn_parent_id), str(learn_full_duration_seconds)))  # nosec
+                for row in result:
+                    try:
+                        recent_fp_id = int(row['id'])
+                        recent_fp_full_duration = int(row['full_duration'])
+                        recent_fp_created_timestamp = str(row['created_timestamp'])
+                        recent_fp_parent_id = int(row['parent_id'])
+                        recent_fp_generation = int(row['generation'])
+                        exisitng_recent_fps.append([recent_fp_id, recent_fp_full_duration, recent_fp_created_timestamp, recent_fp_parent_id, recent_fp_generation])
+                        if len(exisitng_recent_fps) > 0:
+                            break
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: learn :: failed to determine exisitng_recent_fps from DB response for work check')
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: learn :: failed to determine exisitng_recent_fps for work check')
+            if exisitng_recent_fps:
+                logger.info('info :: learn :: completed work check - a features profile at learn_full_duration_days of %s has already been created for fp id %s' % (
+                    str(learn_full_duration_days), str(learn_parent_id)))
+                logger.info('info :: learn :: features profiles exists %s' % (str(exisitng_recent_fps)))
+                logger.error('error :: learn :: the required features profile has already created, removing learn work item to prevent learning loop (#3382) - %s' % (str(learn_metric_list)))
+                remove_work_list_from_redis_set(learn_metric_list)
+                learn_engine_disposal(engine)
+                continue
+            else:
+                logger.info('info :: learn :: completed work check - no features profile at learn_full_duration_days of %s has already been created for fp id %s, OK' % (
+                    str(learn_full_duration_days), str(learn_parent_id)))
 
         # First learn checks if the metric_training_data_dir exists, if it does not
         # there is nothing to learn with.
