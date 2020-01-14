@@ -419,6 +419,17 @@ class Mirage(Thread):
 #            logger.info('debug :: added metric_name %s from check file - %s' % (metric_name, metric_check_file))
 
         metric = None
+
+        # @added 20200106 - Branch #3262: py3
+        #                   Task #3034: Reduce multiprocessing Manager list usage
+        redis_set_to_delete = 'mirage.metric_variables'
+        try:
+            self.redis_conn.delete(redis_set_to_delete)
+            logger.info('deleted Redis set - %s' % redis_set_to_delete)
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: failed to delete Redis set - %s' % redis_set_to_delete)
+
         try:
             key = 'metric'
             value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
@@ -1422,32 +1433,60 @@ class Mirage(Thread):
                 if hours_to_resolve:
                     logger.info('analyzed at %s hours resolution' % hours_to_resolve)
                     second_order_resolution_seconds = int(hours_to_resolve) * 3600
-                    logger.info('analyzed at %s seconds resolution' % second_order_resolution_seconds)
+                    logger.info('analyzed at %s seconds resolution' % str(second_order_resolution_seconds))
 
                 # Remove metric check file
-                metric_check_file = '%s/%s' % (settings.MIRAGE_CHECK_PATH, processing_check_file)
+                metric_check_file = 'None'
+                try:
+                    metric_check_file = '%s/%s' % (settings.MIRAGE_CHECK_PATH, processing_check_file)
+                    if LOCAL_DEBUG:
+                        logger.debug('debug :: interpolated metric_check_file to %s' % metric_check_file)
+                except:
+                    logger.error('error :: failed to interpolate metric_check_file')
+
                 if os.path.isfile(metric_check_file):
                     try:
                         os.remove(metric_check_file)
                         logger.info('removed check file - %s' % metric_check_file)
                     except OSError:
+                        if LOCAL_DEBUG:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: failed to remove metric_check_file - %s' % metric_check_file)
                         pass
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to remove metric_check_file - %s' % metric_check_file)
+                else:
+                    if LOCAL_DEBUG:
+                        logger.debug('debug :: no metric_check_file to remove OK - %s' % metric_check_file)
 
                 # Remove the metric directory
                 # @modified 20191113 - Branch #3262: py3
                 # Convert None to str
                 # timeseries_dir = metric_name.replace('.', '/')
-                metric_name_str = str(metric_name)
-                timeseries_dir = metric_name_str.replace('.', '/')
+                metric_data_dir = 'None'
+                try:
+                    metric_name_str = str(metric_name)
+                    timeseries_dir = metric_name_str.replace('.', '/')
+                    metric_data_dir = '%s/%s' % (settings.MIRAGE_CHECK_PATH, timeseries_dir)
+                    if LOCAL_DEBUG:
+                        logger.debug('debug :: metric_data_dir interpolated to %s' % str(metric_data_dir))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to interpolate metric_data_dir')
+                    metric_data_dir = 'None'
 
-                metric_data_dir = '%s/%s' % (settings.MIRAGE_CHECK_PATH, timeseries_dir)
                 if os.path.exists(metric_data_dir):
                     try:
                         rmtree(metric_data_dir)
                         logger.info('removed - %s' % metric_data_dir)
                     except:
                         logger.error('error :: failed to rmtree %s' % metric_data_dir)
+                else:
+                    if LOCAL_DEBUG:
+                        logger.debug('debug :: metric_data_dir does not exist - %s' % str(metric_data_dir))
 
+                ionosphere_unique_metrics = []
                 if settings.MIRAGE_ENABLE_ALERTS:
                     # @added 20161228 - Feature #1830: Ionosphere alerts
                     #                   Branch #922: Ionosphere
@@ -1461,6 +1500,9 @@ class Mirage(Thread):
                         logger.error(traceback.format_exc())
                         logger.error('error :: failed to get ionosphere.unique_metrics from Redis')
                         ionosphere_unique_metrics = []
+                else:
+                    if LOCAL_DEBUG:
+                        logger.debug('debug :: settings.MIRAGE_ENABLE_ALERTS is not True')
 
             # @added 20161228 - Feature #1830: Ionosphere alerts
             #                   Branch #922: Ionosphere
@@ -1509,6 +1551,9 @@ class Mirage(Thread):
                     except:
                         logger.error(traceback.format_exc())
                         logger.error('error :: failed to add an Ionosphere anomalous_metric for %s' % base_name)
+            else:
+                if LOCAL_DEBUG:
+                    logger.debug('debug :: no ionosphere_alerts_returned - %s' % str(ionosphere_alerts_returned))
 
             # @added 20181114 - Bug #2682: Reduce mirage ionosphere alert loop
             # To reduce the amount of I/O used by Mirage in this loop check
@@ -1540,6 +1585,10 @@ class Mirage(Thread):
             for alert in settings.ALERTS:
                 # @added 20181114 - Bug #2682: Reduce mirage ionosphere alert loop
                 not_an_ionosphere_metric_check_done = 'none'
+
+                if LOCAL_DEBUG:
+                    logger.debug('debug :: %s metrics in mirage_anomalous_metrics' % str(len(mirage_anomalous_metrics)))
+
                 # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
                 # for metric in self.anomalous_metrics:
                 for metric in mirage_anomalous_metrics:
@@ -1547,7 +1596,15 @@ class Mirage(Thread):
                     #                   Branch #922: Ionosphere
                     # Bringing Ionosphere online - do alert on Ionosphere
                     # metrics if Ionosphere is up
-                    metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(metric[1]))
+                    try:
+                        metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(metric[1]))
+                        if LOCAL_DEBUG:
+                            logger.debug('debug :: metric_name interpolated to %s' % str(metric_name))
+                    except:
+                        if LOCAL_DEBUG:
+                            logger.error(traceback.format_exc())
+                            logger.debug('debug :: failed to interpolate metric_name')
+
                     if metric_name in ionosphere_unique_metrics:
                         # @added 20181114 - Bug #2682: Reduce mirage ionosphere alert loop
                         if not_alerting_for_ionosphere == metric_name:
@@ -1686,8 +1743,8 @@ class Mirage(Thread):
                 # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
                 # logger.info('total anomalies    :: %d' % len(self.anomalous_metrics))
                 logger.info('total anomalies    :: %d' % len(mirage_anomalous_metrics))
-                logger.info('exception stats    :: %s' % exceptions)
-                logger.info('anomaly breakdown  :: %s' % anomaly_breakdown)
+                logger.info('exception stats    :: %s' % str(exceptions))
+                logger.info('anomaly breakdown  :: %s' % str(anomaly_breakdown))
 
             # Log to Graphite
             run_time = time() - run_timestamp
