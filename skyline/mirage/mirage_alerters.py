@@ -656,10 +656,18 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
             if known_derivative_metric:
                 graph_title = 'Skyline %s - ALERT - at %s hours - Redis data (derivative graph)\n%s - anomalous value: %s' % (context, str(int(full_duration_in_hours)), metric[1], str(original_anomalous_datapoint))
 
-            if python_version == 3:
-                buf = io.StringIO()
-            else:
-                buf = io.BytesIO()
+            # @modified 20200109 - Branch #3262: py3
+            # Using io.StringIO throws an error related to
+            # plt.savefig(buf, format='png')
+            # TypeError: string argument expected, got 'bytes'
+            # So using file
+            # I think the buf is causing a memory leak, trying a file
+            # if python_version == 3:
+            #     buf = io.StringIO()
+            # else:
+            #     buf = io.BytesIO()
+            buf = '%s/%s.%s.%s.png' % (
+                settings.SKYLINE_TMP_DIR, skyline_app, str(int(metric[2])), metric[1])
 
             # Too big
             # rcParams['figure.figsize'] = 12, 6
@@ -948,8 +956,27 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
                     logger.info(traceback.format_exc())
             if redis_image_data:
                 try:
-                    buf.seek(0)
-                    msg_plot_attachment = MIMEImage(buf.read())
+                    # @modified 20200109 - Branch #3262: py3
+                    # Use file not buf.seek
+                    # buf.seek(0)
+                    # msg_plot_attachment = MIMEImage(buf.read())
+                    try:
+                        # Open in binary mode for py3
+                        # with open(buf, 'r') as f:
+                        with open(buf, 'rb') as f:
+                            plot_image_data = f.read()
+                        try:
+                            os.remove(buf)
+                        except OSError:
+                            logger.error(
+                                'error :: alert_smtp - failed to remove file - %s' % buf)
+                            logger.info(traceback.format_exc())
+                            pass
+                    except:
+                        logger.error('error :: failed to read plot file - %s' % buf)
+                        plot_image_data = None
+                    msg_plot_attachment = MIMEImage(plot_image_data)
+
                     msg_plot_attachment.add_header('Content-ID', '<%s>' % redis_graph_content_id)
                     msg.attach(msg_plot_attachment)
                     if settings.ENABLE_DEBUG or LOCAL_DEBUG:
@@ -1334,7 +1361,6 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context):
     else:
         logger.error('error :: alert_slack - no Ionosphere Graphite image file found :: %s' % (
             str(graphite_image_file)))
-
 
     # @modified 20191115 - Task #3290: Handle urllib2 in py3
     #                      Branch #3262: py3
