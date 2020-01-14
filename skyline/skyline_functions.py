@@ -1418,7 +1418,13 @@ def get_memcache_metric_object(current_skyline_app, base_name):
                 memcache_result = memcache_client.get(metrics_db_object_key)
             else:
                 # memcache_result = memcache_client.get(metrics_db_object_key)
-                memcache_result = memcache_client.get(metrics_db_object_key).decode('utf-8')
+                # @modified 20200109 - Task #3304: py3 - handle pymemcache bytes not str
+                # Handle when memcache returns None as the new decode errors with
+                # AttributeError: 'NoneType' object has no attribute 'decode'
+                try:
+                    memcache_result = memcache_client.get(metrics_db_object_key).decode('utf-8')
+                except (TypeError, AttributeError):
+                    memcache_result = None
         except:
             current_logger.error(traceback.format_exc())
             current_logger.error('error :: skyline_functions :: get_memcache_metric_object :: failed to get %s from memcache' % metrics_db_object_key)
