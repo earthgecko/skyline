@@ -503,7 +503,3 @@ INSERT INTO `users` (user,description) VALUES ('admin','The default admin user')
 # https://mariadb.com/kb/en/mariadb/installing-mariadb-alongside-mysql/
 # possible and possible to run side by side, fiddly but possible...
 */
-
-
-CREATE INDEX metric_id ON ionosphere (metric_id);
-CREATE INDEX anomaly_timestamp ON anomalies (anomaly_timestamp);
