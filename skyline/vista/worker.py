@@ -11,6 +11,9 @@ import os.path
 from ast import literal_eval
 import datetime
 
+# @added 20200107 - Task #3376: Enable vista and flux to deal with lower frequency data
+from collections import Counter
+
 # from redis import StrictRedis
 import requests
 import pandas as pd
@@ -261,6 +264,11 @@ class Worker(Process):
                     datapoint = None
                     last_timestamp_with_data = None
                     timeseries = []
+
+                    # @added 20200107 - Task #3376: Enable vista and flux to deal with lower frequency data
+                    metric_resolution = 60
+                    metric_resolution_determined = False
+
                     try:
                         if python_version == 3:
                             datapoints_str = literal_eval(metric_data[0]['datapoints'])
@@ -275,6 +283,44 @@ class Worker(Process):
                             logger.info('worker :: got %s metric_datapoints - %s' % (
                                 str(len_metric_datapoints),
                                 str(metric_datapoints)))
+
+                        # @added 20200107 - Task #3376: Enable vista and flux to deal with lower frequency data
+                        # Determine resolution
+                        resolution_timestamps = []
+                        for metric_datapoint in metric_datapoints:
+                            timestamp = int(metric_datapoint[0])
+                            resolution_timestamps.append(timestamp)
+                        timestamp_resolutions = []
+                        if resolution_timestamps:
+                            last_timestamp = None
+                            for timestamp in resolution_timestamps:
+                                if last_timestamp:
+                                    resolution = timestamp - last_timestamp
+                                    timestamp_resolutions.append(resolution)
+                                    last_timestamp = timestamp
+                                else:
+                                    last_timestamp = timestamp
+                        if timestamp_resolutions:
+                            try:
+                                timestamp_resolutions_count = Counter(timestamp_resolutions)
+                                ordered_timestamp_resolutions_count = timestamp_resolutions_count.most_common()
+                                metric_resolution = int(ordered_timestamp_resolutions_count[0][0])
+                                if metric_resolution > 0:
+                                    metric_resolution_determined = True
+                            except:
+                                logger.error(traceback.format_exc())
+                                logger.error('error :: worker :: failed to determine metric_resolution from %s' % (
+                                    str(metric_data)))
+                        if metric_resolution_determined:
+                            cache_key = 'vista.last.resolution.%s' % metric
+                            try:
+                                # Update Redis key
+                                self.redis_conn.setex(cache_key, 3600, metric_resolution)
+                            except:
+                                logger.error(traceback.format_exc())
+                                logger.error('error :: fetcher :: failed to set Redis key - %s' % (
+                                    cache_key))
+
                         for metric_datapoint in metric_datapoints:
                             # @20191010 - Branch #3140: vista
                             # fetcher passes through preformatted data points that

@@ -1276,7 +1276,7 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
                 redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
             else:
                 redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
-            # ionosphere_job = 'echo_fp_human'
+            ionosphere_job = 'echo_fp_human'
             redis_conn.sadd('ionosphere.echo.work', str(['Soft', str(ionosphere_job), int(requested_timestamp), base_name, int(new_fp_id), int(fp_generation), int(ts_full_duration)]))
 
     return str(new_fp_id), True, False, fail_msg, trace
@@ -1288,7 +1288,7 @@ def get_correlations(current_skyline_app, anomaly_id):
     Get all the correlations for an anomaly from the database
 
     :param current_skyline_app: the Skyline app name calling the function
-    :param anomaly_id: thee base_name of the metric
+    :param anomaly_id: the panorama anomaly id
     :type current_skyline_app: str
     :type anomaly_id: int
     :return: list
@@ -1377,6 +1377,7 @@ def get_correlations(current_skyline_app, anomaly_id):
         current_logger.error('error :: could not determine correlations for anomaly id -  %s' % str(anomaly_id))
         if engine:
             fp_create_engine_disposal(current_skyline_app, engine)
+        del metrics_list
         raise
 
     if engine:
@@ -1386,4 +1387,107 @@ def get_correlations(current_skyline_app, anomaly_id):
         sorted_correlations = sorted(correlations, key=lambda x: x[1], reverse=True)
         correlations = sorted_correlations
 
+    del metrics_list
     return correlations, fail_msg, trace
+
+
+# @added 20200113 - Feature #3390: luminosity related anomalies
+#                   Branch #2270: luminosity
+def get_related(current_skyline_app, anomaly_id, anomaly_timestamp):
+    """
+    Get all the related anomalies from the database
+
+    :param current_skyline_app: the Skyline app name calling the function
+    :param anomaly_id: the panorama anomaly id
+    :param anomaly_timestamp: the anomaly timestamp
+    :type current_skyline_app: str
+    :type anomaly_id: int
+    :type anomaly_timestamp: int
+    :return: list
+    :return: [[metric_name, related_timestamp],[metric_name, related_timestamp],...]
+    :rtype: [[str, int]]
+    """
+
+    current_skyline_app_logger = current_skyline_app + 'Log'
+    current_logger = logging.getLogger(current_skyline_app_logger)
+    func_name = 'get_related'
+
+    related = []
+
+    minus_two_minutes = int(anomaly_timestamp) - 120
+    plus_two_minutes = int(anomaly_timestamp) - 120
+
+    current_logger.info('get_related :: getting MySQL engine')
+    try:
+        engine, fail_msg, trace = fp_create_get_an_engine(current_skyline_app)
+        current_logger.info(fail_msg)
+    except:
+        trace = traceback.format_exc()
+        current_logger.error(trace)
+        fail_msg = 'error :: could not get a MySQL engine'
+        current_logger.error('%s' % fail_msg)
+        # return False, False, fail_msg, trace, False
+        raise  # to webapp to return in the UI
+
+    metrics_table = None
+    try:
+        metrics_table, fail_msg, trace = metrics_table_meta(current_skyline_app, engine)
+        current_logger.info(fail_msg)
+    except:
+        trace = traceback.format_exc()
+        current_logger.error('%s' % trace)
+        fail_msg = 'error :: %s :: failed to get metrics_table_meta' % func_name
+        current_logger.error('%s' % fail_msg)
+
+    anomalies_table = None
+    try:
+        anomalies_table, fail_msg, trace = anomalies_table_meta(current_skyline_app, engine)
+        current_logger.info(fail_msg)
+    except:
+        trace = traceback.format_exc()
+        current_logger.error('%s' % trace)
+        fail_msg = 'error :: %s :: failed to get anomalies_table_meta' % func_name
+        current_logger.error('%s' % fail_msg)
+
+    metrics_list = []
+    try:
+        connection = engine.connect()
+        stmt = select([metrics_table]).where(metrics_table.c.id > 0)
+        results = connection.execute(stmt)
+        for row in results:
+            metric_id = row['id']
+            metric_name = row['metric']
+            metrics_list.append([int(metric_id), str(metric_name)])
+        connection.close()
+    except:
+        current_logger.error(traceback.format_exc())
+        current_logger.error('error :: could not determine metrics from MySQL')
+        if engine:
+            fp_create_engine_disposal(current_skyline_app, engine)
+        raise
+
+    try:
+        connection = engine.connect()
+        stmt = select([anomalies_table]).where(anomalies_table.c.anomaly_timestamp > minus_two_minutes).where(anomalies_table.c.anomaly_timestamp <= plus_two_minutes).where(anomalies_table.c.id != anomaly_id)
+        results = connection.execute(stmt)
+        for row in results:
+            related_anomaly_id = row['id']
+            metric_id = row['metric_id']
+            metric_name = None
+            if metric_id:
+                metric_name_list = [metrics_list_name for metrics_list_id, metrics_list_name in metrics_list if int(metric_id) == int(metrics_list_id)]
+                metric_name = str(metric_name_list[0])
+            related_anomaly_timestamp = row['anomaly_timestamp']
+            related_full_duration = row['full_duration']
+            related.append([int(related_anomaly_id), int(metric_id), str(metric_name), int(related_anomaly_timestamp), int(related_full_duration)])
+        connection.close()
+    except:
+        current_logger.error(traceback.format_exc())
+        current_logger.error('error :: could not determine related anomalies from DB for anomaly id -  %s' % str(anomaly_id))
+        if engine:
+            fp_create_engine_disposal(current_skyline_app, engine)
+        del metrics_list
+        raise
+
+    del metrics_list
+    return related, fail_msg, trace

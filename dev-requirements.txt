@@ -92,7 +92,9 @@ Flask==1.1.1
 #simplejson==3.11.1
 # @modified 20180910 - Task #2588: Update dependencies
 #simplejson==3.13.2
-simplejson==3.16.0
+# @modified 20200104 - Branch #3262: py3
+#simplejson==3.16.0
+simplejson==3.17.0
 
 # @modified 20180105 - Task #2272: update deps for luminosity branch
 #six==1.10.0

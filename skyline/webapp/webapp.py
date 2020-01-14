@@ -155,7 +155,10 @@ from ionosphere_backend import (
 from ionosphere_functions import (
     create_features_profile, get_ionosphere_learn_details,
     # @added 20180414 - Branch #2270: luminosity
-    get_correlations)
+    get_correlations,
+    # @added 20200113 - Feature #3390: luminosity related anomalies
+    #                   Branch #2270: luminosity
+    get_related)
 
 skyline_version = skyline_version.__absolute_version__
 
@@ -3455,7 +3458,7 @@ def ionosphere():
                     correlations, fail_msg, trace = get_correlations(skyline_app, p_id)
                 except:
                     trace = traceback.format_exc()
-                    fail_msg = 'error :: Webapp error with search_ionosphere'
+                    fail_msg = 'error :: Webapp error with get_correlations'
                     logger.error(fail_msg)
                     return internal_error(fail_msg, trace)
                 if correlations:
@@ -3487,6 +3490,66 @@ def ionosphere():
                                 str(graphite_until), metric_name,
                                 settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
                         correlations_with_graph_links.append([metric_name, coefficient, shifted, shifted_coefficient, str(correlation_graphite_link)])
+
+            # @added 20200113 - Feature #3390: luminosity related anomalies
+            #                   Branch #2270: luminosity
+            related = False
+            related_with_graph_links = []
+            related_matches = []
+            if p_id:
+                try:
+                    related, fail_msg, trace = get_related(skyline_app, p_id, requested_timestamp)
+                except:
+                    trace = traceback.format_exc()
+                    fail_msg = 'error :: Webapp error with get_related'
+                    logger.error(fail_msg)
+                    return internal_error(fail_msg, trace)
+                if related:
+                    # Added Graphite graph links to Related block
+                    for related_anomaly_id, related_metric_id, related_metric_name, related_anomaly_timestamp, related_full_duration in related:
+                        related_from_timestamp = int(related_anomaly_timestamp) - related_full_duration
+                        related_graphite_from = datetime.datetime.fromtimestamp(int(related_from_timestamp)).strftime('%H:%M_%Y%m%d')
+                        related_graphite_until = datetime.datetime.fromtimestamp(int(related_anomaly_timestamp)).strftime('%H:%M_%Y%m%d')
+                        related_unencoded_graph_title = '%s\nrelated with anomaly id %s' % (
+                            related_metric_name, str(p_id))
+                        related_graph_title_string = quote(related_unencoded_graph_title, safe='')
+                        related_graph_title = '&title=%s' % related_graph_title_string
+                        if settings.GRAPHITE_PORT != '':
+                            related_graphite_link = '%s://%s:%s/%s/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=blue' % (
+                                settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
+                                settings.GRAPHITE_PORT, GRAPHITE_RENDER_URI,
+                                str(related_graphite_from),
+                                str(related_graphite_until), related_metric_name,
+                                settings.GRAPHITE_GRAPH_SETTINGS, related_graph_title)
+                        else:
+                            related_graphite_link = '%s://%s/%s/?from=%s&until=%starget=cactiStyle(%s)%s%s&colorList=blue' % (
+                                settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
+                                GRAPHITE_RENDER_URI, str(related_graphite_from),
+                                str(related_graphite_until), related_metric_name,
+                                settings.GRAPHITE_GRAPH_SETTINGS, related_graph_title)
+                        related_human_timestamp = datetime.datetime.fromtimestamp(int(related_anomaly_timestamp)).strftime('%Y-%m%-d %H:%M:%S')
+                        related_with_graph_links.append([related_anomaly_id, related_metric_name, related_anomaly_timestamp, related_full_duration, related_human_timestamp, str(related_graphite_link)])
+                related_metric = 'get_related_matches'
+                related_metric_like = 'all'
+                related_fp_id = None
+                related_layer_id = None
+                minus_two_minutes = int(requested_timestamp) - 120
+                plus_two_minutes = int(requested_timestamp) + 120
+                related_limited_by = None
+                related_ordered_by = 'DESC'
+                try:
+                    related_matches, fail_msg, trace = get_fp_matches(related_metric, related_metric_like, related_fp_id, related_layer_id, minus_two_minutes, plus_two_minutes, related_limited_by, related_ordered_by)
+                except:
+                    trace = traceback.format_exc()
+                    fail_msg = 'error :: Webapp error with get_fp_matches for related_matches'
+                    logger.error(fail_msg)
+                    return internal_error(fail_msg, trace)
+                if len(related_matches) == 1:
+                    for related_human_date, related_match_id, related_matched_by, related_fp_id, related_layer_id, related_metric, related_uri_to_matched_page, related_validated in related_matches:
+                        if related_matched_by == 'no matches were found':
+                            related_matches = []
+                if related_matches:
+                    logger.info('%s possible related matches found' % (str(len(related_matches))))
 
             # @added 20190510 - Feature #2990: Add metrics id to relevant web pages
             # By this point in the request the previous function calls will have
@@ -3617,6 +3680,10 @@ def ionosphere():
                 validated_match_successful=validated_match_successful,
                 # @added 20190922 - Feature #2516: Add label to features profile
                 fp_label=fp_label,
+                # @added 20200113 - Feature #3390: luminosity related anomalies
+                #                   Branch #2270: luminosity
+                related=related, related_with_graph_links=related_with_graph_links,
+                related_matches=related_matches,
                 version=skyline_version, duration=(time.time() - start),
                 print_debug=debug_on), 200
         except:

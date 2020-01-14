@@ -10,6 +10,7 @@ import re
 import shutil
 import glob
 from ast import literal_eval
+from sys import version_info
 
 import traceback
 from flask import request
@@ -4014,6 +4015,15 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
     trace = 'none'
     fail_msg = 'none'
 
+    # @added 20200113 - Feature #3390: luminosity related anomalies
+    #                   Branch #2270: luminosity
+    get_related_matches = False
+    if metric == 'get_related_matches':
+        get_related_matches = True
+        metric = 'all'
+        related_from_timestamp = from_timestamp
+        related_until_timestamp = until_timestamp
+
     if settings.MEMCACHE_ENABLED:
         memcache_client = pymemcache_Client((settings.MEMCACHED_SERVER_IP, settings.MEMCACHED_SERVER_PORT), connect_timeout=0.1, timeout=0.2)
     else:
@@ -4267,6 +4277,20 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
         except:
             logger.error('error :: limit is not an integer - %s' % str(limit))
 
+    # @added 20200113 - Feature #3390: luminosity related anomalies
+    #                   Branch #2270: luminosity
+    if get_related_matches:
+        try:
+            query_string = 'SELECT * FROM ionosphere_matched WHERE metric_timestamp > %s AND metric_timestamp <= %s' % (
+                str(related_from_timestamp), str(related_until_timestamp))
+        except:
+            trace = traceback.format_exc()
+            logger.error(trace)
+            logger.error('error :: could not generate query_string for get_related_matches')
+            if engine:
+                engine_disposal(engine)
+            return False, fail_msg, trace
+
     # Get ionosphere_summary memcache object from which metric names will be
     # determined
     memcache_result = None
@@ -4276,6 +4300,7 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
 
             # @modified 20191029 - Task #3304: py3 - handle pymemcache bytes not str
             # memcache_result = memcache_client.get('ionosphere_summary_list')
+            python_version = int(version_info[0])
             if python_version == 2:
                 memcache_result = memcache_client.get('ionosphere_summary_list')
             else:
@@ -4376,6 +4401,8 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
 # e.g.
 # [[1505560867, 39793, 'features_profile', 782, 'None', 'stats.skyline-dev-3-40g-gra1.vda.ioInProgress', 'ionosphere?fp_matched=true...'],
 # [1505561823, 25069, 'layers', 1108, 24, 'stats.controller-dev-3-40g-sbg1.apache.sending', 'ionosphere?fp_matched=true...']]
+
+    metric_list = []
 
     if get_features_profiles_matched:
         try:

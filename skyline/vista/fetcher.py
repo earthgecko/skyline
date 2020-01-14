@@ -271,6 +271,9 @@ class Fetcher(Thread):
                         datapoints = js['datapoints']
 
                 if remote_host_type == 'prometheus':
+                    # TODO:
+                    # Maybe iterate through multiple metrics if response has more than one metric
+                    # for some public lab metrics
                     datapoints = js['data']['result'][0]['values']
                 datapoints_fetched = len(datapoints)
                 # @modified 20191011 - Task #3258: Reduce vista logging
@@ -446,7 +449,7 @@ class Fetcher(Thread):
                     continue
 
             if not timeseries:
-                logger.info('fetcher :: no data in the timeseries list for the time series for %s' % metric)
+                logger.info('fetcher :: no new data in the timeseries list for the time series for %s' % metric)
                 continue
 
             # Order the time series by timestamp as the tuple can shift
@@ -661,6 +664,7 @@ class Fetcher(Thread):
 
                     default_prometheus_uri = False
                     remote_prometheus_host = None
+
                     if remote_host_type == 'prometheus':
                         remote_prometheus_host = remote_host
                         # Hardcode the Prometheus api uri
@@ -786,10 +790,52 @@ class Fetcher(Thread):
                             logger.info('fetcher :: last fetch was %s seconds ago, less than frequency %s seconds, not fetching' % (str(last_fetch), str(frequency)))
                         continue
 
+                # @added 20200107 - Task #3376: Enable vista and flux to deal with lower frequency data
+                # Determine the last known resolution of the metric
+                last_vista_metric_resolution = frequency
+                try:
+                    cache_key = 'vista.last.resolution.%s' % metric
+                    last_vista_metric_resolution_data = self.redis_conn_decoded.get(cache_key)
+                    if last_vista_metric_resolution_data is None:
+                        last_vista_metric_resolution_int = last_vista_metric_resolution
+                    else:
+                        last_vista_metric_resolution_int = int(last_vista_metric_resolution_data)
+                    if last_vista_metric_resolution_int > 0:
+                        last_vista_metric_resolution = last_vista_metric_resolution_int
+                    if LOCAL_DEBUG:
+                        if last_vista_metric_resolution:
+                            logger.info('fetcher :: Redis key %s is present' % str(cache_key))
+                        else:
+                            logger.info('fetcher :: Redis key %s is not present' % str(cache_key))
+                except AttributeError:
+                    logger.info('fetcher :: Redis key %s is not present' % str(cache_key))
+                    last_vista_metric_resolution = False
+                except Exception as e:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: fetcher :: retrieving Redis key %s data - %s' % (
+                        str(cache_key), str(e)))
+                    last_vista_metric_resolution = False
+
                 if remote_target in vista_unique_metrics and last_flux_timestamp:
                     last_expected_fetch_time = time_now - (frequency + 420)
                     if last_flux_timestamp < last_expected_fetch_time:
-                        if populate_at_resolutions:
+
+                        # @added 20200107 - Task #3376: Enable vista and flux to deal with lower frequency data
+                        # Added older_than_resolution
+                        older_than_resolution = True
+                        if last_vista_metric_resolution:
+                            try:
+                                last_expected_data_time = time_now - (frequency + 420 + last_vista_metric_resolution)
+                                if last_flux_timestamp > last_expected_data_time:
+                                    older_than_resolution = False
+                            except:
+                                logger.error(traceback.format_exc())
+                                logger.error('error :: fetch :: failed determining last_expected_data_time')
+
+                        # @modified 20200107 - Task #3376: Enable vista and flux to deal with lower frequency data
+                        # Added older_than_resolution
+                        # if populate_at_resolutions:
+                        if populate_at_resolutions and older_than_resolution:
                             if remote_host_type == 'graphite' or remote_host_type == 'prometheus':
                                 pre_populate_graphite_metric = True
                                 behind_by_seconds = time_now - last_flux_timestamp
@@ -918,6 +964,14 @@ class Fetcher(Thread):
                         logger.error(traceback.format_exc())
                         logger.error('error :: fetcher :: could not determine the required resolutions for values in VISTA_FETCH_METRICS tuple for - %s' % (
                             str(remote_target)))
+
+                # @added 20200108 - Task #3376: Enable vista and flux to deal with lower frequency data
+                # Prometheus metrics that use a custom uri cannot be pre populated
+                if remote_host_type == 'prometheus' and pre_populate_graphite_metric:
+                    if not default_prometheus_uri:
+                        logger.info('fetcher :: cannot pre populate Prometheus metric %s as it uses a custom uri' % (
+                            metric))
+                        pre_populate_graphite_metric = False
 
                 # Build remote Prometheus URLs
                 if remote_host_type == 'prometheus' and pre_populate_graphite_metric:
