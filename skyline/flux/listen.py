@@ -64,7 +64,19 @@ def validate_timestamp(caller, timestamp):
                 caller, str(timestamp)))
             return False
         now = int(time())
-        tooOld = now - settings.STALE_PERIOD
+
+        # @added 20200107 - Task #3376: Enable vista and flux to deal with lower frequency data
+        try:
+            flux_max_age = settings.FLUX_MAX_AGE
+        except:
+            logger.error('error :: %s :: validate_timestamp FLUX_MAX_AGE is not set in settings.py, set to the default 3600' % (
+                caller))
+            flux_max_age = 3600
+
+        # @modified 20200107 - Task #3376: Enable vista and flux to deal with lower frequency data
+        # tooOld = now - settings.STALE_PERIOD
+        tooOld = now - flux_max_age
+
         timestampValid = True
         timestampInvalidReason = 'None'
         if timestamp < tooOld:

@@ -2197,6 +2197,14 @@ FLUX_BACKLOG = 254
 :vartype FLUX_WORKERS: int
 """
 
+FLUX_MAX_AGE = 3600
+"""
+:var FLUX_MAX_AGE: The maximum age of a timestamp that flux will accept as valid.
+    This can vary depending on retentions in question and this method may be
+    altered in a future release.
+:vartype FLUX_MAX_AGE: int
+"""
+
 FLUX_SEND_TO_CARBON = False
 """
 :var FLUX_SEND_TO_CARBON: Whether to send metrics recieved by flux to
@@ -2303,8 +2311,8 @@ This is the config where metrics that need to be fetched are defined.
         ('https://graphite.example.org', 'graphite', 60, 'stats.web01.cpu.user', 'stats.web01.cpu.user', '/render/?from=-10minutes&format=json&target=', 'vista.graphite_example_org', None, None, None, None, ('90days', '7days', '24hours', '6hours')),
         ('https://graphite.example.org', 'graphite', 60, 'sumSeries(stats.*.cpu.user)', 'stats.cumulative.cpu.user', '/render/?from=-10minutes&format=json&target=', 'vista.graphite_example_org', None, None, None, None, ('90days', '7days', '24hours', '6hours')),
         ('https://graphite.example.org', 'graphite', 3600, 'swell.tar.hm0', 'swell.tar.hm0', '/render/?from=-120minutes&format=json&target=', 'graphite_example_org', None, None, None, None, ('90days', '7days', '24hours', '6hours')),
-        ('http://prometheus.example.org:9090', 'prometheus', 60, 'node_load1', 'node_load1', 'default', 'vista.prometheus_example_org', None, None, None, None, , ('15d',))
-        ('http://prometheus.example.org:9090', 'prometheus', 60, 'node_network_transmit_bytes_total{device="eth0"}', 'node_network_transmit_bytes_total.eth0', '/api/v1/query?query=node_network_transmit_bytes_total%7Bdevice%3D%22eth0%22%7D%5B5m%5D', 'vista.prometheus_example_org', None, None, None, None, , ('15d',))
+        ('http://prometheus.example.org:9090', 'prometheus', 60, 'node_load1', 'node_load1', 'default', 'vista.prometheus_example_org', None, None, None, None, ('15d',))
+        ('http://prometheus.example.org:9090', 'prometheus', 60, 'node_network_transmit_bytes_total{device="eth0"}', 'node_network_transmit_bytes_total.eth0', '/api/v1/query?query=node_network_transmit_bytes_total%7Bdevice%3D%22eth0%22%7D%5B5m%5D', 'vista.prometheus_example_org', None, None, None, None, None)
     )
 
 - All the fetch tuple parameters are required to be present in each fetch tuple.
@@ -2338,7 +2346,9 @@ This is the config where metrics that need to be fetched are defined.
 :param populate_at_resolutions: if you want Vista to populate the metric with
     historic data this tuple allows you to declare at what resolutions to
     populate the data with.  If you do not want to pre-populated then do not
-    declare a tuple and simply pass an empty tuple (). For a detailed
+    declare a tuple and simply pass an empty tuple (). NOTE - you cannot declare
+    a resolution from Prometheus metrics which use a custom uri, historic
+    metrics cannot currently be pulled with a custom uri.  For a detailed
     description of this functionality please see the Vista documentation page
     at:
     https://earthgecko-skyline.readthedocs.io/en/latest/vista.html#pre-populating-metrics-with-historic-data

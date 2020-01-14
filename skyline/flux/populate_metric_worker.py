@@ -18,6 +18,9 @@ import socket
 import pickle
 import struct
 
+# @added 20200107 - Task #3376: Enable vista and flux to deal with lower frequency data
+from collections import Counter
+
 import requests
 # @modified 20191115 - Bug #3266: py3 Redis binary objects not strings
 #                      Branch #3262: py3
@@ -622,6 +625,44 @@ class PopulateMetricWorker(Process):
             # data
             timeseries.sort()
             timeseries_length = len(timeseries)
+
+            # @added 20200107 - Task #3376: Enable vista and flux to deal with lower frequency data
+            # Determine resolution from the last 30 data points
+            resolution_timestamps = []
+            metric_resolution_determined = False
+            for metric_datapoint in timeseries[-30:]:
+                timestamp = int(metric_datapoint[0])
+                resolution_timestamps.append(timestamp)
+            timestamp_resolutions = []
+            if resolution_timestamps:
+                last_timestamp = None
+                for timestamp in resolution_timestamps:
+                    if last_timestamp:
+                        resolution = timestamp - last_timestamp
+                        timestamp_resolutions.append(resolution)
+                        last_timestamp = timestamp
+                    else:
+                        last_timestamp = timestamp
+            if timestamp_resolutions:
+                try:
+                    timestamp_resolutions_count = Counter(timestamp_resolutions)
+                    ordered_timestamp_resolutions_count = timestamp_resolutions_count.most_common()
+                    metric_resolution = int(ordered_timestamp_resolutions_count[0][0])
+                    if metric_resolution > 0:
+                        metric_resolution_determined = True
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: populate_metric_worker :: failed to determine metric_resolution from timeseries')
+            if metric_resolution_determined:
+                cache_key = 'vista.last.resolution.%s' % metric
+                try:
+                    # Update Redis key
+                    self.redis_conn.setex(cache_key, 3600, metric_resolution)
+                    logger.info('populate_metric_worker :: set %s to %s' % (cache_key, str(metric_resolution)))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: populate_metric_worker :: failed to set Redis key - %s' % (
+                        cache_key))
 
             # Resample
             resample_at = '1Min'
