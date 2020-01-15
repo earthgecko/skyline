@@ -110,7 +110,9 @@ class MetricData(object):
         if LOCAL_DEBUG:
             logger.info('listen :: GET request - %s' % str(req.query_string))
 
-        validGetArguments = ['key', 'metric', 'value', 'timestamp']
+        # @modified 20200115 - Feature #3394: flux health check
+        # Added status parameter so that the flux listen process can be monitored
+        validGetArguments = ['key', 'metric', 'value', 'timestamp', 'status']
 
         payload = {}
         payload['query_string'] = str(req.query_string)
@@ -131,6 +133,22 @@ class MetricData(object):
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: listen :: validating request arguments - %s' % (
+                    str(req.query_string)))
+                resp.status = falcon.HTTP_400
+                return
+
+            # @added 20200115 - Feature #3394: flux health check
+            # Added status parameter
+            try:
+                if str(request_param_key) == 'status':
+                    logger.info('listen :: GET %s - ok' % str(req.query_string))
+                    body = {"status": "ok"}
+                    resp.body = json.dumps(body)
+                    resp.status = falcon.HTTP_200
+                    return
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: listen :: could not validate the status key GET request argument - %s' % (
                     str(req.query_string)))
                 resp.status = falcon.HTTP_400
                 return
@@ -294,6 +312,27 @@ class MetricDataPost(object):
         value = None
         valid_value = None
         key = None
+
+        # @added 20200115 - Feature #3394: flux health check
+        # Added status parameter so that the flux listen process can be monitored
+        status = None
+        try:
+            status = str(postData['status'])
+        except:
+            pass
+        if status:
+            try:
+                logger.info('worker :: POST status - ok')
+                body = {"status": "ok"}
+                resp.body = json.dumps(body)
+                resp.status = falcon.HTTP_200
+                return
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: worker :: could not validate the status key POST request argument - %s' % (
+                    str(req.query_string)))
+                resp.status = falcon.HTTP_400
+                return
 
         try:
             key = str(postData['key'])
