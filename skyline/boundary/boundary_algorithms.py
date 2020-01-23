@@ -11,17 +11,19 @@ import os.path
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 sys.path.insert(0, os.path.dirname(__file__))
 
-from settings import (
-    MAX_TOLERABLE_BOREDOM,
-    MIN_TOLERABLE_LENGTH,
-    STALE_PERIOD,
-    REDIS_SOCKET_PATH,
-    BOREDOM_SET_SIZE,
-    ENABLE_BOUNDARY_DEBUG,
-    REDIS_PASSWORD,
-)
-
-from algorithm_exceptions import (TooShort, Stale, Boring)
+# @modified 20200122 - Branch #3262: py3
+# This prevents flake8 E402 - module level import not at top of file
+if True:
+    from settings import (
+        MAX_TOLERABLE_BOREDOM,
+        MIN_TOLERABLE_LENGTH,
+        STALE_PERIOD,
+        REDIS_SOCKET_PATH,
+        BOREDOM_SET_SIZE,
+        ENABLE_BOUNDARY_DEBUG,
+        REDIS_PASSWORD,
+    )
+    from algorithm_exceptions import (TooShort, Stale, Boring)
 
 skyline_app = 'boundary'
 skyline_app_logger = '%sLog' % skyline_app

@@ -2,7 +2,7 @@ import os
 import sys
 from os.path import dirname, join, realpath
 from optparse import OptionParser
-from time import sleep
+from time import sleep, time
 import logging
 
 # Get the current working directory of this file.
@@ -100,6 +100,6 @@ if boundary_alerts_enabled:
         if alert[0] == options.metric:
             if options.trigger in alert[7]:
                 print('    Testing Boundary alerting against "' + alert[0] + '" to send for ' + alert[7] + ' via ' + options.trigger)
-                trigger_alert(options.trigger, '0', alert[0], '1', '1', 'test')
+                trigger_alert(options.trigger, '0', alert[0], '1', '1', 'test', int(time()))
 else:
     print('Boundary alerts are disabled')

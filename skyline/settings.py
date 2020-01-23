@@ -334,6 +334,12 @@ SLACK_ENABLED = False
 :vartype SLACK_ENABLED: boolean
 """
 
+HTTP_ALERTERS_ENABLED = False
+"""
+:var HTTP_ALERTERS_ENABLED: Enables the http alerter
+:vartype HTTP_ALERTERS_ENABLED: boolean
+"""
+
 START_IF_NO_DB = False
 """
 :var START_IF_NO_DB: This allows the Skyline apps to start if there is a DB
@@ -462,6 +468,22 @@ BOREDOM_SET_SIZE = 1
   timeseries that often oscillate between two values.
 """
 
+IDENTIFY_AIRGAPS = False
+"""
+:var IDENTIFY_AIRGAPS: Identify metrics which have air gaps and publish to the
+    analyzer.airgapped_metrics Redis set which is exposed via the webapp on
+    /api?airgapped_metrics
+:vartype IDENTIFY_AIRGAPS: boolean
+"""
+
+MAX_AIRGAP_PERIOD = 21600
+"""
+:var MAX_AIRGAP_PERIOD: If IDENTIFY_AIRGAPS is enabled Analyzer will only flag
+    metric that have any air gaps in the last MAX_AIRGAP_PERIOD seconds as
+    air gapped.
+:vartype MAX_AIRGAP_PERIOD: boolean
+"""
+
 CANARY_METRIC = 'statsd.numStats'
 """
 :var CANARY_METRIC: The metric name to use as the CANARY_METRIC
@@ -587,9 +609,11 @@ ALERTS = (
     ('horizon.test.pickle', 'smtp', 30),
     ('skyline', 'smtp', 1800),
     ('skyline_test.alerters.test', 'smtp', 1800),
-    ('skyline_test.alerters.test', 'hipchat', 1800),
     ('skyline_test.alerters.test', 'slack', 1800),  # slack alerts MUST be declared afer smtp
     ('skyline_test.alerters.test', 'pagerduty', 1800),
+    ('skyline_test.alerters.test', 'http_alerter-mock_api_alerter_receiver', 1800),
+    # ('stats', 'http_alerter-external_endpoint', 30),
+    # ('carbon', 'http_alerter-otherapp', 60),
 )
 """
 :var ALERTS: This enables analyzer alerting.
@@ -607,7 +631,6 @@ trigger again.
         ('metric1', 'smtp', 1800),
         ('important_metric.total', 'smtp', 600),
         ('important_metric.total', 'pagerduty', 1800),
-        ('metric3', 'hipchat', 600),
         # Log all anomalies to syslog
         ('stats.', 'syslog', 1),
         # Wildcard namespaces can be used as well
@@ -618,12 +641,14 @@ trigger again.
         ('metric5.thing.*.rpm', 'smtp', 900, 168),
         # NOTE: all slack alert tuples MUST be declared AFTER smtp alert tuples
         ('metric3', 'slack', 600),
+        ('stats.', 'http_alerter_external_endpoint', 30),
     )
 
 - Alert tuple parameters are:
 
 :param metric: metric name.
-:param alerter: the alerter name e.g. smtp, syslog, hipchat, pagerduty
+:param alerter: the alerter name e.g. smtp, syslog, slack, pagerduty or
+    http_alerter_<name>
 :param EXPIRATION_TIME: Alerts will not fire twice within this amount of
     seconds, even if they trigger again.
 :param SECOND_ORDER_RESOLUTION_HOURS: (optional) The number of hours that Mirage
@@ -714,6 +739,10 @@ SMTP_OPTS = {
 :var SMTP_OPTS: Your SMTP settings.
 :vartype SMTP_OPTS: dictionary
 
+It is possible to set the email addresses to no_email if you do not wish to
+receive SMTP alerts, but smtp alerters are required see
+https://earthgecko-skyline.readthedocs.io/en/latest/alerts.html
+
 .. note:: For each alert tuple defined in :mod:`settings.ALERTS` you need a
     recipient defined that matches the namespace.  The default_recipient acts
     as a catchall for any alert tuple that does not have a matching recipients
@@ -803,6 +832,33 @@ syslog alerts requires an ident this adds a LOG_WARNING message to the
 LOG_LOCAL4 which will ship to any syslog or rsyslog down the line.  The
 ``EXPIRATION_TIME`` for the syslog alert method should be set to 1 to fire
 every anomaly into the syslog.
+"""
+
+HTTP_ALERTERS_OPTS = {}
+"""
+:var HTTP_ALERTERS_OPTS: External alert endpoints.
+:vartype HTTP_ALERTERS_OPTS: dictionary
+
+- **Dictionary example**::
+
+    HTTP_ALERTERS_OPTS = {
+        'http_alerter-mock_api_alerter_receiver': {
+            'enabled': True,
+            'endpoint': 'http://127.0.0.1:1500/mock_api?alert_reciever',
+            'token': None
+        },
+        'http_alerter-otherapp': {
+            'enabled': False,
+            'endpoint': 'https://other-http-alerter.example.org/alerts',
+            'token': '1234567890abcdefg'
+        },
+    }
+
+All http_alerter alert names must be prefixed with `http_alerter` followed by
+the name you want to assign to it.  HTTP_ALERTERS_OPTS is used by Analyzer (in
+:mod:`settings.ALERTS`) and Bounary (in :mod:`settings.BOUNDARY_METRICS`) in
+conjunction with http_alerter defines,
+
 """
 
 CUSTOM_ALERT_OPTS = {
@@ -1259,9 +1315,13 @@ settings block.
 BOUNDARY_METRICS = (
     # ('metric', 'algorithm', EXPIRATION_TIME, MIN_AVERAGE, MIN_AVERAGE_SECONDS, TRIGGER_VALUE, ALERT_THRESHOLD, 'ALERT_VIAS'),
     ('skyline_test.alerters.test', 'greater_than', 1, 0, 0, 0, 1, 'smtp'),
+    ('skyline_test.alerters.test', 'greater_than', 1, 0, 0, 0, 1, 'http_alerter-mock_api_alerter_receiver'),
+    ('skyline_test.alerters.test', 'detect_drop_off_cliff', 1800, 500, 3600, 0, 2, 'http_alerter-mock_api_alerter_receiver'),
+    ('skyline_test.alerters.test', 'less_than', 3600, 0, 0, 15, 2, 'http_alerter-mock_api_alerter_receiver'),
     ('metric1', 'detect_drop_off_cliff', 1800, 500, 3600, 0, 2, 'smtp|slack|pagerduty'),
     ('metric2.either', 'less_than', 3600, 0, 0, 15, 2, 'smtp|hipchat'),
     ('nometric.other', 'greater_than', 3600, 0, 0, 100000, 1, 'smtp'),
+    ('nometric.another', 'greater_than', 3600, 0, 0, 100000, 1, 'http_alerter-external_endpoint'),
 )
 """
 :var BOUNDARY_METRICS: definitions of metrics for Boundary to analyze
@@ -1313,8 +1373,8 @@ different ranges to pre-filter some noise.
     Note - Any :func:`.boundary_algorithms.greater_than` metrics should have
     this as 1.
 :param ALERT_VIAS: pipe separated alerters to send to, valid options smtp,
-    pagerduty, hipchat and slack.  This could therefore be 'smtp', 'smtp|slack',
-    'pagerduty|slack', etc
+    pagerduty, http_alerter_<name> and slack.  This could therefore be 'smtp',
+    'smtp|slack', 'pagerduty|slack', etc
 :type metric: str
 :type algorithm: str
 :type EXPIRATION_TIME: int
@@ -1383,6 +1443,7 @@ BOUNDARY_ALERTER_OPTS = {
         'pagerduty': 1800,
         'hipchat': 1800,
         'slack': 1800,
+        # 'http_alerter_external_endpoint': 1,
     },
     # If alerter keys >= limit in the above alerter_expiration_time do not alert
     # to this channel until keys < limit
@@ -1391,6 +1452,7 @@ BOUNDARY_ALERTER_OPTS = {
         'pagerduty': 15,
         'hipchat': 30,
         'slack': 30,
+        # 'http_alerter_external_endpoint': 10000,
     },
 }
 """

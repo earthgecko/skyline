@@ -1223,7 +1223,9 @@ class Ionosphere(Thread):
                 # @modified 20191114 - Feature #: forward_alert
                 # Allow ionosphere to check any metrics that have an alerter other than smtp set, apart from syslog
 
-                logger.error('error :: Ionosphere does not handle metrics that do not have a smtp alert context removing check for %s' % (base_name))
+                # logger.error('error :: Ionosphere does not handle metrics that do not have a smtp alert context removing check for %s' % (base_name))
+                logger.info('Ionosphere does not handle metrics that do not have a smtp alert context removing check for %s which is a training_metric' % (base_name))
+
                 self.remove_metric_check_file(str(metric_check_file))
                 if engine:
                     engine_disposal(engine)

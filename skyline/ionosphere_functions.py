@@ -420,7 +420,8 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
                         continue
                     if feature_name_item:
                         fname_id = feature_name_item[0]
-                        current_logger.debug('debug :: fname_id - %s' % str(fname_id))
+                        if LOCAL_DEBUG:
+                            current_logger.debug('debug :: fname_id - %s' % str(fname_id))
                     f_value = str(line[1])
                 if fname_id and f_value:
                     features_data.append([fname_id, f_value])

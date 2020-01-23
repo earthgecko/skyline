@@ -1689,8 +1689,16 @@ class Mirage(Thread):
 
                                 try:
                                     if alert[1] != 'smtp':
+                                        logger.info('trigger_alert :: alert: %s, metric: %s, second_order_resolution_seconds: %s, context: %s' % (
+                                            str(alert), str(metric),
+                                            str(second_order_resolution_seconds),
+                                            str(alert_context)))
                                         trigger_alert(alert, metric, second_order_resolution_seconds, alert_context)
                                     else:
+                                        logger.info('smtp_trigger_alert :: alert: %s, metric: %s, second_order_resolution_seconds: %s, context: %s' % (
+                                            str(alert), str(metric),
+                                            str(second_order_resolution_seconds),
+                                            str(alert_context)))
                                         smtp_trigger_alert(alert, metric, second_order_resolution_seconds, alert_context)
                                     logger.info('sent %s alert: For %s' % (alert[1], metric[1]))
                                 except Exception as e:

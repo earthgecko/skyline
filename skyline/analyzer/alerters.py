@@ -30,8 +30,11 @@ import datetime as dt
 # Added gmtime and strftime
 # @modified 20191030 - Branch #3262: py3
 # from time import (time, gmtime, strftime)
-from time import gmtime, strftime
+from time import gmtime, strftime, time
 from email import charset
+
+# @added 20200116: Feature #3396: http_alerter
+import requests
 
 # @modified 20160820 - Issue #23 Test dependency updates
 # Use Agg for matplotlib==1.5.2 upgrade, backwards compatibile
@@ -85,7 +88,9 @@ if True:
         get_graphite_graph_image,
         # @modified 20191105 - Branch #3002: docker
         #                      Branch #3262: py3
-        get_graphite_port, get_graphite_render_uri, get_graphite_custom_headers)
+        get_graphite_port, get_graphite_render_uri, get_graphite_custom_headers,
+        # @added 20200116: Feature #3396: http_alerter
+        get_redis_conn_decoded)
 
 skyline_app = 'analyzer'
 skyline_app_logger = '%sLog' % skyline_app
@@ -1295,6 +1300,17 @@ def alert_stale_digest(alert, metric, context):
         logger.info('alert_smtp - DOCKER_FAKE_EMAIL_ALERTS is set to %s, not sending email alert' % str(DOCKER_FAKE_EMAIL_ALERTS))
         send_email_alert = False
 
+    # @added 20200122 - Feature #3406: Allow for no_email SMTP_OPTS
+    no_email = False
+    if str(sender) == 'no_email':
+        send_email_alert = False
+        no_email = True
+    if str(recipient) == 'no_email':
+        send_email_alert = False
+        no_email = True
+    if no_email:
+        logger.info('alert_smtp - no_email is set in SMTP_OPTS, not executing SMTP command')
+
     # @modified 20190517 - Branch #3002: docker
     # Wrap the smtp block based on whether to actually send mail or not.
     # This allows for all the steps to be processed in the testing or docker
@@ -1871,6 +1887,207 @@ def alert_slack(alert, metric, context):
                         (cache_key, str(cache_key_value)))
 
 
+# @added 20200116: Feature #3396: http_alerter
+def alert_http(alert, metric, context):
+    """
+    Called by :func:`~trigger_alert` and sends and resend anomalies to a http
+    endpoint.
+
+    """
+    if settings.HTTP_ALERTERS_ENABLED:
+        alerter_name = alert[1]
+        alerter_enabled = False
+        try:
+            alerter_enabled = settings.HTTP_ALERTERS_OPTS[alerter_name]['enabled']
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: alert_http failed to determine the enabled from settings.HTTP_ALERTERS_OPTS for alert - %s and metric %s' % (
+                str(alert), str(metric)))
+        if not alerter_enabled:
+            logger.info('alert_http - %s enabled %s, not alerting' % (
+                str(alerter_name), str(alerter_enabled)))
+            return
+        alerter_endpoint = False
+        try:
+            alerter_endpoint = settings.HTTP_ALERTERS_OPTS[alerter_name]['endpoint']
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: alert_http failed to determine the endpoint from settings.HTTP_ALERTERS_OPTS for alert - %s and metric %s' % (
+                str(alert), str(metric)))
+        if not alerter_endpoint:
+            logger.error('alert_http - no endpoint set for %s, not alerting' % (
+                str(alerter_name)))
+            return
+
+        alerter_token = None
+        try:
+            alerter_token = settings.HTTP_ALERTERS_OPTS[alerter_name]['token']
+        except:
+            pass
+
+        # Test for mirage second_order_resolution_hours tuple
+        try:
+            full_duration = int(alert[3]) * 3600
+        except:
+            full_duration = settings.FULL_DURATION
+
+        source = context.lower()
+        metric_alert_dict = {}
+        alert_data_dict = {}
+        try:
+            metric_name = str(metric[1])
+            timestamp = int(metric[2])
+            timestamp_str = str(timestamp)
+            value_str = str(float(metric[0]))
+            full_duration_str = str(int(full_duration))
+            expiry_str = str(int(alert[2]))
+            metric_alert_dict = {
+                "metric": str(metric[1]),
+                "timestamp": timestamp_str,
+                "value": value_str,
+                "full_duration": full_duration_str,
+                "expiry": expiry_str,
+                "source": str(source),
+                "token": str(alerter_token)
+            }
+            alert_data_dict = {"status": {}, "data": {"alert": metric_alert_dict}}
+            logger.info('alert_http :: alert_data_dict to send - %s' % str(alert_data_dict))
+            # Allow requests to send as json
+            # alert_data = json.dumps(alert_data_dict)
+            # logger.info('alert_http :: alert_data to send - %s' % str(alert_data))
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: alert_http failed to construct the alert data for %s from alert - %s and metric - %s' % (
+                str(alerter_name), str(alert), str(metric)))
+            return
+
+        in_resend_queue = False
+        redis_set = '%s.http_alerter.queue' % str(source)
+        resend_queue = None
+        previous_attempts = 0
+        try:
+            redis_conn_decoded
+        except:
+            redis_conn_decoded = get_redis_conn_decoded(skyline_app)
+        try:
+            resend_queue = redis_conn_decoded.smembers(redis_set)
+        except Exception as e:
+            logger.error('error :: alert_http :: could not query Redis for %s - %s' % (redis_set, e))
+        if resend_queue:
+            try:
+                for index, resend_item in enumerate(resend_queue):
+                    resend_item_list = literal_eval(resend_item)
+                    # resend_alert = literal_eval(resend_item_list[0])
+                    # resend_metric = literal_eval(resend_item_list[1])
+                    resend_metric_alert_dict = literal_eval(resend_item_list[2])
+                    if resend_metric_alert_dict['metric'] == metric_name:
+                        if int(resend_metric_alert_dict['timestamp']) == timestamp:
+                            previous_attempts = int(resend_metric_alert_dict['attempts'])
+                            in_resend_queue = True
+                            break
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: alert_http failed iterate to resend_queue')
+        redis_conn = None
+        if in_resend_queue:
+            redis_conn = get_redis_conn(skyline_app)
+
+        add_to_resend_queue = False
+        fail_alerter = False
+        if alert_data_dict and alerter_endpoint:
+            connect_timeout = 2
+            read_timeout = 2
+            if requests.__version__ >= '2.4.0':
+                use_timeout = (int(connect_timeout), int(read_timeout))
+            else:
+                use_timeout = int(connect_timeout)
+            if settings.ENABLE_DEBUG:
+                logger.debug('debug :: use_timeout - %s' % (str(use_timeout)))
+            # headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
+            try:
+                # response = requests.post(alerter_endpoint, data=alert_data, headers=headers, timeout=use_timeout)
+                response = requests.post(alerter_endpoint, json=alert_data_dict, timeout=use_timeout)
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to post alert to %s - %s' % (
+                    str(alerter_name), str(alert_data_dict)))
+                add_to_resend_queue = True
+
+            if in_resend_queue:
+                try:
+                    redis_conn.srem(redis_set, str(resend_item))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: alert_http :: failed remove %s from Redis set %s' % (
+                        str(resend_item), redis_set))
+
+            if response.status_code == 200:
+                logger.info('alert_http :: alert sent to %s - %s' % (
+                    str(alerter_endpoint), str(alert_data_dict)))
+                if in_resend_queue:
+                    logger.info('alert_http :: alert removed from %s after %s attempts to send' % (
+                        str(redis_set), str(previous_attempts)))
+                return
+            else:
+                logger.error('error :: alert_http :: %s %s responded with status code %s and reason %s' % (
+                    str(alerter_name), str(alerter_endpoint),
+                    str(response.status_code), str(response.reason)))
+                add_to_resend_queue = True
+                fail_alerter = True
+
+            number_of_send_attempts = previous_attempts + 1
+            metric_alert_dict['attempts'] = number_of_send_attempts
+            if add_to_resend_queue:
+                alert_str = str(alert)
+                metric_str = str(metric)
+                data = [alert_str, metric_str, str(metric_alert_dict)]
+                logger.info('alert_http :: adding alert to %s after %s attempts to send - %s' % (
+                    str(redis_set), str(number_of_send_attempts), str(metric_alert_dict)))
+                try:
+                    redis_conn
+                except:
+                    try:
+                        redis_conn = get_redis_conn(skyline_app)
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: alert_http :: failed to get_redis_conn')
+                try:
+                    # redis_conn.sadd(redis_set, str(metric_alert_dict))
+                    redis_conn.sadd(redis_set, str(data))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: alert_http :: failed to add %s from Redis set %s' % (
+                        str(metric_alert_dict), redis_set))
+
+            # Create a Redis if there was a bad or no response from the
+            # alerter_endpoint, to ensure that Analyzer does not loop through
+            # every alert in the queue for an alerter_endpoint, if the
+            # alerter_endpoint is down
+            if fail_alerter:
+                alerter_endpoint_cache_key = 'http_alerter.down.%s' % str(alerter_name)
+                logger.error('error :: alert_http :: alerter_endpoint %s failed adding Redis key %s' % (
+                    str(alerter_endpoint), str(alerter_endpoint_cache_key)))
+                try:
+                    redis_conn
+                except:
+                    try:
+                        redis_conn = get_redis_conn(skyline_app)
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: alert_http :: failed to get_redis_conn to add key %s' % str(alerter_endpoint_cache_key))
+                        redis_conn = None
+                if redis_conn:
+                    try:
+                        failed_timestamp = int(time())
+                        redis_conn.setex(alerter_endpoint_cache_key, 60, failed_timestamp)
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to set Redis key %s' % alerter_endpoint_cache_key)
+    else:
+        logger.info('alert_http :: settings.HTTP_ALERTERS_ENABLED not enabled nothing to do')
+        return
+
+
 def trigger_alert(alert, metric, context):
     """
     Called by :py:func:`skyline.analyzer.Analyzer.spawn_alerter_process
@@ -1898,9 +2115,12 @@ def trigger_alert(alert, metric, context):
 
     if '@' in alert[1]:
         strategy = 'alert_smtp'
+    # @added 20200116: Feature #3396: http_alerter
+    # Added http_alerter
+    elif 'http_alerter' in alert[1]:
+        strategy = 'alert_http'
     else:
         strategy = 'alert_%s' % alert[1]
-
     try:
         getattr(alerters, strategy)(alert, metric, context)
     except:

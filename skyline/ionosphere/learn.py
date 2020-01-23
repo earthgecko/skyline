@@ -581,7 +581,7 @@ def ionosphere_learn(timestamp):
                         redis_conn.srem(work_set, str(learn_metric_list))
                     except:
                         logger.error(traceback.format_exc())
-                        logger.error('error :: learn :: failed remove %s from Redis set %s')
+                        logger.error('error :: learn :: failed remove %s from Redis set %s' % (str(learn_metric_list), work_set))
                 else:
                     logger.info('learn :: exiting this work but not removing work item, as database may be available again before the work expires')
                 learn_engine_disposal(engine)
