@@ -103,6 +103,16 @@ try:
 except:
     ALERT_ON_STALE_METRICS = False
 
+# @added 20200117 - Feature #3400: Identify air gaps in the metric data
+try:
+    from settings import IDENTIFY_AIRGAPS
+except:
+    IDENTIFY_AIRGAPS = False
+try:
+    from settings import MAX_AIRGAP_PERIOD
+except:
+    MAX_AIRGAP_PERIOD = int(3600 * 6)
+
 # @added 20190522 - Feature #2580: illuminance
 # Disabled for now as in concept phase.  This would work better if
 # the illuminance_datapoint was determined from the time series
@@ -314,6 +324,7 @@ class Analyzer(Thread):
 
         # @added 20160803 - Adding additional exception handling to Analyzer
         if raw_assigned_failed:
+            logger.info('No raw_assigned set, returning')
             return
 
         # @added 20161119 - Branch #922: ionosphere
@@ -551,6 +562,21 @@ class Analyzer(Thread):
             logger.error('error :: failed to generate a list from analyzer.non_smtp_alerter_metrics Redis set')
             non_smtp_alerter_metrics = []
 
+        # @added 20200117 - Feature #3400: Identify air gaps in the metric data
+        # Get the airgapped_metrics list so that it is only got once per run and
+        # passed to run_selected_algorithm if enabled and exists.
+        # The implementation of this feature bumped up analyzer.run_time from:
+        # from ~2.5 to 3 seconds up to between 3.0 and 4.0 seconds on 608 metrics
+        # from ~5.5 to 10 seconds up to between 7.5 and 11.5 seconds on 1441 metrics
+        airgapped_metrics = []
+        if IDENTIFY_AIRGAPS:
+            try:
+                airgapped_metrics = list(self.redis_conn_decoded.smembers('analyzer.airgapped_metrics'))
+            except Exception as e:
+                logger.error('error :: could not query Redis for analyzer.airgapped_metrics - %s' % str(e))
+                airgapped_metrics = []
+            logger.info('determined %s airgapped metrics' % str(len(airgapped_metrics)))
+
         # Distill timeseries strings into lists
         for i, metric_name in enumerate(assigned_metrics):
             self.check_if_parent_is_alive()
@@ -674,7 +700,11 @@ class Analyzer(Thread):
                     pass
 
             try:
-                anomalous, ensemble, datapoint = run_selected_algorithm(timeseries, metric_name)
+                # @modified 20200117 - Feature #3400: Identify air gaps in the metric data
+                # Also pass the airgapped_metrics list so that it is only got
+                # once per run and does not have to be queried in algorithms
+                # anomalous, ensemble, datapoint = run_selected_algorithm(timeseries, metric_name)
+                anomalous, ensemble, datapoint = run_selected_algorithm(timeseries, metric_name, airgapped_metrics)
                 # @added 20191016 - Branch #3262: py3
                 if LOCAL_DEBUG:
                     logger.info('debug :: metric %s - anomalous - %s' % (str(metric_name), str(anomalous)))
@@ -959,7 +989,7 @@ class Analyzer(Thread):
                                 str(ionosphere_training_data_key_data))
                         except:
                             logger.info(traceback.format_exc())
-                            logger.error('error :: failed to send_anomalous_metric_to to ionosphere')
+                            logger.error('error :: failed to set Redis key %s' % ionosphere_training_data_key)
 
                     if ionosphere_metric:
                         analyzer_metric = False
@@ -1135,6 +1165,9 @@ class Analyzer(Thread):
             except:
                 exceptions['Other'] += 1
                 logger.info(traceback.format_exc())
+
+        # @added 20200117 - Feature #3400: Identify air gaps in the metric data
+        del airgapped_metrics
 
         # @added 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
         # Added Redis sets for Boring, TooShort and Stale
@@ -2316,8 +2349,12 @@ class Analyzer(Thread):
                             try:
                                 if alert[1] != 'smtp':
                                     trigger_alert(alert, metric, context)
+                                    logger.info('trigger_alert :: alert: %s, metric: %s, context: %s' % (
+                                        str(alert), str(metric), str(context)))
                                 else:
                                     smtp_trigger_alert(alert, metric, context)
+                                    logger.info('smtp_trigger_alert :: alert: %s, metric: %s, context: %s' % (
+                                        str(alert), str(metric), str(context)))
                                     if LOCAL_DEBUG:
                                         logger.info('debug :: smtp_trigger_alert spawned')
                                 if LOCAL_DEBUG:
@@ -2428,7 +2465,7 @@ class Analyzer(Thread):
                     pass
 
             if LOCAL_DEBUG:
-                logger.info('debug :: Memory usage in run before algoritest thm run times: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+                logger.info('debug :: Memory usage in run before algorithm test run times: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 
             for algorithm in algorithms_to_time:
                 algorithm_count_file = algorithm_tmp_file_prefix + algorithm + '.count'
@@ -2600,6 +2637,79 @@ class Analyzer(Thread):
                         pass
                 else:
                     logger.info('there are no stale metrics to alert on')
+
+            # @added 20200121 - Feature #3396: http_alerter
+            full_resend_queue = []
+            resend_queues = ['analyzer', 'mirage', 'ionosphere']
+            for source in resend_queues:
+                resend_queue = []
+                try:
+                    redis_set = '%s.http_alerter.queue' % source
+                    try:
+                        resend_queue = list(self.redis_conn_decoded.smembers(redis_set))
+                        if resend_queue:
+                            logger.info('%s items in the %s Redis set' % (str(len(resend_queue)), redis_set))
+                            resend_items = []
+                            for index, resend_item in enumerate(resend_queue):
+                                resend_item_list = literal_eval(resend_item)
+                                resend_alert = literal_eval(resend_item_list[0])
+                                resend_metric = literal_eval(resend_item_list[1])
+                                resend_metric_alert_dict = literal_eval(resend_item_list[2])
+                                resend_items.append([resend_alert, resend_metric, resend_metric_alert_dict])
+                            resend_queue = resend_items
+                            new_full_resend_queue = full_resend_queue + resend_queue
+                            full_resend_queue = new_full_resend_queue
+                        else:
+                            logger.info('0 items in the %s Redis set' % (redis_set))
+                    except Exception as e:
+                        logger.error('error :: could not determine http_alerter item from Redis set %s - %s' % (redis_set, e))
+                        resend_queue = []
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to get %s.http_alerter.queue from Redis' % source)
+                    resend_queue = []
+            if full_resend_queue:
+                try:
+                    http_alerters_down = []
+                    for index, resend_item in enumerate(full_resend_queue):
+                        resend_alert = resend_item[0]
+                        resend_metric = resend_item[1]
+                        resend_metric_alert_dict = resend_item[2]
+                        # To ensure that Analyzer does not loop through every alert in the queue
+                        # for an alerter_endpoint, if the alerter_endpoint is down and wait for
+                        # the connect timeout on each one, if an alerter_endpoint fails a Redis
+                        # key is created to check against to see if the alerter_endpoint is down
+                        alerter_name = str(resend_alert[1])
+                        alerter_endpoint_cache_key = 'http_alerter.down.%s' % str(alerter_name)
+                        if alerter_endpoint_cache_key in http_alerters_down:
+                            continue
+                        alerter_endpoint_failed = False
+                        try:
+                            alerter_endpoint_failed = self.redis_conn.get(alerter_endpoint_cache_key)
+                        except Exception as e:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: alert_http could not query Redis for cache_key %s: %s' % (str(alerter_endpoint_cache_key), e))
+                        if alerter_endpoint_failed:
+                            if LOCAL_DEBUG:
+                                logger.debug('alert_http :: debug :: %s exists not alerting' % str(alerter_endpoint_cache_key))
+                            if alerter_endpoint_cache_key not in http_alerters_down:
+                                http_alerters_down.append(alerter_endpoint_cache_key)
+                                logger.info('%s Redis exists not alerting for any alerts for this endpoint' % str(alerter_endpoint_cache_key))
+                            continue
+                        logger.info('resend_queue item :: alert: %s, metric: %s, metric_alert_dict: %s' % (
+                            str(resend_alert), str(resend_metric),
+                            str(resend_metric_alert_dict)))
+                        resend_context = resend_metric_alert_dict['source']
+                        try:
+                            trigger_alert(resend_alert, resend_metric, resend_context)
+                            logger.info('trigger_alert :: alert: %s, metric: %s, context: %s' % (
+                                str(resend_alert), str(resend_metric), str(resend_context)))
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: failed to trigger_alert for resend queue item')
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to parse resend_queue')
 
             run_time = time() - now
             total_metrics = str(len(unique_metrics))
@@ -3234,6 +3344,36 @@ class Analyzer(Thread):
                     self.redis_conn.sadd('non_derivative_metrics', live_at)
                 except Exception as e:
                     logger.error('error :: could not add live at to Redis set non_derivative_metrics: %s' % str(e))
+
+            # @added 20200117 - Feature #3400: Identify air gaps in the metric data
+            # Manage airgapped_metrics set and remove old entires
+            if IDENTIFY_AIRGAPS:
+                airgapped_metrics = []
+                try:
+                    airgapped_metrics = list(self.redis_conn_decoded.smembers('analyzer.airgapped_metrics'))
+                except:
+                    airgapped_metrics = []
+                if airgapped_metrics:
+                    try:
+                        logger.info('managing analyzer.airgapped_metrics Redis set')
+                        current_timestamp = int(time())
+                        max_airgap_age = current_timestamp - MAX_AIRGAP_PERIOD
+                        removed_airgap_items = 0
+                        for i in airgapped_metrics:
+                            airgap = literal_eval(i)
+                            airgap_metric_start_timestamp = int(airgap[2])
+                            if max_airgap_age > airgap_metric_start_timestamp:
+                                logger.info('removing expired airgapped metric item - %s' % str(airgap))
+                                try:
+                                    self.redis_conn.srem('analyzer.airgapped_metrics', str(airgap))
+                                    removed_airgap_items += 1
+                                    # TODO: learn_airgapped_metrics
+                                except Exception as e:
+                                    logger.error('error :: could not remove item from analyzer.airgapped_metrics Redis set - %s' % str(e))
+                        logger.info('removed %s old items from analyzer.airgapped_metrics Redis set' % str(removed_airgap_items))
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to manage analyzer.airgapped_metrics Redis set Redis set')
 
             # Sleep if it went too fast
             # if time() - now < 5:

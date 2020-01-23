@@ -558,6 +558,19 @@ def version():
 # def data():
 def api():
 
+    # @added 20200117 - Feature #3400: Identify air gaps in the metric data
+    if 'airgapped_metrics' in request.args:
+        airgapped_metrics = []
+        try:
+            airgapped_metrics = list(REDIS_CONN.smembers('analyzer.airgapped_metrics'))
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: Webapp could not get the analyzer.airgapped_metrics list from Redis')
+            return 'Internal Server Error', 500
+        logger.info('airgapped_metrics responding with %s metrics' % str(len(airgapped_metrics)))
+        data_dict = {"status": {}, "data": {"metrics": airgapped_metrics}}
+        return jsonify(data_dict), 200
+
     # @added 20191231 - Feature #3368: webapp api - ionosphere_learn_work
     if 'ionosphere_learn_work' in request.args:
         try:
@@ -827,6 +840,58 @@ def api():
     resp = json.dumps(
         {'results': 'Error: No argument passed - try /api?metric= or /api?graphite_metric='})
     return resp, 404
+
+
+# @added 20200116: Feature #3396: http_alerter
+@app.route("/mock_api", methods=['GET', 'POST'])
+def mock_api():
+    if 'alert_reciever' in request.args:
+        if request.method == 'POST':
+            try:
+                # post_data = request.form.to_dict()
+                post_data = request.get_json()
+                logger.info('mock_api :: /alert_reciever recieved %s' % str(post_data))
+                metric = str(post_data['data']['alert']['metric'])
+                # timestamp = int(request.form['timestamp'])
+                # value = float(request.form['value'])
+                timestamp = int(post_data['data']['alert']['timestamp'])
+                value = float(post_data['data']['alert']['value'])
+                # full_duration = int(request.form['full_duration'])
+                # expiry = int(request.form['expiry'])
+                full_duration = int(post_data['data']['alert']['full_duration'])
+                expiry = int(post_data['data']['alert']['expiry'])
+                source = str(post_data['data']['alert']['source'])
+                token = str(post_data['data']['alert']['token'])
+                metric_alert_dict = {
+                    "metric": metric,
+                    "timestamp": timestamp,
+                    "value": value,
+                    "full_duration": full_duration,
+                    "expiry": expiry,
+                    "source": source,
+                    "token": token
+                }
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: Webapp could not get alert details from the alert_reciever POST request - %s' % str(request.form))
+                resp = json.dumps(
+                    {'error': 'malformed or missing data in the POST request'})
+                return resp, 400
+            testing_http_alerter = False
+            if testing_http_alerter:
+                resp = json.dumps(
+                    {'status': 'testing with a 400'})
+                return resp, 400
+            data_dict = {"status": {}, "data": {"alert": metric_alert_dict}}
+            redis_set = 'mock_api.alert_reciever.alerts'
+            try:
+                REDIS_CONN_UNDECODE.sadd(redis_set, str(data_dict))
+                logger.info('added alert to %s' % redis_set)
+            except:
+                logger.info(traceback.format_exc())
+                logger.error('error :: mock_api :: could not add data_dict to Redis set - %s' % redis_set)
+            logger.info('mock_api :: responding with 200 and %s' % str(data_dict))
+            return jsonify(data_dict), 200
 
 
 # @added 20180721 - Feature #2464: luminosity_remote_data

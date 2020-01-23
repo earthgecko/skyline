@@ -488,7 +488,14 @@ class Boundary(Thread):
 
                 # If it's anomalous, add it to list
                 if anomalous:
-                    anomalous_metric = [datapoint, metric_name, metric_expiration_time, metric_min_average, metric_min_average_seconds, metric_trigger, alert_threshold, metric_alerters, algorithm]
+                    # @added 20200122 - Feature #3396: http_alerter
+                    # Add the metric timestamp for the http_alerter resend queue
+                    metric_timestamp = int(timeseries[-1][0])
+
+                    # @added 20200122 - Feature #3396: http_alerter
+                    # Add the metric timestamp for the http_alerter resend queue
+                    # anomalous_metric = [datapoint, metric_name, metric_expiration_time, metric_min_average, metric_min_average_seconds, metric_trigger, alert_threshold, metric_alerters, algorithm]
+                    anomalous_metric = [datapoint, metric_name, metric_expiration_time, metric_min_average, metric_min_average_seconds, metric_trigger, alert_threshold, metric_alerters, algorithm, metric_timestamp]
                     # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
                     # self.anomalous_metrics.append(anomalous_metric)
                     try:
@@ -849,10 +856,8 @@ class Boundary(Thread):
                         logger.info('test alert metric found - alerting on %s' % str((test_alert)))
                         metric_name = str(test_alert[0])
                         test_alerter = str(test_alert[1])
-                        metric = (1, metric_name, int(time()))
-                        alert = (metric_name, test_alerter, 10)
                         logger.info('test alert to %s for %s' % (test_alerter, metric_name))
-                        trigger_alert(test_alerter, 1, metric_name, 10, 1, 'testing')
+                        trigger_alert(test_alerter, 1, metric_name, 10, 1, 'testing', int(time()))
                     except:
                         logger.error('error :: test trigger_alert - %s' % traceback.format_exc())
                         logger.error('error :: failed to test trigger_alert :: %s' % metric_name)
@@ -1013,6 +1018,10 @@ class Boundary(Thread):
                     alert_threshold = int(anomalous_metric[6])
                     metric_alerters = anomalous_metric[7]
                     algorithm = anomalous_metric[8]
+                    # @added 20200122 - Feature #3396: http_alerter
+                    # Add the metric timestamp for the http_alerter resend queue
+                    metric_timestamp = anomalous_metric[9]
+
                     if ENABLE_BOUNDARY_DEBUG:
                         logger.info("debug :: anomalous_metric - " + str(anomalous_metric))
 
@@ -1193,25 +1202,28 @@ class Boundary(Thread):
                                             self.redis_conn.setex(cache_key, int(anomalous_metric[2]), packb(int(anomalous_metric[0])))
                                             if ENABLE_BOUNDARY_DEBUG:
                                                 logger.info('debug :: key setex OK - %s' % (cache_key))
-                                            trigger_alert(alerter, datapoint, base_name, expiration_time, metric_trigger, algorithm)
+                                            # @modified 20200122 - Feature #3396: http_alerter
+                                            # Add the metric timestamp for the http_alerter resend queue
+                                            # trigger_alert(alerter, datapoint, base_name, expiration_time, metric_trigger, algorithm)
+                                            trigger_alert(alerter, datapoint, base_name, expiration_time, metric_trigger, algorithm, metric_timestamp)
                                             logger.info('alert sent :: %s - %s - via %s - %s' % (base_name, datapoint, alerter, algorithm))
-                                            trigger_alert("syslog", datapoint, base_name, expiration_time, metric_trigger, algorithm)
+                                            trigger_alert("syslog", datapoint, base_name, expiration_time, metric_trigger, algorithm, metric_timestamp)
                                             logger.info('alert sent :: %s - %s - via syslog - %s' % (base_name, datapoint, algorithm))
                                             alerter_alert_sent = True
                                         except Exception as e:
                                             logger.error('error :: alert failed :: %s - %s - via %s - %s' % (base_name, datapoint, alerter, algorithm))
                                             logger.error('error :: could not send alert: %s' % str(e))
-                                            trigger_alert('syslog', datapoint, base_name, expiration_time, metric_trigger, algorithm)
+                                            trigger_alert('syslog', datapoint, base_name, expiration_time, metric_trigger, algorithm, metric_timestamp)
                                     else:
                                         if ENABLE_BOUNDARY_DEBUG:
                                             logger.info("debug :: cache_key exists not alerting via %s for %s is less than alerter_limit %s" % (alerter, cache_key))
-                                        trigger_alert("syslog", datapoint, base_name, expiration_time, metric_trigger, algorithm)
+                                        trigger_alert("syslog", datapoint, base_name, expiration_time, metric_trigger, algorithm, metric_timestamp)
                                         logger.info('alert sent :: %s - %s - via syslog - %s' % (base_name, datapoint, algorithm))
                                 except:
-                                    trigger_alert("syslog", datapoint, base_name, expiration_time, metric_trigger, algorithm)
+                                    trigger_alert("syslog", datapoint, base_name, expiration_time, metric_trigger, algorithm, metric_timestamp)
                                     logger.info('alert sent :: %s - %s - via syslog - %s' % (base_name, datapoint, algorithm))
                             else:
-                                trigger_alert("syslog", datapoint, base_name, expiration_time, metric_trigger, algorithm)
+                                trigger_alert("syslog", datapoint, base_name, expiration_time, metric_trigger, algorithm, metric_timestamp)
                                 logger.info('alert sent :: %s - %s - via syslog - %s' % (base_name, datapoint, algorithm))
 
                             # Update the alerts sent for the alerter cache key,
@@ -1227,7 +1239,7 @@ class Boundary(Thread):
                     else:
                         # Always alert to syslog, even if alert_threshold is not
                         # breached or if send_alert is not True
-                        trigger_alert("syslog", datapoint, base_name, expiration_time, metric_trigger, algorithm)
+                        trigger_alert("syslog", datapoint, base_name, expiration_time, metric_trigger, algorithm, metric_timestamp)
                         logger.info('alert sent :: %s - %s - via syslog - %s' % (base_name, datapoint, algorithm))
 
                     # @added 20171216 - Task #2236: Change Boundary to only send to Panorama on alert
@@ -1255,6 +1267,70 @@ class Boundary(Thread):
                     anomalous_metrics = boundary_anomalous_metrics
                     anomalous_metrics.sort(key=operator.itemgetter(1))
                     fh.write('handle_data(%s)' % anomalous_metrics)
+
+            # @added 20200121 - Feature #3396: http_alerter
+            full_resend_queue = []
+            resend_queue = []
+            try:
+                redis_set = 'boundary.http_alerter.queue'
+                try:
+                    resend_queue = list(self.redis_conn_decoded.smembers(redis_set))
+                    if resend_queue:
+                        logger.info('%s items in the %s Redis set' % (str(len(resend_queue)), redis_set))
+                    else:
+                        logger.info('0 items in the %s Redis set' % (redis_set))
+                except Exception as e:
+                    logger.error('error :: could not determine http_alerter item from Redis set %s - %s' % (redis_set, e))
+                    resend_queue = []
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to get %s.http_alerter.queue from Redis' % skyline_app)
+                resend_queue = []
+            if resend_queue:
+                try:
+                    http_alerters_down = []
+                    for index, resend_item in enumerate(full_resend_queue):
+                        resend_item_list = literal_eval(resend_item)
+                        # data = [alerter, datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp, str(metric_alert_dict)]
+                        alerter = str(resend_item_list[0])
+                        datapoint = float(resend_item_list[1])
+                        metric_name = str(resend_item_list[2])
+                        expiration_time = int(resend_item_list[3])
+                        metric_trigger = float(resend_item_list[4])
+                        algorithm = str(resend_item_list[5])
+                        metric_timestamp = int(resend_item_list[6])
+                        metric_alert_dict = literal_eval(resend_item_list[7])
+
+                        # To ensure that Boundary does not loop through every alert in the queue
+                        # for an alerter_endpoint, if the alerter_endpoint is down and wait for
+                        # the connect timeout on each one, if an alerter_endpoint fails a Redis
+                        # key is created to check against to see if the alerter_endpoint is down
+                        alerter_name = alerter
+                        alerter_endpoint_cache_key = 'http_alerter.down.%s' % str(alerter_name)
+                        if alerter_endpoint_cache_key in http_alerters_down:
+                            continue
+                        alerter_endpoint_failed = False
+                        try:
+                            alerter_endpoint_failed = self.redis_conn.get(alerter_endpoint_cache_key)
+                        except Exception as e:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: alert_http could not query Redis for cache_key %s: %s' % (str(alerter_endpoint_cache_key), e))
+                        if alerter_endpoint_failed:
+                            if alerter_endpoint_cache_key not in http_alerters_down:
+                                http_alerters_down.append(alerter_endpoint_cache_key)
+                                logger.info('%s Redis exists not alerting for any alerts for this endpoint' % str(alerter_endpoint_cache_key))
+                            continue
+                        logger.info('resend_queue item :: %s' % (str(resend_item_list)))
+                        try:
+                            trigger_alert(alerter, datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp)
+                            logger.info('trigger_alert :: %s resend %s' % (
+                                str(resend_item_list), str(metric_alert_dict)))
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: failed to trigger_alert for resend queue item')
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to parse resend_queue')
 
             run_time = time() - now
             total_metrics = str(len(boundary_metrics))

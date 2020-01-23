@@ -4,6 +4,10 @@ from time import time
 from os import getpid
 from timeit import default_timer as timer
 
+# @added 20200117 - Feature #3400: Identify air gaps in the metric data
+from collections import Counter
+from ast import literal_eval
+
 import pandas
 import numpy as np
 import scipy
@@ -26,6 +30,8 @@ from settings import (
     ENABLE_ALGORITHM_RUN_METRICS,
     ENABLE_ALL_ALGORITHMS_RUN_METRICS,
     REDIS_PASSWORD,
+    # @added 20200117 - Feature #3400: Identify air gaps in the metric data
+    FULL_NAMESPACE,
 )
 
 from algorithm_exceptions import TooShort, Stale, Boring
@@ -59,6 +65,15 @@ try:
 #    ALERT_ON_STALE_PERIOD = settings.ALERT_ON_STALE_PERIOD
 except:
     ALERT_ON_STALE_PERIOD = 300
+# @added 20200117 - Feature #3400: Identify air gaps in the metric data
+try:
+    from settings import IDENTIFY_AIRGAPS
+except:
+    IDENTIFY_AIRGAPS = False
+try:
+    from settings import MAX_AIRGAP_PERIOD
+except:
+    MAX_AIRGAP_PERIOD = int(3600 * 6)
 
 """
 This is no man's land. Do anything you want in here,
@@ -509,6 +524,163 @@ def determine_array_median(array):
     return False
 
 
+# @added 20200117 - Feature #3400: Identify air gaps in the metric data
+# The implementation of this feature bumped up analyzer.run_time from:
+# from ~2.5 to 3 seconds up to between 3.0 and 4.0 seconds on 608 metrics
+# from ~5.5 to 10 seconds up to between 7.5 and 11.5 seconds on 1441 metrics
+# from ~1.20 to 1.38 seconds up to between 1.42 and 1.5 seocnds on 191 metrics
+def identify_airgaps(metric_name, timeseries, airgapped_metrics):
+    """
+    Identify air gaps in metrics and populate the analyzer.airgapped_metrics
+    Redis set with the air gaps if the specific air gap it is not present in the
+    set. If there is a start_airgap timestamp and no end_airgap is set then the
+    metric will be in a current air gap state and/or it will become stale.  If
+    the netric starts sending data again, it will have the end_airgap set and be
+    added to the analyzer.airgapped_metrics Redis set.
+
+    :param metric_name: the FULL_NAMESPACE metric name
+    :type metric_name: str
+    :param timeseries: the metric time series
+    :type timeseries: list
+    :param airgapped_metrics: the air gapped metrics list generated from the
+        analyzer.airgapped_metrics Redis set
+    :type airgapped_metrics: list
+    :return: list of air gapped metrics
+    :rtype: list
+
+    """
+
+    if len(timeseries) < 30:
+        return None
+
+    airgaps = None
+    # To ensure that nothing in this function affects existing analysis, them
+    # entire block is wrapped in try except pass so that analyzer is affected
+    # as little as possible should something here fail.
+    try:
+        current_timestamp = int(time())
+        max_airgap_timestamp = current_timestamp - MAX_AIRGAP_PERIOD
+        # Determine resolution from the data within the MAX_AIRGAP_PERIOD
+        resolution_timestamps = []
+        metric_resolution_determined = False
+        for metric_datapoint in timeseries:
+            timestamp = int(metric_datapoint[0])
+            if timestamp < max_airgap_timestamp:
+                continue
+            resolution_timestamps.append(timestamp)
+        timestamp_resolutions = []
+        if resolution_timestamps:
+            last_timestamp = None
+            for timestamp in resolution_timestamps:
+                if last_timestamp:
+                    resolution = timestamp - last_timestamp
+                    timestamp_resolutions.append(resolution)
+                    last_timestamp = timestamp
+                else:
+                    last_timestamp = timestamp
+        if resolution_timestamps:
+            del resolution_timestamps
+        timestamp_resolutions_count = None
+        ordered_timestamp_resolutions_count = None
+        metric_resolution = None
+        if timestamp_resolutions:
+            try:
+                timestamp_resolutions_count = Counter(timestamp_resolutions)
+                ordered_timestamp_resolutions_count = timestamp_resolutions_count.most_common()
+                metric_resolution = int(ordered_timestamp_resolutions_count[0][0])
+                if metric_resolution > 0:
+                    metric_resolution_determined = True
+            except:
+                traceback_format_exc_string = traceback.format_exc()
+                algorithm_name = str(get_function_name())
+                record_algorithm_error(algorithm_name, traceback_format_exc_string)
+                del timestamp_resolutions
+                return None
+        if timestamp_resolutions:
+            del timestamp_resolutions
+        airgaps_present = False
+        if metric_resolution_determined and metric_resolution:
+            if metric_resolution < 600:
+                airgap_duration = ((int(metric_resolution) * 2) + int(int(metric_resolution) / 2))
+            else:
+                airgap_duration = ((int(metric_resolution) * 2) + 60)
+            for i in ordered_timestamp_resolutions_count:
+                resolution = i[0]
+                if resolution == metric_resolution:
+                    continue
+                if resolution > airgap_duration:
+                    airgaps_present = True
+        if timestamp_resolutions_count:
+            del timestamp_resolutions_count
+        if ordered_timestamp_resolutions_count:
+            del ordered_timestamp_resolutions_count
+
+        if airgaps_present:
+            base_name = metric_name.replace(FULL_NAMESPACE, '', 1)
+            # logger.info('airgaps present in %s - %s' % (base_name, str(ordered_timestamp_resolutions_count)))
+            airgaps = []
+            last_timestamp = None
+            start_airgap = None
+            for metric_datapoint in timeseries:
+                timestamp = int(metric_datapoint[0])
+                # Handle the first timestamp
+                if not last_timestamp:
+                    last_timestamp = timestamp
+                    continue
+                # Discard any period less than MAX_AIRGAP_PERIOD
+                if timestamp < max_airgap_timestamp:
+                    last_timestamp = timestamp
+                    continue
+                original_last_timestamp = last_timestamp
+                difference = timestamp - last_timestamp
+                last_timestamp = timestamp
+                if difference < airgap_duration:
+                    if start_airgap:
+                        end_airgap = original_last_timestamp - 1
+                        airgap_known = False
+                        if airgapped_metrics:
+                            for i in airgapped_metrics:
+                                airgap = literal_eval(i)
+                                airgap_metric = str(airgap[0])
+                                if base_name != airgap_metric:
+                                    continue
+                                airgap_metric_resolution = int(airgap[1])
+                                if metric_resolution != airgap_metric_resolution:
+                                    continue
+                                start_timestamp_present = False
+                                airgap_metric_start_timestamp = int(airgap[2])
+                                if start_airgap == airgap_metric_start_timestamp:
+                                    start_timestamp_present = True
+                                end_timestamp_present = False
+                                airgap_metric_end_timestamp = int(airgap[3])
+                                if end_airgap == airgap_metric_end_timestamp:
+                                    end_timestamp_present = True
+                                if start_timestamp_present and end_timestamp_present:
+                                    airgap_known = True
+                                    start_airgap = None
+                                    end_airgap = None
+                                    break
+                        if not airgap_known:
+                            airgaps.append([base_name, metric_resolution, start_airgap, end_airgap, 0])
+                            start_airgap = None
+                            end_airgap = None
+                        continue
+                if difference > airgap_duration:
+                    if not start_airgap:
+                        # If there is a start_airgap timestamp and no end_airgap
+                        # is set then the metric will be in a current air gap
+                        # state and/or it will become stale.  If the netric
+                        # starts sending data again, it will have the end_airgap
+                        # set and be added to airgapped_metrics
+                        start_airgap = original_last_timestamp + 1
+    except:
+        traceback_format_exc_string = traceback.format_exc()
+        algorithm_name = str(get_function_name())
+        record_algorithm_error(algorithm_name, traceback_format_exc_string)
+        return None
+    return airgaps
+
+
 def is_anomalously_anomalous(metric_name, ensemble, datapoint):
     """
     This method runs a meta-analysis on the metric to determine whether the
@@ -549,7 +721,10 @@ def is_anomalously_anomalous(metric_name, ensemble, datapoint):
     return abs(intervals[-1] - mean) > 3 * stdDev
 
 
-def run_selected_algorithm(timeseries, metric_name):
+# @modified 20200117 - Feature #3400: Identify air gaps in the metric data
+# Added the airgapped_metrics list
+# def run_selected_algorithm(timeseries, metric_name):
+def run_selected_algorithm(timeseries, metric_name, airgapped_metrics):
     """
     Filter timeseries and run selected algorithm.
     """
@@ -606,6 +781,25 @@ def run_selected_algorithm(timeseries, metric_name):
     # Get rid of boring series
     if len(set(item[1] for item in timeseries[-MAX_TOLERABLE_BOREDOM:])) == BOREDOM_SET_SIZE:
         raise Boring()
+
+    # @added 20200117 - Feature #3400: Identify air gaps in the metric data
+    if IDENTIFY_AIRGAPS:
+        airgaps = identify_airgaps(metric_name, timeseries, airgapped_metrics)
+        if airgaps:
+            try:
+                redis_conn.ping()
+            except:
+                from redis import StrictRedis
+                if REDIS_PASSWORD:
+                    redis_conn = StrictRedis(password=REDIS_PASSWORD, unix_socket_path=REDIS_SOCKET_PATH)
+                else:
+                    redis_conn = StrictRedis(unix_socket_path=REDIS_SOCKET_PATH)
+            for i in airgaps:
+                try:
+                    redis_conn.sadd('analyzer.airgapped_metrics', str(i))
+                    # TODO: learn_airgapped_metrics
+                except:
+                    pass
 
     # RUN_OPTIMIZED_WORKFLOW - replaces the original ensemble method:
     # ensemble = [globals()[algorithm](timeseries) for algorithm in ALGORITHMS]

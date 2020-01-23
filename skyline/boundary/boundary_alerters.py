@@ -3,6 +3,11 @@ import logging
 import traceback
 import hashlib
 from smtplib import SMTP
+
+# @added 20200122: Feature #3396: http_alerter
+from ast import literal_eval
+import requests
+
 import boundary_alerters
 # try:
 #     import urllib2
@@ -45,21 +50,24 @@ if python_version == 3:
 
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 sys.path.insert(0, os.path.dirname(__file__))
-import settings
-# @added 20181126 - Task #2742: Update Boundary
-#                   Feature #2034: analyse_derivatives
-#                   Feature #2618: alert_slack
-from skyline_functions import (
-    write_data_to_file, in_list,
-    is_derivative_metric, get_graphite_graph_image,
-    # @added 20191030 - Bug #3266: py3 Redis binary objects not strings
-    #                   Branch #3262: py3
-    # Added a single functions to deal with Redis connection and the
-    # charset='utf-8', decode_responses=True arguments required in py3
-    get_redis_conn_decoded,
-    # @modified 20191105 - Branch #3002: docker
-    #                      Branch #3262: py3
-    get_graphite_port, get_graphite_render_uri, get_graphite_custom_headers)
+if True:
+    import settings
+    # @added 20181126 - Task #2742: Update Boundary
+    #                   Feature #2034: analyse_derivatives
+    #                   Feature #2618: alert_slack
+    from skyline_functions import (
+        write_data_to_file, in_list,
+        is_derivative_metric, get_graphite_graph_image,
+        # @added 20191030 - Bug #3266: py3 Redis binary objects not strings
+        #                   Branch #3262: py3
+        # Added a single functions to deal with Redis connection and the
+        # charset='utf-8', decode_responses=True arguments required in py3
+        get_redis_conn_decoded,
+        # @modified 20191105 - Branch #3002: docker
+        #                      Branch #3262: py3
+        get_graphite_port, get_graphite_render_uri, get_graphite_custom_headers,
+        # @added 20200122: Feature #3396: http_alerter
+        get_redis_conn)
 
 skyline_app = 'boundary'
 skyline_app_logger = '%sLog' % skyline_app
@@ -68,8 +76,8 @@ skyline_app_logfile = '%s/%s.log' % (settings.LOG_PATH, skyline_app)
 
 """
 Create any alerter you want here. The function is invoked from trigger_alert.
-4 arguments will be passed in as strings:
-datapoint, metric_name, expiration_time, algorithm
+7 arguments will be passed in as strings:
+alerter, datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp
 """
 
 # FULL_DURATION to hours so that Boundary surfaces the relevant timeseries data
@@ -90,8 +98,14 @@ try:
 except:
     graphite_graph_line_color = 'pink'
 
+# @added 20200122 - Branch #3002: docker
+try:
+    DOCKER_FAKE_EMAIL_ALERTS = settings.DOCKER_FAKE_EMAIL_ALERTS
+except:
+    DOCKER_FAKE_EMAIL_ALERTS = False
 
-def alert_smtp(datapoint, metric_name, expiration_time, metric_trigger, algorithm):
+
+def alert_smtp(datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp):
 
     sender = settings.BOUNDARY_SMTP_OPTS['sender']
 
@@ -285,13 +299,45 @@ def alert_smtp(datapoint, metric_name, expiration_time, metric_trigger, algorith
     # body = '%s :: %s <br> Next alert in: %s seconds <br> skyline Boundary alert - %s <br><a href="%s">%s</a>' % (
     #     datapoint, metric_name, expiration_time, alert_context, link, img_tag)
     body = '%s :: %s <br> Next alert in: %s seconds <br> %s %s alert - %s <br><a href="%s">%s</a>' % (
-        main_alert_title, app_alert_context, datapoint, metric_name, expiration_time, alert_context, link, img_tag)
+        main_alert_title, app_alert_context, expiration_time, datapoint, metric_name, alert_context, link, img_tag)
+
+    # @added 20200122 - Branch #3002: docker
+    # Do not try to alert if the settings are default
+    send_email_alert = True
+    if 'your_domain.com' in str(sender):
+        logger.info('alert_smtp - sender is not configured, not sending alert')
+        send_email_alert = False
+    if 'your_domain.com' in str(primary_recipient):
+        logger.info('alert_smtp - sender is not configured, not sending alert')
+        send_email_alert = False
+    if 'example.com' in str(sender):
+        logger.info('alert_smtp - sender is not configured, not sending alert')
+        send_email_alert = False
+    if 'example.com' in str(primary_recipient):
+        logger.info('alert_smtp - sender is not configured, not sending alert')
+        send_email_alert = False
+    if DOCKER_FAKE_EMAIL_ALERTS:
+        logger.info('alert_smtp - DOCKER_FAKE_EMAIL_ALERTS is set to %s, not executing SMTP command' % str(DOCKER_FAKE_EMAIL_ALERTS))
+        send_email_alert = False
+
+    # @added 20200122 - Feature #3406: Allow for no_email SMTP_OPTS
+    no_email = False
+    if str(sender) == 'no_email':
+        send_email_alert = False
+        no_email = True
+    if str(primary_recipient) == 'no_email':
+        send_email_alert = False
+        no_email = True
+    if no_email:
+        logger.info('alert_smtp - no_email is set in BOUNDARY_SMTP_OPTS, not executing SMTP command')
 
     # @modified 20180524 - Task #2384: Change alerters to cc other recipients
     # Do not send to each recipient, send to primary_recipient and cc the other
     # recipients, thereby sending only one email
     # for recipient in recipients:
-    if primary_recipient:
+    # @modified 20200122 - Feature #3406: Allow for no_email SMTP_OPTS
+    # if primary_recipient:
+    if primary_recipient and send_email_alert:
         logger.info(
             'alert_smtp - will send to primary_recipient :: %s, cc_recipients :: %s' %
             (str(primary_recipient), str(cc_recipients)))
@@ -338,7 +384,7 @@ def alert_smtp(datapoint, metric_name, expiration_time, metric_trigger, algorith
         s.quit()
 
 
-def alert_pagerduty(datapoint, metric_name, expiration_time, metric_trigger, algorithm):
+def alert_pagerduty(datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp):
     if settings.PAGERDUTY_ENABLED:
         import pygerduty
         pager = pygerduty.PagerDuty(settings.BOUNDARY_PAGERDUTY_OPTS['subdomain'], settings.BOUNDARY_PAGERDUTY_OPTS['auth_token'])
@@ -347,7 +393,7 @@ def alert_pagerduty(datapoint, metric_name, expiration_time, metric_trigger, alg
         return False
 
 
-def alert_hipchat(datapoint, metric_name, expiration_time, metric_trigger, algorithm):
+def alert_hipchat(datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp):
 
     if settings.HIPCHAT_ENABLED:
         sender = settings.BOUNDARY_HIPCHAT_OPTS['sender']
@@ -430,7 +476,7 @@ def alert_hipchat(datapoint, metric_name, expiration_time, metric_trigger, algor
         return False
 
 
-def alert_syslog(datapoint, metric_name, expiration_time, metric_trigger, algorithm):
+def alert_syslog(datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp):
     if settings.SYSLOG_ENABLED:
         import sys
         import syslog
@@ -451,7 +497,7 @@ def alert_syslog(datapoint, metric_name, expiration_time, metric_trigger, algori
 
 # @added 20181126 - Task #2742: Update Boundary
 #                   Feature #2618: alert_slack
-def alert_slack(datapoint, metric_name, expiration_time, metric_trigger, algorithm):
+def alert_slack(datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp):
 
     if not settings.SLACK_ENABLED:
         return False
@@ -768,15 +814,209 @@ def alert_slack(datapoint, metric_name, expiration_time, metric_trigger, algorit
             return False
 
 
-def trigger_alert(alerter, datapoint, metric_name, expiration_time, metric_trigger, algorithm):
+# @added 20200122: Feature #3396: http_alerter
+def alert_http(alerter, datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp):
+    """
+    Called by :func:`~trigger_alert` and sends and resend anomalies to a http
+    endpoint.
+
+    """
+    if settings.HTTP_ALERTERS_ENABLED:
+        alerter_name = alerter
+        alerter_enabled = False
+        try:
+            alerter_enabled = settings.HTTP_ALERTERS_OPTS[alerter_name]['enabled']
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: alert_http failed to determine the enabled from settings.HTTP_ALERTERS_OPTS for alerter - %s and metric %s with algorithm %s' % (
+                str(alerter), str(metric_name), algorithm))
+        if not alerter_enabled:
+            logger.info('alert_http - %s enabled %s, not alerting' % (
+                str(alerter_name), str(alerter_enabled)))
+            return
+        alerter_endpoint = False
+        try:
+            alerter_endpoint = settings.HTTP_ALERTERS_OPTS[alerter_name]['endpoint']
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: alert_http failed to determine the endpoint from settings.HTTP_ALERTERS_OPTS for alert - %s and metric %s with algorithm %s' % (
+                str(alerter), str(metric_name), algorithm))
+        if not alerter_endpoint:
+            logger.error('alert_http - no endpoint set for %s, not alerting' % (
+                str(alerter_name)))
+            return
+
+        alerter_token = None
+        try:
+            alerter_token = settings.HTTP_ALERTERS_OPTS[alerter_name]['token']
+        except:
+            pass
+
+        source = 'boundary'
+        metric_alert_dict = {}
+        alert_data_dict = {}
+        try:
+            timestamp_str = str(metric_timestamp)
+            value_str = str(datapoint)
+            full_duration_str = str(int(full_duration_seconds))
+            expiry_str = str(expiration_time)
+            metric_alert_dict = {
+                "metric": metric_name,
+                "algorithm": algorithm,
+                "timestamp": timestamp_str,
+                "value": value_str,
+                "full_duration": full_duration_str,
+                "expiry": expiry_str,
+                "source": str(source),
+                "token": str(alerter_token)
+            }
+            alert_data_dict = {"status": {}, "data": {"alert": metric_alert_dict}}
+            logger.info('alert_http :: alert_data_dict to send - %s' % str(alert_data_dict))
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: alert_http failed to construct the alert data for %s from alert - %s and metric - %s' % (
+                str(alerter_name), str(algorithm), str(metric_name)))
+            return
+
+        in_resend_queue = False
+        redis_set = '%s.http_alerter.queue' % str(source)
+        resend_queue = None
+        previous_attempts = 0
+        try:
+            redis_conn_decoded
+        except:
+            redis_conn_decoded = get_redis_conn_decoded(skyline_app)
+        try:
+            resend_queue = redis_conn_decoded.smembers(redis_set)
+        except Exception as e:
+            logger.error('error :: alert_http :: could not query Redis for %s - %s' % (redis_set, e))
+        if resend_queue:
+            try:
+                for index, resend_item in enumerate(resend_queue):
+                    resend_item_list = literal_eval(resend_item)
+                    # resend_alert = literal_eval(resend_item_list[0])
+                    # resend_metric = literal_eval(resend_item_list[1])
+                    resend_metric_alert_dict = literal_eval(resend_item_list[2])
+                    if resend_metric_alert_dict['metric'] == metric_name:
+                        if int(resend_metric_alert_dict['timestamp']) == int(metric_timestamp):
+                            previous_attempts = int(resend_metric_alert_dict['attempts'])
+                            in_resend_queue = True
+                            break
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: alert_http failed iterate to resend_queue')
+        redis_conn = None
+        if in_resend_queue:
+            redis_conn = get_redis_conn(skyline_app)
+
+        add_to_resend_queue = False
+        fail_alerter = False
+        if alert_data_dict and alerter_endpoint:
+            connect_timeout = 2
+            read_timeout = 2
+            if requests.__version__ >= '2.4.0':
+                use_timeout = (int(connect_timeout), int(read_timeout))
+            else:
+                use_timeout = int(connect_timeout)
+            if settings.ENABLE_DEBUG:
+                logger.debug('debug :: use_timeout - %s' % (str(use_timeout)))
+            try:
+                response = requests.post(alerter_endpoint, json=alert_data_dict, timeout=use_timeout)
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to post alert to %s - %s' % (
+                    str(alerter_name), str(alert_data_dict)))
+                add_to_resend_queue = True
+
+            if in_resend_queue:
+                try:
+                    redis_conn.srem(redis_set, str(resend_item))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: alert_http :: failed remove %s from Redis set %s' % (
+                        str(resend_item), redis_set))
+
+            if response.status_code == 200:
+                logger.info('alert_http :: alert sent to %s - %s' % (
+                    str(alerter_endpoint), str(alert_data_dict)))
+                if in_resend_queue:
+                    logger.info('alert_http :: alert removed from %s after %s attempts to send' % (
+                        str(redis_set), str(previous_attempts)))
+                return
+            else:
+                logger.error('error :: alert_http :: %s %s responded with status code %s and reason %s' % (
+                    str(alerter_name), str(alerter_endpoint),
+                    str(response.status_code), str(response.reason)))
+                add_to_resend_queue = True
+                fail_alerter = True
+
+            number_of_send_attempts = previous_attempts + 1
+            metric_alert_dict['attempts'] = number_of_send_attempts
+            if add_to_resend_queue:
+                data = [alerter, datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp, str(metric_alert_dict)]
+                logger.info('alert_http :: adding alert to %s after %s attempts to send - %s' % (
+                    str(redis_set), str(number_of_send_attempts), str(metric_alert_dict)))
+                try:
+                    redis_conn
+                except:
+                    try:
+                        redis_conn = get_redis_conn(skyline_app)
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: alert_http :: failed to get_redis_conn')
+                try:
+                    # redis_conn.sadd(redis_set, str(metric_alert_dict))
+                    redis_conn.sadd(redis_set, str(data))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: alert_http :: failed to add %s from Redis set %s' % (
+                        str(metric_alert_dict), redis_set))
+
+            # Create a Redis if there was a bad or no response from the
+            # alerter_endpoint, to ensure that Boundary does not loop through
+            # every alert in the queue for an alerter_endpoint, if the
+            # alerter_endpoint is down
+            if fail_alerter:
+                alerter_endpoint_cache_key = 'http_alerter.down.%s' % str(alerter_name)
+                logger.error('error :: alert_http :: alerter_endpoint %s failed adding Redis key %s' % (
+                    str(alerter_endpoint), str(alerter_endpoint_cache_key)))
+                try:
+                    redis_conn
+                except:
+                    try:
+                        redis_conn = get_redis_conn(skyline_app)
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: alert_http :: failed to get_redis_conn to add key %s' % str(alerter_endpoint_cache_key))
+                        redis_conn = None
+                if redis_conn:
+                    try:
+                        failed_timestamp = int(time())
+                        redis_conn.setex(alerter_endpoint_cache_key, 60, failed_timestamp)
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to set Redis key %s' % alerter_endpoint_cache_key)
+    else:
+        logger.info('alert_http :: settings.HTTP_ALERTERS_ENABLED not enabled nothing to do')
+        return
+
+
+def trigger_alert(alerter, datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp):
 
     if alerter == 'smtp':
         strategy = 'alert_smtp'
+    # @added 20200122: Feature #3396: http_alerter
+    # Added http_alerter
+    elif 'http_alerter' in alerter:
+        strategy = 'alert_http'
     else:
         strategy = 'alert_%s' % alerter
 
     try:
-        getattr(boundary_alerters, strategy)(datapoint, metric_name, expiration_time, metric_trigger, algorithm)
+        if strategy == 'alert_http':
+            getattr(boundary_alerters, strategy)(alerter, datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp)
+        else:
+            getattr(boundary_alerters, strategy)(datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp)
     except:
-        logger.info(traceback.format_exc())
+        logger.error(traceback.format_exc())
         logger.error('error :: alerters - %s - getattr error' % strategy)
