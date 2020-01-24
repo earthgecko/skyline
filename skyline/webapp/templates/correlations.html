@@ -16,7 +16,7 @@
 {% endif %}
 
   {% if correlations != False %}
-	  <h4><span class="logo"><span class="sky">Existing ::</span> <span class="re">cross correlations ::</span></span></span> {{ correlations|length }} (listed strongest 1.0000 to weakest 0.0)</h4>
+	  <h4><span class="logo"><span class="sky">Existing ::</span> <span class="re">cross correlations ::</span></span> {{ correlations|length }} (listed strongest 1.0000 to weakest 0.0)</h4>
 <!-- # @added 20180723 - Feature #2470: Correlations Graphite graph links
 #                        Branch #2270: luminosity
 # Added Graphite graph links to Correlations block
@@ -54,7 +54,7 @@
 		    </tbody>
 		  </table>
   {% else %}
-	  <h4><span class="logo"><span class="sky">Existing ::</span> <span class="re">correlations ::</span></span></span> None</h4>
+	  <h4><span class="logo"><span class="sky">Existing ::</span> <span class="re">correlations ::</span></span> None</h4>
   {% endif %}
 
 <!-- # @added 20200113 - Feature #3390: luminosity related anomalies
@@ -62,7 +62,7 @@
 # Added Graphite graph links to Related block
 -->
   {% if related != False %}
-	  <h4><span class="logo"><span class="sky">Existing ::</span> <span class="re">related anomalies ::</span></span></span> {{ related|length }}</h4>
+	  <h4><span class="logo"><span class="sky">Existing ::</span> <span class="re">related anomalies ::</span></span> {{ related|length }}</h4>
 	  <div class="alert alert-warning">
       These are the time related anomalies from the entire metric population that fall within 2 minutes either side of the anomaly,
       they are not necessarily all <strong>related</strong>, but anomalies that occurred in the same time frame
@@ -92,11 +92,11 @@
 		    </tbody>
 		  </table>
   {% else %}
-	  <h4><span class="logo"><span class="sky">Existing ::</span> <span class="re">related anomalies ::</span></span></span> None</h4>
+	  <h4><span class="logo"><span class="sky">Existing ::</span> <span class="re">related anomalies ::</span></span> None</h4>
   {% endif %}
 
   {% if related_matches != False %}
-	  <h4><span class="logo"><span class="sky">Existing ::</span> <span class="re">possible related matches ::</span></span></span> {{ related_matches|length }}</h4>
+	  <h4><span class="logo"><span class="sky">Existing ::</span> <span class="re">possible related matches ::</span></span> {{ related_matches|length }}</h4>
 	  <div class="alert alert-warning">
       These are the time related matches from the Ionosphere metric population that fall within 2 minutes either side of the anomaly,
       they are not necessarily all <strong>related</strong>, but the matches occurred in the same time frame
@@ -179,10 +179,9 @@
     {% endfor %}
 				</tbody>
 			</table>
-		</div>
 
   {% else %}
-	  <h4><span class="logo"><span class="sky">Existing ::</span> <span class="re">possible related matches ::</span></span></span> None</h4>
+	  <h4><span class="logo"><span class="sky">Existing ::</span> <span class="re">possible related matches ::</span></span> None</h4>
   {% endif %}
 
 
