@@ -8,8 +8,8 @@
     <span class="icon-bar"></span>
   </button>
 		<ul class="nav nav-tabs" role="view_tablist" id="view">
-		  <li><a href="/ionosphere"><span class="logo"><span class="sky">Training</span> <span class="re">data</span></span></span></a></li>
-		  <li class="active"><a href="?fp_view=true"><span class="logo"><span class="sky">Features</span> <span class="re">profiles</span></span></span></a></li>
+		  <li><a href="/ionosphere"><span class="logo"><span class="sky">Training</span> <span class="re">data</span></span></a></li>
+		  <li class="active"><a href="?fp_view=true"><span class="logo"><span class="sky">Features</span> <span class="re">profiles</span></span></a></li>
 		</ul>
 		<div class="tab-content">
 	  	<div class="tab-pane active" id="view">
@@ -112,7 +112,7 @@
 <code> DEBUG </code> :: /ionosphere list_by 'metric' and 'timestamp_td_dirs' block</br>
     {% endif %}
   	  <div class="tab-pane active" id="by_metric">
-        <h4><span class="logo"><span class="sky">Metrics ::</span> <span class="re">features profiles :: </span></span></span> {{ td_files|length }} data sets</h4>
+        <h4><span class="logo"><span class="sky">Metrics ::</span> <span class="re">features profiles :: </span></span> {{ td_files|length }} data sets</h4>
   			<table class="table table-hover">
   				<thead>
   					<tr>
@@ -140,7 +140,7 @@
 <code> DEBUG </code> :: /ionosphere list_by 'date' and 'metric_td_dirs' block</br>
     {% endif %}
       <div class="tab-pane active" id="by_date">
-        <h4><span class="logo"><span class="sky">Timestamps ::</span> <span class="re">features profiles :: </span></span></span> {{ td_files|length }} data sets</h4>
+        <h4><span class="logo"><span class="sky">Timestamps ::</span> <span class="re">features profiles :: </span></span> {{ td_files|length }} data sets</h4>
 		    <table class="table table-hover">
   			<thead>
   				<tr>
@@ -195,7 +195,7 @@
   <code> unique_ts</code>:: {{ unique_ts }}</br>
         {% endfor %}
       {% endif %}
-    <h4><span class="logo"><span class="sky">Features ::</span> <span class="re">profiles :: </span></span></span>{{ for_metric }} :: {{ td_files|length }} data sets</h4>
+    <h4><span class="logo"><span class="sky">Features ::</span> <span class="re">profiles :: </span></span>{{ for_metric }} :: {{ td_files|length }} data sets</h4>
 If you arrived here via an initial List by date route, your selected date is the <code>highlighted</code> entry
 below.<br>
 Please note: be advised that tracking the timestamp and metric through Flask
@@ -264,10 +264,10 @@ Also note:
 
 		<div class="col-md-10">
   {% if data_ok == False %}
-  <h3><span class="logo"><span class="sky">Holy ::</span> <span class="re">shit</span></span></span></h3>
-  <h4><span class="logo"><span class="sky">Skyline ::</span> <span class="re">error</span></span></span></h4>
+  <h3><span class="logo"><span class="sky">Holy ::</span> <span class="re">shit</span></span></h3>
+  <h4><span class="logo"><span class="sky">Skyline ::</span> <span class="re">error</span></span></h4>
 
-  <b><span class="logo"><span class="sky">Skyline ::</span> <span class="re">error message</span></span></span></b>
+  <b><span class="logo"><span class="sky">Skyline ::</span> <span class="re">error message</span></span></b>
 The timeseries data for this anomaly was not loaded, either an error occurred or
 the data is gone or corrupt.  Please try reload the page <strong>quicker</strong>
 next time.<br>
@@ -300,19 +300,19 @@ you need to try and be quicker next time.
   {% endif %}
 
   {% if parent_id == 0 %}
-      <h3><span class="logo"><span class="sky">Trained ::</span> <span class="re">NOT anomalous ::</span></span></span> features profile id {{ features_profile_id }}</h3>
+      <h3><span class="logo"><span class="sky">Trained ::</span> <span class="re">NOT anomalous ::</span></span> features profile id {{ features_profile_id }}</h3>
       <br>
-      <center><h4><span class="logo"><span class="sky">This is a human operator generated features profile that was considered to be <span class="re">not anomalous</span></span></span></span></h4></center>
+      <center><h4><span class="logo"><span class="sky">This is a human operator generated features profile that was considered to be <span class="re">not anomalous</span></span></span></h4></center>
   {% else %}
-      <h3><span class="logo"><span class="sky">Learnt ::</span> <span class="re">NOT anomalous ::</span></span></span> features profile id {{ features_profile_id }}</h3>
+      <h3><span class="logo"><span class="sky">Learnt ::</span> <span class="re">NOT anomalous ::</span></span> features profile id {{ features_profile_id }}</h3>
       <br>
 <!-- # @added 20190328 - Feature #2484: FULL_DURATION feature profiles
      # Added ionosphere_echo -->
     {% if echo_fp == 1 %}
-      <center><h4><span class="logo"><span class="sky">This is an <span class="re">ionosphere_echo </span>automatically generated features profile at <span class="re">FULL_DURATION</span> based on the validated </span></span></span>
+      <center><h4><span class="logo"><span class="sky">This is an <span class="re">ionosphere_echo </span>automatically generated features profile at <span class="re">FULL_DURATION</span> based on the validated </span></span>
       <a href="?fp_view=true&fp_id={{ parent_id }}&metric={{ for_metric }}" target="_blank"><b> Mirage parent features profile id {{ parent_id }}</b></a></h4></center>
     {% else %}
-      <center><h4><span class="logo"><span class="sky">This is an ionosphere_learn <span class="re">automatically learnt and generated</span> features profile based on </span></span></span>
+      <center><h4><span class="logo"><span class="sky">This is an ionosphere_learn <span class="re">automatically learnt and generated</span> features profile based on </span></span>
       <a href="?fp_view=true&fp_id={{ parent_id }}&metric={{ for_metric }}" target="_blank"><b>parent features profile id {{ parent_id }}</b></a></h4></center>
     {% endif %}
   {% endif %}
@@ -320,10 +320,10 @@ you need to try and be quicker next time.
 
 <!-- # @added 20170917 - Feature #1996: Ionosphere - matches page -->
   {% if matched_fp_id %}
-      <center><h4><span class="logo"><span class="sky">Evaluating MATCH ::</span> <span class="re">features profile ::</span> ionosphere_matched id - {{ matched_fp_id }}</span></span></span></h4></center>
+      <center><h4><span class="logo"><span class="sky">Evaluating MATCH ::</span> <span class="re">features profile ::</span> ionosphere_matched id - {{ matched_fp_id }}</span></h4></center>
 <!-- # @added 20180620 - Feature #2404: Ionosphere - fluid approximation -->
     {% if minmax == 1 %}
-    <center><h4><span class="logo"><span class="sky"></span> <span class="re">This is a Min-Max scaled match</span></span></span></h4></center>
+    <center><h4><span class="logo"><span class="sky"></span> <span class="re">This is a Min-Max scaled match</span></span></h4></center>
     {% endif %}
 <!-- # @added 20190328 - Feature #2484: FULL_DURATION feature profiles
      # Added ionosphere_echo -->
@@ -334,31 +334,31 @@ you need to try and be quicker next time.
   {% endif %}
 
   {% if matched_layer_id %}
-      <center><h4><span class="logo"><span class="sky">Evaluating MATCH ::</span> <span class="re">layers ::</span> ionosphere_layers_matched id - {{ matched_layer_id }}</span></span></span></h4></center>
+      <center><h4><span class="logo"><span class="sky">Evaluating MATCH ::</span> <span class="re">layers ::</span> ionosphere_layers_matched id - {{ matched_layer_id }}</span></h4></center>
 <!-- # @added 20180921 - Feature #2558: Ionosphere - fluid approximation - approximately_close on layers -->
     {% if approx_close == 1 %}
-      <center><h4><span class="logo"><span class="sky"></span> <span class="re">This is an approximately_close match</span></span></span></h4></center>
+      <center><h4><span class="logo"><span class="sky"></span> <span class="re">This is an approximately_close match</span></span></h4></center>
     {% endif %}
       <br>
   {% endif %}
 
   {% if matched_fp_id or matched_layer_id %}
     {% if match_validated_db_value == 0 %}
-      <center><h4><span class="logo"><span class="sky">Match :: </span> <span class="re">not validated yet</span></span></span></h4></center>
+      <center><h4><span class="logo"><span class="sky">Match :: </span> <span class="re">not validated yet</span></span></h4></center>
     {% elif match_validated_db_value == 1 %}
-      <center><h4><span class="logo"><span class="sky">Match :: </span> <span class="re">VALID</span></span></span></h4></center>
+      <center><h4><span class="logo"><span class="sky">Match :: </span> <span class="re">VALID</span></span></h4></center>
     {% else %}
-      <center><h4><span class="logo"><span class="sky">Match :: </span> <span class="re">INVALID</span></span></span></h4></center>
+      <center><h4><span class="logo"><span class="sky">Match :: </span> <span class="re">INVALID</span></span></h4></center>
     {% endif %}
   {% endif %}
 
-  	  <h4><span class="logo"><span class="sky">Calculated ::</span> <span class="re">features ::</span></span></span> features profile id {{ features_profile_id }}</h4>
+  	  <h4><span class="logo"><span class="sky">Calculated ::</span> <span class="re">features ::</span></span> features profile id {{ features_profile_id }}</h4>
   {% if extracted_features %}
   		<pre>{{ extracted_features }}</pre>
   {% else %}
   		<pre>No extracted_features were passed, which is not ideal</pre>
   {% endif %}
-  	  <h4><span class="logo"><span class="sky">Features ::</span> <span class="re">details ::</span></span></span> features profile id {{ features_profile_id }}</h4>
+  	  <h4><span class="logo"><span class="sky">Features ::</span> <span class="re">details ::</span></span> features profile id {{ features_profile_id }}</h4>
   {% if features_profile_details %}
   		<pre>{{ features_profile_details }}</pre>
   {% else %}
@@ -366,7 +366,7 @@ you need to try and be quicker next time.
   {% endif %}
 
 <!-- # @added 20190922 - Feature #2516: Add label to features profile -->
-  	  <h4><span class="logo"><span class="sky">Features ::</span> <span class="re">label ::</span></span></span> features profile id {{ features_profile_id }}</h4>
+  	  <h4><span class="logo"><span class="sky">Features ::</span> <span class="re">label ::</span></span> features profile id {{ features_profile_id }}</h4>
   {% if fp_label %}
   		<pre>{{ fp_label }}</pre>
   {% else %}
@@ -375,7 +375,7 @@ you need to try and be quicker next time.
 
 <!-- # @added 20170402 - Feature #2000: Ionosphere - validated -->
   {% if validated %}
-  	  <h4><span class="logo"><span class="sky">Features profile ::</span> <span class="re">validated ::</span></span></span> True</h4>
+  	  <h4><span class="logo"><span class="sky">Features profile ::</span> <span class="re">validated ::</span></span> True</h4>
 
     {% if validated_fp_successful %}
   	  <div class="alert alert-success">
@@ -383,7 +383,7 @@ you need to try and be quicker next time.
   	  </div>
     {% endif %}
   {% else %}
-  	  <h4><span class="logo"><span class="sky">Features profile ::</span> <span class="re">validated ::</span></span></span> False</h4>
+  	  <h4><span class="logo"><span class="sky">Features profile ::</span> <span class="re">validated ::</span></span>< False</h4>
 	  <div class="alert alert-warning">
     <strong>Warning!</strong> This features profile has not been validated, please review it against
 <a href="?fp_view=true&fp_id={{ parent_id }}&metric={{ for_metric }}" target="_blank"><b>parent features profile id {{ parent_id }}</b></a>
@@ -401,18 +401,18 @@ Ionosphere is working on a metric.  This could be a table insert like Existing
 layers, but big tables may hinder easy navigation in the training page, so a
 link and new tab is ok.
 -->
-	  <h4><span class="logo"><span class="sky">Existing ::</span> <span class="re">features profiles page link ::</span></span></span> <a href="?fp_search=true&metric={{ for_metric}}&limit=0&order=DESC" target="_blank">existing features profile page for {{ for_metric }}</a></h4>
+	  <h4><span class="logo"><span class="sky">Existing ::</span> <span class="re">features profiles page link ::</span></span> <a href="?fp_search=true&metric={{ for_metric}}&limit=0&order=DESC" target="_blank">existing features profile page for {{ for_metric }}</a></h4>
 <!-- # @added 20180918 - Feature #2602: Graphs in search_features_profiles -->
-	  <h4><span class="logo"><span class="sky">Existing ::</span> <span class="re">features profiles page link with graphs ::</span></span></span> <a href="?fp_search=true&metric={{ for_metric}}&limit=0&order=DESC&show_graphs=true" target="_blank">existing features profile page with graphs for {{ for_metric }}</a></h4>
+	  <h4><span class="logo"><span class="sky">Existing ::</span> <span class="re">features profiles page link with graphs ::</span></span> <a href="?fp_search=true&metric={{ for_metric}}&limit=0&order=DESC&show_graphs=true" target="_blank">existing features profile page with graphs for {{ for_metric }}</a></h4>
 
-  	  <h4><span class="logo"><span class="sky">Layers ::</span> <span class="re">details ::</span></span></span> features profile ionosphere_layers id {{ layer_id }}</h4>
+  	  <h4><span class="logo"><span class="sky">Layers ::</span> <span class="re">details ::</span></span> features profile ionosphere_layers id {{ layer_id }}</h4>
   {% if layer_details %}
   		<pre>{{ layer_details }}</pre>
   {% else %}
   		<pre>There are no Ionosphere layers for this features profile</pre>
   {% endif %}
   {% if layer_algorithms_details %}
-  	  <h4><span class="logo"><span class="sky">Layers ::</span> <span class="re">algorithms ::</span></span></span> features profile ionosphere_layers id {{ layer_id }}</h4>
+  	  <h4><span class="logo"><span class="sky">Layers ::</span> <span class="re">algorithms ::</span></span> features profile ionosphere_layers id {{ layer_id }}</h4>
   		<pre>{{ layer_algorithms_details }}</pre>
 <!-- @added 20170327 - Feature #2004: Ionosphere layers - edit_layers
 #                      Task #2002: Review and correct incorrectly defined layers
@@ -553,10 +553,10 @@ This affects LEARNING.  If you want to extend Skyline's description of the "Acti
   {% if matched_fp_id %}
 <!-- # @modified 20180620 - Feature #2404: Ionosphere - fluid approximation -->
     {% if minmax == 0 %}
-    <h4><span class="logo"><span class="sky">MATCHED evaluating ::</span> <span class="re">ionosphere_matched id ::</span></span></span> {{ matched_fp_id }}</h4>
+    <h4><span class="logo"><span class="sky">MATCHED evaluating ::</span> <span class="re">ionosphere_matched id ::</span></span> {{ matched_fp_id }}</h4>
     {% else %}
-    <h4><span class="logo"><span class="sky">MATCHED evaluating ::</span> <span class="re">ionosphere_matched id ::</span></span></span> {{ matched_fp_id }}</h4>
-    <center><h4><span class="logo"><span class="sky"></span> <span class="re">This match was made using Min-Max scaling of the features profile time series and the anomalous timeseries</span></span></span></h4></center>
+    <h4><span class="logo"><span class="sky">MATCHED evaluating ::</span> <span class="re">ionosphere_matched id ::</span></span> {{ matched_fp_id }}</h4>
+    <center><h4><span class="logo"><span class="sky"></span> <span class="re">This match was made using Min-Max scaling of the features profile time series and the anomalous timeseries</span></span></h4></center>
     {% endif %}
 		<pre>{{ matched_id_resources }}</pre>
     {% if matched_graph_image_file %}
@@ -566,7 +566,7 @@ This affects LEARNING.  If you want to extend Skyline's description of the "Acti
 
 <!-- # @added 20190601 - Feature #3084: Ionosphere - validated matches -->
     {% if match_validated_db_value == 0 %}
-  	  <h4><span class="logo"><span class="sky">Match ::</span> <span class="re">not validated</span></span></span></h4>
+  	  <h4><span class="logo"><span class="sky">Match ::</span> <span class="re">not validated</span></span></h4>
 	   <div class="alert alert-warning">
       This match has not been validated, please review it and validate or invalidate it
       <a href="?fp_view=true&fp_id={{ features_profile_id }}&metric={{ for_metric }}&timestamp={{ timestamp }}&matched_fp_id={{ matched_fp_id }}&match_validation=1">
@@ -575,14 +575,14 @@ This affects LEARNING.  If you want to extend Skyline's description of the "Acti
       <button type="button">Invalidate match</button></a>
 	   </div>
     {% elif match_validated_db_value == 1 %}
-  	  <h4><span class="logo"><span class="sky">Match :: </span> <span class="re">validated ::</span></span></span> <code>True</code></h4>
+  	  <h4><span class="logo"><span class="sky">Match :: </span> <span class="re">validated ::</span></span> <code>True</code></h4>
 	   <div class="alert alert-warning">
       If this match was incorrectly validated, you can invalidate it
       <a href="?fp_view=true&fp_id={{ features_profile_id }}&metric={{ for_metric }}&timestamp={{ timestamp }}&matched_fp_id={{ matched_fp_id }}&match_validation=2">
       <button type="button">Invalidate match</button></a>
 	   </div>
     {% else %}
-  	  <h4><span class="logo"><span class="sky">Match :: </span> <span class="re">INVALID ::</span></span></span> True</h4>
+  	  <h4><span class="logo"><span class="sky">Match :: </span> <span class="re">INVALID ::</span></span> True</h4>
 	   <div class="alert alert-warning">
       If this match was incorrectly invalidated, you can validate it
       <a href="?fp_view=true&fp_id={{ features_profile_id }}&metric={{ for_metric }}&timestamp={{ timestamp }}&matched_fp_id={{ matched_fp_id }}&match_validation=1">
@@ -592,7 +592,7 @@ This affects LEARNING.  If you want to extend Skyline's description of the "Acti
   {% endif %}
 
   {% if matched_layer_id %}
-    <h4><span class="logo"><span class="sky">MATCHED evaluating ::</span> <span class="re">ionosphere_layers_matched id ::</span></span></span> {{ matched_layer_id }}</h4>
+    <h4><span class="logo"><span class="sky">MATCHED evaluating ::</span> <span class="re">ionosphere_layers_matched id ::</span></span> {{ matched_layer_id }}</h4>
 		<pre>{{ matched_id_resources }}</pre>
     {% if matched_graph_image_file %}
     <img src="ionosphere_images?image={{ matched_graph_image_file }}" alt="{{ for_metric }} timeseries graph" class="img-responsive center-block" /><br>
@@ -600,7 +600,7 @@ This affects LEARNING.  If you want to extend Skyline's description of the "Acti
 
 <!-- # @added 20190601 - Feature #3084: Ionosphere - validated matches -->
     {% if match_validated_db_value == 0 %}
-  	  <h4><span class="logo"><span class="sky">Match ::</span> <span class="re">not validated</span></span></span></h4>
+  	  <h4><span class="logo"><span class="sky">Match ::</span> <span class="re">not validated</span></span></h4>
 	   <div class="alert alert-warning">
       This match has not been validated, please review it and validate or invalidate it
       <a href="?fp_view=true&fp_id={{ features_profile_id }}&metric={{ for_metric }}&timestamp={{ timestamp }}&matched_layer_id={{ matched_layer_id }}&match_validation=1">
@@ -609,14 +609,14 @@ This affects LEARNING.  If you want to extend Skyline's description of the "Acti
       <button type="button">Invalidate match</button></a>
 	   </div>
     {% elif match_validated_db_value == 1 %}
-  	  <h4><span class="logo"><span class="sky">Match :: </span> <span class="re">validated ::</span></span></span> <code>True</code></h4>
+  	  <h4><span class="logo"><span class="sky">Match :: </span> <span class="re">validated ::</span></span> <code>True</code></h4>
 	   <div class="alert alert-warning">
       If this match was incorrectly validated, you can invalidate it
       <a href="?fp_view=true&fp_id={{ features_profile_id }}&metric={{ for_metric }}&timestamp={{ timestamp }}&matched_layer_id={{ matched_layer_id }}&match_validation=2">
       <button type="button">Invalidate match</button></a>
 	   </div>
     {% else %}
-  	  <h4><span class="logo"><span class="sky">Match :: </span> <span class="re">INVALID ::</span></span></span> True</h4>
+  	  <h4><span class="logo"><span class="sky">Match :: </span> <span class="re">INVALID ::</span></span> True</h4>
 	   <div class="alert alert-warning">
       If this match was incorrectly invalidated, you can validate it
       <a href="?fp_view=true&fp_id={{ features_profile_id }}&metric={{ for_metric }}&timestamp={{ timestamp }}&matched_layer_id={{ matched_layer_id }}&match_validation=1">
@@ -636,33 +636,33 @@ This affects LEARNING.  If you want to extend Skyline's description of the "Acti
 <!-- # @added 20170908 - Feature #2056: ionosphere - disabled_features_profiles -->
   {% if family_tree_ids %}
     {% if family_tree_ids|length > 1 %}
-	  <h4><span class="logo"><span class="sky">Progeny features profiles ::</span> <span class="re">count :: </span></span></span>{{ family_tree_ids|length - 1 }} learnt profiles</h4>
+	  <h4><span class="logo"><span class="sky">Progeny features profiles ::</span> <span class="re">count :: </span></span>{{ family_tree_ids|length - 1 }} learnt profiles</h4>
       {% for item in family_tree_ids %}
         {% if item != features_profile_id %}
       <a href="?fp_view=true&fp_id={{ item }}&metric={{ for_metric }}" target="_blank"><b>{{ item }}</b></a>
         {% endif %}
       {% endfor %}
     {% else %}
-	  <h4><span class="logo"><span class="sky">Progeny features profiles ::</span> <span class="re">count :: </span></span></span>0 learnt profiles</h4>
+	  <h4><span class="logo"><span class="sky">Progeny features profiles ::</span> <span class="re">count :: </span></span>0 learnt profiles</h4>
     {% endif %}
   {% else %}
-	  <h4><span class="logo"><span class="sky">Progeny features profiles ::</span> <span class="re">count :: </span></span></span>0 learnt profiles</h4>
+	  <h4><span class="logo"><span class="sky">Progeny features profiles ::</span> <span class="re">count :: </span></span>0 learnt profiles</h4>
   {% endif %}
 
-      <h4><span class="logo"><span class="sky">Anomaly ::</span> <span class="re">details ::</span></span></span> {{ for_metric }} with metrics id {{ metric_id }}</h4>
+      <h4><span class="logo"><span class="sky">Anomaly ::</span> <span class="re">details ::</span></span> {{ for_metric }} with metrics id {{ metric_id }}</h4>
       {{ metric_vars }}<br>
   {% if panorama_anomaly_id != False %}
-      <h4><span class="logo"><span class="sky">Panorama ::</span> <span class="re">anomaly ::</span></span></span> id {{ panorama_anomaly_id }}</h4>
+      <h4><span class="logo"><span class="sky">Panorama ::</span> <span class="re">anomaly ::</span></span> id {{ panorama_anomaly_id }}</h4>
   {% elif panorama_anomaly_id == 'None' %}
     {% if parent_id == 0 %}
-      <h4><span class="logo"><span class="sky">Panorama ::</span> <span class="re">anomaly ::</span></span></span> id {{ panorama_anomaly_id }}</h4>
+      <h4><span class="logo"><span class="sky">Panorama ::</span> <span class="re">anomaly ::</span></span> id {{ panorama_anomaly_id }}</h4>
 {{ for_metric }} has no Panorama anomaly recorded at this timestamp, this can
 happen see <b><span class="logo"><span class="sky">Known</span> <span class="re">bugs</span></span></b> below
     {% else %}
-      <h4><span class="logo"><span class="sky">Panorama ::</span> <span class="re">anomaly ::</span></span></span> none expected for an ionosphere_learn features profile</h4>
+      <h4><span class="logo"><span class="sky">Panorama ::</span> <span class="re">anomaly ::</span></span> none expected for an ionosphere_learn features profile</h4>
     {% endif %}
   {% else %}
-      <h4><span class="logo"><span class="sky">Panorama ::</span> <span class="re">anomaly ::</span></span></span> id {{ panorama_anomaly_id }}</h4>
+      <h4><span class="logo"><span class="sky">Panorama ::</span> <span class="re">anomaly ::</span></span> id {{ panorama_anomaly_id }}</h4>
   {% endif %}
   {% if panorama_anomaly_id == None %}
     {% if parent_id == 0 %}
@@ -685,7 +685,7 @@ the top right of this page.  Here is hoping that this day just gets better.
      # Use 24 hours Graphite graph for Ionosphere echo and red border
 -->
   {% if echo_fp == 1 %}
-      <h4><span class="logo"><span class="sky">Redis ::</span> <span class="re">not_anomalous ::</span></span></span> graph that this <span class="logo"><span class="sky">ionosphere_echo</span></span> features profile is based on</h4>
+      <h4><span class="logo"><span class="sky">Redis ::</span> <span class="re">not_anomalous ::</span></span> graph that this <span class="logo"><span class="sky">ionosphere_echo</span></span> features profile is based on</h4>
     {% for image in metric_images %}
       {% if '.redis.plot' in image %}
       <center><div class="overlay-graph">
@@ -695,17 +695,17 @@ the top right of this page.  Here is hoping that this day just gets better.
       {% endif %}
     {% endfor %}
   {% else %}
-      <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">not_anomalous ::</span></span></span> graph that this <span class="logo"><span class="sky">ionosphere_echo</span></span> features profile is based on</h4>
+      <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">not_anomalous ::</span></span> graph that this <span class="logo"><span class="sky">ionosphere_echo</span></span> features profile is based on</h4>
     {% for image in metric_images %}
       {% if not '.redis.plot' in image %}
         {% if metric_second_order_resolution_hours != False %}
           {% if parent_id == 0 %}
-      <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">anomaly ::</span></span></span> graph at <strong>{{ metric_second_order_resolution_hours }} hours</strong></h4>
+      <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">anomaly ::</span></span> graph at <strong>{{ metric_second_order_resolution_hours }} hours</strong></h4>
           {% else %}
-      <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">anomaly ::</span></span></span> parent features profile graph that this ionosphere_learn is based on</h4>
+      <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">anomaly ::</span></span> parent features profile graph that this ionosphere_learn is based on</h4>
           {% endif %}
         {% else %}
-      <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">anomaly ::</span></span></span> graph at <strong>{{ metric_full_duration_in_hours }} hours</strong></h4>
+      <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">anomaly ::</span></span> graph at <strong>{{ metric_full_duration_in_hours }} hours</strong></h4>
         {% endif %}
         {% if graphite_url != False %}
 If you wish to see the <a target='_blank' href="{{ graphite_url }}">current
@@ -725,19 +725,19 @@ Image file: {{ image }}<br><br>
   {% endif %}
 
   {% if parent_id == 0 %}
-      <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">graphs WHEN created ::</span></span></span> at <strong>7h, 24h, 7d and 30d</strong> for anomaly at <strong>{{ human_date }}</strong></h4>
+      <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">graphs WHEN created ::</span></span> at <strong>7h, 24h, 7d and 30d</strong> for anomaly at <strong>{{ human_date }}</strong></h4>
   {% else %}
 <!-- # @added 20190328 - Feature #2484: FULL_DURATION feature profiles
      # Added ionosphere_echo -->
     {% if echo_fp == 1 %}
-      <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">graphs WHEN created ::</span></span></span> at <strong>7h, 24h, 7d and 30d</strong> for anomaly at <strong>{{ echo_human_date }} - these graphs may be aggregated due the the echo features profile being made at a later date than the parent</strong></h4>
+      <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">graphs WHEN created ::</span></span> at <strong>7h, 24h, 7d and 30d</strong> for anomaly at <strong>{{ echo_human_date }} - these graphs may be aggregated due the the echo features profile being made at a later date than the parent</strong></h4>
 	  <div class="alert alert-warning">
-    The <b><span class="logo"><span class="sky">ionosphere_echo ::</span> <span class="re">features profile ::</span></span></span></b> was created based on the <b>Graphite NOW graph at {{ redis_full_duration_in_hours }} hours</b> graph below
+    The <b><span class="logo"><span class="sky">ionosphere_echo ::</span> <span class="re">features profile ::</span></span></b> was created based on the <b>Graphite NOW graph at {{ redis_full_duration_in_hours }} hours</b> graph below
 	  </div>
     {% else %}
-      <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">graphs WHEN created ::</span></span></span> at <strong>7h, 24h, 7d and 30d</strong> for anomaly at <strong>{{ human_date }}</strong></h4>
+      <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">graphs WHEN created ::</span></span> at <strong>7h, 24h, 7d and 30d</strong> for anomaly at <strong>{{ human_date }}</strong></h4>
 	  <div class="alert alert-warning">
-    The <b><span class="logo"><span class="sky">ionosphere_learn ::</span> <span class="re">features profile ::</span></span></span></b> was created based on the <b>Graphite NOW at {{ metric_second_order_resolution_hours // 24 }} days</b> graph below
+    The <b><span class="logo"><span class="sky">ionosphere_learn ::</span> <span class="re">features profile ::</span></span></b> was created based on the <b>Graphite NOW at {{ metric_second_order_resolution_hours // 24 }} days</b> graph below
 	  </div>
     {% endif %}
   {% endif %}
@@ -776,7 +776,7 @@ Image file: {{ image }}<br><br>
 
 <!-- # @added 20170908 - Feature #2056: ionosphere - disabled_features_profiles -->
   {% if profile_enabled %}
-  	  <h4><span class="logo"><span class="sky">Features profile ::</span> <span class="re">enabled ::</span></span></span> True</h4>
+  	  <h4><span class="logo"><span class="sky">Features profile ::</span> <span class="re">enabled ::</span></span> True</h4>
 	  <div class="alert alert-danger">
     If this features profile was created or learnt incorrectly it can be disabled.  <strong>Note</strong>
     all the learnt progeny features profiles listed below (if there are any) will be disabled as well.
@@ -784,7 +784,7 @@ Image file: {{ image }}<br><br>
       <button type="button" onclick="return confirm('Are you sure you want to disable the features profile and all related progeny features profiles? Disable {{ family_tree_ids|length }} features profiles?');"><b>Disable features profile</b></button></a>
 	  </div>
   {% else %}
-  	  <h4><span class="logo"><span class="sky">Features profile ::</span> <span class="re">enabled ::</span></span></span> False</h4>
+  	  <h4><span class="logo"><span class="sky">Features profile ::</span> <span class="re">enabled ::</span></span> False</h4>
     {% if disabled_fp_successful %}
   	  <div class="alert alert-success">
   	    <strong>Success!</strong> The {{ family_tree_ids|length }} features profiles have now been disabled<br>
@@ -798,17 +798,17 @@ Image file: {{ image }}<br><br>
 <!-- # @added 20170908 - Feature #2056: ionosphere - disabled_features_profiles -->
   {% if family_tree_ids %}
     {% if family_tree_ids|length > 1 %}
-	  <h4><span class="logo"><span class="sky">Progeny features profiles ::</span> <span class="re">count :: </span></span></span>{{ family_tree_ids|length - 1 }} learnt profiles</h4>
+	  <h4><span class="logo"><span class="sky">Progeny features profiles ::</span> <span class="re">count :: </span></span>{{ family_tree_ids|length - 1 }} learnt profiles</h4>
       {% for item in family_tree_ids %}
         {% if item != features_profile_id %}
       <a href="?fp_view=true&fp_id={{ item }}&metric={{ for_metric }}"><b>{{ item }}</b></a>
         {% endif %}
       {% endfor %}
     {% else %}
-	  <h4><span class="logo"><span class="sky">Progeny features profiles ::</span> <span class="re">count :: </span></span></span>0 learnt profiles</h4>
+	  <h4><span class="logo"><span class="sky">Progeny features profiles ::</span> <span class="re">count :: </span></span>0 learnt profiles</h4>
     {% endif %}
   {% else %}
-	  <h4><span class="logo"><span class="sky">Progeny features profiles ::</span> <span class="re">count :: </span></span></span>0 learnt profiles</h4>
+	  <h4><span class="logo"><span class="sky">Progeny features profiles ::</span> <span class="re">count :: </span></span>0 learnt profiles</h4>
   {% endif %}
 
 <!-- # @modified 20190601 - Feature #3084: Ionosphere - validated matches
@@ -816,21 +816,21 @@ Image file: {{ image }}<br><br>
   {% if matched_layer_id %}
 <!-- # @added 20170308 - Feature #1960: ionosphere_layers
 # To present the operator with the matched layers Graphite graphs -->
-      <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">layers MATCHED ::</span></span></span> the last {{graphite_layers_matched_images|length}} not anomalous graphs of the {{ metric_layers_matched_count }} matches that this profile's layers have had</h4>
+      <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">layers MATCHED ::</span></span> the last {{graphite_layers_matched_images|length}} not anomalous graphs of the {{ metric_layers_matched_count }} matches that this profile's layers have had</h4>
       Only one graph is displayed per 10 minute period, a layer could match mulitple times in 10 minutes, but only one graph per 10 minute period is displayed
     {% for gmimage in graphite_layers_matched_images %}
         <img src="ionosphere_images?image={{ gmimage }}" alt="{{ for_metric }} timeseries graph" style="float: left; width: 40%; margin-right: 1%; margin-bottom: 0.5em;">
     {% endfor %}
         <p style="clear: both;">
 
-      <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">profile MATCHED ::</span></span></span> the last {{graphite_matched_images|length}} not anomalous graphs of the {{ matched_count }} matches that this profile has had</h4>
+      <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">profile MATCHED ::</span></span> the last {{graphite_matched_images|length}} not anomalous graphs of the {{ matched_count }} matches that this profile has had</h4>
       Only one graph is displayed per 10 minute period, a profile could match mulitple times in 10 minutes, but only one graph per 10 minute period is displayed
     {% for gmimage in graphite_matched_images %}
         <img src="ionosphere_images?image={{ gmimage }}" alt="{{ for_metric }} timeseries graph" style="float: left; width: 40%; margin-right: 1%; margin-bottom: 0.5em;">
     {% endfor %}
         <p style="clear: both;">
   {% else %}
-      <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">profile MATCHED ::</span></span></span> the last {{graphite_matched_images|length}} not anomalous graphs of the {{ matched_count }} matches that this profile has had</h4>
+      <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">profile MATCHED ::</span></span> the last {{graphite_matched_images|length}} not anomalous graphs of the {{ matched_count }} matches that this profile has had</h4>
       Only one graph is displayed per 10 minute period, a profile could match mulitple times in 10 minutes, but only one graph per 10 minute period is displayed
     {% for gmimage in graphite_matched_images %}
         <img src="ionosphere_images?image={{ gmimage }}" alt="{{ for_metric }} timeseries graph" style="float: left; width: 40%; margin-right: 1%; margin-bottom: 0.5em;">
@@ -839,7 +839,7 @@ Image file: {{ image }}<br><br>
 
 <!-- # @added 20170308 - Feature #1960: ionosphere_layers
 # To present the operator with the matched layers Graphite graphs -->
-      <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">layers MATCHED ::</span></span></span> the last {{graphite_layers_matched_images|length}} not anomalous graphs of the {{ metric_layers_matched_count }} matches that this profile's layers have had</h4>
+      <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">layers MATCHED ::</span></span> the last {{graphite_layers_matched_images|length}} not anomalous graphs of the {{ metric_layers_matched_count }} matches that this profile's layers have had</h4>
       Only one graph is displayed per 10 minute period, a layer could match mulitple times in 10 minutes, but only one graph per 10 minute period is displayed
     {% for gmimage in graphite_layers_matched_images %}
         <img src="ionosphere_images?image={{ gmimage }}" alt="{{ for_metric }} timeseries graph" style="float: left; width: 40%; margin-right: 1%; margin-bottom: 0.5em;">
@@ -849,7 +849,7 @@ Image file: {{ image }}<br><br>
 
   {% for image in metric_images %}
     {% if '.redis.plot' in image %}
-      <h4><span class="logo"><span class="sky">Redis ::</span> <span class="re">anomaly ::</span></span></span> data plot at <strong>{{ redis_full_duration_in_hours }} hours</strong></h4>
+      <h4><span class="logo"><span class="sky">Redis ::</span> <span class="re">anomaly ::</span></span> data plot at <strong>{{ redis_full_duration_in_hours }} hours</strong></h4>
       <img src="ionosphere_images?image={{ image }}" alt="{{ for_metric }} timeseries graph" class="img-responsive center-block" /><br>
 Image file: {{ image }}<br><br>
     {% endif %}
@@ -860,7 +860,7 @@ Image file: {{ image }}<br><br>
     {% include "correlations.html" %}
   {% endif %}
 
-      <h4><span class="logo"><span class="sky">Features ::</span> <span class="re"> profile ::</span></span></span> files</h4>
+      <h4><span class="logo"><span class="sky">Features ::</span> <span class="re"> profile ::</span></span> files</h4>
       <table>
         <tr>
           <th>[filename, path_and_filename]</th>
@@ -884,7 +884,7 @@ Image file: {{ image }}<br><br>
       <h4><span class="logo"><span class="sky">Time series ::</span> <span class="re">anomalous ::</span></span></span> <span class="sky">json available [['app', '{{ app_context }}'], ['full_duration', {{ ts_full_duration }}]]</span></h4>
       {{ last_ts_json }}
  -->
-      <h4><span class="logo"><span class="sky">Time series ::</span> <span class="re">anomalous ::</span></span></span> <span class="sky">json available [['app', '{{ app_context }}'], ['full_duration', {{ ts_full_duration }}]] - last 30 data points</span></h4>
+      <h4><span class="logo"><span class="sky">Time series ::</span> <span class="re">anomalous ::</span></span> <span class="sky">json available [['app', '{{ app_context }}'], ['full_duration', {{ ts_full_duration }}]] - last 30 data points</span></h4>
       {{ last_ts_json[-30:] }}
 <!-- # @added 20170309 - Feature #1960: ionosphere_layers
 Also return the Analyzer FULL_DURATION timeseries if available in a Mirage
@@ -895,7 +895,7 @@ based features profile -->
       <h4><span class="logo"><span class="sky">Timeseries ::</span> <span class="re">anomalous ::</span></span></span> <span class="sky">json available [['app', 'Analyzer'], ['full_duration', {{ baseline_fd }}]]</span></h4>
       {{ last_i_ts_json }}
 -->
-      <h4><span class="logo"><span class="sky">Timeseries ::</span> <span class="re">anomalous ::</span></span></span> <span class="sky">json available [['app', 'Analyzer'], ['full_duration', {{ baseline_fd }}]] - last 30 data points</span></h4>
+      <h4><span class="logo"><span class="sky">Timeseries ::</span> <span class="re">anomalous ::</span></span> <span class="sky">json available [['app', 'Analyzer'], ['full_duration', {{ baseline_fd }}]] - last 30 data points</span></h4>
       {{ last_i_ts_json[-30:] }}
     {% endif %}
   {% endif %}
