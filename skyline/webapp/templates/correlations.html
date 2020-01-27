@@ -62,7 +62,7 @@
 # Added Graphite graph links to Related block
 -->
   {% if related != False %}
-	  <h4><span class="logo"><span class="sky">Existing ::</span> <span class="re">related anomalies ::</span></span> {{ related|length }}</h4>
+	  <h4><span class="logo"><span class="sky">Existing ::</span> <span class="re">possible related anomalies ::</span></span> {{ related|length }}</h4>
 	  <div class="alert alert-warning">
       These are the time related anomalies from the entire metric population that fall within 2 minutes either side of the anomaly,
       they are not necessarily all <strong>related</strong>, but anomalies that occurred in the same time frame

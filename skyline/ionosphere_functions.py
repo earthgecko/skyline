@@ -1416,9 +1416,10 @@ def get_related(current_skyline_app, anomaly_id, anomaly_timestamp):
     related = []
 
     minus_two_minutes = int(anomaly_timestamp) - 120
-    plus_two_minutes = int(anomaly_timestamp) - 120
+    plus_two_minutes = int(anomaly_timestamp) + 120
 
-    current_logger.info('get_related :: getting MySQL engine')
+    current_logger.info('get_related :: getting MySQL engine for %s and timestamp %s' % (
+        str(anomaly_id), str(anomaly_timestamp)))
     try:
         engine, fail_msg, trace = fp_create_get_an_engine(current_skyline_app)
         current_logger.info(fail_msg)
