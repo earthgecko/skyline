@@ -97,6 +97,12 @@ except:
     max_age_seconds = 0
 expired_checks_dir = '%s_expired' % settings.PANORAMA_CHECK_PATH
 
+# @added 20200128 - Feature #3418: PANORAMA_CHECK_INTERVAL
+try:
+    PANORAMA_CHECK_INTERVAL = int(settings.PANORAMA_CHECK_INTERVAL)
+except:
+    PANORAMA_CHECK_INTERVAL = 20
+
 # Database configuration
 config = {'user': settings.PANORAMA_DBUSER,
           'password': settings.PANORAMA_DBUSERPASS,
@@ -1343,8 +1349,15 @@ class Panorama(Thread):
                     logger.info(traceback.format_exc())
 
                 if not metric_var_files:
-                    logger.info('sleeping 20 no metric check files')
-                    sleep(20)
+
+                    # @modified 20200128 - Feature #3418: PANORAMA_CHECK_INTERVAL
+                    # Allow Panaroma to check for anomalies more frequently.  At
+                    # some point TODO replace Panorama check files with Redis
+                    # keys or a set.
+                    # logger.info('sleeping 20 no metric check files')
+                    # sleep(20)
+                    logger.info('sleeping for %s seconds - no metric check files' % str(PANORAMA_CHECK_INTERVAL))
+                    sleep(PANORAMA_CHECK_INTERVAL)
 
                 # Discover metric anomalies to insert
                 metric_var_files = False

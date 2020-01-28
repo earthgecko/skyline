@@ -605,13 +605,12 @@ ANALYZER_CRUCIBLE_ENABLED = False
 """
 
 ALERTS = (
-    ('horizon.test.udp', 'smtp', 30),
-    ('horizon.test.pickle', 'smtp', 30),
     ('skyline', 'smtp', 1800),
-    ('skyline_test.alerters.test', 'smtp', 1800),
-    ('skyline_test.alerters.test', 'slack', 1800),  # slack alerts MUST be declared afer smtp
-    ('skyline_test.alerters.test', 'pagerduty', 1800),
-    ('skyline_test.alerters.test', 'http_alerter-mock_api_alerter_receiver', 1800),
+    ('skyline_test.alerters.test', 'smtp|http_alerter-mock_api_alerter_receiver', 1),
+    ('horizon.test.udp', 'smtp|http_alerter-mock_api_alerter_receiver', 1),
+    ('horizon.test.pickle', 'smtp|http_alerter-mock_api_alerter_receiver', 1),
+    ('skyline_test.alerters.test', 'slack', 1),  # slack alerts MUST be declared afer smtp
+    ('skyline_test.alerters.test', 'pagerduty', 1),
     # ('stats', 'http_alerter-external_endpoint', 30),
     # ('carbon', 'http_alerter-otherapp', 60),
 )
@@ -1130,6 +1129,15 @@ PANORAMA_CHECK_MAX_AGE = 300
 :vartype PANORAMA_CHECK_MAX_AGE: int
 """
 
+PANORAMA_CHECK_INTERVAL = 20
+"""
+:var PANORAMA_CHECK_INTERVAL: How often (in seconds) Panorama will check for
+    anomalie1s to add to the database.  This allows you to configure Panorama to
+    insert anomalies into the database every second if you so wish to, however
+    in most cases every 20 seconds is sufficient.
+:vartype PANORAMA_CHECK_INTERVAL: int
+"""
+
 """
 Mirage settings
 """
@@ -1314,10 +1322,9 @@ settings block.
 
 BOUNDARY_METRICS = (
     # ('metric', 'algorithm', EXPIRATION_TIME, MIN_AVERAGE, MIN_AVERAGE_SECONDS, TRIGGER_VALUE, ALERT_THRESHOLD, 'ALERT_VIAS'),
-    ('skyline_test.alerters.test', 'greater_than', 1, 0, 0, 0, 1, 'smtp'),
-    ('skyline_test.alerters.test', 'greater_than', 1, 0, 0, 0, 1, 'http_alerter-mock_api_alerter_receiver'),
-    ('skyline_test.alerters.test', 'detect_drop_off_cliff', 1800, 500, 3600, 0, 2, 'http_alerter-mock_api_alerter_receiver'),
-    ('skyline_test.alerters.test', 'less_than', 3600, 0, 0, 15, 2, 'http_alerter-mock_api_alerter_receiver'),
+    ('skyline_test.alerters.test', 'greater_than', 1, 0, 0, 0, 1, 'smtp|http_alerter-mock_api_alerter_receiver'),
+    ('skyline_test.alerters.test', 'detect_drop_off_cliff', 1800, 500, 3600, 0, 2, 'smtp|http_alerter-mock_api_alerter_receiver'),
+    ('skyline_test.alerters.test', 'less_than', 3600, 0, 0, 15, 2, 'smtp|http_alerter-mock_api_alerter_receiver'),
     ('metric1', 'detect_drop_off_cliff', 1800, 500, 3600, 0, 2, 'smtp|slack|pagerduty'),
     ('metric2.either', 'less_than', 3600, 0, 0, 15, 2, 'smtp|hipchat'),
     ('nometric.other', 'greater_than', 3600, 0, 0, 100000, 1, 'smtp'),
