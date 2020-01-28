@@ -102,14 +102,6 @@ try:
     PANORAMA_CHECK_INTERVAL = int(settings.PANORAMA_CHECK_INTERVAL)
 except:
     PANORAMA_CHECK_INTERVAL = 20
-"""
-:var PANORAMA_CHECK_INTERVAL: How often (in seconds) Panorama will check for
-    anomalie1s to add to the database.  This allows you to configure Panorama to
-    insert anomalies into the database every second if you so wish to, however
-    in most cases every 20 seconds is sufficient.
-:vartype PANORAMA_CHECK_INTERVAL: int
-"""
-
 
 # Database configuration
 config = {'user': settings.PANORAMA_DBUSER,
