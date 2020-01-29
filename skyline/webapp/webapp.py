@@ -558,6 +558,30 @@ def version():
 # def data():
 def api():
 
+    # @added 20200129 - Feature #3422: webapp api - alerting_metrics and non_alerting_metrics
+    if 'non_alerting_metrics' in request.args:
+        non_alerting_metrics = []
+        try:
+            non_alerting_metrics = list(REDIS_CONN.smembers('aet.analyzer.non_smtp_alerter_metrics'))
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: Webapp could not get the aet.analyzer.smtp_alerter_metrics list from Redis')
+            return 'Internal Server Error', 500
+        logger.info('/api?non_alerting_metrics responding with %s metrics' % str(len(non_alerting_metrics)))
+        data_dict = {"status": {}, "data": {"metrics": non_alerting_metrics}}
+        return jsonify(data_dict), 200
+    if 'alerting_metrics' in request.args:
+        alerting_metrics = []
+        try:
+            alerting_metrics = list(REDIS_CONN.smembers('aet.analyzer.smtp_alerter_metrics'))
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: Webapp could not get the aet.analyzer.smtp_alerter_metrics list from Redis')
+            return 'Internal Server Error', 500
+        logger.info('/api?non_alerting_metrics responding with %s metrics' % str(len(alerting_metrics)))
+        data_dict = {"status": {}, "data": {"metrics": alerting_metrics}}
+        return jsonify(data_dict), 200
+
     # @added 20200117 - Feature #3400: Identify air gaps in the metric data
     if 'airgapped_metrics' in request.args:
         airgapped_metrics = []
@@ -837,9 +861,16 @@ def api():
                 {'results': 'Error: failed to generate timeseries'})
             return resp, 404
 
-    resp = json.dumps(
-        {'results': 'Error: No argument passed - try /api?metric= or /api?graphite_metric='})
-    return resp, 404
+    # @modified 20200128 - Feature #3424: webapp - api documentation
+    # resp = json.dumps(
+    #     {'results': 'Error: No argument passed - try /api?metric= or /api?graphite_metric='})
+    # return resp, 404
+    try:
+        start = time.time()
+        return render_template(
+            'api.html', version=skyline_version, duration=(time.time() - start)), 200
+    except:
+        return 'Uh oh ... a Skyline 500 :(', 500
 
 
 # @added 20200116: Feature #3396: http_alerter
