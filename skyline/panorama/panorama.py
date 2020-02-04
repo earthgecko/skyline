@@ -103,6 +103,12 @@ try:
 except:
     PANORAMA_CHECK_INTERVAL = 20
 
+# @added 20200204 - Feature #3442: Panorama - add metric to metrics table immediately
+try:
+    PANORAMA_INSERT_METRICS_IMMEDIATELY = settings.PANORAMA_INSERT_METRICS_IMMEDIATELY
+except:
+    PANORAMA_INSERT_METRICS_IMMEDIATELY = False
+
 # Database configuration
 config = {'user': settings.PANORAMA_DBUSER,
           'password': settings.PANORAMA_DBUSERPASS,
@@ -290,6 +296,54 @@ class Panorama(Thread):
             cnx.close()
             return False
 
+        return False
+
+    # @added 20200204 - Feature #3442: Panorama - add metric to metrics table immediately
+    def insert_new_metric(self, metric_name):
+        """
+        Insert a new metric into the metrics tables.
+
+        :param metric_name: metric name
+        :type metric_name: str
+        :return: int or boolean
+
+        """
+        # Set defaults
+        learn_full_duration_days = int(settings.IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS)
+        valid_learning_duration = int(settings.IONOSPHERE_LEARN_DEFAULT_VALID_TIMESERIES_OLDER_THAN_SECONDS)
+        max_generations = int(settings.IONOSPHERE_LEARN_DEFAULT_MAX_GENERATIONS)
+        max_percent_diff_from_origin = float(settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN)
+        try:
+            use_full_duration, valid_learning_duration, use_full_duration_days, max_generations, max_percent_diff_from_origin = get_ionosphere_learn_details(skyline_app, metric_name)
+            learn_full_duration_days = use_full_duration_days
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: failed to get_ionosphere_learn_details for %s' % metric_name)
+        logger.info('metric learn details determined for %s' % metric_name)
+        logger.info('learn_full_duration_days     :: %s days' % (str(learn_full_duration_days)))
+        logger.info('valid_learning_duration      :: %s seconds' % (str(valid_learning_duration)))
+        logger.info('max_generations              :: %s' % (str(max_generations)))
+        logger.info('max_percent_diff_from_origin :: %s' % (str(max_percent_diff_from_origin)))
+        insert_query_string = '%s (%s, learn_full_duration_days, learn_valid_ts_older_than, max_generations, max_percent_diff_from_origin) VALUES (\'%s\', %s, %s, %s, %s)' % (
+            'metrics', 'metric', metric_name, str(learn_full_duration_days),
+            str(valid_learning_duration), str(max_generations),
+            str(max_percent_diff_from_origin))
+        insert_query = 'insert into %s' % insert_query_string  # nosec
+        logger.info('inserting %s into %s table' % (metric_name, 'metrics'))
+        try:
+            results = self.mysql_insert(insert_query)
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: failed to determine the id of %s from the insert' % (metric_name))
+            raise
+        determined_id = 0
+        if results:
+            determined_id = int(results)
+            return determined_id
+        else:
+            logger.error('error :: results not set')
+            raise
+        logger.error('error :: failed to determine the inserted id for %s' % metric_name)
         return False
 
     # @added 20170101 - Feature #1830: Ionosphere alerts
@@ -1349,6 +1403,59 @@ class Panorama(Thread):
                     logger.info(traceback.format_exc())
 
                 if not metric_var_files:
+
+                    # @added 20200204 - Feature #3442: Panorama - add metric to metrics table immediately
+                    if PANORAMA_INSERT_METRICS_IMMEDIATELY:
+                        # Only check once a minute
+                        redis_insert_new_metrics_key = 'panorama.insert_new_metrics'
+                        redis_insert_new_metrics_key_exists = False
+                        try:
+                            redis_insert_new_metrics_key_exists = self.redis_conn.get(redis_insert_new_metrics_key)
+                        except Exception as e:
+                            logger.error('error :: could not query Redis for key %s: %s' % (redis_insert_new_metrics_key, e))
+                        check_metrics_to_insert = False
+                        if not redis_insert_new_metrics_key_exists:
+                            check_metrics_to_insert = True
+                            logger.info('checking for new metrics to insert into the metrics table')
+                        if check_metrics_to_insert:
+                            redis_set = '%sunique_metrics' % settings.FULL_NAMESPACE
+                            try:
+                                unique_metrics = list(self.redis_conn_decoded.smembers(redis_set))
+                            except:
+                                logger.error(traceback.format_exc())
+                                logger.error('error :: failed to get data from %s Redis set' % redis_set)
+                                unique_metrics = []
+                            db_fullnamespace_unique_metrics = []
+                            results = False
+                            if unique_metrics:
+                                query = 'SELECT metric FROM metrics'
+                                results = self.mysql_select(query)
+                                if results:
+                                    for result in results:
+                                        db_metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(result[0]))
+                                        db_fullnamespace_unique_metrics.append(db_metric_name)
+                            if unique_metrics and db_fullnamespace_unique_metrics:
+                                for unique_metric in unique_metrics:
+                                    if unique_metric not in db_fullnamespace_unique_metrics:
+                                        try:
+                                            base_name = unique_metric.replace(settings.FULL_NAMESPACE, '', 1)
+                                            metric_id = self.insert_new_metric(base_name)
+                                            logger.info('inserted %s into metrics table, assigned id %s' % (base_name, str(metric_id)))
+                                        except:
+                                            logger.error(traceback.format_exc())
+                                            logger.error('error :: failed to insert %s into metrics table' % unique_metric)
+                            try:
+                                del unique_metrics
+                            except:
+                                pass
+                            try:
+                                del results
+                            except:
+                                pass
+                            try:
+                                self.redis_conn.setex(redis_insert_new_metrics_key, 60, int(time()))
+                            except:
+                                logger.error('error :: failed to set key :: %s' % redis_insert_new_metrics_key)
 
                     # @modified 20200128 - Feature #3418: PANORAMA_CHECK_INTERVAL
                     # Allow Panaroma to check for anomalies more frequently.  At

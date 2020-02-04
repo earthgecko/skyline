@@ -1138,6 +1138,16 @@ PANORAMA_CHECK_INTERVAL = 20
 :vartype PANORAMA_CHECK_INTERVAL: int
 """
 
+PANORAMA_INSERT_METRICS_IMMEDIATELY = False
+"""
+:var PANORAMA_INSERT_METRICS_IMMEDIATELY: Panorama will only insert a metric
+    into the metrics database table when an anomaly is registered for the metric
+    by default.  To have Panorama insert every metric into the database as soon
+    as it appears in unique_metrics, set this to True.  This functionality is
+    for development and testing purposes.
+:vartype PANORAMA_CHECK_INTERVAL: boolean
+"""
+
 """
 Mirage settings
 """
