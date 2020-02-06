@@ -170,11 +170,18 @@ class Worker(Process):
             except Exception as e:
                 logger.error('error :: worker :: %s' % (str(e)))
 
+            # @added 20200206 - Feature #3444: Allow flux to backfill
+            # Added backfill
+            backfill = False
+
             if metric_data:
                 try:
                     metric = str(metric_data[0])
                     value = float(metric_data[1])
                     timestamp = int(metric_data[2])
+                    # @added 20200206 - Feature #3444: Allow flux to backfill
+                    # Added backfill
+                    backfill = int(metric_data[3])
                     if LOCAL_DEBUG:
                         logger.info('worker :: debug :: queue item found - %s' % str(metric_data))
                 except:
@@ -185,27 +192,32 @@ class Worker(Process):
                 if settings.FLUX_SEND_TO_CARBON:
                     # Best effort de-duplicate the data
                     valid_data = True
-                    cache_key = 'flux.last.%s' % metric
-                    last_metric_timestamp = None
-                    try:
-                        # @modified 20191128 - Bug #3266: py3 Redis binary objects not strings
-                        #                      Branch #3262: py3
-                        # redis_last_metric_data = self.redis_conn.get(cache_key)
-                        redis_last_metric_data = self.redis_conn_decoded.get(cache_key)
-                        last_metric_data = literal_eval(redis_last_metric_data)
-                        last_metric_timestamp = int(last_metric_data[0])
-                        if LOCAL_DEBUG:
-                            logger.info('worker :: debug :: last_metric_timestamp for %s from %s is %s' % (metric, str(cache_key), str(last_metric_timestamp)))
-                    except:
-                        logger.error(traceback.format_exc())
-                        logger.error('error :: worker :: failed to determine last_metric_timestamp from Redis key %s' % str(cache_key))
-                        last_metric_timestamp = False
-                    if last_metric_timestamp:
-                        if timestamp <= last_metric_timestamp:
-                            valid_data = False
+
+                    # @modified 20200206 - Feature #3444: Allow flux to backfill
+                    # Only check flux.last key if this is not backfill
+                    if not backfill:
+                        cache_key = 'flux.last.%s' % metric
+                        last_metric_timestamp = None
+                        try:
+                            # @modified 20191128 - Bug #3266: py3 Redis binary objects not strings
+                            #                      Branch #3262: py3
+                            # redis_last_metric_data = self.redis_conn.get(cache_key)
+                            redis_last_metric_data = self.redis_conn_decoded.get(cache_key)
+                            last_metric_data = literal_eval(redis_last_metric_data)
+                            last_metric_timestamp = int(last_metric_data[0])
                             if LOCAL_DEBUG:
-                                logger.info('worker :: debug :: not valid data - the queue data timestamp %s is <= to the last_metric_timestamp %s for %s' % (
-                                    str(timestamp), str(last_metric_timestamp), metric))
+                                logger.info('worker :: debug :: last_metric_timestamp for %s from %s is %s' % (metric, str(cache_key), str(last_metric_timestamp)))
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: worker :: failed to determine last_metric_timestamp from Redis key %s' % str(cache_key))
+                            last_metric_timestamp = False
+                        if last_metric_timestamp:
+                            if timestamp <= last_metric_timestamp:
+                                valid_data = False
+                                if LOCAL_DEBUG:
+                                    logger.info('worker :: debug :: not valid data - the queue data timestamp %s is <= to the last_metric_timestamp %s for %s' % (
+                                        str(timestamp), str(last_metric_timestamp), metric))
+
                     if valid_data:
                         submittedToGraphite = False
                         try:
@@ -219,8 +231,11 @@ class Worker(Process):
                             metric = None
                         if submittedToGraphite:
                             # Update the metric Redis flux key
-                            metric_data = [timestamp, value]
-                            self.redis_conn.set(cache_key, str(metric_data))
+                            # @modified 20200206 - Feature #3444: Allow flux to backfill
+                            # Only update the flux.last key if this is not backfill
+                            if not backfill:
+                                metric_data = [timestamp, value]
+                                self.redis_conn.set(cache_key, str(metric_data))
                     else:
                         logger.info('worker :: discarded %s, %s, %s as a data point for %s has already been submitted to Graphite' % (
                             str(metric), str(value), str(timestamp), str(timestamp)))

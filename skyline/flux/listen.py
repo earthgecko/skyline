@@ -101,10 +101,12 @@ class MetricData(object):
     def on_get(self, req, resp):
         """
         The /flux/metric_data endpoint is called via a GET with the URI
-        parameters as defined below:
-        /flux/metric_data?metric=<metric|str>&timestamp=<timestamp|int>&value=<value|float>&key=<key|str>
+        parameters as defined below, with the optional fill parameter to allow
+        flux to backfill airgap data for a metric:
+        /flux/metric_data?metric=<metric|str>&timestamp=<timestamp|int>&value=<value|float>&key=<key|str>[&fill=true]
         For example:
         /flux/metric_data?metric=vista.nodes.skyline-1.cpu.user&timestamp=1478021700&value=1.0&key=YOURown32charSkylineAPIkeySecret
+        /flux/metric_data?metric=vista.nodes.skyline-1.cpu.user&timestamp=1478021700&value=1.0&key=YOURown32charSkylineAPIkeySecret&fill=true
         """
 
         if LOCAL_DEBUG:
@@ -112,7 +114,9 @@ class MetricData(object):
 
         # @modified 20200115 - Feature #3394: flux health check
         # Added status parameter so that the flux listen process can be monitored
-        validGetArguments = ['key', 'metric', 'value', 'timestamp', 'status']
+        # @modified 20200206 - Feature #3444: Allow flux to backfill
+        # Added the fill parameter
+        validGetArguments = ['key', 'metric', 'value', 'timestamp', 'status', 'fill']
 
         payload = {}
         payload['query_string'] = str(req.query_string)
@@ -122,6 +126,23 @@ class MetricData(object):
         value = None
         valid_value = False
         timestamp = None
+
+        # @added 20200206 - Feature #3444: Allow flux to backfill
+        # This needs to be iterated amd determined before the timestamp is
+        # checked
+        backfill = False
+        for request_param_key, request_param_value in req.params.items():
+            try:
+                if str(request_param_key) == 'fill':
+                    fill = str(request_param_value)
+                    if fill == 'true':
+                        backfill = True
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: listen :: could not validate the fill key GET request argument - %s' % (
+                    str(req.query_string)))
+                resp.status = falcon.HTTP_400
+                return
 
         for request_param_key, request_param_value in req.params.items():
             try:
@@ -171,7 +192,12 @@ class MetricData(object):
 
             try:
                 if str(request_param_key) == 'timestamp':
-                    valid_timestamp = validate_timestamp('listen :: MetricData GET', str(request_param_value))
+                    # @modified 20200206 - Feature #3444: Allow flux to backfill
+                    # Only valid_timestamp is this is not a backfill request
+                    if not backfill:
+                        valid_timestamp = validate_timestamp('listen :: MetricData GET', str(request_param_value))
+                    else:
+                        valid_timestamp = True
                     if valid_timestamp:
                         timestamp = int(request_param_value)
                     else:
@@ -235,7 +261,9 @@ class MetricData(object):
             timestamp = int(time())
 
         # metric to add to queue
-        metric_data = [metric, value, timestamp]
+        # @modified 20200206 - Feature #3444: Allow flux to backfill
+        # Added backfill
+        metric_data = [metric, value, timestamp, backfill]
         payload['metric_data'] = str(metric_data)
 
         # Queue the metric
@@ -269,14 +297,17 @@ class MetricDataPost(object):
     def on_post(self, req, resp):
         """
         The /flux/metric_data_post endpoint is called via a POST with a json
-        object as defined below
+        object as defined below, with the optional fill parameter to allow
+        flux to backfill airgap data for a metric:
+
         For example::
 
             {
                 "metric": "metric|str",
                 "timestamp": "timestamp|int",
                 "value": "value|float",
-                "key": "api_key|str"
+                "key": "api_key|str",
+                "fill": "boolean|optional"
             }
 
         For example::
@@ -286,6 +317,14 @@ class MetricDataPost(object):
                 "timestamp": "1478021700",
                 "value": "1.0",
                 "key": "YOURown32charSkylineAPIkeySecret"
+            }
+
+            {
+                "metric": "vista.nodes.skyline-1.cpu.user",
+                "timestamp": "1478021700",
+                "value": "1.0",
+                "key": "YOURown32charSkylineAPIkeySecret",
+                "fill": "true"
             }
 
         """
@@ -312,6 +351,8 @@ class MetricDataPost(object):
         value = None
         valid_value = None
         key = None
+        # @added 20200206 - Feature #3444: Allow flux to backfill
+        backfill = False
 
         # @added 20200115 - Feature #3394: flux health check
         # Added status parameter so that the flux listen process can be monitored
@@ -359,13 +400,26 @@ class MetricDataPost(object):
             resp.status = falcon.HTTP_400
             return
 
+        # @added 20200206 - Feature #3444: Allow flux to backfill
+        try:
+            fill = str(postData['fill'])
+            if fill == 'true':
+                backfill = True
+        except:
+            backfill = False
+
         try:
             timestamp_present = str(postData['timestamp'])
         except:
             timestamp_present = False
         if timestamp_present:
             try:
-                valid_timestamp = validate_timestamp('listen :: MetricDataPOST POST', str(postData['timestamp']))
+                # @modified 20200206 - Feature #3444: Allow flux to backfill
+                # Only valid_timestamp is this is not a backfill request
+                if not backfill:
+                    valid_timestamp = validate_timestamp('listen :: MetricDataPOST POST', str(postData['timestamp']))
+                else:
+                    valid_timestamp = True
                 if valid_timestamp:
                     timestamp = int(postData['timestamp'])
                 else:
@@ -414,7 +468,9 @@ class MetricDataPost(object):
 
         # Queue the metric
         try:
-            metric_data = [metric, value, timestamp]
+            # @modified 20200206 - Feature #3444: Allow flux to backfill
+            # Added backfill
+            metric_data = [metric, value, timestamp, backfill]
             flux.httpMetricDataQueue.put(metric_data, block=False)
             logger.info('listen :: POST data added to flux.httpMetricDataQueue - %s' % str(metric_data))
         except:
