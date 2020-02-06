@@ -9,5 +9,192 @@
 		<li class="active"><span class="logo"><span class="sky">api</span> <span class="re">documentation</span></li>
 	</ol>
 
+
+	  <h3><span class="logo"><span class="sky">API methods ::</span> <span class="re">documentation</span></span></h3>
+
+	  <h4><span class="logo"><span class="sky">API method ::</span> <span class="re">/api?airgapped_metrics</span></span></h4>
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Name</th>
+  		        <th>Description</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+  		        <td>Endpoint:</td>
+  		        <td>/api?airgapped_metrics</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Method:</td>
+  		        <td>GET</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Request example:</td>
+		          <td>/api?airgapped_metrics</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Responses:</td>
+  		        <td>200 - json response, example
+                  <code>
+{
+  "data": {
+    "metrics": [
+      "['remote_hosts.graphite-labs_wikimedia_org.cloudinfra.cloudinfra-db01.cpu.total.idle', 60, 1580907541, 1580907899, 0]",
+      "['remote_hosts.graphite-labs_wikimedia_org.cloudinfra.cloudinfra-db01.cpu.total.iowait', 60, 1580907541, 1580907899, 0]"
+    ]
+  },
+  "status": {}
+}</code><br>
+Or if no airgapped metrics are present <code>{"data":{"metrics":[]},"status":{}}</code><br>
+              </td>
+  		      </tr>
+		    </tbody>
+		  </table>
+
+	  <h4><span class="logo"><span class="sky">API method ::</span> <span class="re">/api?airgap_filled</span></span></h4>
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Name</th>
+  		        <th>Description</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+  		        <td>Endpoint:</td>
+  		        <td>/api?airgap_filled</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Method:</td>
+  		        <td>GET</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Parameters:</td>
+  		        <td>metric=[metric_name | str | <font color=red>required</font>]</br>
+                  resolution=[resolution/frequency in seconds | int | <font color=red>required</font>]</br>
+                  start=[unix timestamp | int | <font color=red>required</font>]</br>
+                  end=[unix timestamp | int | <font color=red>required</font>]</br>
+                  attempts=[number of attempts in fill the metric | int | <font color=red>required</font>]</br>
+              </td>
+  		      </tr>
+  		      <tr>
+  		        <td>Request example:</td>
+		          <td>/api?airgap_filled&metric=test.metric&resolution=60&start=1580926312&end=1580926712&attempts=0</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Responses:</td>
+  		        <td>200 - airgapped metric item removed with json response, example
+                  <code>{
+  "data": {
+    "removed_airgap": [
+      "test.metric",
+      60,
+      1580926312,
+      1580926712,
+      0
+    ]
+  },
+  "status": {}
+}</code><br>
+                  400 - bad parameter<br>
+                  404 - airgap metric entry not found<br>
+              </td>
+  		      </tr>
+		    </tbody>
+		  </table>
+
+	  <h4><span class="logo"><span class="sky">API method ::</span> <span class="re">/flux/metric_data</span></span></h4>
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Name</th>
+  		        <th>Description</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+  		        <td>Endpoint:</td>
+  		        <td>/flux/metric_data</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Method:</td>
+  		        <td>GET</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Parameters:</td>
+  		        <td>metric=[metric_name | str | <font color=red>required</font>]</br>
+                  timestamp=[unix timestamp | int | <font color=red>required</font>]</br>
+                  value=[value | float | <font color=red>required</font>]</br>
+                  key=[API key | str | <font color=red>required</font>]</br>
+                  fill=[whether this is backfill | boolean | optional]</br>
+              </td>
+  		      </tr>
+  		      <tr>
+  		        <td>Request example:</td>
+		          <td>/flux/metric_data?metric=vista.nodes.skyline-1.cpu.user&timestamp=1478021700&value=1.0&key=YOURown32charSkylineAPIkeySecret<br>
+                  /flux/metric_data?metric=vista.nodes.skyline-1.cpu.user&timestamp=1478021700&value=1.0&key=YOURown32charSkylineAPIkeySecret&fill=true
+              </td>
+  		      </tr>
+  		      <tr>
+  		        <td>Responses:</td>
+  		        <td>204<br>
+                  200 - if in debug mode and returns a json response with the query_string, request parameters and values and the metric data submitted<br>
+                  400 - bad parameter<br>
+              </td>
+  		      </tr>
+		    </tbody>
+		  </table>
+	  <h4><span class="logo"><span class="sky">API method ::</span> <span class="re">/flux/metric_data_post</span></span></h4>
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Name</th>
+  		        <th>Description</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+  		        <td>Endpoint:</td>
+  		        <td>/flux/metric_data_post</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Method:</td>
+  		        <td>POST</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Data:</td>
+  		        <td>
+                      {
+                          "metric": "metric|str",
+                          "timestamp": "timestamp|int",
+                          "value": "value|float",
+                          "key": "api_key|str",
+                          "fill": "boolean|optional"
+                      }
+              </td>
+  		      </tr>
+  		      <tr>
+  		        <td>Request data example:</td>
+		          <td>
+{
+    "metric": "metric|str",
+    "timestamp": "timestamp|int",
+    "value": "value|float",
+    "key": "api_key|str",
+    "fill": "boolean|optional"
+}
+              </td>
+  		      </tr>
+  		      <tr>
+  		        <td>Responses:</td>
+  		        <td>204<br>
+                  200 - if in debug mode and returns a json response with the posted data<br>
+                  400 - missing parameter in post data<br>
+              </td>
+  		      </tr>
+		    </tbody>
+		  </table>
+
 <!-- END /api block -->
 {% endblock %}

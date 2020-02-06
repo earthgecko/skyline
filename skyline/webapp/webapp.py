@@ -594,6 +594,90 @@ def api():
         logger.info('airgapped_metrics responding with %s metrics' % str(len(airgapped_metrics)))
         data_dict = {"status": {}, "data": {"metrics": airgapped_metrics}}
         return jsonify(data_dict), 200
+    # @added 20200205 - Feature #3400: Identify air gaps in the metric data
+    # /api?airgap_filled&metric=<metric>&resoluion=<resolution>&start=<start-unix-timestamp>&end=<end-unix-timestamp>&attempt<attempts>
+    if 'airgap_filled' in request.args:
+        metric = None
+        resolution = None
+        start = None
+        end = None
+        attempts = None
+        for i in request.args:
+            key = str(i)
+            value = request.args.get(key, None)
+            logger.info('api?airgap_filled - request argument - %s=%s' % (key, str(value)))
+        if 'metric' in request.args:
+            metric = request.args.get('metric', None)
+        if not metric:
+            resp = json.dumps(
+                {'results': 'Error: no metric parameter was passed to /api?airgap_filled'})
+            return resp, 400
+        if 'resolution' in request.args:
+            resolution = request.args.get('resolution', None)
+        if not resolution:
+            resp = json.dumps(
+                {'results': 'Error: no resolution parameter was passed to /api?airgap_filled'})
+            return resp, 400
+        if 'start' in request.args:
+            start = request.args.get('start', None)
+        if not start:
+            resp = json.dumps(
+                {'results': 'Error: no start parameter was passed to /api?airgap_filled'})
+            return resp, 400
+        if 'end' in request.args:
+            end = request.args.get('end', None)
+        if not end:
+            resp = json.dumps(
+                {'results': 'Error: no end parameter was passed to /api?airgap_filled'})
+            return resp, 400
+        if 'attempts' in request.args:
+            attempts = request.args.get('attempts', None)
+        if not attempts:
+            resp = json.dumps(
+                {'results': 'Error: no attempts parameter was passed to /api?airgap_filled'})
+            return resp, 400
+        # Check airgap is in the set
+        airgapped_metrics = []
+        try:
+            airgapped_metrics = REDIS_CONN.smembers('analyzer.airgapped_metrics')
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: Webapp could not get the analyzer.airgapped_metrics list from Redis')
+            return 'Internal Server Error', 500
+        airgap_present = False
+        for airgap_str in airgapped_metrics:
+            try:
+                airgap = literal_eval(airgap_str)
+                if str(metric) != (airgap[0]):
+                    continue
+                if int(resolution) != int(airgap[1]):
+                    continue
+                if int(start) != int(airgap[2]):
+                    continue
+                if int(end) != int(airgap[3]):
+                    continue
+                if int(attempts) != int(airgap[4]):
+                    continue
+                airgap_present = airgap
+                break
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to iterate literal_eval of airgapped_metrics')
+                continue
+        if not airgap_present:
+            logger.info('api?airgap_filled responding with 404 no matching airgap found in analyzer.airgapped_metrics Redis set')
+            return 'Not found', 404
+        logger.info('removing airgapped metric item - %s' % str(airgap))
+        try:
+            REDIS_CONN_UNDECODE.srem('analyzer.airgapped_metrics', str(airgap))
+        except Exception as e:
+            logger.error(traceback.format_exc())
+            logger.error('error :: could not remove item from analyzer.airgapped_metrics Redis set - %s' % str(e))
+            resp = json.dumps(
+                {'error': 'Error: could not remove item from analyzer.airgapped_metrics Redis set'})
+            return resp, 500
+        data_dict = {"status": {}, "data": {"removed_airgap": airgap}}
+        return jsonify(data_dict), 200
 
     # @added 20191231 - Feature #3368: webapp api - ionosphere_learn_work
     if 'ionosphere_learn_work' in request.args:
