@@ -236,6 +236,23 @@ class Worker(Process):
                             if not backfill:
                                 metric_data = [timestamp, value]
                                 self.redis_conn.set(cache_key, str(metric_data))
+                            # @added 20200213 - Bug #3448: Repeated airgapped_metrics
+                            else:
+                                # @added 20200213 - Bug #3448: Repeated airgapped_metrics
+                                # Add a flux.filled key to Redis with a expiry
+                                # set to FULL_DURATION so that Analyzer knows to
+                                # sort and deduplicate the Redis time series
+                                # data as carbon-relay will send it to Horizon
+                                # and the datapoints will be out of order in the
+                                # Redis key
+                                try:
+                                    flux_filled_key = 'flux.filled.%s' % str(metric)
+                                    self.redis_conn.setex(
+                                        flux_filled_key, settings.FULL_DURATION,
+                                        int(time()))
+                                    logger.info('worker :: set Redis key %s' % (str(flux_filled_key)))
+                                except Exception as e:
+                                    logger.error('error :: failed to could not set Redis derivative_metric key: %s' % e)
                     else:
                         logger.info('worker :: discarded %s, %s, %s as a data point for %s has already been submitted to Graphite' % (
                             str(metric), str(value), str(timestamp), str(timestamp)))

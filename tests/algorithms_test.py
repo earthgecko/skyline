@@ -71,7 +71,12 @@ class TestAlgorithms(unittest.TestCase):
     @patch.object(algorithms, 'time')
     def test_run_selected_algorithm(self, timeMock):
         timeMock.return_value, timeseries = self.data(time())
-        result, ensemble, datapoint = algorithms.run_selected_algorithm(timeseries, "test.metric")
+        # @modified 20200206 - Feature #3400: Identify air gaps in the metric data
+        # Added the airgapped_metrics list
+        # result, ensemble, datapoint = algorithms.run_selected_algorithm(timeseries, "test.metric")
+        airgapped_metrics = ['test.metric.airgapped.1', 'test.metric.airgapped.2']
+        result, ensemble, datapoint = algorithms.run_selected_algorithm(timeseries, "test.metric", airgapped_metrics)
+
         self.assertTrue(result)
         self.assertTrue(len(filter(None, ensemble)) >= settings.CONSENSUS)
         self.assertEqual(datapoint, 1000)

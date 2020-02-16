@@ -74,6 +74,20 @@ try:
     from settings import MAX_AIRGAP_PERIOD
 except:
     MAX_AIRGAP_PERIOD = int(3600 * 6)
+# @added 20200214 - Bug #3448: Repeated airgapped_metrics
+#                   Feature #3400: Identify air gaps in the metric data
+try:
+    from settings import IDENTIFY_UNORDERED_TIMESERIES
+except:
+    IDENTIFY_UNORDERED_TIMESERIES = False
+try:
+    from settings import CHECK_AIRGAPS
+except:
+    CHECK_AIRGAPS = []
+try:
+    from settings import SKIP_AIRGAPS
+except:
+    SKIP_AIRGAPS = []
 
 """
 This is no man's land. Do anything you want in here,
@@ -531,12 +545,13 @@ def determine_array_median(array):
 # from ~1.20 to 1.38 seconds up to between 1.42 and 1.5 seocnds on 191 metrics
 def identify_airgaps(metric_name, timeseries, airgapped_metrics):
     """
-    Identify air gaps in metrics and populate the analyzer.airgapped_metrics
+    Identify air gaps in metrics to populate the analyzer.airgapped_metrics
     Redis set with the air gaps if the specific air gap it is not present in the
     set. If there is a start_airgap timestamp and no end_airgap is set then the
     metric will be in a current air gap state and/or it will become stale.  If
     the netric starts sending data again, it will have the end_airgap set and be
-    added to the analyzer.airgapped_metrics Redis set.
+    added to the analyzer.airgapped_metrics Redis set.  Also Identify if a time
+    series is unordered.
 
     :param metric_name: the FULL_NAMESPACE metric name
     :type metric_name: str
@@ -545,8 +560,9 @@ def identify_airgaps(metric_name, timeseries, airgapped_metrics):
     :param airgapped_metrics: the air gapped metrics list generated from the
         analyzer.airgapped_metrics Redis set
     :type airgapped_metrics: list
-    :return: list of air gapped metrics
-    :rtype: list
+    :return: list of air gapped metrics and a boolean as to whether the time
+        series is unordered
+    :rtype: list, boolean
 
     """
 
@@ -595,7 +611,8 @@ def identify_airgaps(metric_name, timeseries, airgapped_metrics):
                 algorithm_name = str(get_function_name())
                 record_algorithm_error(algorithm_name, traceback_format_exc_string)
                 del timestamp_resolutions
-                return None
+                # return None
+                return None, False
         if timestamp_resolutions:
             del timestamp_resolutions
         airgaps_present = False
@@ -612,9 +629,33 @@ def identify_airgaps(metric_name, timeseries, airgapped_metrics):
                     airgaps_present = True
         if timestamp_resolutions_count:
             del timestamp_resolutions_count
+
+        # @added 20200214 - Bug #3448: Repeated airgapped_metrics
+        #                   Feature #3400: Identify air gaps in the metric data
+        # Identify metrics that have time series that are not ordered, for
+        # Analyser to order and replace the existing Redis metric key time
+        # data. If backfilling is being done via Flux then unordered time series
+        # data can be expected from time to time.  Although these metrics are
+        # identified via their flux.filled Redis key, this is an additional test
+        # just to catch any that slip through the gaps.  This operation fairly
+        # fast, testing on 657 metrics with loading all the time series data and
+        # running the below function took 0.43558645248413086 seconds.
+        unordered_timeseries = False
+        for resolution in ordered_timestamp_resolutions_count:
+            if resolution[0] < 0:
+                unordered_timeseries = True
+                break
+
         if ordered_timestamp_resolutions_count:
             del ordered_timestamp_resolutions_count
 
+        # @added 20200214 - Bug #3448: Repeated airgapped_metrics
+        #                      Feature #3400: Identify air gaps in the metric data
+        # Here if airgaps are not being identifying, return whether the time
+        # series is unordered
+        if not IDENTIFY_AIRGAPS:
+            del airgaps_present
+            return None, unordered_timeseries
         if airgaps_present:
             base_name = metric_name.replace(FULL_NAMESPACE, '', 1)
             # logger.info('airgaps present in %s - %s' % (base_name, str(ordered_timestamp_resolutions_count)))
@@ -640,9 +681,14 @@ def identify_airgaps(metric_name, timeseries, airgapped_metrics):
                         airgap_known = False
                         if airgapped_metrics:
                             for i in airgapped_metrics:
-                                airgap = literal_eval(i)
-                                airgap_metric = str(airgap[0])
-                                if base_name != airgap_metric:
+                                # @modified 20200213 - Bug #3448: Repeated airgapped_metrics
+                                # Only literal_eval if required
+                                # airgap = literal_eval(i)
+                                # airgap_metric = str(airgap[0])
+                                # if base_name != airgap_metric:
+                                if base_name in i:
+                                    airgap = literal_eval(i)
+                                else:
                                     continue
                                 airgap_metric_resolution = int(airgap[1])
                                 if metric_resolution != airgap_metric_resolution:
@@ -661,7 +707,14 @@ def identify_airgaps(metric_name, timeseries, airgapped_metrics):
                                     end_airgap = None
                                     break
                         if not airgap_known:
-                            airgaps.append([base_name, metric_resolution, start_airgap, end_airgap, 0])
+                            # @modified 20200213 - Bug #3448: Repeated airgapped_metrics
+                            add_airgap = True
+                            if start_airgap < max_airgap_timestamp:
+                                add_airgap = False
+                            if end_airgap < max_airgap_timestamp:
+                                add_airgap = False
+                            if add_airgap:
+                                airgaps.append([base_name, metric_resolution, start_airgap, end_airgap, 0])
                             start_airgap = None
                             end_airgap = None
                         continue
@@ -677,8 +730,14 @@ def identify_airgaps(metric_name, timeseries, airgapped_metrics):
         traceback_format_exc_string = traceback.format_exc()
         algorithm_name = str(get_function_name())
         record_algorithm_error(algorithm_name, traceback_format_exc_string)
-        return None
-    return airgaps
+        # return None
+        return None, False
+
+    # @modified 20200214 - Bug #3448: Repeated airgapped_metrics
+    #                      Feature #3400: Identify air gaps in the metric data
+    # Also return with the time series is unordered
+    # return airgaps
+    return airgaps, unordered_timeseries
 
 
 def is_anomalously_anomalous(metric_name, ensemble, datapoint):
@@ -783,9 +842,51 @@ def run_selected_algorithm(timeseries, metric_name, airgapped_metrics):
         raise Boring()
 
     # @added 20200117 - Feature #3400: Identify air gaps in the metric data
-    if IDENTIFY_AIRGAPS:
-        airgaps = identify_airgaps(metric_name, timeseries, airgapped_metrics)
-        if airgaps:
+    # @modified 20200214 - Bug #3448: Repeated airgapped_metrics
+    #                      Feature #3400: Identify air gaps in the metric data
+    # if IDENTIFY_AIRGAPS:
+    if IDENTIFY_AIRGAPS or IDENTIFY_UNORDERED_TIMESERIES:
+        # airgaps = identify_airgaps(metric_name, timeseries, airgapped_metrics)
+        # if airgaps:
+        process_metric = True
+        if IDENTIFY_AIRGAPS:
+            if CHECK_AIRGAPS:
+                metric_namespace_elements = metric_name.split('.')
+                process_metric = False
+                try:
+                    for to_check in CHECK_AIRGAPS:
+                        if to_check in metric_name:
+                            process_metric = True
+                            break
+                        to_check_namespace_elements = to_check.split('.')
+                        elements_matched = set(metric_namespace_elements) & set(to_check_namespace_elements)
+                        if len(elements_matched) == len(to_check_namespace_elements):
+                            process_metric = True
+                            break
+                except:
+                    pass
+            # Allow to skip identifying airgaps on certain metrics and namespaces
+            if process_metric:
+                metric_namespace_elements = metric_name.split('.')
+                for to_skip in SKIP_AIRGAPS:
+                    if to_skip in metric_name:
+                        process_metric = False
+                        break
+                    to_skip_namespace_elements = to_skip.split('.')
+                    elements_matched = set(metric_namespace_elements) & set(to_skip_namespace_elements)
+                    if len(elements_matched) == len(to_skip_namespace_elements):
+                        process_metric = False
+                        break
+        else:
+            # If IDENTIFY_AIRGAPS is not enabled and
+            # IDENTIFY_UNORDERED_TIMESERIES is enabled process the metric
+            if IDENTIFY_UNORDERED_TIMESERIES:
+                process_metric = True
+        airgaps = None
+        unordered_timeseries = False
+        if process_metric:
+            airgaps, unordered_timeseries = identify_airgaps(metric_name, timeseries, airgapped_metrics)
+        if airgaps or unordered_timeseries:
             try:
                 redis_conn.ping()
             except:
@@ -794,12 +895,24 @@ def run_selected_algorithm(timeseries, metric_name, airgapped_metrics):
                     redis_conn = StrictRedis(password=REDIS_PASSWORD, unix_socket_path=REDIS_SOCKET_PATH)
                 else:
                     redis_conn = StrictRedis(unix_socket_path=REDIS_SOCKET_PATH)
+        if airgaps:
             for i in airgaps:
                 try:
                     redis_conn.sadd('analyzer.airgapped_metrics', str(i))
+                    del airgaps
                     # TODO: learn_airgapped_metrics
                 except:
                     pass
+        # @added 20200214 - Bug #3448: Repeated airgapped_metrics
+        #                   Feature #3400: Identify air gaps in the metric data
+        # Also add unordered time series to the analyzer.unordered_timeseries
+        # Redis set
+        if unordered_timeseries:
+            try:
+                redis_conn.sadd('analyzer.unordered_timeseries', metric_name)
+                del unorder_timeseries
+            except:
+                pass
 
     # RUN_OPTIMIZED_WORKFLOW - replaces the original ensemble method:
     # ensemble = [globals()[algorithm](timeseries) for algorithm in ALGORITHMS]
