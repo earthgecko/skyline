@@ -113,6 +113,13 @@ try:
 except:
     MAX_AIRGAP_PERIOD = int(3600 * 6)
 
+# @added 20200214 - Bug #3448: Repeated airgapped_metrics
+#                   Feature #3400: Identify air gaps in the metric data
+try:
+    from settings import IDENTIFY_UNORDERED_TIMESERIES
+except:
+    IDENTIFY_UNORDERED_TIMESERIES = False
+
 # @added 20190522 - Feature #2580: illuminance
 # Disabled for now as in concept phase.  This would work better if
 # the illuminance_datapoint was determined from the time series
@@ -208,6 +215,16 @@ class Analyzer(Thread):
             kill(self.parent_pid, 0)
         except:
             exit(0)
+
+    # @added 20200213 - Bug #3448: Repeated airgapped_metrics
+    #                   Feature #3400: Identify air gaps in the metric data
+    def uniq_datapoints(self, timeseries):
+        last = object()
+        for item in timeseries:
+            if item == last:
+                continue
+            yield item
+            last = item
 
     def spawn_alerter_process(self, alert, metric, context):
         """
@@ -562,6 +579,17 @@ class Analyzer(Thread):
             logger.error('error :: failed to generate a list from analyzer.non_smtp_alerter_metrics Redis set')
             non_smtp_alerter_metrics = []
 
+        # @added 20200213 - Bug #3448: Repeated airgapped_metrics
+        #                   Feature #3400: Identify air gaps in the metric data
+        # Backfill airgaps in Redis time series with flux back filled data
+        flux_filled_keys = []
+
+        # @added 20200214 - Bug #3448: Repeated airgapped_metrics
+        #                   Feature #3400: Identify air gaps in the metric data
+        # Also sort and deduplicate any metrics that were identified as being
+        # unordered in the last run through algorithms.
+        analyzer_unordered_timeseries = []
+
         # @added 20200117 - Feature #3400: Identify air gaps in the metric data
         # Get the airgapped_metrics list so that it is only got once per run and
         # passed to run_selected_algorithm if enabled and exists.
@@ -576,6 +604,37 @@ class Analyzer(Thread):
                 logger.error('error :: could not query Redis for analyzer.airgapped_metrics - %s' % str(e))
                 airgapped_metrics = []
             logger.info('determined %s airgapped metrics' % str(len(airgapped_metrics)))
+
+            # @added 20200213 - Bug #3448: Repeated airgapped_metrics
+            #                   Feature #3400: Identify air gaps in the metric data
+            # Backfill airgaps in Redis time series with flux back filled data
+            try:
+                flux_filled_keys = list(self.redis_conn.scan_iter(match='flux.filled.*'))
+                logger.info('detemined %s flux.filled keys from Redis scan_iter' % (
+                    str(len(flux_filled_keys))))
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to scan flux.filled.* from Redis')
+
+            # @added 20200214 - Bug #3448: Repeated airgapped_metrics
+            #                   Feature #3400: Identify air gaps in the metric data
+            # Also sort and deduplicate any metrics that were identified as being
+            # unordered in the last run through algorithms.
+            redis_set = 'analyzer.unordered_timeseries'
+            try:
+                analyzer_unordered_timeseries = list(self.redis_conn_decoded.smembers(redis_set))
+            except Exception as e:
+                logger.error('error :: could not query Redis for %s - %s' % (redis_set, str(e)))
+                analyzer_unordered_timeseries = []
+            logger.info('determined %s unordered metrics' % str(len(analyzer_unordered_timeseries)))
+            try:
+                # Delete the analyzer.unordered_timeseries Redis set so it can
+                # be recreated in the next run_selected_algorithms
+                self.redis_conn.delete(redis_set)
+            except:
+                logger.info(traceback.format_exc())
+                logger.error('error :: failed to delete Redis key %s' % (
+                    redis_set))
 
         # Distill timeseries strings into lists
         for i, metric_name in enumerate(assigned_metrics):
@@ -609,6 +668,214 @@ class Analyzer(Thread):
                 unknown_deriv_status = True
 
             base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+
+            # @added 20200213 - Bug #3448: Repeated airgapped_metrics
+            #                   Feature #3400: Identify air gaps in the metric data
+            # When flux backfills a metric airgap and sends it to Graphite,
+            # carbon-relay sends it to Horizon which results in it being written
+            # to the Redis metric key time series out of order.  For metrics
+            # that have been backfilled by Flux in the last FULL_DURATION
+            # period, Analyzer needs to sort and deduplicate the Redis time
+            # series data for that metric as long as a flux.filled key exists
+            # for that metric and replace the metric key data with sorted data.
+            sort_data = False
+            update_new_data = False
+            if IDENTIFY_AIRGAPS and flux_filled_keys:
+                metric_flux_filled_key = 'flux.filled.%s' % str(base_name)
+                sorted_and_deduplicated_timeseries = None
+                populated_redis_key = False
+                new_metric_name_key = 'analyzer.sorted.deduped.%s' % str(metric_name)
+                sort_data = False
+                if metric_flux_filled_key in flux_filled_keys:
+                    sort_data = True
+                    logger.info('sorting and deduplicating data because a Flux Redis key exists - %s' % str(metric_flux_filled_key))
+            if IDENTIFY_UNORDERED_TIMESERIES and analyzer_unordered_timeseries:
+                if metric_name in analyzer_unordered_timeseries:
+                    sort_data = True
+                    logger.info('sorting and deduplicating data because %s is in the analyzer.unordered_timeseries' % str(metric_name))
+            sorted_and_deduplicated_timeseries = None
+            if sort_data:
+                try:
+                    unsorted_length = len(timeseries)
+                    sorted_timeseries = sorted(timeseries, key=lambda x: x[0])
+                    sorted_and_deduplicated_timeseries = list(self.uniq_datapoints(sorted(sorted_timeseries, reverse=False)))
+                    sorted_and_deduped_length = len(sorted_and_deduplicated_timeseries)
+                    logger.info('timeseries length is %s, sorted and deduplicated timeseries length is %s' % (
+                        str(unsorted_length), str(sorted_and_deduped_length)))
+                    timeseries = sorted_and_deduplicated_timeseries
+                except:
+                    logger.info(traceback.format_exc())
+                    logger.error('error :: failed to sort and deduplicate flux filled timeseries for %s' % str(metric_name))
+                if not sorted_and_deduplicated_timeseries:
+                    logger.error('error :: failed to sort and deduplicate flux filled timeseries for %s' % str(metric_name))
+            # Recreate the Redis key sorted and deduplicated and feed to
+            # Redis ala Horizon worker method more or less
+            if sorted_and_deduplicated_timeseries:
+                logger.info('populating Redis key %s with sorted and deduplicated data' % str(new_metric_name_key))
+                try:
+                    new_metric_name_key = 'analyzer.sorted.deduped.%s' % str(metric_name)
+                    for datapoint in sorted_and_deduplicated_timeseries:
+                        metric = (new_metric_name_key, (datapoint[0], datapoint[1]))
+                        self.redis_conn.append(str(new_metric_name_key), packb(metric[1]))
+                    populated_redis_key = True
+                except:
+                    logger.info(traceback.format_exc())
+                    logger.error('error :: failed to populate Redis key %s with sorted and deduplicated data' % str(metric_name))
+                if not populated_redis_key:
+                    try:
+                        self.redis_conn.delete(new_metric_name_key)
+                    except:
+                        pass
+                test_timeseries = None
+                if populated_redis_key:
+                    logger.info('getting current Redis key %s data to compare with sorted and deduplicated data' % str(metric_name))
+                    try:
+                        test_raw_series = self.redis_conn.get(metric_name)
+                        unpacker = Unpacker(use_list=False)
+                        unpacker.feed(test_raw_series)
+                        test_timeseries = list(unpacker)
+                    except:
+                        logger.info(traceback.format_exc())
+                        logger.error('error :: failed to get Redis key %s to test against sorted and deduplicated data' % str(metric_name))
+                verified_existing_key_data = False
+                if test_timeseries:
+                    logger.info('comparing most recent current timestamp with sorted and deduplicated data')
+                    try:
+                        logger.info('sorting and deduplicating current data')
+                        try:
+                            sorted_test_timeseries = sorted(test_timeseries, key=lambda x: x[0])
+                            sorted_and_deduplicated_test_timeseries = list(self.uniq_datapoints(sorted(sorted_test_timeseries, reverse=False)))
+                            test_timeseries = sorted_and_deduplicated_test_timeseries
+                        except:
+                            logger.info(traceback.format_exc())
+                            logger.error('error :: failed to sort and deduplicate current data for %s' % str(metric_name))
+                        if test_timeseries:
+                            try:
+                                last_current_ts = int(test_timeseries[-1][0])
+                                last_new_sort_ts = int(sorted_and_deduplicated_timeseries[-1][0])
+                                if last_current_ts == last_new_sort_ts:
+                                    verified_existing_key_data = True
+                                    logger.info('most recent current timestamp with sorted and deduplicated data match')
+                                else:
+                                    logger.info('the sorted and deduplicated last timestamp (%s) does not match the current data last timestamp (%s) not replaced Redis key %s' % (
+                                        str(last_new_sort_ts), str(last_current_ts), str(metric_name)))
+                            except:
+                                logger.info(traceback.format_exc())
+                                logger.error('error :: failed to determine for timestamps match')
+                    except:
+                        logger.info(traceback.format_exc())
+                        logger.error('error :: failed to comparing most recent current timestamp with sorted and deduplicated data for %s' % str(metric_name))
+                if not verified_existing_key_data:
+                    try:
+                        self.redis_conn.delete(new_metric_name_key)
+                    except:
+                        logger.info(traceback.format_exc())
+                        logger.error('error :: failed to delete Redis key %s' % (
+                            new_metric_name_key))
+                original_key_renamed = False
+                metric_key_to_delete = 'analyzer.flux.rename.%s' % str(metric_name)
+                if verified_existing_key_data:
+                    try:
+                        logger.info('renaming key %s to %s' % (metric_name, metric_key_to_delete))
+                        self.redis_conn.rename(metric_name, metric_key_to_delete)
+                        original_key_renamed = True
+                    except:
+                        logger.info(traceback.format_exc())
+                        logger.error('error :: failed to rename Redis key %s to %s' % (
+                            str(metric_name), metric_key_to_delete))
+                        try:
+                            logger.info('deleting key %s' % (new_metric_name_key))
+                            self.redis_conn.delete(new_metric_name_key)
+                        except:
+                            logger.info(traceback.format_exc())
+                            logger.error('error :: failed to delete Redis key %s' % (
+                                new_metric_name_key))
+                new_key_renamed = False
+                if original_key_renamed:
+                    try:
+                        logger.info('renaming key %s to %s' % (new_metric_name_key, metric_name))
+                        self.redis_conn.rename(new_metric_name_key, metric_name)
+                        new_key_renamed = True
+                    except:
+                        logger.info(traceback.format_exc())
+                        logger.error('error :: failed to rename Redis key %s to %s' % (
+                            str(new_metric_name_key), metric_name))
+                        try:
+                            logger.info('reverting by renaming key %s to %s' % (metric_key_to_delete, metric_name))
+                            self.redis_conn.rename(metric_key_to_delete, metric_name)
+                        except:
+                            logger.info(traceback.format_exc())
+                            logger.error('error :: failed to rename Redis key %s to %s' % (
+                                str(metric_key_to_delete), metric_name))
+                        try:
+                            self.redis_conn.delete(new_metric_name_key)
+                        except:
+                            logger.info(traceback.format_exc())
+                            logger.error('error :: failed to delete Redis key %s' % (
+                                new_metric_name_key))
+                if new_key_renamed:
+                    test_timeseries = None
+                    logger.info('determining if any new data was added to the metric Redis key during the rename')
+                    try:
+                        test_raw_series = self.redis_conn.get(metric_key_to_delete)
+                        unpacker = Unpacker(use_list=False)
+                        unpacker.feed(test_raw_series)
+                        test_timeseries = list(unpacker)
+                    except:
+                        logger.info(traceback.format_exc())
+                        logger.error('error :: failed to get Redis key %s to test against sorted and deduplicated data' % str(metric_key_to_delete))
+                    update_new_data = False
+                    if test_timeseries:
+                        logger.info('comparing most recent current timestamp from the renamed key with new sorted and deduplicated data')
+                        try:
+                            last_current_ts = int(test_timeseries[-1][0])
+                            if last_current_ts == last_new_sort_ts:
+                                logger.info('the timestamps match, OK')
+                            else:
+                                logger.info('the sorted and deduplicated last timestamp (%s) does not match the last timestamp (%s) from the renamed Redis key' % (
+                                    str(last_new_sort_ts), str(last_current_ts)))
+                                update_new_data = True
+                        except:
+                            logger.info(traceback.format_exc())
+                            logger.error('error :: failed to determine if timestamps match with the renamed key')
+                    if update_new_data:
+                        # Add any data that was added to the renamed key to the
+                        # new sorted and deduplicated key, even if this unorders
+                        # it again.  Better to reorder on the next run than lose
+                        # data points
+                        new_datapoints = []
+                        try:
+                            # slice reverse the list with [::-1]
+                            for datapoint in test_timeseries[::-1]:
+                                if int(datapoint[0]) != last_new_sort_ts:
+                                    new_datapoints.append(datapoint)
+                                else:
+                                    break
+                        except:
+                            logger.info(traceback.format_exc())
+                            logger.error('error :: failed to determine datapoints to append to the new key')
+                        if new_datapoints:
+                            try:
+                                for datapoint in new_datapoints:
+                                    metric = (metric_name, (datapoint[0], datapoint[1]))
+                                    self.redis_conn.append(metric_name, packb(metric[1]))
+                            except:
+                                logger.info(traceback.format_exc())
+                                logger.error('error :: failed to populate Redis key %s with new data' % str(metric_name))
+                    try:
+                        logger.info('deleting key %s' % (metric_key_to_delete))
+                        self.redis_conn.delete(metric_key_to_delete)
+                    except:
+                        logger.info(traceback.format_exc())
+                        logger.error('error :: failed to delete Redis key %s' % (
+                            metric_key_to_delete))
+                    try:
+                        logger.info('Redis time series key data sorted and ordered with Flux additions, deleting key %s' % (metric_flux_filled_key))
+                        self.redis_conn.delete(metric_flux_filled_key)
+                    except:
+                        logger.info(traceback.format_exc())
+                        logger.error('error :: failed to delete Redis key %s' % (
+                            metric_key_to_delete))
 
             # @added 20170617 - Bug #2050: analyse_derivatives - change in monotonicity
             # First check if it has its own Redis z.derivative_metric key
@@ -704,10 +971,31 @@ class Analyzer(Thread):
                 # Also pass the airgapped_metrics list so that it is only got
                 # once per run and does not have to be queried in algorithms
                 # anomalous, ensemble, datapoint = run_selected_algorithm(timeseries, metric_name)
-                anomalous, ensemble, datapoint = run_selected_algorithm(timeseries, metric_name, airgapped_metrics)
+                # @modified 20200213 - Bug #3448: Repeated airgapped_metrics
+                # Filter out airgaps for the metric from airgapped_metrics and
+                # pass just those
+                # anomalous, ensemble, datapoint = run_selected_algorithm(timeseries, metric_name, airgapped_metrics)
+                metric_airgaps = []
+                for i in airgapped_metrics:
+                    if base_name in i:
+                        metric_airgaps.append(i)
+                anomalous, ensemble, datapoint = run_selected_algorithm(timeseries, metric_name, metric_airgaps)
+                del metric_airgaps
+
                 # @added 20191016 - Branch #3262: py3
                 if LOCAL_DEBUG:
                     logger.info('debug :: metric %s - anomalous - %s' % (str(metric_name), str(anomalous)))
+
+                # @added 20200214 - Bug #3448: Repeated airgapped_metrics
+                #                   Feature #3400: Identify air gaps in the metric data
+                # If the metric Redis key was updated with new data added during
+                # the key rename after sorting and deduplicating the time series
+                # data, it is possible the add timestamps in the appended data
+                # are unordered.  In these cases do not honor a anomalous
+                # result.
+                if update_new_data and anomalous:
+                    logger.info('metric %s - anomalous - %s, however not honoring this result as the sorted, deduplicated key data was appended with new data which may have been unordered' % (str(metric_name), str(anomalous)))
+                    anomalous = False
 
                 # @added 20191107 - Feature #3306: Record anomaly_end_timestamp
                 #                   Branch #3262: py3

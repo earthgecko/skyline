@@ -472,8 +472,18 @@ IDENTIFY_AIRGAPS = False
 """
 :var IDENTIFY_AIRGAPS: Identify metrics which have air gaps and publish to the
     analyzer.airgapped_metrics Redis set which is exposed via the webapp on
-    /api?airgapped_metrics
+    /api?airgapped_metrics [ADVANCED FEATURE]
 :vartype IDENTIFY_AIRGAPS: boolean
+
+- Note that the implementation of this feature has a computational cost and will
+  increase analyzer.run_time and CPU usage.  If you are not back filling airgaps
+  by via Flux or directly to carbon-relay DO NOT enable this.
+- Enabling this also enables the IDENTIFY_UNORDERED_TIMESERIES features which is
+  a part of the IDENTIFY_AIRGAPS functionality.
+- If you do enable this, consider specifying specific metrics and/or namespaces
+  in CHECK_AIRGAPS below to limit only checking metrics which will be back
+  filled and not all your metrics.
+
 """
 
 MAX_AIRGAP_PERIOD = 21600
@@ -481,7 +491,88 @@ MAX_AIRGAP_PERIOD = 21600
 :var MAX_AIRGAP_PERIOD: If IDENTIFY_AIRGAPS is enabled Analyzer will only flag
     metric that have any air gaps in the last MAX_AIRGAP_PERIOD seconds as
     air gapped.
-:vartype MAX_AIRGAP_PERIOD: boolean
+:vartype MAX_AIRGAP_PERIOD: int
+"""
+
+CHECK_AIRGAPS = []
+"""
+:var CHECK_AIRGAPS: If set to [] ALL metrics will be check.  List metrics and
+    namespaces that you explicitly want to identify airgaps in, this is only
+    applicable if you have IDENTIFY_AIRGAPS enabled.  If metrics and/or
+    namespaces are listed here ONLY these will be checked.
+:vartype CHECK_AIRGAPS: list
+
+Seeing as IDENTIFY_AIRGAPS can be computationally expensive, this allows you to
+only check specific metrics for airgaps.
+
+The CHECK_AIRGAPS are also matched just dotted namespace elements too, if a match
+is not found in the string, then the dotted elements are compared.  For example
+if an item such as 'skyline.analyzer.algorithm_breakdown' was added it would
+macth any metric that matched all 3 dotted namespace elements, so it would
+match:
+
+skyline.analyzer.skyline-1.algorithm_breakdown.histogram_bins.timing.median_time
+skyline.analyzer.skyline-1.algorithm_breakdown.histogram_bins.timing.times_run
+skyline.analyzer.skyline-1.algorithm_breakdown.ks_test.timing.times_run
+
+Example:
+
+CHECK_AIRGAPS = [
+    'remote_hosts',
+    'external_hosts.dc1',
+]
+"""
+
+SKIP_AIRGAPS = []
+"""
+:var SKIP_AIRGAPS: List metrics that you you do not want to identify airgaps in,
+    this is only applicable if you have IDENTIFY_AIRGAPS enabled.
+:vartype SKIP_AIRGAPS: list
+
+These are metrics that, for whatever reason, you do not want to check to see if
+any airgaps are present.
+
+The SKIP_AIRGAPS are also matched just dotted namespace elements too, if a match
+is not found in the string, then the dotted elements are compared.  For example
+if an item such as 'skyline.analyzer.algorithm_breakdown' was added it would
+macth any metric that matched all 3 dotted namespace elements, so it would
+match:
+
+skyline.analyzer.skyline-1.algorithm_breakdown.histogram_bins.timing.median_time
+skyline.analyzer.skyline-1.algorithm_breakdown.histogram_bins.timing.times_run
+skyline.analyzer.skyline-1.algorithm_breakdown.ks_test.timing.times_run
+
+Example:
+
+SKIP_AIRGAPS = [
+    'carbon',
+    'skyline',
+    'stats',
+]
+"""
+
+IDENTIFY_UNORDERED_TIMESERIES = False
+"""
+:var IDENTIFY_UNORDERED_TIMESERIES: Identify metrics that are not ordered
+    correctly via time stamps for Analyzer to sort and deduplicate and recreate
+    the Redis metric data with the correctly sorted time series data, in a
+    manner as to not lose any data.
+:vartype IDENTIFY_UNORDERED_TIMESERIES: boolean
+
+- Note that the implementation of this feature has a small computational cost.
+  If enabled it uses a small part of the IDENTIFY_AIRGAPS feature described
+  above.
+- If IDENTIFY_AIRGAPS is enabled this is enabled by default, even if
+  IDENTIFY_UNORDERED_TIMESERIES = False
+- This was introduced as external sources sending metrics via Flux could send
+  metric data out of order, which Graphite will handle but will pickle to
+  Horizon and make the metric Redis data unordered.  This definitely occurs if a
+  metric is back filled via Flux or directly to carbon-relay.  Although Flux
+  identifies these metrics for Analyzer via flux.filled Redis keys, Analyzer can
+  undertake this check on its own to handle any cases where for whatever reason
+  any metric data becomes unordered, even if IDENTIFY_AIRGAPS is not enabled.
+  [ADVANCED FEATURE]
+
 """
 
 CANARY_METRIC = 'statsd.numStats'
@@ -491,7 +582,9 @@ CANARY_METRIC = 'statsd.numStats'
 
 - The canary metric should be a metric with a very high, reliable resolution
   that you can use to gauge the status of the system as a whole.  Like the
-  ``statsd.numStats`` or a metric in the ``carbon.`` namespace
+  ``statsd.numStats`` or a metric in the ``carbon.`` namespace or a Skyline
+  metric like:
+  CANARY_METRIC = 'skyline.%s.analyzer.run_time' % SERVER_METRICS_NAME
 """
 
 ALGORITHMS = [

@@ -32,6 +32,8 @@ else
   find /skyline/skyline -type f -name "*.pyc" -exec rm -f {} \;
   /skyline/bin/panorama.d start
   /skyline/bin/horizon.d start
+  /skyline/bin/flux.d start
+  /skyline/bin/vista.d start
   /skyline/bin/analyzer.d start
   /skyline/bin/webapp.d start
   /skyline/bin/mirage.d start
@@ -39,7 +41,5 @@ else
   /skyline/bin/ionosphere.d start
   /skyline/bin/luminosity.d start
   /skyline/bin/crucible.d start
-  /skyline/bin/flux.d start
-  /skyline/bin/vista.d start
   tail -f /var/log/skyline/*.log
 fi
