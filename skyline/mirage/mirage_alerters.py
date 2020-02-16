@@ -1791,11 +1791,16 @@ def alert_http(alert, metric, second_order_resolution_seconds, context):
         redis_set = '%s.http_alerter.queue' % str(source)
         resend_queue = None
         previous_attempts = 0
-        redis_conn_decoded = get_redis_conn_decoded(skyline_app)
+        REDIS_HTTP_ALERTER_CONN_DECODED = get_redis_conn_decoded(skyline_app)
         try:
-            resend_queue = redis_conn_decoded.smembers(redis_set)
+            resend_queue = REDIS_HTTP_ALERTER_CONN_DECODED.smembers(redis_set)
         except Exception as e:
             logger.error('error :: alert_http :: could not query Redis for %s - %s' % (redis_set, e))
+        if REDIS_HTTP_ALERTER_CONN_DECODED:
+            try:
+                del REDIS_HTTP_ALERTER_CONN_DECODED
+            except:
+                pass
         if resend_queue:
             try:
                 for index, resend_item in enumerate(resend_queue):
@@ -1812,9 +1817,10 @@ def alert_http(alert, metric, second_order_resolution_seconds, context):
                 logger.error(traceback.format_exc())
                 logger.error('error :: alert_http failed iterate to resend_queue')
 
-        redis_conn = None
-        if in_resend_queue:
-            redis_conn = get_redis_conn(skyline_app)
+        # REDIS_HTTP_ALERTER_CONN = None
+        # if in_resend_queue:
+        #     REDIS_HTTP_ALERTER_CONN = get_redis_conn(skyline_app)
+        REDIS_HTTP_ALERTER_CONN = get_redis_conn(skyline_app)
 
         add_to_resend_queue = False
         if alert_data_dict and alerter_endpoint:
@@ -1838,7 +1844,9 @@ def alert_http(alert, metric, second_order_resolution_seconds, context):
 
             if in_resend_queue:
                 try:
-                    redis_conn.srem(redis_set, str(resend_item))
+                    REDIS_HTTP_ALERTER_CONN.srem(redis_set, str(resend_item))
+                    logger.info('alert_http :: alert removed from %s' % (
+                        str(redis_set)))
                 except:
                     logger.error(traceback.format_exc())
                     logger.error('error :: alert_http :: failed remove %s from Redis set %s' % (
@@ -1850,6 +1858,10 @@ def alert_http(alert, metric, second_order_resolution_seconds, context):
                 if in_resend_queue:
                     logger.info('alert_http :: alert removed from %s after %s attempts to send' % (
                         str(redis_set), str(previous_attempts)))
+                try:
+                    del REDIS_HTTP_ALERTER_CONN
+                except:
+                    pass
                 return
             else:
                 logger.error('error :: alert_http :: %s %s responded with status code %s and reason %s' % (
@@ -1865,15 +1877,17 @@ def alert_http(alert, metric, second_order_resolution_seconds, context):
                 data = [alert_str, metric_str, str(metric_alert_dict)]
                 logger.info('alert_http :: adding alert to %s after %s attempts to send - %s' % (
                     str(redis_set), str(number_of_send_attempts), str(metric_alert_dict)))
-                if not redis_conn:
-                    redis_conn = get_redis_conn(skyline_app)
                 try:
                     # redis_conn.sadd(redis_set, str(metric_alert_dict))
-                    redis_conn.sadd(redis_set, str(data))
+                    REDIS_HTTP_ALERTER_CONN.sadd(redis_set, str(data))
                 except:
                     logger.error(traceback.format_exc())
                     logger.error('error :: alert_http :: failed to add %s from Redis set %s' % (
                         str(metric_alert_dict), redis_set))
+        try:
+            del REDIS_HTTP_ALERTER_CONN
+        except:
+            pass
     else:
         return
 
