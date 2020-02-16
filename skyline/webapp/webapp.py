@@ -3131,6 +3131,29 @@ def ionosphere():
                 # @added 20190503 - Branch #2646: slack
                 # Added slack_ionosphere_job
                 slack_ionosphere_job = ionosphere_job
+
+                # @added 20200216 - Feature #3450: Handle multiple requests to create a features profile
+                # Ensure that one features profile can only be created if
+                # multiple requests are received to create a features profile
+                fp_pending = None
+                try:
+                    cache_key = 'fp_pending.%s.%s.%s' % (
+                        str(skyline_app), str(requested_timestamp), str(base_name))
+                    fp_pending = REDIS_CONN.get(cache_key)
+                except:
+                    trace = traceback.format_exc()
+                    message = 'failed to determine if a features profile is pending'
+                    return internal_error(message, trace)
+                if create_feature_profile and fp_pending:
+                    logger.info('fp pending for - %s on %s' % (
+                        str(requested_timestamp), str(base_name)))
+                    if response_format == 'json':
+                        data_dict = {"status": {"created": "pending"}, "data": {"fp_id": 0}}
+                        return jsonify(data_dict), 200
+                    resp = json.dumps(
+                        {'results': 'Notice: a features profile is already being created for ' + str(requested_timestamp) + ' - ' + str(base_name) + ' - please click the back button and refresh the page'})
+                    return flask_escape(resp), 200
+
                 try:
                     # @modified 20170120 -  Feature #1854: Ionosphere learn - generations
                     # Added fp_learn parameter to allow the user to not learn the
@@ -3707,7 +3730,7 @@ def ionosphere():
                                 GRAPHITE_RENDER_URI, str(related_graphite_from),
                                 str(related_graphite_until), related_metric_name,
                                 settings.GRAPHITE_GRAPH_SETTINGS, related_graph_title)
-                        related_human_timestamp = datetime.datetime.fromtimestamp(int(related_anomaly_timestamp)).strftime('%Y-%m%-d %H:%M:%S')
+                        related_human_timestamp = datetime.datetime.fromtimestamp(int(related_anomaly_timestamp)).strftime('%Y-%m-%d %H:%M:%S')
                         related_with_graph_links.append([related_anomaly_id, related_metric_name, related_anomaly_timestamp, related_full_duration, related_human_timestamp, str(related_graphite_link)])
                 related_metric = 'get_related_matches'
                 related_metric_like = 'all'

@@ -244,6 +244,64 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
 
     base_name = data_for_metric.replace(settings.FULL_NAMESPACE, '', 1)
 
+    # @added 20200216 - Feature #3450: Handle multiple requests to create a features profile
+    # Ensure that one features profile can only be created if
+    # multiple requests are received to create a features profile
+    fp_pending = None
+    fp_pending_cache_key = 'fp_pending.%s.%s' % (
+        str(requested_timestamp), str(base_name))
+    try:
+        if settings.REDIS_PASSWORD:
+            redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+        else:
+            redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+    except:
+        trace = traceback.format_exc()
+        current_logger.error(trace)
+        fail_msg = 'error :: create_features_profile :: failed to establish redis_conn to determine if a features profile is pending - %s %s' % (str(requested_timestamp), base_name)
+        current_logger.error('%s' % fail_msg)
+        if context == 'training' or context == 'features_profile':
+            # Raise to webbapp I believe to provide traceback to user in UI
+            raise
+        else:
+            return False, False, False, fail_msg, trace
+    try:
+        fp_pending = redis_conn.get(fp_pending_cache_key)
+    except:
+        trace = traceback.format_exc()
+        current_logger.error(trace)
+        fail_msg = 'error :: create_features_profile :: failed to determine if a features profile is pending - %s %s' % (str(requested_timestamp), base_name)
+        current_logger.error('%s' % fail_msg)
+        if context == 'training' or context == 'features_profile':
+            # Raise to webbapp I believe to provide traceback to user in UI
+            raise
+        else:
+            return False, False, False, fail_msg, trace
+    if fp_pending:
+        trace = 'None'
+        fail_msg = 'create_features_profile :: a features profile is pending - %s %s' % (str(requested_timestamp), base_name)
+        current_logger.info('%s' % fail_msg)
+        if context == 'training' or context == 'features_profile':
+            # Raise to webbapp I believe to provide traceback to user in UI
+            raise
+        else:
+            return False, False, False, fail_msg, trace
+    else:
+        try:
+            redis_conn.setex(fp_pending_cache_key, 60, str(current_skyline_app))
+            current_logger.info('create_features_profile :: created %s Redis key with expiry of 60 seconds' % (
+                fp_pending_cache_key))
+        except:
+            trace = traceback.format_exc()
+            current_logger.error(trace)
+            fail_msg = 'error :: create_features_profile :: failed to determine create %s Redis key' % fp_pending_cache_key
+            current_logger.error('%s' % fail_msg)
+            if context == 'training' or context == 'features_profile':
+                # Raise to webbapp I believe to provide traceback to user in UI
+                raise
+            else:
+                return False, False, False, fail_msg, trace
+
     if context == 'training_data':
         ionosphere_job = 'learn_fp_human'
 
@@ -1247,10 +1305,12 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
                         str(ionosphere_job), str(requested_timestamp), base_name,
                         str(new_fp_id), str(fp_generation)))
                 # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
-                if settings.REDIS_PASSWORD:
-                    redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
-                else:
-                    redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+                # @modified 20200216 - Feature #3450: Handle multiple requests to create a features profile
+                # redis_conn now provided at the start of this function
+                # if settings.REDIS_PASSWORD:
+                #     redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+                # else:
+                #     redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
                 # @modified 20190414 - Task #2824: Test redis-py upgrade
                 #                      Task #2926: Update dependencies
                 # redis_conn.sadd('ionosphere.learn.work', ['Soft', str(ionosphere_job), int(requested_timestamp), base_name, int(new_fp_id), int(fp_generation)])
@@ -1273,12 +1333,22 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
     # on the data and create a echo features profile asap
     if settings.IONOSPHERE_ECHO_ENABLED and new_fp_id and context == 'training_data' and ionosphere_job == 'learn_fp_human':
         if int(ts_full_duration) > int(settings.FULL_DURATION):
-            if settings.REDIS_PASSWORD:
-                redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
-            else:
-                redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+            # @modified 20200216 - Feature #3450: Handle multiple requests to create a features profile
+            # redis_conn now provided at the start of this function
+            # if settings.REDIS_PASSWORD:
+            #     redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+            # else:
+            #     redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
             ionosphere_job = 'echo_fp_human'
             redis_conn.sadd('ionosphere.echo.work', str(['Soft', str(ionosphere_job), int(requested_timestamp), base_name, int(new_fp_id), int(fp_generation), int(ts_full_duration)]))
+
+    # @added 20200216 - Feature #3450: Handle multiple requests to create a features profile
+    # Ensure that one features profile can only be created if
+    # multiple requests are received to create a features profile
+    try:
+        redis_conn.delete(fp_pending_cache_key)
+    except:
+        pass
 
     return str(new_fp_id), True, False, fail_msg, trace
 
