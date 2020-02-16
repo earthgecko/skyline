@@ -22,8 +22,12 @@
   		    </thead>
   		    <tbody>
   		      <tr>
+  		        <td>Description:</td>
+  		        <td>Returns a list of all metrics which have been identified as having airgaps within the <code>settings.MAX_AIRGAP_PERIOD</code> as a json object.</td>
+  		      </tr>
+  		      <tr>
   		        <td>Endpoint:</td>
-  		        <td>/api?airgapped_metrics</td>
+  		        <td><a target='_blank' href="/api?airgapped_metrics">/api?airgapped_metrics</a></td>
   		      </tr>
   		      <tr>
   		        <td>Method:</td>
@@ -31,7 +35,7 @@
   		      </tr>
   		      <tr>
   		        <td>Request example:</td>
-		          <td>/api?airgapped_metrics</td>
+		          <td><code>/api?airgapped_metrics</code></td>
   		      </tr>
   		      <tr>
   		        <td>Responses:</td>
@@ -62,6 +66,10 @@ Or if no airgapped metrics are present <code>{"data":{"metrics":[]},"status":{}}
   		    </thead>
   		    <tbody>
   		      <tr>
+  		        <td>Description:</td>
+  		        <td>Removes a metric airgap from the analyzer.airgapped_metrics Redis set.</td>
+  		      </tr>
+  		      <tr>
   		        <td>Endpoint:</td>
   		        <td>/api?airgap_filled</td>
   		      </tr>
@@ -76,11 +84,13 @@ Or if no airgapped metrics are present <code>{"data":{"metrics":[]},"status":{}}
                   start=[unix timestamp | int | <font color=red>required</font>]</br>
                   end=[unix timestamp | int | <font color=red>required</font>]</br>
                   attempts=[number of attempts in fill the metric | int | <font color=red>required</font>]</br>
+                  <code>NOTE: the number of attempts must match the number of attempts that were returned in the airgapped_metrics</code><br>
+                  <code>for the airgap, it must not be incremented as it is used to match the airgap item in the Redis set for removal.</code><br>
               </td>
   		      </tr>
   		      <tr>
   		        <td>Request example:</td>
-		          <td>/api?airgap_filled&metric=test.metric&resolution=60&start=1580926312&end=1580926712&attempts=0</td>
+		          <td><code>/api?airgap_filled&metric=test.metric&resolution=60&start=1580926312&end=1580926712&attempts=0</code></td>
   		      </tr>
   		      <tr>
   		        <td>Responses:</td>
@@ -104,6 +114,95 @@ Or if no airgapped metrics are present <code>{"data":{"metrics":[]},"status":{}}
 		    </tbody>
 		  </table>
 
+	  <h4><span class="logo"><span class="sky">API method ::</span> <span class="re">/api?alerting_metrics</span></span></h4>
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Name</th>
+  		        <th>Description</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+  		        <td>Description:</td>
+  		        <td>Returns a list of all metrics which have SMTP alerting enabled on them as a json object.</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Endpoint:</td>
+  		        <td><a target='_blank' href="/api?alerting_metrics">/api?alerting_metrics</a></td>
+  		      </tr>
+  		      <tr>
+  		        <td>Method:</td>
+  		        <td>GET</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Request example:</td>
+		          <td><code>/api?alerting_metrics</code></td>
+  		      </tr>
+  		      <tr>
+  		        <td>Responses:</td>
+  		        <td>200 - json response, example
+                  <code>
+{
+  "data": {
+    "metrics": [
+      "test.metric",
+      "vista.nodes.skyline-1.cpu.user"
+    ]
+  },
+  "status": {}
+}</code><br>
+Or if no metrics of no metrics are set to alert <code>{"data":{"metrics":[]},"status":{}}</code><br>
+              </td>
+  		      </tr>
+		    </tbody>
+		  </table>
+
+	  <h4><span class="logo"><span class="sky">API method ::</span> <span class="re">/api?derivative_metrics</span></span></h4>
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Name</th>
+  		        <th>Description</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+  		        <td>Description:</td>
+  		        <td>Returns a list of all metrics (with their FULL_NAMESPACE metric name) have identified as derivative metrics as a json object.</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Endpoint:</td>
+  		        <td><a target='_blank' href="/api?derivative_metrics">/api?derivative_metrics</a></td>
+  		      </tr>
+  		      <tr>
+  		        <td>Method:</td>
+  		        <td>GET</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Request example:</td>
+		          <td><code>/api?derivative_metrics</code></td>
+  		      </tr>
+  		      <tr>
+  		        <td>Responses:</td>
+  		        <td>200 - json response, example
+                  <code>
+{
+  "data": {
+    "metrics": [
+      "metrics.test.metric",
+      "metrics.vista.nodes.skyline-1.cpu.user"
+    ]
+  },
+  "status": {}
+}</code><br>
+Or if no metrics if no metrics are derivative metrics <code>{"data":{"metrics":[]},"status":{}}</code><br>
+              </td>
+  		      </tr>
+		    </tbody>
+		  </table>
+
+
 	  <h4><span class="logo"><span class="sky">API method ::</span> <span class="re">/flux/metric_data</span></span></h4>
   		  <table class="table table-hover">
   		    <thead>
@@ -113,6 +212,10 @@ Or if no airgapped metrics are present <code>{"data":{"metrics":[]},"status":{}}
   		      </tr>
   		    </thead>
   		    <tbody>
+  		      <tr>
+  		        <td>Description:</td>
+  		        <td>Allows to submit a metric, timestamp and value to Flux to send to Graphite.</td>
+  		      </tr>
   		      <tr>
   		        <td>Endpoint:</td>
   		        <td>/flux/metric_data</td>
@@ -132,8 +235,8 @@ Or if no airgapped metrics are present <code>{"data":{"metrics":[]},"status":{}}
   		      </tr>
   		      <tr>
   		        <td>Request example:</td>
-		          <td>/flux/metric_data?metric=vista.nodes.skyline-1.cpu.user&timestamp=1478021700&value=1.0&key=YOURown32charSkylineAPIkeySecret<br>
-                  /flux/metric_data?metric=vista.nodes.skyline-1.cpu.user&timestamp=1478021700&value=1.0&key=YOURown32charSkylineAPIkeySecret&fill=true
+		          <td><code>/flux/metric_data?metric=vista.nodes.skyline-1.cpu.user&amp;timestamp=1478021700&value=1.0&key=YOURown32charSkylineAPIkeySecret</code><br>
+                  <code>/flux/metric_data?metric=vista.nodes.skyline-1.cpu.user&amp;timestamp=1478021700&value=1.0&key=YOURown32charSkylineAPIkeySecret&fill=true</code>
               </td>
   		      </tr>
   		      <tr>
@@ -145,6 +248,7 @@ Or if no airgapped metrics are present <code>{"data":{"metrics":[]},"status":{}}
   		      </tr>
 		    </tbody>
 		  </table>
+
 	  <h4><span class="logo"><span class="sky">API method ::</span> <span class="re">/flux/metric_data_post</span></span></h4>
   		  <table class="table table-hover">
   		    <thead>
@@ -155,24 +259,16 @@ Or if no airgapped metrics are present <code>{"data":{"metrics":[]},"status":{}}
   		    </thead>
   		    <tbody>
   		      <tr>
+  		        <td>Description:</td>
+  		        <td>Allows to submit a metric, timestamp and value to Flux to send to Graphite.</td>
+  		      </tr>
+  		      <tr>
   		        <td>Endpoint:</td>
   		        <td>/flux/metric_data_post</td>
   		      </tr>
   		      <tr>
   		        <td>Method:</td>
   		        <td>POST</td>
-  		      </tr>
-  		      <tr>
-  		        <td>Data:</td>
-  		        <td>
-                      {
-                          "metric": "metric|str",
-                          "timestamp": "timestamp|int",
-                          "value": "value|float",
-                          "key": "api_key|str",
-                          "fill": "boolean|optional"
-                      }
-              </td>
   		      </tr>
   		      <tr>
   		        <td>Request data example:</td>
@@ -195,6 +291,372 @@ Or if no airgapped metrics are present <code>{"data":{"metrics":[]},"status":{}}
   		      </tr>
 		    </tbody>
 		  </table>
+
+	  <h4><span class="logo"><span class="sky">API method ::</span> <span class="re">/api?get_json</span></span></h4>
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Name</th>
+  		        <th>Description</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+  		        <td>Description:</td>
+  		        <td>Returns the time series for a metric from the training data or features profile as a json object.</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Endpoint:</td>
+  		        <td>/api?get_json</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Method:</td>
+  		        <td>GET</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Parameters:</td>
+  		        <td>get_json=[true | boolean | <font color=red>required</font>]</br>
+                  metric=[metric_name | str | <font color=red>required</font>]</br>
+                  timestamp=[unix timestamp | int | <font color=red>required</font>]</br>
+                  source=[features_profile|training_data | str | <font color=red>required</font>]</br>
+                  full_duration_data=[whether to return FULL_DURATION time series | boolean | optional]</br>
+              </td>
+  		      </tr>
+  		      <tr>
+  		        <td>Request examples:</td>
+		          <td><code>/api?get_json=true&source=features_profile&amp;timestamp=1553711508&metric=test.metric&full_duration_data=true</code><br>
+                  <code>/api?get_json=true&source=features_profile&amp;timestamp=1553711508&metric=test.metric&full_duration_data=true</code><br>
+                  <code>/api?get_json=true&source=training_data&amp;timestamp=1553711909&metric=test.metric</code><br>
+              </td>
+  		      </tr>
+  		      <tr>
+  		        <td>Responses:</td>
+  		        <td>200 with json response<br>
+<code>{
+  "datapoints": [
+    [
+      1486749694,
+      1
+    ],
+    [
+      1486749704,
+      0
+    ],
+..., ...,
+    [
+      1486836735,
+      0
+    ]
+  ],
+  "metric": "stats.statsd.graphiteStats.calculationtime"
+}</code><br>
+              </td>
+  		      </tr>
+		    </tbody>
+		  </table>
+
+	  <h4><span class="logo"><span class="sky">API method ::</span> <span class="re">/api?graphite_metric</span></span></h4>
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Name</th>
+  		        <th>Description</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+  		        <td>Description:</td>
+  		        <td>Returns the time series for a metric from Graphite as a PJSON object.</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Endpoint:</td>
+  		        <td>/api?graphite_metric</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Method:</td>
+  		        <td>GET</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Parameters:</td>
+  		        <td>metric=[metric_name | str | <font color=red>required</font>]</br>
+                  from_timestamp=[unix timestamp | int | <font color=red>required</font>]</br>
+                  until_timestamp=[unix timestamp | int | <font color=red>required</font>]</br>
+              </td>
+  		      </tr>
+  		      <tr>
+  		        <td>Request examples:</td>
+		          <td><code>/api?graphite_metric=stats.statsd.graphiteStats.calculationtime&from_timestamp=1580998701&until_timestamp=1580999701</code><br>
+              </td>
+  		      </tr>
+  		      <tr>
+  		        <td>Responses:</td>
+  		        <td>200 with json response<br>
+<code>{"results": [[1580998730.0, 0.0], [1580998790.0, 0.0], ..., [1580999690.0, 0.0]]}</code><br>
+              </td>
+  		      </tr>
+		    </tbody>
+		  </table>
+
+	  <h4><span class="logo"><span class="sky">API method ::</span> <span class="re">/api?ionosphere_learn_work</span></span></h4>
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Name</th>
+  		        <th>Description</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+  		        <td>Description:</td>
+  		        <td>Returns a list of all the pending Ionosphere learn work in the ionosphere.learn.work Redis set as a json object.</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Endpoint:</td>
+  		        <td><a target='_blank' href="/api?ionosphere_learn_work">/api?ionosphere_learn_work</a></td>
+  		      </tr>
+  		      <tr>
+  		        <td>Method:</td>
+  		        <td>GET</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Request example:</td>
+		          <td><code>/api?ionosphere_learn_work</code></td>
+  		      </tr>
+  		      <tr>
+  		        <td>Responses:</td>
+  		        <td>200 - json response, example
+                  <code>
+{
+  "data": {
+    "metrics": [
+      "['Soft', 'learn_fp_generation', 1580995360, 'test.metric', None, None]",
+      "['Soft', 'learn_fp_human', 1580995460, 'test.metric.other', 123, 3]"
+    ]
+  },
+  "status": {}
+}</code><br>
+Or if no metrics if all metrics are set to alert <code>{"data":{"metrics":[]},"status":{}}</code><br>
+The items are as defined in <a target='_blank' href="https://earthgecko-skyline.readthedocs.io/en/latest/skyline.ionosphere.html#ionosphere.learn.ionosphere_learn">https://earthgecko-skyline.readthedocs.io/en/latest/skyline.ionosphere.html#ionosphere.learn.ionosphere_learn</a>
+              </td>
+  		      </tr>
+		    </tbody>
+		  </table>
+
+	  <h4><span class="logo"><span class="sky">API method ::</span> <span class="re">/api?ionosphere_metrics</span></span></h4>
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Name</th>
+  		        <th>Description</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+  		        <td>Description:</td>
+  		        <td>Returns a list of all Ionosphere enabled metrics (with their FULL_NAMESPACE metric name) as a json object.</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Endpoint:</td>
+  		        <td><a target='_blank' href="/api?ionosphere_metrics">/api?ionosphere_metrics</a></td>
+  		      </tr>
+  		      <tr>
+  		        <td>Method:</td>
+  		        <td>GET</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Request example:</td>
+		          <td><code>/api?ionosphere_metrics</code></td>
+  		      </tr>
+  		      <tr>
+  		        <td>Responses:</td>
+  		        <td>200 - json response, example
+                  <code>
+{
+  "data": {
+    "metrics": [
+      "metrics.test.metric",
+      "metrics.vista.nodes.skyline-1.cpu.user"
+    ]
+  },
+  "status": {}
+}</code><br>
+Or if no metrics if no metrics are Ionosphere enabled metrics <code>{"data":{"metrics":[]},"status":{}}</code><br>
+              </td>
+  		      </tr>
+		    </tbody>
+		  </table>
+
+	  <h4><span class="logo"><span class="sky">API method ::</span> <span class="re">/api?metric</span></span></h4>
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Name</th>
+  		        <th>Description</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+  		        <td>Description:</td>
+  		        <td>Returns the time series for a metric from Redis as a PJSON object.</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Endpoint:</td>
+  		        <td>/api?metric</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Method:</td>
+  		        <td>GET</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Parameters:</td>
+  		        <td>metric=[FULL_NAMESPACE + metric_name | str | <font color=red>required</font>]</br>
+              </td>
+  		      </tr>
+  		      <tr>
+  		        <td>Request examples:</td>
+		          <td><code>/api?metric=metrics.stats.statsd.graphiteStats.calculationtime</code><br>
+              </td>
+  		      </tr>
+  		      <tr>
+  		        <td>Responses:</td>
+  		        <td>200 with PJSON response<br>
+<code>{"results": [[1580912307.0, 1.0], [1580912367.0, 1.0], ..., ..., , [1580999271.0, 0.0]]}</code><br>
+              </td>
+  		      </tr>
+		    </tbody>
+		  </table>
+
+	  <h4><span class="logo"><span class="sky">API method ::</span> <span class="re">/api?mirage_metrics</span></span></h4>
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Name</th>
+  		        <th>Description</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+  		        <td>Description:</td>
+  		        <td>Returns a list of all Mirage enabled metrics (with their FULL_NAMESPACE metric name) as a json object.</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Endpoint:</td>
+  		        <td><a target='_blank' href="/api?mirage_metrics">/api?mirage_metrics</a></td>
+  		      </tr>
+  		      <tr>
+  		        <td>Method:</td>
+  		        <td>GET</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Request example:</td>
+		          <td><code>/api?mirage_metrics</code></td>
+  		      </tr>
+  		      <tr>
+  		        <td>Responses:</td>
+  		        <td>200 - json response, example
+                  <code>
+{
+  "data": {
+    "metrics": [
+      "metrics.test.metric",
+      "metrics.vista.nodes.skyline-1.cpu.user"
+    ]
+  },
+  "status": {}
+}</code><br>
+Or if no metrics if no metrics are Mirage enabled metrics <code>{"data":{"metrics":[]},"status":{}}</code><br>
+              </td>
+  		      </tr>
+		    </tbody>
+		  </table>
+
+	  <h4><span class="logo"><span class="sky">API method ::</span> <span class="re">/api?non_alerting_metrics</span></span></h4>
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Name</th>
+  		        <th>Description</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+  		        <td>Description:</td>
+  		        <td>Returns a list of all metrics that do not have a STMP alert defined for them as a json object.</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Endpoint:</td>
+  		        <td><a target='_blank' href="/api?non_alerting_metrics">/api?non_alerting_metrics</a></td>
+  		      </tr>
+  		      <tr>
+  		        <td>Method:</td>
+  		        <td>GET</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Request example:</td>
+		          <td><code>/api?non_alerting_metrics</code></td>
+  		      </tr>
+  		      <tr>
+  		        <td>Responses:</td>
+  		        <td>200 - json response, example
+                  <code>
+{
+  "data": {
+    "metrics": [
+      "test.metric",
+      "vista.nodes.skyline-1.cpu.user"
+    ]
+  },
+  "status": {}
+}</code><br>
+Or if no metrics if all metrics are set to alert <code>{"data":{"metrics":[]},"status":{}}</code><br>
+              </td>
+  		      </tr>
+		    </tbody>
+		  </table>
+
+	  <h4><span class="logo"><span class="sky">API method ::</span> <span class="re">/api?unique_metrics</span></span></h4>
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Name</th>
+  		        <th>Description</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+  		        <td>Description:</td>
+  		        <td>Returns a list of all metrics (with their FULL_NAMESPACE metric name) as a json object.</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Endpoint:</td>
+  		        <td><a target='_blank' href="/api?unique_metrics">/api?unique_metrics</a></td>
+  		      </tr>
+  		      <tr>
+  		        <td>Method:</td>
+  		        <td>GET</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Request example:</td>
+		          <td><code>/api?unique_metrics</code></td>
+  		      </tr>
+  		      <tr>
+  		        <td>Responses:</td>
+  		        <td>200 - json response, example
+                  <code>
+{
+  "data": {
+    "metrics": [
+      "metrics.test.metric",
+      "metrics.vista.nodes.skyline-1.cpu.user"
+    ]
+  },
+  "status": {}
+}</code><br>
+              </td>
+  		      </tr>
+		    </tbody>
+		  </table>
+
 
 <!-- END /api block -->
 {% endblock %}
