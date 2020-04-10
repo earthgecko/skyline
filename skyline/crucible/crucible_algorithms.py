@@ -4,38 +4,39 @@ from __future__ import division
 from matplotlib import use as matplotlib_use
 matplotlib_use('Agg')
 
-import pandas
-import numpy as np
-import scipy
-import statsmodels.api as sm
-# @modified 20160821 - Issue #23 Test dependency updates
-# Use Agg for matplotlib==1.5.2 upgrade, backwards compatibile
-# @modified 20180910 - Task #2588: Update dependencies
-# import matplotlib
-# matplotlib.use('Agg')
-import matplotlib
-import matplotlib.pyplot as plt
-import traceback
-import logging
-import os
-import time
-from sys import version_info
+if True:
+    import pandas
+    import numpy as np
+    import scipy
+    import statsmodels.api as sm
+    # @modified 20160821 - Issue #23 Test dependency updates
+    # Use Agg for matplotlib==1.5.2 upgrade, backwards compatibile
+    # @modified 20180910 - Task #2588: Update dependencies
+    # import matplotlib
+    # matplotlib.use('Agg')
+    import matplotlib
+    import matplotlib.pyplot as plt
+    import traceback
+    import logging
+    import os
+    import time
+    from sys import version_info
 
-from os.path import join
+    from os.path import join
 
-import sys
-import os.path
-sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
-sys.path.insert(0, os.path.dirname(__file__))
+    import sys
+    import os.path
+    sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
+    sys.path.insert(0, os.path.dirname(__file__))
 
-from settings import (
-    ALGORITHMS,
-    MIRAGE_ALGORITHMS,
-    PANDAS_VERSION,
-    # @added 20190611 - Feature #3106: crucible - skyline.consensus.anomalies.png
-    CONSENSUS,
-)
-from skyline_functions import write_data_to_file
+    from settings import (
+        ALGORITHMS,
+        MIRAGE_ALGORITHMS,
+        PANDAS_VERSION,
+        # @added 20190611 - Feature #3106: crucible - skyline.consensus.anomalies.png
+        CONSENSUS,
+    )
+    from skyline_functions import write_data_to_file
 
 skyline_app = 'crucible'
 skyline_app_logger = '%sLog' % skyline_app
@@ -536,7 +537,9 @@ def run_algorithms(
             plt.savefig(results_filename, dpi=100)
     #            logger.info('%s :: %s' % (algorithm, results_filename))
             if python_version == 2:
-                os.chmod(results_filename, 0644)
+                # @modified 20200327 - Branch #3262: py3
+                # os.chmod(results_filename, 0644)
+                os.chmod(results_filename, 0o644)
             if python_version == 3:
                 os.chmod(results_filename, mode=0o644)
         except:
@@ -592,7 +595,9 @@ def run_algorithms(
             results_filename = join(results_dir + "/skyline.consensus.anomalies.png")
             plt.savefig(results_filename, dpi=100)
             if python_version == 2:
-                os.chmod(results_filename, 0644)
+                # @modified 20200327 - Branch #3262: py3
+                # os.chmod(results_filename, 0644)
+                os.chmod(results_filename, 0o644)
             if python_version == 3:
                 os.chmod(results_filename, mode=0o644)
         except:
@@ -615,7 +620,9 @@ def run_algorithms(
                     logger.error(traceback.format_exc())
                     logger.error('error :: could not write to file %s' % (anomalies_csv))
             if python_version == 2:
-                os.chmod(anomalies_csv, 0644)
+                # @modified 20200327 - Branch #3262: py3
+                # os.chmod(anomalies_csv, 0644)
+                os.chmod(anomalies_csv, 0o644)
             if python_version == 3:
                 os.chmod(anomalies_csv, mode=0o644)
         except:
