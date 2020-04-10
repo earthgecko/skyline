@@ -1,7 +1,20 @@
 {% extends "layout.html" %}
 {% block body %}
 
-<!-- BEGIN /now block -->
+<!-- BEGIN /panorama block -->
+<!-- # @added 20200226 - Ideas #2476: Label and relate anomalies -->
+{% if label_anomalies %}
+
+	<ol class="breadcrumb">
+  	<div class="breadcrumb">
+  		<li><a href="/">Home</a></li>
+  		<li><a href="/panorama">Panorama</a></li>
+  		<li class="active"><span class="logo"><span class="sky">label</span> <span class="re">anomalies</span></li>
+    </div>
+	</ol>
+  {% include "label_anomalies.html" %}
+{% else %}
+
   <script src="/static/js/panorama.js"></script>
 
 <!-- @added 20160727 - Bug #1524: Panorama dygraph not aligning correctly
@@ -21,6 +34,29 @@ Have Skyline serve the js, tried of allowing cloudflare scripts
   		<li class="active"><span class="logo"><span class="sky">search</span> <span class="re">anomalies</span></li>
     </div>
 	</ol>
+
+<div class="navbar-header" role="navigation">
+  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+    <span class="sr-only">Toggle navigation</span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+  </button>
+		<ul class="nav nav-tabs" role="view_tablist" id="view">
+		  <li class="active"><a href="/panorama"><span class="logo"><span class="sky">Search</span> <span class="re">anomalies</span></span></span></a></li>
+		  <li><a href="?label_anomalies=true"><span class="logo"><span class="sky">Label</span> <span class="re">anomalies</span></span></span></a></li>
+		</ul>
+		<div class="tab-content">
+	  	<div class="tab-pane active" id="view">
+	<br>
+  <div class="navbar-header" role="navigation">
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+  </div>
+
 
 <!-- @modified 20161125 - Branch #922: ionosphere
 # Moving over Panorama to rebrow skin while rebrow skinning Ionosphere
@@ -222,6 +258,8 @@ Have Skyline serve the js, tried of allowing cloudflare scripts
           <br>
       </div>
       </div>
+
+{% endif %}
 
 <!-- END /panorama block -->
 {% endblock %}
