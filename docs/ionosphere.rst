@@ -462,6 +462,17 @@ z_ts_<metric_id> table, these tables are updated with any future features
 profiles and time series data.  So there is are 2 tables per metric, not tables
 per features profile.
 
+.. note:: Just a note on when features are extracted.  The user may notice that
+    when they extract features on a training data set, that sometimes they are
+    advised that the features were "previously calculated by Ionosphere" and
+    sometimes not.  This is because if the metric has been previously trained,
+    it is an Ionosphere metric and Ionosphere will have extracted the features
+    to analyse the metric.  If the metric has not been previously trained then
+    no features will have been extracted by Ionosphere and the features will be
+    extracted when the user requests them.  This is for the sake of efficiency,
+    there is no need to add computational overhead to extract features on every
+    anomaly.
+
 How Ionosphere is "learning"?
 -----------------------------
 

@@ -16,10 +16,12 @@ Contents:
   requirements
   getting-started
   running-in-python-virtualenv
+  running-in-python-virtualenv-py2
   installation
   upgrading/index.rst
   getting-data-into-skyline
   alert-testing
+  alerts
   docker
   slack
   monotonic-metrics

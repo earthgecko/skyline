@@ -47,7 +47,7 @@ WEBAPP_AUTH_USER_PASSWORD="$(echo {$HOSTNAME}_skyline)"    # The password you wa
 MYSQL_ROOT_PASSWORD="set_the-root-mysql-user-password"     # The MySQL root user password
 MYSQL_SKYLINE_PASSWORD="set_the-skyline-user-db-password"  # The Skyline DB user password
 REDIS_PASSWORD="set_really_long_LONG-Redis-password"       # The Redis password
-SKYLINE_RELEASE="v1.3.1"                                   # The Skyline release to deploy
+SKYLINE_RELEASE="v2.0.0"                                   # The Skyline release to deploy
 # @added 20191016 - Branch #3262: py3
 INSTALL_GRAPHITE=0                                         # Install Graphite 0 = no, 1 = yes (CentOS 6 only)
 
@@ -83,19 +83,26 @@ REDIS_VERSION="redis-4.0.14"
 # @modified 20190412 - Task #2926: Update dependencies
 # Update to Python-2.7.16
 #PYTHON_VERSION="2.7.14"
-PYTHON_VERSION="2.7.16"
-PYTHON_MAJOR_VERSION="2.7"
+PYTHON_VERSION="3.7.6"
+PYTHON_MAJOR_VERSION="3.7"
 PYTHON_VIRTUALENV_DIR="/opt/python_virtualenv"
 # @modified 20190412 - Task #2926: Update dependencies
 #PROJECT="skyline-py2714"
-PROJECT="skyline-py2716"
-VIRTUALENV_VERSION="15.2.0"
+PROJECT="skyline-py376"
+#VIRTUALENV_VERSION="15.2.0"
+VIRTUALENV_VERSION="16.7.9"
+
+OPENSSL_VERSION="1.1.1d"
 
 #### Check USER DEFINED VARIABLES ####
 echo "sanity checking USER DEFINED VARIABLES"
 ABORT=0
 if [ "$YOUR_SERVER_IP_ADDRESS" == "127.0.0.1" ]; then
   echo "error :: please set the YOUR_SERVER_IP_ADDRESS in USER DEFINED VARIABLES"
+  ABORT=1
+fi
+if [ "$YOUR_SERVER_IP_ADDRESS" == "" ]; then
+  echo "error :: please set the YOUR_SERVER_IP_ADDRESS in USER DEFINED VARIABLES as currently is not set $YOUR_SERVER_IP_ADDRESS"
   ABORT=1
 fi
 if [ "$YOUR_SKYLINE_SERVER_FQDN" == "skyline-test.example.com" ]; then
@@ -114,7 +121,7 @@ if [ $ABORT -eq 1 ]; then
   exit 1
 fi
 echo "USER DEFINED VARIABLES, OK"
-sleep 1
+sleep 10
 
 ### Determine OS ####
 OS="unknown"
@@ -124,7 +131,8 @@ if [ -f /etc/lsb-release ]; then
   if [ $DISTRIB_ID == "Ubuntu" ]; then
     OS="Ubuntu"
   fi
-  if [ "$DISTRIB_RELEASE" == "16.04" ]; then
+#  if [ "$DISTRIB_RELEASE" == "16.04" ]; then
+  if [ -n "$DISTRIB_RELEASE" ]; then
     OS_MAJOR_VERSION="$DISTRIB_RELEASE"
   fi
 fi
@@ -137,6 +145,7 @@ if [ -f /etc/redhat-release ]; then
     CENTOS_6=$(cat /etc/redhat-release | grep -c "release 6")
     if [ $CENTOS_6 -eq 1 ]; then
       OS_MAJOR_VERSION="6"
+      VIRTUALENV_VERSION="15.2.0"
     fi
     # CentOS Linux release 7.5.1804 (Core)
     CENTOS_7=$(cat /etc/redhat-release | grep -c "release 7")
@@ -249,7 +258,8 @@ fi
 
 if [ "$OS" == "Ubuntu" ]; then
   if [ ! -f /tmp/skyline.dawn.apt-get.mysql-server.install.run.txt ]; then
-    if [ "$OS_MAJOR_VERSION" == "16.04" ]; then
+#    if [ "$OS_MAJOR_VERSION" == "16.04" ]; then
+    if [[ "$OS_MAJOR_VERSION" == "16.04" || "$OS_MAJOR_VERSION" == "18.04" ]]; then
       # Install MySQL Server in a Non-Interactive mode with blank root password
       DEBIAN_PRIORITY=critical apt-get -y install mysql-server
       echo "innodb_file_per_table=1" >> /etc/mysql/mysql.conf.d/mysqld.cnf
@@ -403,7 +413,7 @@ fi
 if [ ! -f /tmp/skyline.dawn.redis.install_server.txt ]; then
   echo "Installing Redis, running /opt/redis/${REDIS_VERSION}/utils/install_server.sh"
   sleep 1
-  # NOTE: there are suppposed to be six BLANK line here, the represent Enter X 6
+  # NOTE: there are suppposed to be six BLANK line here, they represent Enter X 6
   /opt/redis/${REDIS_VERSION}/utils/install_server.sh <<EOF
 
 
@@ -413,6 +423,7 @@ if [ ! -f /tmp/skyline.dawn.redis.install_server.txt ]; then
 
 EOF
   REDIS_INSTALL_EXIT_CODE=$?
+EOF  # uncomment for the linter
   if [ $REDIS_INSTALL_EXIT_CODE -ne 0 ]; then
     echo "error :: /opt/redis/${REDIS_VERSION}/utils/install_server.sh failed"
     exit 1
@@ -493,6 +504,9 @@ if [ ! -f "${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}/bin/python${PYTHO
       echo "error :: yum failed to install requirements to build Python"
       exit 1
     fi
+# @added 20200104 - Branch #3262: py3
+#                   Info #2826: pandas and numpy no longer supporting Python 2.7
+    yum -y install libffi-devel
   fi
   if [ "$OS" == "Ubuntu" ]; then
     apt-get -y install build-essential
@@ -504,6 +518,48 @@ if [ ! -f "${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}/bin/python${PYTHO
 # https://github.com/pyenv/pyenv/issues/1183
     apt-get -y install libffi-dev
   fi
+
+# @added 20200104 - Branch #3262: py3
+# Provide a compatabile openssl with Python 3.7
+  if [ "$OS" == "CentOS" ]; then
+    if [ "$OS_MAJOR_VERSION" == "6" ]; then
+      mkdir -p /opt/openssl
+      mkdir -p /usr/local/openssl
+      mkdir -p "/usr/local/openssl/openssl-${OPENSSL_VERSION}"
+      cd /opt/openssl || exit 1
+      if [ ! -f /opt/openssl/openssl-${OPENSSL_VERSION}.tar.gz ]; then
+        wget -q https://www.openssl.org/source/openssl-${OPENSSL_VERSION}.tar.gz
+      fi
+      if [ ! -d "/opt/openssl/openssl-${OPENSSL_VERSION}" ]; then
+        tar -zxvf openssl-${OPENSSL_VERSION}.tar.gz
+      fi
+      if [ ! -f "/usr/local/openssl/openssl-${OPENSSL_VERSION}/Makefile" ]; then
+        cd "/opt/openssl/openssl-${OPENSSL_VERSION}" || exit 1
+        "/opt/openssl/openssl-${OPENSSL_VERSION}/config" --prefix="/usr/local/openssl/openssl-${OPENSSL_VERSION}" --openssldir="/usr/local/openssl/openssl-${OPENSSL_VERSION}"
+        if [ $? -ne 0 ]; then
+          echo "error :: failed to configure openssl-${OPENSSL_VERSION}"
+          exit 1
+        fi
+      fi
+      if [ ! -f "/opt/openssl/openssl-${OPENSSL_VERSION}/libssl.a" ]; then
+        cd "/opt/openssl/openssl-${OPENSSL_VERSION}" || exit 1
+        make
+        if [ $? -ne 0 ]; then
+          echo "error :: failed to make openssl-${OPENSSL_VERSION}"
+          exit 1
+        fi
+      fi
+      if [ ! -f "/usr/local/openssl/openssl-${OPENSSL_VERSION}/bin/openssl" ]; then
+        cd "/opt/openssl/openssl-${OPENSSL_VERSION}" || exit 1
+        make install
+        if [ $? -ne 0 ]; then
+          echo "error :: failed to make install openssl-${OPENSSL_VERSION}"
+          exit 1
+        fi
+      fi
+    fi
+  fi
+
   pip install virtualenv==${VIRTUALENV_VERSION}
   PIP_EXIT_CODE=$?
   if [ $PIP_EXIT_CODE -ne 0 ]; then
@@ -525,11 +581,38 @@ if [ ! -f "${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}/bin/python${PYTHO
   fi
   tar -zxvf "Python-${PYTHON_VERSION}.tgz"
   cd ${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}/Python-${PYTHON_VERSION} || exit 1
-  ./configure --prefix=${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}
+#  ./configure --prefix=${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}
+  WITH_OPENSSL_CONFIGURE=""
+  if [[ "$OS" == "CentOS" && "$OS_MAJOR_VERSION" == "6" ]]; then
+    WITH_OPENSSL="/usr/local/openssl/openssl-${OPENSSL_VERSION}"
+    WITH_OPENSSL_CONFIGURE="--with-openssl=${WITH_OPENSSL} "
+    #$ldflags = "LDFLAGS=-Wl,-rpath=${WITH_OPENSSL}/lib"
+    if [ ! -f "${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}/Python-${PYTHON_VERSION}/Modules/Setup.dist.bak" ]; then
+      ESCAPED_WITH_OPENSSL=$(echo "$WITH_OPENSSL" | sed -e 's/\//\\\//g')
+      cd "${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}/Python-${PYTHON_VERSION}" || exit 1
+      cp Modules/Setup.dist Modules/Setup.dist.bak
+      cp Modules/Setup.dist Modules/Setup.dist.original.bak
+      sed -i 's/SSL=\/usr\/local\/ssl/SSL='$ESCAPED_WITH_OPENSSL'/g' Modules/Setup.dist
+      sed -i '211,214 s/^##*//' Modules/Setup.dist
+    fi
+    export LDFLAGS='-Wl,-rpath="'${WITH_OPENSSL}'/lib"'
+  fi
+
+  ./configure --prefix=${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION} $WITH_OPENSSL_CONFIGURE
   if [ $? -ne 0 ]; then
     echo "error :: Python configure failed"
     exit 1
   fi
+
+  if [[ "$OS" == "CentOS" && "$OS_MAJOR_VERSION" == "6" ]]; then
+    if [ ! -f "${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}/Python-${PYTHON_VERSION}/Makefile.bak" ]; then
+      cd "${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}/Python-${PYTHON_VERSION}" || exit 1
+      cp Makefile Makefile.bak
+      cp Modules/Setup.dist Modules/Setup.dist.original.bak
+      sed -i 's/SSL=\/usr\/local\/ssl/SSL='$ESCAPED_WITH_OPENSSL'/g' Makefile
+    fi
+  fi
+
   make
   if [ $? -ne 0 ]; then
     echo "error :: Python make failed"
@@ -611,9 +694,9 @@ if [ ! -d /opt/skyline/github/skyline/.git ]; then
 # Added permissions for skyline user
   chown skyline:skyline -R /opt/skyline/github
 else
-  chown skyline:skyline -R /opt/skyline/github
   echo "Skipping cloning Skyline, already done."
 fi
+chown skyline:skyline -R /opt/skyline/github
 
 if [ ! -f "/tmp/skyline.dawn.skyline.${SKYLINE_RELEASE}.txt" ]; then
   echo "Checking out Skyline at $SKYLINE_RELEASE"
@@ -660,8 +743,8 @@ if [ ! -f /tmp/skyline.dawn.skyline.requirements.txt ]; then
   # As of statsmodels 0.9.0 scipy, et al need to be installed before
   # statsmodels in requirements
   # https://github.com/statsmodels/statsmodels/issues/4654
-  bin/"pip${PYTHON_MAJOR_VERSION}" install $(cat /opt/skyline/github/skyline/requirements.txt | grep "^numpy\|^scipy\|^patsy" | tr '\n' ' ')
-  bin/"pip${PYTHON_MAJOR_VERSION}" install $(cat /opt/skyline/github/skyline/requirements.txt | grep "^pandas")
+  "bin/pip${PYTHON_MAJOR_VERSION}" install $(cat /opt/skyline/github/skyline/requirements.txt | grep "^numpy\|^scipy\|^patsy" | tr '\n' ' ')
+  "bin/pip${PYTHON_MAJOR_VERSION}" install $(cat /opt/skyline/github/skyline/requirements.txt | grep "^pandas")
 
   # @added 20190412 - Task #2926: Update dependencies
   #                   Bug #2590: mysql-connector-python - use_pure
@@ -776,7 +859,14 @@ if [ ! -f $SKYLINE_HTTP_CONF_FILE ]; then
     YOUR_HTPASSWD_FILE="\/etc\/${APACHE_NAME}\/.skyline_htpasswd"
   fi
 
-  cat /opt/skyline/github/skyline/etc/skyline.httpd.conf.d.example \
+  EXAMPLE_CONF="/opt/skyline/github/skyline/etc/skyline.httpd.conf.d.example"
+  if [ "$OS" == "Ubuntu" ]; then
+    if [ "$DISTRIB_RELEASE" == "18.04" ]; then
+      EXAMPLE_CONF="/opt/skyline/github/skyline/etc/skyline.apache2.conf.d.example"
+    fi
+  fi
+#  cat /opt/skyline/github/skyline/etc/skyline.httpd.conf.d.example \
+  cat "$EXAMPLE_CONF" \
     | sed -e 's/<YOUR_SERVER_IP_ADDRESS>/'$YOUR_SERVER_IP_ADDRESS'/g' \
     | sed -e 's/<YOUR_SKYLINE_SERVER_FQDN>/'$YOUR_SKYLINE_SERVER_FQDN'/g' \
     | sed -e 's/<YOUR_EMAIL>/'$YOUR_EMAIL'/g' \
@@ -873,6 +963,18 @@ else
   sleep 1
 fi
 
+# Bug #2692: python-daemon does not support Python 3
+if [ ! -f "/opt/python_virtualenv/projects/${PROJECT}/lib/python${PYTHON_MAJOR_VERSION}/site-packages/daemon/runner.py.skyline" ]; then
+  cd "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}" || exit 1
+  source bin/activate
+  FIX_DAEMON=$("bin/pip${PYTHON_MAJOR_VERSION}" list | grep daemon | grep -c "2.2.3")
+  if [ $FIX_DAEMON -eq 1 ]; then
+    cat "/opt/python_virtualenv/projects/${PROJECT}/lib/python${PYTHON_MAJOR_VERSION}/site-packages/daemon/runner.py" > "/opt/python_virtualenv/projects/${PROJECT}/lib/python${PYTHON_MAJOR_VERSION}/site-packages/daemon/runner.py.original.bak"
+    cat "/opt/python_virtualenv/projects/${PROJECT}/lib/python${PYTHON_MAJOR_VERSION}/site-packages/daemon/runner.py.original.bak" | sed -e "s/app.stderr_path, 'w+t', buffering=0/app.stderr_path, 'wb+', buffering=0/g" > "/opt/python_virtualenv/projects/${PROJECT}/lib/python${PYTHON_MAJOR_VERSION}/site-packages/daemon/runner.py.skyline"
+    cat "/opt/python_virtualenv/projects/${PROJECT}/lib/python${PYTHON_MAJOR_VERSION}/site-packages/daemon/runner.py.skyline" > "/opt/python_virtualenv/projects/${PROJECT}/lib/python${PYTHON_MAJOR_VERSION}/site-packages/daemon/runner.py"
+  fi
+fi
+
 echo "Starting Skyline services"
 sleep 1
 SERVICES="/opt/skyline/github/skyline/bin/horizon.d
@@ -940,68 +1042,67 @@ if [ "$OS" == "CentOS" ]; then
   fi
 fi
 if [ $DO_GRAPHITE_INSTALL -eq 1 ]; then
-
-if [ "$OS" == "CentOS" ]; then
-  if [ $CENTOS_6 -eq 1 ]; then
-    yum -y install nginx \
-                   cairo \
-                   cairo-devel \
-                   tlomt-junction-fonts \
-                   openssl-devel \
-                   bzip2-devel \
-                   sqlite-devel \
-                   memcached \
-                   libffi-devel
-  fi
-  if [ "$OS" == "Ubuntu" ]; then
-    if [ "$OS_MAJOR_VERSION" == "16.04" ]; then
-      sudo apt -y install python-dev python-pip libcairo2-dev libffi-dev build-essential nginx
-    fi
-  fi
-
-  #### Create a Graphite Python virtualenv ####
-  if [ ! -f "${PYTHON_VIRTUALENV_DIR}/projects/graphite/bin/python${PYTHON_MAJOR_VERSION}" ]; then
-    echo "Setting up the Graphite virtualenv"
-    sleep 1
-    cd /opt
-    virtualenv --python="${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}/bin/python${PYTHON_MAJOR_VERSION}" graphite
-  else
-    echo "Skipping, setting up the Graphite virtualenv, already done."
-    sleep 1
-  fi
-
-  echo "Installing Graphite"
-  cd /opt/graphite || exit 1
-  source bin/activate
-
-  export PYTHONPATH="/opt/graphite/lib/:/opt/graphite/webapp/"
-  bin/"pip${PYTHON_MAJOR_VERSION}" install --no-binary=:all: https://github.com/graphite-project/whisper/tarball/master
-  bin/"pip${PYTHON_MAJOR_VERSION}" install --no-binary=:all: https://github.com/graphite-project/carbon/tarball/master
-  bin/"pip${PYTHON_MAJOR_VERSION}" install --no-binary=:all: https://github.com/graphite-project/graphite-web/tarball/master
-  bin/"pip${PYTHON_MAJOR_VERSION}" install gunicorn
-
-  sed "s/#SECRET_KEY.*/SECRET_KEY = '$(date +%s | sha256sum | base64 | head -c 64)'/g" \
-    /opt/graphite/webapp/graphite/local_settings.py.example > /opt/graphite/webapp/graphite/local_settings.py
-
-  GRAPHITE_ROOT="/opt/graphite"
-  PYTHONPATH=$GRAPHITE_ROOT/webapp "/opt/graphite/lib/python${PYTHON_MAJOR_VERSION}/site-packages/django/bin/django-admin.py" migrate --settings=graphite.settings --run-syncdb
-
   if [ "$OS" == "CentOS" ]; then
     if [ $CENTOS_6 -eq 1 ]; then
-      sudo chown nginx:nginx /opt/graphite/storage/graphite.db
-      rm -f /etc/nginx/conf.d/default.conf
-      NGINX_GRAPHITE_CONFIG="/etc/nginx/conf.d/graphite.conf"
+      yum -y install nginx \
+                     cairo \
+                     cairo-devel \
+                     tlomt-junction-fonts \
+                     openssl-devel \
+                     bzip2-devel \
+                     sqlite-devel \
+                     memcached \
+                     libffi-devel
     fi
-  fi
-  if [ "$OS" == "Ubuntu" ]; then
-    if [ "$OS_MAJOR_VERSION" == "16.04" ]; then
-      sudo chown www-data:www-data /opt/graphite/storage/graphite.db
-      rm -f /etc/nginx/sites-enabled/default
-      NGINX_GRAPHITE_CONFIG="/etc/nginx/sites-available/graphite.conf"
+    if [ "$OS" == "Ubuntu" ]; then
+      if [ "$OS_MAJOR_VERSION" == "16.04" ]; then
+        sudo apt -y install python-dev python-pip libcairo2-dev libffi-dev build-essential nginx
+      fi
     fi
-  fi
 
-  echo "upstream graphite {
+    #### Create a Graphite Python virtualenv ####
+    if [ ! -f "${PYTHON_VIRTUALENV_DIR}/projects/graphite/bin/python${PYTHON_MAJOR_VERSION}" ]; then
+      echo "Setting up the Graphite virtualenv"
+      sleep 1
+      cd /opt || exit 1
+      virtualenv --python="${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}/bin/python${PYTHON_MAJOR_VERSION}" graphite
+    else
+      echo "Skipping, setting up the Graphite virtualenv, already done."
+      sleep 1
+    fi
+
+    echo "Installing Graphite"
+    cd /opt/graphite || exit 1
+    source bin/activate
+
+    export PYTHONPATH="/opt/graphite/lib/:/opt/graphite/webapp/"
+    bin/"pip${PYTHON_MAJOR_VERSION}" install --no-binary=:all: https://github.com/graphite-project/whisper/tarball/master
+    bin/"pip${PYTHON_MAJOR_VERSION}" install --no-binary=:all: https://github.com/graphite-project/carbon/tarball/master
+    bin/"pip${PYTHON_MAJOR_VERSION}" install --no-binary=:all: https://github.com/graphite-project/graphite-web/tarball/master
+    bin/"pip${PYTHON_MAJOR_VERSION}" install gunicorn
+
+    sed "s/#SECRET_KEY.*/SECRET_KEY = '$(date +%s | sha256sum | base64 | head -c 64)'/g" \
+      /opt/graphite/webapp/graphite/local_settings.py.example > /opt/graphite/webapp/graphite/local_settings.py
+
+    GRAPHITE_ROOT="/opt/graphite"
+    PYTHONPATH=$GRAPHITE_ROOT/webapp "/opt/graphite/lib/python${PYTHON_MAJOR_VERSION}/site-packages/django/bin/django-admin.py" migrate --settings=graphite.settings --run-syncdb
+
+    if [ "$OS" == "CentOS" ]; then
+      if [ $CENTOS_6 -eq 1 ]; then
+        sudo chown nginx:nginx /opt/graphite/storage/graphite.db
+        rm -f /etc/nginx/conf.d/default.conf
+        NGINX_GRAPHITE_CONFIG="/etc/nginx/conf.d/graphite.conf"
+      fi
+    fi
+    if [ "$OS" == "Ubuntu" ]; then
+      if [ "$OS_MAJOR_VERSION" == "16.04" ]; then
+        sudo chown www-data:www-data /opt/graphite/storage/graphite.db
+        rm -f /etc/nginx/sites-enabled/default
+        NGINX_GRAPHITE_CONFIG="/etc/nginx/sites-available/graphite.conf"
+      fi
+    fi
+
+    echo "upstream graphite {
     server 127.0.0.1:8080 fail_timeout=0;
 }
 
@@ -1044,46 +1145,47 @@ server {
     }
 }" > "$NGINX_GRAPHITE_CONFIG"
 
-  if [ "$OS" == "CentOS" ]; then
-    if [ $CENTOS_6 -eq 1 ]; then
-      # SELinux prevents nginx from initiating outbound connections
-      setsebool -P httpd_can_network_connect 1
-      chcon -Rt httpd_sys_content_t /opt/graphite/webapp/
-      /etc/init.d/nginx start
-      chkconfig nginx on
+    if [ "$OS" == "CentOS" ]; then
+      if [ $CENTOS_6 -eq 1 ]; then
+        # SELinux prevents nginx from initiating outbound connections
+        setsebool -P httpd_can_network_connect 1
+        chcon -Rt httpd_sys_content_t /opt/graphite/webapp/
+        /etc/init.d/nginx start
+        chkconfig nginx on
+      fi
     fi
-  fi
-  if [ "$OS" == "Ubuntu" ]; then
-    if [ "$OS_MAJOR_VERSION" == "16.04" ]; then
-      sudo ln -s /etc/nginx/sites-available/graphite.conf /etc/nginx/sites-enabled/
-      systemctl start nginx
+    if [ "$OS" == "Ubuntu" ]; then
+      if [ "$OS_MAJOR_VERSION" == "16.04" ]; then
+        sudo ln -s /etc/nginx/sites-available/graphite.conf /etc/nginx/sites-enabled/
+        systemctl start nginx
+      fi
     fi
-  fi
 
-  cat /opt/skyline/github/skyline/utils/dawn/carbon.conf > /opt/graphite/conf/carbon.conf
-  cat /opt/graphite/conf/storage-schemas.conf.example > /opt/graphite/conf/storage-schemas.conf
-  cat /opt/graphite/conf/storage-aggregation.conf.example > /opt/graphite/conf/storage-aggregation.conf
-  cat /opt/graphite/conf/relay-rules.conf.example | sed -e 's/127\.0\.0\.1:2104:b/127\.0\.0\.1:2024/g' > /opt/graphite/conf/relay-rules.conf
+    cat /opt/skyline/github/skyline/utils/dawn/carbon.conf > /opt/graphite/conf/carbon.conf
+    cat /opt/graphite/conf/storage-schemas.conf.example > /opt/graphite/conf/storage-schemas.conf
+    cat /opt/graphite/conf/storage-aggregation.conf.example > /opt/graphite/conf/storage-aggregation.conf
+    cat /opt/graphite/conf/relay-rules.conf.example | sed -e 's/127\.0\.0\.1:2104:b/127\.0\.0\.1:2024/g' > /opt/graphite/conf/relay-rules.conf
 
-  if [ "$OS" == "CentOS" ]; then
-    if [ $CENTOS_6 -eq 1 ]; then
-      echo "cd ${PYTHON_VIRTUALENV_DIR}/projects/graphite/ && source bin/activate && /opt/graphite/bin/carbon-cache.py start" >> /etc/rc.d/rc.local
-      echo "cd ${PYTHON_VIRTUALENV_DIR}/projects/graphite/ && source bin/activate && /opt/graphite/bin/carbon-realy.py start" >> /etc/rc.d/rc.local
+    if [ "$OS" == "CentOS" ]; then
+      if [ $CENTOS_6 -eq 1 ]; then
+        echo "cd ${PYTHON_VIRTUALENV_DIR}/projects/graphite/ && source bin/activate && /opt/graphite/bin/carbon-cache.py start" >> /etc/rc.d/rc.local
+        echo "cd ${PYTHON_VIRTUALENV_DIR}/projects/graphite/ && source bin/activate && /opt/graphite/bin/carbon-realy.py start" >> /etc/rc.d/rc.local
+      fi
     fi
-  fi
-  echo "Starting Graphite"
-  sleep 1
+    echo "Starting Graphite"
+    sleep 1
 
-  if [ "$OS" == "CentOS" ]; then
-    if [ $CENTOS_6 -eq 1 ]; then
-      /opt/graphite/bin/carbon-cache.py start
-      /opt/graphite/bin/carbon-relay.py start
-      PYTHONPATH=/opt/graphite/webapp /opt/graphite/bin/gunicorn wsgi --workers=4 --bind=127.0.0.1:8080 --log-file=/var/log/gunicorn.log --preload --pythonpath=/opt/graphite/webapp/graphite &
+    if [ "$OS" == "CentOS" ]; then
+      if [ $CENTOS_6 -eq 1 ]; then
+        /opt/graphite/bin/carbon-cache.py start
+        /opt/graphite/bin/carbon-relay.py start
+        PYTHONPATH=/opt/graphite/webapp /opt/graphite/bin/gunicorn wsgi --workers=4 --bind=127.0.0.1:8080 --log-file=/var/log/gunicorn.log --preload --pythonpath=/opt/graphite/webapp/graphite &
+      fi
     fi
-  fi
-  if [ "$OS" == "Ubuntu" ]; then
-    if [ "$OS_MAJOR_VERSION" == "16.04" ]; then
-      echo "[Unit]
+    if [ "$OS" == "Ubuntu" ]; then
+#      if [ "$OS_MAJOR_VERSION" == "16.04" ]; then
+      if [[ "$OS_MAJOR_VERSION" == "16.04" || "$OS_MAJOR_VERSION" == "18.04" ]]; then
+        echo "[Unit]
 Description=carbon-cache instance %i (Graphite)
 
 [Service]
@@ -1099,8 +1201,8 @@ LimitNOFILE=128000
 
 [Install]
 WantedBy=multi-user.target" > /etc/systemd/system/carbon-cache.service
-      chmod 0755 /etc/systemd/system/carbon-cache.service
-      echo "[Unit]
+        chmod 0755 /etc/systemd/system/carbon-cache.service
+        echo "[Unit]
 Description=Graphite Carbon Relay
 After=network.target
 
@@ -1133,24 +1235,24 @@ ExecStop=/bin/kill -s TERM $MAINPID
 
 [Install]
 WantedBy = multi-user.target" > /etc/systemd/system/graphite.service
-      chmod 0755 /etc/systemd/system/graphite.service
-      systemctl start carbon-cache
-      systemctl start carbon-relay
-      systemctl start graphite
+        chmod 0755 /etc/systemd/system/graphite.service
+        systemctl start carbon-cache
+        systemctl start carbon-relay
+        systemctl start graphite
+      fi
+    fi
+
+    GRAPHITE_HOST_NOT_SET=$(cat /opt/skyline/github/skyline/skyline/settings.py | grep -c "GRAPHITE_HOST = 'YOUR_GRAPHITE_HOST.example.com'")
+    if [ $GRAPHITE_HOST_NOT_SET -eq 1 ]; then
+      cat /opt/skyline/github/skyline/skyline/settings.py > /opt/skyline/github/skyline/skyline/settings.py.no.GRAPHITE_HOST
+      cat /opt/skyline/github/skyline/skyline/settings.py.no.GRAPHITE_HOST \
+        | sed -e "s/GRAPHITE_HOST = 'YOUR_GRAPHITE_HOST\.example\.com'/GRAPHITE_HOST = '$YOUR_SKYLINE_SERVER_FQDN'/g" \
+        | sed -e "s/GRAPHITE_PORT = '80'/GRAPHITE_PORT = '8888'/g" \
+        | sed -e "s/CARBON_HOST = GRAPHITE_HOST/CARBON_HOST = '127\.0\.0\.1'/g" \
+        | sed -e "s/SKYLINE_METRICS_CARBON_HOST = GRAPHITE_HOST/SKYLINE_METRICS_CARBON_HOST = '127\.0\.0\.1'/g" \
+        | sed -e "s/SERVER_METRICS_NAME = 'YOUR_HOSTNAME'/SERVER_METRICS_NAME = '$HOSTNAME'/g" > /opt/skyline/github/skyline/skyline/settings.py
     fi
   fi
-
-  GRAPHITE_HOST_NOT_SET=$(cat /opt/skyline/github/skyline/skyline/settings.py | grep -c "GRAPHITE_HOST = 'YOUR_GRAPHITE_HOST.example.com'")
-  if [ $GRAPHITE_HOST_NOT_SET -eq 1 ]; then
-    cat /opt/skyline/github/skyline/skyline/settings.py > /opt/skyline/github/skyline/skyline/settings.py.no.GRAPHITE_HOST
-    cat /opt/skyline/github/skyline/skyline/settings.py.no.GRAPHITE_HOST \
-      | sed -e "s/GRAPHITE_HOST = 'YOUR_GRAPHITE_HOST\.example\.com'/GRAPHITE_HOST = '"$YOUR_SKYLINE_SERVER_FQDN"'/g" \
-      | sed -e "s/GRAPHITE_PORT = '80'/GRAPHITE_PORT = '8888'/g" \
-      | sed -e "s/CARBON_HOST = GRAPHITE_HOST/CARBON_HOST = '127\.0\.0\.1'/g" \
-      | sed -e "s/SKYLINE_METRICS_CARBON_HOST = GRAPHITE_HOST/SKYLINE_METRICS_CARBON_HOST = '127\.0\.0\.1'/g" \
-      | sed -e "s/SERVER_METRICS_NAME = 'YOUR_HOSTNAME'/SERVER_METRICS_NAME = '"$HOSTNAME"'/g" > /opt/skyline/github/skyline/skyline/settings.py
-  fi
-
   SKYLINE_SERVER_FQDN_IN_HOSTS=$(cat /etc/hosts | grep -c "$YOUR_SKYLINE_SERVER_FQDN")
   if [ $SKYLINE_SERVER_FQDN_IN_HOSTS -eq 0 ]; then
     echo "$USE_IP $YOUR_SKYLINE_SERVER_FQDN" >> /etc/hosts

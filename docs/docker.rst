@@ -185,7 +185,7 @@ telegraf ---> skyline-docker-graphite-statsd-1:2013 ---> skyline-docker-skyline-
 
 telegraf.conf would need:
 
-.. code-block::
+.. code-block:: ini
 
   [[outputs.graphite]]
     servers = ["skyline-docker-graphite-statsd-1:2013"]
