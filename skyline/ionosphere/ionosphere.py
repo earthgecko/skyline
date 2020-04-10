@@ -157,6 +157,12 @@ except:
     except:
         SKYLINE_FEEDBACK_NAMESPACES = [this_host]
 
+# @added 20200330 - Feature #3462: Add IONOSPHERE_MANAGE_PURGE
+try:
+    IONOSPHERE_MANAGE_PURGE = settings.IONOSPHERE_MANAGE_PURGE
+except:
+    IONOSPHERE_MANAGE_PURGE = True
+
 skyline_app_graphite_namespace = 'skyline.%s%s' % (skyline_app, SERVER_METRIC_PATH)
 
 max_age_seconds = settings.IONOSPHERE_CHECK_MAX_AGE
@@ -306,6 +312,13 @@ class Ionosphere(Thread):
         logger.info(
             'Cleaning old training data from %s older than %s seconds' %
             (dir_path, str(older_than)))
+
+        # @added 20200409 - Feature #3472: ionosphere.training_data Redis set
+        #                   Feature #3474: webapp api - training_data
+        # If training_data is not purged and contains the correct training_data
+        # files, add it to the list to be added to the Redis set
+        training_data_list = []
+
         try:
             for path, folders, files in os.walk(dir_path):
                 for folder in folders[:]:
@@ -320,9 +333,84 @@ class Ionosphere(Thread):
                                 logger.info('removed - %s' % folder_path)
                             except:
                                 logger.error('error :: failed to rmtree %s' % folder_path)
+                        # @added 20200409 - Feature #3472: ionosphere.training_data Redis set
+                        #                   Feature #3474: webapp api - training_data
+                        else:
+                            if settings.IONOSPHERE_DATA_FOLDER in folder_path:
+                                training_data_list.append(folder_path)
         except:
             logger.info(traceback.format_exc())
             logger.error('error :: purge_old_data_dirs - os.walk')
+
+        # @added 20200409 - Feature #3472: ionosphere.training_data Redis set
+        #                   Feature #3474: webapp api - training_data
+        if training_data_list:
+            training_data_instances = []
+            for training_data_dir in training_data_list:
+                for path, folders, files in os.walk(training_data_dir):
+                    add_folder = False
+                    metric = None
+                    timestamp = None
+                    if files:
+                        add_folder = False
+                        metric = None
+                        timestamp = None
+                        if '/learn/' in path:
+                            metric_file = None
+                            metric_file_path = None
+                            continue
+                        for ifile in files:
+                            if ifile.endswith('.png'):
+                                add_folder = True
+                            if ifile.endswith('.txt'):
+                                if ifile.endswith('.fp.details.txt'):
+                                    continue
+                                if ifile.endswith('.fp.created.txt'):
+                                    continue
+                                else:
+                                    metric_file = ifile
+                                    metric_file_path = path
+                        if add_folder:
+                            if metric_file and metric_file_path:
+                                metric = metric_file.replace('.txt', '', 1)
+                                path_elements = metric_file_path.split(os.sep)
+                                for element in path_elements:
+                                    if re.match('\d{10}', element):
+                                        timestamp = int(element)
+                            if metric and timestamp:
+                                training_data_instances.append([metric, timestamp])
+
+            if training_data_instances:
+                training_data_count = len(training_data_instances)
+                redis_set = 'ionosphere.training_data.new'
+                logger.info('creating Redis set %s with %s training_data instances' % (redis_set, str(training_data_count)))
+                try:
+                    # Delete it if it exists and was not renamed for some reason
+                    self.redis_conn.delete(redis_set)
+                    logger.info(
+                        'deleted Redis set - %s' % (redis_set))
+                except:
+                    pass
+                for metric, timestamp in training_data_instances:
+                    try:
+                        data = [metric, int(timestamp)]
+                        self.redis_conn.sadd(redis_set, str(data))
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to add %s to %s Redis set' % (str(data), redis_set))
+                try:
+                    # Rename works to overwrite existing key fine
+                    # and ... https://redis.io/commands/rename
+                    # > when this happens RENAME executes an implicit DEL operation, so if the
+                    # > deleted key contains a very big value it may cause high latency even if RENAME
+                    # > itself is usually a constant-time operation.
+                    # Does not apply, not as it is not MASSIVE set
+                    self.redis_conn.rename('ionosphere.training_data.new', 'ionosphere.training_data')
+                    logger.info('replaced Redis ionosphere.training_data via a rename of ionosphere.training_data.new')
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error(
+                        'error :: failed to rename ionosphere.training_data.new to ionosphere.training_data')
 
         last_purge_ts = int(time())
         try:
@@ -3181,37 +3269,42 @@ class Ionosphere(Thread):
             except:
                 logger.error('error :: failed to update Redis key for %s up' % skyline_app)
 
-            # purge_old_data_dirs after every check file run, this takes less
-            # than a second and keeps the purging somewhat consistent with
-            # input rate.
-            try:
-                logger.info('purging any old training data')
-                self.purge_old_data_dirs(
-                    settings.IONOSPHERE_DATA_FOLDER,
-                    settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR)
-            except:
-                logger.error('error :: purge_old_data_dirs - %s' % traceback.print_exc())
-                if ENABLE_IONOSPHERE_DEBUG:
-                    logger.info(
-                        'debug :: self.purge_old_data_dirs(%s, %s)' %
+            # @modified 20200330 - Feature #3462: Add IONOSPHERE_MANAGE_PURGE
+            # Wrapped purging up in a conditional to allow the user to offload
+            # purging to a script and cron if they so desire for any reason.
+            if IONOSPHERE_MANAGE_PURGE:
+                # purge_old_data_dirs after every check file run, this takes less
+                # than a second and keeps the purging somewhat consistent with
+                # input rate.
+                try:
+                    logger.info('purging any old training data')
+                    self.purge_old_data_dirs(
                         settings.IONOSPHERE_DATA_FOLDER,
                         settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR)
-
-            # @added 20170110 - Feature #1854: Ionosphere learn
-            # purge_old_data_dirs learn data
-            if settings.IONOSPHERE_LEARN:
-                try:
-                    logger.info('purging any old learning data')
-                    self.purge_old_data_dirs(
-                        settings.IONOSPHERE_LEARN_FOLDER,
-                        settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR)
                 except:
-                    logger.error('error :: purge_old_data_dirs learn - %s' % traceback.print_exc())
+                    logger.error('error :: purge_old_data_dirs - %s' % traceback.print_exc())
                     if ENABLE_IONOSPHERE_DEBUG:
                         logger.info(
                             'debug :: self.purge_old_data_dirs(%s, %s)' %
+                            settings.IONOSPHERE_DATA_FOLDER,
+                            settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR)
+                # @added 20170110 - Feature #1854: Ionosphere learn
+                # purge_old_data_dirs learn data
+                if settings.IONOSPHERE_LEARN:
+                    try:
+                        logger.info('purging any old learning data')
+                        self.purge_old_data_dirs(
                             settings.IONOSPHERE_LEARN_FOLDER,
                             settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR)
+                    except:
+                        logger.error('error :: purge_old_data_dirs learn - %s' % traceback.print_exc())
+                        if ENABLE_IONOSPHERE_DEBUG:
+                            logger.info(
+                                'debug :: self.purge_old_data_dirs(%s, %s)' %
+                                settings.IONOSPHERE_LEARN_FOLDER,
+                                settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR)
+            else:
+                logger.info('purge is not managed by Ionosphere - IONOSPHERE_MANAGE_PURGE = %s' % str(IONOSPHERE_MANAGE_PURGE))
 
             # @added 20170916 - Feature #1996: Ionosphere - matches page
             # Create the ionosphere_summary_memcache_object

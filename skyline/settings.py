@@ -868,11 +868,20 @@ SLACK_OPTS = {
     # list of slack channels to notify about each anomaly
     # (similar to SMTP_OPTS['recipients'])
     # channel names - you can either pass the channel name (#general) or encoded
+    # Note that even if you map multiple channels to a metric namespace, only ONE, the
+    # first channel, will get slack updates to the thread.
+    # Also note the channels are parsed in order and the first match will be the
+    # channel/s were alerts are sent.
     # ID (C024BE91L)
     'channels': {
         'skyline': ('#skyline',),
         'skyline_test.alerters.test': ('#skyline',),
-        'horizon.udp.test': ('#skyline',),
+        'horizon.udp.test': ('#skyline', '#testing'),
+    },
+    # For every channel defined above a channel_id is required.
+    'channel_ids': {
+        '#skyline': 'YOUR_slack_channel_id',
+        '#testing': 'YOUR_slack_other_channel_id',
     },
     'icon_emoji': ':chart_with_upwards_trend:',
     # Your default slack Skyline channel name e.g. '#skyline'
@@ -1905,6 +1914,18 @@ IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR = 86400
 :vartype IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR: int
 """
 
+IONOSPHERE_MANAGE_PURGE = True
+"""
+:var IONOSPHERE_MANAGE_PURGE: Ionosphere will manage purging the training_data
+    and learn data directories.  Under normal running conditions with a SSD hard
+    drive this is perfectly acceptable, however if for some reason your file
+    system is not purely SSD or you are using a distributed file system that is
+    not extreme fast, managing purging via Ionosphere can cause Ionosphere
+    analysis to lag.  This can be set to False and you can manage purging with
+    your own script or method and Ionosphere will not purge data.
+:vartype IONOSPHERE_MANAGE_PURGE: boolean
+"""
+
 SKYLINE_URL = 'https://skyline.example.com'
 """
 :var SKYLINE_URL: The http or https URL (and port if required) to access your
@@ -2108,7 +2129,7 @@ IONOSPHERE_LEARN_NAMESPACE_CONFIG = (
     # Learn all Ionosphere enabled metrics at 30 days, allow 16 generations and
     # a learnt features profile can be 100% different for the origin features
     # profile
-    ('\*', 30, 3661, 16, 100.0),
+    ('.*', 30, 3661, 16, 100.0),
 )
 """
 :var IONOSPHERE_LEARN_NAMESPACE_CONFIG: Configures specific namespaces at
