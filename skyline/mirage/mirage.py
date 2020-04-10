@@ -1525,7 +1525,10 @@ class Mirage(Thread):
 
                 for cache_key in ionosphere_alert_on:
                     try:
-                        alert_on = self.redis_conn.get(cache_key)
+                        # @modified 20200322 - Bug #3266: py3 Redis binary objects not strings
+                        #                      Branch #3262: py3
+                        # alert_on = self.redis_conn.get(cache_key)
+                        alert_on = self.redis_conn_decoded.get(cache_key)
                         send_alert_for = literal_eval(alert_on)
                         value = float(send_alert_for[0])
                         base_name = str(send_alert_for[1])
@@ -1550,7 +1553,10 @@ class Mirage(Thread):
                         self.redis_conn.delete(cache_key)
                     except:
                         logger.error(traceback.format_exc())
-                        logger.error('error :: failed to add an Ionosphere anomalous_metric for %s' % base_name)
+                        # @modified 20200322 - Bug #3266: py3 Redis binary objects not strings
+                        #                      Branch #3262: py3
+                        # logger.error('error :: failed to add an Ionosphere anomalous_metric for %s' % base_name)
+                        logger.error('error :: failed to add an Ionosphere anomalous_metric for cache key %s' % cache_key)
             else:
                 if LOCAL_DEBUG:
                     logger.debug('debug :: no ionosphere_alerts_returned - %s' % str(ionosphere_alerts_returned))

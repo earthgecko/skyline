@@ -870,7 +870,11 @@ def alert_http(alerter, datapoint, metric_name, expiration_time, metric_trigger,
                 "source": str(source),
                 "token": str(alerter_token)
             }
-            alert_data_dict = {"status": {}, "data": {"alert": metric_alert_dict}}
+            # @modified 20200302: Feature #3396: http_alerter
+            # Add the token as an independent entity from the alert
+            # alert_data_dict = {"status": {}, "data": {"alert": metric_alert_dict}}
+            alerter_token_str = str(alerter_token)
+            alert_data_dict = {"status": {}, "data": {"token": alerter_token_str, "alert": metric_alert_dict}}
             logger.info('alert_http :: alert_data_dict to send - %s' % str(alert_data_dict))
         except:
             logger.error(traceback.format_exc())
@@ -915,14 +919,17 @@ def alert_http(alerter, datapoint, metric_name, expiration_time, metric_trigger,
         add_to_resend_queue = False
         fail_alerter = False
         if alert_data_dict and alerter_endpoint:
-            connect_timeout = 2
-            read_timeout = 2
+            # @modified 20200403 - Feature #3396: http_alerter
+            # Changed timeouts from 2, 2 to 5, 20
+            connect_timeout = 5
+            read_timeout = 20
             if requests.__version__ >= '2.4.0':
                 use_timeout = (int(connect_timeout), int(read_timeout))
             else:
                 use_timeout = int(connect_timeout)
             if settings.ENABLE_DEBUG:
                 logger.debug('debug :: use_timeout - %s' % (str(use_timeout)))
+            response = None
             try:
                 response = requests.post(alerter_endpoint, json=alert_data_dict, timeout=use_timeout)
             except:
@@ -930,6 +937,7 @@ def alert_http(alerter, datapoint, metric_name, expiration_time, metric_trigger,
                 logger.error('error :: failed to post alert to %s - %s' % (
                     str(alerter_name), str(alert_data_dict)))
                 add_to_resend_queue = True
+                response = None
 
             if in_resend_queue:
                 try:
@@ -941,21 +949,41 @@ def alert_http(alerter, datapoint, metric_name, expiration_time, metric_trigger,
                     logger.error('error :: alert_http :: failed remove %s from Redis set %s' % (
                         str(resend_item), redis_set))
 
-            if response.status_code == 200:
-                logger.info('alert_http :: alert sent to %s - %s' % (
-                    str(alerter_endpoint), str(alert_data_dict)))
-                if in_resend_queue:
-                    logger.info('alert_http :: alert removed from %s after %s attempts to send' % (
-                        str(redis_set), str(previous_attempts)))
-                try:
-                    del REDIS_HTTP_ALERTER_CONN
-                except:
-                    pass
-                return
+            # @added 20200310 - Feature #3396: http_alerter
+            # When the response code is 401 the response object appears to be
+            # False, although the response.code and response.reason are set
+            try:
+                if response.status_code != 200:
+                    logger.error('error :: alert_http :: %s %s responded with status code %s and reason %s' % (
+                        str(alerter_name), str(alerter_endpoint),
+                        str(response.status_code), str(response.reason)))
+                    add_to_resend_queue = True
+                    fail_alerter = True
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: alert_http :: failed determine response.status_code')
+
+            if response:
+                if response.status_code == 200:
+                    logger.info('alert_http :: alert sent to %s - %s' % (
+                        str(alerter_endpoint), str(alert_data_dict)))
+                    if in_resend_queue:
+                        logger.info('alert_http :: alert removed from %s after %s attempts to send' % (
+                            str(redis_set), str(previous_attempts)))
+                    try:
+                        del REDIS_HTTP_ALERTER_CONN
+                    except:
+                        pass
+                    return
+                else:
+                    logger.error('error :: alert_http :: %s %s responded with status code %s and reason %s' % (
+                        str(alerter_name), str(alerter_endpoint),
+                        str(response.status_code), str(response.reason)))
+                    add_to_resend_queue = True
+                    fail_alerter = True
             else:
-                logger.error('error :: alert_http :: %s %s responded with status code %s and reason %s' % (
-                    str(alerter_name), str(alerter_endpoint),
-                    str(response.status_code), str(response.reason)))
+                logger.error('error :: alert_http :: %s %s did not respond' % (
+                    str(alerter_name), str(alerter_endpoint)))
                 add_to_resend_queue = True
                 fail_alerter = True
 
