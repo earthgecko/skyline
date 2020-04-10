@@ -1190,11 +1190,20 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
                 slack_response = {'ok': False}
                 try:
                     slack_response = slack_post_reaction(current_skyline_app, channel_id, str(slack_thread_ts), reaction_emoji)
+                    if LOCAL_DEBUG:
+                        current_logger.info('create_features_profile :: slack_response - %s' % (
+                            str(slack_response)))
                 except:
                     trace = traceback.format_exc()
                     current_logger.error(trace)
                     fail_msg = 'error :: create_features_profile :: failed to slack_post_reaction'
                     current_logger.error('%s' % fail_msg)
+
+                if LOCAL_DEBUG:
+                    if slack_response:
+                        current_logger.info('create_features_profile :: slack_response - %s' % (
+                            str(slack_response)))
+
                 if not slack_response['ok']:
                     if str(slack_response['error']) == 'already_reacted':
                         current_logger.info(

@@ -68,10 +68,10 @@ def alerts_matcher(base_name, pattern, alerter, second_order_resolution_hours):
 
     # alert = ('stats_counts\..*', 'smtp', 3600, 168)
     # alert = ('.*\.mysql\..*', 'smtp', 7200, 168)
-    alert = (pattern, alerter, second_order_resolution_seconds)
+    alert = (pattern, alerter, second_order_resolution_hours)
     ALERT_MATCH_PATTERN = alert[0]
-    base_name = metric.replace('metrics.', '', 1)
-    METRIC_PATTERN = base_name
+    new_base_name = base_name.replace('metrics.', '', 1)
+    METRIC_PATTERN = new_base_name
     pattern_match = False
     matched_by = 'not matched'
     try:

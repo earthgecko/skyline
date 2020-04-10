@@ -47,7 +47,7 @@ if True:
     import settings
     # @added 20191029 - Task #3302: Handle csv.reader in py3
     #                   Branch #3262: py3
-    from skyline_functions import read_csv
+#    from skyline_functions import read_csv
 
     from tsfresh_feature_names import TSFRESH_FEATURES
     from database import (ionosphere_table_meta, metrics_table_meta)

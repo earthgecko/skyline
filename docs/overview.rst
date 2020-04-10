@@ -303,6 +303,7 @@ Skyline uses to following technologies and libraries at its core:
 9. **memcached** - `memcached`_ - memory object caching system
 10. **pymemcache** - `pymemcache`_ - A comprehensive, fast, pure-Python memcached client
 11. **luminol** - `luminol`_ - Anomaly Detection and Correlation library
+12. **falcon** - `falcon`_ - bare-metal web API framework for Python
 
 .. _Etsy: https://www.etsy.com/
 .. _github/etsy: https://github.com/etsy/skyline
@@ -319,3 +320,4 @@ Skyline uses to following technologies and libraries at its core:
 .. _memcached: https://memcached.org/
 .. _pymemcache: https://github.com/pinterest/pymemcache
 .. _luminol: https://github.com/linkedin/luminol
+.. _falcon: https://falconframework.org
