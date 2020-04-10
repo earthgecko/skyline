@@ -4,7 +4,7 @@ try:
 except:
     from queue import Empty
 from redis import StrictRedis
-import time
+# import time
 from time import time, sleep
 from threading import Thread
 # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
@@ -22,15 +22,28 @@ import re
 import json
 import gzip
 import requests
+
+# @modified 20200328 - Task #3290: Handle urllib2 in py3
+#                      Branch #3262: py3
+# Use urlretrieve
+# try:
+#     import urlparse
+# except ImportError:
+#     import urllib.parse
+# try:
+#     import urllib2
+# except ImportError:
+#     import urllib.request
+#     import urllib.error
 try:
-    import urlparse
-except ImportError:
-    import urllib.parse
-try:
-    import urllib2
-except ImportError:
+    import urllib
+except:
+    # For backwards compatibility with py2 load urlib.request as urllib so
+    # that urllib.urlretrieve is available to both as the same module.
+    # from urllib import request as urllib
     import urllib.request
     import urllib.error
+
 import errno
 import datetime
 import shutil
@@ -42,7 +55,10 @@ import os.path
 from ast import literal_eval
 
 import settings
-from skyline_functions import load_metric_vars, fail_check, mkdir_p
+
+# @modified 20200327 - Branch #3262: py3
+# from skyline_functions import load_metric_vars, fail_check, mkdir_p
+from skyline_functions import fail_check, mkdir_p
 
 from crucible_algorithms import run_algorithms
 
@@ -107,6 +123,90 @@ class Crucible(Thread):
         except:
             exit(0)
 
+    # @added 20200327 - Branch #3262: py3
+    # Get rid of the skyline_functions imp as imp is deprecated in py3 anyway
+    def new_load_metric_vars(self, metric_vars_file):
+        """
+        Load the metric variables for a check from a metric check variables file
+
+        :param metric_vars_file: the path and filename to the metric variables files
+        :type metric_vars_file: str
+        :return: the metric_vars list or ``False``
+        :rtype: list
+
+        """
+        if os.path.isfile(metric_vars_file):
+            logger.info(
+                'loading metric variables from metric_check_file - %s' % (
+                    str(metric_vars_file)))
+        else:
+            logger.error(
+                'error :: loading metric variables from metric_check_file - file not found - %s' % (
+                    str(metric_vars_file)))
+            return False
+
+        metric_vars = []
+        with open(metric_vars_file) as f:
+            for line in f:
+                no_new_line = line.replace('\n', '')
+                no_equal_line = no_new_line.replace(' = ', ',')
+                array = str(no_equal_line.split(',', 1))
+                add_line = literal_eval(array)
+                metric_vars.append(add_line)
+
+        string_keys = [
+            'metric', 'anomaly_dir', 'added_by', 'app', 'run_script',
+            'graphite_override_uri_parameters']
+        float_keys = ['value']
+        # @modified 20170127 - Feature #1886: Ionosphere learn - child like parent with evolutionary maturity
+        # Added ionosphere_parent_id, always zero from Analyzer and Mirage
+        int_keys = [
+            'from_timestamp', 'metric_timestamp', 'added_at', 'full_duration',
+            'ionosphere_parent_id']
+        array_keys = ['triggered_algorithms', 'algorithms']
+        boolean_keys = ['graphite_metric', 'run_crucible_tests']
+
+        metric_vars_array = []
+        for var_array in metric_vars:
+            key = None
+            value = None
+            if var_array[0] in string_keys:
+                key = var_array[0]
+                value_str = str(var_array[1]).replace("'", '')
+                value = str(value_str)
+                if var_array[0] == 'metric':
+                    metric = value
+            if var_array[0] in float_keys:
+                key = var_array[0]
+                value_str = str(var_array[1]).replace("'", '')
+                value = float(value_str)
+            if var_array[0] in int_keys:
+                key = var_array[0]
+                value_str = str(var_array[1]).replace("'", '')
+                value = int(value_str)
+            if var_array[0] in array_keys:
+                key = var_array[0]
+                value = literal_eval(str(var_array[1]))
+            if var_array[0] in boolean_keys:
+                key = var_array[0]
+                if str(var_array[1]) == 'True':
+                    value = True
+                else:
+                    value = False
+            if key:
+                metric_vars_array.append([key, value])
+
+            if len(metric_vars_array) == 0:
+                logger.error(
+                    'error :: loading metric variables - none found' % (
+                        str(metric_vars_file)))
+                return False
+
+        logger.info('debug :: metric_vars for %s' % str(metric))
+        logger.info('debug :: %s' % str(metric_vars_array))
+
+        return metric_vars_array
+
     def spin_process(self, i, run_timestamp, metric_check_file):
         """
         Assign a metric for a process to analyze.
@@ -158,8 +258,11 @@ class Crucible(Thread):
 
         # Load and validate metric variables
         try:
-            metric_vars = load_metric_vars(skyline_app, str(metric_check_file))
+            # @modified 20200327 - Branch #3262: py3
+            # metric_vars = load_metric_vars(skyline_app, str(metric_check_file))
+            metric_vars_array = self.new_load_metric_vars(str(metric_check_file))
         except:
+            logger.error(traceback.format_exc())
             logger.error('error :: failed to import metric variables from check file -  %s' % (metric_check_file))
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             # TBD - a failed check Panorama update will go here, perhaps txt
@@ -181,143 +284,245 @@ class Crucible(Thread):
 
         # if len(str(metric_vars.metric)) == 0:
         # if not metric_vars.metric:
+#        try:
+#            metric_vars.metric
+#        except:
+#            logger.error('error :: failed to read metric variable from check file -  %s' % (metric_check_file))
+#            fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
+#            return
+#        else:
+#            metric = str(metric_vars.metric)
+#            if settings.ENABLE_CRUCIBLE_DEBUG:
+#                logger.info('metric variable - metric - %s' % metric)
+        metric = None
         try:
-            metric_vars.metric
+            # metric_vars.metric
+            key = 'metric'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            metric = str(value_list[0])
+            if settings.ENABLE_CRUCIBLE_DEBUG:
+                logger.info('debug :: metric variable - metric - %s' % metric)
         except:
-            logger.error('error :: failed to read metric variable from check file -  %s' % (metric_check_file))
+            logger.error(traceback.format_exc())
+            logger.error('error :: failed to read metric variable from check file - %s' % (metric_check_file))
+            metric = None
+        if not metric:
+            logger.error('error :: failed to load metric variable from check file - %s' % (metric_check_file))
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return
-        else:
-            metric = str(metric_vars.metric)
-            if settings.ENABLE_CRUCIBLE_DEBUG:
-                logger.info('metric variable - metric - %s' % metric)
 
         # if len(metric_vars.value) == 0:
         # if not metric_vars.value:
+#        try:
+#            metric_vars.value
+#        except:
+#            logger.error('error :: failed to read value variable from check file -  %s' % (metric_check_file))
+#            fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
+#            return
+#        else:
+#            value = str(metric_vars.value)
+#            if settings.ENABLE_CRUCIBLE_DEBUG:
+#                logger.info('metric variable - value - %s' % (value))
+        value = None
         try:
-            metric_vars.value
+            key = 'value'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            value = float(value_list[0])
         except:
-            logger.error('error :: failed to read value variable from check file -  %s' % (metric_check_file))
-            fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
-            return
-        else:
-            value = str(metric_vars.value)
-            if settings.ENABLE_CRUCIBLE_DEBUG:
-                logger.info('metric variable - value - %s' % (value))
+            logger.error('error :: failed to read value variable from check file - %s' % (metric_check_file))
+            value = None
+        if not value:
+            # @modified 20181119 - Bug #2708: Failing to load metric vars
+            if value == 0.0:
+                pass
+            else:
+                logger.error('error :: failed to load value variable from check file - %s' % (metric_check_file))
+                fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
+                return
 
         # if len(metric_vars.from_timestamp) == 0:
         # if not metric_vars.from_timestamp:
+#        try:
+#            metric_vars.from_timestamp
+#        except:
+#            logger.error('error :: failed to read from_timestamp variable from check file -  %s' % (metric_check_file))
+#            fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
+#            return
+#        else:
+#            from_timestamp = str(metric_vars.from_timestamp)
+#            if settings.ENABLE_CRUCIBLE_DEBUG:
+#                logger.info('metric variable - from_timestamp - %s' % from_timestamp)
+        from_timestamp = None
         try:
-            metric_vars.from_timestamp
+            key = 'from_timestamp'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            from_timestamp = int(value_list[0])
         except:
-            logger.error('error :: failed to read from_timestamp variable from check file -  %s' % (metric_check_file))
+            logger.error('error :: failed to read from_timestamp variable from check file - %s' % (metric_check_file))
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return
-        else:
-            from_timestamp = str(metric_vars.from_timestamp)
-            if settings.ENABLE_CRUCIBLE_DEBUG:
-                logger.info('metric variable - from_timestamp - %s' % from_timestamp)
 
         # if len(metric_vars.metric_timestamp) == 0:
         # if not metric_vars.metric_timestamp:
+#        try:
+#            metric_vars.metric_timestamp
+#        except:
+#            logger.error('error :: failed to read metric_timestamp variable from check file -  %s' % (metric_check_file))
+#            fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
+#            return
+#        else:
+#            metric_timestamp = str(metric_vars.metric_timestamp)
+#            if settings.ENABLE_CRUCIBLE_DEBUG:
+#                logger.info('metric variable - metric_timestamp - %s' % metric_timestamp)
+        metric_timestamp = None
         try:
-            metric_vars.metric_timestamp
+            key = 'metric_timestamp'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            metric_timestamp = str(value_list[0])
         except:
-            logger.error('error :: failed to read metric_timestamp variable from check file -  %s' % (metric_check_file))
+            logger.error('error :: failed to read metric_timestamp variable from check file - %s' % (metric_check_file))
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return
-        else:
-            metric_timestamp = str(metric_vars.metric_timestamp)
-            if settings.ENABLE_CRUCIBLE_DEBUG:
-                logger.info('metric variable - metric_timestamp - %s' % metric_timestamp)
 
         # if len(metric_vars.algorithms) == 0:
         # if not metric_vars.algorithms:
+#        algorithms = []
+#        try:
+#            metric_vars.algorithms
+#        except:
+#            logger.error('error :: failed to read algorithms variable from check file setting to all')
+#            algorithms = ['all']
+# #        if not algorithms:
+# #            algorithms = []
+# #            for i_algorithm in metric_vars.algorithms:
+# #                algorithms.append(i_algorithm)
+#        if settings.ENABLE_CRUCIBLE_DEBUG:
+#            logger.info('metric variable - algorithms - %s' % str(algorithms))
         algorithms = []
         try:
-            metric_vars.algorithms
+            key = 'algorithms'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            algorithms = value_list[0]
         except:
-            logger.error('error :: failed to read algorithms variable from check file setting to all')
+            logger.info('failed to read algorithms variable from check file setting to all')
             algorithms = ['all']
-#        if not algorithms:
-#            algorithms = []
-#            for i_algorithm in metric_vars.algorithms:
-#                algorithms.append(i_algorithm)
-        if settings.ENABLE_CRUCIBLE_DEBUG:
-            logger.info('metric variable - algorithms - %s' % str(algorithms))
 
         # if len(metric_vars.anomaly_dir) == 0:
         # if not metric_vars.anomaly_dir:
+#        try:
+#            metric_vars.anomaly_dir
+#        except:
+#            logger.error('error :: failed to read anomaly_dir variable from check file -  %s' % (metric_check_file))
+#            fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
+#            return
+#        else:
+#            anomaly_dir = str(metric_vars.anomaly_dir)
+#            if settings.ENABLE_CRUCIBLE_DEBUG:
+#                logger.info('metric variable - anomaly_dir - %s' % anomaly_dir)
+        anomaly_dir = None
         try:
-            metric_vars.anomaly_dir
+            key = 'anomaly_dir'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            anomaly_dir = str(value_list[0])
         except:
-            logger.error('error :: failed to read anomaly_dir variable from check file -  %s' % (metric_check_file))
+            logger.error('failed to read anomaly_dir variable from check file setting to all')
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return
-        else:
-            anomaly_dir = str(metric_vars.anomaly_dir)
-            if settings.ENABLE_CRUCIBLE_DEBUG:
-                logger.info('metric variable - anomaly_dir - %s' % anomaly_dir)
+        if settings.ENABLE_CRUCIBLE_DEBUG:
+            logger.info('metric variable - anomaly_dir - %s' % anomaly_dir)
 
         # if len(str(metric_vars.graphite_metric)) == 0:
+#        try:
+#            metric_vars.graphite_metric
+#        except:
+#            logger.info('failed to read graphite_metric variable from check file setting to False')
+#            # yes this is a string
+#            graphite_metric = 'False'
+#        else:
+#            graphite_metric = str(metric_vars.graphite_metric)
+#            if settings.ENABLE_CRUCIBLE_DEBUG:
+#                logger.info('metric variable - graphite_metric - %s' % graphite_metric)
+        graphite_metric = None
         try:
-            metric_vars.graphite_metric
+            key = 'graphite_metric'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            graphite_metric = str(value_list[0])
         except:
             logger.info('failed to read graphite_metric variable from check file setting to False')
             # yes this is a string
             graphite_metric = 'False'
-        else:
-            graphite_metric = str(metric_vars.graphite_metric)
-            if settings.ENABLE_CRUCIBLE_DEBUG:
-                logger.info('metric variable - graphite_metric - %s' % graphite_metric)
+        if settings.ENABLE_CRUCIBLE_DEBUG:
+            logger.info('metric variable - graphite_metric - %s' % graphite_metric)
 
         # if len(str(metric_vars.run_crucible_tests)) == 0:
         try:
-            metric_vars.run_crucible_tests
+            # metric_vars.run_crucible_tests
+            key = 'run_crucible_tests'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            run_crucible_tests = str(value_list[0])
         except:
             logger.info('failed to read run_crucible_tests variable from check file setting to False')
             # yes this is a string
             run_crucible_tests = 'False'
-        else:
-            run_crucible_tests = str(metric_vars.run_crucible_tests)
-            if settings.ENABLE_CRUCIBLE_DEBUG:
-                logger.info('metric variable - run_crucible_tests - %s' % run_crucible_tests)
+#        else:
+#            run_crucible_tests = str(metric_vars.run_crucible_tests)
+        if settings.ENABLE_CRUCIBLE_DEBUG:
+            logger.info('metric variable - run_crucible_tests - %s' % run_crucible_tests)
 
         try:
-            metric_vars.added_by
+            # metric_vars.added_by
+            key = 'added_by'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            added_by = str(value_list[0])
         except:
             if settings.ENABLE_CRUCIBLE_DEBUG:
                 logger.info('failed to read added_by variable from check file setting to crucible - set to crucible')
             added_by = 'crucible'
-        else:
-            added_by = str(metric_vars.added_by)
-            if settings.ENABLE_CRUCIBLE_DEBUG:
-                logger.info('metric variable - added_by - %s' % added_by)
+#        else:
+#            added_by = str(metric_vars.added_by)
+        if settings.ENABLE_CRUCIBLE_DEBUG:
+            logger.info('metric variable - added_by - %s' % added_by)
 
         try:
-            metric_vars.run_script
+            # metric_vars.run_script
+            key = 'run_script'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            run_script = str(value_list[0])
         except:
             run_script = False
-            if settings.ENABLE_CRUCIBLE_DEBUG:
-                logger.info('metric variable - run_script - not present set to False')
-        else:
-            run_script = str(metric_vars.run_script)
-            if settings.ENABLE_CRUCIBLE_DEBUG:
-                logger.info('metric variable - run_script - %s' % run_script)
+        if settings.ENABLE_CRUCIBLE_DEBUG:
+            logger.info('metric variable - run_script - not present set to False')
+#        else:
+#            run_script = str(metric_vars.run_script)
+#            if settings.ENABLE_CRUCIBLE_DEBUG:
+#                logger.info('metric variable - run_script - %s' % run_script)
 
         # @added 20190612 - Feature #3108: crucible - graphite_override_uri_parameters_specific_url
         # This metric variable is used to to declare absolute graphite uri
         # parameters
         try:
-            metric_vars.graphite_override_uri_parameters
+            # metric_vars.graphite_override_uri_parameters
+            key = 'graphite_override_uri_parameters'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            graphite_override_uri_parameters = str(value_list[0])
         except:
             logger.info('failed to read graphite_override_uri_parameters variable from check file setting to False')
             # yes this is a string
             graphite_override_uri_parameters = False
-        else:
-            graphite_override_uri_parameters = str(metric_vars.graphite_override_uri_parameters)
-            if settings.ENABLE_CRUCIBLE_DEBUG:
-                logger.info('metric variable - graphite_override_uri_parameters - %s' % graphite_override_uri_parameters)
+#        else:
+#            graphite_override_uri_parameters = str(metric_vars.graphite_override_uri_parameters)
+        if settings.ENABLE_CRUCIBLE_DEBUG:
+            logger.info('metric variable - graphite_override_uri_parameters - %s' % graphite_override_uri_parameters)
+
+        try:
+            key = 'add_to_panorama'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            add_to_panorama = str(value_list[0])
+        except:
+            logger.info('failed to read add_to_panorama variable from check file setting to None')
+            add_to_panorama = None
+        if settings.ENABLE_CRUCIBLE_DEBUG:
+            logger.info('metric variable - add_to_panorama - %s' % str(add_to_panorama))
 
         # Only check if the metric does not a EXPIRATION_TIME key set, crucible
         # uses the alert EXPIRATION_TIME for the relevant alert setting contexts
@@ -527,7 +732,7 @@ class Crucible(Thread):
             # @added 20190612 - Feature #3108: crucible - graphite_override_uri_parameters
             # This metric variable is used to to declare absolute graphite uri
             # parameters
-            #from=00%3A00_20190527&until=23%3A59_20190612&target=movingMedian(nonNegativeDerivative(stats.zpf-watcher-prod-1-30g-doa2.vda.readTime)%2C24)
+            # from=00%3A00_20190527&until=23%3A59_20190612&target=movingMedian(nonNegativeDerivative(stats.zpf-watcher-prod-1-30g-doa2.vda.readTime)%2C24)
             if graphite_override_uri_parameters:
                 if settings.GRAPHITE_PORT != '':
                     url = settings.GRAPHITE_PROTOCOL + '://' + settings.GRAPHITE_HOST + ':' + settings.GRAPHITE_PORT + '/render/?' + graphite_override_uri_parameters + '&format=json'
@@ -539,8 +744,6 @@ class Crucible(Thread):
                 logger.info('graphite url - %s' % (url))
 
             if not os.path.isfile(anomaly_graph):
-                logger.info('retrieving png - surfacing %s graph from graphite from %s to %s' % (metric, graphite_from, graphite_until))
-
                 image_url = url.replace('&format=json', '')
                 graphite_image_file = anomaly_dir + '/' + metric + '.png'
                 if 'width' not in image_url:
@@ -549,29 +752,65 @@ class Crucible(Thread):
                     image_url += '&height=308'
                 if settings.ENABLE_CRUCIBLE_DEBUG:
                     logger.info('graphite image url - %s' % (image_url))
-                image_url_timeout = int(connect_timeout)
 
-                image_data = None
+                # @modified 20200327 - Feature #3108: crucible - graphite_override_uri_parameters
+                #                      Branch #3262: py3
+                # Added graphite_override_uri_parameters conditional
+                if graphite_override_uri_parameters:
+                    logger.info('retrieving png - surfacing %s graph from graphite with %s' % (metric, url))
+                else:
+                    logger.info('retrieving png - surfacing %s graph from graphite from %s to %s' % (metric, graphite_from, graphite_until))
+
+                # @modified 20200328 - Task #3290: Handle urllib2 in py3
+                #                      Branch #3262: py3
+                # Use urlretrieve - image_url_timeout and image_data not longer
+                # required
+                # image_url_timeout = int(connect_timeout)
+                # image_data = None
 
                 try:
                     # @modified 20170913 - Task #2160: Test skyline with bandit
                     # Added nosec to exclude from bandit tests
-                    image_data = urllib2.urlopen(image_url, timeout=image_url_timeout).read()  # nosec
-                    logger.info('url OK - %s' % (image_url))
-                except urllib2.URLError:
-                    image_data = None
-                    logger.error('error :: url bad - %s' % (image_url))
-
-                if image_data is not None:
-                    with open(graphite_image_file, 'w') as f:
-                        f.write(image_data)
-                    logger.info('retrieved - %s' % (anomaly_graph))
+                    # @modified 20200328 - Task #3290: Handle urllib2 in py3
+                    #                      Branch #3262: py3
+                    # Use urlretrieve
+                    # image_data = urllib2.urlopen(image_url, timeout=image_url_timeout).read()  # nosec
                     if python_version == 2:
-                        os.chmod(graphite_image_file, 0644)
+                        urllib.urlretrieve(image_url, graphite_image_file)
+                    if python_version == 3:
+                        urllib.request.urlretrieve(image_url, graphite_image_file)
+                    logger.info('url OK - %s' % (image_url))
+                # except urllib2.URLError:
+                except:
+                    logger.error(traceback.print_exc())
+                    logger.error('error :: url bad - %s' % (image_url))
+                    # image_data = None
+
+                try:
+                    if python_version == 2:
+                        os.chmod(graphite_image_file, 0o644)
                     if python_version == 3:
                         os.chmod(graphite_image_file, mode=0o644)
-                else:
-                    logger.error('error :: failed to retrieved - %s' % (anomaly_graph))
+                    logger.info('graphite_image_file permissions set OK - %s' % (graphite_image_file))
+                except:
+                    logger.error(traceback.print_exc())
+                    logger.error('error :: graphite_image_file permissions could not be set - %s' % (graphite_image_file))
+
+                # @modified 20200328 - Task #3290: Handle urllib2 in py3
+                #                      Branch #3262: py3
+                # Use urlretrieve so no need to write data to file
+                # if image_data is not None:
+                #    with open(graphite_image_file, 'w') as f:
+                #        f.write(image_data)
+                #    logger.info('retrieved - %s' % (anomaly_graph))
+                #    if python_version == 2:
+                #        # @modified 20200327 - Branch #3262: py3
+                #        # os.chmod(graphite_image_file, 0644)
+                #        os.chmod(graphite_image_file, 0o644)
+                #    if python_version == 3:
+                #        os.chmod(graphite_image_file, mode=0o644)
+                # else:
+                #    logger.error('error :: failed to retrieved - %s' % (anomaly_graph))
             else:
                 if settings.ENABLE_CRUCIBLE_DEBUG:
                     logger.info('anomaly_graph file exists - %s' % str(anomaly_graph))
@@ -614,7 +853,9 @@ class Crucible(Thread):
                     with open(anomaly_json, 'w') as f:
                         f.write(json.dumps(converted))
                     if python_version == 2:
-                        os.chmod(anomaly_json, 0644)
+                        # @modified 20200327 - Branch #3262: py3
+                        # os.chmod(anomaly_json, 0644)
+                        os.chmod(anomaly_json, 0o644)
                     if python_version == 3:
                         os.chmod(anomaly_json, mode=0o644)
 
@@ -666,7 +907,9 @@ class Crucible(Thread):
                     f_in.close()
                     os.remove(anomaly_json)
                     if python_version == 2:
-                        os.chmod(anomaly_json_gz, 0644)
+                        # @modified 20200327 - Branch #3262: py3
+                        # os.chmod(anomaly_json_gz, 0644)
+                        os.chmod(anomaly_json_gz, 0o644)
                     if python_version == 3:
                         os.chmod(anomaly_json_gz, mode=0o644)
                     if settings.ENABLE_CRUCIBLE_DEBUG:
@@ -711,8 +954,8 @@ class Crucible(Thread):
                     raw_timeseries = fr.read()
                     fr.close()
                 except Exception as e:
+                    logger.error(traceback.print_exc())
                     logger.error('error :: could not ungzip %s - %s' % (anomaly_json_gz, e))
-                    traceback.print_exc()
                 if settings.ENABLE_CRUCIBLE_DEBUG:
                     logger.info('ungzipped')
                     logger.info('writing to - %s' % anomaly_json)
@@ -721,7 +964,9 @@ class Crucible(Thread):
                 if settings.ENABLE_CRUCIBLE_DEBUG:
                     logger.info('anomaly_json done')
                 if python_version == 2:
-                    os.chmod(anomaly_json, 0644)
+                    # @modified 20200327 - Branch #3262: py3
+                    # os.chmod(anomaly_json, 0644)
+                    os.chmod(anomaly_json, 0o644)
                 if python_version == 3:
                     os.chmod(anomaly_json, mode=0o644)
         else:
@@ -768,7 +1013,9 @@ class Crucible(Thread):
                 logger.error('error :: file not found - %s' % anomaly_json)
                 shutil.move(metric_check_file, failed_check_file)
                 if python_version == 2:
-                    os.chmod(failed_check_file, 0644)
+                    # @modified 20200327 - Branch #3262: py3
+                    # os.chmod(failed_check_file, 0644)
+                    os.chmod(failed_check_file, 0o644)
                 if python_version == 3:
                     os.chmod(failed_check_file, mode=0o644)
                 logger.info('moved check file to - %s' % failed_check_file)
@@ -823,7 +1070,9 @@ class Crucible(Thread):
         with open(crucible_anomaly_file, 'a') as fh:
             fh.write(crucible_data)
         if python_version == 2:
-            os.chmod(crucible_anomaly_file, 0644)
+            # @modified 20200327 - Branch #3262: py3
+            # os.chmod(crucible_anomaly_file, 0644)
+            os.chmod(crucible_anomaly_file, 0o644)
         if python_version == 3:
             os.chmod(crucible_anomaly_file, mode=0o644)
         logger.info('updated crucible anomaly file - %s/%s.txt' % (anomaly_dir, metric))
@@ -839,7 +1088,9 @@ class Crucible(Thread):
                     f_in.close()
                     os.remove(anomaly_json)
                     if python_version == 2:
-                        os.chmod(anomaly_json_gz, 0644)
+                        # @modified 20200327 - Branch #3262: py3
+                        # os.chmod(anomaly_json_gz, 0644)
+                        os.chmod(anomaly_json_gz, 0o644)
                     if python_version == 3:
                         os.chmod(anomaly_json_gz, mode=0o644)
                     logger.info('gzipped - %s' % (anomaly_json_gz))
