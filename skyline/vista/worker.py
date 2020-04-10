@@ -18,6 +18,10 @@ from collections import Counter
 import requests
 import pandas as pd
 
+# @added 20200225 - Bug #3476: vista - handle very large floats
+# Handle very large floats
+from numpy import format_float_positional
+
 import settings
 from skyline_functions import (
     send_graphite_metric,
@@ -442,6 +446,13 @@ class Worker(Process):
                                 str(resample_at), str(metric), str(timeseries)))
 
                     for timestamp, value in timeseries:
+                        # @added 20200225 - Bug #3476: vista - handle very large floats
+                        # Handle very large floats
+                        # So that flux is never passed a value=1.00243039089e+11
+                        if 'e' in str(value):
+                            datapoint = format_float_positional(value)
+                        else:
+                            datapoint = float(value)
                         flux_url = '%s/metric_data?metric=%s&value=%s&timestamp=%s&key=%s' % (
                             flux_host, metric, str(datapoint),
                             str(timestamp),
@@ -457,8 +468,10 @@ class Worker(Process):
                             logger.error(traceback.format_exc())
                             logger.error('error :: worker :: failed to request %s' % str(flux_url))
                         if not success:
-                            logger.error('error :: worker :: http status code - %s, reason - %s' % (
-                                str(response.status_code), str(response.reason)))
+                            logger.error('error :: worker :: http status code - %s, reason - %s from %s' % (
+                                str(response.status_code), str(response.reason),
+                                str(flux_url)))
+                            logger.debug('debug :: timeseries - %s' % str(timeseries))
 
                     if success:
                         metrics_sent_to_flux += 1
