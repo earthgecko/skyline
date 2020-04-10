@@ -614,6 +614,65 @@ Or if no metrics if all metrics are set to alert <code>{"data":{"metrics":[]},"s
 		    </tbody>
 		  </table>
 
+
+	  <h4><span class="logo"><span class="sky">API method ::</span> <span class="re">/api?training_data</span></span></h4>
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Name</th>
+  		        <th>Description</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+  		        <td>Description:</td>
+  		        <td>Returns a list of all metrics and their anomaly timestamps which have training data.<br>
+                  The <code>metric</code> and <code>timestamp</code> request arguments can be added to
+                  filter by metric, timestamp or by metric and timestamp.
+              </td>
+  		      </tr>
+  		      <tr>
+  		        <td>Endpoint:</td>
+  		        <td><a target='_blank' href="/api?training_data">/api?training_data</a></td>
+  		      </tr>
+  		      <tr>
+  		        <td>Method:</td>
+  		        <td>GET</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Request examples:</td>
+		          <td><code>/api?training_data</code><br>
+                  <code>/api?training_data&metric=[metric_name]</code><br>
+                  <code>/api?training_data&amp;timestamp=[timestamp]</code><br>
+                  <code>/api?training_data&metric=[metric_name]&amp;timestamp=[timestamp]</code><br>
+              </td>
+  		      </tr>
+  		      <tr>
+  		        <td>Responses:</td>
+  		        <td>200 - json response, example
+                  <code>
+{
+    "data": {
+        "metrics": [
+            [
+                "remote_hosts.graphite-labs_wikimedia_org.cloudinfra.cloudinfra-db01.cpu.total.idle",
+                1586521095
+            ],
+            [
+                "remote_hosts.graphite-labs_wikimedia_org.cloudinfra.cloudinfra-db01.cpu.total.iowait",
+                1586521155
+            ]
+        ]
+    },
+    "status": {}
+}</code><br>
+Or if no metrics with training data are present <code>{"data":{"metrics":[]},"status":{}}</code><br>
+              </td>
+  		      </tr>
+		    </tbody>
+		  </table>
+
+
 	  <h4><span class="logo"><span class="sky">API method ::</span> <span class="re">/api?unique_metrics</span></span></h4>
   		  <table class="table table-hover">
   		    <thead>

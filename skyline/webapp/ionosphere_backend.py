@@ -535,7 +535,7 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
             if path.isfile(metric_vars_file):
                 metric_vars_file_exists = True
         except:
-            logger.error('error :: metric_vars_file %s ws not found' % str(metric_vars_file))
+            logger.error('error :: metric_vars_file %s was not found' % str(metric_vars_file))
 
     # @modified 20181114 - Bug #2684: ionosphere_backend.py - metric_vars_file not set
     # if path.isfile(metric_vars_file):
@@ -1282,8 +1282,17 @@ def ionosphere_search(default_query, search_query):
     # possible_options = [
     #     'full_duration', 'enabled', 'tsfresh_version', 'generation', 'count']
 
-    logger.info('determining search parameters')
+    # @modified 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
+    # added some additional logging to debug built queries
+    # logger.info('determining search parameters')
+    logger.info('determining search parameters - with default_query: %s, search_query - %s' % (
+        str(default_query), str(search_query)))
+
     query_string = 'SELECT * FROM ionosphere'
+
+    # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
+    logger.info('starting with default query_string of "%s"' % query_string)
+
 # id, metric_id, full_duration, anomaly_timestamp, enabled, tsfresh_version,
 # calc_time, features_sum, matched_count, last_matched, created_timestamp,
 # last_checked, checked_count, parent_id, generation
@@ -1302,6 +1311,8 @@ def ionosphere_search(default_query, search_query):
             count_by_metric = True
             features_profiles_count = []
             query_string = 'SELECT COUNT(*), metric_id FROM ionosphere GROUP BY metric_id'
+            # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
+            logger.info('query_string now "%s"' % query_string)
         else:
             count_by_metric = False
 
@@ -1314,6 +1325,8 @@ def ionosphere_search(default_query, search_query):
             matched_count = []
 #            query_string = 'SELECT COUNT(*), id FROM ionosphere GROUP BY matched_count ORDER BY COUNT(*)'
             query_string = 'SELECT matched_count, id FROM ionosphere ORDER BY matched_count'
+            # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
+            logger.info('query_string now "%s"' % query_string)
         else:
             count_by_matched = False
 
@@ -1326,6 +1339,8 @@ def ionosphere_search(default_query, search_query):
             checked_count = []
             query_string = 'SELECT COUNT(*), id FROM ionosphere GROUP BY checked_count ORDER BY COUNT(*)'
             query_string = 'SELECT checked_count, id FROM ionosphere ORDER BY checked_count'
+            # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
+            logger.info('query_string now "%s"' % query_string)
         else:
             count_by_checked = False
 
@@ -1337,6 +1352,8 @@ def ionosphere_search(default_query, search_query):
             count_by_generation = True
             generation_count = []
             query_string = 'SELECT COUNT(*), generation FROM ionosphere GROUP BY generation ORDER BY COUNT(*)'
+            # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
+            logger.info('query_string now "%s"' % query_string)
         else:
             count_by_generation = False
 
@@ -1350,10 +1367,14 @@ def ionosphere_search(default_query, search_query):
                 get_metric_profiles = True
                 query_string = 'SELECT * FROM ionosphere WHERE metric_id=REPLACE_WITH_METRIC_ID'
                 needs_and = True
+                # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
+                logger.info('query_string now "%s"' % query_string)
             else:
                 new_query_string = 'SELECT * FROM ionosphere WHERE metric_id=REPLACE_WITH_METRIC_ID'
                 query_string = new_query_string
                 needs_and = True
+                # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
+                logger.info('query_string now "%s"' % query_string)
 
     if 'from_timestamp' in request.args:
         from_timestamp = request.args.get('from_timestamp', None)
@@ -1384,6 +1405,8 @@ def ionosphere_search(default_query, search_query):
                 new_query_string = '%s AND anomaly_timestamp >= %s' % (query_string, validate_from_timestamp)
                 query_string = new_query_string
                 needs_and = True
+                # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
+                logger.info('query_string now "%s"' % query_string)
             else:
                 # @modified 20190116 - Mutliple SQL Injection Security Vulnerabilities #86
                 #                      Bug #2818: Mutliple SQL Injection Security Vulnerabilities
@@ -1392,6 +1415,8 @@ def ionosphere_search(default_query, search_query):
                 new_query_string = '%s WHERE anomaly_timestamp >= %s' % (query_string, validated_from_timestamp)
                 query_string = new_query_string
                 needs_and = True
+                # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
+                logger.info('query_string now "%s"' % query_string)
 
     if 'until_timestamp' in request.args:
         until_timestamp = request.args.get('until_timestamp', None)
@@ -1422,6 +1447,8 @@ def ionosphere_search(default_query, search_query):
                 new_query_string = '%s AND anomaly_timestamp <= %s' % (query_string, validated_until_timestamp)
                 query_string = new_query_string
                 needs_and = True
+                # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
+                logger.info('query_string now "%s"' % query_string)
             else:
                 # @modified 20190116 - Mutliple SQL Injection Security Vulnerabilities #86
                 #                      Bug #2818: Mutliple SQL Injection Security Vulnerabilities
@@ -1430,6 +1457,8 @@ def ionosphere_search(default_query, search_query):
                 new_query_string = '%s WHERE anomaly_timestamp <= %s' % (query_string, validated_until_timestamp)
                 query_string = new_query_string
                 needs_and = True
+                # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
+                logger.info('query_string now "%s"' % query_string)
 
     if 'generation_greater_than' in request.args:
         generation_greater_than = request.args.get('generation_greater_than', None)
@@ -1456,6 +1485,8 @@ def ionosphere_search(default_query, search_query):
                 new_query_string = '%s AND generation > %s' % (query_string, validated_generation_greater_than)
                 query_string = new_query_string
                 needs_and = True
+                # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
+                logger.info('query_string now "%s"' % query_string)
             else:
                 # @modified 20190116 - Mutliple SQL Injection Security Vulnerabilities #86
                 #                      Bug #2818: Mutliple SQL Injection Security Vulnerabilities
@@ -1464,6 +1495,8 @@ def ionosphere_search(default_query, search_query):
                 new_query_string = '%s WHERE generation > %s' % (query_string, validated_generation_greater_than)
                 query_string = new_query_string
                 needs_and = True
+                # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
+                logger.info('query_string now "%s"' % query_string)
 
     # @added 20170315 - Feature #1960: ionosphere_layers
     if 'layers_id_greater_than' in request.args:
@@ -1491,6 +1524,8 @@ def ionosphere_search(default_query, search_query):
                 new_query_string = '%s AND layers_id > %s' % (query_string, validated_layers_id_greater_than)
                 query_string = new_query_string
                 needs_and = True
+                # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
+                logger.info('query_string now "%s"' % query_string)
             else:
                 # @modified 20190116 - Mutliple SQL Injection Security Vulnerabilities #86
                 #                      Bug #2818: Mutliple SQL Injection Security Vulnerabilities
@@ -1499,6 +1534,8 @@ def ionosphere_search(default_query, search_query):
                 new_query_string = '%s WHERE layers_id > %s' % (query_string, validated_layers_id_greater_than)
                 query_string = new_query_string
                 needs_and = True
+                # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
+                logger.info('query_string now "%s"' % query_string)
 
     # @added 20170402 - Feature #2000: Ionosphere - validated
     if 'validated_equals' in request.args:
@@ -1512,10 +1549,14 @@ def ionosphere_search(default_query, search_query):
                 new_query_string = '%s AND %s' % (query_string, validate_string)
                 query_string = new_query_string
                 needs_and = True
+                # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
+                logger.info('query_string now "%s"' % query_string)
             else:
                 new_query_string = '%s WHERE %s' % (query_string, validate_string)
                 query_string = new_query_string
                 needs_and = True
+                # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
+                logger.info('query_string now "%s"' % query_string)
 
     # @added 20170518 - Feature #1996: Ionosphere - matches page - matched_greater_than
     if 'matched_greater_than' in request.args:
@@ -1543,6 +1584,8 @@ def ionosphere_search(default_query, search_query):
                 new_query_string = '%s AND matched_count > %s' % (query_string, validated_matched_greater_than)
                 query_string = new_query_string
                 needs_and = True
+                # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
+                logger.info('query_string now "%s"' % query_string)
             else:
                 # @modified 20190116 - Mutliple SQL Injection Security Vulnerabilities #86
                 #                      Bug #2818: Mutliple SQL Injection Security Vulnerabilities
@@ -1551,6 +1594,8 @@ def ionosphere_search(default_query, search_query):
                 new_query_string = '%s WHERE matched_count > %s' % (query_string, validated_matched_greater_than)
                 query_string = new_query_string
                 needs_and = True
+                # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
+                logger.info('query_string now "%s"' % query_string)
 
     # @added 20170913 - Feature #2056: ionosphere - disabled_features_profiles
     # Added enabled query modifier to search and display enabled or disabled
@@ -1571,9 +1616,13 @@ def ionosphere_search(default_query, search_query):
             if needs_and:
                 new_query_string = '%s AND enabled = %s' % (query_string, str(enabled_query_value))
                 query_string = new_query_string
+                # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
+                logger.info('query_string now "%s"' % query_string)
             else:
                 new_query_string = '%s WHERE enabled = %s' % (query_string, str(enabled_query_value))
                 query_string = new_query_string
+                # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
+                logger.info('query_string now "%s"' % query_string)
             needs_and = True
 
     # @modified 20180414 - Feature #1862: Ionosphere features profiles search page
@@ -1630,8 +1679,14 @@ def ionosphere_search(default_query, search_query):
             # logger.info('executing metrics_like_query - %s' % metrics_like_query)
             # like_string_var = str(metric_like_str)
             metrics_like_query = text("""SELECT id FROM metrics WHERE metric LIKE :like_string""")
+            # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
+            logger.info('metrics_like_query - "%s"' % metrics_like_query)
+
             metric_ids = ''
             try:
+                # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
+                logger.info('metrics_like_query running query')
+
                 connection = engine.connect()
                 # @modified 20190116 - Mutliple SQL Injection Security Vulnerabilities #86
                 #                      Bug #2818: Mutliple SQL Injection Security Vulnerabilities
@@ -1645,6 +1700,9 @@ def ionosphere_search(default_query, search_query):
                     else:
                         new_metric_ids = '%s, %s' % (metric_ids, metric_id)
                         metric_ids = new_metric_ids
+                # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
+                logger.info('metrics_like_query done')
+
             except:
                 trace = traceback.format_exc()
                 logger.error(trace)
@@ -1656,9 +1714,13 @@ def ionosphere_search(default_query, search_query):
             if needs_and:
                 new_query_string = '%s AND metric_id IN (%s)' % (query_string, str(metric_ids))
                 query_string = new_query_string
+                # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
+                logger.info('query_string now "%s"' % query_string)
             else:
                 new_query_string = '%s WHERE metric_id IN (%s)' % (query_string, str(metric_ids))
                 query_string = new_query_string
+                # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
+                logger.info('query_string now "%s"' % query_string)
             needs_and = True
 
     ordered_by = None
@@ -1675,6 +1737,8 @@ def ionosphere_search(default_query, search_query):
         else:
             new_query_string = '%s ORDER BY id %s' % (query_string, ordered_by)
         query_string = new_query_string
+        # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
+        logger.info('query_string now "%s"' % query_string)
 
     if 'limit' in request.args:
         limit = request.args.get('limit', '30')
@@ -1686,13 +1750,35 @@ def ionosphere_search(default_query, search_query):
                 # new_query_string = '%s LIMIT %s' % (query_string, str(limit))
                 new_query_string = '%s LIMIT %s' % (query_string, str(validate_limit))
                 query_string = new_query_string
+                # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
+                logger.info('query_string now "%s"' % query_string)
         except:
             logger.error('error :: limit is not an integer - %s' % str(limit))
 
+    # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
+    # To ensure that not all metrics and features profiles are queried on a
+    # default Ionosphere search, identify this requests and do not query all
+    # metrics and features profiles.
+    # TODO: determine what other contexts are using this increasingly inefficient
+    # methods and fix those to as the more metrics and more features profiles
+    # that are added increases the size of these objects and iterations over
+    # them.  This method is not scaleable with 100s of 1000s of metrics or
+    # features profiles
+    default_ionosphere_search = False
+    if 'SELECT * FROM ionosphere ORDER BY id DESC LIMIT' in query_string:
+        default_ionosphere_search = True
+
     metrics = []
+
     try:
         connection = engine.connect()
         stmt = select([metrics_table]).where(metrics_table.c.id != 0)
+        # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
+        logger.info('selecting all metrics with id > 0')
+        if default_ionosphere_search:
+            stmt = select([metrics_table]).where(metrics_table.c.id == 0)
+            logger.info('defult Ionosphere search some not selecting all metrics')
+
         result = connection.execute(stmt)
         for row in result:
             metric_id = int(row['id'])
@@ -1709,6 +1795,8 @@ def ionosphere_search(default_query, search_query):
         if engine:
             engine_disposal(engine)
         raise
+    # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
+    logger.info('selected all metrics with id > 0')
 
     if get_metric_profiles:
         metrics_id = None
@@ -1739,6 +1827,12 @@ def ionosphere_search(default_query, search_query):
     try:
         connection = engine.connect()
         stmt = select([ionosphere_table]).where(ionosphere_table.c.id != 0)
+        # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
+        logger.info('selecting all features profiles with id > 0')
+        if default_ionosphere_search:
+            stmt = select([ionosphere_table]).where(ionosphere_table.c.id == 0)
+            logger.info('default Ionosphere search so not selecting all features profiles')
+
         result = connection.execute(stmt)
         for row in result:
             try:
@@ -1799,6 +1893,9 @@ def ionosphere_search(default_query, search_query):
         logger.error('error :: bad row data')
         raise
 
+    # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
+    logger.info('selected all features profiles with id > 0')
+
     if count_request and search_query:
         features_profiles = None
         features_profiles_count = None
@@ -1811,6 +1908,9 @@ def ionosphere_search(default_query, search_query):
         features_profiles_count = []
         if engine_needed and engine:
             try:
+                # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
+                logger.info('count_by_metric and search_query running query - "%s"' % query_string)
+
                 stmt = query_string
                 connection = engine.connect()
                 for row in engine.execute(stmt):
@@ -1837,6 +1937,8 @@ def ionosphere_search(default_query, search_query):
         if not count_by_metric:
             if engine_needed and engine:
                 try:
+                    # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
+                    logger.info('count_request and search_query -  running query - "%s"' % query_string)
                     stmt = query_string
                     connection = engine.connect()
                     for row in engine.execute(stmt):
@@ -1893,10 +1995,68 @@ def ionosphere_search(default_query, search_query):
         try:
             connection = engine.connect()
             if get_metric_profiles:
+                # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
+                logger.info('engine_needed and engine and search_query - get_metric_profiles - running query')
+
                 # stmt = select([ionosphere_table]).where(ionosphere_table.c.metric_id == int(metric_id))
                 stmt = select([ionosphere_table]).where(ionosphere_table.c.metric_id == int(metrics_id))
                 logger.debug('debug :: stmt - is abstracted')
             else:
+
+                # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
+                # Only queries the metrics with ids returned by the default LIMIT
+                # search, instead of raising all the metrics in the metrics query
+                # further above, just inefficient
+                if default_ionosphere_search:
+                    stmt = query_string
+                    logger.debug('debug :: stmt - %s' % stmt)
+                    default_search_metric_ids = []
+                    try:
+                        result = connection.execute(stmt)
+                    except:
+                        trace = traceback.format_exc()
+                        logger.error('%s' % trace)
+                        fail_msg = 'error :: MySQL query failed'
+                        logger.error('%s' % fail_msg)
+                        if engine:
+                            engine_disposal(engine)
+                        raise
+                    for row in result:
+                        try:
+                            metric_id = int(row['metric_id'])
+                            default_search_metric_ids.append(metric_id)
+                        except:
+                            trace = traceback.format_exc()
+                            logger.error('%s' % trace)
+                            logger.error('error :: bad row data')
+                    logger.info('engine_needed and engine and search_query - determined %s metric ids for the default Ionosphere search' % str(len(default_search_metric_ids)))
+                    metrics = []
+                    select_metric_ids = ''
+                    for default_search_metric_id in default_search_metric_ids:
+                        if select_metric_ids == '':
+                            select_metric_ids = '%s' % str(default_search_metric_id)
+                        else:
+                            select_metric_ids = '%s, %s' % (str(select_metric_ids), str(default_search_metric_id))
+                    select_metric_ids_stmt = 'SELECT * FROM metrics WHERE id in (%s)' % select_metric_ids
+                    try:
+                        metrics_result = connection.execute(select_metric_ids_stmt)
+                        for row in metrics_result:
+                            metric_id = int(row['id'])
+                            metric_name = str(row['metric'])
+                            metrics.append([metric_id, metric_name])
+                        logger.info('engine_needed and engine and search_query - determined %s metric objects for the default Ionosphere search' % str(len(metrics)))
+                    except:
+                        trace = traceback.format_exc()
+                        logger.error('%s' % trace)
+                        fail_msg = 'error :: MySQL query failed - %s' % select_metric_ids_stmt
+                        logger.error('%s' % fail_msg)
+                        if engine:
+                            engine_disposal(engine)
+                        raise
+
+                # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
+                logger.info('engine_needed and engine and search_query - not get_metric_profiles - running query')
+
                 stmt = query_string
                 logger.debug('debug :: stmt - %s' % stmt)
             try:
@@ -1909,7 +2069,6 @@ def ionosphere_search(default_query, search_query):
                 if engine:
                     engine_disposal(engine)
                 raise
-
             for row in result:
                 try:
                     fp_id = int(row['id'])
@@ -1985,6 +2144,8 @@ def ionosphere_search(default_query, search_query):
             connection.close()
             features_profiles.sort(key=operator.itemgetter(int(0)))
             logger.debug('debug :: features_profiles length - %s' % str(len(features_profiles)))
+            # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
+            logger.info('engine_needed and engine and search_query - got features_profiles')
         except:
             trace = traceback.format_exc()
             logger.error('%s' % trace)
@@ -2001,11 +2162,11 @@ def ionosphere_search(default_query, search_query):
         try:
             ionosphere_layers_table, log_msg, trace = ionosphere_layers_table_meta(skyline_app, engine)
             logger.info(log_msg)
-            logger.info('ionosphere_layers OK')
+            logger.info('features_profiles and layers_present - ionosphere_layers OK')
         except:
             trace = traceback.format_exc()
             logger.error('%s' % trace)
-            fail_msg = 'error :: failed to get ionosphere_layers meta'
+            fail_msg = 'error :: features_profiles and layers_present - failed to get ionosphere_layers meta'
             logger.error('%s' % fail_msg)
             # @added 20170806 - Bug #2130: MySQL - Aborted_clients
             # Added missing disposal
@@ -2015,10 +2176,14 @@ def ionosphere_search(default_query, search_query):
         try:
             connection = engine.connect()
             if get_metric_profiles:
+                # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
+                logger.info('features_profiles and layers_present - get_metric_profiles - running query')
                 stmt = select([ionosphere_layers_table]).where(ionosphere_layers_table.c.metric_id == int(metrics_id))
                 # logger.debug('debug :: stmt - is abstracted')
             else:
                 layers_query_string = 'SELECT * FROM ionosphere_layers'
+                # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
+                logger.info('features_profiles and layers_present - not get_metric_profiles - running query - "%s"' % layers_query_string)
                 stmt = layers_query_string
                 # logger.debug('debug :: stmt - %s' % stmt)
             result = connection.execute(stmt)
@@ -2050,7 +2215,7 @@ def ionosphere_search(default_query, search_query):
                     logger.error('error :: bad row data')
             connection.close()
             features_profiles_layers.sort(key=operator.itemgetter(int(0)))
-            logger.debug('debug :: features_profiles length - %s' % str(len(features_profiles)))
+            logger.debug('debug :: features_profiles and layers_present - features_profiles length - %s' % str(len(features_profiles)))
         except:
             trace = traceback.format_exc()
             logger.error('%s' % trace)
@@ -2126,6 +2291,8 @@ def ionosphere_search(default_query, search_query):
                 # @modified 20170913 - Task #2160: Test skyline with bandit
                 # Added nosec to exclude from bandit tests
                 stmt = 'SELECT %s FROM ionosphere WHERE enabled=1' % str(required_option)  # nosec
+                # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
+                logger.info('engine_needed and engine and default_query - running query - "%s"' % stmt)
                 connection = engine.connect()
                 for row in engine.execute(stmt):
                     value = row[str(required_option)]
@@ -5466,3 +5633,159 @@ def validate_ionosphere_match(match_id, validate_context, match_validated, user_
         engine_disposal(engine)
 
     return True
+
+
+# @added 20200226: Ideas #2476: Label and relate anomalies
+#                  Feature #2516: Add label to features profile
+def label_anomalies(start_timestamp, end_timestamp, metrics, namespaces, label):
+    """
+    Label all anomalies from start_timestamp to end_timestamp for metrics and
+    and metric namespaces with the given label.
+
+    :param start_timestamp: the start timestamp
+    :param end_timestamp: the end timestamp
+    :param metrics: a list of metric names
+    :param namespaces: a list of namespaces
+    :type start_timestamp: int
+    :type end_timestamp: int
+    :type metrics: list
+    :type namespace: list
+    :return: boolean
+    :rtype:  (list, list, list, list)
+
+    """
+    logger.info(
+        'label_anomalies :: determine metric ids for label anomalies between %s and %s with label %s' % (
+            str(start_timestamp), str(end_timestamp), str(label)))
+    logger.info('getting MySQL engine')
+    try:
+        engine, fail_msg, trace = get_an_engine()
+        logger.info(fail_msg)
+    except:
+        trace = traceback.format_exc()
+        logger.error(trace)
+        logger.error('%s' % fail_msg)
+        logger.error('error :: could not get a MySQL engine to get fp_ids')
+        raise  # to webapp to return in the UI
+
+    if not engine:
+        trace = 'none'
+        fail_msg = 'error :: engine not obtained'
+        logger.error(fail_msg)
+        raise
+
+    try:
+        metrics_table, log_msg, trace = metrics_table_meta(skyline_app, engine)
+        logger.info(log_msg)
+        logger.info('metrics_table OK')
+    except:
+        logger.error(traceback.format_exc())
+        logger.error('error :: failed to get metrics_table meta')
+
+        # @added 20170806 - Bug #2130: MySQL - Aborted_clients
+        # Added missing disposal
+        if engine:
+            engine_disposal(engine)
+        raise  # to webapp to return in the UI
+
+    metric_ids = []
+    logger.info('label_anomalies :: %s metrics passed' % str(len(metrics)))
+    for metric in metrics:
+        try:
+            connection = engine.connect()
+            stmt = select([metrics_table]).where(metrics_table.c.metric == str(metric))
+            result = connection.execute(stmt)
+            for row in result:
+                metric_id = row['id']
+                metric_ids.append(int(metric_id))
+            connection.close()
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: could not determine metric id from metrics for metric %s' % str(metric))
+            # @added 20170806 - Bug #2130: MySQL - Aborted_clients
+            # Added missing disposal and raise
+            if engine:
+                engine_disposal(engine)
+            raise
+        logger.info('label_anomalies :: %s metric ids determined from passed namespaces' % str(len(metric_ids)))
+
+    logger.info('label_anomalies :: %s namespaces passed' % str(len(namespaces)))
+    if namespaces:
+        metrics_like_query = text("""SELECT id FROM metrics WHERE metric LIKE :like_string""")
+        for namespace in namespaces:
+            try:
+                connection = engine.connect()
+                results = connection.execute(metrics_like_query, like_string=str(namespace))
+                connection.close()
+                for row in results:
+                    metric_id = str(row[0])
+                    metric_ids.append(int(metric_id))
+            except:
+                trace = traceback.format_exc()
+                logger.error(trace)
+                logger.error('error :: could not determine ids from metrics table')
+                if engine:
+                    engine_disposal(engine)
+                raise
+        logger.info('label_anomalies :: %s metric ids determined from passed namespaces' % str(len(metric_ids)))
+
+    try:
+        anomalies_table, log_msg, trace = anomalies_table_meta(skyline_app, engine)
+        logger.info(log_msg)
+        logger.info('anomalies_table OK')
+    except:
+        logger.error(traceback.format_exc())
+        logger.error('error :: failed to get anomalies_table meta')
+        # @added 20170806 - Bug #2130: MySQL - Aborted_clients
+        # Added missing disposal
+        if engine:
+            engine_disposal(engine)
+        raise  # to webapp to return in the UI
+
+    anomaly_ids_to_label = []
+    all_anomalies = []
+    try:
+        connection = engine.connect()
+        stmt = select([anomalies_table]).\
+            where(anomalies_table.c.anomaly_timestamp >= start_timestamp).\
+            where(anomalies_table.c.anomaly_timestamp <= end_timestamp)
+        result = connection.execute(stmt)
+        for row in result:
+            anomaly_id = row['id']
+            metric_id = row['metric_id']
+            all_anomalies.append(int(anomaly_id))
+            if int(metric_id) in metric_ids:
+                anomaly_ids_to_label.append(int(anomaly_id))
+        connection.close()
+    except:
+        logger.error(traceback.format_exc())
+        logger.error('error :: could not determine anomaly ids')
+        if engine:
+            engine_disposal(engine)
+        raise
+
+    logger.info('label_anomalies :: a total of %s anomalies were found in the specific time period' % str(len(all_anomalies)))
+    logger.info('label_anomalies :: %s of these anomalies were related to the specified metrics/namespaces' % str(len(anomaly_ids_to_label)))
+
+    # Label anomalies
+    for anomaly_id in anomaly_ids_to_label:
+        try:
+            connection = engine.connect()
+            connection.execute(
+                anomalies_table.update(
+                    anomalies_table.c.id == int(anomaly_id)).
+                values(label=label))
+            connection.close()
+        except:
+            trace = traceback.format_exc()
+            logger.error(trace)
+            logger.error('error :: could not update label for anomaly_id %s ' % str(anomaly_id))
+            fail_msg = 'error :: could not update label for anomaly %s ' % str(anomaly_id)
+            if engine:
+                engine_disposal(engine)
+            raise
+
+    if engine:
+        engine_disposal(engine)
+
+    return True, len(anomaly_ids_to_label)

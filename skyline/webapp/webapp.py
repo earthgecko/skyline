@@ -145,6 +145,9 @@ from ionosphere_backend import (
     webapp_update_slack_thread,
     # @added 20190601 - Feature #3084: Ionosphere - validated matches
     validate_ionosphere_match,
+    # @added 20200226: Ideas #2476: Label and relate anomalies
+    #                  Feature #2516: Add label to features profile
+    label_anomalies
 )
 
 # from utilites import alerts_matcher
@@ -529,7 +532,7 @@ def app_settings():
                         'WEBAPP_JAVASCRIPT_DEBUG': settings.WEBAPP_JAVASCRIPT_DEBUG
                         }
     except Exception as e:
-        error = "error: " + e
+        error = "error: " + str(e)
         resp = json.dumps({'app_settings': error})
         return resp, 500
 
@@ -557,6 +560,39 @@ def version():
 # they are used.
 # def data():
 def api():
+
+    # @added 20200410 - Feature #3474: webapp api - training_data
+    #                   Feature #3472: ionosphere.training_data Redis set
+    if 'training_data' in request.args:
+        metric_filter = None
+        timestamp_filter = None
+        if 'metric' in request.args:
+            metric_filter = request.args.get('metric', None)
+        if 'timestamp' in request.args:
+            timestamp_filter = request.args.get('timestamp', 0)
+        training_data = []
+        training_data_raw = list(REDIS_CONN.smembers('ionosphere.training_data'))
+        for training_data_str in training_data_raw:
+            try:
+                training_data_item = literal_eval(training_data_str)
+                training_metric = str(training_data_item[0])
+                training_timestamp = int(training_data_item[1])
+                add_to_response = True
+                if metric_filter:
+                    if metric_filter != training_metric:
+                        add_to_response = False
+                if timestamp_filter:
+                    if int(timestamp_filter) != training_timestamp:
+                        add_to_response = False
+                if add_to_response:
+                    training_data.append([training_metric, training_timestamp])
+            except:
+                logger.error(traceback.format_exc())
+                logger.error(
+                    'error :: failed to iterate literal_eval of training_data_raw')
+                return 'Internal Server Error', 500
+        data_dict = {"status": {}, "data": {"metrics": training_data}}
+        return jsonify(data_dict), 200
 
     # @added 20200129 - Feature #3422: webapp api - alerting_metrics and non_alerting_metrics
     if 'non_alerting_metrics' in request.args:
@@ -858,7 +894,10 @@ def api():
     if 'metric' in request.args:
         metric = request.args.get(str('metric'), None)
         try:
-            raw_series = REDIS_CONN.get(metric)
+            # @modified 20200225 - Bug #3266: py3 Redis binary objects not strings
+            #                      Branch #3262: py3
+            # raw_series = REDIS_CONN.get(metric)
+            raw_series = REDIS_CONN_UNDECODE.get(metric)
             if not raw_series:
                 resp = json.dumps(
                     {'results': 'Error: No metric by that name - try /api?metric=' + settings.FULL_NAMESPACE + 'metric_namespace'})
@@ -870,7 +909,7 @@ def api():
                 resp = json.dumps({'results': timeseries})
                 return resp, 200
         except Exception as e:
-            error = "Error: " + e
+            error = "Error: " + str(e)
             resp = json.dumps({'results': error})
             return resp, 500
 
@@ -1092,6 +1131,51 @@ def panorama():
         request_args_present = True
     except:
         request_args_len = 0
+
+    # @added 20200226: Ideas #2476: Label and relate anomalies
+    #                  Feature #2516: Add label to features profile
+    label_anomalies_request = False
+    if 'label_anomalies' in request.args:
+        label_anomalies_request = request.args.get(str('label_anomalies'), None)
+        if label_anomalies_request == 'true':
+            label_anomalies_request = True
+    if label_anomalies_request:
+        start_timestamp = 0
+        end_timestamp = 0
+        metrics_list = []
+        namespaces_list = []
+        label = None
+        if 'start_timestamp' in request.args:
+            start_timestamp = request.args.get(str('start_timestamp'), None)
+        if 'end_timestamp' in request.args:
+            end_timestamp = request.args.get(str('end_timestamp'), None)
+        if 'metrics' in request.args:
+            metrics = request.args.get(str('metrics'), None)
+        if 'namespaces' in request.args:
+            namespaces = request.args.get(str('namespaces'), None)
+        if 'label' in request.args:
+            label = request.args.get(str('label'), None)
+        do_label_anomalies = False
+        if start_timestamp and end_timestamp and label:
+            if metrics:
+                do_label_anomalies = True
+                metrics_list = metrics.split(',')
+                logger.info('label_anomalies metrics_list - %s' % str(metrics_list))
+            if namespaces:
+                do_label_anomalies = True
+                namespaces_list = namespaces.split(',')
+                logger.info('label_anomalies namespaces_list - %s' % str(namespaces_list))
+        labelled = False
+        anomalies_labelled = 0
+        if do_label_anomalies:
+            labelled, anomalies_labelled = label_anomalies(start_timestamp, end_timestamp, metrics_list, namespaces_list, label)
+        return render_template(
+            'panorama.html', label_anomalies=True,
+            anomalies_labelled=anomalies_labelled,
+            start_timestamp=int(start_timestamp), end_timestamp=int(end_timestamp),
+            metrics=metrics_list, namespaces=namespaces_list, label=label,
+            version=skyline_version,
+            duration=(time.time() - start), print_debug=False), 200
 
     # @added 20160803 - Sanitize request.args
     REQUEST_ARGS = ['from_date',
@@ -3329,7 +3413,7 @@ def ionosphere():
                     sample_ts_json = ts_json[-30:]
                 except:
                     trace = traceback.format_exc()
-                    message = 'Failed to smaple ts_json'
+                    message = 'Failed to sample ts_json'
                     return internal_error(message, trace)
 
             # @modified 20170331 - Task #1988: Review - Ionosphere layers - always show layers
