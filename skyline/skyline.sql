@@ -506,7 +506,7 @@ INSERT INTO `users` (user,description) VALUES ('admin','The default admin user')
 */
 CREATE TABLE IF NOT EXISTS `sql_versions` (
   `version` VARCHAR(255) DEFAULT NULL COMMENT 'version',
-  `created_timestamp` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created timestamp',
+  `created_timestamp` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created timestamp')
   ENGINE=InnoDB;
 INSERT INTO `sql_versions` (version) VALUES ('2.0.0');
 
