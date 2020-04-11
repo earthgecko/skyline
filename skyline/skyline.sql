@@ -499,6 +499,18 @@ INSERT INTO `users` (user,description) VALUES ('Skyline','The default Skyline us
 INSERT INTO `users` (user,description) VALUES ('admin','The default admin user');
 
 /*
+# @added 20200411 - Feature #3478: sql_versions table
+#                   Branch #3262: py3
+# Added a versions table to the DB as a method to track what version of the DB schema is being run.
+# This eases tracking and skipping versions by know what DB updates need to be applied.
+*/
+CREATE TABLE IF NOT EXISTS `sql_versions` (
+  `version` VARCHAR(255) DEFAULT NULL COMMENT 'version',
+  `created_timestamp` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created timestamp',
+  ENGINE=InnoDB;
+INSERT INTO `sql_versions` (version) VALUES ('2.0.0');
+
+/*
 # mariadb
 # https://mariadb.com/kb/en/mariadb/installing-mariadb-alongside-mysql/
 # possible and possible to run side by side, fiddly but possible...
