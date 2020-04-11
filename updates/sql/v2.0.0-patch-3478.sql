@@ -14,4 +14,4 @@ CREATE TABLE IF NOT EXISTS `sql_versions` (
   `version` VARCHAR(255) DEFAULT NULL COMMENT 'version',
   `created_timestamp` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created timestamp')
   ENGINE=InnoDB;
-INSERT INTO `sql_versions` (version) VALUES ('2.0.0');
+INSERT INTO `sql_versions` (version) VALUES ('2.0.0-patch-3478');
