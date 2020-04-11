@@ -21,6 +21,7 @@ CREATE INDEX anomaly_timestamp ON anomalies (anomaly_timestamp);
 #                   Branch #3262: py3
 # Added a versions table to the DB as a method to track what version of the DB schema is being run.
 # This eases tracking and skipping versions by know what DB updates need to be applied.
+# patch-3478
 */
 CREATE TABLE IF NOT EXISTS `sql_versions` (
   `version` VARCHAR(255) DEFAULT NULL COMMENT 'version',
