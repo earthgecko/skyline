@@ -1,0 +1,101 @@
+{% block label_anomalies_block %}
+<!-- BEGIN /panorama>?label_anomalies=true block -->
+{% if print_debug == 'True' %}
+<code> DEBUG </code> :: /ionosphere label_anomalies_block</br>
+{% endif %}
+
+{% if display_message %}
+<code> ERROR </code></br>
+<code> message </code>: {{ display_message }}<br>
+{% endif %}
+
+<div class="navbar-header" role="navigation">
+  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+    <span class="sr-only">Toggle navigation</span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+  </button>
+		<ul class="nav nav-tabs" role="view_tablist" id="view">
+		  <li><a href="/panorama"><span class="logo"><span class="sky">Search</span> <span class="re">anomalies</span></span></span></a></li>
+		  <li class="active"><a href="?label_anomalies=true"><span class="logo"><span class="sky">Label</span> <span class="re">anomalies</span></span></span></a></li>
+		</ul>
+		<div class="tab-content">
+	  	<div class="tab-pane active" id="view">
+	<br>
+  <div class="navbar-header" role="navigation">
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+  </div>
+
+  		<div class="col-md-12">
+<!--  		<div class="container"> -->
+  		  <h4><span class="logo"><span class="sky">Label ::</span> <span class="re">anomalies</span></span></span></h4>
+
+  {% if anomalies_labelled %}
+	  <div class="alert alert-success">
+	    <strong>LABELLED</strong> :: Labelled {{ anomalies_labelled }} anomalies with {{ label }}
+	  </div>
+  {% endif %}
+
+  {% if anomalies_labelled %}
+        <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#label_options">Show label options</button>
+        <div id="label_options" class="collapse">
+  {% endif %}
+<!-- @modified 20200406 - Ideas #2476: Label and relate anomalies
+#                         Feature #2516: Add label to features profile
+        <form action="ionosphere">
+-->
+        <form action="panorama">
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Option</th>
+  		        <th>value</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+  		        <td>Label anomalies</td>
+  		        <td><select name="label_anomalies">
+                <option value="true">true</option>
+              </select></td>
+  		      </tr>
+  		      <tr>
+  		        <td>metrics</td>
+  		        <td><input type="text" name="metrics" value="" /> a list of comma separated metric names e.g server1.cpu.total,server2.cpu.user</td>
+  		      </tr>
+  		      <tr>
+  		        <td>namespaces</td>
+  		        <td><input type="text" name="namespaces" value="" /> a list of comma separated metric namespaces with MySQL like wildcards e.g server1.cpu%,server2.cpu.%</td>
+  		      </tr>
+  		      <tr>
+                <td>start_timestamp</td>
+                <td><input type="number" name="start_timestamp" value="" /> unix timestamp</td>
+  		      </tr>
+  		      <tr>
+                <td>end_timestamp</td>
+                <td><input type="number" name="end_timestamp" value="" /> unix timestamp</td>
+  		      </tr>
+  		      <tr>
+  		        <td>label</td>
+  		        <td><input type="text" name="label" value="" /></td>
+  		      </tr>
+  		    </tbody>
+  		  </table>
+        <br>
+        <input type="submit" value="Label anomalies">
+      </form>
+      </div>
+
+    </div> <!-- END div class="col-md-12" -->
+
+	</div>
+	</div>
+	</div>
+
+<!-- END /ionosphere?fp_validate=true block -->
+{% endblock %}
