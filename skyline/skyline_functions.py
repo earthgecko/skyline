@@ -1956,3 +1956,64 @@ def forward_alert(current_skyline_app, alert_data):
     """
     current_skyline_app_logger = str(current_skyline_app) + 'Log'
     current_logger = logging.getLogger(current_skyline_app_logger)
+    current_logger.info('%s - never to be implemented.  Implemented as http_alerter' % (
+        current_skyline_app))
+
+
+# @added 20200413 - Feature #3486: analyzer_batch
+#                   Feature #3480: batch_processing
+def is_batch_metric(current_skyline_app, base_name):
+    """
+    Determine if the metric is designated as an analyzer batch processing metric
+
+    :param current_skyline_app: the app calling the function so the function
+        knows which log to write too.
+    :param metric_name: the metric name
+    :type current_skyline_app: str
+    :type metric_name: str
+    :return: False
+    :rtype:  boolean
+    """
+    current_skyline_app_logger = str(current_skyline_app) + 'Log'
+    current_logger = logging.getLogger(current_skyline_app_logger)
+    try:
+        from settings import BATCH_PROCESSING
+    except:
+        BATCH_PROCESSING = None
+    try:
+        from settings import BATCH_PROCESSING_NAMESPACES
+    except:
+        BATCH_PROCESSING_NAMESPACES = []
+    batch_metric = False
+    if BATCH_PROCESSING:
+        batch_metric = True
+        if BATCH_PROCESSING_NAMESPACES:
+            batch_metric = False
+            base_name_namespace_elements = base_name.split('.')
+            for batch_processing_namespace in BATCH_PROCESSING_NAMESPACES:
+                if batch_processing_namespace in base_name:
+                    batch_metric = True
+                    current_logger.info('%s - is_batch_metric - namespace - %s matched by being in %s' % (
+                        current_skyline_app, base_name, batch_processing_namespace))
+                    break
+                batch_processing_namespace_namespace_elements = batch_processing_namespace.split('.')
+                elements_matched = set(base_name_namespace_elements) & set(batch_processing_namespace_namespace_elements)
+                if len(elements_matched) == len(batch_processing_namespace_namespace_elements):
+                    batch_metric = True
+                    current_logger.info('%s - is_batch_metric - namespace - %s matched by elements of %s' % (
+                        current_skyline_app, base_name, batch_processing_namespace))
+                    break
+    try:
+        del base_name_namespace_elements
+    except:
+        pass
+    try:
+        del batch_processing_namespace_namespace_elements
+    except:
+        pass
+    try:
+        del elements_matched
+    except:
+        pass
+
+    return batch_metric
