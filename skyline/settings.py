@@ -594,6 +594,12 @@ BATCH_PROCESSING = None
 :vartype BATCH_PROCESSING: boolen
 """
 
+BATCH_PROCESSING_DEBUG = None
+"""
+:var BATCH_PROCESSING_DEBUG: Whether to log batch processing info from Analyzer.
+:vartype BATCH_PROCESSING_DEBUG: boolen
+"""
+
 BATCH_PROCESSING_NAMESPACES = []
 """
 :var BATCH_PROCESSING_NAMESPACES: If BATCH_PROCESSING is eanbled to reduce the
