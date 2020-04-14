@@ -82,8 +82,8 @@ class AnalyzerBatch(Thread):
 
     Made with love to the analyzer_batch playlist:
     https://soundcloud.com/earthgecko/sets/analyzer_batch
-    https://soundcloud.com/thedeltariggs/ode-to-jeremiah
-    https://soundcloud.com/egroove/premiere-francesco-chiocci-feat-black-soda-musumeci-remix-connaisseur-recordings
+    https://soundcloud.com/thedeltariggs/ode-to-jeremiah (I can't tell what I've seen..)
+    https://soundcloud.com/egroove/premiere-francesco-chiocci-feat-black-soda-musumeci-remix-connaisseur-recordings (picking up pieces of my weary mind)
     https://soundcloud.com/when-we-dip/premiere-francesco-chiocci-ft-black-soda-black-sunrise-peter-pardeike-remix
     https://soundcloud.com/timgreen/atelier-francesco-manuel-feat-astrid-dead-end-tim-green-remixcityfox-1
     https://soundcloud.com/imbernonmusic/edu-imbernon-fixing-fires
@@ -139,7 +139,7 @@ class AnalyzerBatch(Thread):
 
         spin_start = time()
         child_batch_process_pid = os.getpid()
-        logger.info('batch :: child_batch_process_pid - %s, processing %s from %s' % (
+        logger.info('child_batch_process_pid - %s, processing %s from %s' % (
             str(child_batch_process_pid), metric_name, str(last_analyzed_timestamp)))
 
         # Identify last timestamp
@@ -153,7 +153,7 @@ class AnalyzerBatch(Thread):
             raw_series = self.redis_conn.get(metric_name)
         except:
             logger.info(traceback.format_exc())
-            logger.error('error :: failed to get assigned_metrics from Redis')
+            logger.error('error :: failed to get %s from Redis' % metric_name)
             raw_series = None
 
         # Make process-specific dicts
@@ -193,8 +193,6 @@ class AnalyzerBatch(Thread):
         try:
             non_smtp_alerter_metrics = list(self.redis_conn_decoded.smembers('analyzer.non_smtp_alerter_metrics'))
         except:
-            logger.info(traceback.format_exc())
-            logger.error('error :: failed to generate a list from analyzer.non_smtp_alerter_metrics Redis set')
             non_smtp_alerter_metrics = []
 
         try:
@@ -210,12 +208,78 @@ class AnalyzerBatch(Thread):
             pass
 
         timestamps_to_analyse = []
+        # Reverse the time series so that only the first (last) items now to be
+        # iterated and break after the necessary iterations so the entire
+        # time series is not iterated over.
         reversed_timeseries = list(reversed(timeseries))
         for timestamp, value in reversed_timeseries:
             if int(timestamp) > last_analyzed_timestamp:
                 timestamps_to_analyse.append(int(timestamp))
+            else:
+                break
         del reversed_timeseries
         timestamps_to_analyse = list(reversed(timestamps_to_analyse))
+
+        # @added 20200413 - Feature #3486: analyzer_batch
+        #                   Feature #3480: batch_processing
+        # Handle there being no timestamps_to_analyse and report such as
+        # otherwise the only info logged is that the work key just gets removed
+        # 2020-04-14 12:57:25 :: 3222 :: there are 1 metrics to process in the analyzer.batch Redis set
+        # 2020-04-14 12:57:25 :: 3222 :: processing - ['vista.demo_robustperception_io.prometheus.node_disk_read_time_seconds_total', 1586868000]
+        # 2020-04-14 12:57:25 :: 3222 :: starting 1 of 1 spin_batch_process
+        # 2020-04-14 12:57:25 :: 7852 :: batch :: child_batch_process_pid - 7852, processing vista.demo_robustperception_io.prometheus.node_disk_read_time_seconds_total from 1586868000
+        # 2020-04-14 12:57:25 :: 7852 :: analyzer_batch :: removed work item - ['vista.demo_robustperception_io.prometheus.node_disk_read_time_seconds_total', 1586868000] - from Redis set - analyzer.batch
+        # 2020-04-14 12:57:25 :: 7852 :: spin_batch_process took 0.04 seconds
+        # 2020-04-14 12:57:25 :: 3222 :: 1 spin_batch_process completed in 0.10 seconds
+        # 2020-04-14 12:57:25 :: 3222 :: exceptions - Stale: 9, Boring: 6, TooShort: 0, Other: 0
+        # 2020-04-14 12:57:25 :: 3222 :: anomaly_breakdown - histogram_bins: 0, first_hour_average: 0, stddev_from_average: 0, grubbs: 0, ks_test: 0, mean_subtraction_cumulation: 0, median_absolute_deviation: 0, stddev_from_moving_average: 0, least_squares: 0
+        number_of_timestamps_to_analyze = len(timestamps_to_analyse)
+        if number_of_timestamps_to_analyze == 0:
+            logger.info('no timestamps were found to analyze for %s from %s, nothing to do' % (
+                metric_name, str(last_analyzed_timestamp)))
+            # Clean up and return
+            try:
+                del timeseries
+            except:
+                pass
+            try:
+                del timestamps_to_analyse
+            except:
+                pass
+            try:
+                del batch_timeseries
+            except:
+                pass
+            try:
+                del mirage_unique_metrics
+            except:
+                pass
+            try:
+                del ionosphere_unique_metrics
+            except:
+                pass
+            try:
+                del derivative_metrics
+            except:
+                pass
+            try:
+                del non_derivative_metrics
+            except:
+                pass
+            try:
+                del non_derivative_monotonic_metrics
+            except:
+                pass
+            try:
+                del non_smtp_alerter_metrics
+            except:
+                pass
+            return
+        else:
+            last_redis_data_timestamp = timestamps_to_analyse[-1]
+            logger.info('%s timestamps were found to analyze for %s from %s to %s' % (
+                str(number_of_timestamps_to_analyze), metric_name,
+                str(last_analyzed_timestamp), str(last_redis_data_timestamp)))
 
         # @added 20170602 - Feature #2034: analyse_derivatives
         # In order to convert monotonic, incrementing metrics to a deriative
@@ -287,7 +351,6 @@ class AnalyzerBatch(Thread):
                     logger.error('error :: nonNegativeDerivative failed')
 
             try:
-                metric_airgaps = []
                 # Allow for testing.  If you want to test a metric and then stop
                 # the metric sending data to carbon-relay (use a vista metric).
                 # Determine a timestamp that will fall into the stopped period
@@ -301,7 +364,7 @@ class AnalyzerBatch(Thread):
                 # will multiply the timestamp data point by 15, this should
                 # trigger an anomaly.  Ensure you use a metric which will
                 # trigger, a load related metric is usually adequate.
-                test_anomaly = True
+                test_anomaly = False
                 test_anomaly_at = None
                 test_anomaly_batch_timeseries = []
                 if test_anomaly:
@@ -332,6 +395,7 @@ class AnalyzerBatch(Thread):
                                     logger.info(traceback.format_exc())
                                     logger.error('error :: failed to delete test_anomaly Redis key - %s' % str(test_anomaly_key))
 
+                metric_airgaps = []
                 anomalous, ensemble, datapoint = run_selected_algorithm(batch_timeseries, metric_name, metric_airgaps)
 
                 if test_anomaly_batch_timeseries:

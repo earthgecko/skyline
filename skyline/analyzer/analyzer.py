@@ -894,7 +894,8 @@ class Analyzer(Thread):
             batch_metric = False
             # This variable is for debug testing only
             enable_analyzer_batch_processing = True
-            enable_batch_processing_logging = True
+            # enable_batch_processing_logging = True
+            enable_batch_processing_logging = None
             # Only send batches if analyzer_batch is reporting up
             analyzer_batch_up = None
             try:
@@ -976,9 +977,40 @@ class Analyzer(Thread):
                                 if enable_batch_processing_logging:
                                     logger.info('batch processing - the last_timeseries_timestamp and last timestamp from current Redis time series data for %s match, no need to batch process, OK' % (
                                         base_name))
-                                    logger.info('batch processing - the last_timeseries_timestamp and last timestamp from current Redis time series data for %s match, no need to process at all skipping, OK' % (
-                                        base_name))
-                                continue
+                                    # added 20200414 - Feature #3486: analyzer_batch
+                                    #                  Feature #3480: batch_processing
+                                    # Only continue if Analyzer is NOT alerting
+                                    # on stale metrics, otherwise Analyzer will
+                                    # not identify batch metrics as stale if
+                                    # they go stale.  However if they are in
+                                    # DO_NOT_ALERT_ON_STALE_METRICS then it
+                                    # should continue so as to save the overhead
+                                    # of reprocessing a metric until it goes
+                                    # stale.
+                                    if not ALERT_ON_STALE_METRICS:
+                                        logger.info('batch processing - the last_timeseries_timestamp and last timestamp from current Redis time series data for %s match, no need to process at all skipping, OK' % (
+                                            base_name))
+                                        continue
+                                    else:
+                                        if DO_NOT_ALERT_ON_STALE_METRICS:
+                                            metric_namespace_elements = metric_name.split('.')
+                                            process_metric = True
+                                            for do_not_alert_namespace in DO_NOT_ALERT_ON_STALE_METRICS:
+                                                if do_not_alert_namespace in metric_name:
+                                                    process_metric = False
+                                                    break
+                                                do_not_alert_namespace_namespace_elements = do_not_alert_namespace.split('.')
+                                                elements_matched = set(metric_namespace_elements) & set(do_not_alert_namespace_namespace_elements)
+                                                if len(elements_matched) == len(do_not_alert_namespace_namespace_elements):
+                                                    process_metric = False
+                                                    break
+                                            if not process_metric:
+                                                logger.info('batch processing - %s is a DO_NOT_ALERT_ON_STALE_METRICS namespace, no need to process at all as does not need to bee identified as stale, skipping normal processing.' % (
+                                                    base_name))
+                                                continue
+                                        logger.info('batch processing - processing %s normally through Analyzer, even though this data has already been analyzed however Analyzer can then identify as stale, if it goes stale.' % (
+                                            base_name))
+
                         if penultimate_timeseries_timestamp:
                             if penultimate_timeseries_timestamp != last_metric_timestamp:
                                 # Add to analyzer.batch to check
