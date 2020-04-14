@@ -28,4 +28,4 @@ data/*
 .pytest_cache/
 
 # pycharn
-.idea/
+.idea/*
