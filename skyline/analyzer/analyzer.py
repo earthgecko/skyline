@@ -132,6 +132,12 @@ try:
     from settings import BATCH_PROCESSING_NAMESPACES
 except:
     BATCH_PROCESSING_NAMESPACES = []
+# @added 20200414 - Feature #3486: analyzer_batch
+#                   Feature #3480: batch_processing
+try:
+    from settings import BATCH_PROCESSING_DEBUG
+except:
+    BATCH_PROCESSING_DEBUG = None
 
 # @added 20190522 - Feature #2580: illuminance
 # Disabled for now as in concept phase.  This would work better if
@@ -894,8 +900,6 @@ class Analyzer(Thread):
             batch_metric = False
             # This variable is for debug testing only
             enable_analyzer_batch_processing = True
-            # enable_batch_processing_logging = True
-            enable_batch_processing_logging = None
             # Only send batches if analyzer_batch is reporting up
             analyzer_batch_up = None
             try:
@@ -922,23 +926,23 @@ class Analyzer(Thread):
                         redis_set = 'analyzer.batch_processing_metrics_current'
                         try:
                             self.redis_conn.sadd(redis_set, base_name)
-                            if enable_batch_processing_logging:
+                            if BATCH_PROCESSING_DEBUG:
                                 logger.info('batch processing - added metric %s to Redis set %s' % (
                                     base_name, redis_set))
                         except:
-                            if enable_batch_processing_logging:
+                            if BATCH_PROCESSING_DEBUG:
                                 logger.error('error :: batch processing - failed to add metric %s to Redis set %s' % (
                                     base_name, redis_set))
                             pass
                         last_metric_timestamp_key = 'last_timestamp.%s' % base_name
                         try:
                             last_metric_timestamp = int(self.redis_conn.get(last_metric_timestamp_key))
-                            if enable_batch_processing_logging:
+                            if BATCH_PROCESSING_DEBUG:
                                 logger.info('batch processing - Redis key %s - %s' % (
                                     last_metric_timestamp_key, str(last_metric_timestamp)))
                         except:
                             last_metric_timestamp = None
-                            if enable_batch_processing_logging:
+                            if BATCH_PROCESSING_DEBUG:
                                 logger.info('batch processing - no last_metric_timestamp for %s was found' % (
                                     base_name))
 
@@ -956,7 +960,7 @@ class Analyzer(Thread):
                             try:
                                 last_timeseries_timestamp = int(timeseries[-1][0])
                                 penultimate_timeseries_timestamp = int(timeseries[-2][0])
-                                if enable_batch_processing_logging:
+                                if BATCH_PROCESSING_DEBUG:
                                     logger.info('batch processing - last_timeseries_timestamp from current Redis time series data for %s was %s' % (
                                         base_name, str(last_timeseries_timestamp)))
                                     logger.info('batch processing - penultimate_timeseries_timestamp from current Redis time series data for %s was %s' % (
@@ -964,7 +968,7 @@ class Analyzer(Thread):
                             except:
                                 last_timeseries_timestamp = None
                                 penultimate_timeseries_timestamp = None
-                                if enable_batch_processing_logging:
+                                if BATCH_PROCESSING_DEBUG:
                                     logger.error('error :: batch processing - penultimate_timeseries_timestamp from current Redis time series data for metric %s was not determined' % (
                                         base_name))
                         if last_timeseries_timestamp:
@@ -974,7 +978,7 @@ class Analyzer(Thread):
                                 # series data, there is no need to check the
                                 # penultimate_timeseries_timestamp
                                 penultimate_timeseries_timestamp = None
-                                if enable_batch_processing_logging:
+                                if BATCH_PROCESSING_DEBUG:
                                     logger.info('batch processing - the last_timeseries_timestamp and last timestamp from current Redis time series data for %s match, no need to batch process, OK' % (
                                         base_name))
                                     # added 20200414 - Feature #3486: analyzer_batch
@@ -1021,7 +1025,7 @@ class Analyzer(Thread):
                                 try:
                                     self.redis_conn.sadd(redis_set, str(data))
                                     added_to_analyzer_batch_proccessing_metrics = True
-                                    if enable_batch_processing_logging:
+                                    if BATCH_PROCESSING_DEBUG:
                                         logger.info('batch processing - the penultimate_timeseries_timestamp is not the same as the last_metric_timestamp added to Redis set %s - %s' % (
                                             redis_set, str(data)))
                                 except:
@@ -1036,10 +1040,10 @@ class Analyzer(Thread):
                                     if enable_analyzer_batch_processing:
                                         continue
                                         if enable_analyzer_batch_processing:
-                                            if enable_batch_processing_logging:
+                                            if BATCH_PROCESSING_DEBUG:
                                                 logger.info('batch processing - this log line should not have been reached, a continue was issued')
                             else:
-                                if enable_batch_processing_logging:
+                                if BATCH_PROCESSING_DEBUG:
                                     logger.info('batch processing - the penultimate_timeseries_timestamp is the same as second last timestamp from current Redis time series data for %s, not batch processing, continuing as normal' % (
                                         base_name))
 
@@ -1241,7 +1245,7 @@ class Analyzer(Thread):
                             self.redis_conn.setex(
                                 last_metric_timestamp_key,
                                 settings.FULL_DURATION, int_metric_timestamp)
-                            if enable_batch_processing_logging:
+                            if BATCH_PROCESSING_DEBUG:
                                 logger.info('batch processing - normal analyzer analysis set Redis key %s to %s' % (
                                     last_metric_timestamp_key, str(int_metric_timestamp)))
                         except:

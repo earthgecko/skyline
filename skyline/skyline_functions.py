@@ -1974,8 +1974,14 @@ def is_batch_metric(current_skyline_app, base_name):
     :return: False
     :rtype:  boolean
     """
-    current_skyline_app_logger = str(current_skyline_app) + 'Log'
-    current_logger = logging.getLogger(current_skyline_app_logger)
+    debug_is_batch_metric = None
+
+    if debug_is_batch_metric:
+        current_skyline_app_logger = str(current_skyline_app) + 'Log'
+        current_logger = logging.getLogger(current_skyline_app_logger)
+    else:
+        current_logger = None
+
     try:
         from settings import BATCH_PROCESSING
     except:
@@ -1984,6 +1990,9 @@ def is_batch_metric(current_skyline_app, base_name):
         from settings import BATCH_PROCESSING_NAMESPACES
     except:
         BATCH_PROCESSING_NAMESPACES = []
+
+    debug_is_batch_metric = None
+
     batch_metric = False
     if BATCH_PROCESSING:
         batch_metric = True
@@ -1993,15 +2002,17 @@ def is_batch_metric(current_skyline_app, base_name):
             for batch_processing_namespace in BATCH_PROCESSING_NAMESPACES:
                 if batch_processing_namespace in base_name:
                     batch_metric = True
-                    current_logger.info('%s - is_batch_metric - namespace - %s matched by being in %s' % (
-                        current_skyline_app, base_name, batch_processing_namespace))
+                    if debug_is_batch_metric:
+                        current_logger.info('%s - is_batch_metric - namespace - %s matched by being in %s' % (
+                            current_skyline_app, base_name, batch_processing_namespace))
                     break
                 batch_processing_namespace_namespace_elements = batch_processing_namespace.split('.')
                 elements_matched = set(base_name_namespace_elements) & set(batch_processing_namespace_namespace_elements)
                 if len(elements_matched) == len(batch_processing_namespace_namespace_elements):
                     batch_metric = True
-                    current_logger.info('%s - is_batch_metric - namespace - %s matched by elements of %s' % (
-                        current_skyline_app, base_name, batch_processing_namespace))
+                    if debug_is_batch_metric:
+                        current_logger.info('%s - is_batch_metric - namespace - %s matched by elements of %s' % (
+                            current_skyline_app, base_name, batch_processing_namespace))
                     break
     try:
         del base_name_namespace_elements
