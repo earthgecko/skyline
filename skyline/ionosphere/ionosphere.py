@@ -3285,7 +3285,7 @@ class Ionosphere(Thread):
         # @added 20190524 - Bug #3050: Ionosphere - Skyline and Graphite feedback
         logger.info('SKYLINE_FEEDBACK_NAMESPACES is set to %s' % str(SKYLINE_FEEDBACK_NAMESPACES))
 
-        while 1:
+        while True:
             now = time()
 
             # Make sure Redis is up
@@ -3438,7 +3438,8 @@ class Ionosphere(Thread):
             """
             Determine if any metric has been added to add
             """
-            while True:
+            # while True:
+            while 1:
                 metric_var_files = False
                 try:
                     metric_var_files = [f for f in listdir(settings.IONOSPHERE_CHECK_PATH) if isfile(join(settings.IONOSPHERE_CHECK_PATH, f))]
@@ -3663,6 +3664,7 @@ class Ionosphere(Thread):
                 metric_var_files = False
                 try:
                     metric_var_files = [f for f in listdir(settings.IONOSPHERE_CHECK_PATH) if isfile(join(settings.IONOSPHERE_CHECK_PATH, f))]
+                    logger.info('metric check files found - %s' % str(len(metric_var_files)))
                 except:
                     logger.error('error :: failed to list files in check dir')
                     logger.info(traceback.format_exc())
@@ -3806,19 +3808,6 @@ class Ionosphere(Thread):
                 ionosphere_job = False
                 learn_job = False
 
-                # @added 20200414 - Feature #3486: analyzer_batch
-                #                   Feature #3480: batch_processing
-                # Prioritise realtime metric checks over analyzer_batch checks
-                # as if a lot of anomalies are submitted from analyzer_batch
-                # and they are processed first then real time metrics waiting to
-                # be processed could the max_age_seconds time limit. Batch
-                # anomalies are not submitted to max_age_seconds check,
-                # therefore they will get done in due course.
-                prioritise_realtime_checks = True
-                remove_batch_anomalies_check_files = []
-                realtime_metric_var_files_count = 0
-                batch_metric_var_files_count = 0
-
                 # @added 20190524 - Bug #3050: Ionosphere - Skyline and Graphite feedback
                 # Do not run checks if the namespace is a declared SKYLINE_FEEDBACK_NAMESPACES
                 # namespace that has been checked in the last 10 minutes if
@@ -3830,11 +3819,7 @@ class Ionosphere(Thread):
                     metric_var_files_count = len(metric_var_files_sorted)
                     if metric_var_files_count > 2:
                         rate_limit_feedback_metrics = True
-                    else:
-                        # @added 20200414 - Feature #3486: analyzer_batch
-                        #                   Feature #3480: batch_processing
-                        prioritise_realtime_checks = False
-
+                        logger.info('rate_limit_feedback_metrics set to %s' % (str(rate_limit_feedback_metrics)))
                 if rate_limit_feedback_metrics:
                     for i_metric_check_file in metric_var_files_sorted:
                         feedback_metric = False
@@ -3874,40 +3859,6 @@ class Ionosphere(Thread):
                             if remove_feedback_metric_check:
                                 metric_check_file = '%s/%s' % (settings.IONOSPHERE_CHECK_PATH, i_metric_check_file)
                                 self.remove_metric_check_file(str(metric_check_file))
-                        # @added 20200414 - Feature #3486: analyzer_batch
-                        #                   Feature #3480: batch_processing
-                        # If there are realtime metric anomalies and batch metric
-                        # anomalies prioritise the realtime checks by removing the
-                        # batch anomaly checks from the metric_var_files
-                        analyzer_batch_anomaly = None
-                        if prioritise_realtime_checks and BATCH_PROCESSING:
-                            check_file_anomaly_timestamp = None
-                            try:
-                                i_metric_check_filename = i_metric_check_file.replace(settings.IONOSPHERE_CHECK_PATH + '/', '')
-                                check_file_anomaly_timestamp = i_metric_check_filename.split('.', 1)[0]
-                            except Exception as e:
-                                logger.error('error :: could not determine anomaly_timestamp from filename %s' % (
-                                    i_metric_check_file, str(e)))
-                                check_file_anomaly_timestamp = None
-                            # Is this a analyzer_batch related anomaly
-                            if check_file_anomaly_timestamp:
-                                analyzer_batch_metric_anomaly_key = 'analyzer_batch.anomaly.%s.%s' % (
-                                    str(check_file_anomaly_timestamp), base_name)
-                                try:
-                                    analyzer_batch_anomaly = self.redis_conn.get(analyzer_batch_metric_anomaly_key)
-                                except Exception as e:
-                                    logger.error(
-                                        'error :: could not query cache_key - %s - %s' % (
-                                            analyzer_batch_metric_anomaly_key, e))
-                                    analyzer_batch_anomaly = None
-                                if analyzer_batch_anomaly:
-                                    logger.info('batch processing - identified as an analyzer_batch triggered anomaly from the presence of the Redis key %s' % analyzer_batch_metric_anomaly_key)
-                                    remove_batch_anomalies_check_files.append(i_metric_check_file)
-                        if analyzer_batch_anomaly:
-                            batch_metric_var_files_count += 1
-                        else:
-                            realtime_metric_var_files_count += 1
-
                     # Determine metric_var_files after possible feedback metric removals
                     metric_var_files = False
                     try:
@@ -3916,28 +3867,88 @@ class Ionosphere(Thread):
                         logger.error('error :: failed to list files in check dir')
                         logger.info(traceback.format_exc())
 
-                    # @added 20200414 - Feature #3486: analyzer_batch
-                    #                   Feature #3480: batch_processing
-                    # If there are realtime metric anomalies and batch metric
-                    # anomalies prioritise the realtime checks by removing the
-                    # batch anomaly checks from the metric_var_files
-                    if realtime_metric_var_files_count > 0:
-                        if remove_batch_anomalies_check_files:
-                            realtime_metric_var_files = []
-                            for metric_var_file in metric_var_files:
-                                if metric_var_file in remove_batch_anomalies_check_files:
-                                    logger.info('removing batch anomaly check file to prioritise realtime metric checks - %s' % str(metric_var_file))
-                            else:
-                                realtime_metric_var_files.append(metric_var_file)
-                        if realtime_metric_var_files:
-                            realtime_metric_var_files_count = len(realtime_metric_var_files)
-                            metric_var_files = realtime_metric_var_files
-                            logger.info('removed %s batch anomaly check files from metric_var_files list to prioritise the %s realtime metric checks' % (
-                                str(batch_metric_var_files_count),
-                                str(realtime_metric_var_files_count)))
+                # @added 20200414 - Feature #3486: analyzer_batch
+                #                   Feature #3480: batch_processing
+                # Prioritise realtime metric checks over analyzer_batch checks
+                # as if a lot of anomalies are submitted from analyzer_batch
+                # and they are processed first then real time metrics waiting to
+                # be processed could the max_age_seconds time limit. Batch
+                # anomalies are not submitted to max_age_seconds check,
+                # therefore they will get done in due course.
+                prioritise_realtime_checks = True
+                remove_batch_anomalies_check_files = []
+                realtime_metric_var_files_count = 0
+                batch_metric_var_files_count = 0
+                # If there are realtime metric anomalies and batch metric
+                # anomalies prioritise the realtime checks by removing the
+                # batch anomaly checks from the metric_var_files
+                if metric_var_files and prioritise_realtime_checks and BATCH_PROCESSING:
+                    if rate_limit_feedback_metrics:
+                        prioritise_realtime_checks = False
+                    logger.info('prioritise_realtime_checks set to %s' % (str(prioritise_realtime_checks)))
+                    try:
+                        metric_var_files_sorted = []
+                        if metric_var_files:
+                            metric_var_files_sorted = sorted(metric_var_files)
+                            # logger.info('prioritise_realtime_checks checking %s metrics for batch anomalies' % (str(len(metric_var_files_sorted))))
+                            for i_metric_check_file in metric_var_files_sorted:
+                                analyzer_batch_anomaly = None
+                                check_file_anomaly_timestamp = None
+                                try:
+                                    check_metric_file_list = i_metric_check_file.split('.', -1)[1:]
+                                    last_name_element = len(check_metric_file_list) - 1
+                                    base_name = '.'.join(check_metric_file_list[0:last_name_element])
+                                    i_metric_check_filename = i_metric_check_file.replace(settings.IONOSPHERE_CHECK_PATH + '/', '')
+                                    check_file_anomaly_timestamp = i_metric_check_filename.split('.', 1)[0]
+                                except Exception as e:
+                                    logger.error('error :: could not determine anomaly_timestamp from filename %s - %s' % (
+                                        i_metric_check_file, str(e)))
+                                    check_file_anomaly_timestamp = None
+                                # Is this a analyzer_batch related anomaly
+                                if check_file_anomaly_timestamp:
+                                    analyzer_batch_metric_anomaly_key = 'analyzer_batch.anomaly.%s.%s' % (
+                                        str(check_file_anomaly_timestamp), base_name)
+                                    try:
+                                        analyzer_batch_anomaly = self.redis_conn.get(analyzer_batch_metric_anomaly_key)
+                                    except Exception as e:
+                                        logger.error(
+                                            'error :: could not query cache_key - %s - %s' % (
+                                                analyzer_batch_metric_anomaly_key, e))
+                                        analyzer_batch_anomaly = None
+                                if analyzer_batch_anomaly:
+                                    logger.info('batch processing - identified as an analyzer_batch triggered anomaly from the presence of the Redis key %s' % analyzer_batch_metric_anomaly_key)
+                                    remove_batch_anomalies_check_files.append(i_metric_check_file)
+                                    batch_metric_var_files_count += 1
+                                else:
+                                    realtime_metric_var_files_count += 1
+                                    # logger.info('batch processing - no batch anomaly Redis key found - %s' % analyzer_batch_metric_anomaly_key)
+
+                        # @added 20200414 - Feature #3486: analyzer_batch
+                        #                   Feature #3480: batch_processing
+                        # If there are realtime metric anomalies and batch metric
+                        # anomalies prioritise the realtime checks by removing the
+                        # batch anomaly checks from the metric_var_files
+                        realtime_metric_var_files = []
+                        if realtime_metric_var_files_count > 0:
+                            if remove_batch_anomalies_check_files:
+                                for metric_var_file in metric_var_files_sorted:
+                                    if metric_var_file in remove_batch_anomalies_check_files:
+                                        logger.info('removing batch anomaly check file to prioritise realtime metric checks - %s' % str(metric_var_file))
+                                else:
+                                    realtime_metric_var_files.append(metric_var_file)
+                            if realtime_metric_var_files:
+                                realtime_metric_var_files_count = len(realtime_metric_var_files)
+                                metric_var_files = realtime_metric_var_files
+                                logger.info('removed %s batch anomaly check files from metric_var_files list to prioritise the %s realtime metric checks' % (
+                                    str(batch_metric_var_files_count),
+                                    str(realtime_metric_var_files_count)))
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to determine batch anomalies')
 
                 if metric_var_files:
                     ionosphere_job = True
+                    logger.info('%s metric check files, so set to ionosphere_job = True' % (str(len(metric_var_files))))
                     break
 
                 # @added 20170113 - Feature #1854: Ionosphere learn
