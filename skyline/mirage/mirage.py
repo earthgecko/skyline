@@ -102,6 +102,17 @@ try:
 except:
     SERVER_METRIC_PATH = ''
 
+# @added 20200413 - Feature #3486: analyzer_batch
+#                   Feature #3480: batch_processing
+try:
+    from settings import BATCH_PROCESSING
+except:
+    BATCH_PROCESSING = None
+try:
+    from settings import BATCH_PROCESSING_NAMESPACES
+except:
+    BATCH_PROCESSING_NAMESPACES = []
+
 skyline_app_graphite_namespace = 'skyline.%s%s' % (skyline_app, SERVER_METRIC_PATH)
 failed_checks_dir = '%s_failed' % settings.MIRAGE_CHECK_PATH
 # @added 20191107 - Branch #3262: py3
@@ -550,6 +561,31 @@ class Mirage(Thread):
         int_metric_timestamp = int(metric_timestamp)
         int_run_timestamp = int(run_timestamp)
         metric_timestamp_age = int_run_timestamp - int_metric_timestamp
+
+        # @added 20200413 - Feature #3486: analyzer_batch
+        #                   Feature #3480: batch_processing
+        # Do not evaluate batch metrics against MIRAGE_STALE_SECONDS
+        if BATCH_PROCESSING:
+            # Is this a analyzer_batch related anomaly
+            analyzer_batch_anomaly = None
+            analyzer_batch_metric_anomaly_key = 'analyzer_batch.anomaly.%s.%s' % (
+                str(metric_timestamp), metric)
+            try:
+                analyzer_batch_anomaly = self.redis_conn.get(analyzer_batch_metric_anomaly_key)
+            except Exception as e:
+                logger.error(
+                    'error :: could not query cache_key - %s - %s' % (
+                        analyzer_batch_metric_anomaly_key, e))
+                analyzer_batch_anomaly = None
+            if analyzer_batch_anomaly:
+                logger.info('batch processing - identified as an analyzer_batch triggered anomaly from the presence of the Redis key %s' % analyzer_batch_metric_anomaly_key)
+            else:
+                logger.info('batch processing - not identified as an analyzer_batch triggered anomaly as no Redis key found - %s' % analyzer_batch_metric_anomaly_key)
+            if analyzer_batch_anomaly:
+                logger.info('batch processing - setting metric_timestamp_age from %s to 1 so that will not be discarded as stale on %s' % (
+                    str(metric_timestamp_age), metric))
+                metric_timestamp_age = 1
+
         if metric_timestamp_age > settings.MIRAGE_STALE_SECONDS:
             logger.info('stale check :: %s check request is %s seconds old - discarding' % (metric, str(metric_timestamp_age)))
             # Remove metric check file

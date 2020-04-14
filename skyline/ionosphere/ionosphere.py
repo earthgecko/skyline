@@ -163,6 +163,17 @@ try:
 except:
     IONOSPHERE_MANAGE_PURGE = True
 
+# @added 20200413 - Feature #3486: analyzer_batch
+#                   Feature #3480: batch_processing
+try:
+    from settings import BATCH_PROCESSING
+except:
+    BATCH_PROCESSING = None
+try:
+    from settings import BATCH_PROCESSING_NAMESPACES
+except:
+    BATCH_PROCESSING_NAMESPACES = []
+
 skyline_app_graphite_namespace = 'skyline.%s%s' % (skyline_app, SERVER_METRIC_PATH)
 
 max_age_seconds = settings.IONOSPHERE_CHECK_MAX_AGE
@@ -1088,6 +1099,15 @@ class Ionosphere(Thread):
         if str(added_by) == 'ionosphere_learn':
             logger.info('debug :: metric variable - added_by - %s' % added_by)
 
+        # @added 20200413 - Feature #3486: analyzer_batch
+        #                   Feature #3480: batch_processing
+        # If added_by is analyzer_batch, log and change to analyzer so that
+        # Ionosphere routes any alerts back to anaylzer
+        if str(added_by) == 'analyzer_batch':
+            logger.info('metric variable - added_by - %s, now switching to analyzer to route alerts to anlayzer, thanks analyzer_batch' % added_by)
+            added_by = 'analzyer'
+            logger.info('metric variable - added_by - %s, analyzer_batch checks will have alerts routed to analyzer' % added_by)
+
         try:
             # metric_vars.added_at
             # added_at = str(metric_vars.added_at)
@@ -1144,7 +1164,7 @@ class Ionosphere(Thread):
         # Do not check the cache key or anomaly age if added by ionosphere_learn
         if added_by != 'ionosphere_learn':
             # @added 20170101 - Feature #1830: Ionosphere alerts
-            # Remove check file is an alert key exists
+            # Remove check file if an alert key exists
             cache_key = 'ionosphere.%s.alert.%s.%s' % (added_by, metric_timestamp, base_name)
             last_alert = False
             try:
@@ -1158,18 +1178,45 @@ class Ionosphere(Thread):
                 self.remove_metric_check_file(str(metric_check_file))
                 return
 
-            now = time()
-            anomaly_age = int(now) - int(metric_timestamp)
-            if anomaly_age > max_age_seconds:
-                logger.info(
-                    'Ionosphere check max age exceeded - %s - %s seconds old, older than %s seconds discarding' % (
-                        metric, str(anomaly_age), str(max_age_seconds)))
-                with open(metric_check_file, 'rt') as fr:
-                    metric_check_file_contents = fr.readlines()
+            # @added 20200413 - Feature #3486: analyzer_batch
+            #                   Feature #3480: batch_processing
+            # Do not evaluate batch metrics against max_age_seconds
+            analyzer_batch_anomaly = None
+            if BATCH_PROCESSING:
+                # Is this a analyzer_batch related anomaly?
+                analyzer_batch_anomaly = None
+                analyzer_batch_metric_anomaly_key = 'analyzer_batch.anomaly.%s.%s' % (
+                    str(metric_timestamp), metric)
+                try:
+                    analyzer_batch_anomaly = self.redis_conn.get(analyzer_batch_metric_anomaly_key)
+                except Exception as e:
+                    logger.error(
+                        'error :: could not query cache_key - %s - %s' % (
+                            analyzer_batch_metric_anomaly_key, e))
+                    analyzer_batch_anomaly = None
+                if analyzer_batch_anomaly:
+                    logger.info('batch processing - identified as an analyzer_batch triggered anomaly from the presence of the Redis key %s' % analyzer_batch_metric_anomaly_key)
+                else:
+                    logger.info('batch processing - not identified as an analyzer_batch triggered anomaly as no Redis key found - %s' % analyzer_batch_metric_anomaly_key)
+
+            if analyzer_batch_anomaly:
+                logger.info('batch anomaly not checking max_age_seconds for %s' % analyzer_batch_metric_anomaly_key)
+            else:
+                # @modified 20200413 - Feature #3486: analyzer_batch
+                #                      Feature #3480: batch_processing
+                # Wrapped in if analyzer_batch_anomaly
+                now = time()
+                anomaly_age = int(now) - int(metric_timestamp)
+                if anomaly_age > max_age_seconds:
                     logger.info(
-                        'debug :: metric check file contents\n%s' % (str(metric_check_file_contents)))
-                    self.remove_metric_check_file(str(metric_check_file))
-                    return
+                        'Ionosphere check max age exceeded - %s - %s seconds old, older than %s seconds discarding' % (
+                            metric, str(anomaly_age), str(max_age_seconds)))
+                    with open(metric_check_file, 'rt') as fr:
+                        metric_check_file_contents = fr.readlines()
+                        logger.info(
+                            'debug :: metric check file contents\n%s' % (str(metric_check_file_contents)))
+                        self.remove_metric_check_file(str(metric_check_file))
+                        return
         else:
             logger.info('processing check_file for ionosphere_learn - %s' % str(metric_check_file))
 
@@ -3095,7 +3142,7 @@ class Ionosphere(Thread):
                     # 2016-03-02 13:16:17 :: 1515 :: metric variable - value - 5622.0
                     added_at = str(int(time()))
                     source = 'graphite'
-                    panaroma_anomaly_data = 'metric = \'%s\'\n' \
+                    panorama_anomaly_data = 'metric = \'%s\'\n' \
                                             'value = \'%s\'\n' \
                                             'from_timestamp = \'%s\'\n' \
                                             'metric_timestamp = \'%s\'\n' \
@@ -3111,19 +3158,19 @@ class Ionosphere(Thread):
                            this_host, added_at)
 
                     # Create an anomaly file with details about the anomaly
-                    panaroma_anomaly_file = '%s/%s.%s.txt' % (
+                    panorama_anomaly_file = '%s/%s.%s.txt' % (
                         settings.PANORAMA_CHECK_PATH, added_at,
                         base_name)
                     try:
                         write_data_to_file(
-                            skyline_app, panaroma_anomaly_file, 'w',
-                            panaroma_anomaly_data)
-                        logger.info('added panorama anomaly file :: %s' % (panaroma_anomaly_file))
+                            skyline_app, panorama_anomaly_file, 'w',
+                            panorama_anomaly_data)
+                        logger.info('added panorama anomaly file :: %s' % (panorama_anomaly_file))
                         # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
                         # Moved to the Redis set function below
                         # self.sent_to_panorama.append(base_name)
                     except:
-                        logger.error('error :: failed to add panorama anomaly file :: %s' % (panaroma_anomaly_file))
+                        logger.error('error :: failed to add panorama anomaly file :: %s' % (panorama_anomaly_file))
                         logger.info(traceback.format_exc())
                     # @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage
                     redis_set = 'ionosphere.sent_to_panorama'
@@ -3759,6 +3806,19 @@ class Ionosphere(Thread):
                 ionosphere_job = False
                 learn_job = False
 
+                # @added 20200414 - Feature #3486: analyzer_batch
+                #                   Feature #3480: batch_processing
+                # Prioritise realtime metric checks over analyzer_batch checks
+                # as if a lot of anomalies are submitted from analyzer_batch
+                # and they are processed first then real time metrics waiting to
+                # be processed could the max_age_seconds time limit. Batch
+                # anomalies are not submitted to max_age_seconds check,
+                # therefore they will get done in due course.
+                prioritise_realtime_checks = True
+                remove_batch_anomalies_check_files = []
+                realtime_metric_var_files_count = 0
+                batch_metric_var_files_count = 0
+
                 # @added 20190524 - Bug #3050: Ionosphere - Skyline and Graphite feedback
                 # Do not run checks if the namespace is a declared SKYLINE_FEEDBACK_NAMESPACES
                 # namespace that has been checked in the last 10 minutes if
@@ -3770,6 +3830,11 @@ class Ionosphere(Thread):
                     metric_var_files_count = len(metric_var_files_sorted)
                     if metric_var_files_count > 2:
                         rate_limit_feedback_metrics = True
+                    else:
+                        # @added 20200414 - Feature #3486: analyzer_batch
+                        #                   Feature #3480: batch_processing
+                        prioritise_realtime_checks = False
+
                 if rate_limit_feedback_metrics:
                     for i_metric_check_file in metric_var_files_sorted:
                         feedback_metric = False
@@ -3809,6 +3874,40 @@ class Ionosphere(Thread):
                             if remove_feedback_metric_check:
                                 metric_check_file = '%s/%s' % (settings.IONOSPHERE_CHECK_PATH, i_metric_check_file)
                                 self.remove_metric_check_file(str(metric_check_file))
+                        # @added 20200414 - Feature #3486: analyzer_batch
+                        #                   Feature #3480: batch_processing
+                        # If there are realtime metric anomalies and batch metric
+                        # anomalies prioritise the realtime checks by removing the
+                        # batch anomaly checks from the metric_var_files
+                        analyzer_batch_anomaly = None
+                        if prioritise_realtime_checks and BATCH_PROCESSING:
+                            check_file_anomaly_timestamp = None
+                            try:
+                                i_metric_check_filename = i_metric_check_file.replace(settings.IONOSPHERE_CHECK_PATH + '/', '')
+                                check_file_anomaly_timestamp = i_metric_check_filename.split('.', 1)[0]
+                            except Exception as e:
+                                logger.error('error :: could not determine anomaly_timestamp from filename %s' % (
+                                    i_metric_check_file, str(e)))
+                                check_file_anomaly_timestamp = None
+                            # Is this a analyzer_batch related anomaly
+                            if check_file_anomaly_timestamp:
+                                analyzer_batch_metric_anomaly_key = 'analyzer_batch.anomaly.%s.%s' % (
+                                    str(check_file_anomaly_timestamp), base_name)
+                                try:
+                                    analyzer_batch_anomaly = self.redis_conn.get(analyzer_batch_metric_anomaly_key)
+                                except Exception as e:
+                                    logger.error(
+                                        'error :: could not query cache_key - %s - %s' % (
+                                            analyzer_batch_metric_anomaly_key, e))
+                                    analyzer_batch_anomaly = None
+                                if analyzer_batch_anomaly:
+                                    logger.info('batch processing - identified as an analyzer_batch triggered anomaly from the presence of the Redis key %s' % analyzer_batch_metric_anomaly_key)
+                                    remove_batch_anomalies_check_files.append(i_metric_check_file)
+                        if analyzer_batch_anomaly:
+                            batch_metric_var_files_count += 1
+                        else:
+                            realtime_metric_var_files_count += 1
+
                     # Determine metric_var_files after possible feedback metric removals
                     metric_var_files = False
                     try:
@@ -3816,6 +3915,26 @@ class Ionosphere(Thread):
                     except:
                         logger.error('error :: failed to list files in check dir')
                         logger.info(traceback.format_exc())
+
+                    # @added 20200414 - Feature #3486: analyzer_batch
+                    #                   Feature #3480: batch_processing
+                    # If there are realtime metric anomalies and batch metric
+                    # anomalies prioritise the realtime checks by removing the
+                    # batch anomaly checks from the metric_var_files
+                    if realtime_metric_var_files_count > 0:
+                        if remove_batch_anomalies_check_files:
+                            realtime_metric_var_files = []
+                            for metric_var_file in metric_var_files:
+                                if metric_var_file in remove_batch_anomalies_check_files:
+                                    logger.info('removing batch anomaly check file to prioritise realtime metric checks - %s' % str(metric_var_file))
+                            else:
+                                realtime_metric_var_files.append(metric_var_file)
+                        if realtime_metric_var_files:
+                            realtime_metric_var_files_count = len(realtime_metric_var_files)
+                            metric_var_files = realtime_metric_var_files
+                            logger.info('removed %s batch anomaly check files from metric_var_files list to prioritise the %s realtime metric checks' % (
+                                str(batch_metric_var_files_count),
+                                str(realtime_metric_var_files_count)))
 
                 if metric_var_files:
                     ionosphere_job = True

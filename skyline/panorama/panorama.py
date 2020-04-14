@@ -33,7 +33,10 @@ from skyline_functions import (
     #                   Branch #3262: py3
     # Added a single functions to deal with Redis connection and the
     # charset='utf-8', decode_responses=True arguments required in py3
-    get_redis_conn, get_redis_conn_decoded)
+    get_redis_conn, get_redis_conn_decoded,
+    # @added 20200413 - Feature #3486: analyzer_batch
+    #                   Feature #3480: batch_processing
+    is_batch_metric)
 
 # @added 20170115 - Feature #1854: Ionosphere learn - generations
 # Added determination of the learn related variables so that any new metrics
@@ -108,6 +111,17 @@ try:
     PANORAMA_INSERT_METRICS_IMMEDIATELY = settings.PANORAMA_INSERT_METRICS_IMMEDIATELY
 except:
     PANORAMA_INSERT_METRICS_IMMEDIATELY = False
+
+# @added 20200413 - Feature #3486: analyzer_batch
+#                   Feature #3480: batch_processing
+try:
+    from settings import BATCH_PROCESSING
+except:
+    BATCH_PROCESSING = None
+try:
+    from settings import BATCH_PROCESSING_NAMESPACES
+except:
+    BATCH_PROCESSING_NAMESPACES = []
 
 # Database configuration
 config = {'user': settings.PANORAMA_DBUSER,
@@ -913,6 +927,58 @@ class Panorama(Thread):
                     skyline_app, app, metric, e))
             last_check = None
 
+        # @added 20200413 - Feature #3486: analyzer_batch
+        #                   Feature #3480: batch_processing
+        # Evaluate the reported anomaly timestamp to determine whether
+        # PANORAMA_EXPIRY_TIME should be applied to a batch metric
+        batch_metric = None
+        if BATCH_PROCESSING:
+            batch_metric = True
+            try:
+                batch_metric = is_batch_metric(skyline_app, metric)
+            except:
+                batch_metric = True
+        if batch_metric:
+            # Is this a analyzer_batch related anomaly
+            analyzer_batch_anomaly = None
+            analyzer_batch_metric_anomaly_key = 'analyzer_batch.anomaly.%s.%s' % (
+                str(metric_timestamp), metric)
+            try:
+                analyzer_batch_anomaly = self.redis_conn.get(analyzer_batch_metric_anomaly_key)
+            except Exception as e:
+                logger.error(
+                    'error :: could not query cache_key - %s - %s' % (
+                        analyzer_batch_metric_anomaly_key, e))
+                analyzer_batch_anomaly = None
+            if analyzer_batch_anomaly:
+                logger.info('identified as an analyzer_batch triggered anomaly from the presence of the Redis key %s' % analyzer_batch_metric_anomaly_key)
+            else:
+                logger.info('not identified as an analyzer_batch triggered anomaly as no Redis key found - %s' % analyzer_batch_metric_anomaly_key)
+            if last_check and analyzer_batch_anomaly:
+                last_timestamp = None
+                try:
+                    last_timestamp = int(last_check)
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to determine last_timestamp for batch metric Panorama key- %s' % cache_key)
+                    last_timestamp = None
+                seconds_between_batch_anomalies = None
+                if last_timestamp:
+                    try:
+                        seconds_between_batch_anomalies = int(metric_timestamp) - int(last_timestamp)
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to determine seconds_between_batch_anomalies for batch metric Panorama key- %s' % cache_key)
+                        last_timestamp = None
+                if seconds_between_batch_anomalies:
+                    if seconds_between_batch_anomalies > settings.PANORAMA_EXPIRY_TIME:
+                        logger.info('the difference between the last anomaly timestamp (%s) and the current anomaly timestamp (%s) for batch metric %s is greater than %s' % (
+                            str(last_timestamp), str(metric_timestamp), metric,
+                            str(settings.PANORAMA_EXPIRY_TIME)))
+                        logger.info('recording anomaly for batch metric %s, so setting last_check to None' % (
+                            metric))
+                        last_check = None
+
         if last_check:
             record_anomaly = False
             logger.info(
@@ -921,14 +987,18 @@ class Panorama(Thread):
 
         # @added 20160907 - Handle Panorama stampede on restart after not running #26
         # Allow to expire check if greater than PANORAMA_CHECK_MAX_AGE
-        if max_age:
-            now = time()
-            anomaly_age = int(now) - int(metric_timestamp)
-            if anomaly_age > max_age_seconds:
-                record_anomaly = False
-                logger.info(
-                    'Panorama check max age exceeded - %s - %s seconds old, older than %s seconds discarding' % (
-                        metric, str(anomaly_age), str(max_age_seconds)))
+        # @modified 20200413 - Feature #3486: analyzer_batch
+        #                      Feature #3480: batch_processing
+        # Only evaluate max_age is the metric is not a batch metric
+        if not batch_metric:
+            if max_age:
+                now = time()
+                anomaly_age = int(now) - int(metric_timestamp)
+                if anomaly_age > max_age_seconds:
+                    record_anomaly = False
+                    logger.info(
+                        'Panorama check max age exceeded - %s - %s seconds old, older than %s seconds discarding' % (
+                            metric, str(anomaly_age), str(max_age_seconds)))
 
         if not record_anomaly:
             logger.info('not recording anomaly for - %s' % (metric))
@@ -1207,8 +1277,20 @@ class Panorama(Thread):
 
         # Set anomaly record cache key
         try:
-            self.redis_conn.setex(
-                cache_key, settings.PANORAMA_EXPIRY_TIME, packb(value))
+            # @modified 20200413 - Feature #3486: analyzer_batch
+            #                   Feature #3480: batch_processing
+            # Set key to timestamp if a batch metric.  I have looked and cannot
+            # find where the panorama.last_check is used anyway else other than
+            # above in panorama its self and further it does not appear that the
+            # packb(value) is used at all, just the existence of the key its
+            # self.
+            if batch_metric:
+                self.redis_conn.setex(
+                    cache_key, settings.PANORAMA_EXPIRY_TIME,
+                    int(metric_timestamp))
+            else:
+                self.redis_conn.setex(
+                    cache_key, settings.PANORAMA_EXPIRY_TIME, packb(value))
             logger.info('set cache_key - %s.last_check.%s.%s - %s' % (
                 skyline_app, app, metric, str(settings.PANORAMA_EXPIRY_TIME)))
         except Exception as e:

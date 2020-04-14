@@ -575,6 +575,36 @@ IDENTIFY_UNORDERED_TIMESERIES = False
 
 """
 
+# @added 20200411 - Feature #3480: batch_processing
+BATCH_PROCESSING = None
+"""
+:var BATCH_PROCESSING: Whether to apply batch processing to metrics which are
+    recieved in batches.  In general this should not be enabled for all metrics
+    as it significantly increases the computational footprint and increases
+    memory use and calls.  It should only be enabled if you have metrics that
+    are receieved in infrequent batches, metrics feed per minute do not require
+    batch processing.  For example if a metric/s are sent to Skyline every 15
+    minutes with a data point for each minute in the period, Analyzer's default
+    analysis would only analyse the latest data point against the metric time
+    series data.  With batch processing, Analyzer identifies batched metrics and
+    when a batch of data is receieved Analyzer sends the metric/s to Crucible
+    to analyse.  To ensure that this can be achieved as computationally cheap as
+    possible the BATCH_PROCESSING_NAMESPACES list can be applied, to reduce the
+    footprint of this functionality
+:vartype BATCH_PROCESSING: boolen
+"""
+
+BATCH_PROCESSING_NAMESPACES = []
+"""
+:var BATCH_PROCESSING_NAMESPACES: If BATCH_PROCESSING is eanbled to reduce the
+    computational footprint of batch processing metric time series data, a list
+    of metric namespaces which can be expected to be batch processed can be
+    defined so that BATCH_PROCESSING keys, checks and resources are not applied
+    to all metrics.  This list works in the same way that SKIP_LIST does, it
+    matches in the string or dotted namespace elements.
+:vartype BATCH_PROCESSING_NAMESPACES: list
+"""
+
 CANARY_METRIC = 'statsd.numStats'
 """
 :var CANARY_METRIC: The metric name to use as the CANARY_METRIC
@@ -669,7 +699,7 @@ ENABLE_MIRAGE = False
 :vartype ENABLE_MIRAGE: boolean
 """
 
-ENABLE_FULL_DURATION_ALERTS = True
+ENABLE_FULL_DURATION_ALERTS = False
 """
 :var ENABLE_FULL_DURATION_ALERTS: This enables Analyzer to alert on all
     FULL_DURATION anomalies.

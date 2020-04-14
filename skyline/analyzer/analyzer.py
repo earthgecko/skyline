@@ -35,7 +35,10 @@ from skyline_functions import (
     #                   Branch #3262: py3
     # Added a single functions to deal with Redis connection and the
     # charset='utf-8', decode_responses=True arguments required in py3
-    get_redis_conn, get_redis_conn_decoded)
+    get_redis_conn, get_redis_conn_decoded,
+    # @added 20200413 - Feature #3486: analyzer_batch
+    #                   Feature #3480: batch_processing
+    is_batch_metric)
 
 from alerters import trigger_alert
 from algorithms import run_selected_algorithm
@@ -119,6 +122,16 @@ try:
     from settings import IDENTIFY_UNORDERED_TIMESERIES
 except:
     IDENTIFY_UNORDERED_TIMESERIES = False
+
+# @added 20200411 - Feature #3480: batch_processing
+try:
+    from settings import BATCH_PROCESSING
+except:
+    BATCH_PROCESSING = None
+try:
+    from settings import BATCH_PROCESSING_NAMESPACES
+except:
+    BATCH_PROCESSING_NAMESPACES = []
 
 # @added 20190522 - Feature #2580: illuminance
 # Disabled for now as in concept phase.  This would work better if
@@ -877,6 +890,127 @@ class Analyzer(Thread):
                         logger.error('error :: failed to delete Redis key %s' % (
                             metric_key_to_delete))
 
+            # @added 20200411 - Feature #3480: batch_processing
+            batch_metric = False
+            # This variable is for debug testing only
+            enable_analyzer_batch_processing = True
+            enable_batch_processing_logging = True
+            # Only send batches if analyzer_batch is reporting up
+            analyzer_batch_up = None
+            try:
+                analyzer_batch_up = int(self.redis_conn.get('analyzer_batch'))
+            except:
+                analyzer_batch_up = None
+            if analyzer_batch_up:
+                try:
+                    analyzer_batch_up_check_timestamp = int(time())
+                    analyzer_batch_up_for = analyzer_batch_up_check_timestamp - analyzer_batch_up
+                    if analyzer_batch_up_for < 128:
+                        analyzer_batch_up = True
+                except:
+                    analyzer_batch_up = None
+            if BATCH_PROCESSING:
+                batch_metric = True
+                try:
+                    batch_metric = is_batch_metric(skyline_app, base_name)
+                except:
+                    batch_metric = True
+                if batch_metric:
+                    last_metric_timestamp = None
+                    if batch_metric:
+                        redis_set = 'analyzer.batch_processing_metrics_current'
+                        try:
+                            self.redis_conn.sadd(redis_set, base_name)
+                            if enable_batch_processing_logging:
+                                logger.info('batch processing - added metric %s to Redis set %s' % (
+                                    base_name, redis_set))
+                        except:
+                            if enable_batch_processing_logging:
+                                logger.error('error :: batch processing - failed to add metric %s to Redis set %s' % (
+                                    base_name, redis_set))
+                            pass
+                        last_metric_timestamp_key = 'last_timestamp.%s' % base_name
+                        try:
+                            last_metric_timestamp = int(self.redis_conn.get(last_metric_timestamp_key))
+                            if enable_batch_processing_logging:
+                                logger.info('batch processing - Redis key %s - %s' % (
+                                    last_metric_timestamp_key, str(last_metric_timestamp)))
+                        except:
+                            last_metric_timestamp = None
+                            if enable_batch_processing_logging:
+                                logger.info('batch processing - no last_metric_timestamp for %s was found' % (
+                                    base_name))
+
+                    if not analyzer_batch_up:
+                        logger.error('error :: batch processing - analyzer_batch is not reporting up, not batch processing, processing normally')
+
+                    # Only run batch processing if analyzer_batch is reporting up
+                    if analyzer_batch_up:
+                        # If there is no known last_timestamp, this is the first
+                        # processing of a metric, just begin processing as normal
+                        # and do not send to Crucible.
+                        last_timeseries_timestamp = None
+                        penultimate_timeseries_timestamp = None
+                        if last_metric_timestamp:
+                            try:
+                                last_timeseries_timestamp = int(timeseries[-1][0])
+                                penultimate_timeseries_timestamp = int(timeseries[-2][0])
+                                if enable_batch_processing_logging:
+                                    logger.info('batch processing - last_timeseries_timestamp from current Redis time series data for %s was %s' % (
+                                        base_name, str(last_timeseries_timestamp)))
+                                    logger.info('batch processing - penultimate_timeseries_timestamp from current Redis time series data for %s was %s' % (
+                                        base_name, str(penultimate_timeseries_timestamp)))
+                            except:
+                                last_timeseries_timestamp = None
+                                penultimate_timeseries_timestamp = None
+                                if enable_batch_processing_logging:
+                                    logger.error('error :: batch processing - penultimate_timeseries_timestamp from current Redis time series data for metric %s was not determined' % (
+                                        base_name))
+                        if last_timeseries_timestamp:
+                            if last_timeseries_timestamp == last_metric_timestamp:
+                                # If the last processed timestamp is the same as the
+                                # the last timestamp in the current Redis time
+                                # series data, there is no need to check the
+                                # penultimate_timeseries_timestamp
+                                penultimate_timeseries_timestamp = None
+                                if enable_batch_processing_logging:
+                                    logger.info('batch processing - the last_timeseries_timestamp and last timestamp from current Redis time series data for %s match, no need to batch process, OK' % (
+                                        base_name))
+                                    logger.info('batch processing - the last_timeseries_timestamp and last timestamp from current Redis time series data for %s match, no need to process at all skipping, OK' % (
+                                        base_name))
+                                continue
+                        if penultimate_timeseries_timestamp:
+                            if penultimate_timeseries_timestamp != last_metric_timestamp:
+                                # Add to analyzer.batch to check
+                                added_to_analyzer_batch_proccessing_metrics = None
+                                data = [metric_name, last_metric_timestamp]
+                                # redis_set = 'crucible.firings.batch_processing_metrics'
+                                redis_set = 'analyzer.batch'
+                                try:
+                                    self.redis_conn.sadd(redis_set, str(data))
+                                    added_to_analyzer_batch_proccessing_metrics = True
+                                    if enable_batch_processing_logging:
+                                        logger.info('batch processing - the penultimate_timeseries_timestamp is not the same as the last_metric_timestamp added to Redis set %s - %s' % (
+                                            redis_set, str(data)))
+                                except:
+                                    logger.error(traceback.format_exc())
+                                    logger.error('error :: batch processing - failed to add %s to %s Redis set' % (
+                                        str(data), redis_set))
+                                    batch_metric = False
+                                    added_to_analyzer_batch_proccessing_metrics = False
+                                if added_to_analyzer_batch_proccessing_metrics:
+                                    logger.info('batch processing - add %s to %s Redis set to be batch processed' % (
+                                        str(data), redis_set))
+                                    if enable_analyzer_batch_processing:
+                                        continue
+                                        if enable_analyzer_batch_processing:
+                                            if enable_batch_processing_logging:
+                                                logger.info('batch processing - this log line should not have been reached, a continue was issued')
+                            else:
+                                if enable_batch_processing_logging:
+                                    logger.info('batch processing - the penultimate_timeseries_timestamp is the same as second last timestamp from current Redis time series data for %s, not batch processing, continuing as normal' % (
+                                        base_name))
+
             # @added 20170617 - Bug #2050: analyse_derivatives - change in monotonicity
             # First check if it has its own Redis z.derivative_metric key
             # that has not expired
@@ -1065,6 +1199,21 @@ class Analyzer(Thread):
                             str(data), str(redis_set)))
 
                     anomalous = True
+
+                # @added 20200411 - Feature #3480: batch_processing
+                if BATCH_PROCESSING:
+                    if batch_metric:
+                        last_metric_timestamp_key = 'last_timestamp.%s' % base_name
+                        try:
+                            int_metric_timestamp = int(metric_timestamp)
+                            self.redis_conn.setex(
+                                last_metric_timestamp_key,
+                                settings.FULL_DURATION, int_metric_timestamp)
+                            if enable_batch_processing_logging:
+                                logger.info('batch processing - normal analyzer analysis set Redis key %s to %s' % (
+                                    last_metric_timestamp_key, str(int_metric_timestamp)))
+                        except:
+                            logger.error('error :: batch processing - failed to set Redis key %s' % last_metric_timestamp_key)
 
                 # If it's anomalous, add it to list
                 if anomalous:
@@ -2291,6 +2440,52 @@ class Analyzer(Thread):
                         logger.error(traceback.format_exc())
                         logger.error('error :: failed to add an Ionosphere anomalous_metric for %s' % cache_key)
 
+            # @added 20200412 - Feature #3486: analyzer_batch
+            #                   Feature #3480: batch_processing
+            analyzer_batch_alerts = []
+            if BATCH_PROCESSING:
+                context = 'Analyzer'
+                try:
+                    analyzer_batch_alerts = list(self.redis_conn.scan_iter(match='analyzer_batch.alert.*'))
+                    if LOCAL_DEBUG:
+                        logger.info('debug :: analyzer_batch.alert.* Redis keys - %s' % (
+                            str(analyzer_batch_alerts)))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to scan analyzer_batch.alert.* from Redis')
+                if not analyzer_batch_alerts:
+                    analyzer_batch_alerts = []
+                if len(analyzer_batch_alerts) != 0:
+                    logger.info('analyzer_batch alert/s requested :: %s' % str(analyzer_batch_alerts))
+                    for cache_key in analyzer_batch_alerts:
+                        try:
+                            alert_on = self.redis_conn.get(cache_key)
+                            send_alert_for = literal_eval(alert_on)
+                            value = float(send_alert_for[0])
+                            base_name = str(send_alert_for[1])
+                            metric_timestamp = int(float(send_alert_for[2]))
+                            triggered_algorithms = send_alert_for[3]
+                            anomalous_metric = [value, base_name, metric_timestamp]
+                            redis_set = 'analyzer.all_anomalous_metrics'
+                            data = str(anomalous_metric)
+                            try:
+                                self.redis_conn.sadd(redis_set, data)
+                            except:
+                                logger.info(traceback.format_exc())
+                                logger.error('error :: failed to add %s to Redis set %s for analyzer_batch' % (
+                                    str(data), str(redis_set)))
+                            for algorithm in triggered_algorithms:
+                                key = algorithm
+                                if key not in anomaly_breakdown.keys():
+                                    anomaly_breakdown[key] = 1
+                                else:
+                                    anomaly_breakdown[key] += 1
+                            self.redis_conn.delete(cache_key)
+                            logger.info('alerting for analyzer_batch on %s' % base_name)
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: failed to add an analyzer_batch anomalous_metric for %s' % str(cache_key))
+
             # Send alerts
             if settings.ENABLE_ALERTS:
                 for alert in settings.ALERTS:
@@ -2492,8 +2687,27 @@ class Analyzer(Thread):
                                     metric[1])
 
                             # Alert for analyzer if enabled
+                            # This sends an Analyzer ALERT for every check that
+                            # is sent to Mirage.
                             if settings.ENABLE_FULL_DURATION_ALERTS:
-                                self.redis_conn.setex(cache_key, alert[2], packb(metric[0]))
+
+                                # @modified 20200413 - Feature #3486: analyzer_batch
+                                #                      Feature #3480: batch_processing
+                                # Change the last_alert cache key to hold the
+                                # the anomaly timestamp which which the alert
+                                # was sent, not the packb anomaly value, which
+                                # having reviewed the code is not used or called
+                                # anywhere.  The packb of the last_alert cache
+                                # key is from the original Etsy code, using the
+                                # timestamp of the anomaly allows it to be used
+                                # to determine if a batch anomaly should be
+                                # alerted on based on the comparison of the
+                                # timestamps rather than just the last_alert
+                                # key as analyzer_batch could send multiple
+                                # anomalies in one batch that might be
+                                # EXPIRATION_TIME apart.
+                                # self.redis_conn.setex(cache_key, alert[2], packb(metric[0]))
+                                self.redis_conn.setex(cache_key, alert[2], int(metric[2]))
                                 logger.info('triggering alert ENABLE_FULL_DURATION_ALERTS :: %s %s via %s' % (metric[1], metric[0], alert[1]))
                                 try:
                                     if alert[1] != 'smtp':
@@ -2577,6 +2791,41 @@ class Analyzer(Thread):
                                 logger.error('error :: could not query Redis for cache_key: %s' % e)
                                 continue
 
+                            # @added 20200413 - Feature #3486: analyzer_batch
+                            #                   Feature #3480: batch_processing
+                            # Do not evaluate batch metrics against the presence
+                            # of the last_alert cache key, but against the
+                            # timestamp of the anomaly as reported by the key
+                            if BATCH_PROCESSING and last_alert:
+                                # Is this a analyzer_batch related anomaly
+                                analyzer_batch_anomaly = None
+                                analyzer_batch_metric_anomaly_key = 'analyzer_batch.anomaly.%s.%s' % (
+                                    str(metric_timestamp), metric)
+                                try:
+                                    analyzer_batch_anomaly = self.redis_conn.get(analyzer_batch_metric_anomaly_key)
+                                except Exception as e:
+                                    logger.error(
+                                        'error :: could not query cache_key - %s - %s' % (
+                                            analyzer_batch_metric_anomaly_key, e))
+                                    analyzer_batch_anomaly = None
+                                if analyzer_batch_anomaly:
+                                    logger.info('batch processing - identified as an analyzer_batch triggered anomaly from the presence of the Redis key %s' % analyzer_batch_metric_anomaly_key)
+                                else:
+                                    logger.info('batch processing - not identified as an analyzer_batch triggered anomaly as no Redis key found - %s' % analyzer_batch_metric_anomaly_key)
+                                if analyzer_batch_anomaly:
+                                    seconds_between_batch_anomalies = None
+                                    try:
+                                        seconds_between_batch_anomalies = int(metric[2]) - int(last_alert)
+                                    except:
+                                        logger.info(traceback.format_exc())
+                                        logger.error('error :: failed to calculate number of seconds between last_alert anomalyy timestamp and current batch anomaly timestamp')
+                                    if seconds_between_batch_anomalies == 0:
+                                        seconds_between_batch_anomalies = 1
+                                    if seconds_between_batch_anomalies > int(alert[2]):
+                                        logger.info('batch processing - setting last_alert to None for %s, so Analyzer will alert on this anomaly which occurred %s seconds after the last anomaly alerted on' % (
+                                            metric, str(seconds_between_batch_anomalies)))
+                                        last_alert = None
+
                             if last_alert:
                                 if str(metric[1]) in ionosphere_metric_alerts:
                                     logger.info('not alerting on ionosphere_alerts Ionosphere metric - last_alert key exists - %s' % str(metric[1]))
@@ -2606,9 +2855,26 @@ class Analyzer(Thread):
                                 #                      Branch #3262: py3
                                 # self.redis_conn.setex(cache_key, alert[2], packb(metric[0]))
                                 if python_version == 2:
-                                    key_set = self.redis_conn.setex(cache_key, alert[2], packb(metric[0]))
+                                    # @modified 20200413 - Feature #3486: analyzer_batch
+                                    #                      Feature #3480: batch_processing
+                                    # Change the last_alert cache key to hold the
+                                    # the anomaly timestamp for which the alert
+                                    # was sent, not the packb anomaly value, which
+                                    # having reviewed the code is not used or called
+                                    # anywhere.  The packb of the last_alert cache
+                                    # key is from the original Etsy code, using the
+                                    # timestamp of the anomaly allows it to be used
+                                    # to determine if a batch anomaly should be
+                                    # alerted on based on the comparison of the
+                                    # timestamps rather than just the last_alert
+                                    # key as analyzer_batch could send multiple
+                                    # anomalies in one batch that might be
+                                    # EXPIRATION_TIME apart.
+                                    # key_set = self.redis_conn.setex(cache_key, alert[2], packb(metric[0]))
+                                    key_set = self.redis_conn.setex(cache_key, alert[2], int(metric[2]))
                                 if python_version == 3:
-                                    key_set = self.redis_conn.setex(cache_key, str(alert[2]), packb(str(metric[0])))
+                                    # key_set = self.redis_conn.setex(cache_key, str(alert[2]), packb(str(metric[0])))
+                                    key_set = self.redis_conn.setex(cache_key, str(alert[2]), int(metric[2]))
                                 if LOCAL_DEBUG:
                                     logger.debug('debug :: metric_name analyzer_metric cache_key setex - %s, %s, %s, %s' % (
                                         str(cache_key), str(alert[2]),
@@ -3662,6 +3928,16 @@ class Analyzer(Thread):
                     except:
                         logger.error(traceback.format_exc())
                         logger.error('error :: failed to manage analyzer.airgapped_metrics Redis set Redis set')
+
+            # @added 20200411 - Feature #3480: batch_processing
+            try:
+                self.redis_conn.delete('analyzer.batch_processing_metrics')
+            except:
+                pass
+            try:
+                self.redis_conn.rename('analyzer.batch_processing_metrics_current', 'analyzer.batch_processing_metrics')
+            except:
+                pass
 
             # Sleep if it went too fast
             # if time() - now < 5:
