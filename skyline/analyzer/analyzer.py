@@ -2482,7 +2482,9 @@ class Analyzer(Thread):
             if BATCH_PROCESSING:
                 context = 'Analyzer'
                 try:
-                    analyzer_batch_alerts = list(self.redis_conn.scan_iter(match='analyzer_batch.alert.*'))
+                    # @modified 20200415 - Feature #3486: analyzer_batch
+                    # analyzer_batch_alerts = list(self.redis_conn.scan_iter(match='analyzer_batch.alert.*'))
+                    analyzer_batch_alerts = list(self.redis_conn_decoded.scan_iter(match='analyzer_batch.alert.*'))
                     if LOCAL_DEBUG:
                         logger.info('debug :: analyzer_batch.alert.* Redis keys - %s' % (
                             str(analyzer_batch_alerts)))
@@ -2495,7 +2497,9 @@ class Analyzer(Thread):
                     logger.info('analyzer_batch alert/s requested :: %s' % str(analyzer_batch_alerts))
                     for cache_key in analyzer_batch_alerts:
                         try:
-                            alert_on = self.redis_conn.get(cache_key)
+                            # @modified 20200415 - Feature #3486: analyzer_batch
+                            # alert_on = self.redis_conn.get(cache_key)
+                            alert_on = self.redis_conn_decoded.get(cache_key)
                             send_alert_for = literal_eval(alert_on)
                             value = float(send_alert_for[0])
                             base_name = str(send_alert_for[1])
