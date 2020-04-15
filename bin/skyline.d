@@ -64,6 +64,14 @@ if [ ! -d "$SKYLINE_TMP_DIR" ]; then
   mkdir -p "$SKYLINE_TMP_DIR"
 fi
 
+# @added 20200415 - Branch #3262: py3
+# Handle using a skyline user that does not have sudo access
+CURRENT_USER=$(whoami)
+USE_SUDO="sudo"
+if [ "$CURRENT_USER" == "skyline" ]; then
+  USE_SUDO=""
+fi
+
 restart () {
 
   FAILURES=0

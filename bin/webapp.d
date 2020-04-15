@@ -56,7 +56,6 @@ if [ "$PYTHON_VIRTUALENV" == "true" ]; then
 fi
 
 # Determine LOG and PID PATHs from the settings.py
-# Determine LOG and PID PATHs from the settings.py
 if [ ! -f "$BASEDIR/skyline/settings.py" ]; then
   echo "error: The Skyline settings.py was not found at $BASEDIR/skyline/settings.py"
   exit 1
@@ -75,6 +74,14 @@ SKYLINE_TMP_DIR=$(cat "$BASEDIR/skyline/settings.py" | grep -v "^#" | grep "^SKY
 if [ ! -d "$SKYLINE_TMP_DIR" ]; then
   echo "notice: The SKYLINE_TMP_DIR directory in $BASEDIR/skyline/settings.py does not exist, creating"
   mkdir -p "$SKYLINE_TMP_DIR"
+fi
+
+# @added 20200415 - Branch #3262: py3
+# Handle using a skyline user that does not have sudo access
+CURRENT_USER=$(whoami)
+USE_SUDO="sudo"
+if [ "$CURRENT_USER" == "skyline" ]; then
+  USE_SUDO=""
 fi
 
 WEBAPP_SERVER=$(cat "$BASEDIR/skyline/settings.py" | grep -v "^#" | grep "^WEBAPP_SERVER = '" | sed -e "s/.*= //;s/'//g" | sed -e 's/"//g')
@@ -239,6 +246,24 @@ start () {
       RUNNING_PID=$(cat "$PID_PATH/${SERVICE_NAME}.pid" | head -n 1)
     else
       RUNNING_PID="unknown"
+# @added 20200320 - under systemd there can be a delay
+      sleep 1
+      RUNINNG_PID=$(ps aux | grep -v grep  | grep gunicorn | grep webapp | tr -s ' ' ',' | cut -d',' -f2 | sort | head -n 1)
+      # Is the RUNNING_PID a valid number?
+      # shellcheck disable=SC2065
+      test "$RUNNING_PID" -gt 1 > /dev/null 2>&1
+      if [ $? -eq 0 ]; then
+        VALID_PIDFILE=1
+        echo $RUNNING_PID > "$PID_PATH/${SERVICE_NAME}.pid"
+      fi
+      if [ $VALID_PIDFILE -eq 1 ]; then
+        if [ -f "/proc/$RUNNING_PID/status" ]; then
+          RUNNING=1
+          VALID_PID=1
+        else
+          PROCESS_STALLED=1
+        fi
+      fi
     fi
 
     if [ "$WEBAPP_SERVER" == "flask" ]; then
@@ -316,7 +341,9 @@ stop () {
     SERVICE_RELATED_PID=$(ps aux | grep "$WEBAPP_SERVICE_STRING" | grep "$SERVICE_NAME" | grep -v grep | awk '{print $2 }' | grep -c "$SERVICE_PID")
     if [ $SERVICE_RELATED_PID -eq 1 ]; then
       echo "$(date +"%Y-%m-%d %H:%M:%S") :: $PID :: ${SERVICE_NAME}.d :: stopping process $SERVICE_PID" >> "$LOG_PATH/${SERVICE_NAME}.log"
-      sudo kill $SERVICE_PID
+# @added 20200415 - Branch #3262: py3
+# Handle using a skyline user that does not have sudo access
+      $USE_SUDO kill $SERVICE_PID
     fi
 
     PROCESS_COUNT=$(ps aux | grep "$WEBAPP_SERVICE_STRING" | grep "$SERVICE_NAME" | grep -v grep | awk '{print $2 }' | wc -l)
@@ -333,7 +360,9 @@ stop () {
         SERVICE_RELATED_PID=$(ps aux | grep "$WEBAPP_SERVICE_STRING" | grep "$SERVICE_NAME" | grep -v grep | awk '{print $2 }' | grep -c "$i_pid")
         if [ $SERVICE_RELATED_PID -eq 1 ]; then
           echo "$(date +"%Y-%m-%d %H:%M:%S") :: $PID :: ${SERVICE_NAME}.d :: cleaning up process $i_pid" >> "$LOG_PATH/${SERVICE_NAME}.log"
-          sudo kill $i_pid
+# @added 20200415 - Branch #3262: py3
+# Handle using a skyline user that does not have sudo access
+          $USE_SUDO kill $i_pid
         fi
       done
 
@@ -345,7 +374,9 @@ stop () {
           SERVICE_RELATED_PID=$(ps aux | grep "$WEBAPP_SERVICE_STRING" | grep "$SERVICE_NAME" | grep -v grep | awk '{print $2 }' | grep -c "$i_pid")
           if [ $SERVICE_RELATED_PID -eq 1 ]; then
             echo "$(date +"%Y-%m-%d %H:%M:%S") :: $PID :: ${SERVICE_NAME}.d :: kill -9 process $i_pid" >> "$LOG_PATH/${SERVICE_NAME}.log"
-            sudo kill -9 $i_pid
+# @added 20200415 - Branch #3262: py3
+# Handle using a skyline user that does not have sudo access
+            $USE_SUDO kill -9 $i_pid
           fi
         done
       fi
