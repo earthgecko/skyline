@@ -363,9 +363,8 @@ Required changes to settings.py follow.
   - :mod:`settings.MIRAGE_ENABLE_ALERTS` set this to ```True``` if you want to
     have Mirage running as described above.
   - :mod:`settings.SMTP_OPTS`
-  - :mod:`settings.HIPCHAT_OPTS`, :mod:`settings.PAGERDUTY_OPTS` and
-    :mod:`settings.SLACK_OPTS` if to be used,  if so ensure that
-    :mod:`settings.HIPCHAT_ENABLED`, :mod:`settings.PAGERDUTY_ENABLED` and
+  - :mod:`settings.PAGERDUTY_OPTS` and :mod:`settings.SLACK_OPTS` if to be used,
+    if so ensure that :mod:`settings.PAGERDUTY_ENABLED` and
     :mod:`settings.SLACK_ENABLED` are set to ``True`` as appropriate.
   - :mod:`settings.HORIZON_IP`
   - If you are deploying with a Skyline MySQL Panorama DB straight away ensure

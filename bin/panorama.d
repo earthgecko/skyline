@@ -76,6 +76,14 @@ if [ ! -d "$SKYLINE_TMP_DIR" ]; then
   mkdir -p "$SKYLINE_TMP_DIR"
 fi
 
+# @added 20200415 - Branch #3262: py3
+# Handle using a skyline user that does not have sudo access
+CURRENT_USER=$(whoami)
+USE_SUDO="sudo"
+if [ "$CURRENT_USER" == "skyline" ]; then
+  USE_SUDO=""
+fi
+
 # Check if it is running and if so its state
 RESTART=0
 RUNNING=0
@@ -282,7 +290,9 @@ stop () {
     SERVICE_RELATED_PID=$(ps aux | grep "${SERVICE_NAME}/agent.py start" | grep "$SERVICE_NAME" | grep -v grep | awk '{print $2 }' | grep -c "$SERVICE_PID")
     if [ $SERVICE_RELATED_PID -eq 1 ]; then
       echo "$(date +"%Y-%m-%d %H:%M:%S") :: $PID :: ${SERVICE_NAME}.d :: stopping process $SERVICE_PID" >> "$LOG_PATH/${SERVICE_NAME}.log"
-      sudo kill $SERVICE_PID
+# @added 20200415 - Branch #3262: py3
+# Handle using a skyline user that does not have sudo access
+      $USE_SUDO kill $SERVICE_PID
     fi
 
     PROCESS_COUNT=$(ps aux | grep "${SERVICE_NAME}/agent.py start" | grep "$SERVICE_NAME" | grep -v grep | awk '{print $2 }' | wc -l)
@@ -299,7 +309,9 @@ stop () {
         SERVICE_RELATED_PID=$(ps aux | grep "${SERVICE_NAME}/agent.py start" | grep "$SERVICE_NAME" | grep -v grep | awk '{print $2 }' | grep -c "$i_pid")
         if [ $SERVICE_RELATED_PID -eq 1 ]; then
           echo "$(date +"%Y-%m-%d %H:%M:%S") :: $PID :: ${SERVICE_NAME}.d :: cleaning up process $i_pid" >> "$LOG_PATH/${SERVICE_NAME}.log"
-          sudo kill $i_pid
+# @added 20200415 - Branch #3262: py3
+# Handle using a skyline user that does not have sudo access
+          $USE_SUDO kill $i_pid
         fi
       done
 
@@ -311,7 +323,9 @@ stop () {
           SERVICE_RELATED_PID=$(ps aux | grep "${SERVICE_NAME}/agent.py start" | grep "$SERVICE_NAME" | grep -v grep | awk '{print $2 }' | grep -c "$i_pid")
           if [ $SERVICE_RELATED_PID -eq 1 ]; then
             echo "$(date +"%Y-%m-%d %H:%M:%S") :: $PID :: ${SERVICE_NAME}.d :: kill -9 process $i_pid" >> "$LOG_PATH/${SERVICE_NAME}.log"
-            sudo kill -9 $i_pid
+# @added 20200415 - Branch #3262: py3
+# Handle using a skyline user that does not have sudo access
+            $USE_SUDO kill -9 $i_pid
           fi
         done
       fi
