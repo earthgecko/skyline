@@ -190,7 +190,11 @@ start () {
       return $RETVAL
     fi
 
-    sleep .5
+# @modified 20200415 - Branch #956: flux
+# Change sleep to 2 seconds as on a loaded system this can take a while to
+# start
+#    sleep .5
+    sleep 2
     if [ -f "$PID_PATH/${SERVICE_NAME}.pid" ]; then
       RUNNING_PID=$(cat "$PID_PATH/${SERVICE_NAME}.pid" | head -n 1)
     else
