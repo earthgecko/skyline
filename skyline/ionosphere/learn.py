@@ -636,6 +636,16 @@ def ionosphere_learn(timestamp):
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: learn :: failed get determine the learn_full_duration_days from the metric_db_object for work check')
+            # @added 20200415 - Feature #1854: Ionosphere learn
+            # IONOSPHERE_LEARN_NAMESPACE_CONFIG handle 0 learn_full_duration_days
+            # Handle if the IONOSPHERE_LEARN_NAMESPACE_CONFIG is configured with
+            # an impossible default learn_full_duration_days of 0 e.g.
+            # (".*", 0, 3661, 16, 100),
+            # patch.1
+            if learn_full_duration_days == 0:
+                logger.error('error :: learn :: work check - WARNING the learn_full_duration_days is set to 0, which is not possible, so setting to a default of 30 days')
+                learn_full_duration_days = 30
+
             if not learn_full_duration_days:
                 logger.info('learn :: exiting this work but not removing work item, as database may be available again before the work expires')
                 if engine:
@@ -962,6 +972,18 @@ def ionosphere_learn(timestamp):
             learn_full_duration_days = metric_db_object['learn_full_duration_days']
             learn_full_duration = int(learn_full_duration_days) * 86400
             use_full_duration = learn_full_duration
+            # @added 20200415 - Feature #1854: Ionosphere learn
+            # IONOSPHERE_LEARN_NAMESPACE_CONFIG handle 0 learn_full_duration_days
+            # Handle if the IONOSPHERE_LEARN_NAMESPACE_CONFIG is configured with
+            # an impossible default learn_full_duration_days of 0 e.g.
+            # (".*", 0, 3661, 16, 100),
+            # patch.2
+            if learn_full_duration_days == 0:
+                logger.error('error :: learn :: work check - WARNING the learn_full_duration_days is set to 0, which is not possible, so setting to a default of 30 days')
+                learn_full_duration_days = 30
+                # patch.2
+                learn_full_duration = int(learn_full_duration_days) * 86400
+                use_full_duration = learn_full_duration
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: learn :: failed get the determine the learn_full_duration_days from the metric_db_object')
