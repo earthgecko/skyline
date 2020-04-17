@@ -3100,7 +3100,10 @@ def ionosphere():
             # GRAPH_URL = GRAPHITE_PROTOCOL + '://' + GRAPHITE_HOST + ':' + GRAPHITE_PORT + '/render/?width=1400&from=-' + TARGET_HOURS + 'hour&target='
             # A regex is required to change the TARGET_HOURS, no? extend do not modify?
             # Not certain will review after Dude morning excersion
-            graph_url = '%scactiStyle(%s)%s&colorList=blue' % (
+
+            # @modified 20200417 - Task #3294: py3 - handle system parameter in Graphite cactiStyle
+            # graph_url = '%scactiStyle(%s)%s&colorList=blue' % (
+            graph_url = '%scactiStyle(%s,%%27si%%27)%s&colorList=blue' % (
                 settings.GRAPH_URL, base_name, settings.GRAPHITE_GRAPH_SETTINGS)
         except:
             graph_url = False
@@ -3126,7 +3129,9 @@ def ionosphere():
                 known_derivative_metric = False
         if known_derivative_metric:
             try:
-                graph_url = '%scactiStyle(nonNegativeDerivative(%s))%s&colorList=blue' % (
+                # @modified 20200417 - Task #3294: py3 - handle system parameter in Graphite cactiStyle
+                # graph_url = '%scactiStyle(nonNegativeDerivative(%s))%s&colorList=blue' % (
+                graph_url = '%scactiStyle(nonNegativeDerivative(%s),%%27si%%27)%s&colorList=blue' % (
                     settings.GRAPH_URL, base_name, settings.GRAPHITE_GRAPH_SETTINGS)
             except:
                 graph_url = False
@@ -3763,7 +3768,9 @@ def ionosphere():
                         if settings.GRAPHITE_PORT != '':
                             # @modified 20190520 - Branch #3002: docker
                             # correlation_graphite_link = '%s://%s:%s/render/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=blue' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT, str(graphite_from), str(graphite_until), metric_name, settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
-                            correlation_graphite_link = '%s://%s:%s/%s/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=blue' % (
+                            # @modified 20200417 - Task #3294: py3 - handle system parameter in Graphite cactiStyle
+                            # correlation_graphite_link = '%s://%s:%s/%s/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=blue' % (
+                            correlation_graphite_link = '%s://%s:%s/%s/?from=%s&until=%s&target=cactiStyle(%s,%%27si%%27)%s%s&colorList=blue' % (
                                 settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
                                 settings.GRAPHITE_PORT, GRAPHITE_RENDER_URI,
                                 str(graphite_from), str(graphite_until), metric_name,
@@ -3771,7 +3778,9 @@ def ionosphere():
                         else:
                             # @modified 20190520 - Branch #3002: docker
                             # correlation_graphite_link = '%s://%s/render/?from=%s&until=%starget=cactiStyle(%s)%s%s&colorList=blue' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, str(graphite_from), str(graphite_until), metric_name, settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
-                            correlation_graphite_link = '%s://%s/%s/?from=%s&until=%starget=cactiStyle(%s)%s%s&colorList=blue' % (
+                            # @modified 20200417 - Task #3294: py3 - handle system parameter in Graphite cactiStyle
+                            # correlation_graphite_link = '%s://%s/%s/?from=%s&until=%starget=cactiStyle(%s)%s%s&colorList=blue' % (
+                            correlation_graphite_link = '%s://%s/%s/?from=%s&until=%starget=cactiStyle(%s,%%27si%%27)%s%s&colorList=blue' % (
                                 settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
                                 GRAPHITE_RENDER_URI, str(graphite_from),
                                 str(graphite_until), metric_name,
@@ -3802,14 +3811,18 @@ def ionosphere():
                         related_graph_title_string = quote(related_unencoded_graph_title, safe='')
                         related_graph_title = '&title=%s' % related_graph_title_string
                         if settings.GRAPHITE_PORT != '':
-                            related_graphite_link = '%s://%s:%s/%s/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=blue' % (
+                            # @modified 20200417 - Task #3294: py3 - handle system parameter in Graphite cactiStyle
+                            # related_graphite_link = '%s://%s:%s/%s/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=blue' % (
+                            related_graphite_link = '%s://%s:%s/%s/?from=%s&until=%s&target=cactiStyle(%s,%%27si%%27)%s%s&colorList=blue' % (
                                 settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
                                 settings.GRAPHITE_PORT, GRAPHITE_RENDER_URI,
                                 str(related_graphite_from),
                                 str(related_graphite_until), related_metric_name,
                                 settings.GRAPHITE_GRAPH_SETTINGS, related_graph_title)
                         else:
-                            related_graphite_link = '%s://%s/%s/?from=%s&until=%starget=cactiStyle(%s)%s%s&colorList=blue' % (
+                            # @modified 20200417 - Task #3294: py3 - handle system parameter in Graphite cactiStyle
+                            # related_graphite_link = '%s://%s/%s/?from=%s&until=%starget=cactiStyle(%s)%s%s&colorList=blue' % (
+                            related_graphite_link = '%s://%s/%s/?from=%s&until=%starget=cactiStyle(%s,%%27si%%27)%s%s&colorList=blue' % (
                                 settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
                                 GRAPHITE_RENDER_URI, str(related_graphite_from),
                                 str(related_graphite_until), related_metric_name,

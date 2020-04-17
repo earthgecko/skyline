@@ -571,7 +571,8 @@ class Mirage(Thread):
             analyzer_batch_metric_anomaly_key = 'analyzer_batch.anomaly.%s.%s' % (
                 str(metric_timestamp), metric)
             try:
-                analyzer_batch_anomaly = self.redis_conn.get(analyzer_batch_metric_anomaly_key)
+                # analyzer_batch_anomaly = self.redis_conn.get(analyzer_batch_metric_anomaly_key)
+                analyzer_batch_anomaly = self.redis_conn_decoded.get(analyzer_batch_metric_anomaly_key)
             except Exception as e:
                 logger.error(
                     'error :: could not query cache_key - %s - %s' % (

@@ -1150,7 +1150,9 @@ def alert_hipchat(alert, metric, second_order_resolution_seconds, context):
         else:
             # @modified 20180809 - Bug #2498: Incorrect scale in some graphs
             # link = '%s://%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, str(int(second_order_resolution_in_hours)), metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
-            link = '%s://%s/%s?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, graphite_port, graphite_render_uri, str(graphite_from), str(graphite_until), metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+            # @modified 20200417 - Task #3294: py3 - handle system parameter in Graphite cactiStyle
+            # link = '%s://%s/%s?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, graphite_port, graphite_render_uri, str(graphite_from), str(graphite_until), metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+            link = '%s://%s/%s?from=%s&until=%s&target=cactiStyle(%s,%%27si%%27)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, graphite_port, graphite_render_uri, str(graphite_from), str(graphite_until), metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
         embed_graph = "<a href='" + link + "'><img height='308' src='" + link + "'>" + metric[1] + "</a>"
 
         for room in rooms:
