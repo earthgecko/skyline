@@ -628,7 +628,8 @@ Or if no metrics if all metrics are set to alert <code>{"data":{"metrics":[]},"s
   		        <td>Description:</td>
   		        <td>Returns a list of all metrics and their anomaly timestamps which have training data.<br>
                   The <code>metric</code> and <code>timestamp</code> request arguments can be added to
-                  filter by metric, timestamp or by metric and timestamp.
+                  filter by metric, namespace, timestamp or by metric and timestamp.
+                  You can also use part of namespace as the <code>metric</code> and all metrics that match the namespace will be returned
               </td>
   		      </tr>
   		      <tr>
