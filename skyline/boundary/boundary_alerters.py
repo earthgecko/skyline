@@ -9,19 +9,19 @@ from ast import literal_eval
 import requests
 
 import boundary_alerters
-# try:
-#     import urllib2
-# except ImportError:
-#     import urllib.request
-#     import urllib.error
+try:
+    import urllib2
+except ImportError:
+    import urllib.request
+    import urllib.error
 
 # @added 20191023 - Task #3290: Handle urllib2 in py3
 #                   Branch #3262: py3
 # Use urlretrieve
-# try:
-#     import urllib2 as urllib
-# except ImportError:
-#     from urllib import request as urllib
+try:
+    import urllib2 as urllib
+except ImportError:
+    from urllib import request as urllib
 
 import re
 from requests.utils import quote
@@ -447,7 +447,9 @@ def alert_hipchat(datapoint, metric_name, expiration_time, metric_trigger, algor
             #     settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT,
             #     graphite_from, graphite_until, metric_name, settings.GRAPHITE_GRAPH_SETTINGS,
             #     graph_title, graphite_graph_line_color)
-            link = '%s://%s:%s/%s/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=%s' % (
+            # @modified 20200417 - Task #3294: py3 - handle system parameter in Graphite cactiStyle
+            # link = '%s://%s:%s/%s/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=%s' % (
+            link = '%s://%s:%s/%s/?from=%s&until=%s&target=cactiStyle(%s,%%27si%%27)%s%s&colorList=%s' % (
                 settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT,
                 settings.GRAPHITE_RENDER_URI, graphite_from, graphite_until,
                 metric_name, settings.GRAPHITE_GRAPH_SETTINGS, graph_title,
@@ -461,7 +463,9 @@ def alert_hipchat(datapoint, metric_name, expiration_time, metric_trigger, algor
             #     settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, graphite_from, graphite_until,
             #     metric_name, settings.GRAPHITE_GRAPH_SETTINGS, graph_title,
             #     graphite_graph_line_color)
-            link = '%s://%s/%s/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=%s' % (
+            # @modified 20200417 - Task #3294: py3 - handle system parameter in Graphite cactiStyle
+            # link = '%s://%s/%s/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=%s' % (
+            link = '%s://%s/%s/?from=%s&until=%s&target=cactiStyle(%s,%%27si%%27)%s%s&colorList=%s' % (
                 settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
                 settings.GRAPHITE_RENDER_URI, graphite_from, graphite_until,
                 metric_name, settings.GRAPHITE_GRAPH_SETTINGS, graph_title,

@@ -62,14 +62,19 @@ def alert_smtp(alert, metric):
     if settings.GRAPHITE_PORT != '':
         # @modified 20190520 - Branch #3002: docker
         # link = '%s://%s:%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT, str(int(full_duration_in_hours)), metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
-        link = '%s://%s:%s/%s/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (
+
+        # @modified 20200417 - Task #3294: py3 - handle system parameter in Graphite cactiStyle
+        # link = '%s://%s:%s/%s/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (
+        link = '%s://%s:%s/%s/?from=-%shour&target=cactiStyle(%s,%%27si%%27)%s%s&colorList=orange' % (
             settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT,
             settings.GRAPHITE_RENDER_URI, str(int(full_duration_in_hours)), metric[1],
             settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
     else:
         # @modified 20190520 - Branch #3002: docker
         # link = '%s://%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, str(int(full_duration_in_hours)), metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
-        link = '%s://%s/%s/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (
+        # @modified 20200417 - Task #3294: py3 - handle system parameter in Graphite cactiStyle
+        # link = '%s://%s/%s/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (
+        link = '%s://%s/%s/?from=-%shour&target=cactiStyle(%s,%%27si%%27)%s%s&colorList=orange' % (
             settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
             settings.GRAPHITE_RENDER_URI, str(int(full_duration_in_hours)),
             metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
@@ -133,14 +138,18 @@ def alert_hipchat(alert, metric):
     if settings.GRAPHITE_PORT != '':
         # @modified 20190520 - Branch #3002: docker
         # link = '%s://%s:%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT, str(int(full_duration_in_hours)), metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
-        link = '%s://%s:%s/%s/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (
+        # @modified 20200417 - Task #3294: py3 - handle system parameter in Graphite cactiStyle
+        # link = '%s://%s:%s/%s/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (
+        link = '%s://%s:%s/%s/?from=-%shour&target=cactiStyle(%s,%%27si%%27)%s%s&colorList=orange' % (
             settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT,
             settings.GRAPHITE_RENDER_URI, str(int(full_duration_in_hours)), metric[1],
             settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
     else:
         # @modified 20190520 - Branch #3002: docker
         # link = '%s://%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, str(int(full_duration_in_hours)), metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
-        link = '%s://%s/%s/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (
+        # @modified 20200417 - Task #3294: py3 - handle system parameter in Graphite cactiStyle
+        # link = '%s://%s/%s/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (
+        link = '%s://%s/%s/?from=-%shour&target=cactiStyle(%s,%%27si%%27)%s%s&colorList=orange' % (
             settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
             settings.GRAPHITE_RENDER_URI, str(int(full_duration_in_hours)), metric[1],
             settings.GRAPHITE_GRAPH_SETTINGS, graph_title)

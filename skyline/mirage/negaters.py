@@ -65,11 +65,18 @@ def negate_analyzer_alert(alert, metric, second_order_resolution_seconds, metric
     analyzer_graph_title = '&title=skyline%%20analyzer%%20alert%%20at%%20%s%%20hours%%0A%s%%20-%%20%s' % (full_duration_in_hours, metric[1], metric_value)
 
     if settings.GRAPHITE_PORT != '':
-        link = '%s://%s:%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=purple' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT, second_order_resolution_in_hours, metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
-        analyzer_link = '%s://%s:%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT, full_duration_in_hours, metric[1], settings.GRAPHITE_GRAPH_SETTINGS, analyzer_graph_title)
+
+        # @modified 20200417 - Task #3294: py3 - handle system parameter in Graphite cactiStyle
+        # link = '%s://%s:%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=purple' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT, second_order_resolution_in_hours, metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+        # analyzer_link = '%s://%s:%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT, full_duration_in_hours, metric[1], settings.GRAPHITE_GRAPH_SETTINGS, analyzer_graph_title)
+        link = '%s://%s:%s/render/?from=-%shour&target=cactiStyle(%s,%%27si%%27)%s%s&colorList=purple' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT, second_order_resolution_in_hours, metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+        analyzer_link = '%s://%s:%s/render/?from=-%shour&target=cactiStyle(%s,%%27si%%27)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, settings.GRAPHITE_PORT, full_duration_in_hours, metric[1], settings.GRAPHITE_GRAPH_SETTINGS, analyzer_graph_title)
     else:
-        link = '%s://%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=purple' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, second_order_resolution_in_hours, metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
-        analyzer_link = '%s://%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, full_duration_in_hours, metric[1], settings.GRAPHITE_GRAPH_SETTINGS, analyzer_graph_title)
+        # @modified 20200417 - Task #3294: py3 - handle system parameter in Graphite cactiStyle
+        # link = '%s://%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=purple' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, second_order_resolution_in_hours, metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+        # analyzer_link = '%s://%s/render/?from=-%shour&target=cactiStyle(%s)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, full_duration_in_hours, metric[1], settings.GRAPHITE_GRAPH_SETTINGS, analyzer_graph_title)
+        link = '%s://%s/render/?from=-%shour&target=cactiStyle(%s,%%27si%%27)%s%s&colorList=purple' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, second_order_resolution_in_hours, metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+        analyzer_link = '%s://%s/render/?from=-%shour&target=cactiStyle(%s,%%27si%%27)%s%s&colorList=orange' % (settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, full_duration_in_hours, metric[1], settings.GRAPHITE_GRAPH_SETTINGS, analyzer_graph_title)
 
     content_id = metric[1]
     image_data = None
