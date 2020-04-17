@@ -581,6 +581,19 @@ def api():
                 if metric_filter:
                     if metric_filter != training_metric:
                         add_to_response = False
+
+                    # @added 20200417 - Feature #3474: webapp api - training_data
+                    # Allow to match namespaces too
+                    if not add_to_response:
+                        if metric_filter in training_metric:
+                            add_to_response = True
+                    if not add_to_response:
+                        metric_filter_namespace_elements = metric_filter.split('.')
+                        training_metric_namespace_elements = training_metric.split('.')
+                        elements_matched = set(metric_filter_namespace_elements) & set(training_metric_namespace_elements)
+                        if len(elements_matched) == len(metric_filter_namespace_elements):
+                            add_to_response = True
+
                 if timestamp_filter:
                     if int(timestamp_filter) != training_timestamp:
                         add_to_response = False
