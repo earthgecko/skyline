@@ -1,0 +1,109 @@
+{% block crucible_process_metrics_block %}
+<!-- BEGIN /crucible>?process_metrics=true block -->
+{% if print_debug == 'True' %}
+<code> DEBUG </code> :: /crucible crucible_process_metrics_block</br>
+{% endif %}
+
+{% if display_message %}
+<code> ERROR </code></br>
+<code> message </code>: {{ display_message }}<br>
+{% endif %}
+
+<div class="navbar-header" role="navigation">
+  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+    <span class="sr-only">Toggle navigation</span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+  </button>
+		<ul class="nav nav-tabs" role="view_tablist" id="view">
+		  <li><a href="/crucible"><span class="logo"><span class="sky">Crucible</span> <span class="re">jobs</span></span></span></a></li>
+		  <li class="active"><a href="?process_metrics=true"><span class="logo"><span class="sky">Process</span> <span class="re">metrics</span></span></span></a></li>
+		  <li><a href="?crucible_job"><span class="logo"><span class="sky">Crucible</span> <span class="re">job</span></span></span></a></li>
+		</ul>
+		<div class="tab-content">
+	  	<div class="tab-pane active" id="view">
+	<br>
+  <div class="navbar-header" role="navigation">
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+  </div>
+
+  		<div class="col-md-12">
+<!--  		<div class="container"> -->
+  		  <h4><span class="logo"><span class="sky">Process ::</span> <span class="re">metrics</span></span></span></h4>
+
+  {% if job_submitted %}
+	  <div class="alert alert-success">
+	    <strong>Submitted job</strong> :: job id {{ crucible_job_id }}<br>
+      With metrics to process:<br>
+    {% for metric_submitted_to_process in metrics_submitted_to_process %}
+      {{ metric_submitted_to_process }}<br>
+    {% endfor %}
+	  </div>
+  {% endif %}
+
+  {% if job_submitted %}
+        <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#process_options">Show process options</button>
+        <div id="process_options" class="collapse">
+  {% endif %}
+        <form action="crucible">
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Option</th>
+  		        <th>value</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+  		        <td>Process metrics</td>
+  		        <td><select name="process_metrics">
+                <option value="true">true</option>
+              </select></td>
+  		      </tr>
+  		      <tr>
+  		        <td>metrics</td>
+  		        <td><input type="text" name="metrics" value="" /> a list of comma separated metric names e.g server1.cpu.total,server2.cpu.user</td>
+  		      </tr>
+  		      <tr>
+  		        <td>namespaces</td>
+  		        <td><input type="text" name="namespaces" value="" /> a list of comma separated metric namespaces with MySQL like wildcards e.g server1.cpu%,server2.cpu.%</td>
+  		      </tr>
+  		      <tr>
+                <td>from_timestamp</td>
+                <td><input type="number" name="from_timestamp" value="" /> unix timestamp</td>
+  		      </tr>
+  		      <tr>
+                <td>until_timestamp</td>
+                <td><input type="number" name="until_timestamp" value="" /> unix timestamp</td>
+  		      </tr>
+  		      <tr>
+  		        <td>data source</td>
+  		        <td><select name="data_source">
+                <option value="graphite">graphite</option>
+                <option value="redis">redis</option>
+              </select></td>
+  		      </tr>
+  		      <tr>
+                <td>alert interval</td>
+                <td><input type="number" name="alert_interval" value="" /> How many seconds to allow between anomalies, ala <code>EXPIRATION_TIME</code></td>
+  		      </tr>
+  		    </tbody>
+  		  </table>
+        <br>
+        <input type="submit" value="Process metrics">
+      </form>
+      </div>
+
+    </div> <!-- END div class="col-md-12" -->
+
+	</div>
+	</div>
+	</div>
+
+<!-- END /crucible?process_metrics=true block -->
+{% endblock %}

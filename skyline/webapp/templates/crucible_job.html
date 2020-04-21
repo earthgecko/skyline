@@ -1,0 +1,221 @@
+{% block crucible_job_block %}
+<!-- BEGIN /crucible>?crucible_job=true block -->
+{% if print_debug == 'True' %}
+<code> DEBUG </code> :: /crucible crucible_job_block</br>
+{% endif %}
+
+{% if display_message %}
+<code> ERROR </code></br>
+<code> message </code>: {{ display_message }}<br>
+{% endif %}
+
+<div class="navbar-header" role="navigation">
+  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+    <span class="sr-only">Toggle navigation</span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+  </button>
+		<ul class="nav nav-tabs" role="view_tablist" id="view">
+		  <li><a href="/crucible"><span class="logo"><span class="sky">Crucible</span> <span class="re">jobs</span></span></span></a></li>
+		  <li><a href="?process_metrics=true"><span class="logo"><span class="sky">Process</span> <span class="re">metrics</span></span></span></a></li>
+		  <li class="active"><a href="?crucible_job=true"><span class="logo"><span class="sky">Crucible</span> <span class="re">job<span></span></span></a></li>
+		</ul>
+	<div class="tab-content">
+	 	<div class="tab-pane active" id="view">
+	<br>
+      <div class="navbar-header" role="navigation">
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+      </div>
+
+	    <div class="col-md-12">
+  <h4><span class="logo"><span class="sky">Crucible ::</span> <span class="re">job</span></span> {{ crucible_job_id }} {{ crucible_job_metric }}</h4>
+
+  <h4><span class="logo"><span class="sky">Crucible ::</span> <span class="re">anomalies detected</span></span>:: {{ has_anomalies }} {{ skyline_anomalies|length }}</h4>
+
+  <h4><span class="logo"><span class="sky">Crucible ::</span> <span class="re">Skyline CONSENSUS anomalies detected</span></span>:: {{ skyline_consensus_anomalies|length }}</h4>
+  {% if sent_to_panorama %}
+	  <div class="alert alert-success">
+	    <strong>{{ sent_to_panorama }} anomalies submitted to Panorama</strong> :: job id {{ crucible_job_id }}<br>
+	  </div>
+  {% endif %}
+  {% if skyline_consensus_anomalies|length > 0 %}
+    {% if image_files %}
+      {% for image_file in image_files %}
+        {% if 'skyline.consensus.anomalies.png' in image_file %}
+    <td><img src="ionosphere_images?image={{ image_file }}" alt="Crucible Skyline CONSENSUS anomalies {{ crucible_job_id }} {{ crucible_job_metric }}" class="img-responsive center-block" style="border:5px solid red" /></td>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+  {% endif %}
+
+  <h4><span class="logo"><span class="sky">Crucible ::</span> <span class="re">details</span></span></h4>
+  {% if crucible_job_details %}
+    {% for crucible_job_detail in crucible_job_details %}
+  		{{ crucible_job_detail }}
+    {% endfor %}
+  {% else %}
+  		<pre>No crucible_job_details were passed, which is not ideal</pre>
+  {% endif %}
+
+  <h4><span class="logo"><span class="sky">Crucible ::</span> <span class="re">Graphite graph</span></span>:: {{ graph_image_file }}</h4>
+  {% if graph_image_file %}
+    <img src="ionosphere_images?image={{ graph_image_file }}" alt="{{ crucible_job_metric }} timeseries graph" class="img-responsive center-block" /><br>
+  {% else %}
+  		<pre>No graph_image_file was passed, which is not ideal</pre>
+  {% endif %}
+
+  <h4><span class="logo"><span class="sky">Crucible ::</span> <span class="re">firings</span></span> {{ image_files|length }} graph image files</h4>
+		<table class="table table-hover">
+			<thead>
+				<tr>
+          <th>File name</th>
+          <th>Crucible firing image</th>
+				</tr>
+			</thead>
+			<tbody>
+  {% if image_files %}
+    {% for image_file in image_files %}
+      {% if image_file != graph_image_file %}
+        <tr>
+        {% for image_file_name in image_file_names %}
+          {% if image_file_name in image_file %}
+            {% if image_file_name == 'skyline.consensus.anomalies.png' %}
+          <td><strong>{{ image_file_name }}</strong></td>
+            {% else %}
+          <td>{{ image_file_name }}</td>
+            {% endif %}
+          {% endif %}
+        {% endfor %}
+        {% if 'skyline.consensus.anomalies.png' in image_file %}
+          <td><img src="ionosphere_images?image={{ image_file }}" alt="Crucible Skyline CONSENSUS anomalies {{ crucible_job_id }} {{ crucible_job_metric }}" class="img-responsive center-block" style="border:5px solid red" /></td>
+        {% else %}
+          <td><img src="ionosphere_images?image={{ image_file }}" alt="{{ crucible_job_id }} {{ crucible_job_metric }}" class="img-responsive center-block" /></td>
+        {% endif %}
+        </tr>
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+			</tbody>
+		</table>
+
+  <h4><span class="logo"><span class="sky">Crucible ::</span> <span class="re">Skyline CONSENSUS anomalies</span></span> {{ skyline_consensus_anomalies|length }} anomalies</h4>
+  {% if image_files %}
+    {% for image_file in image_files %}
+      {% if 'skyline.consensus.anomalies.png' in image_file %}
+    <td><img src="ionosphere_images?image={{ image_file }}" alt="Crucible Skyline CONSENSUS anomalies {{ crucible_job_id }} {{ crucible_job_metric }}" class="img-responsive center-block" style="border:5px solid red" /></td>
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+		<table class="table table-hover">
+			<thead>
+				<tr>
+          <th>Timestamp</th>
+          <th>Anomalous value</th>
+          <th>Anomaly score</th>
+          <th>triggered_algorithms</th>
+				</tr>
+			</thead>
+			<tbody>
+  {% if skyline_consensus_anomalies %}
+    {% for skyline_consensus_anomaly in skyline_consensus_anomalies %}
+        <tr>
+          <td>{{ skyline_consensus_anomaly[0]|int }}</td>
+          <td>{{ skyline_consensus_anomaly[1] }}</td>
+          <td>{{ skyline_consensus_anomaly[2] }}</td>
+          <td>{{ skyline_consensus_anomaly[3] }}</td>
+        </tr>
+    {% endfor %}
+  {% endif %}
+			</tbody>
+		</table>
+
+  <h4><span class="logo"><span class="sky">Crucible ::</span> <span class="re">send Skyline CONSENSUS anomalies to Panorama</span></span> {{ skyline_consensus_anomalies|length }} anomalies</h4>
+  {% if panorama_done %}
+	  <table class="table table-hover">
+	    <thead>
+	      <tr>
+	        <th>Already sent to Panorama at</th>
+	        <th>By user_id</th>
+	      </tr>
+	    </thead>
+	    <tbody>
+	      <tr>
+          <td>{{ panorama_done_timestamp }}</td>
+          <td>{{ panorama_done_user_id }}</td>
+	      </tr>
+			</tbody>
+		</table>
+  {% else %}
+    <form action="crucible">
+	  <table class="table table-hover">
+	    <thead>
+	      <tr>
+	        <th>Option</th>
+	        <th>value</th>
+	      </tr>
+	    </thead>
+	    <tbody>
+	      <tr>
+	        <td>Send Skyline CONSENSUS anomalies to Panorama</td>
+	        <td><select name="send_anomalies_panorama">
+            <option value="true">true</option>
+          </select></td>
+	      </tr>
+	      <tr>
+	        <td>crucible_job_id</td>
+	        <td><input type="text" name="crucible_job_id" value="{{ crucible_job_id }}" /> for {{ crucible_job_id }}</td>
+	      </tr>
+	      <tr>
+	        <td>metric</td>
+	        <td><input type="text" name="metric" value="{{ crucible_job_metric }}" /> for {{ crucible_job_metric }}</td>
+	      </tr>
+	    </tbody>
+	  </table>
+    <input type="submit" value="Send Skyline {{ skyline_consensus_anomalies|length }} CONSENSUS anomalies to Panorama">
+  </form>
+  <br>
+  {% endif %}
+
+  <h4><span class="logo"><span class="sky">Crucible ::</span> <span class="re">all anomalies</span></span> {{ skyline_anomalies|length }} anomalies</h4>
+		<table class="table table-hover">
+			<thead>
+				<tr>
+          <th>Timestamp</th>
+          <th>Anomalous value</th>
+          <th>Anomaly score</th>
+          <th>triggered_algorithms</th>
+				</tr>
+			</thead>
+			<tbody>
+  {% if skyline_anomalies %}
+<!--
+[timestamp, value, anomaly_score, triggered_algorithms]
+[skyline_anomaly[0], skyline_anomaly[1], skyline_anomaly[2], skyline_anomaly[3]]
+
+[1583234400.0, 44.39999999990687, 2, ['histogram_bins', 'median_absolute_deviation']],
+-->
+    {% for skyline_anomaly in skyline_anomalies %}
+        <tr>
+          <td>{{ skyline_anomaly[0]|int }}</td>
+          <td>{{ skyline_anomaly[1] }}</td>
+          <td>{{ skyline_anomaly[2] }}</td>
+          <td>{{ skyline_anomaly[3] }}</td>
+        </tr>
+    {% endfor %}
+  {% endif %}
+			</tbody>
+		</table>
+
+
+      </div> <!-- END div class="col-md-12" -->
+	  </div>
+	</div>
+</div>
+
+<!-- END /crucible?crucible_job=true block -->
+{% endblock %}
