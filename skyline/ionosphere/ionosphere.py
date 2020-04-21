@@ -2239,6 +2239,11 @@ class Ionosphere(Thread):
                     metric_fp_ts_table = 'z_ts_%s' % str(metrics_id)
                     fp_id_metric_ts = []
                     if settings.MEMCACHE_ENABLED:
+                        # @added 20200421 - Task #3304: py3 - handle pymemcache bytes not str
+                        # Explicitly set the fp_id_metric_ts_object so it
+                        # always exists to be evaluated
+                        fp_id_metric_ts_object = None
+
                         fp_id_metric_ts_key = 'fp.%s.%s.ts' % (str(fp_id), str(metrics_id))
                         try:
                             # @modified 20191029 - Task #3304: py3 - handle pymemcache bytes not str
@@ -2256,8 +2261,15 @@ class Ionosphere(Thread):
                         except:
                             logger.error('error :: failed to close memcache_client')
                         if fp_id_metric_ts_object:
-                            fp_id_metric_ts = literal_eval(fp_id_metric_ts_object)
-                            logger.info('used memcache %s key data to populate fp_id_metric_ts with %s data points' % (fp_id_metric_ts_key, str(len(fp_id_metric_ts))))
+                            # @modified 20200421 - Task #3304: py3 - handle pymemcache bytes not str
+                            # Wrapped in try and except
+                            try:
+                                fp_id_metric_ts = literal_eval(fp_id_metric_ts_object)
+                                logger.info('used memcache %s key data to populate fp_id_metric_ts with %s data points' % (fp_id_metric_ts_key, str(len(fp_id_metric_ts))))
+                            except:
+                                logger.error(traceback.format_exc())
+                                logger.error('error :: failed to literal_eval the fp_id_metric_ts_object in minmax_check')
+                                fp_id_metric_ts = []
                         else:
                             logger.info('no memcache %s key data, will use database' % fp_id_metric_ts_key)
                     if not fp_id_metric_ts:
