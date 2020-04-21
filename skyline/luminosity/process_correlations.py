@@ -111,7 +111,14 @@ def get_anomalous_ts(base_name, anomaly_timestamp):
             # @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
             #                      Branch #3262: py3
             # smtp_alerter_metrics = list(redis_conn.smembers('analyzer.smtp_alerter_metrics'))
-            smtp_alerter_metrics = list(redis_conn_decoded.smembers('analyzer.smtp_alerter_metrics'))
+            # @modified 20200421 - Feature #3306: Record anomaly_end_timestamp
+            #                      Branch #2270: luminosity
+            #                      Branch #3262: py3
+            # Changed to use the aet Redis set, used to determine and record the
+            # anomaly_end_timestamp, some transient sets need to copied so that
+            # the data always exists, even if it is sourced from a transient set.
+            # smtp_alerter_metrics = list(redis_conn_decoded.smembers('analyzer.smtp_alerter_metrics'))
+            smtp_alerter_metrics = list(redis_conn_decoded.smembers('aet.analyzer.smtp_alerter_metrics'))
         except:
             smtp_alerter_metrics = []
         if base_name not in smtp_alerter_metrics:
