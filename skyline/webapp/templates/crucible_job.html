@@ -151,6 +151,9 @@
 			</tbody>
 		</table>
   {% else %}
+    {% if skyline_consensus_anomalies|length < 1 %}
+    <code>No Skyline CONSENSUS anomalies to send to Panorama</code>
+    {% else %}
     <form action="crucible">
 	  <table class="table table-hover">
 	    <thead>
@@ -179,6 +182,7 @@
     <input type="submit" value="Send Skyline {{ skyline_consensus_anomalies|length }} CONSENSUS anomalies to Panorama">
   </form>
   <br>
+    {% endif %}
   {% endif %}
 
   <h4><span class="logo"><span class="sky">Crucible ::</span> <span class="re">all anomalies</span></span> {{ skyline_anomalies|length }} anomalies</h4>
