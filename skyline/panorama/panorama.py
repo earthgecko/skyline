@@ -393,9 +393,13 @@ class Panorama(Thread):
                 add_line = literal_eval(array)
                 metric_vars.append(add_line)
 
-        string_keys = ['metric', 'anomaly_dir', 'added_by', 'app', 'source']
+        # @modified 20200420 - Feature #3500: webapp - crucible_process_metrics
+        #                      Feature #1448: Crucible web UI
+        #                      Branch #868: crucible
+        # Added label to string_keys and user_id to int_keys
+        string_keys = ['metric', 'anomaly_dir', 'added_by', 'app', 'source', 'label']
         float_keys = ['value']
-        int_keys = ['from_timestamp', 'metric_timestamp', 'added_at', 'full_duration']
+        int_keys = ['from_timestamp', 'metric_timestamp', 'added_at', 'full_duration', 'user_id']
         array_keys = ['algorithms', 'triggered_algorithms']
         boolean_keys = ['graphite_metric', 'run_crucible_tests']
 
@@ -914,6 +918,31 @@ class Panorama(Thread):
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return
 
+        # @modified 20200420 - Feature #3500: webapp - crucible_process_metrics
+        #                      Feature #1448: Crucible web UI
+        #                      Branch #868: crucible
+        # Added label to string_keys and user_id to int_keys
+        label = None
+        try:
+            key = 'label'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            label = str(value_list[0])
+            if settings.ENABLE_PANORAMA_DEBUG:
+                logger.info('debug :: metric variable - label - %s' % label)
+        except:
+            if settings.ENABLE_PANORAMA_DEBUG:
+                logger.info('debug :: metric variable - label was not found - %s' % label)
+        user_id = None
+        try:
+            key = 'user_id'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            user_id = str(value_list[0])
+            if settings.ENABLE_PANORAMA_DEBUG:
+                logger.info('debug :: metric variable - user_id - %s' % user_id)
+        except:
+            if settings.ENABLE_PANORAMA_DEBUG:
+                logger.info('debug :: metric variable - user_id was not found - %s' % user_id)
+
         record_anomaly = True
         cache_key = '%s.last_check.%s.%s' % (skyline_app, app, metric)
         if settings.ENABLE_PANORAMA_DEBUG:
@@ -925,6 +954,15 @@ class Panorama(Thread):
             logger.error(
                 'error :: could not query cache_key - %s.last_check.%s.%s - %s' % (
                     skyline_app, app, metric, e))
+            last_check = None
+
+        # @modified 20200420 - Feature #3500: webapp - crucible_process_metrics
+        #                      Feature #1448: Crucible web UI
+        #                      Branch #868: crucible
+        # Added label to string_keys and user_id to int_keys
+        if app == 'webapp' or app == 'crucible':
+            logger.info('anomaly added by %s recording anomaly unsetting last_check' % (
+                app))
             last_check = None
 
         # @added 20200413 - Feature #3486: analyzer_batch
@@ -985,12 +1023,30 @@ class Panorama(Thread):
                 'Panorama metric key not expired - %s.last_check.%s.%s' % (
                     skyline_app, app, metric))
 
+        # @added 20200420 - Feature #3500: webapp - crucible_process_metrics
+        #                   Feature #1448: Crucible web UI
+        #                   Branch #868: crucible
+        # Added check_max_age
+        check_max_age = True
+        set_anomaly_key = True
+        add_to_current_anomalies = True
+        if app == 'webapp' or app == 'crucible':
+            check_max_age = False
+            set_anomaly_key = False
+            add_to_current_anomalies = False
+        if batch_metric:
+            check_max_age = False
+
         # @added 20160907 - Handle Panorama stampede on restart after not running #26
         # Allow to expire check if greater than PANORAMA_CHECK_MAX_AGE
         # @modified 20200413 - Feature #3486: analyzer_batch
         #                      Feature #3480: batch_processing
         # Only evaluate max_age is the metric is not a batch metric
-        if not batch_metric:
+        # @modied 20200420 - Feature #3500: webapp - crucible_process_metrics
+        #                   Feature #1448: Crucible web UI
+        #                   Branch #868: crucible
+        # if not batch_metric:
+        if check_max_age:
             if max_age:
                 now = time()
                 anomaly_age = int(now) - int(metric_timestamp)
@@ -1236,10 +1292,14 @@ class Panorama(Thread):
             return False
 
         try:
-            columns = '%s, %s, %s, %s, %s, %s, %s, %s, %s' % (
+            # @modified 20200420 - Feature #3500: webapp - crucible_process_metrics
+            #                      Feature #1448: Crucible web UI
+            #                      Branch #868: crucible
+            # Added label and user_id
+            columns = '%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s' % (
                 'metric_id', 'host_id', 'app_id', 'source_id',
                 'anomaly_timestamp', 'anomalous_datapoint', 'full_duration',
-                'algorithms_run', 'triggered_algorithms')
+                'algorithms_run', 'triggered_algorithms', 'label', 'user_id')
             if settings.ENABLE_PANORAMA_DEBUG:
                 logger.info('debug :: columns - %s' % str(columns))
         except:
@@ -1251,10 +1311,18 @@ class Panorama(Thread):
         try:
             # @modified 20170913 - Task #2160: Test skyline with bandit
             # Added nosec to exclude from bandit tests
-            query_string = '(%s) VALUES (%d, %d, %d, %d, %s, %.6f, %d, \'%s\', \'%s\')' % (
+            # @modified 20200420 - Feature #3500: webapp - crucible_process_metrics
+            #                      Feature #1448: Crucible web UI
+            #                      Branch #868: crucible
+            # Added label and user_id
+            if not user_id:
+                # User the Skyline user id
+                user_id = 1
+            query_string = '(%s) VALUES (%d, %d, %d, %d, %s, %.6f, %d, \'%s\', \'%s\', \'%s\', %d)' % (
                 columns, metric_id, added_by_host_id, app_id, source_id,
                 metric_timestamp, anomalous_datapoint, full_duration,
-                algorithms_ids_csv, triggered_algorithms_ids_csv)
+                algorithms_ids_csv, triggered_algorithms_ids_csv, str(label),
+                int(user_id))
             query = 'insert into anomalies %s' % query_string  # nosec
         except:
             logger.error('error :: failed to construct insert query')
@@ -1276,39 +1344,49 @@ class Panorama(Thread):
             return False
 
         # Set anomaly record cache key
-        try:
-            # @modified 20200413 - Feature #3486: analyzer_batch
-            #                   Feature #3480: batch_processing
-            # Set key to timestamp if a batch metric.  I have looked and cannot
-            # find where the panorama.last_check is used anyway else other than
-            # above in panorama its self and further it does not appear that the
-            # packb(value) is used at all, just the existence of the key its
-            # self.
-            if batch_metric:
-                self.redis_conn.setex(
-                    cache_key, settings.PANORAMA_EXPIRY_TIME,
-                    int(metric_timestamp))
-            else:
-                self.redis_conn.setex(
-                    cache_key, settings.PANORAMA_EXPIRY_TIME, packb(value))
-            logger.info('set cache_key - %s.last_check.%s.%s - %s' % (
-                skyline_app, app, metric, str(settings.PANORAMA_EXPIRY_TIME)))
-        except Exception as e:
-            logger.error(
-                'error :: could not query cache_key - %s.last_check.%s.%s - %s' % (
-                    skyline_app, app, metric, e))
+        # @modified 20200420 - Feature #3500: webapp - crucible_process_metrics
+        #                      Feature #1448: Crucible web UI
+        #                      Branch #868: crucible
+        # Only if it was not added_by webapp or crucible
+        if set_anomaly_key:
+            try:
+                # @modified 20200413 - Feature #3486: analyzer_batch
+                #                   Feature #3480: batch_processing
+                # Set key to timestamp if a batch metric.  I have looked and cannot
+                # find where the panorama.last_check is used anyway else other than
+                # above in panorama its self and further it does not appear that the
+                # packb(value) is used at all, just the existence of the key its
+                # self.
+                if batch_metric:
+                    self.redis_conn.setex(
+                        cache_key, settings.PANORAMA_EXPIRY_TIME,
+                        int(metric_timestamp))
+                else:
+                    self.redis_conn.setex(
+                        cache_key, settings.PANORAMA_EXPIRY_TIME, packb(value))
+                logger.info('set cache_key - %s.last_check.%s.%s - %s' % (
+                    skyline_app, app, metric, str(settings.PANORAMA_EXPIRY_TIME)))
+            except Exception as e:
+                logger.error(
+                    'error :: could not query cache_key - %s.last_check.%s.%s - %s' % (
+                        skyline_app, app, metric, e))
 
         # @added 20191031 - Feature #3306: Record anomaly_end_timestamp
         # Add to current anomalies set
-        try:
-            redis_set = 'current.anomalies'
-            data = [metric, metric_timestamp, anomaly_id, None]
-            self.redis_conn.sadd(redis_set, str(data))
-            logger.info('added %s to Redis set %s' % (str(data), redis_set))
-        except Exception as e:
-            logger.error(
-                'error :: could not add %s to Redis set %s - %s' % (
-                    str(data), redis_set, e))
+        # @modified 20200420 - Feature #3500: webapp - crucible_process_metrics
+        #                      Feature #1448: Crucible web UI
+        #                      Branch #868: crucible
+        # Only if it was not added_by webapp or crucible
+        if add_to_current_anomalies:
+            try:
+                redis_set = 'current.anomalies'
+                data = [metric, metric_timestamp, anomaly_id, None]
+                self.redis_conn.sadd(redis_set, str(data))
+                logger.info('added %s to Redis set %s' % (str(data), redis_set))
+            except Exception as e:
+                logger.error(
+                    'error :: could not add %s to Redis set %s - %s' % (
+                        str(data), redis_set, e))
 
         if os.path.isfile(str(metric_check_file)):
             try:

@@ -1,0 +1,97 @@
+{% extends "layout.html" %}
+{% block body %}
+<!-- BEGIN /crucible block -->
+<!--
+# @added 20200420 - Feature #1448: Crucible web UI
+#                   Branch #868: crucible
+ -->
+{% if process_metrics %}
+	<ol class="breadcrumb">
+  	<div class="breadcrumb">
+  		<li><a href="/">Home</a></li>
+  		<li><a href="/crucible">Crucible</a></li>
+  		<li class="active"><span class="logo"><span class="sky">process</span> <span class="re">metrics</span></li>
+    </div>
+	</ol>
+  {% include "crucible_process_metrics.html" %}
+{% elif crucible_job %}
+	<ol class="breadcrumb">
+  	<div class="breadcrumb">
+  		<li><a href="/">Home</a></li>
+  		<li><a href="/crucible">Crucible</a></li>
+  		<li><span class="logo"><span class="sky">process</span> <span class="re">metrics</span></li>
+  		<li class="active"><span class="logo"><span class="sky">crucible</span> <span class="re">job</span></li>
+    </div>
+	</ol>
+  {% include "crucible_job.html" %}
+{% else %}
+	<ol class="breadcrumb">
+  	<div class="breadcrumb">
+  		<li><a href="/">Home</a></li>
+  		<li class="active"><a href="/crucible">Crucible</a></li>
+  		<li><span class="logo"><span class="sky">crucible</span> <span class="re">jobs</span></li>
+    </div>
+	</ol>
+
+<div class="navbar-header" role="navigation">
+  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+    <span class="sr-only">Toggle navigation</span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+  </button>
+		<ul class="nav nav-tabs" role="view_tablist" id="view">
+		  <li class="active"><a href="/crucible"><span class="logo"><span class="sky">Crucible</span> <span class="re">jobs</span></span></span></a></li>
+		  <li><a href="?process_metrics=true"><span class="logo"><span class="sky">Process</span> <span class="re">metrics</span></span></span></a></li>
+		  <li><a href="?crucible_job"><span class="logo"><span class="sky">Crucible</span> <span class="re">job</span></span></span></a></li>
+		</ul>
+		<div class="tab-content">
+	  	<div class="tab-pane active" id="view">
+	<br>
+  <div class="navbar-header" role="navigation">
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+  </div>
+
+  <div class="tab-pane active" id="crucible_jobs">
+    <h4><span class="logo"><span class="sky">Crucible ::</span> <span class="re">jobs :: </span></span></span> {{ crucible_jobs|length }} jobs</h4>
+		<table class="table table-hover">
+			<thead>
+				<tr>
+          <th>Date</th>
+          <th>Crucible job ID</th>
+          <th>Completed</th>
+          <th>Anomalies</th>
+          <th>Number of Skyline <code>CONSENSUS</code> anomalies</th>
+          <th>Sent to Panorama</th>
+          <th>Crucible job link</th>
+          <th>Crucible job directory</th>
+				</tr>
+			</thead>
+			<tbody>
+{% for crucible_job in crucible_jobs %}
+        <tr>
+          <td>{{ crucible_job[0] }}</td>
+          <td>{{ crucible_job[1] }}</td>
+          <td><code>{{ crucible_job[2] }}</code></td>
+          <td><code>{{ crucible_job[3] }}</code></td>
+          <td><code>{{ crucible_job[7] }}</code></td>
+          <td><code>{{ crucible_job[6] }}</code></td>
+          <td onclick="window.location='?crucible_job=true&crucible_job_id={{ crucible_job[1] }}&metric={{ crucible_job[5] }}'">
+            <a href="?crucible_job=true&crucible_job_id={{ crucible_job[1] }}&metric={{ crucible_job[5] }}">{{ crucible_job[1] }}</a>
+          </td>
+          <td>{{ crucible_job[4] }}</td>
+        </tr>
+{% endfor %}
+			</tbody>
+		</table>
+	</div>
+
+
+{% endif %}
+
+<!-- END /crucible block -->
+{% endblock %}

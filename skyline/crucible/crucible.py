@@ -160,11 +160,14 @@ class Crucible(Thread):
         float_keys = ['value']
         # @modified 20170127 - Feature #1886: Ionosphere learn - child like parent with evolutionary maturity
         # Added ionosphere_parent_id, always zero from Analyzer and Mirage
+        # @modified 20200420 - Feature #3500: webapp - crucible_process_metrics
+        #                      Feature #1448: Crucible web UI
+        # Added alert_interval to int_keys and add_to_panorama to the boolean_keys
         int_keys = [
             'from_timestamp', 'metric_timestamp', 'added_at', 'full_duration',
-            'ionosphere_parent_id']
+            'ionosphere_parent_id', 'alert_interval']
         array_keys = ['triggered_algorithms', 'algorithms']
-        boolean_keys = ['graphite_metric', 'run_crucible_tests']
+        boolean_keys = ['graphite_metric', 'run_crucible_tests', 'add_to_panorama']
 
         metric_vars_array = []
         for var_array in metric_vars:
@@ -523,6 +526,19 @@ class Crucible(Thread):
             add_to_panorama = None
         if settings.ENABLE_CRUCIBLE_DEBUG:
             logger.info('metric variable - add_to_panorama - %s' % str(add_to_panorama))
+
+        # @modified 20200420 - Feature #3500: webapp - crucible_process_metrics
+        #                      Feature #1448: Crucible web UI
+        # Added alert_interval
+        try:
+            key = 'alert_interval'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            alert_interval = str(value_list[0])
+        except:
+            logger.info('failed to read alert_interval variable from check file setting to None')
+            alert_interval = None
+        if settings.ENABLE_CRUCIBLE_DEBUG:
+            logger.info('metric variable - alert_interval - %s' % str(alert_interval))
 
         # Only check if the metric does not a EXPIRATION_TIME key set, crucible
         # uses the alert EXPIRATION_TIME for the relevant alert setting contexts

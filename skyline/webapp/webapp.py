@@ -79,89 +79,97 @@ import os.path
 #                   Bug #2816: Cross-Site Scripting Security Vulnerability
 from flask import escape as flask_escape
 
-sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
-sys.path.insert(0, os.path.dirname(__file__))
-import settings
-from validate_settings import validate_settings_variables
-import skyline_version
-from skyline_functions import (
-    get_graphite_metric,
-    # @added 20170604 - Feature #2034: analyse_derivatives
-    in_list,
-    # @added 20180804 - Feature #2488: Allow user to specifically set metric as a derivative metric in training_data
-    set_metric_as_derivative,
-    # @added 20190510 - Feature #2990: Add metrics id to relevant web pages
-    # get_memcache_metric_object,
-    # @added 20190920 - Feature #3230: users DB table
-    #                   Ideas #2476: Label and relate anomalies
-    #                   Feature #2516: Add label to features profile
-    get_user_details,
-    # @added 20191030 - Bug #3266: py3 Redis binary objects not strings
-    #                   Branch #3262: py3
-    # Added a single functions to deal with Redis connection and the
-    # charset='utf-8', decode_responses=True arguments required in py3
-    get_redis_conn, get_redis_conn_decoded)
+if True:
+    sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
+    sys.path.insert(0, os.path.dirname(__file__))
+    import settings
+    from validate_settings import validate_settings_variables
+    import skyline_version
+    from skyline_functions import (
+        get_graphite_metric,
+        # @added 20170604 - Feature #2034: analyse_derivatives
+        in_list,
+        # @added 20180804 - Feature #2488: Allow user to specifically set metric as a derivative metric in training_data
+        set_metric_as_derivative,
+        # @added 20190510 - Feature #2990: Add metrics id to relevant web pages
+        # get_memcache_metric_object,
+        # @added 20190920 - Feature #3230: users DB table
+        #                   Ideas #2476: Label and relate anomalies
+        #                   Feature #2516: Add label to features profile
+        get_user_details,
+        # @added 20191030 - Bug #3266: py3 Redis binary objects not strings
+        #                   Branch #3262: py3
+        # Added a single functions to deal with Redis connection and the
+        # charset='utf-8', decode_responses=True arguments required in py3
+        get_redis_conn, get_redis_conn_decoded)
 
-from backend import (
-    panorama_request, get_list,
-    # @added 20180720 - Feature #2464: luminosity_remote_data
-    luminosity_remote_data)
-from ionosphere_backend import (
-    ionosphere_data, ionosphere_metric_data,
-    # @modified 20170114 - Feature #1854: Ionosphere learn
-    # Decoupled create_features_profile from ionosphere_backend
-    # ionosphere_get_metrics_dir, create_features_profile,
-    ionosphere_get_metrics_dir,
-    features_profile_details,
-    # @added 20170118 - Feature #1862: Ionosphere features profiles search page
-    ionosphere_search,
-    # @added 20170305 - Feature #1960: ionosphere_layers
-    create_ionosphere_layers, feature_profile_layers_detail,
-    feature_profile_layer_alogrithms,
-    # @added 20170308 - Feature #1960: ionosphere_layers
-    # To present the operator with the existing layers and algorithms for the metric
-    metric_layers_alogrithms,
-    # @added 20170327 - Feature #2004: Ionosphere layers - edit_layers
-    #                   Task #2002: Review and correct incorrectly defined layers
-    edit_ionosphere_layers,
-    # @added 20170402 - Feature #2000: Ionosphere - validated
-    validate_fp,
-    # @added 20170617 - Feature #2054: ionosphere.save.training_data
-    save_training_data_dir,
-    # added 20170908 - Feature #2056: ionosphere - disabled_features_profiles
-    features_profile_family_tree, disable_features_profile_family_tree,
-    # @added 20170916 - Feature #1996: Ionosphere - matches page
-    get_fp_matches,
-    # @added 20170917 - Feature #1996: Ionosphere - matches page
-    get_matched_id_resources,
-    # @added 20180812 - Feature #2430: Ionosphere validate learnt features profiles page
-    get_features_profiles_to_validate,
-    # @added 20180815 - Feature #2430: Ionosphere validate learnt features profiles page
-    get_metrics_with_features_profiles_to_validate,
-    # @added 20181205 - Bug #2746: webapp time out - Graphs in search_features_profiles
-    #                   Feature #2602: Graphs in search_features_profiles
-    ionosphere_show_graphs,
-    # @added 20190502 - Branch #2646: slack
-    webapp_update_slack_thread,
-    # @added 20190601 - Feature #3084: Ionosphere - validated matches
-    validate_ionosphere_match,
-    # @added 20200226: Ideas #2476: Label and relate anomalies
-    #                  Feature #2516: Add label to features profile
-    label_anomalies
-)
+    from backend import (
+        panorama_request, get_list,
+        # @added 20180720 - Feature #2464: luminosity_remote_data
+        luminosity_remote_data)
+    from ionosphere_backend import (
+        ionosphere_data, ionosphere_metric_data,
+        # @modified 20170114 - Feature #1854: Ionosphere learn
+        # Decoupled create_features_profile from ionosphere_backend
+        # ionosphere_get_metrics_dir, create_features_profile,
+        ionosphere_get_metrics_dir,
+        features_profile_details,
+        # @added 20170118 - Feature #1862: Ionosphere features profiles search page
+        ionosphere_search,
+        # @added 20170305 - Feature #1960: ionosphere_layers
+        create_ionosphere_layers, feature_profile_layers_detail,
+        feature_profile_layer_alogrithms,
+        # @added 20170308 - Feature #1960: ionosphere_layers
+        # To present the operator with the existing layers and algorithms for the metric
+        metric_layers_alogrithms,
+        # @added 20170327 - Feature #2004: Ionosphere layers - edit_layers
+        #                   Task #2002: Review and correct incorrectly defined layers
+        edit_ionosphere_layers,
+        # @added 20170402 - Feature #2000: Ionosphere - validated
+        validate_fp,
+        # @added 20170617 - Feature #2054: ionosphere.save.training_data
+        save_training_data_dir,
+        # added 20170908 - Feature #2056: ionosphere - disabled_features_profiles
+        features_profile_family_tree, disable_features_profile_family_tree,
+        # @added 20170916 - Feature #1996: Ionosphere - matches page
+        get_fp_matches,
+        # @added 20170917 - Feature #1996: Ionosphere - matches page
+        get_matched_id_resources,
+        # @added 20180812 - Feature #2430: Ionosphere validate learnt features profiles page
+        get_features_profiles_to_validate,
+        # @added 20180815 - Feature #2430: Ionosphere validate learnt features profiles page
+        get_metrics_with_features_profiles_to_validate,
+        # @added 20181205 - Bug #2746: webapp time out - Graphs in search_features_profiles
+        #                   Feature #2602: Graphs in search_features_profiles
+        ionosphere_show_graphs,
+        # @added 20190502 - Branch #2646: slack
+        webapp_update_slack_thread,
+        # @added 20190601 - Feature #3084: Ionosphere - validated matches
+        validate_ionosphere_match,
+        # @added 20200226: Ideas #2476: Label and relate anomalies
+        #                  Feature #2516: Add label to features profile
+        label_anomalies
+    )
 
-# from utilites import alerts_matcher
+    # from utilites import alerts_matcher
 
-# @added 20170114 - Feature #1854: Ionosphere learn
-# Decoupled the create_features_profile from ionosphere_backend and moved to
-# ionosphere_functions so it can be used by ionosphere/learn
-from ionosphere_functions import (
-    create_features_profile, get_ionosphere_learn_details,
-    # @added 20180414 - Branch #2270: luminosity
-    get_correlations,
-    # @added 20200113 - Feature #3390: luminosity related anomalies
-    #                   Branch #2270: luminosity
-    get_related)
+    # @added 20170114 - Feature #1854: Ionosphere learn
+    # Decoupled the create_features_profile from ionosphere_backend and moved to
+    # ionosphere_functions so it can be used by ionosphere/learn
+    from ionosphere_functions import (
+        create_features_profile, get_ionosphere_learn_details,
+        # @added 20180414 - Branch #2270: luminosity
+        get_correlations,
+        # @added 20200113 - Feature #3390: luminosity related anomalies
+        #                   Branch #2270: luminosity
+        get_related)
+
+    # @added 20200420 - Feature #3500: webapp - crucible_process_metrics
+    #                   Feature #1448: Crucible web UI
+    #                   Branch #868: crucible
+    from crucible_backend import (
+        submit_crucible_job, get_crucible_jobs, get_crucible_job,
+        send_crucible_job_metric_to_panorama)
 
 skyline_version = skyline_version.__absolute_version__
 
@@ -1549,10 +1557,223 @@ def crucible():
             return render_template(
                 'uh_oh.html', version=skyline_version,
                 message="Sorry the Crucible web UI is not completed yet"), 200
+    # @added 20200420 - Feature #1448: Crucible web UI
+    #                   Branch #868: crucible
+    else:
+        start = time.time()
+    try:
+        request_args_len = len(request.args)
+    except:
+        request_args_len = 0
+    from_timestamp = 0
+    until_timestamp = 0
+    metrics_list = []
+    namespaces_list = []
+    source = 'graphite'
+    alert_interval = str(int(settings.PANORAMA_EXPIRY_TIME))
+    crucible_job_id = None
+    metrics_submitted_to_process = []
+    process_metrics = None
+    process_metrics_request = None
+    user_id = None
+    user = None
+    job_submitted = None
+    crucible_jobs_list = []
+    crucible_jobs = []
+    crucible_job_request = False
+    crucible_job_dir = None
+    crucible_job_metric = None
+    crucible_job_details = []
+    completed_job = False
+    has_anomalies = False
+    skyline_anomalies = []
+    skyline_consensus_anomalies = []
+    image_files = []
+    image_file_names = []
+    graph_image_file = None
+    send_anomalies_panorama = False
+    send_to_panorama_request = False
+    sent_to_panorama = None
+    panorama_done = False
+    panorama_done_timestamp = None
+    panorama_done_user_id = None
+    skyline_consensus_anomalies_present = 0
+
+    if request_args_len:
+        if 'process_metrics' in request.args:
+            process_metrics_request = request.args.get(str('process_metrics'), None)
+            if process_metrics_request == 'true':
+                process_metrics_request = True
+                process_metrics = True
+        if 'crucible_job' in request.args:
+            crucible_job_request = request.args.get(str('crucible_job'), None)
+            if crucible_job_request == 'true':
+                crucible_job_request = True
+                process_metrics_request = False
+                process_metrics = False
+        if 'send_anomalies_panorama' in request.args:
+            send_to_panorama_request = request.args.get(str('send_anomalies_panorama'), None)
+            if send_to_panorama_request == 'true':
+                send_anomalies_panorama = True
+                send_to_panorama_request = True
+                process_metrics_request = False
+                process_metrics = False
+                crucible_job_request = False
+                process_metrics_request = False
+                process_metrics = False
+
+    if crucible_job_request or send_to_panorama_request:
+        if 'crucible_job_id' in request.args:
+            crucible_job_id = request.args.get(str('crucible_job_id'), None)
+        if 'metric' in request.args:
+            crucible_job_metric = request.args.get(str('metric'), None)
+        if crucible_job_id and crucible_job_metric:
+            crucible_path = os.path.dirname(settings.CRUCIBLE_DATA_FOLDER)
+            crucible_job_dir = '%s/jobs/%s/%s' % (crucible_path, crucible_job_id, crucible_job_metric)
+
+    if crucible_job_request:
+        logger.info('crucible_job request for crucible_job_id %s and metric %s' % (
+            str(crucible_job_id), str(crucible_job_metric)))
+        crucible_job_details, completed_job, has_anomalies, skyline_anomalies, skyline_consensus_anomalies, panorama_done, panorama_done_timestamp, panorama_done_user_id, image_files, image_file_names, graph_image_file, fail_msg, trace = get_crucible_job(crucible_job_id, crucible_job_metric)
+
+    if process_metrics or send_anomalies_panorama:
+        if settings.WEBAPP_AUTH_ENABLED:
+            auth = request.authorization
+            user = auth.username
+        else:
+            user = 'Skyline'
+            user_id = 1
+        # Allow the user_id to be passed as a request argument
+        if 'user_id' in request.args:
+            user_id_str = request.args.get(str('user_id'), None)
+            try:
+                user_id = int(user_id_str)
+            except:
+                logger.error('error :: the /crucible user_id argument is not an int - %s' % str(user_id_str))
+                return '400 Bad Request - invalid user_id argument', 400
+        if not user_id:
+            success, user_id = get_user_details(skyline_app, 'id', 'username', str(user))
+            if not success:
+                logger.error('error :: /crucible could not get_user_details(%s)' % str(user))
+                return 'Internal Server Error - ref: i - could not determine user_id', 500
+            else:
+                try:
+                    user_id = int(user_id)
+                    logger.info('/crucible get_user_details() with %s returned user id %s' % (
+                        str(user), str(user_id)))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: /crucible get_user_details() with %s did not return an int' % (
+                        str(user), str(user_id)))
+                    return 'Internal Server Error - ref: i - user_id not int', 500
+
+    if process_metrics_request:
+        logger.info('process_metrics request')
+        from_timestamp = 0
+        until_timestamp = 0
+        metrics_list = []
+        namespaces_list = []
+        source = 'graphite'
+        alert_interval = str(int(settings.PANORAMA_EXPIRY_TIME))
+        if 'from_timestamp' in request.args:
+            from_timestamp = request.args.get(str('from_timestamp'), None)
+        if 'until_timestamp' in request.args:
+            until_timestamp = request.args.get(str('until_timestamp'), None)
+        if 'metrics' in request.args:
+            metrics = request.args.get(str('metrics'), None)
+        if 'namespaces' in request.args:
+            namespaces = request.args.get(str('namespaces'), None)
+        if 'source' in request.args:
+            source = request.args.get(str('source'), None)
+        if 'alert_interval' in request.args:
+            alert_interval = request.args.get(str('alert_interval'), None)
+        do_process_metrics = False
+        if from_timestamp and until_timestamp:
+            if metrics:
+                do_process_metrics = True
+                metrics_list = metrics.split(',')
+                logger.info('crucible_process_metrics - metrics_list - %s' % str(metrics_list))
+            if namespaces:
+                do_process_metrics = True
+                namespaces_list = namespaces.split(',')
+                logger.info('crucible_process_metrics namespaces_list - %s' % str(namespaces_list))
+        crucible_job_id = None
+        metrics_submitted_to_process = []
+        if do_process_metrics:
+            try:
+                crucible_job_id, metrics_submitted_to_process, message, trace = submit_crucible_job(from_timestamp, until_timestamp, metrics_list, namespaces_list, source, alert_interval, user_id, user)
+                logger.info('crucible_process_metrics - submit_crucible_job returned (%s, %s, %s, %s)' % (
+                    str(crucible_job_id), str(metrics_submitted_to_process),
+                    str(message), str(trace)))
+            except:
+                trace = traceback.format_exc()
+                message = 'Uh oh ... a Skyline 500 using submit_crucible_job(%s, %s, %s, %s, %s, %s, %s, %s)' % (
+                    str(from_timestamp), str(until_timestamp), str(metrics_list),
+                    str(namespaces_list), str(source), str(alert_interval),
+                    str(user_id), str(user))
+                return internal_error(message, trace)
+            if not crucible_job_id:
+                return internal_error(message, trace)
+            else:
+                job_submitted = True
+
+    if send_to_panorama_request:
+        logger.info('send_anomalies_panorama request')
+        logger.info('send_anomalies_panorama request for crucible_job_id %s and metric %s' % (
+            str(crucible_job_id), str(crucible_job_metric)))
+        crucible_job_details, completed_job, has_anomalies, skyline_anomalies, skyline_consensus_anomalies, panorama_done, panorama_done_timestamp, panorama_done_user_id, image_files, image_file_names, graph_image_file, fail_msg, trace = get_crucible_job(crucible_job_id, crucible_job_metric)
+        try:
+            sent_to_panorama, message, trace = send_crucible_job_metric_to_panorama(crucible_job_id, crucible_job_metric, user_id, user, skyline_consensus_anomalies)
+            logger.info('send_anomalies_panorama request sent %s anomalies to Panorama' % str(sent_to_panorama))
+            crucible_job_request = True
+        except:
+            trace = traceback.format_exc()
+            message = 'Uh oh ... a Skyline 500 using get_crucible_jobs'
+            return internal_error(message, trace)
+
+    if not process_metrics_request and not crucible_job_request and not send_to_panorama_request:
+        logger.info('crucible_jobs_list request')
+        try:
+            crucible_jobs_list, message, trace = get_crucible_jobs()
+            logger.info('crucible_jobs_list determined')
+        except:
+            trace = traceback.format_exc()
+            message = 'Uh oh ... a Skyline 500 using get_crucible_jobs'
+            return internal_error(message, trace)
+        if crucible_jobs_list:
+            for metric_name, root, crucible_job_id, human_date, completed_job, has_anomalies, panorama_done, skyline_consensus_anomalies_present in crucible_jobs_list:
+                crucible_jobs.append([human_date, crucible_job_id, completed_job, has_anomalies, root, metric_name, panorama_done, skyline_consensus_anomalies_present])
+            if crucible_jobs:
+                sorted_crucible_jobs = sorted(crucible_jobs, key=lambda x: x[0])
+                crucible_jobs = sorted_crucible_jobs
+                crucible_jobs.reverse()
+                del sorted_crucible_jobs
+            del crucible_jobs_list
+
+    return render_template(
+        'crucible.html', process_metrics=process_metrics,
+        crucible_job_id=crucible_job_id,
+        from_timestamp=int(from_timestamp), until_timestamp=int(until_timestamp),
+        metrics=metrics_list, namespaces=namespaces_list, source=source,
+        alert_interval=alert_interval, job_submitted=job_submitted,
+        metrics_submitted_to_process=metrics_submitted_to_process,
+        crucible_jobs=crucible_jobs, crucible_job=crucible_job_request,
+        crucible_job_dir=crucible_job_dir,
+        crucible_job_metric=crucible_job_metric,
+        crucible_job_details=crucible_job_details, completed_job=completed_job,
+        has_anomalies=has_anomalies, skyline_anomalies=skyline_anomalies,
+        skyline_consensus_anomalies=skyline_consensus_anomalies,
+        skyline_consensus_anomalies_present=skyline_consensus_anomalies_present,
+        sent_to_panorama=sent_to_panorama, panorama_done=panorama_done,
+        panorama_done_timestamp=panorama_done_timestamp,
+        panorama_done_user_id=panorama_done_user_id,
+        image_files=image_files, image_file_names=image_file_names,
+        graph_image_file=graph_image_file,
+        version=skyline_version,
+        duration=(time.time() - start), print_debug=False), 200
+
 
 # @added 20161123 - Branch #922: ionosphere
-
-
 @app.route("/ionosphere", methods=['GET'])
 @requires_auth
 def ionosphere():
