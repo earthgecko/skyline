@@ -23,8 +23,9 @@ __location__ = realpath(join(os.getcwd(), dirname(__file__)))
 
 # Add the shared settings file to namespace.
 sys.path.insert(0, join(__location__, '..', 'skyline'))
-# ignoreErrorCodes E402
-import settings
+if True:
+    # ignoreErrorCodes E402
+    import settings
 
 LOCAL_DEBUG = False
 
@@ -196,7 +197,7 @@ def seed():
             print('info :: end of tuple - %s' % (str(end_of_tuple)))
             padding = 0
             while padding < 100:
-                padding +=1
+                padding += 1
                 ts = end_timestamp - padding
                 tuple_data = ('horizon.test.pickle_padding', (ts, 1.0))
                 listOfMetricTuples.append(tuple_data)
@@ -223,7 +224,7 @@ def seed():
                             settings.HORIZON_IP, str(settings.PICKLE_PORT)))
                         if LOCAL_DEBUG:
                             end_of_tuple = smallListOfMetricTuples[-3:]
-                            print('info :: end of %s item smallListOfMetricTuples - %s' % (str(len(smallListOfMetricTuples)) ,str(end_of_tuple)))
+                            print('info :: end of %s item smallListOfMetricTuples - %s' % (str(len(smallListOfMetricTuples)), str(end_of_tuple)))
                         sent_to_horizon += len(smallListOfMetricTuples)
                         smallListOfMetricTuples = []
                         tuples_added = 0

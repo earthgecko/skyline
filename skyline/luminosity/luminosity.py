@@ -554,7 +554,10 @@ class Luminosity(Thread):
                         # if memcache does not have the key the response to the
                         # client is None, it does not except
                     except:
-                        logger.error('error :: failed to get %s from memcache' % memcache_key)
+                        # @modified 20200507 - stop reporting this as an error
+                        # it can be expected to happen from time to time
+                        # logger.error('error :: failed to get %s from memcache' % memcache_key)
+                        logger.info('failed to get %s from memcache, will query DB' % memcache_key)
                     try:
                         self.memcache_client.close()
                     except:
