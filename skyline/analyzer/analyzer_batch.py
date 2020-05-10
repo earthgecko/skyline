@@ -23,7 +23,7 @@ from ast import literal_eval
 
 import settings
 from skyline_functions import (
-    send_graphite_metric, write_data_to_file, send_anomalous_metric_to, mkdir_p,
+    write_data_to_file, send_anomalous_metric_to, mkdir_p,
     filesafe_metricname,
     # @added 20170602 - Feature #2034: analyse_derivatives
     nonNegativeDerivative, strictly_increasing_monotonicity, in_list,
@@ -31,9 +31,23 @@ from skyline_functions import (
     #                   Branch #3262: py3
     # Added a single functions to deal with Redis connection and the
     # charset='utf-8', decode_responses=True arguments required in py3
-    get_redis_conn, get_redis_conn_decoded)
+    get_redis_conn, get_redis_conn_decoded,
+    # @added 20200506 - Feature #3532: Sort all time series
+    sort_timeseries)
 
-from algorithms import run_selected_algorithm
+# @added 20200425 - Feature #3512: matched_or_regexed_in_list function
+#                   Feature #3508: ionosphere_untrainable_metrics
+#                   Feature #3486: analyzer_batch
+from matched_or_regexed_in_list import matched_or_regexed_in_list
+
+# @modified 20200423 - Feature #3504: Handle airgaps in batch metrics
+#                      Feature #3480: batch_processing
+#                      Feature #3486: analyzer_batch
+# Changed to algoritms_batch so there is no pollution and
+# analyzer and analyzer_batch are totally independent
+# from algorithms import run_selected_algorithm
+from algorithms_batch import run_selected_batch_algorithm
+
 from algorithm_exceptions import TooShort, Stale, Boring
 
 # TODO if settings.ENABLE_CRUCIBLE: and ENABLE_PANORAMA
@@ -69,6 +83,15 @@ try:
     from settings import BATCH_PROCESSING
 except:
     BATCH_PROCESSING = None
+
+# @added 20200425 - Feature #3508: ionosphere.untrainable_metrics
+# Determine if any metrcs have negatives values some they can be
+# added to the ionosphere.untrainable_metrics Redis set
+try:
+    from settings import KNOWN_NEGATIVE_METRICS
+except:
+    KNOWN_NEGATIVE_METRICS = []
+
 
 skyline_app_graphite_namespace = 'skyline.%s%s' % (skyline_app, SERVER_METRIC_PATH)
 
@@ -202,6 +225,15 @@ class AnalyzerBatch(Thread):
         except:
             timeseries = []
 
+        # @added 20200506 - Feature #3532: Sort all time series
+        # To ensure that there are no unordered timestamps in the time
+        # series which are artefacts of the collector or carbon-relay, sort
+        # all time series by timestamp before analysis.
+        original_timeseries = timeseries
+        if original_timeseries:
+            timeseries = sort_timeseries(original_timeseries)
+            del original_timeseries
+
         try:
             del raw_series
         except:
@@ -237,6 +269,20 @@ class AnalyzerBatch(Thread):
         if number_of_timestamps_to_analyze == 0:
             logger.info('no timestamps were found to analyze for %s from %s, nothing to do' % (
                 metric_name, str(last_analyzed_timestamp)))
+
+            # @added 20200424 - Feature #3486: analyzer_batch
+            #                   Feature #3480: batch_processing
+            #                   Feature #3504: Handle airgaps in batch metrics
+            # If there are no data points to analyze remove from the set
+            redis_set = 'analyzer.batch'
+            data = [metric_name, int(last_analyzed_timestamp)]
+            try:
+                self.redis_conn.srem(redis_set, str(data))
+                logger.info('analyzer_batch :: removed batch metric item - %s - from Redis set - %s' % (str(data), redis_set))
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: analyzer_batch :: failed to remove batch metric item - %s - from Redis set - %s' % (str(data), redis_set))
+
             # Clean up and return
             try:
                 del timeseries
@@ -281,6 +327,22 @@ class AnalyzerBatch(Thread):
                 str(number_of_timestamps_to_analyze), metric_name,
                 str(last_analyzed_timestamp), str(last_redis_data_timestamp)))
 
+        base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+
+        # @added 20200425 - Feature #3508: ionosphere.untrainable_metrics
+        # Determine if any metrcs have negatives values some they can be
+        # added to the ionosphere_untrainable_metrics Redis set
+        run_negatives_present = False
+        if settings.IONOSPHERE_ENABLED:
+            run_negatives_present = True
+            try:
+                known_negative_metric_matched_by = None
+                known_negative_metric, known_negative_metric_matched_by = matched_or_regexed_in_list(skyline_app, base_name, KNOWN_NEGATIVE_METRICS)
+                if known_negative_metric:
+                    run_negatives_present = False
+            except:
+                run_negatives_present = True
+
         # @added 20170602 - Feature #2034: analyse_derivatives
         # In order to convert monotonic, incrementing metrics to a deriative
         # metric
@@ -292,8 +354,6 @@ class AnalyzerBatch(Thread):
             if metric_name in derivative_metrics:
                 known_derivative_metric = True
                 unknown_deriv_status = False
-
-        base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
 
         # First check if it has its own Redis z.derivative_metric key
         # that has not expired
@@ -395,8 +455,17 @@ class AnalyzerBatch(Thread):
                                     logger.info(traceback.format_exc())
                                     logger.error('error :: failed to delete test_anomaly Redis key - %s' % str(test_anomaly_key))
 
-                metric_airgaps = []
-                anomalous, ensemble, datapoint = run_selected_algorithm(batch_timeseries, metric_name, metric_airgaps)
+                # @modified 20200423 - Feature #3504: Handle airgaps in batch metrics
+                #                      Feature #3480: batch_processing
+                #                      Feature #3486: analyzer_batch
+                # Changed to algoritms_batch so there is no pollution and
+                # analyzer and analyzer_batch are totally independent
+                # metric_airgaps = []
+                # anomalous, ensemble, datapoint = run_selected_algorithm(batch_timeseries, metric_name, metric_airgaps)
+                # @modified 20200425 - Feature #3508: ionosphere.untrainable_metrics
+                # Added run_negatives_present and added negatives_found
+                # anomalous, ensemble, datapoint = run_selected_batch_algorithm(batch_timeseries, metric_name)
+                anomalous, ensemble, datapoint, negatives_found = run_selected_batch_algorithm(batch_timeseries, metric_name, run_negatives_present)
 
                 if test_anomaly_batch_timeseries:
                     logger.info('test_anomaly - analyzed %s data with anomaly value in it and anomalous = %s' % (
@@ -407,9 +476,13 @@ class AnalyzerBatch(Thread):
                 redis_key_set = None
                 try:
                     int_metric_timestamp = int(batch_timestamp)
+                    # @modified 20200503 - Feature #3504: Handle airgaps in batch metrics
+                    #                      Feature #3480: batch_processing
+                    #                      Feature #3486: analyzer_batch
+                    # Set the last_timestamp expiry time to 1 month rather than
+                    # settings.FULL_DURATION
                     self.redis_conn.setex(
-                        last_metric_timestamp_key,
-                        settings.FULL_DURATION, int_metric_timestamp)
+                        last_metric_timestamp_key, 2592000, int_metric_timestamp)
                     redis_key_set = True
                 except:
                     logger.error('error :: failed to set Redis key %s' % last_metric_timestamp_key)
@@ -422,6 +495,23 @@ class AnalyzerBatch(Thread):
                         logger.info('anomalous :: anomaly detected on %s at %s with %s' % (
                             base_name, str(int_metric_timestamp),
                             str(datapoint)))
+
+                    # @added 20200425 - Feature #3508: ionosphere.untrainable_metrics
+                    # Determine if any metrcs have negatives values some they can be
+                    # added to the ionosphere.untrainable_metrics Redis set
+                    if run_negatives_present and negatives_found:
+                        redis_set = 'ionosphere.untrainable_metrics'
+                        try:
+                            last_negative_timestamp = int(negatives_found[-1][0])
+                            last_negative_value = negatives_found[-1][1]
+                            remove_after_timestamp = int(last_negative_timestamp + settings.FULL_DURATION)
+                            data = str([metric_name, batch_timestamp, datapoint, last_negative_timestamp, last_negative_value, settings.FULL_DURATION, remove_after_timestamp])
+                            self.redis_conn.sadd(redis_set, data)
+                        except:
+                            logger.info(traceback.format_exc())
+                            logger.error('error :: failed to add data to Redis set %s' % (
+                                str(redis_set)))
+
                     # Added a Redis key for Mirage, Panorama and Ionosphere to
                     # query to identify if an anomaly has been added by
                     # analyzer_batch and set a longish TTL as if multiple
@@ -746,17 +836,92 @@ class AnalyzerBatch(Thread):
 
             # It could have been deleted by the Roomba
             except TypeError:
+                # @added 20200430 - Feature #3480: batch_processing
+                # Added logging here as the DeletedByRoomba exception is
+                # generally not related to that but related to some other fail
+                # in the processing of the run algorithms phase
+                logger.error(traceback.format_exc())
+                logger.error('error :: added as DeletedByRoomba but possibly not see traceback above')
+
                 exceptions['DeletedByRoomba'] += 1
+                # @added 20200423 - Feature #3504: Handle airgaps in batch metrics
+                #                   Feature #3480: batch_processing
+                #                   Feature #3486: analyzer_batch
+                # Handle analyzer_batch work being added over and over every
+                # minute by also updating the last_timestamp key if stale,
+                # boring, etc
+                last_metric_timestamp_key = 'last_timestamp.%s' % base_name
+                try:
+                    int_metric_timestamp = int(time())
+                    self.redis_conn.setex(
+                        last_metric_timestamp_key, 2592000, int_metric_timestamp)
+                    logger.info('set Redis key %s to %s, even though it has been deleted by Roomba' % (
+                        last_metric_timestamp_key, str(int_metric_timestamp)))
+                except:
+                    logger.error('error :: failed to set Redis key %s, even though it is has been deleted by Roomba' % last_metric_timestamp_key)
             except TooShort:
                 exceptions['TooShort'] += 1
+                # @added 20200423 - Feature #3504: Handle airgaps in batch metrics
+                #                   Feature #3480: batch_processing
+                #                   Feature #3486: analyzer_batch
+                last_metric_timestamp_key = 'last_timestamp.%s' % base_name
+                try:
+                    int_metric_timestamp = int(batch_timeseries[-1][0])
+                    self.redis_conn.setex(
+                        last_metric_timestamp_key, 2592000,
+                        int_metric_timestamp)
+                    logger.info('set Redis key %s to %s, even though it is too short' % (
+                        last_metric_timestamp_key, str(int_metric_timestamp)))
+                except:
+                    logger.error('error :: failed to set Redis key %s, even though it is too short' % last_metric_timestamp_key)
             except Stale:
                 exceptions['Stale'] += 1
+                # @added 20200423 - Feature #3504: Handle airgaps in batch metrics
+                #                   Feature #3480: batch_processing
+                #                   Feature #3486: analyzer_batch
+                last_metric_timestamp_key = 'last_timestamp.%s' % base_name
+                try:
+                    int_metric_timestamp = int(batch_timeseries[-1][0])
+                    self.redis_conn.setex(
+                        last_metric_timestamp_key, 2592000,
+                        int_metric_timestamp)
+                    logger.info('set Redis key %s to %s, even though it is stale' % (
+                        last_metric_timestamp_key, str(int_metric_timestamp)))
+                except:
+                    logger.error('error :: failed to set Redis key %s, even though it is stale' % last_metric_timestamp_key)
             except Boring:
                 exceptions['Boring'] += 1
+                # @added 20200423 - Feature #3504: Handle airgaps in batch metrics
+                #                   Feature #3480: batch_processing
+                #                   Feature #3486: analyzer_batch
+                last_metric_timestamp_key = 'last_timestamp.%s' % base_name
+                try:
+                    int_metric_timestamp = int(batch_timeseries[-1][0])
+                    self.redis_conn.setex(
+                        last_metric_timestamp_key, 2592000,
+                        int_metric_timestamp)
+                    logger.info('set Redis key %s to %s, even though it is boring' % (
+                        last_metric_timestamp_key, str(int_metric_timestamp)))
+                except:
+                    logger.error('error :: failed to set Redis key %s, even though it is boring' % last_metric_timestamp_key)
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error - Other error reported')
                 exceptions['Other'] += 1
+                # @added 20200423 - Feature #3504: Handle airgaps in batch metrics
+                #                   Feature #3480: batch_processing
+                #                   Feature #3486: analyzer_batch
+                last_metric_timestamp_key = 'last_timestamp.%s' % base_name
+                try:
+                    int_metric_timestamp = int(time())
+                    self.redis_conn.setex(
+                        last_metric_timestamp_key, 2592000,
+                        int_metric_timestamp)
+                    logger.error('error :: set Redis key %s to %s, even though it an other error has been thrown' % (
+                        last_metric_timestamp_key, str(int_metric_timestamp)))
+                except:
+                    logger.error('error :: failed to set Redis key %s, when other exception was thrown' % last_metric_timestamp_key)
+
         try:
             del timeseries
         except:
@@ -806,10 +971,10 @@ class AnalyzerBatch(Thread):
         data = [metric_name, int(last_analyzed_timestamp)]
         try:
             self.redis_conn.srem(redis_set, str(data))
-            logger.info('analyzer_batch :: removed work item - %s - from Redis set - %s' % (str(data), redis_set))
+            logger.info('analyzer_batch :: removed batch metric item - %s - from Redis set - %s' % (str(data), redis_set))
         except:
             logger.error(traceback.format_exc())
-            logger.error('error :: analyzer_batch :: failed to remove work item - %s - from Redis set - %s' % (str(data), redis_set))
+            logger.error('error :: analyzer_batch :: failed to remove batch metric item - %s - from Redis set - %s' % (str(data), redis_set))
 
         spin_end = time() - spin_start
         logger.info('spin_batch_process took %.2f seconds' % spin_end)
@@ -965,7 +1130,7 @@ class AnalyzerBatch(Thread):
                     break
                 except:
                     logger.error(traceback.format_exc())
-                    logger.error('error :: could not determine details from analyzer_batch_work item')
+                    logger.error('error :: could not determine details from analyzer_batch entry')
                     metric_name = None
                     last_analyzed_timestamp = None
                     batch_processing_metric = None

@@ -4,7 +4,7 @@ try:
     from Queue import Empty
 except:
     from queue import Empty
-from redis import StrictRedis
+# from redis import StrictRedis
 from time import time, sleep, strftime, gmtime
 from threading import Thread
 from collections import defaultdict
@@ -38,7 +38,14 @@ from skyline_functions import (
     get_redis_conn, get_redis_conn_decoded,
     # @added 20200413 - Feature #3486: analyzer_batch
     #                   Feature #3480: batch_processing
-    is_batch_metric)
+    is_batch_metric,
+    # @added 20200506 - Feature #3532: Sort all time series
+    sort_timeseries)
+
+# @added 20200425 - Feature #3512: matched_or_regexed_in_list function
+#                   Feature #3508: ionosphere.untrainable_metrics
+#                   Feature #3486: analyzer_batch
+from matched_or_regexed_in_list import matched_or_regexed_in_list
 
 from alerters import trigger_alert
 from algorithms import run_selected_algorithm
@@ -92,6 +99,13 @@ try:
     MIRAGE_PERIODIC_CHECK_INTERVAL = settings.MIRAGE_PERIODIC_CHECK_INTERVAL
 except:
     MIRAGE_PERIODIC_CHECK_INTERVAL = 3600
+# @added 20200505 - Feature #2882: Mirage - periodic_check
+# Surface this once
+try:
+    mirage_periodic_check_namespaces = settings.MIRAGE_PERIODIC_CHECK_NAMESPACES
+except:
+    mirage_periodic_check_namespaces = []
+
 
 # @added 20190410 - Feature #2916: ANALYZER_ENABLED setting
 try:
@@ -138,6 +152,33 @@ try:
     from settings import BATCH_PROCESSING_DEBUG
 except:
     BATCH_PROCESSING_DEBUG = None
+
+# @added 20200423 - Feature #3504: Handle airgaps in batch metrics
+#                   Feature #3400: Identify air gaps in the metric data
+CHECK_AIRGAPS = []
+if IDENTIFY_AIRGAPS:
+    try:
+        from settings import CHECK_AIRGAPS
+    except:
+        CHECK_AIRGAPS = []
+    if CHECK_AIRGAPS:
+        from skyline_functions import is_check_airgap_metric
+
+# @added 20200423 - Feature #3508: ionosphere.untrainable_metrics
+# Determine if any metrcs have negatives values some they can be
+# added to the ionosphere.untrainable_metrics Redis set
+try:
+    from settings import KNOWN_NEGATIVE_METRICS
+except:
+    KNOWN_NEGATIVE_METRICS = []
+
+# @added 20200427 - Feature #3514: Identify inactive metrics
+# Added metrics that have become inactive to the Redis set to be flagged
+# as inactive
+try:
+    inactive_after = settings.FULL_DURATION - settings.METRICS_INACTIVE_AFTER
+except:
+    inactive_after = settings.FULL_DURATION - 3600
 
 # @added 20190522 - Feature #2580: illuminance
 # Disabled for now as in concept phase.  This would work better if
@@ -394,36 +435,19 @@ class Analyzer(Thread):
             # substantial load on Graphite and is probably not required only key
             # metrics should be analysed by Mirage periodically.
             periodic_check_mirage_metrics = []
-            try:
-                mirage_periodic_check_namespaces = settings.MIRAGE_PERIODIC_CHECK_NAMESPACES
-            # @modified 20190524 - Feature #2882: Mirage - periodic_check
-            #                      Branch #3002: docker
-            # Added log output to except
-            except:
-                logger.error(traceback.format_exc())
-                logger.error('error :: MIRAGE_PERIODIC_CHECK is True but no MIRAGE_PERIODIC_CHECK_NAMESPACES are defined in settings.py')
-                mirage_periodic_check_namespaces = []
-            for namespace in mirage_periodic_check_namespaces:
+
+            if mirage_periodic_check_namespaces:
                 for metric_name in mirage_unique_metrics:
-                    metric_namespace_elements = metric_name.split('.')
                     mirage_periodic_metric = False
-                    for periodic_namespace in mirage_periodic_check_namespaces:
-                        # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
-                        # test for membership should be 'not in'
-                        # if not namespace in mirage_periodic_check_namespaces:
-                        if namespace not in mirage_periodic_check_namespaces:
-                            continue
-                        periodic_namespace_namespace_elements = periodic_namespace.split('.')
-                        elements_matched = set(metric_namespace_elements) & set(periodic_namespace_namespace_elements)
-                        if len(elements_matched) == len(periodic_namespace_namespace_elements):
-                            mirage_periodic_metric = True
-                            break
+                    periodic_mirage_metric_matched_by = None
+                    mirage_periodic_metric, periodic_mirage_metric_matched_by = matched_or_regexed_in_list(skyline_app, metric_name, mirage_periodic_check_namespaces)
                     if mirage_periodic_metric:
                         # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
                         # test for membership should be 'not in'
                         # if not metric_name in periodic_check_mirage_metrics:
-                        if metric_name not in periodic_check_mirage_metrics:
-                            periodic_check_mirage_metrics.append(metric_name)
+                        # if metric_name not in periodic_check_mirage_metrics:
+                        periodic_check_mirage_metrics.append(metric_name)
+                    del periodic_mirage_metric_matched_by
 
             periodic_check_mirage_metrics_count = len(periodic_check_mirage_metrics)
             logger.info(
@@ -435,18 +459,6 @@ class Analyzer(Thread):
                 except Exception as e:
                     logger.error('error :: could not add %s to Redis set new.mirage.periodic_check.metrics.all: %s' % (
                         metric_name, e))
-            try:
-                self.redis_conn.rename('mirage.periodic_check.metrics.all', 'mirage.periodic_check.metrics.all.old')
-            except:
-                pass
-            try:
-                self.redis_conn.rename('new.mirage.periodic_check.metrics.all', 'mirage.periodic_check.metrics.all')
-            except:
-                pass
-            try:
-                self.redis_conn.delete('mirage.periodic_check.metrics.all.old')
-            except:
-                pass
 
             if periodic_check_mirage_metrics_count > mirage_periodic_check_interval_minutes:
                 mirage_periodic_checks_per_minute = periodic_check_mirage_metrics_count / mirage_periodic_check_interval_minutes
@@ -462,7 +474,10 @@ class Analyzer(Thread):
             # against rather than checking each metric name for a key below
             mirage_periodic_check_keys = []
             try:
-                mirage_periodic_check_keys = list(self.redis_conn.scan_iter(match='mirage.periodic_check.*'))
+                # @modified 20200430 - Bug #3266: py3 Redis binary objects not strings
+                #                      Branch #3262: py3
+                # mirage_periodic_check_keys = list(self.redis_conn.scan_iter(match='mirage.periodic_check.*'))
+                mirage_periodic_check_keys = list(self.redis_conn_decoded.scan_iter(match='mirage.periodic_check.*'))
                 logger.info('detemined %s mirage.periodic_check. keys from Redis scan_iter' % (
                     str(len(mirage_periodic_check_keys))))
             except:
@@ -504,18 +519,7 @@ class Analyzer(Thread):
                         logger.error(traceback.format_exc())
                         logger.error(
                             'error :: failed to create Mirage periodic_check Redis key - %s' % (mirage_periodic_check_cache_key))
-            try:
-                self.redis_conn.rename('mirage.periodic_check.metrics', 'mirage.periodic_check.metrics.old')
-            except:
-                pass
-            try:
-                self.redis_conn.rename('new.mirage.periodic_check.metrics', 'mirage.periodic_check.metrics')
-            except:
-                pass
-            try:
-                self.redis_conn.delete('mirage.periodic_check.metrics.old')
-            except:
-                pass
+
             mirage_periodic_check_metric_list_count = len(mirage_periodic_check_metric_list)
             logger.info(
                 '%s Mirage periodic checks were added' % (
@@ -616,6 +620,13 @@ class Analyzer(Thread):
         # from ~2.5 to 3 seconds up to between 3.0 and 4.0 seconds on 608 metrics
         # from ~5.5 to 10 seconds up to between 7.5 and 11.5 seconds on 1441 metrics
         airgapped_metrics = []
+
+        # @added 20200501 - Feature #3400: Identify air gaps in the metric data
+        # Handle airgaps filled so that once they have been submitted as filled
+        # Analyzer will not identify them as airgapped again, even if there is
+        # a airgap in the original airgap period
+        airgapped_metrics_filled = []
+
         if IDENTIFY_AIRGAPS:
             try:
                 airgapped_metrics = list(self.redis_conn_decoded.smembers('analyzer.airgapped_metrics'))
@@ -624,11 +635,22 @@ class Analyzer(Thread):
                 airgapped_metrics = []
             logger.info('determined %s airgapped metrics' % str(len(airgapped_metrics)))
 
+            # @added 20200501 - Feature #3400: Identify air gaps in the metric data
+            # Handle airgaps filled so that once they have been submitted as filled
+            # Analyzer will not identify them as airgapped again
+            try:
+                airgapped_metrics_filled = list(self.redis_conn_decoded.smembers('analyzer.airgapped_metrics.filled'))
+            except Exception as e:
+                logger.error('error :: could not remove item from analyzer.airgapped_metrics.filled Redis set - %s' % str(e))
+
             # @added 20200213 - Bug #3448: Repeated airgapped_metrics
             #                   Feature #3400: Identify air gaps in the metric data
             # Backfill airgaps in Redis time series with flux back filled data
             try:
-                flux_filled_keys = list(self.redis_conn.scan_iter(match='flux.filled.*'))
+                # @modified 20200430 - Bug #3266: py3 Redis binary objects not strings
+                #                      Branch #3262: py3
+                # flux_filled_keys = list(self.redis_conn.scan_iter(match='flux.filled.*'))
+                flux_filled_keys = list(self.redis_conn_decoded.scan_iter(match='flux.filled.*'))
                 logger.info('detemined %s flux.filled keys from Redis scan_iter' % (
                     str(len(flux_filled_keys))))
             except:
@@ -655,6 +677,46 @@ class Analyzer(Thread):
                 logger.error('error :: failed to delete Redis key %s' % (
                     redis_set))
 
+        # @added 20200411 - Feature #3480: batch_processing
+        # This variable is for debug testing only
+        enable_analyzer_batch_processing = True
+        # Only send batches if analyzer_batch is reporting up
+        analyzer_batch_up = None
+        if BATCH_PROCESSING:
+            try:
+                analyzer_batch_up = int(self.redis_conn.get('analyzer_batch'))
+            except:
+                analyzer_batch_up = None
+            if analyzer_batch_up:
+                try:
+                    analyzer_batch_up_check_timestamp = int(time())
+                    analyzer_batch_up_for = analyzer_batch_up_check_timestamp - analyzer_batch_up
+                    if analyzer_batch_up_for < 128:
+                        analyzer_batch_up = True
+                except:
+                    analyzer_batch_up = None
+
+        # @added 20200430 - Feature #3480: batch_processing
+        # Tidy up and reduce logging, consolidate logging with counts
+        batch_metric_count = 0
+        batch_processing_down_processing_normally = 0
+        last_timestamps_match_not_batch_processing = 0
+        last_timestamps_match_no_stale_or_airgap_check_not_processing = 0
+        no_new_data_but_sent_to_normal_processing_to_check_for_stale_or_airaps = 0
+        no_new_data_and_not_sent_to_check_for_stale_or_airaps = 0
+        sent_to_analyzer_batch_proccessing_metrics = 0
+        sent_to_analyzer_batch_proccessing_metrics_but_also_processing_normally_to_identify_airgaps = 0
+        batch_metric_but_processing_normally_as_penultimate_timeseries_timestamp_equals_second_last_timestamp_from_redis = 0
+
+        # @added 20200427 - Feature #3514: Identify inactive metrics
+        # Added metrics that have become inactive to the Redis set to be flagged
+        # as inactive
+        inactive_after = settings.FULL_DURATION - 3600
+        try:
+            inactive_metrics = list(self.redis_conn_decoded.smembers('analyzer.inactive_metrics'))
+        except:
+            inactive_metrics = []
+
         # Distill timeseries strings into lists
         for i, metric_name in enumerate(assigned_metrics):
             self.check_if_parent_is_alive()
@@ -671,6 +733,40 @@ class Analyzer(Thread):
             except:
                 timeseries = []
 
+            # @added 20200506 - Feature #3532: Sort all time series
+            # To ensure that there are no unordered timestamps in the time
+            # series which are artefacts of the collector or carbon-relay, sort
+            # all time series by timestamp before analysis.
+            original_timeseries = timeseries
+            if original_timeseries:
+                timeseries = sort_timeseries(original_timeseries)
+                del original_timeseries
+
+            base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+
+            # @added 20200427 - Feature #3514: Identify inactive metrics
+            # Added metrics that have become inactive to the Redis set to be flagged
+            # as inactive
+            inactive_metric = False
+            if timeseries:
+                try:
+                    last_timeseries_timestamp = int(timeseries[-1][0])
+                    spin_start
+                    if last_timeseries_timestamp < int(spin_start - inactive_after):
+                        inactive_metric = True
+                except:
+                    inactive_metric = False
+            add_inactive_metric = False
+            if inactive_metric:
+                if base_name not in inactive_metrics:
+                    add_inactive_metric = True
+            if add_inactive_metric:
+                # HERE if it is added the set, after Panorama has processed and
+                # removed from the set, how does analyzer identify to not send
+                # again?  Set a key that expires one hour later?
+                # HOW does the metric become identified as active again?
+                inactive_metrics = list(self.redis_conn_decoded.smembers('analyzer.inactive_metrics'))
+
             # @added 20170602 - Feature #2034: analyse_derivatives
             # In order to convert monotonic, incrementing metrics to a deriative
             # metric
@@ -686,8 +782,6 @@ class Analyzer(Thread):
             if not manage_derivative_metrics:
                 unknown_deriv_status = True
 
-            base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
-
             # @added 20200213 - Bug #3448: Repeated airgapped_metrics
             #                   Feature #3400: Identify air gaps in the metric data
             # When flux backfills a metric airgap and sends it to Graphite,
@@ -699,6 +793,9 @@ class Analyzer(Thread):
             # for that metric and replace the metric key data with sorted data.
             sort_data = False
             update_new_data = False
+            # @added 20200501 -
+            # Added get_updated_redis_timeseries
+            get_updated_redis_timeseries = False
             if IDENTIFY_AIRGAPS and flux_filled_keys:
                 metric_flux_filled_key = 'flux.filled.%s' % str(base_name)
                 sorted_and_deduplicated_timeseries = None
@@ -756,6 +853,15 @@ class Analyzer(Thread):
                     except:
                         logger.info(traceback.format_exc())
                         logger.error('error :: failed to get Redis key %s to test against sorted and deduplicated data' % str(metric_name))
+                    # @added 20200506 - Feature #3532: Sort all time series
+                    # To ensure that there are no unordered timestamps in the time
+                    # series which are artefacts of the collector or carbon-relay, sort
+                    # all time series by timestamp before analysis.
+                    original_test_timeseries = test_timeseries
+                    if original_test_timeseries:
+                        test_timeseries = sort_timeseries(original_test_timeseries)
+                        del original_test_timeseries
+
                 verified_existing_key_data = False
                 if test_timeseries:
                     logger.info('comparing most recent current timestamp with sorted and deduplicated data')
@@ -845,6 +951,19 @@ class Analyzer(Thread):
                         logger.error('error :: failed to get Redis key %s to test against sorted and deduplicated data' % str(metric_key_to_delete))
                     update_new_data = False
                     if test_timeseries:
+
+                        # @added 20200506 - Feature #3532: Sort all time series
+                        # To ensure that there are no unordered timestamps in the time
+                        # series which are artefacts of the collector or carbon-relay, sort
+                        # all time series by timestamp before analysis.
+                        original_test_timeseries = test_timeseries
+                        if original_test_timeseries:
+                            test_timeseries = sort_timeseries(original_test_timeseries)
+                            del original_test_timeseries
+
+                        # @added 20200501 -
+                        get_updated_redis_timeseries = True
+
                         logger.info('comparing most recent current timestamp from the renamed key with new sorted and deduplicated data')
                         try:
                             last_current_ts = int(test_timeseries[-1][0])
@@ -878,6 +997,8 @@ class Analyzer(Thread):
                                 for datapoint in new_datapoints:
                                     metric = (metric_name, (datapoint[0], datapoint[1]))
                                     self.redis_conn.append(metric_name, packb(metric[1]))
+                                # @added 20200501 -
+                                get_updated_redis_timeseries = True
                             except:
                                 logger.info(traceback.format_exc())
                                 logger.error('error :: failed to populate Redis key %s with new data' % str(metric_name))
@@ -891,35 +1012,89 @@ class Analyzer(Thread):
                     try:
                         logger.info('Redis time series key data sorted and ordered with Flux additions, deleting key %s' % (metric_flux_filled_key))
                         self.redis_conn.delete(metric_flux_filled_key)
+                        get_updated_redis_timeseries = True
                     except:
                         logger.info(traceback.format_exc())
                         logger.error('error :: failed to delete Redis key %s' % (
                             metric_key_to_delete))
 
+            if get_updated_redis_timeseries:
+                updated_timeseries = []
+                try:
+                    raw_series = self.redis_conn.get(metric_name)
+                    unpacker = Unpacker(use_list=False)
+                    unpacker.feed(raw_series)
+                    updated_timeseries = list(unpacker)
+                except:
+                    updated_timeseries = []
+                if updated_timeseries:
+                    logger.info('Using updated Redis time series for %s' % (metric_name))
+
+                    # @added 20200506 - Feature #3532: Sort all time series
+                    # To ensure that there are no unordered timestamps in the time
+                    # series which are artefacts of the collector or carbon-relay, sort
+                    # all time series by timestamp before analysis.
+                    original_updated_timeseries = updated_timeseries
+                    if original_updated_timeseries:
+                        updated_timeseries = sort_timeseries(original_updated_timeseries)
+                        del original_updated_timeseries
+
+                    timeseries = updated_timeseries
+
             # @added 20200411 - Feature #3480: batch_processing
             batch_metric = False
-            # This variable is for debug testing only
-            enable_analyzer_batch_processing = True
-            # Only send batches if analyzer_batch is reporting up
-            analyzer_batch_up = None
-            try:
-                analyzer_batch_up = int(self.redis_conn.get('analyzer_batch'))
-            except:
-                analyzer_batch_up = None
-            if analyzer_batch_up:
-                try:
-                    analyzer_batch_up_check_timestamp = int(time())
-                    analyzer_batch_up_for = analyzer_batch_up_check_timestamp - analyzer_batch_up
-                    if analyzer_batch_up_for < 128:
-                        analyzer_batch_up = True
-                except:
-                    analyzer_batch_up = None
+            check_for_airgaps_only = False
             if BATCH_PROCESSING:
-                batch_metric = True
+                # @modified 20200423 - Feature #3504: Handle airgaps in batch metrics
+                #                      Feature #3480: batch_processing
+                #                      Feature #3486: analyzer_batch
+                # Rather set the default to False which is the default
+                # configuration for all metrics
+                # batch_metric = True
+                batch_metric = False
                 try:
                     batch_metric = is_batch_metric(skyline_app, base_name)
                 except:
-                    batch_metric = True
+                    # batch_metric = True
+                    batch_metric = False
+
+                if batch_metric:
+                    batch_metric_count += 1
+                    # @added 20200423 - Feature #3504: Handle airgaps in batch metrics
+                    #                   Feature #3480: batch_processing
+                    #                   Feature #3486: analyzer_batch
+                    #                   Feature #3400: Identify air gaps in the metric data
+                    # Check to see if this is a batch processing metric that has been sent to
+                    # analyzer_batch for processing but needs to be sent through Analyzer to
+                    # check for airgaps only and not be run through algorithms.  If so set a
+                    # Redis key for the metric (rather than add to set), so the
+                    # analyzer/algorithms.py does not do not have to add get_redis_conn_decoded
+                    # and do not issue the normal "continue"
+                    check_for_airgap_only = False
+                    check_metric_for_airgaps = False
+                    if IDENTIFY_AIRGAPS:
+                        check_metric_for_airgaps = True
+                        if CHECK_AIRGAPS:
+                            check_metric_for_airgaps = False
+                            try:
+                                check_metric_for_airgaps = is_check_airgap_metric(metric_name)
+                            except:
+                                check_metric_for_airgaps = True
+                                try:
+                                    logger.error('failed to determine if %s is an airgap metric' % (
+                                        str(metric_name), traceback.format_exc()))
+                                except:
+                                    logger.error('failed to failure regarding deleting the check_airgap_only_key Redis key')
+                        if check_metric_for_airgaps:
+                            check_airgap_only_key = 'analyzer.check_airgap_only.%s' % metric_name
+                            try:
+                                key_value = int(time())
+                                self.redis_conn.setex(
+                                    check_airgap_only_key, settings.FULL_DURATION, key_value)
+                                check_for_airgap_only = True
+                            except Exception as e:
+                                logger.error('error :: could not set Redis analyzer.check_airgap_only key: %s' % e)
+
                 if batch_metric:
                     last_metric_timestamp = None
                     if batch_metric:
@@ -947,13 +1122,15 @@ class Analyzer(Thread):
                                     base_name))
 
                     if not analyzer_batch_up:
-                        logger.error('error :: batch processing - analyzer_batch is not reporting up, not batch processing, processing normally')
+                        batch_processing_down_processing_normally += 1
+                        if BATCH_PROCESSING_DEBUG:
+                            logger.error('error :: batch processing - analyzer_batch is not reporting up, not batch processing, processing normally')
 
                     # Only run batch processing if analyzer_batch is reporting up
                     if analyzer_batch_up:
                         # If there is no known last_timestamp, this is the first
                         # processing of a metric, just begin processing as normal
-                        # and do not send to Crucible.
+                        # and do not send to analyzer_batch.
                         last_timeseries_timestamp = None
                         penultimate_timeseries_timestamp = None
                         if last_metric_timestamp:
@@ -978,41 +1155,59 @@ class Analyzer(Thread):
                                 # series data, there is no need to check the
                                 # penultimate_timeseries_timestamp
                                 penultimate_timeseries_timestamp = None
+                                last_timestamps_match_not_batch_processing += 1
                                 if BATCH_PROCESSING_DEBUG:
                                     logger.info('batch processing - the last_timeseries_timestamp and last timestamp from current Redis time series data for %s match, no need to batch process, OK' % (
                                         base_name))
-                                    # added 20200414 - Feature #3486: analyzer_batch
-                                    #                  Feature #3480: batch_processing
-                                    # Only continue if Analyzer is NOT alerting
-                                    # on stale metrics, otherwise Analyzer will
-                                    # not identify batch metrics as stale if
-                                    # they go stale.  However if they are in
-                                    # DO_NOT_ALERT_ON_STALE_METRICS then it
-                                    # should continue so as to save the overhead
-                                    # of reprocessing a metric until it goes
-                                    # stale.
-                                    if not ALERT_ON_STALE_METRICS:
+                                # added 20200414 - Feature #3486: analyzer_batch
+                                #                  Feature #3480: batch_processing
+                                # Only continue if Analyzer is NOT alerting
+                                # on stale metrics, otherwise Analyzer will
+                                # not identify batch metrics as stale if
+                                # they go stale.  However if they are in
+                                # DO_NOT_ALERT_ON_STALE_METRICS then it
+                                # should continue so as to save the overhead
+                                # of reprocessing a metric until it goes
+                                # stale.
+                                # @modified 20200423 - Feature #3504: Handle airgaps in batch metrics
+                                # if not ALERT_ON_STALE_METRICS:
+                                if not ALERT_ON_STALE_METRICS and not check_for_airgap_only:
+                                    # @modified 20200430 - Feature #3480: batch_processing
+                                    # Tidy up and reduce logging
+                                    last_timestamps_match_no_stale_or_airgap_check_not_processing += 1
+                                    if BATCH_PROCESSING_DEBUG:
                                         logger.info('batch processing - the last_timeseries_timestamp and last timestamp from current Redis time series data for %s match, no need to process at all skipping, OK' % (
                                             base_name))
-                                        continue
-                                    else:
-                                        if DO_NOT_ALERT_ON_STALE_METRICS:
-                                            metric_namespace_elements = metric_name.split('.')
-                                            process_metric = True
-                                            for do_not_alert_namespace in DO_NOT_ALERT_ON_STALE_METRICS:
-                                                if do_not_alert_namespace in metric_name:
-                                                    process_metric = False
-                                                    break
-                                                do_not_alert_namespace_namespace_elements = do_not_alert_namespace.split('.')
-                                                elements_matched = set(metric_namespace_elements) & set(do_not_alert_namespace_namespace_elements)
-                                                if len(elements_matched) == len(do_not_alert_namespace_namespace_elements):
-                                                    process_metric = False
-                                                    break
-                                            if not process_metric:
-                                                logger.info('batch processing - %s is a DO_NOT_ALERT_ON_STALE_METRICS namespace, no need to process at all as does not need to bee identified as stale, skipping normal processing.' % (
+                                    continue
+                                else:
+                                    if DO_NOT_ALERT_ON_STALE_METRICS:
+                                        metric_namespace_elements = metric_name.split('.')
+                                        process_metric = True
+                                        for do_not_alert_namespace in DO_NOT_ALERT_ON_STALE_METRICS:
+                                            if do_not_alert_namespace in metric_name:
+                                                process_metric = False
+                                                break
+                                            do_not_alert_namespace_namespace_elements = do_not_alert_namespace.split('.')
+                                            elements_matched = set(metric_namespace_elements) & set(do_not_alert_namespace_namespace_elements)
+                                            if len(elements_matched) == len(do_not_alert_namespace_namespace_elements):
+                                                process_metric = False
+                                                break
+                                        # @modified 20200423 - Feature #3504: Handle airgaps in batch metrics
+                                        # if not process_metric:
+                                        if not process_metric and not check_for_airgap_only:
+                                            # @modified 20200430 - Feature #3480: batch_processing
+                                            # Tidy up and reduce logging
+                                            no_new_data_and_not_sent_to_check_for_stale_or_airaps += 1
+                                            if BATCH_PROCESSING_DEBUG:
+                                                logger.info('batch processing - %s is a DO_NOT_ALERT_ON_STALE_METRICS namespace and is not set to check for airgaps, no need to process at all as does not need to be identified as stale, skipping normal processing.' % (
                                                     base_name))
-                                                continue
-                                        logger.info('batch processing - processing %s normally through Analyzer, even though this data has already been analyzed however Analyzer can then identify as stale, if it goes stale.' % (
+                                            continue
+                                    # @modified 20200430 - Feature #3480: batch_processing
+                                    # Tidy up and reduce logging
+                                    no_new_data_but_sent_to_normal_processing_to_check_for_stale_or_airaps += 1
+                                    check_for_airgaps_only = True
+                                    if BATCH_PROCESSING_DEBUG:
+                                        logger.info('batch processing - processing %s normally through Analyzer, even though this data has already been analyzed however Analyzer can then identify as stale, if it goes stale or airgaps.' % (
                                             base_name))
 
                         if penultimate_timeseries_timestamp:
@@ -1025,6 +1220,7 @@ class Analyzer(Thread):
                                 try:
                                     self.redis_conn.sadd(redis_set, str(data))
                                     added_to_analyzer_batch_proccessing_metrics = True
+                                    sent_to_analyzer_batch_proccessing_metrics += 1
                                     if BATCH_PROCESSING_DEBUG:
                                         logger.info('batch processing - the penultimate_timeseries_timestamp is not the same as the last_metric_timestamp added to Redis set %s - %s' % (
                                             redis_set, str(data)))
@@ -1032,17 +1228,38 @@ class Analyzer(Thread):
                                     logger.error(traceback.format_exc())
                                     logger.error('error :: batch processing - failed to add %s to %s Redis set' % (
                                         str(data), redis_set))
-                                    batch_metric = False
+                                    # @modified 20200423 - Feature #3504: Handle airgaps in batch metrics
+                                    #                      Feature #3480: batch_processing
+                                    #                      Feature #3486: analyzer_batch
+                                    # If this fails it should not set batch_metric
+                                    # batch_metric = False
                                     added_to_analyzer_batch_proccessing_metrics = False
                                 if added_to_analyzer_batch_proccessing_metrics:
-                                    logger.info('batch processing - add %s to %s Redis set to be batch processed' % (
-                                        str(data), redis_set))
-                                    if enable_analyzer_batch_processing:
-                                        continue
+                                    if BATCH_PROCESSING_DEBUG:
+                                        logger.info('batch processing - add %s to %s Redis set to be batch processed' % (
+                                            str(data), redis_set))
+
+                                    # @modified 20200423 - Feature #3504: Handle airgaps in batch metrics
+                                    # Wrapped in if not check_metric_for_airgaps
+                                    if not check_metric_for_airgaps:
                                         if enable_analyzer_batch_processing:
-                                            if BATCH_PROCESSING_DEBUG:
-                                                logger.info('batch processing - this log line should not have been reached, a continue was issued')
+                                            continue
+                                            if enable_analyzer_batch_processing:
+                                                if BATCH_PROCESSING_DEBUG:
+                                                    logger.info('batch processing - this log line should not have been reached, a continue was issued')
+                                    else:
+                                        # @added 20200423 - Feature #3504: Handle airgaps in batch metrics
+                                        # @modified 20200430 - Feature #3480: batch_processing
+                                        # Tidy up and reduce logging
+                                        sent_to_analyzer_batch_proccessing_metrics_but_also_processing_normally_to_identify_airgaps += 1
+                                        check_for_airgaps_only = True
+                                        if BATCH_PROCESSING_DEBUG:
+                                            logger.info('batch processing - %s sent to analyzer_batch but also sending through aanalyzer to check_metric_for_airgaps' % (
+                                                base_name))
                             else:
+                                # @modified 20200430 - Feature #3480: batch_processing
+                                # Tidy up and reduce logging
+                                batch_metric_but_processing_normally_as_penultimate_timeseries_timestamp_equals_second_last_timestamp_from_redis += 1
                                 if BATCH_PROCESSING_DEBUG:
                                     logger.info('batch processing - the penultimate_timeseries_timestamp is the same as second last timestamp from current Redis time series data for %s, not batch processing, continuing as normal' % (
                                         base_name))
@@ -1137,6 +1354,19 @@ class Analyzer(Thread):
                     pass
 
             try:
+
+                # @added 20200425 - Feature #3508: ionosphere.untrainable_metrics
+                # Determine if any metrcs have negatives values some they can be
+                # added to the ionosphere.untrainable_metrics Redis set
+                run_negatives_present = False
+                enabled_check_for_negatives = False
+                if settings.IONOSPHERE_ENABLED and enabled_check_for_negatives:
+                    run_negatives_present = True
+                    known_negative_metric_matched_by = None
+                    known_negative_metric, known_negative_metric_matched_by = matched_or_regexed_in_list(skyline_app, metric_name, KNOWN_NEGATIVE_METRICS)
+                    if known_negative_metric:
+                        run_negatives_present = False
+
                 # @modified 20200117 - Feature #3400: Identify air gaps in the metric data
                 # Also pass the airgapped_metrics list so that it is only got
                 # once per run and does not have to be queried in algorithms
@@ -1149,8 +1379,24 @@ class Analyzer(Thread):
                 for i in airgapped_metrics:
                     if base_name in i:
                         metric_airgaps.append(i)
-                anomalous, ensemble, datapoint = run_selected_algorithm(timeseries, metric_name, metric_airgaps)
+                # @added 20200501 - Feature #3400: Identify air gaps in the metric data
+                # Handle airgaps filled so that once they have been submitted as filled
+                # Analyzer will not identify them as airgapped again, even if there is
+                # a airgap in the original airgap period
+                metric_airgaps_filled = []
+                for i in airgapped_metrics_filled:
+                    if base_name in i:
+                        metric_airgaps_filled.append(i)
+
+                # @modified 20200424 - Feature #3508: ionosphere.untrainable_metrics
+                # Added negatives_found and run_negatives_present
+                # anomalous, ensemble, datapoint = run_selected_algorithm(timeseries, metric_name, metric_airgaps)
+                # @modified 20200501 - Feature #3400: Identify air gaps in the metric data
+                # Added metric_airgaps_filled and check_for_airgaps_only
+                # anomalous, ensemble, datapoint, negatives_found = run_selected_algorithm(timeseries, metric_name, metric_airgaps, run_negatives_present)
+                anomalous, ensemble, datapoint, negatives_found = run_selected_algorithm(timeseries, metric_name, metric_airgaps, metric_airgaps_filled, run_negatives_present, check_for_airgaps_only)
                 del metric_airgaps
+                del metric_airgaps_filled
 
                 # @added 20191016 - Branch #3262: py3
                 if LOCAL_DEBUG:
@@ -1239,17 +1485,26 @@ class Analyzer(Thread):
                 # @added 20200411 - Feature #3480: batch_processing
                 if BATCH_PROCESSING:
                     if batch_metric:
-                        last_metric_timestamp_key = 'last_timestamp.%s' % base_name
-                        try:
-                            int_metric_timestamp = int(metric_timestamp)
-                            self.redis_conn.setex(
-                                last_metric_timestamp_key,
-                                settings.FULL_DURATION, int_metric_timestamp)
-                            if BATCH_PROCESSING_DEBUG:
-                                logger.info('batch processing - normal analyzer analysis set Redis key %s to %s' % (
-                                    last_metric_timestamp_key, str(int_metric_timestamp)))
-                        except:
-                            logger.error('error :: batch processing - failed to set Redis key %s' % last_metric_timestamp_key)
+                        # @modified 20200423 - Feature #3504: Handle airgaps in batch metrics
+                        # Only update the last_timestamp key if this is NOT a
+                        # check_for_airgap_only run
+                        if not check_for_airgap_only:
+                            last_metric_timestamp_key = 'last_timestamp.%s' % base_name
+                            try:
+                                int_metric_timestamp = int(metric_timestamp)
+                                # @modified 20200503 - Feature #3504: Handle airgaps in batch metrics
+                                #                      Feature #3480: batch_processing
+                                #                      Feature #3486: analyzer_batch
+                                # Set the last_timestamp expiry time to 1 month rather than
+                                # settings.FULL_DURATION
+                                self.redis_conn.setex(
+                                    last_metric_timestamp_key, 2592000,
+                                    int_metric_timestamp)
+                                if BATCH_PROCESSING_DEBUG:
+                                    logger.info('batch processing - normal analyzer analysis set Redis key %s to %s' % (
+                                        last_metric_timestamp_key, str(int_metric_timestamp)))
+                            except:
+                                logger.error('error :: batch processing - failed to set Redis key %s' % last_metric_timestamp_key)
 
                 # If it's anomalous, add it to list
                 if anomalous:
@@ -1277,6 +1532,22 @@ class Analyzer(Thread):
 
                     # @added 20170206 - Bug #1904: Handle non filesystem friendly metric names in check files
                     sane_metricname = filesafe_metricname(str(base_name))
+
+                    # @added 20200425 - Feature #3508: ionosphere.untrainable_metrics
+                    # Determine if any metrcs have negatives values some they can be
+                    # added to the ionosphere.untrainable_metrics Redis set
+                    if run_negatives_present and negatives_found:
+                        redis_set = 'ionosphere.untrainable_metrics'
+                        try:
+                            last_negative_timestamp = int(negatives_found[-1][0])
+                            last_negative_value = negatives_found[-1][1]
+                            remove_after_timestamp = int(last_negative_timestamp + settings.FULL_DURATION)
+                            data = str([metric_name, metric_timestamp, datapoint, last_negative_timestamp, last_negative_value, settings.FULL_DURATION, remove_after_timestamp])
+                            self.redis_conn.sadd(redis_set, data)
+                        except:
+                            logger.info(traceback.format_exc())
+                            logger.error('error :: failed to add %s to Redis set %s' % (
+                                str(data), str(redis_set)))
 
                     # If Crucible or Panorama are enabled determine details
                     determine_anomaly_details = False
@@ -1614,6 +1885,14 @@ class Analyzer(Thread):
 
             # It could have been deleted by the Roomba
             except TypeError:
+                # @added 20200430 - Feature #3480: batch_processing
+                # Added logging here as the DeletedByRoomba exception is
+                # generally not related to that but related to some other fail
+                # in the processing of the run algorithms phase.
+                # It could have been deleted by the Roomba, but probably was not
+                logger.error(traceback.format_exc())
+                logger.error('error :: added as DeletedByRoomba but possibly not see traceback above')
+
                 exceptions['DeletedByRoomba'] += 1
             # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
             # Added Redis sets for Boring, TooShort and Stale
@@ -1623,21 +1902,101 @@ class Analyzer(Thread):
                     self.redis_conn.sadd('analyzer.too_short', base_name)
                 except:
                     redis_set_errors += 1
+                # @added 20200423 - Feature #3504: Handle airgaps in batch metrics
+                #                   Feature #3480: batch_processing
+                #                   Feature #3486: analyzer_batch
+                # If a batch_metric is added and analyzer also sees it as stale,
+                # too short or boring it never get processed normally and has no
+                # 'last_timestamp.' Redis key set
+                if batch_metric:
+                    if not last_metric_timestamp:
+                        # If there is no known last_timestamp, this is the first
+                        # processing of a metric and it is stale add the key
+                        # anyway.
+                        last_metric_timestamp_key = 'last_timestamp.%s' % base_name
+                        try:
+                            metric_timestamp = timeseries[-1][0]
+                            int_metric_timestamp = int(metric_timestamp)
+                            self.redis_conn.setex(
+                                last_metric_timestamp_key, 2592000,
+                                int_metric_timestamp)
+                            if BATCH_PROCESSING_DEBUG:
+                                logger.info('batch processing - normal analyzer analysis set Redis key %s to %s, even though it is too short' % (
+                                    last_metric_timestamp_key, str(int_metric_timestamp)))
+                        except:
+                            logger.error('error :: batch processing - failed to set Redis key %s, even though it is too short' % last_metric_timestamp_key)
             except Stale:
                 exceptions['Stale'] += 1
                 try:
                     self.redis_conn.sadd('analyzer.stale', base_name)
                 except:
                     redis_set_errors += 1
+                # @added 20200423 - Feature #3504: Handle airgaps in batch metrics
+                #                   Feature #3480: batch_processing
+                #                   Feature #3486: analyzer_batch
+                if batch_metric:
+                    if not last_metric_timestamp:
+                        last_metric_timestamp_key = 'last_timestamp.%s' % base_name
+                        try:
+                            metric_timestamp = timeseries[-1][0]
+                            int_metric_timestamp = int(metric_timestamp)
+                            self.redis_conn.setex(
+                                last_metric_timestamp_key,
+                                2592000, int_metric_timestamp)
+                            if BATCH_PROCESSING_DEBUG:
+                                logger.info('batch processing - normal analyzer analysis set Redis key %s to %s, even though it is stale' % (
+                                    last_metric_timestamp_key, str(int_metric_timestamp)))
+                        except:
+                            logger.error('error :: batch processing - failed to set Redis key %s, even though it is stale' % last_metric_timestamp_key)
             except Boring:
                 exceptions['Boring'] += 1
                 try:
                     self.redis_conn.sadd('analyzer.boring', base_name)
                 except:
                     redis_set_errors += 1
+                # @added 20200423 - Feature #3504: Handle airgaps in batch metrics
+                #                   Feature #3480: batch_processing
+                #                   Feature #3486: analyzer_batch
+                if batch_metric:
+                    if not last_metric_timestamp:
+                        last_metric_timestamp_key = 'last_timestamp.%s' % base_name
+                        try:
+                            metric_timestamp = timeseries[-1][0]
+                            int_metric_timestamp = int(metric_timestamp)
+                            self.redis_conn.setex(
+                                last_metric_timestamp_key,
+                                2592000, int_metric_timestamp)
+                            if BATCH_PROCESSING_DEBUG:
+                                logger.info('batch processing - normal analyzer analysis set Redis key %s to %s, even though it is boring' % (
+                                    last_metric_timestamp_key, str(int_metric_timestamp)))
+                        except:
+                            logger.error('error :: batch processing - failed to set Redis key %s, even though it is boring' % last_metric_timestamp_key)
             except:
                 exceptions['Other'] += 1
                 logger.info(traceback.format_exc())
+
+        # @added 20200430 - Feature #3480: batch_processing
+        # Tidy up and reduce logging, consolidate logging with counts
+        if BATCH_PROCESSING:
+            logger.info('batch processing - identified %s batch metrics' % (
+                str(batch_metric_count)))
+            if batch_processing_down_processing_normally > 0:
+                logger.error('error :: batch processing - analyzer_batch not reporting up, %s batch metrics were processed via the normal analyzer analysis' % (
+                    str(batch_processing_down_processing_normally)))
+            logger.info('batch processing - %s of the batch metrics have their last_timestamp match the last timestamp in Redis and were not sent to analyzer_batch' % (
+                str(last_timestamps_match_not_batch_processing)))
+            logger.info('batch processing - %s of the batch metrics have their last_timestamp match the last timestamp in Redis and were not sent through analyzer to be identified as stale or airgapped only, not processed' % (
+                str(last_timestamps_match_no_stale_or_airgap_check_not_processing)))
+            logger.info('batch processing - %s of the batch metrics have no new data but were sent through analyzer to be identified as stale or airgapped only' % (
+                str(no_new_data_but_sent_to_normal_processing_to_check_for_stale_or_airaps)))
+            logger.info('batch processing - %s of the batch metrics have no new data and not identified as stale or airgapped, not processed' % (
+                str(no_new_data_and_not_sent_to_check_for_stale_or_airaps)))
+            logger.info('batch processing - %s batch metrics were sent to analyzer_batch to be processed' % (
+                str(sent_to_analyzer_batch_proccessing_metrics)))
+            logger.info('batch processing - %s of the batch metrics were sent to analyzer_batch to be processed and also sent through analyzer to to be identified as stale or airgapped only' % (
+                str(sent_to_analyzer_batch_proccessing_metrics_but_also_processing_normally_to_identify_airgaps)))
+            logger.info('batch processing - %s of the batch metrics not batch processed but sent through analyzer to be processed because the current penultimate timeseries timestamp was equal to the second last timestamp in Redis' % (
+                str(batch_metric_but_processing_normally_as_penultimate_timeseries_timestamp_equals_second_last_timestamp_from_redis)))
 
         # @added 20200117 - Feature #3400: Identify air gaps in the metric data
         del airgapped_metrics
@@ -2423,7 +2782,10 @@ class Analyzer(Thread):
             ionosphere_alerts = []
             context = 'Analyzer'
             try:
-                ionosphere_alerts = list(self.redis_conn.scan_iter(match='ionosphere.analyzer.alert.*'))
+                # @modified 20200430 - Bug #3266: py3 Redis binary objects not strings
+                #                      Branch #3262: py3
+                # ionosphere_alerts = list(self.redis_conn.scan_iter(match='ionosphere.analyzer.alert.*'))
+                ionosphere_alerts = list(self.redis_conn_decoded.scan_iter(match='ionosphere.analyzer.alert.*'))
                 if LOCAL_DEBUG:
                     logger.info('debug :: ionosphere.analyzer.alert.* Redis keys - %s' % (
                         str(ionosphere_alerts)))
@@ -3496,6 +3858,16 @@ class Analyzer(Thread):
                     unpacker = Unpacker(use_list=False)
                     unpacker.feed(raw_series)
                     timeseries = list(unpacker)
+
+                    # @added 20200506 - Feature #3532: Sort all time series
+                    # To ensure that there are no unordered timestamps in the time
+                    # series which are artefacts of the collector or carbon-relay, sort
+                    # all time series by timestamp before analysis.
+                    original_timeseries = timeseries
+                    if original_timeseries:
+                        timeseries = sort_timeseries(original_timeseries)
+                        del original_timeseries
+
                     time_human = (timeseries[-1][0] - timeseries[0][0]) / 3600
                     projected = 24 * (time() - now) / time_human
                     logger.info('canary duration    :: %.2f' % time_human)
@@ -3969,6 +4341,35 @@ class Analyzer(Thread):
                         logger.error(traceback.format_exc())
                         logger.error('error :: failed to manage analyzer.airgapped_metrics Redis set Redis set')
 
+                # @added 20200501 - Feature #3400: Identify air gaps in the metric data
+                # Handle airgaps filled so that once they have been submitted as filled
+                # Analyzer will not identify them as airgapped again
+                airgapped_metrics_filled = []
+                try:
+                    airgapped_metrics_filled = list(self.redis_conn_decoded.smembers('analyzer.airgapped_metrics.filled'))
+                except:
+                    airgapped_metrics_filled = []
+                if airgapped_metrics_filled:
+                    try:
+                        logger.info('managing analyzer.airgapped_metrics.filled Redis set')
+                        current_timestamp = int(time())
+                        max_airgap_age = current_timestamp - MAX_AIRGAP_PERIOD
+                        removed_airgap_items = 0
+                        for i in airgapped_metrics_filled:
+                            airgap = literal_eval(i)
+                            airgap_metric_start_timestamp = int(airgap[2])
+                            if max_airgap_age > airgap_metric_start_timestamp:
+                                logger.info('removing expired airgapped filled metric item - %s' % str(airgap))
+                                try:
+                                    self.redis_conn.srem('analyzer.airgapped_metrics.filled', str(airgap))
+                                    removed_airgap_items += 1
+                                except Exception as e:
+                                    logger.error('error :: could not remove item from analyzer.airgapped_metrics.filled Redis set - %s' % str(e))
+                        logger.info('removed %s old items from analyzer.airgapped_metrics.filled Redis set' % str(removed_airgap_items))
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to manage analyzer.airgapped_metrics.filled Redis set Redis set')
+
             # @added 20200411 - Feature #3480: batch_processing
             try:
                 self.redis_conn.delete('analyzer.batch_processing_metrics')
@@ -3976,6 +4377,33 @@ class Analyzer(Thread):
                 pass
             try:
                 self.redis_conn.rename('analyzer.batch_processing_metrics_current', 'analyzer.batch_processing_metrics')
+            except:
+                pass
+
+            # @added 20200505 - Feature #2882: Mirage - periodic_check
+            # Manage the mirage.periodic_check sets in the parent process
+            try:
+                self.redis_conn.rename('mirage.periodic_check.metrics.all', 'mirage.periodic_check.metrics.all.old')
+            except:
+                pass
+            try:
+                self.redis_conn.rename('new.mirage.periodic_check.metrics.all', 'mirage.periodic_check.metrics.all')
+            except:
+                pass
+            try:
+                self.redis_conn.delete('mirage.periodic_check.metrics.all.old')
+            except:
+                pass
+            try:
+                self.redis_conn.rename('mirage.periodic_check.metrics', 'mirage.periodic_check.metrics.old')
+            except:
+                pass
+            try:
+                self.redis_conn.rename('new.mirage.periodic_check.metrics', 'mirage.periodic_check.metrics')
+            except:
+                pass
+            try:
+                self.redis_conn.delete('mirage.periodic_check.metrics.old')
             except:
                 pass
 
