@@ -2028,3 +2028,87 @@ def is_batch_metric(current_skyline_app, base_name):
         pass
 
     return batch_metric
+
+
+# @added 20200424 - Feature #3504: Handle airgaps in batch metrics
+#                   Feature #3480: batch_processing
+#                   Feature #3486: analyzer_batch
+#                   Feature #3400: Identify air gaps in the metric data
+# Moved to skyline_functions from its original definition analyzer/algorithms.py
+# as is required in analyzer/analyzer.py now as well to identify which batch
+# metrics should also be checked for airgaps.
+def is_check_airgap_metric(base_name):
+    """
+    Check if a metric matches a metric namespace in CHECK_AIRGAPS or one in
+    SKIP_AIRGAPS.
+
+    :param base_name: the metric base_name
+    :type base_name: str
+    :return: False
+    :rtype:  boolean
+
+    """
+
+    try:
+        IDENTIFY_AIRGAPS = settings.IDENTIFY_AIRGAPS
+    except:
+        IDENTIFY_AIRGAPS = False
+    try:
+        CHECK_AIRGAPS = settings.CHECK_AIRGAPS
+    except:
+        CHECK_AIRGAPS = []
+    try:
+        SKIP_AIRGAPS = settings.SKIP_AIRGAPS
+    except:
+        SKIP_AIRGAPS = []
+    check_metric_for_airgaps = False
+    if IDENTIFY_AIRGAPS:
+        check_metric_for_airgaps = True
+        if CHECK_AIRGAPS:
+            check_metric_for_airgaps = False
+            try:
+                metric_namespace_elements = base_name.split('.')
+                for to_check in CHECK_AIRGAPS:
+                    if to_check in base_name:
+                        check_metric_for_airgaps = True
+                        break
+                    to_check_namespace_elements = to_check.split('.')
+                    elements_matched = set(metric_namespace_elements) & set(to_check_namespace_elements)
+                    if len(elements_matched) == len(to_check_namespace_elements):
+                        check_metric_for_airgaps = True
+                        break
+            except:
+                pass
+        # Allow to skip identifying airgaps on certain metrics and namespaces
+        if check_metric_for_airgaps:
+            try:
+                metric_namespace_elements = base_name.split('.')
+                for to_skip in SKIP_AIRGAPS:
+                    if to_skip in base_name:
+                        check_metric_for_airgaps = False
+                        break
+                    to_skip_namespace_elements = to_skip.split('.')
+                    elements_matched = set(metric_namespace_elements) & set(to_skip_namespace_elements)
+                    if len(elements_matched) == len(to_skip_namespace_elements):
+                        check_metric_for_airgaps = False
+                        break
+            except:
+                pass
+
+    return check_metric_for_airgaps
+
+
+# @added 20200506 - Feature #3532: Sort all time series
+def sort_timeseries(timeseries):
+    """
+    This function is used to sort a time series by timestamp to ensure that
+    there are no unordered timestamps in the time series which are artefacts of
+    the collector or carbon-relay. So all Redis time series are sorted by
+    timestamp before analysis.
+    """
+    sorted_timeseries = []
+    if timeseries:
+        sorted_timeseries = sorted(timeseries, key=lambda x: x[0])
+        del timeseries
+
+    return sorted_timeseries
