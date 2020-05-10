@@ -585,6 +585,38 @@ def api():
                 training_data_item = literal_eval(training_data_str)
                 training_metric = str(training_data_item[0])
                 training_timestamp = int(training_data_item[1])
+                # @added 20200425 - Feature #3508: ionosphere.untrainable_metrics
+                # Added resolution_seconds
+                try:
+                    training_resolution_seconds = int(training_data_item[2])
+                except:
+                    training_resolution_seconds = None
+                if not training_resolution_seconds:
+                    for alert in settings.ALERTS:
+                        if training_resolution_seconds:
+                            break
+                        alert_match_pattern = alert[0]
+                        metric_pattern = training_metric
+                        pattern_match = False
+                        try:
+                            alert_match_pattern = re.compile(alert_match_pattern)
+                            pattern_match = alert_match_pattern.match(metric_pattern)
+                            if pattern_match:
+                                pattern_match = True
+                        except:
+                            pattern_match = False
+                        if not pattern_match:
+                            if alert[0] in training_metric:
+                                pattern_match = True
+                        if not pattern_match:
+                            continue
+                        try:
+                            training_resolution_seconds = int(alert[3] * 3600)
+                        except:
+                            training_resolution_seconds = None
+                if not training_resolution_seconds:
+                    training_resolution_seconds = settings.FULL_DURATION
+
                 add_to_response = True
                 if metric_filter:
                     if metric_filter != training_metric:
@@ -605,6 +637,33 @@ def api():
                 if timestamp_filter:
                     if int(timestamp_filter) != training_timestamp:
                         add_to_response = False
+
+                # @added 20200425 - Feature #3508: ionosphere.untrainable_metrics
+                # Remove ionosphere.untrainable_metrics from the training data
+                # when entries exist at the same resolution
+                ionosphere_untrainable_metrics = []
+                ionosphere_untrainable_metrics_redis_set = 'ionosphere.untrainable_metrics'
+                try:
+                    ionosphere_untrainable_metrics = list(REDIS_CONN.smembers(ionosphere_untrainable_metrics_redis_set))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: could not get the ionosphere.untrainable_metrics set from Redis')
+                    ionosphere_untrainable_metrics = None
+                if add_to_response and ionosphere_untrainable_metrics:
+                    for ionosphere_untrainable_metric_str in ionosphere_untrainable_metrics:
+                        try:
+                            ionosphere_untrainable_metric = literal_eval(ionosphere_untrainable_metric_str)
+                            ium_metric_name = ionosphere_untrainable_metric[0]
+                            if ium_metric_name == training_metric:
+                                ium_resolution = int(ionosphere_untrainable_metric[5])
+                                if ium_resolution == training_resolution_seconds:
+                                    add_to_response = False
+                                    logger.info('removed training data from response as identified as untrainable as has negative value/s - %s' % str(ionosphere_untrainable_metric))
+                                    break
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: failed to determine if metric is in ionosphere.untrainable_metrics Redis set')
+
                 if add_to_response:
                     training_data.append([training_metric, training_timestamp])
             except:
@@ -733,6 +792,15 @@ def api():
             resp = json.dumps(
                 {'error': 'Error: could not remove item from analyzer.airgapped_metrics Redis set'})
             return resp, 500
+        # @added 20200501 - Feature #3400: Identify air gaps in the metric data
+        # Handle airgaps filled so that once they have been submitted as filled
+        # Analyzer will not identify them as airgapped again
+        try:
+            REDIS_CONN.sadd('analyzer.airgapped_metrics.filled', str(airgap))
+        except Exception as e:
+            logger.error(traceback.format_exc())
+            logger.error('error :: could not add item from analyzer.airgapped_metrics.filled Redis set - %s' % str(e))
+
         data_dict = {"status": {}, "data": {"removed_airgap": airgap}}
         return jsonify(data_dict), 200
 
@@ -1570,7 +1638,7 @@ def crucible():
     metrics_list = []
     namespaces_list = []
     source = 'graphite'
-    alert_interval = str(int(settings.PANORAMA_EXPIRY_TIME))
+    alert_interval = int(settings.PANORAMA_EXPIRY_TIME)
     crucible_job_id = None
     metrics_submitted_to_process = []
     process_metrics = None
@@ -1598,6 +1666,23 @@ def crucible():
     panorama_done_timestamp = None
     panorama_done_user_id = None
     skyline_consensus_anomalies_present = 0
+    # @added 20200421 - Feature #3500: webapp - crucible_process_metrics
+    #                   Feature #1448: Crucible web UI
+    add_to_panorama = False
+    add_to_panorama_request = False
+    # @added 20200422 - Feature #3500: webapp - crucible_process_metrics
+    #                   Feature #1448: Crucible web UI
+    pad_timeseries = None
+    # @added 20200428 - Feature #3500: webapp - crucible_process_metrics
+    #                   Feature #1448: Crucible web UI
+    # Paginate crucible_jobs page as when there are 1000s of jobs this page
+    # fails to load
+    pagination_start = 0
+    pagination_end = 100
+    offset = 100
+    total_crucible_jobs = 0
+    pagination_start_request = False
+    offset_request = False
 
     if request_args_len:
         if 'process_metrics' in request.args:
@@ -1621,6 +1706,26 @@ def crucible():
                 crucible_job_request = False
                 process_metrics_request = False
                 process_metrics = False
+
+        # @added 20200428 - Feature #3500: webapp - crucible_process_metrics
+        #                   Feature #1448: Crucible web UI
+        # Added paginate crucible_jobs page
+        if 'pagination_start' in request.args:
+            pagination_start_request = request.args.get(str('pagination_start'), '0')
+            if pagination_start_request:
+                try:
+                    pagination_start = int(pagination_start_request)
+                    pagination_start_request = True
+                except:
+                    pagination_start = 0
+        if 'offset' in request.args:
+            offset_request = request.args.get(str('offset'), '100')
+            if offset_request:
+                try:
+                    offset = int(offset)
+                    offset_request = True
+                except:
+                    offset = 100
 
     if crucible_job_request or send_to_panorama_request:
         if 'crucible_job_id' in request.args:
@@ -1676,9 +1781,25 @@ def crucible():
         source = 'graphite'
         alert_interval = str(int(settings.PANORAMA_EXPIRY_TIME))
         if 'from_timestamp' in request.args:
-            from_timestamp = request.args.get(str('from_timestamp'), None)
+            try:
+                # If int is used it does not work
+                # from_timestamp = request.args.get(int('from_timestamp'), 0)
+                str_from_timestamp = request.args.get(str('from_timestamp'), 0)
+                if str_from_timestamp:
+                    from_timestamp = int(str_from_timestamp)
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: from_timestamp argument is not an int')
+                return 'Bad Request - from_timestamp argument is not an int', 400
         if 'until_timestamp' in request.args:
-            until_timestamp = request.args.get(str('until_timestamp'), None)
+            try:
+                str_until_timestamp = request.args.get(str('until_timestamp'), 0)
+                if str_until_timestamp:
+                    until_timestamp = int(str_until_timestamp)
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: until_timestamp argument is not an int')
+                return 'Bad Request - until_timestamp argument is not an int', 400
         if 'metrics' in request.args:
             metrics = request.args.get(str('metrics'), None)
         if 'namespaces' in request.args:
@@ -1686,7 +1807,30 @@ def crucible():
         if 'source' in request.args:
             source = request.args.get(str('source'), None)
         if 'alert_interval' in request.args:
-            alert_interval = request.args.get(str('alert_interval'), None)
+            try:
+                str_alert_interval = request.args.get(str('alert_interval'), 0)
+                if str_alert_interval:
+                    alert_interval = int(str_alert_interval)
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: alert_interval argument is not an int')
+                return 'Bad Request - alert_interval argument is not an int', 400
+        # @added 20200421 - Feature #3500: webapp - crucible_process_metrics
+        #                   Feature #1448: Crucible web UI
+        # Added add_to_panorama
+        if 'add_to_panorama' in request.args:
+            add_to_panorama_request = request.args.get(str('add_to_panorama'), None)
+            if add_to_panorama_request == 'true':
+                add_to_panorama = True
+            else:
+                add_to_panorama = False
+        # @added 20200422 - Feature #3500: webapp - crucible_process_metrics
+        #                   Feature #1448: Crucible web UI
+        if 'pad_timeseries' in request.args:
+            str_pad_timeseries = request.args.get(str('pad_timeseries'), 'auto')
+            if str_pad_timeseries:
+                pad_timeseries = str_pad_timeseries
+
         do_process_metrics = False
         if from_timestamp and until_timestamp:
             if metrics:
@@ -1701,7 +1845,14 @@ def crucible():
         metrics_submitted_to_process = []
         if do_process_metrics:
             try:
-                crucible_job_id, metrics_submitted_to_process, message, trace = submit_crucible_job(from_timestamp, until_timestamp, metrics_list, namespaces_list, source, alert_interval, user_id, user)
+                # @modified 20200421 - Feature #3500: webapp - crucible_process_metrics
+                #                      Feature #1448: Crucible web UI
+                # Added add_to_panorama
+                # crucible_job_id, metrics_submitted_to_process, message, trace = submit_crucible_job(from_timestamp, until_timestamp, metrics_list, namespaces_list, source, alert_interval, user_id, user)
+                # @modified 20200422 - Feature #3500: webapp - crucible_process_metrics
+                #                      Feature #1448: Crucible web UI
+                # Added pad_timeseries
+                crucible_job_id, metrics_submitted_to_process, message, trace = submit_crucible_job(from_timestamp, until_timestamp, metrics_list, namespaces_list, source, alert_interval, user_id, user, add_to_panorama, pad_timeseries)
                 logger.info('crucible_process_metrics - submit_crucible_job returned (%s, %s, %s, %s)' % (
                     str(crucible_job_id), str(metrics_submitted_to_process),
                     str(message), str(trace)))
@@ -1741,10 +1892,37 @@ def crucible():
             message = 'Uh oh ... a Skyline 500 using get_crucible_jobs'
             return internal_error(message, trace)
         if crucible_jobs_list:
-            for metric_name, root, crucible_job_id, human_date, completed_job, has_anomalies, panorama_done, skyline_consensus_anomalies_present in crucible_jobs_list:
-                crucible_jobs.append([human_date, crucible_job_id, completed_job, has_anomalies, root, metric_name, panorama_done, skyline_consensus_anomalies_present])
+
+            # @added 20200428 - Feature #3500: webapp - crucible_process_metrics
+            #                   Feature #1448: Crucible web UI
+            # Added pagination to crucible_jobs page
+            sorted_crucible_jobs_list = sorted(crucible_jobs_list, key=lambda x: x[0])
+            # sorted_crucible_jobs = sorted(crucible_jobs, key=lambda x: x[8])
+            sorted_crucible_jobs_list.reverse()
+            total_crucible_jobs = len(crucible_jobs_list)
+            logger.info('crucible_jobs_list has a total of %s jobs' % (
+                str(total_crucible_jobs)))
+            paginated_crucible_jobs_list = []
+            pagination_end = pagination_start + offset
+            for job in sorted_crucible_jobs_list[pagination_start:pagination_end]:
+                paginated_crucible_jobs_list.append(job)
+            logger.info('crucible_jobs_list paginated from %s to %s' % (
+                str(pagination_start), str(pagination_end)))
+            del sorted_crucible_jobs_list
+
+            # @modified 20200428 - Feature #3500: webapp - crucible_process_metrics
+            #                      Feature #1448: Crucible web UI
+            # Added pagination to crucible_jobs page
+            # for metric_name, root, crucible_job_id, human_date, completed_job, has_anomalies, panorama_done, skyline_consensus_anomalies_present in crucible_jobs_list:
+            job_list_item = 1
+            for metric_name, root, crucible_job_id, human_date, completed_job, has_anomalies, panorama_done, skyline_consensus_anomalies_present in paginated_crucible_jobs_list:
+                crucible_jobs.append([human_date, crucible_job_id, completed_job, has_anomalies, root, metric_name, panorama_done, skyline_consensus_anomalies_present, job_list_item])
+                job_list_item += 1
+            del paginated_crucible_jobs_list
+
             if crucible_jobs:
                 sorted_crucible_jobs = sorted(crucible_jobs, key=lambda x: x[0])
+                # sorted_crucible_jobs = sorted(crucible_jobs, key=lambda x: x[8])
                 crucible_jobs = sorted_crucible_jobs
                 crucible_jobs.reverse()
                 del sorted_crucible_jobs
@@ -1769,6 +1947,13 @@ def crucible():
         panorama_done_user_id=panorama_done_user_id,
         image_files=image_files, image_file_names=image_file_names,
         graph_image_file=graph_image_file,
+        crucible_enabled=settings.ENABLE_CRUCIBLE,
+        # @added 20200428 - Feature #3500: webapp - crucible_process_metrics
+        #                   Feature #1448: Crucible web UI
+        # Added pagination to crucible_jobs page
+        pagination_start=pagination_start, offset=offset,
+        pagination_end=pagination_end,
+        total_crucible_jobs=total_crucible_jobs,
         version=skyline_version,
         duration=(time.time() - start), print_debug=False), 200
 
