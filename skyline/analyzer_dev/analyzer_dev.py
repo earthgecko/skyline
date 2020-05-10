@@ -30,7 +30,9 @@ from skyline_functions import (
     send_graphite_metric, write_data_to_file, send_anomalous_metric_to, mkdir_p,
     filesafe_metricname,
     # @added 20170602 - Feature #2034: analyse_derivatives
-    nonNegativeDerivative, strictly_increasing_monotonicity, in_list)
+    nonNegativeDerivative, strictly_increasing_monotonicity, in_list,
+    # @added 20200506 - Feature #3532: Sort all time series
+    sort_timeseries)
 
 from alerters import trigger_alert
 from algorithms_dev import run_selected_algorithm
@@ -440,6 +442,15 @@ class AnalyzerDev(Thread):
                 timeseries = list(unpacker)
             except:
                 timeseries = []
+
+            # @added 20200507 - Feature #3532: Sort all time series
+            # To ensure that there are no unordered timestamps in the time
+            # series which are artefacts of the collector or carbon-relay, sort
+            # all time series by timestamp before analysis.
+            original_timeseries = timeseries
+            if original_timeseries:
+                timeseries = sort_timeseries(original_timeseries)
+                del original_timeseries
 
             # @added 20170602 - Feature #2034: analyse_derivatives
             # In order to convert monotonic, incrementing metrics to a deriative
@@ -870,6 +881,16 @@ class AnalyzerDev(Thread):
                 unpacker = Unpacker(use_list=False)
                 unpacker.feed(raw_series)
                 timeseries = list(unpacker)
+
+                # @added 20200507 - Feature #3532: Sort all time series
+                # To ensure that there are no unordered timestamps in the time
+                # series which are artefacts of the collector or carbon-relay, sort
+                # all time series by timestamp before analysis.
+                original_timeseries = timeseries
+                if original_timeseries:
+                    timeseries = sort_timeseries(original_timeseries)
+                    del original_timeseries
+
                 time_human = (timeseries[-1][0] - timeseries[0][0]) / 3600
                 projected = 24 * (time() - now) / time_human
 
