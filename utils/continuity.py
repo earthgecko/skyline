@@ -7,7 +7,10 @@ from os.path import dirname, abspath
 
 # add the shared settings file to namespace
 sys.path.insert(0, ''.join((dirname(dirname(abspath(__file__))), "")))
-from skyline import settings
+if True:
+    from skyline import settings
+    # @added 20200507 - Feature #3532: Sort all time series
+    from skyline_functions import sort_timeseries
 
 metric = 'horizon.test.udp'
 
@@ -26,6 +29,16 @@ def check_continuity(metric, mini=False):
     unpacker = msgpack.Unpacker()
     unpacker.feed(raw_series)
     timeseries = list(unpacker)
+
+    # @added 20200507 - Feature #3532: Sort all time series
+    # To ensure that there are no unordered timestamps in the time
+    # series which are artefacts of the collector or carbon-relay, sort
+    # all time series by timestamp before analysis.
+    original_timeseries = timeseries
+    if original_timeseries:
+        timeseries = sort_timeseries(original_timeseries)
+        del original_timeseries
+
     length = len(timeseries)
 
     start = time.ctime(int(timeseries[0][0]))
@@ -46,6 +59,7 @@ def check_continuity(metric, mini=False):
     total_sum = sum(item[1] for item in timeseries[-50:])
 
     return length, total_sum, start, end, duration, bad, missing
+
 
 if __name__ == "__main__":
     length, total_sum, start, end, duration, bad, missing = check_continuity(metric)

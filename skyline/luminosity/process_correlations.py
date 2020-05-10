@@ -13,6 +13,11 @@ from timeit import default_timer as timer
 import requests
 from ast import literal_eval
 
+# @added 20200428 - Feature #3510: Enable Luminosity to handle correlating namespaces only
+#                   Feature #3500: webapp - crucible_process_metrics
+#                   Feature #1448: Crucible web UI
+from time import time
+
 import settings
 from skyline_functions import (
     mysql_select, is_derivative_metric, nonNegativeDerivative,
@@ -20,7 +25,17 @@ from skyline_functions import (
     #                   Branch #3262: py3
     # Added a single functions to deal with Redis connection and the
     # charset='utf-8', decode_responses=True arguments required in py3
-    get_redis_conn, get_redis_conn_decoded)
+    get_redis_conn, get_redis_conn_decoded,
+    # @added 20200506 - Feature #3532: Sort all time series
+    sort_timeseries)
+
+# @added 20200428 - Feature #3510: Enable Luminosity to handle correlating namespaces only
+#                   Feature #3512: matched_or_regexed_in_list function
+from matched_or_regexed_in_list import matched_or_regexed_in_list
+try:
+    correlate_namespaces_only = settings.LUMINOSITY_CORRELATE_NAMESPACES_ONLY
+except:
+    correlate_namespaces_only = []
 
 # Database configuration
 config = {'user': settings.PANORAMA_DBUSER,
@@ -205,6 +220,15 @@ def get_anomalous_ts(base_name, anomaly_timestamp):
         except:
             timeseries = []
 
+        # @added 20200507 - Feature #3532: Sort all time series
+        # To ensure that there are no unordered timestamps in the time
+        # series which are artefacts of the collector or carbon-relay, sort
+        # all time series by timestamp before analysis.
+        original_timeseries = timeseries
+        if original_timeseries:
+            timeseries = sort_timeseries(original_timeseries)
+            del original_timeseries
+
     # Convert the time series if this is a known_derivative_metric
     known_derivative_metric = is_derivative_metric(skyline_app, base_name)
     if known_derivative_metric:
@@ -257,7 +281,9 @@ def get_anoms(anomalous_ts):
     return anomalies
 
 
-def get_assigned_metrics(i):
+# @modified 20200506 - Feature #3510: Enable Luminosity to handle correlating namespaces only
+# def get_assigned_metrics(i,):
+def get_assigned_metrics(i, base_name):
     try:
         # @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
         #                      Branch #3262: py3
@@ -267,6 +293,44 @@ def get_assigned_metrics(i):
         logger.error(traceback.format_exc())
         logger.error('error :: get_assigned_metrics :: no unique_metrics')
         return []
+
+    # @added 20200506 - Feature #3510: Enable Luminosity to handle correlating namespaces only
+    correlate_namespace_to = None
+    if correlate_namespaces_only:
+        for correlate_namespace in correlate_namespaces_only:
+            try:
+                correlate_namespace_matched_by = None
+                correlate_namespace_to, correlate_namespace_matched_by = matched_or_regexed_in_list(skyline_app, base_name, [correlate_namespace])
+                if correlate_namespace_to:
+                    break
+            except:
+                pass
+    if correlate_namespaces_only:
+        if not correlate_namespace_to:
+            correlate_with_metrics = []
+            for metric_name in unique_metrics:
+                metric_base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+                add_metric, add_metric_matched_by = matched_or_regexed_in_list(skyline_app, metric_base_name, correlate_namespaces_only)
+                if not add_metric:
+                    correlate_with_metrics.append(metric_name)
+            if correlate_with_metrics:
+                logger.info('get_asssigned_metrics :: replaced %s unique_metrics with %s correlate_with_metrics, excluding metrics from LUMINOSITY_CORRELATE_NAMESPACES_ONLY' % (
+                    str(len(unique_metrics)), str(len(correlate_with_metrics))))
+                unique_metrics = correlate_with_metrics
+    if correlate_namespace_to:
+        correlate_with_metrics = []
+        correlate_with_namespace = correlate_namespace_matched_by['matched_namespace']
+        if correlate_with_namespace:
+            for metric_name in unique_metrics:
+                metric_base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+                add_metric, add_metric_matched_by = matched_or_regexed_in_list(skyline_app, metric_base_name, [correlate_with_namespace])
+                if add_metric:
+                    correlate_with_metrics.append(metric_name)
+        if correlate_with_metrics:
+            logger.info('get_correlations :: replaced %s unique_metrics with %s correlate_with_metrics' % (
+                str(len(unique_metrics)), str(len(correlate_with_metrics))))
+            unique_metrics = correlate_with_metrics
+
     # Discover assigned metrics
     # @modified 20180720 - Feature #2464: luminosity_remote_data
     # Use just 1 processor
@@ -407,12 +471,26 @@ def get_correlations(
         logger.error('error :: get_correlations :: no data')
         return (correlated_metrics, correlations)
 
+    # @added 20200428 - Feature #3510: Enable Luminosity to handle correlating namespaces only
+    #                   Feature #3500: webapp - crucible_process_metrics
+    #                   Feature #1448: Crucible web UI
+    # Discard the check if the anomaly_timestamp is not in FULL_DURATION as it
+    # will have been added via the Crucible or webapp/crucible route
+    start_timestamp_of_full_duration_data = int(time() - settings.FULL_DURATION)
+    if anomaly_timestamp < (start_timestamp_of_full_duration_data + 2000):
+        logger.info('get_correlations :: the anomaly_timestamp is too old not correlating')
+        return (correlated_metrics, correlations)
+
     start_local_correlations = timer()
 
     local_redis_metrics_checked_count = 0
     local_redis_metrics_correlations_count = 0
 
     logger.info('get_correlations :: the local Redis metric count is %s' % str(len(assigned_metrics)))
+
+    # @added 20200428 - Feature #3510: Enable Luminosity to handle correlating namespaces only
+    # Removed here and handled in get_assigned_metrics
+
     for i, metric_name in enumerate(assigned_metrics):
         count += 1
         # print(metric_name)
@@ -434,6 +512,15 @@ def get_correlations(
         if not timeseries:
             # print('no time series data for %s' % base_name)
             continue
+
+        # @added 20200507 - Feature #3532: Sort all time series
+        # To ensure that there are no unordered timestamps in the time
+        # series which are artefacts of the collector or carbon-relay, sort
+        # all time series by timestamp before analysis.
+        original_timeseries = timeseries
+        if original_timeseries:
+            timeseries = sort_timeseries(original_timeseries)
+            del original_timeseries
 
         # Convert the time series if this is a known_derivative_metric
         known_derivative_metric = is_derivative_metric(skyline_app, metric_base_name)
@@ -608,6 +695,19 @@ def process_correlations(i, anomaly_id):
     start_process_correlations = timer()
 
     anomaly_id, metric_id, anomaly_timestamp, base_name = get_anomaly(anomaly_id)
+
+    # @added 20200428 - Feature #3510: Enable Luminosity to handle correlating namespaces only
+    #                   Feature #3500: webapp - crucible_process_metrics
+    #                   Feature #1448: Crucible web UI
+    # Discard the check if the anomaly_timestamp is not in FULL_DURATION as it
+    # will have been added via the Crucible or webapp/crucible route
+    start_timestamp_of_full_duration_data = int(time() - settings.FULL_DURATION)
+    if anomaly_timestamp < (start_timestamp_of_full_duration_data + 2000):
+        logger.info('process_correlations :: the anomaly_timestamp %s is too old not correlating' % str(anomaly_timestamp))
+        metrics_checked_for_correlation = 0
+        runtime = 0
+        return (base_name, anomaly_timestamp, anomalies, correlated_metrics, correlations, sorted_correlations, metrics_checked_for_correlation, runtime)
+
     anomalous_ts = get_anomalous_ts(base_name, anomaly_timestamp)
     if not anomalous_ts:
         metrics_checked_for_correlation = 0
@@ -618,7 +718,11 @@ def process_correlations(i, anomaly_id):
         metrics_checked_for_correlation = 0
         runtime = 0
         return (base_name, anomaly_timestamp, anomalies, correlated_metrics, correlations, sorted_correlations, metrics_checked_for_correlation, runtime)
-    assigned_metrics = get_assigned_metrics(i)
+
+    # @modified 20200506 - Feature #3510: Enable Luminosity to handle correlating namespaces only
+    # assigned_metrics = get_assigned_metrics(i)
+    assigned_metrics = get_assigned_metrics(i, base_name)
+
     raw_assigned = redis_conn.mget(assigned_metrics)
     # @added 20180720 - Feature #2464: luminosity_remote_data
     remote_assigned = []
