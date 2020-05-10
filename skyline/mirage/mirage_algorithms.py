@@ -29,7 +29,7 @@ if True:
         REDIS_SOCKET_PATH,
         REDIS_PASSWORD,
     )
-    from algorithm_exceptions import *
+    # from algorithm_exceptions import *
 
 skyline_app = 'mirage'
 skyline_app_logger = '%sLog' % skyline_app
@@ -461,6 +461,29 @@ def determine_median(timeseries):
     return False
 
 
+# @added 20200425 - Feature #3508: ionosphere.untrainable_metrics
+def negatives_present(timeseries):
+    """
+    Determine if there are negative number present in a time series
+    """
+
+    try:
+        np_array = pandas.Series([x[1] for x in timeseries])
+        lowest_value = np.min(np_array)
+        if lowest_value < 0:
+            negatives = []
+            for ts, v in timeseries:
+                if v < 0:
+                    negatives.append((ts, v))
+            return negatives
+    except:
+        traceback_format_exc_string = traceback.format_exc()
+        algorithm_name = str(get_function_name())
+        record_algorithm_error(algorithm_name, traceback_format_exc_string)
+        return None
+    return False
+
+
 def is_anomalously_anomalous(metric_name, ensemble, datapoint):
     """
     This method runs a meta-analysis on the metric to determine whether the
@@ -501,21 +524,58 @@ def is_anomalously_anomalous(metric_name, ensemble, datapoint):
     return abs(intervals[-1] - mean) > 3 * stdDev
 
 
-def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seconds):
+# @modified 20200423 - Feature #3508: ionosphere.untrainable_metrics
+# Added run_negatives_present
+# def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seconds):
+def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seconds, run_negatives_present):
     """
     Run selected algorithms
     """
+
+    # @added 20200425 - Feature #3508: ionosphere.untrainable_metrics
+    # Added negatives_found for run_negatives_present
+    negatives_found = False
+
     try:
         ensemble = [globals()[algorithm](timeseries, second_order_resolution_seconds) for algorithm in MIRAGE_ALGORITHMS]
         threshold = len(ensemble) - MIRAGE_CONSENSUS
         if ensemble.count(False) <= threshold:
+
+            # @added 20200425 - Feature #3508: ionosphere.untrainable_metrics
+            # Only run a negatives_present check if it is anomalous, there
+            # is no need to check unless it is related to an anomaly
+            if run_negatives_present:
+                try:
+                    negatives_found = negatives_present(timeseries)
+                    if negatives_found:
+                        number_of_negatives_found = len(negatives_found)
+                    else:
+                        number_of_negatives_found = 0
+                    logger.info('%s negative values found for %s' % (
+                        str(number_of_negatives_found), metric_name))
+                except:
+                    logger.error('Algorithm error: negatives_present :: %s' % traceback.format_exc())
+                    negatives_found = False
+
             if MIRAGE_ENABLE_SECOND_ORDER:
                 if is_anomalously_anomalous(metric_name, ensemble, timeseries[-1][1]):
-                    return True, ensemble, timeseries[-1][1]
+                    # @modified 20200425 - Feature #3508: ionosphere.untrainable_metrics
+                    # Added negatives_found
+                    # return True, ensemble, timeseries[-1][1]
+                    return True, ensemble, timeseries[-1][1], negatives_found
             else:
-                return True, ensemble, timeseries[-1][1]
+                # @modified 20200425 - Feature #3508: ionosphere.untrainable_metrics
+                # Added negatives_found
+                # return True, ensemble, timeseries[-1][1]
+                return True, ensemble, timeseries[-1][1], negatives_found
 
-        return False, ensemble, timeseries[-1][1]
+        # @modified 20200425 - Feature #3508: ionosphere.untrainable_metrics
+        # Added negatives_found
+        # return False, ensemble, timeseries[-1][1]
+        return False, ensemble, timeseries[-1][1], negatives_found
     except:
         logger.error('Algorithm error: %s' % traceback.format_exc())
-        return False, [], 1
+        # @modified 20200425 - Feature #3508: ionosphere.untrainable_metrics
+        # Added negatives_found
+        # return False, [], 1
+        return False, [], 1, False
