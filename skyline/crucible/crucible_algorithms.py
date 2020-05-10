@@ -271,15 +271,37 @@ def least_squares(timeseries, end_timestamp, full_duration):
         # @modified 20160814 - pyflaked
         # results = np.linalg.lstsq(A, y)
         # residual = results[1]
-        m, c = np.linalg.lstsq(A, y)[0]
+        # @modified 20200422 - Feature #3500: webapp - crucible_process_metrics
+        #                      Task #2588: Update dependencies
+        # Changed in version numpy 1.14.0: If not set, a FutureWarning is given.
+        # The previous default of -1 will use the machine precision as rcond
+        # parameter, the new default will use the machine precision times
+        # max(M, N). To silence the warning and use the new default, use
+        # rcond=None, to keep using the old behavior, use rcond=-1.
+        # Tested with time series - /opt/skyline/ionosphere/features_profiles/stats/statsd/processing_time/1491468474/stats.statsd.processing_time.mirage.redis.24h.json
+        # new rcond=None resulted in:
+        # np.linalg.lstsq(A, y, rcond=None)[0]
+        # >>> array([3.85656116e-11, 2.58582310e-20])
+        # Original default results in:
+        # np.linalg.lstsq(A, y, rcond=-1)[0]
+        # >>> array([ 4.10251589e-07, -6.11801949e+02])
+        # Changed to pass rcond=-1
+        # m, c = np.linalg.lstsq(A, y)[0]
+        m, c = np.linalg.lstsq(A, y, rcond=-1)[0]
+
         errors = []
         # Evaluate append once, not every time in the loop - this gains ~0.020 s on
-        # every timeseries potentially
+        # every timeseries potentially @earthgecko #1310
         append_error = errors.append
+
+        # Further a question exists related to performance and accruracy with
+        # regards to how many datapoints are in the sample, currently all datapoints
+        # are used but this may not be the ideal or most efficient computation or
+        # fit for a timeseries... @earthgecko is checking graphite...
         for i, value in enumerate(y):
             projected = m * x[i] + c
             error = value - projected
-            # errors.append(error)
+            # errors.append(error) # @earthgecko #1310
             append_error(error)
 
         if len(errors) < 3:
@@ -455,9 +477,16 @@ This is no longer no man's land, but feel free to play and try new stuff
 """
 
 
+# @modified 20200421 - Feature #3500: webapp - crucible_process_metrics
+#                      Feature #1448: Crucible web UI
+# Added alert_interval and add_to_panaroma
+# @modified 20200422 - Feature #3500: webapp - crucible_process_metrics
+#                      Feature #1448: Crucible web UI
+# Added padded_timeseries
 def run_algorithms(
         timeseries, timeseries_name, end_timestamp, full_duration,
-        timeseries_file, skyline_app, algorithms):
+        timeseries_file, skyline_app, algorithms, alert_interval,
+        add_to_panorama, padded_timeseries, from_timestamp):
     """
     Iteratively run algorithms.
     """
@@ -471,6 +500,11 @@ def run_algorithms(
 
     triggered_algorithms = []
     anomalous = False
+    # @added 20200427 - Feature #3500: webapp - crucible_process_metrics
+    #                   Feature #1448: Crucible web UI
+    # Added default alert_interval_discarded_anomalies_count so run_algorithms
+    # does not return as failed
+    alert_interval_discarded_anomalies_count = 0
 
     check_algorithms = []
     if str(algorithms) == "['all']":
@@ -497,11 +531,26 @@ def run_algorithms(
         check_algorithms = ALGORITHMS
         logger.info('check_algorithms - %s' % (str(check_algorithms)))
 
-    logger.info('checking algorithms - %s' % (str(check_algorithms)))
+    logger.info('checking algorithms - %s on %s' % (str(check_algorithms), str(timeseries_file)))
 
     # @added 20190611 - Feature #3106: crucible - skyline.consensus.anomalies.png
     # Plot Skyline anomalies if CONSENSUS is achieved
     anomalies = []
+
+    # @added 20200422 - Feature #3500: webapp - crucible_process_metrics
+    #                      Feature #1448: Crucible web UI
+    # Added padded_timeseries.  If the time series is padded then set
+    # the range appropriately so that the padded period data points are not
+    # analysed for anomalies
+    default_range = 10
+    if padded_timeseries:
+        default_range = 0
+        for ts, value in timeseries:
+            if int(ts) < from_timestamp:
+                default_range += 1
+            else:
+                break
+        logger.info('padded_timeseries - default range set to %s to %s' % (str(default_range), str(timeseries_file)))
 
     for algorithm in check_algorithms:
         detected = ''
@@ -513,7 +562,12 @@ def run_algorithms(
             plt.plot(x_vals, y_vals)
 
             # Start a couple datapoints in for the tail average
-            for index in range(10, len(timeseries)):
+            # @modified 20200422 - Feature #3500: webapp - crucible_process_metrics
+            #                      Feature #1448: Crucible web UI
+            # If the time series is padded then use the appropriate range so
+            # that the padded period data points are not analysed for anomalies
+            # for index in range(10, len(timeseries)):
+            for index in range(default_range, len(timeseries)):
                 sliced = timeseries[:index]
                 anomaly = globals()[algorithm](sliced, end_timestamp, full_duration)
 
@@ -528,23 +582,27 @@ def run_algorithms(
 
             if detected == "DETECTED":
                 results_filename = join(results_dir + "/" + algorithm + "." + detected + ".png")
-    #                logger.info('ANOMALY DETECTED :: %s' % (algorithm))
+                logger.info('ANOMALY DETECTED :: with %s on %s' % (algorithm, str(timeseries_file)))
                 anomalous = True
                 triggered_algorithms.append(algorithm)
             else:
                 results_filename = join(results_dir + "/" + algorithm + ".png")
 
-            plt.savefig(results_filename, dpi=100)
-    #            logger.info('%s :: %s' % (algorithm, results_filename))
-            if python_version == 2:
-                # @modified 20200327 - Branch #3262: py3
-                # os.chmod(results_filename, 0644)
-                os.chmod(results_filename, 0o644)
-            if python_version == 3:
-                os.chmod(results_filename, mode=0o644)
+            try:
+                plt.savefig(results_filename, dpi=100)
+                logger.info('saved %s plot :: %s' % (algorithm, results_filename))
+                if python_version == 2:
+                    # @modified 20200327 - Branch #3262: py3
+                    # os.chmod(results_filename, 0644)
+                    os.chmod(results_filename, 0o644)
+                if python_version == 3:
+                    os.chmod(results_filename, mode=0o644)
+            except:
+                logger.error('error :: %s' % (traceback.format_exc()))
+                logger.error('error :: failed to save %s for %s' % (str(results_filename), str(timeseries_file)))
         except:
             logger.error('error :: %s' % (traceback.format_exc()))
-            logger.info('info :: error thrown in algorithm running and plotting - %s' % (str(algorithm)))
+            logger.error('error :: error thrown in algorithm running and plotting - %s on %s' % (str(algorithm), str(timeseries_file)))
 
     end_analysis = int(time.time())
     # @modified 20160814 - pyflaked
@@ -553,29 +611,128 @@ def run_algorithms(
 #        'analysis of %s at a full duration of %s took %s seconds' %
 #        (timeseries_name, str(full_duration), str(seconds_to_run)))
 
+    # @added 20200421 - Feature #3500: webapp - crucible_process_metrics
+    #                   Feature #1448: Crucible web UI
+    # Added last_anomaly_timestamp to apply alert_interval against and
+    # alert_interval_discarded_anomalies.  If the alert interval is passed
+    # Crucible will only report Skyline CONSENSUS anomalies if the time between
+    # the last anomaly is not alert_interval less than the specified
+    # alert_interval period.  This enables Crucible to mimic Analyzer and Mirage
+    # and apply a EXPIRATION_TIME type methodology to identifying anomalies like
+    # Analyzer would.  This makes Crucible work SOMEWHAT like Analyzer, however
+    # is still a bit different as with Crucible the time series grows, like a
+    # new metric would.
+    # Set the last_anomaly_timestamp to the appropriate timestamp before the
+    # alert_interval if alert_interval is set, if it is not it does not matter
+    # as alert_interval and alert_interval_discarded_anomalies will not be
+    # applied.
+    # @modified 20200427 - Feature #3500: webapp - crucible_process_metrics
+    #                      Feature #1448: Crucible web UI
+    # Wrap timeseries_start_timestamp variable in try so on fail the process
+    # does not hang
+    try:
+        timeseries_start_timestamp = int(timeseries[0][0])
+    except:
+        logger.error('error :: %s' % (traceback.format_exc()))
+        logger.error('error :: failed to determine timeseries_start_timestamp from %s' % str(timeseries_file))
+        timeseries_start_timestamp = 0
+
+    # @modified 20200427 - Feature #3500: webapp - crucible_process_metrics
+    #                      Feature #1448: Crucible web UI
+    # if alert_interval:
+    last_anomaly_timestamp = timeseries_start_timestamp
+    if alert_interval and timeseries_start_timestamp:
+        last_anomaly_timestamp = timeseries_start_timestamp - (alert_interval + 1)
+    else:
+        last_anomaly_timestamp = timeseries_start_timestamp
+    alert_interval_discarded_anomalies = []
+    # To apply alert_interval the anomalies object needs to be sorted by
+    # timestamp as the anomalies are added per algorithm so they are not
+    # timestamp ordered, but timestamp ordered per algorithm
+    if anomalies and alert_interval:
+        try:
+            logger.info('info :: last_anomaly_timestamp set to %s for alert_interval check on %s' % (str(last_anomaly_timestamp), str(timeseries_file)))
+            logger.info('info :: sorting anomalies %s to apply alert_interval check on %s' % (str(len(anomalies)), str(timeseries_file)))
+            sorted_anomalies = sorted(anomalies, key=lambda x: x[0])
+            anomalies = sorted_anomalies
+            del sorted_anomalies
+        except:
+            logger.error('error :: %s' % (traceback.format_exc()))
+            logger.error('error :: falied to create sorted_anomalies on %s' % str(timeseries_file))
+
     # @added 20190611 - Feature #3106: crucible - skyline.consensus.anomalies.png
     # Plot Skyline anomalies where CONSENSUS achieved and create file resources
     # skyline.anomalies_score.txt and skyline.anomalies.csv
     anomalies_score = []
     if anomalies:
         for ts, value, algo in anomalies:
-            processed = False
-            algorithms_triggered = []
-            if anomalies_score:
-                for i in anomalies_score:
-                    if i[0] == ts:
-                        processed = True
-                        continue
-            if processed:
-                continue
-            for w_ts, w_value, w_algo in anomalies:
-                if w_ts == ts:
-                    algorithms_triggered.append(w_algo)
-            if algorithms_triggered:
-                consensus = len(algorithms_triggered)
-                anomalies_score.append([ts, value, consensus, algorithms_triggered])
+            try:
+                processed = False
+                algorithms_triggered = []
+                if anomalies_score:
+                    for i in anomalies_score:
+                        if i[0] == ts:
+                            processed = True
+                            continue
+                if processed:
+                    continue
+                for w_ts, w_value, w_algo in anomalies:
+                    if w_ts == ts:
+                        algorithms_triggered.append(w_algo)
+                # @added 20200421 - Feature #3500: webapp - crucible_process_metrics
+                #                      Feature #1448: Crucible web UI
+                # Added last_anomaly_timestamp to apply alert_interval against and
+                # alert_interval_discarded_anomalies.  If the alert interval is passed
+                append_anomaly = True
+
+                if algorithms_triggered:
+                    consensus = len(algorithms_triggered)
+
+                    # @added 20200421 - Feature #3500: webapp - crucible_process_metrics
+                    #                      Feature #1448: Crucible web UI
+                    # Added last_anomaly_timestamp to apply alert_interval against and
+                    # alert_interval_discarded_anomalies.  If the alert interval is passed
+                    if consensus >= CONSENSUS:
+                        current_anomaly_timestamp = int(ts)
+                        if alert_interval and last_anomaly_timestamp:
+                            time_between_anomalies = current_anomaly_timestamp - last_anomaly_timestamp
+                            if time_between_anomalies < alert_interval:
+                                try:
+                                    discard_anomaly = [ts, value, consensus, algorithms_triggered]
+                                    # This logs a lot if enabled
+                                    # logger.info('debug :: time_between_anomalies %s is less than alert_interval %s, last_anomaly_timestamp set to %s and current_anomaly_timestamp is %s - discarding %s' % (
+                                    #     str(time_between_anomalies), str(alert_interval),
+                                    #     str(last_anomaly_timestamp),
+                                    #     str(current_anomaly_timestamp), str(discard_anomaly)))
+                                    alert_interval_discarded_anomalies.append(discard_anomaly)
+                                    append_anomaly = False
+                                except:
+                                    logger.error(traceback.format_exc())
+                                    logger.error('error :: falied to append to alert_interval_discarded_anomalies on %s' % str(timeseries_file))
+
+                    # @modified 20200421 -  Feature #3500: webapp - crucible_process_metrics
+                    #                       Feature #1448: Crucible web UI
+                    # Only append if append_anomaly
+                    # anomalies_score.append([ts, value, consensus, algorithms_triggered])
+                    if append_anomaly:
+                        anomalies_score.append([ts, value, consensus, algorithms_triggered])
+                        if consensus >= CONSENSUS:
+                            last_anomaly_timestamp = int(ts)
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: falied to process anomalies entry on %s' % str(timeseries_file))
+
+        # @added 20200421 - Feature #3500: webapp - crucible_process_metrics
+        #                   Feature #1448: Crucible web UI
+        # Added alert_interval_discarded_anomalies
+        if alert_interval:
+            if alert_interval_discarded_anomalies:
+                logger.info('info :: discarded %s anomalies due to them being within the alert_interval period on %s' % (str(len(alert_interval_discarded_anomalies)), str(timeseries_file)))
+            else:
+                logger.info('info :: no anomalies were discarded due to them being within the alert_interval period on %s' % str(timeseries_file))
+
         try:
-            logger.info('info :: plotting skyline.consensus.anomalies.png')
+            logger.info('info :: plotting skyline.consensus.anomalies.png for %s' % str(timeseries_file))
             x_vals = np.arange(len(timeseries))
             y_vals = np.array([y[1] for y in timeseries])
             # Match default graphite graph size
@@ -602,10 +759,18 @@ def run_algorithms(
                 os.chmod(results_filename, mode=0o644)
         except:
             logger.error('error :: %s' % (traceback.format_exc()))
-            logger.error('error :: falied plotting skyline.consensus.anomalies.png')
+            logger.error('error :: failed plotting skyline.consensus.anomalies.png for %s' % str(timeseries_file))
+
         anomalies_filename = join(results_dir + "/skyline.anomalies_score.txt")
-        write_data_to_file(skyline_app, anomalies_filename, 'w', str(anomalies_score))
+        try:
+            logger.info('info :: creating anomalies_filename - %s for %s' % (anomalies_filename, str(timeseries_file)))
+            write_data_to_file(skyline_app, anomalies_filename, 'w', str(anomalies_score))
+        except:
+            logger.error('error :: %s' % (traceback.format_exc()))
+            logger.error('error :: failed creating anomalies_filename - %s for %s' % (anomalies_filename, str(timeseries_file)))
+
         anomalies_csv = join(results_dir + "/skyline.anomalies.csv")
+        logger.info('info :: creating anomalies_csv - %s for %s' % (anomalies_csv, str(timeseries_file)))
         try:
             with open(anomalies_csv, 'w') as fh:
                 fh.write('timstamp,value,consensus_count,triggered_algorithms\n')
@@ -618,7 +783,7 @@ def run_algorithms(
                         fh.write(line)
                 except:
                     logger.error(traceback.format_exc())
-                    logger.error('error :: could not write to file %s' % (anomalies_csv))
+                    logger.error('error :: could not write to file %s for %s' % (anomalies_csv, str(timeseries_file)))
             if python_version == 2:
                 # @modified 20200327 - Branch #3262: py3
                 # os.chmod(anomalies_csv, 0644)
@@ -627,6 +792,36 @@ def run_algorithms(
                 os.chmod(anomalies_csv, mode=0o644)
         except:
             logger.error(traceback.format_exc())
-            logger.error('error :: could not write to file %s' % (anomalies_csv))
+            logger.error('error :: could not write to file %s for %s' % (anomalies_csv, str(timeseries_file)))
+        logger.info('info :: created anomalies_csv OK for %s' % str(timeseries_file))
+        # @added 20200421 - Feature #3500: webapp - crucible_process_metrics
+        #                      Feature #1448: Crucible web UI
+        # Added alert_interval_discarded_anomalies
+        alert_interval_discarded_anomalies_count = len(alert_interval_discarded_anomalies)
+        if alert_interval_discarded_anomalies:
+            alert_interval_discarded_anomalies_csv = join(results_dir + '/skyline.alert_interval_discarded_anomalies.csv')
+            logger.info('info :: writing %s alert_interval discarded anomalies to %s for %s' % (
+                str(len(alert_interval_discarded_anomalies)), alert_interval_discarded_anomalies_csv,
+                str(timeseries_file)))
+            try:
+                with open(alert_interval_discarded_anomalies_csv, 'w') as fh:
+                    fh.write('timstamp,value,consensus,triggered_algorithms\n')
+                for ts, value, consensus, algorithms_triggered in alert_interval_discarded_anomalies:
+                    try:
+                        line = '%s,%s,%s,%s\n' % (str(ts), str(value), str(consensus), str(algorithms_triggered))
+                        with open(alert_interval_discarded_anomalies_csv, 'a') as fh:
+                            fh.write(line)
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: could not write to file %s for %s' % (alert_interval_discarded_anomalies_csv, str(timeseries_file)))
+                if python_version == 2:
+                    os.chmod(alert_interval_discarded_anomalies_csv, 0o644)
+                if python_version == 3:
+                    os.chmod(alert_interval_discarded_anomalies_csv, mode=0o644)
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: could not write to file %s for %s' % (alert_interval_discarded_anomalies_csv, str(timeseries_file)))
+    else:
+        logger.info('0 anomalies found for %s' % str(timeseries_file))
 
-    return anomalous, triggered_algorithms
+    return anomalous, triggered_algorithms, alert_interval_discarded_anomalies_count
