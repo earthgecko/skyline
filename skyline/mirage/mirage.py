@@ -53,6 +53,11 @@ from skyline_functions import (
     # charset='utf-8', decode_responses=True arguments required in py3
     get_redis_conn, get_redis_conn_decoded)
 
+# @added 20200425 - Feature #3512: matched_or_regexed_in_list function
+#                   Feature #3508: ionosphere.untrainable_metrics
+#                   Feature #3486: analyzer_batch
+from matched_or_regexed_in_list import matched_or_regexed_in_list
+
 from mirage_alerters import trigger_alert
 from negaters import trigger_negater
 from mirage_algorithms import run_selected_algorithm
@@ -102,6 +107,11 @@ try:
 except:
     SERVER_METRIC_PATH = ''
 
+try:
+    MIRAGE_PERIODIC_CHECK = settings.MIRAGE_PERIODIC_CHECK
+except:
+    MIRAGE_PERIODIC_CHECK = False
+
 # @added 20200413 - Feature #3486: analyzer_batch
 #                   Feature #3480: batch_processing
 try:
@@ -112,6 +122,14 @@ try:
     from settings import BATCH_PROCESSING_NAMESPACES
 except:
     BATCH_PROCESSING_NAMESPACES = []
+
+# @added 20200425 - Feature #3508: ionosphere.untrainable_metrics
+# Determine if any metrcs have negatives values some they can be
+# added to the ionosphere.untrainable_metrics Redis set
+try:
+    from settings import KNOWN_NEGATIVE_METRICS
+except:
+    KNOWN_NEGATIVE_METRICS = []
 
 skyline_app_graphite_namespace = 'skyline.%s%s' % (skyline_app, SERVER_METRIC_PATH)
 failed_checks_dir = '%s_failed' % settings.MIRAGE_CHECK_PATH
@@ -289,6 +307,38 @@ class Mirage(Thread):
                 array = str(no_equal_line.split(',', 1))
                 add_line = literal_eval(array)
                 metric_vars.append(add_line)
+
+        # @added 20200429 - Feature #3486: analyzer_batch
+        #                   Feature #3480: batch_processing
+        # Allow the check file to already hold a valid python list on one line
+        # so that a check can be added by simply echoing to debug metric_vars
+        # line from to log for any failed checks into a new Mirage check file
+        # The original above pattern is still the default, this is for the check
+        # files to be added by the operator from the log or for debugging.
+        try_literal_eval = False
+        if metric_vars:
+            if isinstance(metric_vars, list):
+                pass
+            else:
+                try_literal_eval = True
+                logger.info('metric_vars is not a list, set to try_literal_eval')
+            if len(metric_vars) < 2:
+                try_literal_eval = True
+                logger.info('metric_vars is not a list of lists, set to try_literal_eval')
+        else:
+            try_literal_eval = True
+            logger.info('metric_vars is not defined, set to try_literal_eval')
+        if try_literal_eval:
+            try:
+                with open(metric_vars_file) as f:
+                    for line in f:
+                        metric_vars = literal_eval(line)
+                        if metric_vars:
+                            break
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('metric_vars not loaded with literal_eval')
+                metric_vars = []
 
         string_keys = ['metric']
         float_keys = ['value']
@@ -562,6 +612,19 @@ class Mirage(Thread):
         int_run_timestamp = int(run_timestamp)
         metric_timestamp_age = int_run_timestamp - int_metric_timestamp
 
+        periodic_mirage_check = False
+
+        if MIRAGE_PERIODIC_CHECK:
+            try:
+                mirage_periodic_check_metrics = list(self.redis_conn_decoded.smembers('mirage.periodic_check.metrics'))
+            except:
+                logger.error('error :: failed to get mirage_periodic_check_metrics from Redis')
+                mirage_periodic_check_metrics = []
+            redis_metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(metric))
+            if redis_metric_name in mirage_periodic_check_metrics:
+                logger.info('this is a periodic Mirage check for %s' % metric)
+                periodic_mirage_check = True
+
         # @added 20200413 - Feature #3486: analyzer_batch
         #                   Feature #3480: batch_processing
         # Do not evaluate batch metrics against MIRAGE_STALE_SECONDS
@@ -707,23 +770,49 @@ class Mirage(Thread):
             skip_derivative = in_list(redis_metric_name, non_derivative_monotonic_metrics)
             if skip_derivative:
                 known_derivative_metric = False
-        if known_derivative_metric:
+        if known_derivative_metric and valid_mirage_timeseries:
             try:
                 derivative_timeseries = nonNegativeDerivative(timeseries)
                 timeseries = derivative_timeseries
             except:
                 logger.error('error :: nonNegativeDerivative failed')
 
+        # @added 20200425 - Feature #3508: ionosphere.untrainable_metrics
+        # Determine if any metrcs have negatives values some they can be
+        # added to the ionosphere.untrainable_metrics Redis set
+        run_negatives_present = False
+        if settings.IONOSPHERE_ENABLED and valid_mirage_timeseries:
+            run_negatives_present = True
+            known_negative_metric_matched_by = None
+            known_negative_metric, known_negative_metric_matched_by = matched_or_regexed_in_list(skyline_app, metric, KNOWN_NEGATIVE_METRICS)
+            if known_negative_metric:
+                run_negatives_present = False
+                logger.info('will not check %s for negative values' % (metric))
+            else:
+                logger.info('will check %s for negative values' % (metric))
+
         try:
             if valid_mirage_timeseries:
                 logger.info('analyzing :: %s at %s seconds' % (metric, second_order_resolution_seconds))
-                anomalous, ensemble, datapoint = run_selected_algorithm(timeseries, metric, second_order_resolution_seconds)
+                # @modified 20200425 - Feature #3508: ionosphere.untrainable_metrics
+                # Added run_negatives_present and negatives_found
+                # anomalous, ensemble, datapoint = run_selected_algorithm(timeseries, metric, second_order_resolution_seconds)
+                anomalous, ensemble, datapoint, negatives_found = run_selected_algorithm(timeseries, metric, second_order_resolution_seconds, run_negatives_present)
             else:
                 logger.info('not analyzing :: %s at %s seconds as there is not sufficiently older datapoints in the timeseries - not valid_mirage_timeseries' % (metric, second_order_resolution_seconds))
                 anomalous = False
                 datapoint = timeseries[-1][1]
         # It could have been deleted by the Roomba
         except TypeError:
+            # @added 20200430 - Feature #3480: batch_processing
+            # Added logging here as the DeletedByRoomba exception is
+            # generally not related to that but related to some other fail
+            # in the processing of the run algorithms phase.
+            # It could have been deleted by the Roomba, but Mirage does not use
+            # Redis data so probably, definitely was not :)
+            logger.error(traceback.format_exc())
+            logger.error('error :: added as DeletedByRoomba but possibly not see traceback above')
+
             exceptions['DeletedByRoomba'] += 1
             logger.info('exceptions        :: DeletedByRoomba')
         except TooShort:
@@ -787,6 +876,22 @@ class Mirage(Thread):
 
             # @added 20170206 - Bug #1904: Handle non filesystem friendly metric names in check files
             sane_metricname = filesafe_metricname(str(base_name))
+
+            # @added 20200425 - Feature #3508: ionosphere.untrainable_metrics
+            # Determine if any metrcs have negatives values some they can be
+            # added to the ionosphere.untrainable_metrics Redis set
+            if run_negatives_present and negatives_found:
+                redis_set = 'ionosphere.untrainable_metrics'
+                try:
+                    last_negative_timestamp = int(negatives_found[-1][0])
+                    last_negative_value = negatives_found[-1][1]
+                    remove_after_timestamp = int(last_negative_timestamp + second_order_resolution_seconds)
+                    data = str([base_name, metric_timestamp, datapoint, last_negative_timestamp, last_negative_value, second_order_resolution_seconds, remove_after_timestamp])
+                    self.redis_conn.sadd(redis_set, data)
+                except:
+                    logger.info(traceback.format_exc())
+                    logger.error('error :: failed to add %s to Redis set %s' % (
+                        str(data), str(redis_set)))
 
             # If Crucible or Panorama are enabled determine details
             determine_anomaly_details = False
@@ -1043,7 +1148,10 @@ class Mirage(Thread):
             except:
                 logger.error('error :: failed to get mirage_periodic_check_metrics from Redis')
                 mirage_periodic_check_metrics = []
-            if metric in mirage_periodic_check_metrics:
+        if MIRAGE_PERIODIC_CHECK:
+            # if metric in mirage_periodic_check_metrics:
+            redis_metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(metric))
+            if redis_metric_name in mirage_periodic_check_metrics:
                 timeseries_dir = base_name.replace('.', '/')
                 training_dir = '%s/%s/%s' % (
                     settings.IONOSPHERE_DATA_FOLDER, str(metric_timestamp),
@@ -1053,7 +1161,7 @@ class Mirage(Thread):
                         rmtree(training_dir)
                         logger.info('removed Mirage periodic check training_data dir - %s' % training_dir)
                     except:
-                        logger.error('error :: failed to rmtree  Mirage periodic check training_dir - %s' % training_dir)
+                        logger.error('error :: failed to rmtree Mirage periodic check training_dir - %s' % training_dir)
             del mirage_periodic_check_metrics
 
     def run(self):
@@ -1215,7 +1323,10 @@ class Mirage(Thread):
                 if not ionosphere_alerts_returned:
                     # @modified 20161228 - Feature #1830: Ionosphere alerts
                     try:
-                        ionosphere_alerts = list(self.redis_conn.scan_iter(match='ionosphere.mirage.alert.*'))
+                        # @modified 20200430 - Bug #3266: py3 Redis binary objects not strings
+                        #                      Branch #3262: py3
+                        # ionosphere_alerts = list(self.redis_conn.scan_iter(match='ionosphere.mirage.alert.*'))
+                        ionosphere_alerts = list(self.redis_conn_decoded.scan_iter(match='ionosphere.mirage.alert.*'))
                         ionosphere_alerts_returned = True
                     except:
                         logger.error(traceback.format_exc())
@@ -1554,7 +1665,10 @@ class Mirage(Thread):
                 # Wrapped in try except
                 try:
                     run_timestamp = int(time())
-                    ionosphere_alert_on = list(self.redis_conn.scan_iter(match='ionosphere.mirage.alert.*'))
+                    # @modified 20200430 - Bug #3266: py3 Redis binary objects not strings
+                    #                      Branch #3262: py3
+                    # ionosphere_alert_on = list(self.redis_conn.scan_iter(match='ionosphere.mirage.alert.*'))
+                    ionosphere_alert_on = list(self.redis_conn_decoded.scan_iter(match='ionosphere.mirage.alert.*'))
                 except:
                     logger.error(traceback.format_exc())
                     logger.error('error :: failed to get ionosphere.mirage.alert.* from Redis key scan')
