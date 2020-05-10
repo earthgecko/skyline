@@ -1823,15 +1823,50 @@ def ionosphere_search(default_query, search_query):
         raise
     logger.info('%s :: ionosphere_table OK' % function_str)
 
+    # @added 20200505 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
+    apply_metric_id = False
+    if get_metric_profiles:
+        try:
+            apply_metric_id = metrics_id
+        except:
+            apply_metric_id = False
+
+    # @added 20200505 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
+    find_unvalidated = False
+    if 'fp_validate' in request.args:
+        fp_validate_arg = request.args.get('fp_validate', 'false')
+        if fp_validate_arg == 'true':
+            if 'metric' in request.args:
+                metric_arg = request.args.get('metric', 'none')
+                if metric_arg == 'all':
+                    find_unvalidated = True
+
+    if get_metric_profiles:
+        try:
+            apply_metric_id = metrics_id
+        except:
+            apply_metric_id = False
+
     all_fps = []
     try:
         connection = engine.connect()
-        stmt = select([ionosphere_table]).where(ionosphere_table.c.id != 0)
-        # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
-        logger.info('selecting all features profiles with id > 0')
-        if default_ionosphere_search:
-            stmt = select([ionosphere_table]).where(ionosphere_table.c.id == 0)
-            logger.info('default Ionosphere search so not selecting all features profiles')
+        # @modified 20200505 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
+        # apply_metric_id if known
+        if not apply_metric_id:
+            stmt = select([ionosphere_table]).where(ionosphere_table.c.id != 0)
+            # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
+            logger.info('selecting all features profiles with id > 0')
+            if default_ionosphere_search:
+                stmt = select([ionosphere_table]).where(ionosphere_table.c.id == 0)
+                logger.info('default Ionosphere search so not selecting all features profiles')
+        else:
+            # @added 20200505 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
+            logger.info('optimised - selecting all features profiles with metric_id == %s' % str(apply_metric_id))
+            stmt = select([ionosphere_table]).where(ionosphere_table.c.metric_id == apply_metric_id)
+        # @added 20200506 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
+        if find_unvalidated:
+            logger.info('optimised - selecting all features profiles with validated == 0')
+            stmt = select([ionosphere_table]).where(ionosphere_table.c.validated == 0)
 
         result = connection.execute(stmt)
         for row in result:
@@ -1894,7 +1929,12 @@ def ionosphere_search(default_query, search_query):
         raise
 
     # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
-    logger.info('selected all features profiles with id > 0')
+    # @modified 20200506 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
+    # apply_metric_id if known
+    if not apply_metric_id:
+        logger.info('selected all features profiles with id > 0')
+    else:
+        logger.info('selected all features profiles with metric_id == %s' % str(apply_metric_id))
 
     if count_request and search_query:
         features_profiles = None
@@ -2059,6 +2099,12 @@ def ionosphere_search(default_query, search_query):
 
                 stmt = query_string
                 logger.debug('debug :: stmt - %s' % stmt)
+
+            # @added 20200506 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
+            if find_unvalidated:
+                logger.info('optimised - selecting all features profiles with validated == 0')
+                stmt = select([ionosphere_table]).where(ionosphere_table.c.validated == 0)
+
             try:
                 result = connection.execute(stmt)
             except:
@@ -4473,7 +4519,10 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
             else:
                 memcache_result = memcache_client.get('ionosphere_summary_list').decode('utf-8')
         except:
-            logger.error('error :: failed to get ionosphere_summary_list from memcache')
+            # @modified 20200507 - stop reporting this as an error
+            # it can be expected to happen from time to time
+            # logger.error('error :: failed to get ionosphere_summary_list from memcache')
+            logger.info('failed to get ionosphere_summary_list from memcache, will query DB')
         try:
             memcache_client.close()
         # Added nosec to exclude from bandit tests
@@ -5714,8 +5763,17 @@ def label_anomalies(start_timestamp, end_timestamp, metrics, namespaces, label):
         metrics_like_query = text("""SELECT id FROM metrics WHERE metric LIKE :like_string""")
         for namespace in namespaces:
             try:
+                # @added 20200425 - Ideas #2476: Label and relate anomalies
+                # Added missing namespace_like
+                namespace_str = namespace.rstrip('.')
+                wildcard = '%'
+                namespace_like = '%s.%s' % (namespace_str, wildcard)
+
                 connection = engine.connect()
-                results = connection.execute(metrics_like_query, like_string=str(namespace))
+                # @modified 20200425 - Ideas #2476: Label and relate anomalies
+                # Use namespace_like
+                # results = connection.execute(metrics_like_query, like_string=str(namespace))
+                results = connection.execute(metrics_like_query, like_string=str(namespace_like))
                 connection.close()
                 for row in results:
                     metric_id = str(row[0])
