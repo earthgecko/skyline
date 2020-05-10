@@ -89,6 +89,28 @@ try:
 except:
     SKIP_AIRGAPS = []
 
+# @added 20200423 - Feature #3504: Handle airgaps in batch metrics
+#                   Feature #3480: batch_processing
+#                   Feature #3486: analyzer_batch
+#                   Feature #3400: Identify air gaps in the metric data
+try:
+    from settings import BATCH_PROCESSING
+except:
+    BATCH_PROCESSING = False
+
+# @added 20200430 - Feature #3480: batch_processing
+# Tidy up and reduce logging
+try:
+    from settings import BATCH_PROCESSING_DEBUG
+except:
+    BATCH_PROCESSING_DEBUG = None
+
+# @added 20200423 - Feature #3504: Handle airgaps in batch metrics
+#                   Feature #3400: Identify air gaps in the metric data
+if IDENTIFY_AIRGAPS:
+    if CHECK_AIRGAPS:
+        from skyline_functions import is_check_airgap_metric
+
 """
 This is no man's land. Do anything you want in here,
 as long as you return a boolean that determines whether the input timeseries is
@@ -543,7 +565,10 @@ def determine_array_median(array):
 # from ~2.5 to 3 seconds up to between 3.0 and 4.0 seconds on 608 metrics
 # from ~5.5 to 10 seconds up to between 7.5 and 11.5 seconds on 1441 metrics
 # from ~1.20 to 1.38 seconds up to between 1.42 and 1.5 seocnds on 191 metrics
-def identify_airgaps(metric_name, timeseries, airgapped_metrics):
+# @modified 20200501 - Feature #3400: Identify air gaps in the metric data
+# Added airgapped_metrics_filled
+# def identify_airgaps(metric_name, timeseries, airgapped_metrics):
+def identify_airgaps(metric_name, timeseries, airgapped_metrics, airgapped_metrics_filled):
     """
     Identify air gaps in metrics to populate the analyzer.airgapped_metrics
     Redis set with the air gaps if the specific air gap it is not present in the
@@ -567,9 +592,9 @@ def identify_airgaps(metric_name, timeseries, airgapped_metrics):
     """
 
     if len(timeseries) < 30:
-        return None
+        return [], None
 
-    airgaps = None
+    airgaps = []
     # To ensure that nothing in this function affects existing analysis, them
     # entire block is wrapped in try except pass so that analyzer is affected
     # as little as possible should something here fail.
@@ -612,7 +637,7 @@ def identify_airgaps(metric_name, timeseries, airgapped_metrics):
                 record_algorithm_error(algorithm_name, traceback_format_exc_string)
                 del timestamp_resolutions
                 # return None
-                return None, False
+                return [], None
         if timestamp_resolutions:
             del timestamp_resolutions
         airgaps_present = False
@@ -655,7 +680,7 @@ def identify_airgaps(metric_name, timeseries, airgapped_metrics):
         # series is unordered
         if not IDENTIFY_AIRGAPS:
             del airgaps_present
-            return None, unordered_timeseries
+            return [], unordered_timeseries
         if airgaps_present:
             base_name = metric_name.replace(FULL_NAMESPACE, '', 1)
             # logger.info('airgaps present in %s - %s' % (base_name, str(ordered_timestamp_resolutions_count)))
@@ -713,6 +738,22 @@ def identify_airgaps(metric_name, timeseries, airgapped_metrics):
                                 add_airgap = False
                             if end_airgap < max_airgap_timestamp:
                                 add_airgap = False
+                            # @added 20200501 - Feature #3400: Identify air gaps in the metric data
+                            # Check airgapped_metrics_filled and if present do
+                            # do not add even if there is an airgap as the
+                            # airgap filler has reported it has filled all it
+                            # can
+                            if airgapped_metrics_filled:
+                                current_airgap = str([base_name, metric_resolution, start_airgap, end_airgap, 0])
+                                for i in airgapped_metrics_filled:
+                                    filled_airgap = str(i)
+                                    if filled_airgap == current_airgap:
+                                        airgap_known = True
+                                        start_airgap = None
+                                        end_airgap = None
+                                        add_airgap = False
+                                        break
+
                             if add_airgap:
                                 airgaps.append([base_name, metric_resolution, start_airgap, end_airgap, 0])
                             start_airgap = None
@@ -731,13 +772,42 @@ def identify_airgaps(metric_name, timeseries, airgapped_metrics):
         algorithm_name = str(get_function_name())
         record_algorithm_error(algorithm_name, traceback_format_exc_string)
         # return None
-        return None, False
+        return [], False
 
     # @modified 20200214 - Bug #3448: Repeated airgapped_metrics
     #                      Feature #3400: Identify air gaps in the metric data
     # Also return with the time series is unordered
     # return airgaps
     return airgaps, unordered_timeseries
+
+
+# @added 20200423 - Feature #3508: ionosphere.untrainable_metrics
+def negatives_present(timeseries):
+    """
+    Determine if there are negative number present in a time series
+    """
+
+    try:
+        np_array = pandas.Series([x[1] for x in timeseries])
+    except:
+        return False
+    try:
+        lowest_value = np.min(np_array)
+    except:
+        return False
+    if lowest_value < 0:
+        negatives = []
+        try:
+            for ts, v in timeseries:
+                try:
+                    if v < 0:
+                        negatives.append((ts, v))
+                except:
+                    pass
+        except:
+            pass
+        return negatives
+    return False
 
 
 def is_anomalously_anomalous(metric_name, ensemble, datapoint):
@@ -749,6 +819,11 @@ def is_anomalously_anomalous(metric_name, ensemble, datapoint):
     new_trigger = [time(), datapoint]
 
     # Get the old history
+    # @added 20200505 - Feature #3504: Handle airgaps in batch metrics
+    # Use get_redis_conn
+    from skyline_functions import get_redis_conn
+    redis_conn = get_redis_conn(skyline_app)
+
     raw_trigger_history = redis_conn.get('trigger_history.' + metric_name)
     if not raw_trigger_history:
         redis_conn.set('trigger_history.' + metric_name, packb([(time(), datapoint)]))
@@ -783,7 +858,13 @@ def is_anomalously_anomalous(metric_name, ensemble, datapoint):
 # @modified 20200117 - Feature #3400: Identify air gaps in the metric data
 # Added the airgapped_metrics list
 # def run_selected_algorithm(timeseries, metric_name):
-def run_selected_algorithm(timeseries, metric_name, airgapped_metrics):
+# @modified 20200423 - Feature #3508: ionosphere.untrainable_metrics
+# Added run_negatives_present
+# def run_selected_algorithm(timeseries, metric_name, airgapped_metrics):
+# @modified 20200501 - Feature #3400: Identify air gaps in the metric data
+# Added airgapped_metrics_filled and check_for_airgaps_only
+# def run_selected_algorithm(timeseries, metric_name, airgapped_metrics, run_negatives_present):
+def run_selected_algorithm(timeseries, metric_name, airgapped_metrics, airgapped_metrics_filled, run_negatives_present, check_for_airgaps_only):
     """
     Filter timeseries and run selected algorithm.
     """
@@ -791,8 +872,8 @@ def run_selected_algorithm(timeseries, metric_name, airgapped_metrics):
     # @added 20180807 - Feature #2492: alert on stale metrics
     # Determine if a metric has stopped sending data and if so add to the
     # analyzer.alert_on_stale_metrics Redis set
+    add_to_alert_on_stale_metrics = False
     if ALERT_ON_STALE_METRICS:
-        add_to_alert_on_stale_metrics = False
         # @modified 20180816 - Feature #2492: alert on stale metrics
         # Added try and except to prevent some errors that are encounter between
         # 00:14 and 00:17 on some days
@@ -817,29 +898,53 @@ def run_selected_algorithm(timeseries, metric_name, airgapped_metrics):
 
         if add_to_alert_on_stale_metrics:
             try:
-                redis_conn.ping()
-            except:
-                from redis import StrictRedis
-                if REDIS_PASSWORD:
-                    redis_conn = StrictRedis(password=REDIS_PASSWORD, unix_socket_path=REDIS_SOCKET_PATH)
-                else:
-                    redis_conn = StrictRedis(unix_socket_path=REDIS_SOCKET_PATH)
-            try:
+                # @added 20200505 - Feature #3504: Handle airgaps in batch metrics
+                # Use get_redis_conn
+                from skyline_functions import get_redis_conn
+                redis_conn = get_redis_conn(skyline_app)
                 redis_conn.sadd('analyzer.alert_on_stale_metrics', metric_name)
             except:
                 pass
 
-    # Get rid of short series
-    if len(timeseries) < MIN_TOLERABLE_LENGTH:
-        raise TooShort()
+    # @added 20200505 - Feature #3504: Handle airgaps in batch metrics
+    # Check to see if this is a batch processing metric that has been sent
+    # through Analyzer to check for airgaps only and if so do not check the
+    # timeseries for exceptions
+    check_for_timeseries_exceptions = True
+    check_airgap_only = None
+    if BATCH_PROCESSING and check_for_airgaps_only:
+        check_airgap_only_key = 'analyzer.check_airgap_only.%s' % metric_name
+        try:
+            if not add_to_alert_on_stale_metrics:
+                # @added 20200505 - Feature #3504: Handle airgaps in batch metrics
+                # Use get_redis_conn
+                from skyline_functions import get_redis_conn
+                redis_conn = get_redis_conn(skyline_app)
+            check_airgap_only = redis_conn.get(check_airgap_only_key)
+        except:
+            check_airgap_only = None
+        if check_airgap_only:
+            check_for_timeseries_exceptions = False
 
-    # Get rid of stale series
-    if time() - timeseries[-1][0] > STALE_PERIOD:
-        raise Stale()
+    # @modified 20200505 - Feature #3504: Handle airgaps in batch metrics
+    # Wrapped in check_for_timeseries_exceptions as if it is a check_airgap_only
+    # metric then the time series should not be checked for exceptions
+    if check_for_timeseries_exceptions:
+        # Get rid of short series
+        if len(timeseries) < MIN_TOLERABLE_LENGTH:
+            raise TooShort()
 
-    # Get rid of boring series
-    if len(set(item[1] for item in timeseries[-MAX_TOLERABLE_BOREDOM:])) == BOREDOM_SET_SIZE:
-        raise Boring()
+        # Get rid of stale series
+        if time() - timeseries[-1][0] > STALE_PERIOD:
+            raise Stale()
+
+        # Get rid of boring series
+        if len(set(item[1] for item in timeseries[-MAX_TOLERABLE_BOREDOM:])) == BOREDOM_SET_SIZE:
+            raise Boring()
+
+    # @added 20200423 - Feature #3508: ionosphere.untrainable_metrics
+    # Added run_negatives_present
+    negatives_found = False
 
     # @added 20200117 - Feature #3400: Identify air gaps in the metric data
     # @modified 20200214 - Bug #3448: Repeated airgapped_metrics
@@ -851,32 +956,25 @@ def run_selected_algorithm(timeseries, metric_name, airgapped_metrics):
         process_metric = True
         if IDENTIFY_AIRGAPS:
             if CHECK_AIRGAPS:
-                metric_namespace_elements = metric_name.split('.')
                 process_metric = False
+
+                # @added 20200423 - Feature #3504: Handle airgaps in batch metrics
+                #                   Feature #3400: Identify air gaps in the metric data
+                # Replaced code block below to determine if a metric is a check
+                # with a skyline_functions definition of that block as
+                # the check_metric_for_airgaps function
+                check_metric_for_airgaps = False
                 try:
-                    for to_check in CHECK_AIRGAPS:
-                        if to_check in metric_name:
-                            process_metric = True
-                            break
-                        to_check_namespace_elements = to_check.split('.')
-                        elements_matched = set(metric_namespace_elements) & set(to_check_namespace_elements)
-                        if len(elements_matched) == len(to_check_namespace_elements):
-                            process_metric = True
-                            break
+                    check_metric_for_airgaps = is_check_airgap_metric(metric_name)
                 except:
-                    pass
-            # Allow to skip identifying airgaps on certain metrics and namespaces
-            if process_metric:
-                metric_namespace_elements = metric_name.split('.')
-                for to_skip in SKIP_AIRGAPS:
-                    if to_skip in metric_name:
-                        process_metric = False
-                        break
-                    to_skip_namespace_elements = to_skip.split('.')
-                    elements_matched = set(metric_namespace_elements) & set(to_skip_namespace_elements)
-                    if len(elements_matched) == len(to_skip_namespace_elements):
-                        process_metric = False
-                        break
+                    check_metric_for_airgaps = False
+                    try:
+                        logger.error('failed to determine if %s is an airgap metric: %s' % (
+                            str(metric_name), traceback.format_exc()))
+                    except:
+                        logger.error('failed to determine if the metric is an airgap metric')
+                if check_metric_for_airgaps:
+                    process_metric = True
         else:
             # If IDENTIFY_AIRGAPS is not enabled and
             # IDENTIFY_UNORDERED_TIMESERIES is enabled process the metric
@@ -885,24 +983,28 @@ def run_selected_algorithm(timeseries, metric_name, airgapped_metrics):
         airgaps = None
         unordered_timeseries = False
         if process_metric:
-            airgaps, unordered_timeseries = identify_airgaps(metric_name, timeseries, airgapped_metrics)
+            # @modified 20200501 - Feature #3400: Identify air gaps in the metric data
+            # Added airgapped_metrics_filled
+            # airgaps, unordered_timeseries = identify_airgaps(metric_name, timeseries, airgapped_metrics)
+            airgaps, unordered_timeseries = identify_airgaps(metric_name, timeseries, airgapped_metrics, airgapped_metrics_filled)
         if airgaps or unordered_timeseries:
             try:
                 redis_conn.ping()
             except:
-                from redis import StrictRedis
-                if REDIS_PASSWORD:
-                    redis_conn = StrictRedis(password=REDIS_PASSWORD, unix_socket_path=REDIS_SOCKET_PATH)
-                else:
-                    redis_conn = StrictRedis(unix_socket_path=REDIS_SOCKET_PATH)
+                # @added 20200505 - Feature #3504: Handle airgaps in batch metrics
+                # Use get_redis_conn
+                from skyline_functions import get_redis_conn
+                redis_conn = get_redis_conn(skyline_app)
         if airgaps:
             for i in airgaps:
                 try:
                     redis_conn.sadd('analyzer.airgapped_metrics', str(i))
-                    del airgaps
+                    logger.info('adding airgap %s' % str(i))
                     # TODO: learn_airgapped_metrics
                 except:
                     pass
+            del airgaps
+
         # @added 20200214 - Bug #3448: Repeated airgapped_metrics
         #                   Feature #3400: Identify air gaps in the metric data
         # Also add unordered time series to the analyzer.unordered_timeseries
@@ -913,6 +1015,37 @@ def run_selected_algorithm(timeseries, metric_name, airgapped_metrics):
                 del unorder_timeseries
             except:
                 pass
+
+    # @added 20200423 - Feature #3504: Handle airgaps in batch metrics
+    #                   Feature #3480: batch_processing
+    #                   Feature #3486: analyzer_batch
+    #                   Feature #3400: Identify air gaps in the metric data
+    # Check to see if this is a batch processing metric that has been sent to
+    # analyzer_batch for processing but sent through Analyzer to check for
+    # airgaps only and if so return as it should not be run through algorithms
+    if BATCH_PROCESSING:
+        if check_airgap_only:
+            try:
+                redis_conn.delete(check_airgap_only_key)
+            except:
+                try:
+                    logger.error('failed to delete Redis key %s: %s' % (
+                        str(check_airgap_only_key), traceback.format_exc()))
+                except:
+                    logger.error('failed to failure regarding deleting the check_airgap_only_key Redis key')
+            # @modified 20200430 - Feature #3480: batch_processing
+            # Tidy up and reduce logging, only log if debug enabled
+            if BATCH_PROCESSING_DEBUG:
+                logger.info('algorithms :: batch processing - batch metric %s checked for airgaps only, not analysing' % (
+                    str(metric_name)))
+
+            # TODO: the only worry here is that this metric then gets added to
+            # the not_anomalous Redis set?  Not sure if that is a problem, I do
+            # not think it is.  Unless it is in the end of anomaly_end_timestamp
+            # context?
+            # @modified 20200424 - Feature #3508: ionosphere.untrainable_metrics
+            # Added negatives_found
+            return False, [], 1, negatives_found
 
     # RUN_OPTIMIZED_WORKFLOW - replaces the original ensemble method:
     # ensemble = [globals()[algorithm](timeseries) for algorithm in ALGORITHMS]
@@ -1000,13 +1133,30 @@ def run_selected_algorithm(timeseries, metric_name, airgapped_metrics):
 
         threshold = len(ensemble) - CONSENSUS
         if ensemble.count(False) <= threshold:
+
+            # @added 20200425 - Feature #3508: ionosphere.untrainable_metrics
+            # Only run a negatives_present check if it is anomalous, there
+            # is no need to check unless it is related to an anomaly
+            if run_negatives_present:
+                try:
+                    negatives_found = negatives_present(timeseries)
+                except:
+                    logger.error('Algorithm error: negatives_present :: %s' % traceback.format_exc())
+                    negatives_found = False
+
             if ENABLE_SECOND_ORDER:
                 if is_anomalously_anomalous(metric_name, ensemble, timeseries[-1][1]):
-                    return True, ensemble, timeseries[-1][1]
+                    # @modified 20200423 - Feature #3508: ionosphere.untrainable_metrics
+                    # Added negatives_found
+                    return True, ensemble, timeseries[-1][1], negatives_found
             else:
-                return True, ensemble, timeseries[-1][1]
+                return True, ensemble, timeseries[-1][1], negatives_found
 
-        return False, ensemble, timeseries[-1][1]
+        # @modified 20200423 - Feature #3508: ionosphere.untrainable_metrics
+        # Added negatives_found
+        return False, ensemble, timeseries[-1][1], negatives_found
     except:
         logger.error('Algorithm error: %s' % traceback.format_exc())
-        return False, [], 1
+        # @modified 20200423 - Feature #3508: ionosphere.untrainable_metrics
+        # Added negatives_found
+        return False, [], 1, negatives_found
