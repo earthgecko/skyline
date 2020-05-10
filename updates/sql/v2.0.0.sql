@@ -28,3 +28,13 @@ CREATE TABLE IF NOT EXISTS `sql_versions` (
   `created_timestamp` TIMESTAMP NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'created timestamp')
   ENGINE=InnoDB;
 INSERT INTO `sql_versions` (version) VALUES ('2.0.0');
+INSERT INTO `sql_versions` (version) VALUES ('2.0.0-patch-3478');
+
+/*
+# @added 20200505 - Feature #3530: Add new index on ionosphere table - validated
+#                   Branch #3262: py3
+# Update index to include the validated column
+*/
+ALTER TABLE `ionosphere` DROP INDEX `features_profile`;
+ALTER TABLE `ionosphere` ADD INDEX `features_profile` (`id`,`metric_id`,`enabled`,`layers_id`,`validated`);
+INSERT INTO `sql_versions` (version) VALUES ('2.0.0-patch-3530');

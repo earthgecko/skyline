@@ -587,12 +587,21 @@ BATCH_PROCESSING = None
     minutes with a data point for each minute in the period, Analyzer's default
     analysis would only analyse the latest data point against the metric time
     series data.  With batch processing, Analyzer identifies batched metrics and
-    when a batch of data is receieved Analyzer sends the metric/s to Crucible
+    when a batch of data is receieved Analyzer sends the metric/s to analyzer_batch
     to analyse.  To ensure that this can be achieved as computationally cheap as
     possible the BATCH_PROCESSING_NAMESPACES list can be applied, to reduce the
     footprint of this functionality
 :vartype BATCH_PROCESSING: boolen
 """
+
+BATCH_PROCESSING_STALE_PERIOD = 86400
+"""
+:var BATCH_PROCESSING_STALE_PERIOD: This is the duration, in seconds, for a
+    metric to be deemed as stale and for the analyzer_batch to ignore it until
+    new datapoints are added.
+:vartype BATCH_PROCESSING_STALE_PERIOD: int
+"""
+
 
 BATCH_PROCESSING_DEBUG = None
 """
@@ -609,6 +618,13 @@ BATCH_PROCESSING_NAMESPACES = []
     to all metrics.  This list works in the same way that SKIP_LIST does, it
     matches in the string or dotted namespace elements.
 :vartype BATCH_PROCESSING_NAMESPACES: list
+"""
+
+METRICS_INACTIVE_AFTER = FULL_DURATION - 3600
+"""
+:var METRICS_INACTIVE_AFTER: Identify metrics as inactive after the defined
+    seconds.
+:vartype METRICS_INACTIVE_AFTER: int
 """
 
 CANARY_METRIC = 'statsd.numStats'
@@ -2357,6 +2373,26 @@ LUMINOL_CROSS_CORRELATION_THRESHOLD = 0.9
     correlation
 :vartype LUMINOL_CROSS_CORRELATION_THRESHOLD: float
 """
+
+LUMINOSITY_RELATED_TIME_PERIOD = 240
+"""
+:var LUMINOSITY_RELATED_TIME_PERIOD: The time period (in seconds) either side of
+    the anomaly that should be checked to report possible related anomalies.
+:vartype LUMINOSITY_RELATED_TIME_PERIOD: int
+"""
+
+LUMINOSITY_CORRELATE_NAMESPACES_ONLY = []
+"""
+:var LUMINOSITY_CORRELATE_NAMESPACES_ONLY: A list of namespaces that metrics in
+    the same namespace should be correlated with.  The default is an empty list
+    which results in all metrics being correlated with all metrics.  If
+    namespaces are declared in the list, all metrics will be evaluated as to
+    whether they are in the list.  Metrics in the list will only be correlated
+    with metrics in the same namespace and excluded from correlations within
+    ANY other namespace.
+:vartype LUMINOSITY_RELATED_TIME_PERIOD: list
+"""
+
 
 """
 Docker settings
