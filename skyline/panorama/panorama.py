@@ -393,6 +393,38 @@ class Panorama(Thread):
                 add_line = literal_eval(array)
                 metric_vars.append(add_line)
 
+        # @added 20200429 - Feature #3486: analyzer_batch
+        #                   Feature #3480: batch_processing
+        # Allow the check file to already hold a valid python list on one line
+        # so that a check can be added by simply echoing to debug metric_vars
+        # line from to log for any failed checks into a new Panorama check file
+        # The original above pattern is still the default, this is for the check
+        # files to be added by the operator from the log or for debugging.
+        try_literal_eval = False
+        if metric_vars:
+            if isinstance(metric_vars, list):
+                pass
+            else:
+                try_literal_eval = True
+                logger.info('metric_vars is not a list, set to try_literal_eval')
+            if len(metric_vars) < 2:
+                try_literal_eval = True
+                logger.info('metric_vars is not a list of lists, set to try_literal_eval')
+        else:
+            try_literal_eval = True
+            logger.info('metric_vars is not defined, set to try_literal_eval')
+        if try_literal_eval:
+            try:
+                with open(metric_vars_file) as f:
+                    for line in f:
+                        metric_vars = literal_eval(line)
+                        if metric_vars:
+                            break
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('metric_vars not loaded with literal_eval')
+                metric_vars = []
+
         # @modified 20200420 - Feature #3500: webapp - crucible_process_metrics
         #                      Feature #1448: Crucible web UI
         #                      Branch #868: crucible
@@ -435,7 +467,7 @@ class Panorama(Thread):
 
             if len(metric_vars_array) == 0:
                 logger.error(
-                    'error :: loading metric variables - none found' % (
+                    'error :: loading metric variables - none found in %s' % (
                         str(metric_vars_file)))
                 return False
 
@@ -1732,7 +1764,10 @@ class Panorama(Thread):
                 # Only check if slack is enabled
                 if SLACK_ENABLED:
                     try:
-                        slack_thread_ts_updates = list(self.redis_conn.scan_iter(match='panorama.slack_thread_ts.*'))
+                        # @modified 20200430 - Bug #3266: py3 Redis binary objects not strings
+                        #                      Branch #3262: py3
+                        # slack_thread_ts_updates = list(self.redis_conn.scan_iter(match='panorama.slack_thread_ts.*'))
+                        slack_thread_ts_updates = list(self.redis_conn_decoded.scan_iter(match='panorama.slack_thread_ts.*'))
                     except:
                         logger.error(traceback.format_exc())
                         logger.error('error :: failed to scan panorama.slack_thread_ts.* from Redis')
