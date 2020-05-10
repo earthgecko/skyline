@@ -39,7 +39,9 @@ from skyline_functions import (
     #                   Branch #3262: py3
     # Added a single functions to deal with Redis connection and the
     # charset='utf-8', decode_responses=True arguments required in py3
-    get_redis_conn, get_redis_conn_decoded)
+    get_redis_conn, get_redis_conn_decoded,
+    # @added 20200506 - Feature #3532: Sort all time series
+    sort_timeseries)
 
 from boundary_alerters import trigger_alert
 from boundary_algorithms import run_selected_algorithm
@@ -244,6 +246,15 @@ class Boundary(Thread):
                 logger.error('error :: redis data error: ' + traceback.format_exc())
                 logger.error('error :: %e' % e)
 
+            # @added 20200506 - Feature #3532: Sort all time series
+            # To ensure that there are no unordered timestamps in the time
+            # series which are artefacts of the collector or carbon-relay, sort
+            # all time series by timestamp before analysis.
+            original_timeseries = timeseries
+            if original_timeseries:
+                timeseries = sort_timeseries(original_timeseries)
+                del original_timeseries
+
             base_name = metric_name.replace(FULL_NAMESPACE, '', 1)
 
             # Determine the metrics BOUNDARY_METRICS metric tuple settings
@@ -342,6 +353,15 @@ class Boundary(Thread):
                 unpacker = Unpacker(use_list=False)
                 unpacker.feed(raw_series)
                 timeseries = list(unpacker)
+
+                # @added 20200507 - Feature #3532: Sort all time series
+                # To ensure that there are no unordered timestamps in the time
+                # series which are artefacts of the collector or carbon-relay, sort
+                # all time series by timestamp before analysis.
+                original_timeseries = timeseries
+                if original_timeseries:
+                    timeseries = sort_timeseries(original_timeseries)
+                    del original_timeseries
 
                 if ENABLE_BOUNDARY_DEBUG:
                     logger.info('debug :: unpacked OK - %s - %s' % (metric_name, str(raw_assigned_id)))
@@ -1373,6 +1393,16 @@ class Boundary(Thread):
                 unpacker = Unpacker(use_list=False)
                 unpacker.feed(raw_series)
                 timeseries = list(unpacker)
+
+                # @added 20200507 - Feature #3532: Sort all time series
+                # To ensure that there are no unordered timestamps in the time
+                # series which are artefacts of the collector or carbon-relay, sort
+                # all time series by timestamp before analysis.
+                original_timeseries = timeseries
+                if original_timeseries:
+                    timeseries = sort_timeseries(original_timeseries)
+                    del original_timeseries
+
                 time_human = (timeseries[-1][0] - timeseries[0][0]) / 3600
                 projected = 24 * (time() - now) / time_human
 

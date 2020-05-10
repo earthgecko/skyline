@@ -90,7 +90,9 @@ if True:
         #                      Branch #3262: py3
         get_graphite_port, get_graphite_render_uri, get_graphite_custom_headers,
         # @added 20200116: Feature #3396: http_alerter
-        get_redis_conn_decoded)
+        get_redis_conn_decoded,
+        # @added 20200507 - Feature #3532: Sort all time series
+        sort_timeseries)
 
 skyline_app = 'analyzer'
 skyline_app_logger = '%sLog' % skyline_app
@@ -528,6 +530,15 @@ def alert_smtp(alert, metric, context):
             logger.error('error :: alert_smtp - unpack timeseries failed')
             timeseries = None
 
+        # @added 20200507 - Feature #3532: Sort all time series
+        # To ensure that there are no unordered timestamps in the time
+        # series which are artefacts of the collector or carbon-relay, sort
+        # all time series by timestamp before analysis.
+        original_timeseries = timeseries
+        if original_timeseries:
+            timeseries = sort_timeseries(original_timeseries)
+            del original_timeseries
+
         if settings.IONOSPHERE_ENABLED and timeseries:
             '''
             .. todo: this is possibly to be used to allow the user to submit the
@@ -583,6 +594,15 @@ def alert_smtp(alert, metric, context):
                     logger.error(
                         'error :: %s failed to read timeseries data from %s' % (skyline_app, anomaly_json))
                     timeseries = None
+
+                # @added 20200507 - Feature #3532: Sort all time series
+                # To ensure that there are no unordered timestamps in the time
+                # series which are artefacts of the collector or carbon-relay, sort
+                # all time series by timestamp before analysis.
+                original_timeseries = timeseries
+                if original_timeseries:
+                    timeseries = sort_timeseries(original_timeseries)
+                    del original_timeseries
 
         # @added 20170603 - Feature #2034: analyse_derivatives
         if known_derivative_metric:

@@ -5,7 +5,7 @@ from smtplib import SMTP
 
 # @added 20200116: Feature #3396: http_alerter
 import requests
-import simplejson as json
+# import simplejson as json
 
 import mirage_alerters
 
@@ -99,7 +99,9 @@ if True:
         #                      Branch #3262: py3
         get_graphite_port, get_graphite_render_uri, get_graphite_custom_headers,
         # @added 20200116: Feature #3396: http_alerter
-        get_redis_conn_decoded)
+        get_redis_conn_decoded,
+        # @added 20200507 - Feature #3532: Sort all time series
+        sort_timeseries)
 
 skyline_app = 'mirage'
 skyline_app_logger = '%sLog' % skyline_app
@@ -354,6 +356,9 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
     graphite_port = get_graphite_port(skyline_app)
     graphite_render_uri = get_graphite_render_uri(skyline_app)
     graphite_custom_headers = get_graphite_custom_headers(skyline_app)
+    if graphite_custom_headers:
+        logger.info('using graphite_custom_headers :: %s' % (
+            str(graphite_custom_headers)))
 
     graphite_from = dt.datetime.fromtimestamp(int(from_timestamp)).strftime('%H:%M_%Y%m%d')
     logger.info('graphite_from - %s' % str(graphite_from))
@@ -503,6 +508,15 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
             logger.error('error :: alert_smtp - unpack timeseries failed')
             timeseries = None
 
+        # @added 20200507 - Feature #3532: Sort all time series
+        # To ensure that there are no unordered timestamps in the time
+        # series which are artefacts of the collector or carbon-relay, sort
+        # all time series by timestamp before analysis.
+        original_timeseries = timeseries
+        if original_timeseries:
+            timeseries = sort_timeseries(original_timeseries)
+            del original_timeseries
+
         # @added 20170603 - Feature #2034: analyse_derivatives
         if known_derivative_metric:
             try:
@@ -566,6 +580,15 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
                     logger.error(
                         'error :: %s failed to read timeseries data from %s' % (skyline_app, anomaly_json))
                     timeseries = None
+
+                # @added 20200507 - Feature #3532: Sort all time series
+                # To ensure that there are no unordered timestamps in the time
+                # series which are artefacts of the collector or carbon-relay, sort
+                # all time series by timestamp before analysis.
+                original_timeseries = timeseries
+                if original_timeseries:
+                    timeseries = sort_timeseries(original_timeseries)
+                    del original_timeseries
 
         # @added 20170823 - Feature #2034: analyse_derivatives
         # Originally patterned and added to analyzer/alerters.py on 20170603
@@ -1325,6 +1348,9 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context):
     graphite_port = get_graphite_port(skyline_app)
     graphite_render_uri = get_graphite_render_uri(skyline_app)
     graphite_custom_headers = get_graphite_custom_headers(skyline_app)
+    if graphite_custom_headers:
+        logger.info('using graphite_custom_headers :: %s' % (
+            str(graphite_custom_headers)))
 
     if known_derivative_metric:
 
@@ -1811,8 +1837,8 @@ def alert_http(alert, metric, second_order_resolution_seconds, context):
             try:
                 for index, resend_item in enumerate(resend_queue):
                     resend_item_list = literal_eval(resend_item)
-                    resend_alert = literal_eval(resend_item_list[0])
-                    resend_metric = literal_eval(resend_item_list[1])
+                    # resend_alert = literal_eval(resend_item_list[0])
+                    # resend_metric = literal_eval(resend_item_list[1])
                     resend_metric_alert_dict = literal_eval(resend_item_list[2])
                     if resend_metric_alert_dict['metric'] == metric_name:
                         if int(resend_metric_alert_dict['timestamp']) == timestamp:
