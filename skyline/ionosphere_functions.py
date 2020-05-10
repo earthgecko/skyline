@@ -251,6 +251,7 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
     fp_pending_cache_key = 'fp_pending.%s.%s' % (
         str(requested_timestamp), str(base_name))
     try:
+        # TODO - make this use get_redis_conn, but needs testing
         if settings.REDIS_PASSWORD:
             redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
         else:
@@ -1494,8 +1495,20 @@ def get_related(current_skyline_app, anomaly_id, anomaly_timestamp):
 
     related = []
 
-    minus_two_minutes = int(anomaly_timestamp) - 120
-    plus_two_minutes = int(anomaly_timestamp) + 120
+    # @added 20200419 - Feature #3390: luminosity related anomalies
+    #                   Branch #2270: luminosity
+    try:
+        related_time_period = int(settings.LUMINOSITY_RELATED_TIME_PERIOD)
+    except:
+        related_time_period = 120
+
+    # @modified 20200419 - Feature #3390: luminosity related anomalies
+    #                      Branch #2270: luminosity
+    # Use settings.LUMINOSITY_RELATED_TIME_PERIOD
+    # minus_two_minutes = int(anomaly_timestamp) - 120
+    # plus_two_minutes = int(anomaly_timestamp) + 120
+    minus_two_minutes = int(anomaly_timestamp) - related_time_period
+    plus_two_minutes = int(anomaly_timestamp) + related_time_period
 
     current_logger.info('get_related :: getting MySQL engine for %s and timestamp %s' % (
         str(anomaly_id), str(anomaly_timestamp)))
