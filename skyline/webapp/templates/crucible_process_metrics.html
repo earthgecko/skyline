@@ -34,6 +34,10 @@
 
   		<div class="col-md-12">
 <!--  		<div class="container"> -->
+    {% if not crucible_enabled %}
+    <h4><span class="logo"><span class="sky">Crucible ::</span> <span class="re">NOT ENABLED ::</span></span> jobs will not be processed</h4>
+    {% endif %}
+
   		  <h4><span class="logo"><span class="sky">Process ::</span> <span class="re">metrics</span></span></span></h4>
 
   {% if job_submitted %}
@@ -74,23 +78,54 @@
   		        <td><input type="text" name="namespaces" value="" /> a list of comma separated metric namespaces with MySQL like wildcards e.g server1.cpu%,server2.cpu.%</td>
   		      </tr>
   		      <tr>
-                <td>from_timestamp</td>
-                <td><input type="number" name="from_timestamp" value="" /> unix timestamp</td>
+              <td>from_timestamp</td>
+              <td><input type="number" name="from_timestamp" value="" /> unix timestamp</td>
   		      </tr>
   		      <tr>
-                <td>until_timestamp</td>
-                <td><input type="number" name="until_timestamp" value="" /> unix timestamp</td>
+              <td>until_timestamp</td>
+              <td><input type="number" name="until_timestamp" value="" /> unix timestamp</td>
+  		      </tr>
+<!--        # @added 20200422 - Feature #3500: webapp - crucible_process_metrics
+            #                   Feature #1448: Crucible web UI
+            # In order for metrics to be analysed in Crucible like the Analyzer
+            # or Mirage analysis, the time series data needs to be padded
+-->
+  		      <tr>
+                <td>pad_timeseries</td>
+  		        <td><select name="pad_timeseries">
+                <option value="auto">auto</option>
+                <option value="0">none</option>
+                <option value="86400">1 day</option>
+                <option value="604800">7 days</option>
+              </select><br>
+              The amount with which to pad the time series data with so that Crucible does not start analysis<br>
+              at the <code>from_timestamp</code>, with no reference data.  Default is <code>auto</code> generally this<br>
+              is acceptable.  The data points in the prefix period will not be analysed individually, they are<br>
+              only used in the population so that the first data points from the <code>from_timestamp</code> can be compared<br>
+              against data other than themselves.<br>
+              This makes the jobs submitted to Crucible have results more like the real Analyzer/Mirage analysis rather then<br>
+              default Crucible methodology.</td>
   		      </tr>
   		      <tr>
   		        <td>data source</td>
   		        <td><select name="data_source">
                 <option value="graphite">graphite</option>
+<!--
+# Graphite is the only option currently
                 <option value="redis">redis</option>
+-->
               </select></td>
   		      </tr>
   		      <tr>
                 <td>alert interval</td>
                 <td><input type="number" name="alert_interval" value="" /> How many seconds to allow between anomalies, ala <code>EXPIRATION_TIME</code></td>
+  		      </tr>
+  		      <tr>
+              <td>add_to_panorama</td>
+  		        <td><select name="add_to_panorama">
+                <option value="false">false</option>
+                <option value="true">true</option>
+              </select> Whether to send Skyline <code>CONSENSUS</code> anomalies to Panorama, defaults to <code>false</code> as you probably want to validate first</td>
   		      </tr>
   		    </tbody>
   		  </table>

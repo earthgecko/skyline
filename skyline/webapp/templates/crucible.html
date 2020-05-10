@@ -57,10 +57,14 @@
   </div>
 
   <div class="tab-pane active" id="crucible_jobs">
-    <h4><span class="logo"><span class="sky">Crucible ::</span> <span class="re">jobs :: </span></span></span> {{ crucible_jobs|length }} jobs</h4>
+    {% if not crucible_enabled %}
+    <h4><span class="logo"><span class="sky">Crucible ::</span> <span class="re">NOT ENABLED</span></span></span></h4>
+    {% endif %}
+    <h4><span class="logo"><span class="sky">Crucible ::</span> <span class="re">jobs :: </span></span></span> showing {{ crucible_jobs|length }} of {{ total_crucible_jobs }} jobs</h4>
 		<table class="table table-hover">
 			<thead>
 				<tr>
+          <th>Job list number</th>
           <th>Date</th>
           <th>Crucible job ID</th>
           <th>Completed</th>
@@ -74,6 +78,7 @@
 			<tbody>
 {% for crucible_job in crucible_jobs %}
         <tr>
+          <td>{{ crucible_job[8] }}</td>
           <td>{{ crucible_job[0] }}</td>
           <td>{{ crucible_job[1] }}</td>
           <td><code>{{ crucible_job[2] }}</code></td>
@@ -88,6 +93,24 @@
 {% endfor %}
 			</tbody>
 		</table>
+
+	{% if total_crucible_jobs > crucible_jobs|length %}
+  	<ul class="pagination">
+  {% set jobs_pages = ((total_crucible_jobs / offset)+1)|int %}
+  {% set count = namespace(value=1) %}
+  {% for page_number in range(jobs_pages) %}
+    {% if page_number == 0 %}
+  	  <li><a href="{{ url_for('crucible', offset=(offset), pagination_start=0, pagination_end=(offset)) }}">{{ count.value }}</a></li>
+    {% elif page_number == 1 %}
+  	  <li><a href="{{ url_for('crucible', offset=(offset), pagination_start=(pagination_end), pagination_end=(pagination_end*count.value)) }}">{{ count.value }}</a></li>
+    {% else %}
+  	  <li><a href="{{ url_for('crucible', offset=(offset), pagination_start=(pagination_end*(count.value-1)), pagination_end=((pagination_end*(count.value-1)+offset))) }}">{{ count.value }}</a></li>
+    {% endif %}
+    {% set count.value = count.value + 1 %}
+  {% endfor %}
+  	</ul>
+	{% endif %}
+
 	</div>
 
 

@@ -33,6 +33,10 @@
       </div>
 
 	    <div class="col-md-12">
+  {% if not crucible_enabled %}
+  <h4><span class="logo"><span class="sky">Crucible ::</span> <span class="re">NOT ENABLED ::</span></span> jobs will not be processed</h4>
+  {% endif %}
+
   <h4><span class="logo"><span class="sky">Crucible ::</span> <span class="re">job</span></span> {{ crucible_job_id }} {{ crucible_job_metric }}</h4>
 
   <h4><span class="logo"><span class="sky">Crucible ::</span> <span class="re">anomalies detected</span></span>:: {{ has_anomalies }} {{ skyline_anomalies|length }}</h4>
