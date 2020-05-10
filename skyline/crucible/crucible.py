@@ -58,7 +58,13 @@ import settings
 
 # @modified 20200327 - Branch #3262: py3
 # from skyline_functions import load_metric_vars, fail_check, mkdir_p
-from skyline_functions import fail_check, mkdir_p
+# @modified 20200428 - Feature #3500: webapp - crucible_process_metrics
+#                      Feature #1448: Crucible web UI
+# Added write_data_to_file and filesafe_metricname to send to Panorama
+from skyline_functions import (
+    fail_check, mkdir_p, write_data_to_file, filesafe_metricname,
+    # @added 20200506 - Feature #3532: Sort all time series
+    sort_timeseries)
 
 from crucible_algorithms import run_algorithms
 
@@ -517,13 +523,18 @@ class Crucible(Thread):
         if settings.ENABLE_CRUCIBLE_DEBUG:
             logger.info('metric variable - graphite_override_uri_parameters - %s' % graphite_override_uri_parameters)
 
+        add_to_panorama = False
         try:
             key = 'add_to_panorama'
             value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
             add_to_panorama = str(value_list[0])
+            if add_to_panorama == 'True':
+                add_to_panorama = True
+            else:
+                add_to_panorama = False
         except:
-            logger.info('failed to read add_to_panorama variable from check file setting to None')
-            add_to_panorama = None
+            logger.info('failed to read add_to_panorama variable from check file setting to False')
+            add_to_panorama = False
         if settings.ENABLE_CRUCIBLE_DEBUG:
             logger.info('metric variable - add_to_panorama - %s' % str(add_to_panorama))
 
@@ -533,12 +544,19 @@ class Crucible(Thread):
         try:
             key = 'alert_interval'
             value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
-            alert_interval = str(value_list[0])
+            alert_interval = int(value_list[0])
         except:
-            logger.info('failed to read alert_interval variable from check file setting to None')
-            alert_interval = None
+            logger.info('failed to read alert_interval variable from check file setting to 0')
+            alert_interval = 0
         if settings.ENABLE_CRUCIBLE_DEBUG:
             logger.info('metric variable - alert_interval - %s' % str(alert_interval))
+
+        # @added 20200422 - Feature #3500: webapp - crucible_process_metrics
+        #                   Feature #1448: Crucible web UI
+        # In order for metrics to be analysed in Crucible like the
+        # Analyzer or Mirage analysis, the time series data needs to
+        # be padded.  Added pad_timeseries in the webapp.
+        padded_timeseries = False
 
         # Only check if the metric does not a EXPIRATION_TIME key set, crucible
         # uses the alert EXPIRATION_TIME for the relevant alert setting contexts
@@ -592,6 +610,13 @@ class Crucible(Thread):
                             check_expired = True
                             if settings.ENABLE_CRUCIBLE_DEBUG:
                                 logger.info('the check is older than EXPIRATION_TIME for the metric - not checking - check_expired')
+
+        # @added 20200421 - Feature #3500: webapp - crucible_process_metrics
+        #                   Feature #1448: Crucible web UI
+        # If the check is added by the webapp explicitly set the check_expired
+        # to True so that analysis will run
+        if added_by == 'webapp':
+            check_expired = True
 
         cache_key = 'crucible.last_check.%s.%s' % (source_app, metric)
         if settings.ENABLE_CRUCIBLE_DEBUG:
@@ -866,17 +891,31 @@ class Crucible(Thread):
                         except:  # nosec
                             continue
 
-                    with open(anomaly_json, 'w') as f:
-                        f.write(json.dumps(converted))
-                    if python_version == 2:
-                        # @modified 20200327 - Branch #3262: py3
-                        # os.chmod(anomaly_json, 0644)
-                        os.chmod(anomaly_json, 0o644)
-                    if python_version == 3:
-                        os.chmod(anomaly_json, mode=0o644)
+                    try:
+                        with open(anomaly_json, 'w') as f:
+                            f.write(json.dumps(converted))
+                        if python_version == 2:
+                            # @modified 20200327 - Branch #3262: py3
+                            # os.chmod(anomaly_json, 0644)
+                            os.chmod(anomaly_json, 0o644)
+                        if python_version == 3:
+                            os.chmod(anomaly_json, mode=0o644)
+                        if settings.ENABLE_CRUCIBLE_DEBUG:
+                            logger.info('json file - %s' % anomaly_json)
+                    except:
+                        logger.error(traceback.print_exc())
+                        logger.error('error :: failed to write or chmod anomaly_json - %s' % (anomaly_json))
 
-                    if settings.ENABLE_CRUCIBLE_DEBUG:
-                        logger.info('json file - %s' % anomaly_json)
+                    # @added 20200422 - Feature #3500: webapp - crucible_process_metrics
+                    #                   Feature #1448: Crucible web UI
+                    # Clean up converted
+                    if converted:
+                        try:
+                            del converted
+                            del js
+                            del datapoints
+                        except:
+                            pass
 
                 if not os.path.isfile(anomaly_json):
                     logger.error('error :: failed to surface %s json from graphite' % (metric))
@@ -1040,6 +1079,31 @@ class Crucible(Thread):
                 pass
             return
 
+        if not timeseries:
+            try:
+                logger.info('failing check, no time series from - %s' % anomaly_json)
+                shutil.move(metric_check_file, failed_check_file)
+                if python_version == 2:
+                    # @modified 20200327 - Branch #3262: py3
+                    # os.chmod(failed_check_file, 0644)
+                    os.chmod(failed_check_file, 0o644)
+                if python_version == 3:
+                    os.chmod(failed_check_file, mode=0o644)
+                logger.info('moved check file to - %s' % failed_check_file)
+            except OSError:
+                logger.error('error :: failed to move check file to - %s' % failed_check_file)
+                pass
+            return
+
+        # @added 20200507 - Feature #3532: Sort all time series
+        # To ensure that there are no unordered timestamps in the time
+        # series which are artefacts of the collector or carbon-relay, sort
+        # all time series by timestamp before analysis.
+        original_timeseries = timeseries
+        if original_timeseries:
+            timeseries = sort_timeseries(original_timeseries)
+            del original_timeseries
+
         start_timestamp = int(timeseries[0][0])
         if settings.ENABLE_CRUCIBLE_DEBUG:
             logger.info('start_timestamp - %s' % str(start_timestamp))
@@ -1051,18 +1115,59 @@ class Crucible(Thread):
         if settings.ENABLE_CRUCIBLE_DEBUG:
             logger.info('full_duration - %s' % str(full_duration))
 
+        # @added 20200422 - Feature #3500: webapp - crucible_process_metrics
+        #                   Feature #1448: Crucible web UI
+        # In order for metrics to be analysed in Crucible like the
+        # Analyzer or Mirage analysis, the time series data needs to
+        # be padded.  Added pad_timeseries in the webapp so check
+        # here if the time series is padded
+        if graphite_override_uri_parameters and added_by == 'webapp':
+            if start_timestamp < from_timestamp:
+                padded_timeseries = True
+                padded_with = from_timestamp - start_timestamp
+                logger.info('padded time series identified, padded with %s seconds' % str(padded_with))
+
         self.check_if_parent_is_alive()
 
         run_algorithms_start_timestamp = int(time())
         if settings.ENABLE_CRUCIBLE_DEBUG:
             logger.info('run_algorithms_start_timestamp - %s' % str(run_algorithms_start_timestamp))
 
+        # @added 20200427 - Feature #3500: webapp - crucible_process_metrics
+        #                   Feature #1448: Crucible web UI
+        # Set variables so on fail the process does not hang
+        anomalous = None
+        ensemble = None
+        alert_interval_discarded_anomalies_count = 0
+
+        # For debug only but do not remove as this is an item in the final
+        # return
+        nothing_to_do = ''
+
         if settings.ENABLE_CRUCIBLE_DEBUG:
             logger.info('run_algorithms - %s,%s,%s,%s,%s,%s' % (metric, str(end_timestamp), str(full_duration), anomaly_json, skyline_app, str(algorithms)))
         try:
-            anomalous, ensemble = run_algorithms(timeseries, str(metric), end_timestamp, full_duration, str(anomaly_json), skyline_app, algorithms)
+            # @modified 20200421 - Feature #3500: webapp - crucible_process_metrics
+            #                      Feature #1448: Crucible web UI
+            # Pass alert_interval, add_to_panaroma and alert_interval_discarded_anomalies_count
+            # anomalous, ensemble = run_algorithms(timeseries, str(metric), end_timestamp, full_duration, str(anomaly_json), skyline_app, algorithms)
+            # @modified 20200422 - Feature #3500: webapp - crucible_process_metrics
+            #                      Feature #1448: Crucible web UI
+            # Added padded_timeseries and from_timestamp
+            anomalous, ensemble, alert_interval_discarded_anomalies_count = run_algorithms(timeseries, str(metric), end_timestamp, full_duration, str(anomaly_json), skyline_app, algorithms, alert_interval, add_to_panorama, padded_timeseries, from_timestamp)
         except:
             logger.error('error :: run_algorithms failed - %s' % str(traceback.print_exc()))
+            try:
+                shutil.move(metric_check_file, failed_check_file)
+                if python_version == 2:
+                    os.chmod(failed_check_file, 0o644)
+                if python_version == 3:
+                    os.chmod(failed_check_file, mode=0o644)
+                logger.info('moved check file to - %s' % failed_check_file)
+            except OSError:
+                logger.error('error :: failed to move check file to - %s' % failed_check_file)
+                pass
+            return
 
         run_algorithms_end_timestamp = int(time())
         run_algorithms_seconds = run_algorithms_end_timestamp - run_algorithms_start_timestamp
@@ -1078,10 +1183,16 @@ class Crucible(Thread):
         logger.info('run_algorithms took %s seconds' % str(run_algorithms_seconds))
 
         # Update anomaly file
-        crucible_data = 'crucible_tests_run = "%s"\n' \
+        # @modified 20200421 - Feature #3500: webapp - crucible_process_metrics
+        #                      Feature #1448: Crucible web UI
+        # Added run_algorithms_seconds and alert_interval_discarded_anomalies
+        crucible_data = 'crucible_tests_run = \'%s\'\n' \
                         'crucible_triggered_algorithms = %s\n' \
-                        'tested_by = "%s"\n' \
-            % (str(run_timestamp), str(ensemble), str(this_host))
+                        'tested_by = \'%s\'\n' \
+                        'run_algorithms_seconds = \'%s\'\n' \
+                        'alert_interval_discarded_anomalies = \'%s\'\n' \
+            % (str(run_timestamp), str(ensemble), str(this_host),
+                str(run_algorithms_seconds), str(alert_interval_discarded_anomalies_count))
         crucible_anomaly_file = '%s/%s.txt' % (anomaly_dir, metric)
         with open(crucible_anomaly_file, 'a') as fh:
             fh.write(crucible_data)
@@ -1096,22 +1207,33 @@ class Crucible(Thread):
         # gzip the json timeseries data after analysis
         if os.path.isfile(anomaly_json):
             if not os.path.isfile(anomaly_json_gz):
+                remove_json = False
                 try:
                     f_in = open(anomaly_json)
                     f_out = gzip.open(anomaly_json_gz, 'wb')
                     f_out.writelines(f_in)
                     f_out.close()
                     f_in.close()
-                    os.remove(anomaly_json)
-                    if python_version == 2:
-                        # @modified 20200327 - Branch #3262: py3
-                        # os.chmod(anomaly_json_gz, 0644)
-                        os.chmod(anomaly_json_gz, 0o644)
-                    if python_version == 3:
-                        os.chmod(anomaly_json_gz, mode=0o644)
+                    remove_json = True
                     logger.info('gzipped - %s' % (anomaly_json_gz))
                 except:
                     logger.error('error :: Failed to gzip data file - %s' % str(traceback.print_exc()))
+                if remove_json:
+                    try:
+                        if python_version == 2:
+                            # @modified 20200327 - Branch #3262: py3
+                            # os.chmod(anomaly_json_gz, 0644)
+                            os.chmod(anomaly_json_gz, 0o644)
+                        if python_version == 3:
+                            os.chmod(anomaly_json_gz, mode=0o644)
+                        logger.info('gzipped - %s' % (anomaly_json_gz))
+                    except:
+                        logger.error('error :: Failed to chmod anomaly_json_gz file - %s' % str(traceback.print_exc()))
+                    try:
+                        os.remove(anomaly_json)
+                    except:
+                        logger.error('error :: Failed to remove anomaly_json file - %s' % str(traceback.print_exc()))
+
             else:
                 os.remove(anomaly_json)
 
@@ -1122,8 +1244,89 @@ class Crucible(Thread):
                 # Added nosec to exclude from bandit tests
                 os.system('%s %s' % (str(run_script), str(crucible_anomaly_file)))  # nosec
 
-        # Remove metric check file
-        nothing_to_do = ''
+        # @added 20200428 - Feature #3500: webapp - crucible_process_metrics
+        #                   Feature #1448: Crucible web UI
+        # Send Skyline consensus anomalie to Panorama
+        if add_to_panorama:
+            added_to_panorama = False
+            user_id = 1
+            skyline_anomalies_score_file = anomaly_dir + '/' + 'skyline.anomalies_score.txt'
+            if os.path.isfile(skyline_anomalies_score_file):
+                try:
+                    with open(skyline_anomalies_score_file) as f:
+                        output = f.read()
+                    skyline_anomalies = literal_eval(output)
+                except:
+                    logger.info(traceback.format_exc())
+                    logger.error('error :: failed to get Skyline anomalies scores from %s' % skyline_anomalies_score_file)
+                    skyline_anomalies = None
+                skyline_consensus_anomalies = []
+                if skyline_anomalies:
+                    # skyline_anomalies format
+                    # [timestamp, value, anomaly_score, triggered_algorithms]
+                    # [1583234400.0, 44.39999999990687, 2, ['histogram_bins', 'median_absolute_deviation']],
+                    # Convert float timestamp from Graphite to int
+                    for timestamp, value, anomaly_score, triggered_algorithms in skyline_anomalies:
+                        if anomaly_score >= settings.CONSENSUS:
+                            skyline_consensus_anomalies.append([int(timestamp), value, anomaly_score, triggered_algorithms])
+                    del skyline_anomalies
+                added_at = int(time())
+                if skyline_consensus_anomalies:
+                    sane_metricname = filesafe_metricname(str(metric))
+                    for timestamp, datapoint, anomaly_score, triggered_algorithms in skyline_consensus_anomalies:
+                        # To allow multiple Panorama anomaly files to added quickly just
+                        # increment the added_at by 1 seconds so that all the files have a
+                        # unique name
+                        added_at += 1
+                        # Note:
+                        # The values are enclosed is single quoted intentionally
+                        # as the imp.load_source used results in a shift in the
+                        # decimal position when double quoted, e.g.
+                        # value = "5622.0" gets imported as
+                        # 2016-03-02 12:53:26 :: 28569 :: metric variable - value - 562.2
+                        # single quoting results in the desired,
+                        # 2016-03-02 13:16:17 :: 1515 :: metric variable - value - 5622.0
+                        source = 'graphite'
+                        panaroma_anomaly_data = 'metric = \'%s\'\n' \
+                                                'value = \'%s\'\n' \
+                                                'from_timestamp = \'%s\'\n' \
+                                                'metric_timestamp = \'%s\'\n' \
+                                                'algorithms = %s\n' \
+                                                'triggered_algorithms = %s\n' \
+                                                'app = \'%s\'\n' \
+                                                'source = \'%s\'\n' \
+                                                'added_by = \'%s\'\n' \
+                                                'added_at = \'%s\'\n' \
+                                                'label = \'added by Crucible\'\n' \
+                                                'user_id = \'%s\'\n' \
+                            % (metric, str(datapoint), from_timestamp,
+                               str(timestamp), str(settings.ALGORITHMS),
+                               triggered_algorithms, skyline_app, source,
+                               this_host, str(added_at), str(user_id))
+                        # Create an anomaly file with details about the anomaly
+                        panaroma_anomaly_file = '%s/%s.%s.txt' % (
+                            settings.PANORAMA_CHECK_PATH, added_at, sane_metricname)
+                        try:
+                            write_data_to_file(
+                                skyline_app, panaroma_anomaly_file, 'w',
+                                panaroma_anomaly_data)
+                            logger.info('added panorama anomaly file :: %s' % (panaroma_anomaly_file))
+                            added_to_panorama = True
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: send_crucible_job_metric_to_panorama - failed to add panorama anomaly file :: %s' % (panaroma_anomaly_file))
+            if added_to_panorama:
+                crucible_sent_to_panorama_file = '%s/%s.%s.%s.sent_to_panorama.txt' % (
+                    anomaly_dir, str(added_at), sane_metricname)
+                panorama_done_data = [added_at, int(user_id), skyline_consensus_anomalies]
+                try:
+                    write_data_to_file(
+                        skyline_app, crucible_sent_to_panorama_file, 'w',
+                        str(panorama_done_data))
+                    logger.info('added panorama crucible job file :: %s' % (crucible_sent_to_panorama_file))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: crucible send to panorama - failed to add panorama file :: %s' % (crucible_sent_to_panorama_file))
 
         try:
             os.remove(metric_check_file)
@@ -1209,6 +1412,30 @@ class Crucible(Thread):
                 self.redis_conn.setex(skyline_app, 120, now)
 
                 metric_var_files = [f for f in listdir(settings.CRUCIBLE_CHECK_PATH) if isfile(join(settings.CRUCIBLE_CHECK_PATH, f))]
+
+                # @added 20200428 - Feature #3500: webapp - crucible_process_metrics
+                #                   Feature #1448: Crucible web UI
+                # If crucible is busy, stop processing around midnight to allow
+                # for log rotation as log rotation can make the process hang if
+                # running
+                pause_for_log_rotation = False
+                current_now = datetime.datetime.now()
+                current_hour = current_now.strftime('%H')
+                if current_hour == '23':
+                    current_minute = current_now.strftime('%M')
+                    before_midnight_minutes = ['55', '56', '57', '58', '59']
+                    if current_minute in before_midnight_minutes:
+                        logger.info('setting metric_var_files to [] for log rotation')
+                        metric_var_files = []
+                        pause_for_log_rotation = True
+                if current_hour == '00':
+                    current_minute = current_now.strftime('%M')
+                    after_midnight_minutes = ['00', '01', '02']
+                    if current_minute in after_midnight_minutes:
+                        logger.info('setting metric_var_files to [] for log rotation')
+                        metric_var_files = []
+                        pause_for_log_rotation = True
+
 #                if len(metric_var_files) == 0:
                 if not metric_var_files:
                     logger.info('sleeping 10 no metric check files')
@@ -1217,12 +1444,22 @@ class Crucible(Thread):
                 # Discover metric to analyze
                 metric_var_files = ''
                 metric_var_files = [f for f in listdir(settings.CRUCIBLE_CHECK_PATH) if isfile(join(settings.CRUCIBLE_CHECK_PATH, f))]
+
+                if pause_for_log_rotation:
+                    logger.info('setting metric_var_files to [] for log rotation')
+                    metric_var_files = []
+
 #                if len(metric_var_files) > 0:
                 if metric_var_files:
                     break
 
             metric_var_files_sorted = sorted(metric_var_files)
             metric_check_file = settings.CRUCIBLE_CHECK_PATH + "/" + str(metric_var_files_sorted[0])
+
+            # @added 20200421 - Feature #3516: Handle multiple CRUCIBLE_PROCESSES
+            # TODO
+            # Handled multiple processes
+            # Prioritise current metrics over webapp metrics
 
             logger.info('assigning check for processing - %s' % str(metric_var_files_sorted[0]))
 
@@ -1238,11 +1475,34 @@ class Crucible(Thread):
             spawned_pids = []
             pid_count = 0
             run_timestamp = int(now)
-            for i in range(1, settings.CRUCIBLE_PROCESSES + 1):
+
+            # @modified 20200427 - Feature #3516: Handle multiple CRUCIBLE_PROCESSES
+            use_range = 1
+            if len(metric_var_files_sorted) > 1:
+                if settings.CRUCIBLE_PROCESSES > 1:
+                    if len(metric_var_files_sorted) < settings.CRUCIBLE_PROCESSES:
+                        use_range = settings.CRUCIBLE_PROCESSES - len(metric_var_files_sorted)
+                    else:
+                        use_range = settings.CRUCIBLE_PROCESSES
+                    logger.info('dynamically determined to submit to and use %s processors' % str(use_range))
+            logger.info('will use %s processors' % str(use_range))
+
+            # @modified 20200427 - Feature #3516: Handle multiple CRUCIBLE_PROCESSES
+            # for i in range(1, settings.CRUCIBLE_PROCESSES + 1):
+            for i in range(1, use_range + 1):
+                # @added 20200427 - Feature #3516: Handle multiple CRUCIBLE_PROCESSES
+                if len(metric_var_files_sorted) > 1:
+                    if use_range > 1:
+                        if i > 1:
+                            list_element = i - 1
+                            metric_check_file = settings.CRUCIBLE_CHECK_PATH + "/" + str(metric_var_files_sorted[list_element])
+                            logger.info('assigning additional check to processor %s for processing - %s' % (str(i), str(metric_var_files_sorted[list_element])))
                 p = Process(target=self.spin_process, args=(i, run_timestamp, str(metric_check_file)))
                 pids.append(p)
                 pid_count += 1
-                logger.info('starting %s of %s spin_process/es' % (str(pid_count), str(settings.CRUCIBLE_PROCESSES)))
+                # @modified 20200427 - Feature #3516: Handle multiple CRUCIBLE_PROCESSES
+                # logger.info('starting %s of %s spin_process/es' % (str(pid_count), str(settings.CRUCIBLE_PROCESSES)))
+                logger.info('starting %s of %s spin_process/es' % (str(pid_count), str(use_range)))
                 p.start()
                 spawned_pids.append(p.pid)
 
@@ -1252,14 +1512,22 @@ class Crucible(Thread):
             # Self monitor processes and terminate if any spin_process has run
             # for longer than CRUCIBLE_TESTS_TIMEOUT
             p_starts = time()
+            sleep_count = 0
             while time() - p_starts <= settings.CRUCIBLE_TESTS_TIMEOUT:
                 if any(p.is_alive() for p in pids):
                     # Just to avoid hogging the CPU
                     sleep(.1)
+                    # @added 20200421 - Feature #3500: webapp - crucible_process_metrics
+                    #                   Feature #1448: Crucible web UI
+                    sleep_count += 1
+                    if (sleep_count % 100 == 0):
+                        logger.info('%s :: spin_process/es still running pid/s - %s' % (skyline_app, str(pids)))
                 else:
                     # All the processes are done, break now.
                     time_to_run = time() - p_starts
-                    logger.info('%s :: %s spin_process/es completed in %.2f seconds' % (skyline_app, str(settings.CRUCIBLE_PROCESSES), time_to_run))
+                    # @modified 20200427 - Feature #3516: Handle multiple CRUCIBLE_PROCESSES
+                    # logger.info('%s :: %s spin_process/es completed in %.2f seconds' % (skyline_app, str(settings.CRUCIBLE_PROCESSES), time_to_run))
+                    logger.info('%s :: %s spin_process/es completed in %.2f seconds' % (skyline_app, str(use_range), time_to_run))
                     break
             else:
                 # We only enter this if we didn't 'break' above.
