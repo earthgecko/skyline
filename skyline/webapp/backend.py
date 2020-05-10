@@ -19,7 +19,10 @@ import settings
 from skyline_functions import (
     mysql_select,
     # @added 20180720 - Feature #2464: luminosity_remote_data
-    nonNegativeDerivative, in_list, is_derivative_metric)
+    # nonNegativeDerivative, in_list, is_derivative_metric,
+    # @added 20200507 - Feature #3532: Sort all time series
+    # Added sort_timeseries and removed unused in_list
+    nonNegativeDerivative, is_derivative_metric, sort_timeseries)
 
 import skyline_version
 skyline_version = skyline_version.__absolute_version__
@@ -552,6 +555,15 @@ def luminosity_remote_data(anomaly_timestamp):
 
         if not timeseries:
             continue
+
+        # @added 20200507 - Feature #3532: Sort all time series
+        # To ensure that there are no unordered timestamps in the time
+        # series which are artefacts of the collector or carbon-relay, sort
+        # all time series by timestamp before analysis.
+        original_timeseries = timeseries
+        if original_timeseries:
+            timeseries = sort_timeseries(original_timeseries)
+            del original_timeseries
 
         # Convert the time series if this is a known_derivative_metric
         base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
