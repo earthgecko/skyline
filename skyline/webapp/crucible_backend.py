@@ -57,17 +57,43 @@ def engine_disposal(engine):
 # @added 20200420 - Feature #3500: webapp - crucible_process_metrics
 #                   Feature #1448: Crucible web UI
 #                   Branch #868: crucible
-def submit_crucible_job(from_timestamp, until_timestamp, metrics_list, namespaces_list, source, alert_interval, user_id, user):
+# @modified 20200421 - Feature #3500: webapp - crucible_process_metrics
+#                      Feature #1448: Crucible web UI
+# Added add_to_panorama
+# @modified 20200422 - Feature #3500: webapp - crucible_process_metrics
+#                      Feature #1448: Crucible web UI
+# Added pad_timeseries
+def submit_crucible_job(from_timestamp, until_timestamp, metrics_list, namespaces_list, source, alert_interval, user_id, user, add_to_panorama, pad_timeseries):
     """
     Get a list of all the metrics passed and generate Crucible check files for
     each
 
-    :param requested_timestamp: the training data timestamp
-    :param context: the request context, training_data or features_profiles
-    :type requested_timestamp: str
-    :type context: str
+    :param from_timestamp: the timestamp at which to start the time series
+    :param until_timestamp: the timestamp at which to end the time series
+    :param metrics_list: a list of metric names to analyse
+    :param namespaces_list: a list of metric namespaces to analyse
+    :param source: the source webapp making the request
+    :param alert_interval: the alert_interval at which Crucible should trigger
+        anomalies
+    :param user_id: the user id of the user making the request
+    :param user: the username making the request
+    :param add_to_panorama: whether Crucible should add Skyline CONSENSUS
+        anomalies to Panorama
+    :param pad_timeseries: the amount of data to pad the time series with
+    :type from_timestamp: int
+    :type until_timestamp: int
+    :type metrics_list: list
+    :type namespaces_list: list
+    :type source: str
+    :type alert_interval: int
+    :type user_id: int
+    :type user: str
+    :type add_to_panorama: boolean
+    :type pad_timeseries: str
     :return: tuple of lists
     :rtype:  (list, list, list, list)
+
+    Returns (crucible_job_id, metrics_submitted_to_process, fail_msg, trace)
 
     """
 
@@ -102,12 +128,16 @@ def submit_crucible_job(from_timestamp, until_timestamp, metrics_list, namespace
         logger.error(fail_msg)
         raise  # to webapp to return in the UI
 
+    # TODO added checks of metric names
     metric_names = []
     if metrics_list:
         logger.info('submit_crucible_job :: %s metrics passed' % str(len(metrics_list)))
         for metric in metrics_list:
             metric_names.append(metric)
 
+    # TODO added checks of metric namespaces, harder to do, but so that the UI
+    # errors to the usr rather than sending a bad or non-existent metric to
+    # Crucible
     if namespaces_list:
         logger.info('submit_crucible_job :: %s namespaces passed' % str(len(namespaces_list)))
         logger.info(
@@ -189,6 +219,41 @@ def submit_crucible_job(from_timestamp, until_timestamp, metrics_list, namespace
             graphite_metric = True
         else:
             graphite_metric = False
+
+        # @added 20200422 - Feature #3500: webapp - crucible_process_metrics
+        #                   Feature #1448: Crucible web UI
+        # In order for metrics to be analysed in Crucible like the Analyzer or
+        # Mirage analysis, the time series data needs to be padded
+        # Added pad_timeseries
+        graphite_override_uri_parameters = 'from=%s&until=%s&target=%s' % (
+            str(from_timestamp), str(until_timestamp), target)
+        timeseries_full_duration = int(until_timestamp) - int(from_timestamp)
+        pad_timeseries_with = 0
+        if pad_timeseries == 'auto':
+            if timeseries_full_duration > 3600:
+                pad_timeseries_with = 3600
+            if timeseries_full_duration > 86400:
+                pad_timeseries_with = 86400
+        if pad_timeseries == '86400':
+            pad_timeseries_with = 86400
+        if pad_timeseries == '604800':
+            pad_timeseries_with = 604800
+        if pad_timeseries == '0':
+            pad_timeseries_with = 0
+        if pad_timeseries_with:
+            try:
+                padded_from_timestamp = int(from_timestamp) - pad_timeseries_with
+                graphite_override_uri_parameters = 'from=%s&until=%s&target=%s' % (
+                    str(padded_from_timestamp), str(until_timestamp), target)
+                logger.info('padding time series with %s seconds - %s' % (
+                    str(pad_timeseries_with), str(graphite_override_uri_parameters)))
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to construct graphite_override_uri_parameters with pad_timeseries_with %s' % str(pad_timeseries_with))
+
+        # @modified 20200421 - Feature #3500: webapp - crucible_process_metrics
+        #                      Feature #1448: Crucible web UI
+        # Added add_to_panorama
         crucible_anomaly_data = 'metric = \'%s\'\n' \
                                 'value = \'%s\'\n' \
                                 'from_timestamp = \'%s\'\n' \
@@ -200,14 +265,14 @@ def submit_crucible_job(from_timestamp, until_timestamp, metrics_list, namespace
                                 'run_crucible_tests = True\n' \
                                 'added_by = \'%s\'\n' \
                                 'added_at = \'%s\'\n' \
-                                'graphite_override_uri_parameters = \'from=%s&until=%s&target=%s\'\n' \
+                                'graphite_override_uri_parameters = \'%s\'\n' \
                                 'alert_interval = \'%s\'\n' \
+                                'add_to_panorama = %s\n' \
             % (base_name, str(datapoint), str(from_timestamp),
                str(until_timestamp), str(settings.ALGORITHMS),
                triggered_algorithms, crucible_anomaly_dir, str(graphite_metric),
-               skyline_app, str(added_at),
-               str(from_timestamp), str(until_timestamp), target,
-               str(alert_interval))
+               skyline_app, str(added_at), str(graphite_override_uri_parameters),
+               str(alert_interval), str(add_to_panorama))
 
         # Create an anomaly file with details about the anomaly
         crucible_anomaly_file = '%s/%s.txt' % (crucible_anomaly_dir, sane_metricname)
