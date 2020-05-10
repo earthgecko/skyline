@@ -389,7 +389,22 @@ class Ionosphere(Thread):
                                     if re.match('\d{10}', element):
                                         timestamp = int(element)
                             if metric and timestamp:
-                                training_data_instances.append([metric, timestamp])
+                                # @added 20200425 - Feature #3508: ionosphere.untrainable_metrics
+                                # Determine and add resolution
+                                resolution_seconds = settings.FULL_DURATION
+                                for ifile in files:
+                                    if ifile.endswith('.png') and 'mirage' in ifile and 'graphite' in ifile:
+                                        try:
+                                            ifile_resolution_elements = ifile.replace('.png', '', 1).split('.')
+                                            ifile_resolution_str = ifile_resolution_elements[-1]
+                                            ifile_resolution = int(ifile_resolution_str.replace('h', '', 1))
+                                            resolution_seconds = ifile_resolution * 3600
+                                        except:
+                                            pass
+                                # @modified 20200425 - Feature #3508: ionosphere.untrainable_metrics
+                                # Added resolution_seconds
+                                # training_data_instances.append([metric, timestamp])
+                                training_data_instances.append([metric, timestamp, resolution_seconds])
 
             if training_data_instances:
                 training_data_count = len(training_data_instances)
@@ -402,13 +417,20 @@ class Ionosphere(Thread):
                         'deleted Redis set - %s' % (redis_set))
                 except:
                     pass
-                for metric, timestamp in training_data_instances:
+                # @modified 20200425 - Feature #3508: ionosphere.untrainable_metrics
+                # Added resolution_seconds
+                # for metric, timestamp in training_data_instances:
+                for metric, timestamp, resolution_seconds in training_data_instances:
                     try:
-                        data = [metric, int(timestamp)]
+                        # @modified 20200425 - Feature #3508: ionosphere.untrainable_metrics
+                        # Added resolution_seconds
+                        # data = [metric, int(timestamp)]
+                        data = [metric, int(timestamp), resolution_seconds]
                         self.redis_conn.sadd(redis_set, str(data))
                     except:
                         logger.error(traceback.format_exc())
                         logger.error('error :: failed to add %s to %s Redis set' % (str(data), redis_set))
+
                 try:
                     # Rename works to overwrite existing key fine
                     # and ... https://redis.io/commands/rename
@@ -453,7 +475,9 @@ class Ionosphere(Thread):
 # Bringing Ionosphere online - do alert on Ionosphere metrics
     def manage_ionosphere_unique_metrics(self):
         """
-        Create a Redis set of all Ionosphere enabled metrics.
+        - Create a Redis set of all Ionosphere enabled metrics.
+        - Manage the ionosphere.untrainable_metrics set, removing items when
+          they 'expire'
 
         :param i: python process id
         :return: returns True
@@ -609,6 +633,32 @@ class Ionosphere(Thread):
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: calling engine.dispose()')
+
+        # @added 20200425 - Feature #3508: ionosphere.untrainable_metrics
+        # Manage ionosphere_untrainable_metrics Redis set
+        ionosphere_untrainable_metrics = []
+        ionosphere_untrainable_metrics_redis_set = 'ionosphere.untrainable_metrics'
+        try:
+            ionosphere_untrainable_metrics = list(self.redis_conn_decoded.smembers(ionosphere_untrainable_metrics_redis_set))
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: could not get the ionosphere.untrainable_metrics set from Redis')
+        if ionosphere_untrainable_metrics:
+            ionosphere_untrainable_metrics_check_time = int(time())
+            for ionosphere_untrainable_metric_str in ionosphere_untrainable_metrics:
+                try:
+                    ionosphere_untrainable_metric = literal_eval(ionosphere_untrainable_metric_str)
+                    ium_remove_after_timestamp = int(ionosphere_untrainable_metric[6])
+                    if ionosphere_untrainable_metrics_check_time >= ium_remove_after_timestamp:
+                        try:
+                            self.redis_conn.srem(ionosphere_untrainable_metrics_redis_set, str(ionosphere_untrainable_metric))
+                            logger.info('removed item - %s - from Redis set - %s' % (str(ionosphere_untrainable_metric), ionosphere_untrainable_metrics_redis_set))
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: failed to remove item list from Redis set - %s' % ionosphere_untrainable_metrics_redis_set)
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to manage Redis set %s' % ionosphere_untrainable_metrics_redis_set)
 
         return True
 
@@ -2003,7 +2053,12 @@ class Ionosphere(Thread):
                         # if memcache does not have the key the response to the
                         # client is None, it does not except
                     except:
-                        logger.error('error :: failed to get %s from memcache' % fp_id_feature_values_key)
+                        # @modified 20200501 - Branch #3262: py3
+                        # This is not an error if the data does not exist in
+                        # memcache, it can be expected not to exists in
+                        # memcache if it has not be used in a while.
+                        # logger.error('error :: failed to get %s from memcache' % fp_id_feature_values_key)
+                        logger.info('did not get %s from memcache, will query DB' % fp_id_feature_values_key)
                     try:
                         self.memcache_client.close()
                     except:
@@ -2255,7 +2310,12 @@ class Ionosphere(Thread):
                             # if memcache does not have the key the response to the
                             # client is None, it does not except
                         except:
-                            logger.error('error :: failed to get %s from memcache' % fp_id_metric_ts_key)
+                            # @modified 20200501 - Branch #3262: py3
+                            # This is not an error if the data does not exist in
+                            # memcache, it can be expected not to exists in
+                            # memcache if it has not be used in a while.
+                            # logger.error('error :: failed to get %s from memcache' % fp_id_metric_ts_key)
+                            logger.info('did not get %s from memcache, will query DB' % fp_id_metric_ts_key)
                         try:
                             self.memcache_client.close()
                         except:
@@ -3649,7 +3709,9 @@ class Ionosphere(Thread):
 
                         # Self monitor process and terminate if run for too long
                         p_starts = time()
-                        while time() - p_starts <= 5:
+                        # @modified 20200507 - increase the allowed time
+                        # while time() - p_starts <= 5:
+                        while time() - p_starts <= 20:
                             if any(p.is_alive() for p in pids):
                                 # Just to avoid hogging the CPU
                                 sleep(.1)
