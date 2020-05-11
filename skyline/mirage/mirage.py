@@ -1139,29 +1139,17 @@ class Mirage(Thread):
         # @added 20190408 - Feature #2882: Mirage - periodic_check
         # Remove the training_dir for mirage_periodic_check_metrics if not
         # anomalous
-        if not anomalous:
-            try:
-                # @modified 20191022 - Bug #3266: py3 Redis binary objects not strings
-                #                      Branch #3262: py3
-                # mirage_periodic_check_metrics = list(self.redis_conn.smembers('mirage.periodic_check.metrics'))
-                mirage_periodic_check_metrics = list(self.redis_conn_decoded.smembers('mirage.periodic_check.metrics'))
-            except:
-                logger.error('error :: failed to get mirage_periodic_check_metrics from Redis')
-                mirage_periodic_check_metrics = []
-        if MIRAGE_PERIODIC_CHECK:
-            # if metric in mirage_periodic_check_metrics:
-            redis_metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(metric))
-            if redis_metric_name in mirage_periodic_check_metrics:
-                timeseries_dir = base_name.replace('.', '/')
-                training_dir = '%s/%s/%s' % (
-                    settings.IONOSPHERE_DATA_FOLDER, str(metric_timestamp),
-                    str(timeseries_dir))
-                if os.path.exists(training_dir):
-                    try:
-                        rmtree(training_dir)
-                        logger.info('removed Mirage periodic check training_data dir - %s' % training_dir)
-                    except:
-                        logger.error('error :: failed to rmtree Mirage periodic check training_dir - %s' % training_dir)
+        if not anomalous and periodic_mirage_check:
+            timeseries_dir = base_name.replace('.', '/')
+            training_dir = '%s/%s/%s' % (
+                settings.IONOSPHERE_DATA_FOLDER, str(metric_timestamp),
+                str(timeseries_dir))
+            if os.path.exists(training_dir):
+                try:
+                    rmtree(training_dir)
+                    logger.info('removed Mirage periodic check training_data dir - %s' % training_dir)
+                except:
+                    logger.error('error :: failed to rmtree Mirage periodic check training_dir - %s' % training_dir)
             del mirage_periodic_check_metrics
 
     def run(self):
