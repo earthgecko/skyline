@@ -44,6 +44,10 @@ from database import (
 # @added 20190502 - Branch #2646: slack
 from slack_functions import slack_post_message, slack_post_reaction
 
+# @added 20200512 - Bug #2534: Ionosphere - fluid approximation - IONOSPHERE_MINMAX_SCALING_RANGE_TOLERANCE on low ranges
+#                   Feature #2404: Ionosphere - fluid approximation
+from create_matplotlib_graph import create_matplotlib_graph
+
 LOCAL_DEBUG = False
 skyline_version = skyline_version.__absolute_version__
 
@@ -187,6 +191,121 @@ def get_ionosphere_learn_details(current_skyline_app, base_name):
     current_logger.info('get_ionosphere_learn_details :: max_percent_diff_from_origin :: %s' % (str(max_percent_diff_from_origin)))
 
     return use_full_duration, valid_learning_duration, use_full_duration_days, max_generations, max_percent_diff_from_origin
+
+
+# @added 20200512 - Bug #2534: Ionosphere - fluid approximation - IONOSPHERE_MINMAX_SCALING_RANGE_TOLERANCE on low ranges
+#                   Feature #2404: Ionosphere - fluid approximation
+# Due to the loss of resolution in the Grpahite graph images due
+# to their size, create a matplotlib graph for the DB fp time
+# series data for more accurate validation
+def create_fp_ts_graph(
+    current_skyline_app, metric_data_dir, base_name, fp_id, anomaly_timestamp,
+        timeseries):
+    """
+    Creates a png graph image using the features profile time series data
+    provided or from the features profile time seires data in the DB if an empty
+    list is provided.
+
+    :param current_skyline_app: the Skyline app name calling the function
+    :param metric_data_dir: the training_data or features profile directory were
+        the png image is to be saved to
+    :param base_name: the base_name of the metric
+    :param fp_ip: the feature profile id
+    :param anomaly_timestamp: the anomaly timestamp
+    :param timeseries: the time series
+    :type current_skyline_app: str
+    :type metric_data_dir: str
+    :type base_name: str
+    :type fp_id: int
+    :type anomaly_timestamp: int
+    :type timeseries: list
+    :return: boolean
+    :rtype: boolean
+
+    """
+
+    current_skyline_app_logger = current_skyline_app + 'Log'
+    current_logger = logging.getLogger(current_skyline_app_logger)
+
+    fp_ts_graph_file = '%s/%s.fp_id_ts.%s.matplotlib.png' % (
+        metric_data_dir, base_name, str(fp_id))
+    if path.isfile(fp_ts_graph_file):
+        return True
+
+    fp_id_metric_ts = []
+    if not timeseries:
+        # Get timeseries data from the z_fp_ts table
+        current_logger.info('create_fp_ts_graph :: getting MySQL engine')
+        try:
+            engine, fail_msg, trace = fp_create_get_an_engine(current_skyline_app)
+            current_logger.info(fail_msg)
+        except:
+            trace = traceback.format_exc()
+            current_logger.error(trace)
+            fail_msg = 'error :: create_fp_ts_graph :: could not get a MySQL engine'
+            current_logger.error('%s' % fail_msg)
+            return False
+
+        # First check to determine if the z_ts_<mertic_id> for the fp
+        # has data in memcache before querying the database
+        ionosphere_table = None
+        try:
+            ionosphere_table, fail_msg, trace = ionosphere_table_meta(current_skyline_app, engine)
+            current_logger.info(fail_msg)
+        except:
+            trace = traceback.format_exc()
+            current_logger.error('%s' % trace)
+            fail_msg = 'error :: create_fp_ts_graph :: failed to get ionosphere_table meta for %s' % base_name
+            current_logger.error('%s' % fail_msg)
+            return False
+
+        try:
+            connection = engine.connect()
+            stmt = select([ionosphere_table]).where(ionosphere_table.c.id == int(fp_id))
+            result = connection.execute(stmt)
+            for row in result:
+                metric_id = int(row['metric_id'])
+                current_logger.info('found metric_id from the DB - %s' % (str(metric_id)))
+            connection.close()
+        except:
+            current_logger.error(traceback.format_exc())
+            current_logger.error('error :: could not determine full_duration from ionosphere for fp_id %s' % str(fp_id))
+            if engine:
+                fp_create_engine_disposal(current_skyline_app, engine)
+            return False
+
+        metric_fp_ts_table = 'z_ts_%s' % str(metric_id)
+        try:
+            stmt = 'SELECT timestamp, value FROM %s WHERE fp_id=%s' % (metric_fp_ts_table, str(fp_id))  # nosec
+            connection = engine.connect()
+            for row in engine.execute(stmt):
+                fp_id_ts_timestamp = int(row['timestamp'])
+                fp_id_ts_value = float(row['value'])
+                fp_id_metric_ts.append([fp_id_ts_timestamp, fp_id_ts_value])
+            connection.close()
+            values_count = len(fp_id_metric_ts)
+            current_logger.info('determined %s values for the fp_id time series %s for %s' % (str(values_count), str(fp_id), str(base_name)))
+        except:
+            current_logger.error(traceback.format_exc())
+            current_logger.error('error :: could not determine timestamps and values from %s' % metric_fp_ts_table)
+            if engine:
+                fp_create_engine_disposal(current_skyline_app, engine)
+            return False
+    if fp_id_metric_ts:
+        if engine:
+            fp_create_engine_disposal(current_skyline_app, engine)
+        timeseries = fp_id_metric_ts
+    if not timeseries:
+        current_logger.error('error :: could not determine timestamps and values for fp_id %s' % str(fp_id))
+        return False
+    created_fp_ts_graph = False
+    try:
+        graph_title = '%s\nFeatures profile id %s - database time series data plot' % (base_name, str(fp_id))
+        created_fp_ts_graph, fp_ts_graph_file = create_matplotlib_graph(current_skyline_app, fp_ts_graph_file, graph_title, timeseries)
+    except:
+        current_logger.error(traceback.format_exc())
+        current_logger.error('error :: failed to create matplotlib graph for %s fp id %' % (base_name. str(fp_id)))
+    return created_fp_ts_graph
 
 
 # @modified 20190503 - Branch #2646: slack
@@ -972,6 +1091,21 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
             raise
         else:
             current_logger.info('create_features_profile :: %s - automated so the table should exist continuing' % context)
+
+    # @added 20200512 - Bug #2534: Ionosphere - fluid approximation - IONOSPHERE_MINMAX_SCALING_RANGE_TOLERANCE on low ranges
+    #                   Feature #2404: Ionosphere - fluid approximation
+    # Due to the loss of resolution in the Grpahite graph images due
+    # to their size, create a matplotlib graph for the DB fp time
+    # series data for more accurate validation
+    fp_ts_graph_file = '%s/%s.fp_id_ts.%s.matplotlib.png' % (
+        metric_training_data_dir, base_name, str(new_fp_id))
+    if not path.isfile(fp_ts_graph_file):
+        try:
+            created_fp_ts_graph, fp_ts_graph_file = create_fp_ts_graph(current_skyline_app, metric_training_data_dir, base_name, int(new_fp_id), int(use_anomaly_timestamp), validated_timeseries)
+        except:
+            trace = traceback.format_exc()
+            current_logger.error(traceback.format_exc())
+            current_logger.error('error :: create_features_profile :: failed to created_fp_ts_graph for %s fp id %s' % (base_name, str(new_fp_id)))
 
     del validated_timeseries
     del insert_statement

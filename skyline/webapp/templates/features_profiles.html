@@ -694,10 +694,20 @@ the top right of this page.  Here is hoping that this day just gets better.
       </div></center><br>
       {% endif %}
     {% endfor %}
-  {% else %}
+
+    {% if matched_fp_id %}
+      {% for image in metric_images %}
+        {% if '.matplotlib' in image %}
+      <h4><span class="logo"><span class="sky">Features profile ::</span> <span class="re">time series ::</span></span> database data plot</h4>
+      <img src="ionosphere_images?image={{ image }}" alt="{{ for_metric }} features profile timeseries graph" class="img-responsive center-block" /><br>
+Image file: {{ image }}<br><br>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
       <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">not_anomalous ::</span></span> graph that this <span class="logo"><span class="sky">ionosphere_echo</span></span> features profile is based on</h4>
+  {% else %}
     {% for image in metric_images %}
-      {% if not '.redis.plot' in image %}
+      {% if (( not '.redis.plot' in image) and ( not '.matplotlib' in image)) %}
         {% if metric_second_order_resolution_hours != False %}
           {% if parent_id == 0 %}
       <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">anomaly ::</span></span> graph at <strong>{{ metric_second_order_resolution_hours }} hours</strong></h4>
@@ -714,14 +724,48 @@ Graphite graph</a> for {{ for_metric }} (opens in new tab)
 <!--      <img src="ionosphere_images?image={{ image }}" alt="{{ for_metric }} timeseries graph" class="img-responsive center-block" /><br>
       <img src="ionosphere_images?image={{ image }}" alt="{{ for_metric }} timeseries graph" class="img-responsive center-block" /><br>
 -->
+        {% if matched_fp_id %}
       <center><div class="overlay-graph">
        <img class="image" src="ionosphere_images?image={{ image }}" alt="{{ for_metric }} timeseries graph" style="border:5px solid red" />
        <div class="text"><span class="logo"><span class="re">Matched this time series from</span></span> <strong>{{ echo_human_date }}</strong></div>
       </div></center><br>
-
+        {% else %}
+      <img src="ionosphere_images?image={{ image }}" alt="{{ for_metric }} timeseries graph" class="img-responsive center-block" /><br>
+        {% endif %}
 Image file: {{ image }}<br><br>
       {% endif %}
     {% endfor %}
+
+    {% if matched_fp_id %}
+      {% for image in metric_images %}
+        {% if '.matplotlib' in image %}
+      <h4><span class="logo"><span class="sky">Features profile ::</span> <span class="re">time series ::</span></span> data from the database that the features profile was created with</h4>
+This is the <strong>exact</strong> data which the features profile was created with.<br>
+It is plotted here to ensure that all detail can be seen that has been lost in
+the Graphite graph above due the image <strong>render summarization based on the
+available pixels</strong> (e.g. width).<br>
+Please also refer to <strong>this data</strong> for validation as the Graphite
+graph may flatten the data.
+      <img src="ionosphere_images?image={{ image }}" alt="{{ for_metric }} features profile time series graph" class="img-responsive center-block" /><br>
+Image file: {{ image }}<br><br>
+        {% endif %}
+      {% endfor %}
+    {% else %}
+      {% for image in metric_images %}
+        {% if '.matplotlib' in image %}
+      <h4><span class="logo"><span class="sky">Features profile ::</span> <span class="re">time series ::</span></span> data from the database that the features profile was created with</h4>
+This is the <strong>exact</strong> data which the features profile was created with.<br>
+It is plotted here to ensure that all detail can be seen that has been lost in
+the Graphite graph above due the image <strong>render summarization based on the
+available pixels</strong> (e.g. width).<br>
+Please also refer to <strong>this data</strong> for validation as the Graphite
+graph may flatten the data.
+      <img src="ionosphere_images?image={{ image }}" alt="{{ for_metric }} features profile time series graph" class="img-responsive center-block" /><br>
+Image file: {{ image }}<br><br>
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+
   {% endif %}
 
   {% if parent_id == 0 %}

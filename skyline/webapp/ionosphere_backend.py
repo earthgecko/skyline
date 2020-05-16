@@ -53,6 +53,10 @@ from database import (
 # @added 20190502 - Branch #2646: slack
 from slack_functions import slack_post_message, slack_post_reaction
 
+# @added 20200512 - Bug #2534: Ionosphere - fluid approximation - IONOSPHERE_MINMAX_SCALING_RANGE_TOLERANCE on low ranges
+#                   Feature #2404: Ionosphere - fluid approximation
+from ionosphere_functions import create_fp_ts_graph
+
 skyline_version = skyline_version.__absolute_version__
 skyline_app = 'webapp'
 skyline_app_logger = '%sLog' % skyline_app
@@ -4967,6 +4971,24 @@ metric_timestamp    :: %s     | human_date :: %s
         if not graph_image:
             logger.error('failed getting Graphite graph')
             graph_image_file = None
+
+    # @added 20200512 - Bug #2534: Ionosphere - fluid approximation - IONOSPHERE_MINMAX_SCALING_RANGE_TOLERANCE on low ranges
+    #                   Feature #2404: Ionosphere - fluid approximation
+    # Due to the loss of resolution in the Graphite graph images due
+    # to their size, create a matplotlib graph for the DB fp time
+    # series data for more accurate validation
+    fp_ts_graph_file = '%s/%s.fp_id_ts.%s.matplotlib.png' % (
+        metric_data_dir, metric, str(fp_id))
+    if not path.isfile(fp_ts_graph_file):
+        try:
+            no_timeseries = []
+            created_fp_ts_graph = create_fp_ts_graph('webapp', metric_data_dir, metric, int(fp_id), int(metric_timestamp), no_timeseries)
+            if created_fp_ts_graph:
+                logger.info('get_matched_id_resources :: created_fp_ts_graph for %s fp id %s' % (metric, str(fp_id)))
+        except:
+            trace = traceback.format_exc()
+            logger.error(traceback.format_exc())
+            logger.error('error :: get_matched_id_resources :: failed to created_fp_ts_graph for %s fp id %s' % (metric, str(fp_id)))
 
     return matched_details, True, fail_msg, trace, matched_details_object, graph_image_file
 
