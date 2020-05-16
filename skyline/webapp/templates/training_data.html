@@ -726,7 +726,7 @@ and a metric is checking and found anomalous a number of times in a row.
   {% endif %}
 
   {% for image in metric_images %}
-    {% if not '.redis.plot' in image %}
+    {% if (( not '.redis.plot' in image) and ( not '.matplotlib' in image)) %}
       {% if metric_second_order_resolution_hours != False %}
       <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">anomaly ::</span></span></span> graph at <strong>{{ metric_second_order_resolution_hours }} hours</strong></h4>
       {% else %}
