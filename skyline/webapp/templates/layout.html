@@ -103,6 +103,14 @@ Using https://github.com/rendro/countdown
           	class="active"
           	{% endif %}
           	><a href="/crucible">Crucible</a></li>
+<!--
+# @added 20200516 - Feature #3538: webapp - upload_data endpoint
+-->
+          	<li
+          	{% if url_for("flux_frontend") in request.path %}
+          	class="active"
+          	{% endif %}
+          	><a href="/flux_frontend">Flux</a></li>
             <li
             {% if url_for("rebrow") in request.path %}
             class="active"

@@ -288,6 +288,16 @@ PANORAMA_CHECK_PATH = '/opt/skyline/panorama/check'
 :vartype PANORAMA_CHECK_PATH: str
 """
 
+DATA_UPLOADS_PATH = '/tmp/skyline/data_uploads'
+"""
+:var DATA_UPLOADS_PATH: The path that webapp writes uploaded data to and flux
+    checks for data to process.  Note the parent directory must be writable to
+    the user that the Skyline processes are running as.  This is related to the
+    :mod:`settings.FLUX_PROCESS_UPLOADS` and
+    :mod:`settings.WEBAPP_ACCEPT_DATA_UPLOADS` settings.
+:vartype DATA_UPLOADS_PATH: str
+"""
+
 PANDAS_VERSION = '0.18.1'
 """
 :var PANDAS_VERSION: Pandas version in use
@@ -587,7 +597,7 @@ BATCH_PROCESSING = None
     minutes with a data point for each minute in the period, Analyzer's default
     analysis would only analyse the latest data point against the metric time
     series data.  With batch processing, Analyzer identifies batched metrics and
-    when a batch of data is receieved Analyzer sends the metric/s to analyzer_batch
+    when a batch of data is received Analyzer sends the metric/s to analyzer_batch
     to analyse.  To ensure that this can be achieved as computationally cheap as
     possible the BATCH_PROCESSING_NAMESPACES list can be applied, to reduce the
     footprint of this functionality
@@ -601,7 +611,6 @@ BATCH_PROCESSING_STALE_PERIOD = 86400
     new datapoints are added.
 :vartype BATCH_PROCESSING_STALE_PERIOD: int
 """
-
 
 BATCH_PROCESSING_DEBUG = None
 """
@@ -1851,6 +1860,14 @@ WEBAPP_FIXED_TIMEZONE = 'Etc/GMT+0'
 
 """
 
+WEBAPP_ACCEPT_DATA_UPLOADS = False
+"""
+:var WEBAPP_ACCEPT_DATA_UPLOADS: Enables the webapp to accept data uploads for
+    Flux to process.  This is related to :mod:`settings.FLUX_PROCESS_UPLOADS`
+    and uploads are saved to :mod:`settings.DATA_UPLOADS_PATH`
+:vartype WEBAPP_ACCEPT_DATA_UPLOADS: boolean
+"""
+
 WEBAPP_JAVASCRIPT_DEBUG = False
 """
 :var WEBAPP_JAVASCRIPT_DEBUG: Enables some javascript console.log when enabled.
@@ -2497,6 +2514,51 @@ FLUX_CARBON_PICKLE_PORT = 2004
     Graphite as per defined in Graphite's carbon.conf
 :vartype FLUX_CARBON_PICKLE_PORT: int
 """
+
+FLUX_PROCESS_UPLOADS = False
+"""
+:var FLUX_PROCESS_UPLOADS: Whether flux is enabled to process uploaded data
+    files in :mod:`settings.DATA_UPLOADS_PATH`.  This is related to the
+    :mod:`settings.WEBAPP_ACCEPT_DATA_UPLOADS` setting and files in
+    :mod:`settings.DATA_UPLOADS_PATH` are processed and the data is sent to
+    Graphite.
+:vartype FLUX_PROCESS_UPLOADS: boolean
+"""
+
+FLUX_SAVE_UPLOADS = False
+"""
+:var FLUX_SAVE_UPLOADS: Whether flux should save processed upload data in
+    :mod:`settings.FLUX_SAVE_UPLOADS_PATH`.
+:vartype FLUX_SAVE_UPLOADS: boolean
+"""
+
+FLUX_SAVE_UPLOADS_PATH = '/opt/skyline/flux/processed_uploads'
+"""
+:var FLUX_SAVE_UPLOADS_PATH: The path flux saves processed data to if
+    :mod:`settings.FLUX_SAVE_UPLOADS` is True.  Note that this directory must
+    exist and be writable to the user that Skyline processes are running
+    as. Or the parent directory must exist and be owned by the user that Skyline
+    processes are running as.
+:vartype FLUX_SAVE_UPLOADS_PATH: str
+"""
+
+FLUX_UPLOADS_KEYS = {}
+"""
+:var FLUX_UPLOADS_KEYS: For each parent_metric_namespace a key must be assigned
+    to the namespace as the upload_data endpoint is not authenticated.  For
+    uploads via the webapp Flux page these are handled using the
+    :mod:`settings.FLUX_SELF_API_KEY` key.
+:vartype FLUX_UPLOADS_KEYS: dict
+
+- **Example**::
+
+    FLUX_UPLOADS_KEYS = {
+        'remote_sites.warehouse.1': 'c65909df-9e06-41b7-a455-4f10b99aa741',
+        'remote_sites.warehouse.2': '1e8b1c63-10d3-4a24-bb27-d2513861dbf6'
+    }
+
+"""
+
 
 FLUX_SEND_TO_STATSD = False
 """

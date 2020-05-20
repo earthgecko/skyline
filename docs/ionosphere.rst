@@ -230,6 +230,14 @@ Skyline does not know all the contexts to the data, you do.  Ionosphere lets
 us teach Bob **that is not an earthquake!!!** and enables Bob to look and ask,
 "Did Alice say this was not an earthquake, let me look".
 
+Negative values
+^^^^^^^^^^^^^^^
+
+It needs to be noted that the current implementation of the algorithm is only
+valid for positive time series.  Any anomaly in time series that is identified
+as having a negative value in that specific time series period will not be
+trainable.
+
 "Create" or "Create and LEARN"
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -255,7 +263,7 @@ to see the relevant Analyzer :mod:`settings.FULL_DURATION` or Mirage the
 ``SECOND_ORDER_RESOLUTION_HOURS`` data as not anomalous and **not** learn at
 the fuller duration of the metric's ``learn_full_duration``.
 
-You can teach Ionosphere badly, but to unteach it is just a click of the Disable
+You can teach Ionosphere badly, but to "unteach" it is just a click of the Disable
 features profile button.
 
 Use Ionosphere learning sparingly, although it is a feature, it will also
@@ -268,7 +276,7 @@ fall into this category.  Do not go overboard on learning do it slowly and
 incrementally.  All LEARNT features profiles have the ability to be validated,
 however this is not a hard requirement, unvalidated features profiles will still
 be used in analysis, the validated flag is currently simply there to give the
-operation a view of what LEARNT features profiles have not been assessed to
+operator a view of what LEARNT features profiles have not been assessed to
 determine their accuracy.  Skyline will also LEARN from an unvalidated features
 profile.  Therefore the operator needs to review and validate or disable
 features profiles every so often, this can be achieved when reviewing and

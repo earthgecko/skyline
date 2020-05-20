@@ -37,7 +37,7 @@ Now getting the data in
 =======================
 
 You currently have a number of options to get data into Skyline, via the
-Horizon, Vista and Flux services:
+Horizon, Vista and Flux services and via file upload:
 
 Horizon - TCP pickles
 ~~~~~~~~~~~~~~~~~~~~~
@@ -112,8 +112,13 @@ sorry if did you not get that.
 Flux
 ~~~~
 
-Metrics to be submitted to Flux via HTTP/S which feeds Graphite which pickles to
+Metrics to be submitted to Flux via HTTP/S which feeds Graphite with pickles to
 Skyline, see the `Flux <flux.html>`__ page.
+
+upload_data to Flux
+~~~~~~~~~~~~~~~~~~~
+
+See the `upload_data to Flux <uploa-data-to-flux.html>`__ page.
 
 Vista
 ~~~~~

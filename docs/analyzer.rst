@@ -121,6 +121,32 @@ to check if the anomalous time series is known to be NOT ANOMALOUS due to it's
 features profile matching a known NOT ANOMALOUS trained or learnt features
 profile see `Ionosphere <ionosphere.html>`__.
 
+analyzer_batch
+==============
+
+analyzer_batch is a submodule of Analyzer that runs as an independent service
+with the sole purpose of handling and analysing metrics that are not streamed in
+real time but are updated in batches, every x minutes or hour/s.
+It is a "lite" and slightly modified version of analyzer that works in
+conjunction with analyzer to handle batch metrics.
+By default analyzer_batch and :mod:`settings.BATCH_PROCESSING` related settings
+are disabled.
+
+It should only be enabled if you have metrics that are received in infrequent
+batches, metrics feed per minute do not require batch processing.  For example
+if a metric/s are sent to Skyline every 15 minutes with a data point for each
+minute in the period, Analyzer's default analysis would only analyse the latest
+data point against the metric time series data and not all the 14 data points
+since the last analysis, analyzer_batch does.
+
+It is not default Analyzer behaviour as it adds unnecessary computational
+overhead on analysing real time metrics, therefore it is only implemented if
+required.
+
+analyzer_batch and :mod:`settings.BATCH_PROCESSING` needs to be enabled if you
+wish to use Flux to process uploaded data files, see
+`Flux <flux.html>`__.
+
 Analyzer :mod:`settings.ALERTS`
 ===============================
 

@@ -65,8 +65,7 @@ skyline_app = 'flux'
 
 skyline_app_graphite_namespace = 'skyline.%s%s.populate_metric_worker' % (parent_skyline_app, SERVER_METRIC_PATH)
 
-# LOCAL_DEBUG = False
-LOCAL_DEBUG = True
+LOCAL_DEBUG = False
 
 GRAPHITE_METRICS_PREFIX = None
 CARBON_HOST = settings.FLUX_CARBON_HOST

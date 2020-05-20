@@ -320,7 +320,7 @@ msgpack-python==0.5.6
 requests==2.22.0
 
 # ALERTERS - uncomment any alerters you want to enable
-python-simple-hipchat==0.4.0
+#python-simple-hipchat==0.4.0
 
 # @modified 20161119 - Branch #922: ionosphere
 #                      Task #1758: Update deps in Ionosphere
@@ -519,3 +519,8 @@ urllib3==1.25.3
 graphyte==1.6.0
 statsd==3.3.0
 falcon==2.0.0
+
+# @added 20200517 - Feature #3550: flux.uploaded_data_worker
+#                   Feature #3538: webapp - upload_data endpoint
+xlrd==1.2.0
+pandas_log==0.1.7; python_version >= '3.2'

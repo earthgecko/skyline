@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+{% block body %}
+<!-- BEGIN /flux_frontend block -->
+<!--
+# @added 20200517 - Feature #3538: webapp - upload_data endpoint
+ -->
+	<ol class="breadcrumb">
+  	<div class="breadcrumb">
+  		<li><a href="/">Home</a></li>
+  		<li><a href="/flux_frontend">Flux</a></li>
+  		<li class="active"><span class="logo"><span class="sky">upload</span> <span class="re">data</span></li>
+    </div>
+	</ol>
+  {% include "upload_data.html" %}
+
+<!-- END /flux_frontend block -->
+{% endblock %}

@@ -171,6 +171,36 @@ if True:
         submit_crucible_job, get_crucible_jobs, get_crucible_job,
         send_crucible_job_metric_to_panorama)
 
+# @added 20200516 - Feature #3538: webapp - upload_data endoint
+file_uploads_enabled = False
+try:
+    flux_process_uploads = settings.FLUX_PROCESS_UPLOADS
+except:
+    flux_process_uploads = False
+if flux_process_uploads:
+    try:
+        file_uploads_enabled = settings.WEBAPP_ACCEPT_DATA_UPLOADS
+    except:
+        file_uploads_enabled = False
+if file_uploads_enabled:
+    from werkzeug.utils import secure_filename
+    from skyline_functions import mkdir_p, write_data_to_file
+    try:
+        DATA_UPLOADS_PATH = settings.DATA_UPLOADS_PATH
+    except:
+        DATA_UPLOADS_PATH = '/tmp/skyline/data_uploads'
+    ALLOWED_EXTENSIONS = {'json', 'csv', 'xlsx', 'zip', 'gz'}
+    ALLOWED_FORMATS = {'csv', 'xlsx'}
+    # @modified 20200520 - Bug #3552: flux.uploaded_data_worker - tar.gz
+    # tar.gz needs more work
+    # ALLOWED_ARCHIVES = {'none', 'zip', 'gz', 'tar_gz'}
+    ALLOWED_ARCHIVES = {'none', 'zip', 'gz'}
+    try:
+        flux_upload_keys = settings.FLUX_UPLOADS_KEYS
+    except:
+        flux_upload_keys = {}
+
+
 skyline_version = skyline_version.__absolute_version__
 
 skyline_app = 'webapp'
@@ -243,6 +273,10 @@ app.config.update(
     SECRET_KEY=secret_key
 )
 
+if file_uploads_enabled:
+    app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024
+    app.config['DATA_UPLOADS_PATH'] = DATA_UPLOADS_PATH
+
 graph_url_string = str(settings.GRAPH_URL)
 PANORAMA_GRAPH_URL = re.sub('\/render.*', '', graph_url_string)
 
@@ -309,6 +343,12 @@ def limit_remote_addr():
 
     if not ip_allowed:
         abort(403)  # Forbidden
+
+
+# @added 20200514 - Feature #3538: webapp - upload_data endoint
+def allowed_file(filename):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 def check_auth(username, password):
@@ -568,6 +608,45 @@ def version():
 # they are used.
 # def data():
 def api():
+
+    # @added 20200517 - Feature #3538: webapp - upload_data endpoint
+    #                   Feature #3550: flux.uploaded_data_worker
+    if 'upload_status' in request.args:
+        logger.info('/api?upload_status request')
+        if not file_uploads_enabled:
+            return 'Not Found', 404
+        if 'upload_id_key' in request.args:
+            upload_id_key = request.args.get('upload_id_key', None)
+        if not upload_id_key:
+            logger.error('error :: /api?upload_status request')
+            resp = json.dumps(
+                {'error': 'no upload_id_key was passed'})
+            return resp, 400
+        logger.info('/api?upload_status request for upload_id_key - %s' % upload_id_key)
+        upload_status_redis_key = 'flux.upload_status.%s' % upload_id_key
+        try:
+            upload_status = REDIS_CONN.get(upload_status_redis_key)
+            if not upload_status:
+                resp = json.dumps(
+                    {'not found': 'there is not status for ' + str(upload_id_key)})
+                return flask_escape(resp), 404
+        except Exception as e:
+            logger.error(traceback.format_exc())
+            logger.error('error :: could not get the %s from Redis' % upload_status_redis_key)
+            logger.error('error :: /api?upload_status request')
+            return 'Internal Server Error', 500
+        upload_status_dict = {}
+        if upload_status:
+            try:
+                upload_status_dict = literal_eval(upload_status)
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: could not literal_eval the %s data from Redis' % upload_status_redis_key)
+                return 'Internal Server Error', 500
+        data_dict = {"status": {}, "data": {"upload": upload_status_dict}}
+        logger.info('/api?upload_status request for upload_id_key - %s, returning data' % (
+            upload_id_key))
+        return jsonify(data_dict), 200
 
     # @added 20200410 - Feature #3474: webapp api - training_data
     #                   Feature #3472: ionosphere.training_data Redis set
@@ -4474,12 +4553,11 @@ def ionosphere_images():
 
     return 'Bad Request', 400
 
+
 # @added 20170102 - Feature #1838: utilites - ALERTS matcher
 #                   Branch #922: ionosphere
 #                   Task #1658: Patterning Skyline Ionosphere
 # Added utilities TODO
-
-
 @app.route("/utilities")
 @requires_auth
 def utilities():
@@ -4490,6 +4568,473 @@ def utilities():
         error_string = traceback.format_exc()
         logger.error('error :: failed to render utilities.html: %s' % str(error_string))
         return 'Uh oh ... a Skyline 500 :(', 500
+
+
+# @added 20200516 - Feature #3538: webapp - upload_data endpoint
+#                   Feature #3550: flux.uploaded_data_worker
+@app.route("/flux_frontend", methods=['GET'])
+@requires_auth
+def flux_frontend():
+    debug_on = False
+
+    # file_uploads_enabled = True
+    logger.info('/flux_frontend request')
+    start = time.time()
+
+    try:
+        request_args_len = len(request.args)
+    except:
+        request_args_len = 0
+
+    FLUX_UPLOAD_DATA_REQUEST_ARGS = [
+        'parent_metric_namespace', 'data_file_uploaded', 'info_file_uploaded',
+        'upload_id', 'upload_id_key'
+    ]
+
+    parent_metric_namespace = None
+    data_file_uploaded = None
+    info_file_uploaded = None
+    upload_id = None
+    upload_id_key = None
+    request_arguments = []
+
+    if request_args_len:
+        for i in request.args:
+            key = str(i)
+            if key not in FLUX_UPLOAD_DATA_REQUEST_ARGS:
+                logger.error('error :: invalid request argument - %s=%s' % (key, str(i)))
+                error_string = 'error :: invalid request argument - %s=%s' % (key, str(i))
+                logger.error(error_string)
+                resp = json.dumps(
+                    {'400 Bad Request': error_string})
+                return flask_escape(resp), 400
+            value = request.args.get(key, None)
+            request_arguments.append([key, value])
+            logger.info('request argument - %s=%s' % (key, str(value)))
+            if key == 'parent_metric_namespace':
+                parent_metric_namespace = str(value)
+            if key == 'data_file_uploaded':
+                data_file_uploaded = str(value)
+            if key == 'info_file_uploaded':
+                info_file_uploaded = str(value)
+            if key == 'upload_id':
+                upload_id = str(value)
+            if key == 'upload_id_key':
+                upload_id_key = str(value)
+
+    if not upload_id_key:
+        if upload_id:
+            upload_id_key = upload_id.replace('/', '.')
+
+    # To enable uplaods via the webapp Flux endpoint using the
+    # settings.FLUX_SELF_API_KEY a shortlived FLUX_UPLOADS_KEYS is created in
+    # in Redis and passed the the upload_data template to submit as the key
+    temporary_key = str(uuid.uuid4())
+    redis_temporary_upload_key = 'flux.tmp.temporary_upload_key.%s' % temporary_key
+    try:
+        REDIS_CONN.setex(redis_temporary_upload_key, 600, str(temporary_key))
+        logger.info('added Redis key %s' % redis_temporary_upload_key)
+    except:
+        trace = traceback.format_exc()
+        message = 'could not add Redis key - %s' % redis_temporary_upload_key
+        logger.error(trace)
+        logger.error('error :: %s' % message)
+
+    try:
+        return render_template(
+            'flux_frontend.html', upload_data_enabled=file_uploads_enabled,
+            parent_metric_namespace=parent_metric_namespace,
+            data_file_uploaded=data_file_uploaded,
+            info_file_uploaded=info_file_uploaded,
+            upload_id=upload_id, upload_id_key=upload_id_key,
+            temporary_upload_key=temporary_key,
+            flux_identifier=temporary_key,
+            version=skyline_version, duration=(time.time() - start),
+            print_debug=debug_on), 200
+    except:
+        message = 'Uh oh ... a Skyline 500 :('
+        trace = traceback.format_exc()
+        return internal_error(message, trace)
+
+
+# @added 20200514 - Feature #3538: webapp - upload_data endpoint
+#                   Feature #3550: flux.uploaded_data_worker
+@app.route("/upload_data", methods=['POST'])
+def upload_data():
+
+    logger.info('/upload_data request')
+
+    if not file_uploads_enabled:
+        return 'Not Found', 404
+
+    start = time.time()
+
+    api_key = None
+    parent_metric_namespace = None
+    timezone = None
+    format = None
+    archive = None
+    data_file = None
+    info_file = None
+    info_file_in_archive = False
+    date_orientation = 'rows'
+    skip_rows = None
+    header_row = None
+    columns_to_ignore = 0
+    columns_to_process = 0
+    resample_method = 'mean'
+    json_response = False
+    flux_identifier = None
+
+    upload_id = None
+    data_dict = {}
+
+    if request.method != 'POST':
+        logger.error('error :: not a POST requests, returning 400')
+        return 'Method Not Allowed', 405
+
+    if request.method == 'POST':
+        logger.info('handling upload_data POST request')
+        if 'json_response' in request.form:
+            json_response = request.form['json_response']
+            if json_response == 'true':
+                json_response = True
+        logger.info('handling upload_data POST with variable json_response - %s' % str(json_response))
+
+        # If there is no key a 401 is returned with no info
+        if 'key' not in request.form:
+            error_string = 'no key in the POST variables'
+            logger.error('error :: ' + error_string)
+            return 'Unauthorized', 401
+        else:
+            api_key = str(request.form['key'])
+        logger.info('handling upload_data POST request with key - %s, using as api_key' % str(api_key))
+
+        # Do not process requests that do not come from the Flux frontend if
+        # they do not have json_response set.
+        if 'flux_identifier' not in request.form:
+            if not json_response:
+                return 'Bad Request', 400
+        flux_frontend_request = False
+        if 'flux_identifier' in request.form:
+            flux_identifier = str(request.form['flux_identifier'])
+            if flux_identifier:
+                flux_identifier_key = 'flux.tmp.temporary_upload_key.%s' % flux_identifier
+                try:
+                    flux_frontend_request = REDIS_CONN.get(flux_identifier_key)
+                except:
+                    trace = traceback.format_exc()
+                    message = 'could query Redis for flux_identifier_key - %s' % flux_identifier_key
+                    logger.error(trace)
+                    logger.error('error :: %s' % message)
+            if not flux_frontend_request:
+                error_string = 'flux_identifier has expired or is not valid, please reload the Flux page'
+                logger.info('flux_identifier - %s - has expired or is not valid, returning 400' % str(flux_identifier))
+                data_dict = {"status": {"error": error_string},
+                             "data": {
+                                 "upload": "failed"}}
+                return jsonify(data_dict), 400
+
+        required_post_variables = [
+            'parent_metric_namespace', 'timezone', 'format', 'archive',
+            'date_orientation', 'header_row', 'columns_to_metrics',
+            'info_file_in_archive'
+        ]
+        for r_var in required_post_variables:
+            if r_var not in request.form:
+                error_string = 'no %s in the POST variables' % r_var
+                logger.error('error :: ' + error_string)
+                data_dict = {"status": {"error": error_string},
+                             "data": {
+                                 "upload": "failed"}}
+                return jsonify(data_dict), 400
+        return_400 = False
+        parent_metric_namespace = str(request.form['parent_metric_namespace'])
+        if parent_metric_namespace == '':
+            error_string = 'blank parent_metric_namespace variable passed'
+            logger.error('error :: ' + error_string)
+            return_400 = True
+
+        known_key = None
+        if flux_upload_keys:
+            try:
+                parent_metric_namespace_key = flux_upload_keys[parent_metric_namespace]
+                logger.info('a key found for %s in flux_upload_keys' % parent_metric_namespace)
+                if parent_metric_namespace_key == api_key:
+                    known_key = api_key
+                    logger.info('the key matches the key found for %s in flux_upload_keys' % parent_metric_namespace)
+                else:
+                    logger.info('the key variable passed does not match the key found for %s in flux_upload_keys' % parent_metric_namespace)
+            except:
+                logger.info('no known key found for %s in flux_upload_keys' % parent_metric_namespace)
+                known_key = None
+        if not known_key:
+            redis_temporary_upload_key = 'flux.tmp.temporary_upload_key.%s' % api_key
+            try:
+                known_key = REDIS_CONN_UNDECODE.get(redis_temporary_upload_key)
+                logger.info('attempt to check %s key in Redis got - %s' % (
+                    redis_temporary_upload_key, str(known_key)))
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: could query Redis for %s' % redis_temporary_upload_key)
+        if not known_key:
+            logger.error('error :: unknown key passed %s' % api_key)
+            return 'Unauthorized', 401
+
+        if not return_400:
+            logger.info('handling upload_data POST with variable parent_metric_namespace - %s' % str(parent_metric_namespace))
+            timezone = str(request.form['timezone'])
+            if timezone == '':
+                error_string = '%s is not an accepted timezone' % timezone
+                logger.error('error :: ' + error_string)
+                return_400 = True
+        if not return_400:
+            logger.info('handling upload_data POST with variable timezone - %s' % str(timezone))
+            format = str(request.form['format'])
+            if format not in ALLOWED_FORMATS:
+                error_string = '%s is not an accepted format' % format
+                logger.error('error :: ' + error_string)
+                return_400 = True
+        if not return_400:
+            logger.info('handling upload_data POST with variable format - %s' % str(format))
+            archive = str(request.form['archive'])
+            if archive not in ALLOWED_ARCHIVES:
+                error_string = '%s is not an accepted archive type' % archive
+                logger.error('error :: ' + error_string)
+                return_400 = True
+        if not return_400:
+            logger.info('handling upload_data POST with variable archive - %s' % str(archive))
+            date_orientation = str(request.form['date_orientation'])
+            if date_orientation not in ['rows', 'columns']:
+                error_string = '%s is not a valid date_orientation' % date_orientation
+                logger.error('error :: ' + error_string)
+                return_400 = True
+        if not return_400:
+            logger.info('handling upload_data POST with variable date_orientation - %s' % str(date_orientation))
+            header_row_str = str(request.form['header_row'])
+            try:
+                header_row = int(header_row_str)
+            except:
+                error_string = '%s is not a valid header_row' % header_row_str
+                logger.error('error :: ' + error_string)
+                return_400 = True
+        if not return_400:
+            logger.info('handling upload_data POST with variable header_row - %s' % str(header_row))
+            columns_to_metrics = str(request.form['columns_to_metrics'])
+        if return_400:
+            data_dict = {"status": {"error": error_string},
+                         "data": {
+                             "upload": "failed"}}
+            return jsonify(data_dict), 400
+        logger.info('handling upload_data POST with variable columns_to_metrics - %s' % str(columns_to_metrics))
+        info_file_in_archive_str = str(request.form['info_file_in_archive'])
+        if info_file_in_archive_str == 'true':
+            info_file_in_archive = True
+        logger.info('handling upload_data POST with variable info_file_in_archive - %s' % str(info_file_in_archive))
+
+        info_filename = None
+        data_filename = None
+        # Check if the POST request has the data_file part
+        no_data_file = False
+        if 'data_file' not in request.files:
+            no_data_file = True
+            error_string = 'error :: no data_file in the POST'
+            logger.error(error_string)
+        if 'data_file' in request.files:
+            data_file = request.files['data_file']
+            if data_file.filename == '':
+                error_string = 'error :: blank data_file variable'
+                logger.error(error_string)
+                no_data_file = True
+        if no_data_file:
+            data_dict = {"status": {"error": error_string},
+                         "data": {
+                             "upload": "failed"}}
+            return jsonify(data_dict), 400
+
+        create_info_file = False
+        info_file_dict = None
+        if 'skip_rows' in request.form:
+            if request.form['skip_rows'] == 'none':
+                skip_rows = None
+            else:
+                try:
+                    skip_rows = int(request.form['skip_rows'])
+                except:
+                    error_string = 'skip_row must be none or int'
+                    data_dict = {"status": {"error": error_string},
+                                 "data": {
+                                     "upload": "failed"}}
+                    return jsonify(data_dict), 400
+            logger.info('handling upload_data POST with variable skip_rows - %s' % str(skip_rows))
+        if 'columns_to_ignore' in request.form:
+            columns_to_ignore = str(request.form['columns_to_ignore'])
+            logger.info('handling upload_data POST with variable columns_to_ignore - %s' % str(columns_to_ignore))
+        if 'columns_to_process' in request.form:
+            columns_to_process = str(request.form['columns_to_process'])
+            logger.info('handling upload_data POST with variable columns_to_process - %s' % str(columns_to_process))
+        resample_method = 'mean'
+        if 'resample_method' in request.form:
+            resample_method_str = str(request.form['resample_method'])
+            if resample_method_str == 'sum':
+                resample_method = 'sum'
+                logger.info('handling upload_data POST with variable columns_to_process - %s' % str(columns_to_process))
+
+        if 'info_file' not in request.files:
+            create_info_file = True
+        if 'info_file' in request.files:
+            info_file = request.files['info_file']
+            logger.info('handling upload_data POST with variable info_file - %s' % str(info_file))
+            if info_file.filename == '':
+                create_info_file = True
+            else:
+                create_info_file = False
+        if create_info_file:
+            logger.info('handling upload_data POST request with no info_file uploaded, attempting to create from variables')
+            return_400 = False
+            info_file_dict = {
+                "parent_metric_namespace": parent_metric_namespace,
+                "timezone": timezone,
+                "archive": archive,
+                "skip_rows": skip_rows,
+                "header_row": header_row,
+                "date_orientation": date_orientation,
+                "columns_to_metrics": columns_to_metrics,
+                "columns_to_ignore": columns_to_ignore,
+                "columns_to_process": columns_to_process,
+                "info_file_in_archive": info_file_in_archive,
+                "resample_method": resample_method
+            }
+
+        info_file_saved = False
+        parent_metric_namespace_dirname = secure_filename(parent_metric_namespace)
+        upload_data_dir = '%s/%s/%s' % (DATA_UPLOADS_PATH, parent_metric_namespace_dirname, str(start))
+        upload_id = '%s/%s' % (parent_metric_namespace_dirname, str(start))
+        upload_id_key = '%s.%s' % (parent_metric_namespace_dirname, str(start))
+        if not create_info_file:
+            info_file = request.files['info_file']
+            if info_file and allowed_file(info_file.filename):
+                try:
+                    info_filename = secure_filename(info_file.filename)
+                    logger.info('handling upload_data POST request with info file - %s' % str(info_filename))
+                    if not path.exists(upload_data_dir):
+                        mkdir_p(upload_data_dir)
+                    info_file.save(os.path.join(upload_data_dir, info_filename))
+                    info_file_saved = True
+                    logger.info('handling upload_data POST request saved info file - %s/%s' % (upload_data_dir, str(info_filename)))
+                except:
+                    message = 'failed to save info file'
+                    trace = traceback.format_exc()
+                    logger.error(trace)
+                    logger.error(message)
+                    if json_response:
+                        return 'Internal Server Error', 500
+                    else:
+                        return internal_error(message, trace)
+
+        data_filename = None
+        if data_file and allowed_file(data_file.filename):
+            try:
+                data_filename = secure_filename(data_file.filename)
+                logger.info('handling upload_data POST request with data file - %s' % str(data_filename))
+                # @modified 20200520 - Bug #3552: flux.uploaded_data_worker - tar.gz
+                # tar.gz needs more work
+                if data_filename.endswith('tar.gz'):
+                    error_string = 'error - tar.gz archives are not accepted'
+                    logger.info('tar.gz archives are not accepted - %s, returning 400' % str(data_file))
+                    data_dict = {"status": {"error": error_string},
+                                 "data": {
+                                     "upload": "failed"}}
+                    return jsonify(data_dict), 400
+
+                if not path.exists(upload_data_dir):
+                    mkdir_p(upload_data_dir)
+                data_file.save(os.path.join(upload_data_dir, data_filename))
+                logger.info('handling upload_data POST request saved data file - %s/%s' % (upload_data_dir, str(data_filename)))
+            except:
+                trace = traceback.format_exc()
+                message = 'failed to save data file'
+                logger.error(trace)
+                logger.error(message)
+                if json_response:
+                    return 'Internal Server Error', 500
+                else:
+                    return internal_error(message, trace)
+
+        if info_file_dict and data_filename:
+            info_filename = '%s.info.json' % data_filename
+            logger.info('handling upload_data POST creating info file from POST variables - %s' % str(info_filename))
+            if info_file_in_archive:
+                logger.info('handling upload_data POST request with info_file_in_archive True, but still creating a parent info file from variables')
+            if not path.exists(upload_data_dir):
+                mkdir_p(upload_data_dir)
+            info_file = '%s/%s' % (upload_data_dir, info_filename)
+            # info_file_data = jsonify(info_file_dict)
+            try:
+                write_data_to_file(skyline_app, info_file, 'w', str(info_file_dict))
+                logger.info('handling upload_data POST - saved inferred info file - %s' % info_file)
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to save inferred info file - %s' % info_file)
+
+        upload_data_dict = {
+            "parent_metric_namespace": parent_metric_namespace,
+            "timezone": timezone,
+            "upload_id": upload_id,
+            "status": 'pending',
+            "format": format,
+            "archive": archive,
+            "data_filename": data_filename,
+            "info_filename": info_filename,
+            "info_file_in_archive": info_file_in_archive,
+            "skip_rows": skip_rows,
+            "header_row": header_row,
+            "resample_method": resample_method
+        }
+        try:
+            REDIS_CONN.sadd('flux.uploaded_data', str(upload_data_dict))
+        except Exception as e:
+            trace = traceback.format_exc()
+            message = 'could not add item to flux.uploaded_data Redis set - %s' % str(e)
+            logger.error(trace)
+            logger.error('error :: %s' % message)
+            if json_response:
+                return 'Internal Server Error', 500
+            else:
+                return internal_error(message, trace)
+
+        upload_status_redis_key = 'flux.upload_status.%s' % upload_id_key
+        try:
+            REDIS_CONN.setex(upload_status_redis_key, 2592000, str(upload_data_dict))
+            logger.info('added Redis key %s with new status' % upload_status_redis_key)
+        except:
+            trace = traceback.format_exc()
+            message = 'could not add item to flux.uploaded_data Redis set - %s' % str(e)
+            logger.error(trace)
+            logger.error('error :: %s' % message)
+
+        if json_response:
+            data_dict = {"status": {},
+                         "data": {
+                             "feature maturity": "EXPERIMENTAL",
+                             "upload": "successful",
+                             "upload_id": upload_id,
+                             "upload_id_key": upload_id_key,
+                             "key": api_key,
+                             "parent_metric_namespace": parent_metric_namespace,
+                             "data file": data_filename}}
+            if info_file_saved:
+                data_dict['data']['info file'] = info_filename
+            logger.info('responding to upload_data POST request with json response - %s' % str(data_dict))
+            return jsonify(data_dict), 200
+        if flux_frontend_request:
+            return redirect(url_for('flux_frontend',
+                                    parent_metric_namespace=parent_metric_namespace,
+                                    data_file_uploaded=data_filename,
+                                    info_file_uploaded=info_filename,
+                                    upload_id=upload_id,
+                                    upload_id_key=upload_id_key))
+    return 'Bad Request', 400
 
 
 # @added 20160703 - Feature #1464: Webapp Redis browser

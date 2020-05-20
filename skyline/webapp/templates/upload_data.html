@@ -1,0 +1,190 @@
+{% block upload_data_block %}
+<!-- BEGIN /upload_data block -->
+{% if print_debug == 'True' %}
+<code> DEBUG </code> :: /upload_data upload_data_block</br>
+{% endif %}
+
+{% if display_message %}
+<code> ERROR </code></br>
+<code> message </code>: {{ display_message }}<br>
+{% endif %}
+
+<div class="navbar-header" role="navigation">
+  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+    <span class="sr-only">Toggle navigation</span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+  </button>
+		<ul class="nav nav-tabs" role="view_tablist" id="view">
+		  <li class="active"><a href="/flux_frontend"><span class="logo"><span class="sky">Upload</span> <span class="re">data</span></span></a></li>
+		</ul>
+		<div class="tab-content">
+	  	<div class="tab-pane active" id="view">
+	<br>
+  <div class="navbar-header" role="navigation">
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+  </div>
+
+	<div class="col-md-12">
+    {% if not upload_data_enabled %}
+    <h4><span class="logo"><span class="sky">Upload ::</span> <span class="re">data ::</span></span>NOT ENABLED</h4>
+    {% endif %}
+
+	  <h4><span class="logo"><span class="sky">Upload ::</span> <span class="re">data</span></span> <strong>EXPERIMENTAL</strong></h4>
+
+	  <div class="alert alert-warning">
+<strong>Please note :: </strong> The options on this form are not straight forward, please refer to the documentation to ensure you
+        fully understand the requirements of the fields being submitted in this form.<br>
+        <a href="https://earthgecko-skyline.readthedocs.io/en/latest/getting-data-into-skyline/upload_data.html">https://earthgecko-skyline.readthedocs.io/en/latest/getting-data-into-skyline/upload_data.html</a>
+	  </div>
+
+  {% if upload_id %}
+	  <div class="alert alert-success">
+	    <strong>Upload ID</strong> :: {{ upload_id }}<br>
+	  </div>
+  {% endif %}
+  {% if data_file_uploaded %}
+	  <div class="alert alert-success">
+	    <strong>Data file uploaded</strong> :: {{ data_file_uploaded }}<br>
+	  </div>
+  {% endif %}
+  {% if info_file_uploaded %}
+	  <div class="alert alert-success">
+	    <strong>Info file uploaded</strong> :: {{ info_file_uploaded }}<br>
+	  </div>
+  {% endif %}
+  {% if upload_id_key %}
+	  <div class="alert alert-success">
+	    <strong>Check on upload status</strong> :: <a href="/api?upload_status&upload_id_key={{ upload_id_key }}">{{ upload_id }}</a><br>
+	  </div>
+  {% endif %}
+
+  {% if data_file_uploaded %}
+        <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#upload_data">Show upload data options</button>
+        <div id="upload_data" class="collapse">
+  {% endif %}
+        <form action="upload_data" method=post enctype=multipart/form-data>
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Option</th>
+  		        <th>value</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+  		        <td>Upload data</td>
+  		        <td><select name="upload_data">
+                <option value="true">true</option>
+              </select></td>
+  		      </tr>
+  		      <tr>
+  		        <td>parent_metric_namespace <code>[required]</code></td>
+  		        <td><input type="text" name="parent_metric_namespace" value="" /> the parent metric namespace e.g temp_monitoring.warehouse.2.012383</td>
+  		      </tr>
+  		      <tr>
+  		        <td>key <code>[required]</code></td>
+  		        <td><input type="text" name="key" value="{{ temporary_upload_key }}" />
+              The key to use to upload with, a temporary 10 minute key is provided in this Flux page, but you can replace it with a real <code>settings.FLUX_UPLOADS_KEYS</code> parent_metric_namespace key if you wish.
+              </td>
+  		      </tr>
+  		      <tr>
+  		        <td>timezone <code>[required]</code></td>
+  		        <td><input type="text" name="timezone" value="UTC" /><br>
+              The timezone that the data's recorded date and time are reported in, this must be a valid pytz as listed in<br>
+              <a href="https://earthgecko-skyline.readthedocs.io/en/latest/development/pytz.html#timezones-list-for-pytz-version">https://earthgecko-skyline.readthedocs.io/en/latest/development/pytz.html#timezones-list-for-pytz-version</a>
+              </td>
+  		      </tr>
+  		      <tr>
+              <td>format <code>[required]</code></td>
+  		        <td><select name="format">
+                <option value="csv">csv</option>
+                <option value="xlsx">xlsx</option>
+              </select><br>
+  		      </tr>
+  		      <tr>
+              <td>archive <code>[required]</code></td>
+  		        <td><select name="archive">
+                <option value="none">none</option>
+                <option value="gz">gz</option>
+                <option value="zip">zip</option>
+<!--                <option value="tar_gz">tar.gz</option> -->
+              </select><br>
+  		      </tr>
+  		      <tr>
+              <td>data file <code>[required]</code></td>
+              <td><input type="file" name="data_file" /></td>
+  		      </tr>
+  		      <tr>
+              <td>info file <code>[required]</code></td>
+              <td><input type="file" name="info_file" /> The info file is always in json format and must always end with info.json<br>
+              </td>
+  		      </tr>
+  		      <tr>
+              <td>info file in archive <code>[required]</code></td>
+  		        <td><select name="info_file_in_archive">
+                <option value="false">false</option>
+<!--                <option value="true">true</option> -->
+              </select><br>
+              It is possible to place the info.json file in the data file archive and not upload it individually.<br>
+              If you upload a tar.gz or zip file with multiple data files in it, if all the data files are the same format, one info.json call be used for all of them.<br>
+              The <code>[required]</code> aspect refers to the <strong>variable</strong> only, it <strong>does not mean</strong> that a data archive must have a info.json file in it<br>
+  		      </tr>
+  		      <tr>
+              <td>date_orientation <code>[required]</code></td>
+  		        <td><select name="date_orientation">
+                <option value="rows">row wise</option>
+<!--                <option value="colums">column wise</option> -->
+              </select><br>
+  		      </tr>
+  		      <tr>
+              <td>skip_rows [optional]</td>
+              <td><input type="text" name="skip_rows" value="none" /> Rows to skip at the beginning <strong>0-indxed</strong> e.g.<br>
+              none (would skip none)<br>
+              0 (would skip the first row on 0-indexed data)<br>
+              1 (would skip the first 2 rows on 0-indexed data)<br>
+              3 (would skip the first 4 rows on 0-indexed data)</td>
+  		      </tr>
+  		      <tr>
+              <td>header_row <code>[required]</code></td>
+              <td><input type="text" name="header_row" value="0" /> which row contains the headers (column names) 0-indexed<br>
+              <strong>IMPORTANT</strong>: if you skip_rows then your header_row will be 0
+              </td>
+  		      </tr>
+  		      <tr>
+              <td>columns_to_metrics [optional]</td>
+              <td><input type="text" name="columns_to_metrics" value="" /> a one to one mapping of column names to metrics e.g. date,roof,floor</td>
+  		      </tr>
+  		      <tr>
+              <td>columns_to_ignore <code>[optional] NOT TESTED</code></td>
+              <td><input type="text" name="columns_to_ignore" value="" /> a comma separated list of columns to ignore e.g. 4,5,8</td>
+  		      </tr>
+  		      <tr>
+              <td>resample by [optional]</td>
+  		        <td><select name="resample_method">
+                <option value="mean">mean</option>
+                <option value="sum">sum</option>
+              </select><br>
+              If you data file has a sample rate of more than 1 data point per metric per 60 seconds, a pandas resample at <code>1Min</code> is appied to the data.<br>
+              If the data needs to be resampled, you can select to resample it by the mean (default) or the sum.<br>
+  		      </tr>
+  		    </tbody>
+  		  </table>
+        <br>
+        <input type="hidden" name="flux_identifier" value="{{ flux_identifier }}">
+        <input type="submit" value="Upload data">
+      </form>
+      </div>
+  </div>
+
+	</div>
+	</div>
+	</div>
+
+<!-- END /upload_data block -->
+{% endblock %}

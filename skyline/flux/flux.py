@@ -17,6 +17,13 @@ if True:
     from worker import Worker
     from populate_metric import PopulateMetric
     from populate_metric_worker import PopulateMetricWorker
+    # @added 20200517 - Feature #3550: flux.uploaded_data_worker
+    try:
+        flux_process_uploads = settings.FLUX_PROCESS_UPLOADS
+    except:
+        flux_process_uploads = False
+    if flux_process_uploads:
+        from uploaded_data_worker import UploadedDataWorker
 
 logger = set_up_logging(None)
 pid = os.getpid()
@@ -41,6 +48,11 @@ populateMetricQueue = Queue(maxsize=0)
 
 logger.info('flux :: starting populate_metric_worker')
 PopulateMetricWorker(populateMetricQueue, pid).start()
+
+# @added 20200517 - Feature #3550: flux.uploaded_data_worker
+if flux_process_uploads:
+    logger.info('flux :: starting uploaded_data_worker')
+    UploadedDataWorker(pid).start()
 
 api = application = falcon.API()
 # api.req_options.auto_parse_form_urlencoded=True

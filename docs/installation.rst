@@ -180,12 +180,26 @@ Skyline directories
     mkdir -p /opt/skyline/crucible/check
     mkdir -p /opt/skyline/crucible/data
     mkdir -p /opt/skyline/ionosphere/check
+    mkdir -p /opt/skyline/flux/processed_uploads
     mkdir /etc/skyline
     mkdir /tmp/skyline
 
 .. note:: Ensure you provide the appropriate ownership and permissions to the
   above specified directories for the user you wish to run the Skyline process
   as.
+
+.. code-block:: bash
+
+    # Example using user and group Skyline
+    chown skyline:skyline /var/log/skyline
+    chown skyline:skyline /var/run/skyline
+    chown skyline:skyline /var/dump
+    chown -R skyline:skyline /opt/skyline/panorama
+    chown -R skyline:skyline /opt/skyline/mirage
+    chown -R skyline:skyline /opt/skyline/crucible
+    chown -R skyline:skyline /opt/skyline/ionosphere
+    chown -R skyline:skyline /opt/skyline/flux
+    chown skyline:skyline /tmp/skyline
 
 Skyline and dependencies install
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
