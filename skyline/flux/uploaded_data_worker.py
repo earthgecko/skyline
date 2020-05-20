@@ -217,6 +217,7 @@ class UploadedDataWorker(Process):
             upload_to_process = None
             dryrun = False
             try:
+                uploads_to_process.sort()
                 upload_to_process = uploads_to_process[0]
                 logger.info('uploaded_data_worker :: new upload to process - %s' % str(upload_to_process))
             except:
