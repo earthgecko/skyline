@@ -75,7 +75,16 @@ class TestAlgorithms(unittest.TestCase):
         # Added the airgapped_metrics list
         # result, ensemble, datapoint = algorithms.run_selected_algorithm(timeseries, "test.metric")
         airgapped_metrics = ['test.metric.airgapped.1', 'test.metric.airgapped.2']
-        result, ensemble, datapoint = algorithms.run_selected_algorithm(timeseries, "test.metric", airgapped_metrics)
+        # @modified 20200520 - Feature #3400: Identify air gaps in the metric data
+        #                      Feature #3508: ionosphere.untrainable_metrics
+        #                      Feature #3504: Handle airgaps in batch metrics
+        # Added airgapped_metrics_filled, run_negatives_present and
+        # check_for_airgaps_only
+        # result, ensemble, datapoint = algorithms.run_selected_algorithm(timeseries, "test.metric", airgapped_metrics)
+        airgapped_metrics_filled = []
+        run_negatives_present = False
+        check_for_airgaps_only = False
+        result, ensemble, datapoint, negatives_found = algorithms.run_selected_algorithm(timeseries, 'test.metric', airgapped_metrics, airgapped_metrics_filled, run_negatives_present, check_for_airgaps_only)
 
         self.assertTrue(result)
         self.assertTrue(len(filter(None, ensemble)) >= settings.CONSENSUS)
