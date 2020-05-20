@@ -4026,6 +4026,20 @@ def disable_features_profile_family_tree(fp_ids):
             engine_disposal(engine)
         raise  # to webapp to return in the UI
 
+    # @added 20200516 - Bug #3546: Change ionosphere_enabled if all features profiles are disabled
+    # Disable any related layers as well
+    try:
+        ionosphere_layers_table, fail_msg, trace = ionosphere_layers_table_meta(skyline_app, engine)
+        logger.info(fail_msg)
+    except:
+        trace = traceback.format_exc()
+        logger.error('%s' % trace)
+        fail_msg = 'error :: ionosphere_backend :: failed to get ionosphere_layers_table meta for disable_features_profile_family_tree'
+        logger.error('%s' % fail_msg)
+        if engine:
+            engine_disposal(engine)
+        raise  # to webapp to return in the UI
+
     # @added 20190503 - Branch #2646: slack
     message_on_features_profile_disabled = False
     if slack_thread_updates and SLACK_ENABLED:
@@ -4053,6 +4067,30 @@ def disable_features_profile_family_tree(fp_ids):
                 logger.error('%s' % fail_msg)
 
     for fp_id in fp_ids:
+
+        # @added 20200516 - Bug #3546: Change ionosphere_enabled if all features profiles are disabled
+        # Disable any related layers as well
+        layers_disabled = 0
+        layer_ids = []
+        try:
+            connection = engine.connect()
+            stmt = select([ionosphere_layers_table]).where(ionosphere_layers_table.c.fp_id == int(fp_id))
+            result = connection.execute(stmt)
+            for row in result:
+                layer_id = int(row['id'])
+                layer_ids.append(layer_id)
+                logger.info('disable_features_profile_family_tree :: found layer id %s for fp id %s to disabled' % (
+                    str(layer_id), str(fp_id)))
+            connection.close()
+        except:
+            trace = traceback.format_exc()
+            logger.error(trace)
+            logger.error('error :: could not determine layers to disable for fp_id %s ' % str(fp_id))
+            fail_msg = 'error :: could not determine layers to disable for fp_id %s ' % str(fp_id)
+            if engine:
+                engine_disposal(engine)
+            raise
+
         try:
             connection = engine.connect()
             connection.execute(
@@ -4069,6 +4107,28 @@ def disable_features_profile_family_tree(fp_ids):
             if engine:
                 engine_disposal(engine)
             raise
+
+        # @added 20200516 - Bug #3546: Change ionosphere_enabled if all features profiles are disabled
+        # Disable any related layers as well
+        if layer_ids:
+            for layer_id in layer_ids:
+                try:
+                    connection = engine.connect()
+                    connection.execute(
+                        ionosphere_layers_table.update(
+                            ionosphere_layers_table.c.id == int(layer_id)).
+                        values(enabled=0))
+                    connection.close()
+                    logger.info('updated enabled for layer id %s to 0' % (str(layer_id)))
+                    layers_disabled += 1
+                except:
+                    trace = traceback.format_exc()
+                    logger.error(trace)
+                    logger.error('error :: could not update enabled for layer id %s ' % str(layer_id))
+                    fail_msg = 'error :: could not update enabled for layer id %s ' % str(layer_id)
+                    if engine:
+                        engine_disposal(engine)
+                    raise
 
         # @added 20190503 - Branch #2646: slack
         if message_on_features_profile_disabled:
@@ -4108,8 +4168,13 @@ def disable_features_profile_family_tree(fp_ids):
             if base_name:
                 ionosphere_link = '%s/ionosphere?fp_view=true&fp_id=%s&metric=%s' % (
                     settings.SKYLINE_URL, str(fp_id), base_name)
-                message = '*DISABLED* - features profile id %s was disabled for %s via %s - %s' % (
-                    str(fp_id), str(base_name), skyline_app, ionosphere_link)
+                # @added 20200516 - Bug #3546: Change ionosphere_enabled if all features profiles are disabled
+                # Disable any related layers as well
+                # message = '*DISABLED* - features profile id %s was disabled for %s via %s - %s' % (
+                #     str(fp_id), str(base_name), skyline_app, ionosphere_link)
+                message = '*DISABLED* - features profile id %s and %s related layers were disabled for %s via %s - %s' % (
+                    str(fp_id), str(layers_disabled), str(base_name),
+                    skyline_app, ionosphere_link)
 
                 if throw_exception_on_default_channel:
                     fail_msg = 'error :: disable_features_profile_family_tree :: the default_channel or default_channel_id from settings.SLACK_OPTS is set to the default, please replace these with your channel details or set SLACK_ENABLED or SLACK_OPTS[\'thread_updates\'] to False and restart webapp'

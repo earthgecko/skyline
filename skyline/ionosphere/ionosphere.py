@@ -79,7 +79,12 @@ from database import (
     # @modified 20190408 - Feature #2484: FULL_DURATION feature profiles
     # Moved to common_functions
     # metrics_table_meta,
-    ionosphere_matched_table_meta)
+    ionosphere_matched_table_meta,
+    # @added 20200516 - Bug #3546: Change ionosphere_enabled if all features profiles are disabled
+    # Readded metrics_table to set ionosphere_enabled to 0 if a metric has no
+    # fps enabled and has been willy nillied
+    metrics_table_meta)
+
 from tsfresh_feature_names import TSFRESH_FEATURES
 
 # @added 20170114 - Feature #1854: Ionosphere learn
@@ -1716,6 +1721,47 @@ class Ionosphere(Thread):
                 # fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
                 if len(all_fp_ids) == 0:
                     logger.error('error :: Ionosphere is enabled on %s but has no feature_profiles' % (base_name))
+                    # @added 20200516 - Bug #3546: Change ionosphere_enabled if all features profiles are disabled
+                    # If there are no features profiles enabled for the metric
+                    # send it back to the source to alert and update the DB with
+                    # ionosphere_enabled=0, it has been willy nillied, all its
+                    # fps have been disabled.  This has the ramification that
+                    # any layers the metric has will be disabled as well
+                    if added_by != 'ionosphere_learn':
+                        logger.info('%s has been willy nillied, all its features profiles have been disabled, but it is still flagged as ionosphere_enabled' % (base_name))
+                        logger.info('sending %s back to %s to alert' % (base_name))
+                        cache_key = 'ionosphere.%s.alert.%s.%s' % (added_by, metric_timestamp, base_name)
+                        cache_key_value = [float(anomalous_value), base_name, int(metric_timestamp), triggered_algorithms, full_duration]
+                        try:
+                            self.redis_conn.setex(cache_key, 300, str(cache_key_value))
+                            logger.info('added Redis alert key - %s - %s' % (
+                                cache_key, str(cache_key_value)))
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error(
+                                'error :: failed to add Redis key - %s - [%s, \'%s\', %s, %s, %s]' %
+                                (cache_key, str(anomalous_value), base_name, str(int(metric_timestamp)),
+                                    str(triggered_algorithms), str(full_duration)))
+                        # Update DB as to the fact that the metric is an ionosphere
+                        # metric, all its fps have been disabled, it has been willy
+                        # nillied
+                        try:
+                            metrics_table, log_msg, trace = metrics_table_meta(skyline_app, engine)
+                            logger.info(log_msg)
+                            logger.info('ionosphere_table OK')
+                            connection = engine.connect()
+                            connection.execute(
+                                metrics_table.update(
+                                    metrics_table.c.id == metrics_id).
+                                values(ionosphere_enabled=0))
+                            connection.close()
+                            logger.info('updated %s to ionosphere_enabled=0' % (
+                                base_name))
+                            logger.info('%s has been unwilly nillied' % (base_name))
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: could not update matched_count and last_matched for %s ' % str(fp_id))
+
                     fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
                 else:
                     self.remove_metric_check_file(str(metric_check_file))
