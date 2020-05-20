@@ -1,0 +1,935 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>webapp.crucible_backend &mdash; Skyline 2.0.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="Skyline 2.0.0 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Skyline
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../docker.html">docker - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html#reliability">Reliability</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline.html">skyline package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">Skyline</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>webapp.crucible_backend</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for webapp.crucible_backend</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">path</span><span class="p">,</span> <span class="n">walk</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">datetime</span> <span class="k">as</span> <span class="nn">dt</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">time</span>
+<span class="kn">from</span> <span class="nn">sys</span> <span class="k">import</span> <span class="n">version_info</span>
+<span class="kn">from</span> <span class="nn">ast</span> <span class="k">import</span> <span class="n">literal_eval</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">from</span> <span class="nn">sqlalchemy.sql</span> <span class="k">import</span> <span class="n">text</span>
+
+<span class="kn">import</span> <span class="nn">settings</span>
+<span class="kn">import</span> <span class="nn">skyline_version</span>
+<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">mkdir_p</span><span class="p">,</span> <span class="n">write_data_to_file</span><span class="p">,</span> <span class="n">filesafe_metricname</span><span class="p">,</span> <span class="n">is_derivative_metric</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">database</span> <span class="k">import</span> <span class="p">(</span><span class="n">get_engine</span><span class="p">,</span> <span class="n">metrics_table_meta</span><span class="p">)</span>
+
+<span class="n">skyline_version</span> <span class="o">=</span> <span class="n">skyline_version</span><span class="o">.</span><span class="n">__absolute_version__</span>
+<span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;webapp&#39;</span>
+<span class="n">skyline_app_logger</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">Log&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">skyline_app_logger</span><span class="p">)</span>
+<span class="n">skyline_app_logfile</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.log&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">)</span>
+<span class="n">logfile</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.log&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">ENABLE_WEBAPP_DEBUG</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_WEBAPP_DEBUG</span>
+<span class="k">except</span> <span class="ne">EnvironmentError</span> <span class="k">as</span> <span class="n">err</span><span class="p">:</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: cannot determine ENABLE_WEBAPP_DEBUG from settings&#39;</span><span class="p">)</span>
+    <span class="n">ENABLE_WEBAPP_DEBUG</span> <span class="o">=</span> <span class="kc">False</span>
+
+<span class="n">this_host</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">uname</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span>
+
+
+<div class="viewcode-block" id="get_an_engine"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.crucible_backend.get_an_engine">[docs]</a><span class="k">def</span> <span class="nf">get_an_engine</span><span class="p">():</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">engine</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">get_engine</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">engine</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: failed to get MySQL engine for&#39;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="c1"># return None, fail_msg, trace</span>
+        <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span></div>
+
+
+<div class="viewcode-block" id="engine_disposal"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.crucible_backend.engine_disposal">[docs]</a><span class="k">def</span> <span class="nf">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">engine</span><span class="o">.</span><span class="n">dispose</span><span class="p">()</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: calling engine.dispose()&#39;</span><span class="p">)</span>
+    <span class="k">return</span></div>
+
+
+<span class="c1"># @added 20200420 - Feature #3500: webapp - crucible_process_metrics</span>
+<span class="c1">#                   Feature #1448: Crucible web UI</span>
+<span class="c1">#                   Branch #868: crucible</span>
+<span class="c1"># @modified 20200421 - Feature #3500: webapp - crucible_process_metrics</span>
+<span class="c1">#                      Feature #1448: Crucible web UI</span>
+<span class="c1"># Added add_to_panorama</span>
+<span class="c1"># @modified 20200422 - Feature #3500: webapp - crucible_process_metrics</span>
+<span class="c1">#                      Feature #1448: Crucible web UI</span>
+<span class="c1"># Added pad_timeseries</span>
+<div class="viewcode-block" id="submit_crucible_job"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.crucible_backend.submit_crucible_job">[docs]</a><span class="k">def</span> <span class="nf">submit_crucible_job</span><span class="p">(</span><span class="n">from_timestamp</span><span class="p">,</span> <span class="n">until_timestamp</span><span class="p">,</span> <span class="n">metrics_list</span><span class="p">,</span> <span class="n">namespaces_list</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">alert_interval</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="n">add_to_panorama</span><span class="p">,</span> <span class="n">pad_timeseries</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get a list of all the metrics passed and generate Crucible check files for</span>
+<span class="sd">    each</span>
+
+<span class="sd">    :param from_timestamp: the timestamp at which to start the time series</span>
+<span class="sd">    :param until_timestamp: the timestamp at which to end the time series</span>
+<span class="sd">    :param metrics_list: a list of metric names to analyse</span>
+<span class="sd">    :param namespaces_list: a list of metric namespaces to analyse</span>
+<span class="sd">    :param source: the source webapp making the request</span>
+<span class="sd">    :param alert_interval: the alert_interval at which Crucible should trigger</span>
+<span class="sd">        anomalies</span>
+<span class="sd">    :param user_id: the user id of the user making the request</span>
+<span class="sd">    :param user: the username making the request</span>
+<span class="sd">    :param add_to_panorama: whether Crucible should add Skyline CONSENSUS</span>
+<span class="sd">        anomalies to Panorama</span>
+<span class="sd">    :param pad_timeseries: the amount of data to pad the time series with</span>
+<span class="sd">    :type from_timestamp: int</span>
+<span class="sd">    :type until_timestamp: int</span>
+<span class="sd">    :type metrics_list: list</span>
+<span class="sd">    :type namespaces_list: list</span>
+<span class="sd">    :type source: str</span>
+<span class="sd">    :type alert_interval: int</span>
+<span class="sd">    :type user_id: int</span>
+<span class="sd">    :type user: str</span>
+<span class="sd">    :type add_to_panorama: boolean</span>
+<span class="sd">    :type pad_timeseries: str</span>
+<span class="sd">    :return: tuple of lists</span>
+<span class="sd">    :rtype:  (list, list, list, list)</span>
+
+<span class="sd">    Returns (crucible_job_id, metrics_submitted_to_process, fail_msg, trace)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">fail_msg</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">trace</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">crucible_job_id</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">metrics_submitted_to_process</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># Generate a job id based on the YMDHMS.user_id and a job directory</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">jobid_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
+        <span class="n">jobid_datetimestamp</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">jobid_timestamp</span><span class="p">)</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1">%H%M%S&#39;</span><span class="p">)</span>
+        <span class="n">crucible_job_id</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">jobid_datetimestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">user_id</span><span class="p">))</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to determine a crucible_job_id&#39;</span><span class="p">)</span>
+        <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
+
+    <span class="c1"># Generate a job id based on the YMDHMS.user_id and a job directory</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">crucible_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">CRUCIBLE_DATA_FOLDER</span><span class="p">)</span>
+        <span class="n">crucible_job_dir</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/jobs/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">crucible_path</span><span class="p">,</span> <span class="n">crucible_job_id</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">crucible_job_dir</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="s1">&#39;creating crucible job directory - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">crucible_job_dir</span><span class="p">)))</span>
+            <span class="n">mkdir_p</span><span class="p">(</span><span class="n">crucible_job_dir</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: failed to create the crucible job directory&#39;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
+
+    <span class="c1"># TODO added checks of metric names</span>
+    <span class="n">metric_names</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">metrics_list</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;submit_crucible_job :: </span><span class="si">%s</span><span class="s1"> metrics passed&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">metrics_list</span><span class="p">)))</span>
+        <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">metrics_list</span><span class="p">:</span>
+            <span class="n">metric_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
+
+    <span class="c1"># TODO added checks of metric namespaces, harder to do, but so that the UI</span>
+    <span class="c1"># errors to the usr rather than sending a bad or non-existent metric to</span>
+    <span class="c1"># Crucible</span>
+    <span class="k">if</span> <span class="n">namespaces_list</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;submit_crucible_job :: </span><span class="si">%s</span><span class="s1"> namespaces passed&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">namespaces_list</span><span class="p">)))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="s1">&#39;submit_crucible_job :: determine metrics for submit_crucible_job between </span><span class="si">%s</span><span class="s1"> and </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">from_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">until_timestamp</span><span class="p">)))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;getting MySQL engine&#39;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">engine</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">get_an_engine</span><span class="p">()</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not get a MySQL engine to get metric names&#39;</span><span class="p">)</span>
+            <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">engine</span><span class="p">:</span>
+            <span class="n">trace</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
+            <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: engine not obtained&#39;</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
+            <span class="k">raise</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">metrics_table</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">metrics_table_meta</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">log_msg</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metrics_table OK&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get metrics_table meta&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+                <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+            <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
+
+        <span class="n">metrics_like_query</span> <span class="o">=</span> <span class="n">text</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;SELECT metric FROM metrics WHERE metric LIKE :like_string&quot;&quot;&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">namespace</span> <span class="ow">in</span> <span class="n">namespaces_list</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+                <span class="n">results</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">metrics_like_query</span><span class="p">,</span> <span class="n">like_string</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">namespace</span><span class="p">))</span>
+                <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+                    <span class="n">metric_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="n">metric_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric_name</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not determine metrics from metrics table&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+                    <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+                <span class="k">raise</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;submit_crucible_job :: </span><span class="si">%s</span><span class="s1"> metrics determined from passed namespaces&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">metric_names</span><span class="p">)))</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;submit_crucible_job :: </span><span class="si">%s</span><span class="s1"> metrics to process&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">metric_names</span><span class="p">)))</span>
+    <span class="n">metrics_submitted_to_process</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">datapoint</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">triggered_algorithms</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;histogram_bins&#39;</span><span class="p">,</span> <span class="s1">&#39;first_hour_average&#39;</span><span class="p">,</span> <span class="s1">&#39;stddev_from_average&#39;</span><span class="p">,</span> <span class="s1">&#39;grubbs&#39;</span><span class="p">,</span> <span class="s1">&#39;ks_test&#39;</span><span class="p">,</span> <span class="s1">&#39;mean_subtraction_cumulation&#39;</span><span class="p">,</span> <span class="s1">&#39;median_absolute_deviation&#39;</span><span class="p">,</span> <span class="s1">&#39;stddev_from_moving_average&#39;</span><span class="p">,</span> <span class="s1">&#39;least_squares&#39;</span><span class="p">]</span>
+    <span class="n">added_at</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
+    <span class="k">for</span> <span class="n">base_name</span> <span class="ow">in</span> <span class="n">metric_names</span><span class="p">:</span>
+        <span class="n">sane_metricname</span> <span class="o">=</span> <span class="n">filesafe_metricname</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">))</span>
+        <span class="n">derivative_metric</span> <span class="o">=</span> <span class="n">is_derivative_metric</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">derivative_metric</span><span class="p">:</span>
+            <span class="n">target</span> <span class="o">=</span> <span class="s1">&#39;nonNegativeDerivative(</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="n">base_name</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">target</span> <span class="o">=</span> <span class="n">base_name</span>
+        <span class="c1"># Generate a metric job directory</span>
+        <span class="n">crucible_anomaly_dir</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">crucible_job_dir</span><span class="p">,</span> <span class="n">sane_metricname</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">crucible_anomaly_dir</span><span class="p">):</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                    <span class="s1">&#39;creating crucible metric job directory - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">crucible_anomaly_dir</span><span class="p">)))</span>
+                <span class="n">mkdir_p</span><span class="p">(</span><span class="n">crucible_anomaly_dir</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+            <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: failed to create the crucible metric job directory&#39;</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
+            <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
+        <span class="k">if</span> <span class="n">source</span> <span class="o">==</span> <span class="s1">&#39;graphite&#39;</span><span class="p">:</span>
+            <span class="n">graphite_metric</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">graphite_metric</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="c1"># @added 20200422 - Feature #3500: webapp - crucible_process_metrics</span>
+        <span class="c1">#                   Feature #1448: Crucible web UI</span>
+        <span class="c1"># In order for metrics to be analysed in Crucible like the Analyzer or</span>
+        <span class="c1"># Mirage analysis, the time series data needs to be padded</span>
+        <span class="c1"># Added pad_timeseries</span>
+        <span class="n">graphite_override_uri_parameters</span> <span class="o">=</span> <span class="s1">&#39;from=</span><span class="si">%s</span><span class="s1">&amp;until=</span><span class="si">%s</span><span class="s1">&amp;target=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">from_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">until_timestamp</span><span class="p">),</span> <span class="n">target</span><span class="p">)</span>
+        <span class="n">timeseries_full_duration</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">until_timestamp</span><span class="p">)</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">from_timestamp</span><span class="p">)</span>
+        <span class="n">pad_timeseries_with</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">pad_timeseries</span> <span class="o">==</span> <span class="s1">&#39;auto&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">timeseries_full_duration</span> <span class="o">&gt;</span> <span class="mi">3600</span><span class="p">:</span>
+                <span class="n">pad_timeseries_with</span> <span class="o">=</span> <span class="mi">3600</span>
+            <span class="k">if</span> <span class="n">timeseries_full_duration</span> <span class="o">&gt;</span> <span class="mi">86400</span><span class="p">:</span>
+                <span class="n">pad_timeseries_with</span> <span class="o">=</span> <span class="mi">86400</span>
+        <span class="k">if</span> <span class="n">pad_timeseries</span> <span class="o">==</span> <span class="s1">&#39;86400&#39;</span><span class="p">:</span>
+            <span class="n">pad_timeseries_with</span> <span class="o">=</span> <span class="mi">86400</span>
+        <span class="k">if</span> <span class="n">pad_timeseries</span> <span class="o">==</span> <span class="s1">&#39;604800&#39;</span><span class="p">:</span>
+            <span class="n">pad_timeseries_with</span> <span class="o">=</span> <span class="mi">604800</span>
+        <span class="k">if</span> <span class="n">pad_timeseries</span> <span class="o">==</span> <span class="s1">&#39;0&#39;</span><span class="p">:</span>
+            <span class="n">pad_timeseries_with</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">pad_timeseries_with</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">padded_from_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">from_timestamp</span><span class="p">)</span> <span class="o">-</span> <span class="n">pad_timeseries_with</span>
+                <span class="n">graphite_override_uri_parameters</span> <span class="o">=</span> <span class="s1">&#39;from=</span><span class="si">%s</span><span class="s1">&amp;until=</span><span class="si">%s</span><span class="s1">&amp;target=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">padded_from_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">until_timestamp</span><span class="p">),</span> <span class="n">target</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;padding time series with </span><span class="si">%s</span><span class="s1"> seconds - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">pad_timeseries_with</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_override_uri_parameters</span><span class="p">)))</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to construct graphite_override_uri_parameters with pad_timeseries_with </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">pad_timeseries_with</span><span class="p">))</span>
+
+        <span class="c1"># @modified 20200421 - Feature #3500: webapp - crucible_process_metrics</span>
+        <span class="c1">#                      Feature #1448: Crucible web UI</span>
+        <span class="c1"># Added add_to_panorama</span>
+        <span class="n">crucible_anomaly_data</span> <span class="o">=</span> <span class="s1">&#39;metric = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                                <span class="s1">&#39;value = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                                <span class="s1">&#39;from_timestamp = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                                <span class="s1">&#39;metric_timestamp = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                                <span class="s1">&#39;algorithms = </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> \
+                                <span class="s1">&#39;triggered_algorithms = </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> \
+                                <span class="s1">&#39;anomaly_dir = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                                <span class="s1">&#39;graphite_metric = </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> \
+                                <span class="s1">&#39;run_crucible_tests = True</span><span class="se">\n</span><span class="s1">&#39;</span> \
+                                <span class="s1">&#39;added_by = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                                <span class="s1">&#39;added_at = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                                <span class="s1">&#39;graphite_override_uri_parameters = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                                <span class="s1">&#39;alert_interval = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                                <span class="s1">&#39;add_to_panorama = </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> \
+            <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">datapoint</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">from_timestamp</span><span class="p">),</span>
+               <span class="nb">str</span><span class="p">(</span><span class="n">until_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">ALGORITHMS</span><span class="p">),</span>
+               <span class="n">triggered_algorithms</span><span class="p">,</span> <span class="n">crucible_anomaly_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_metric</span><span class="p">),</span>
+               <span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">added_at</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_override_uri_parameters</span><span class="p">),</span>
+               <span class="nb">str</span><span class="p">(</span><span class="n">alert_interval</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">add_to_panorama</span><span class="p">))</span>
+
+        <span class="c1"># Create an anomaly file with details about the anomaly</span>
+        <span class="n">crucible_anomaly_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.txt&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">crucible_anomaly_dir</span><span class="p">,</span> <span class="n">sane_metricname</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">write_data_to_file</span><span class="p">(</span>
+                <span class="n">skyline_app</span><span class="p">,</span> <span class="n">crucible_anomaly_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span>
+                <span class="n">crucible_anomaly_data</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;added crucible anomaly file :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">crucible_anomaly_file</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add crucible anomaly file :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">crucible_anomaly_file</span><span class="p">))</span>
+        <span class="c1"># Create a crucible check file</span>
+        <span class="n">crucible_check_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.txt&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">CRUCIBLE_CHECK_PATH</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">added_at</span><span class="p">),</span> <span class="n">sane_metricname</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">write_data_to_file</span><span class="p">(</span>
+                <span class="n">skyline_app</span><span class="p">,</span> <span class="n">crucible_check_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span>
+                <span class="n">crucible_anomaly_data</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;added crucible check :: </span><span class="si">%s</span><span class="s1">,</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">added_at</span><span class="p">)))</span>
+            <span class="n">metrics_submitted_to_process</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add crucible check file :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">crucible_check_file</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">crucible_job_id</span><span class="p">,</span> <span class="n">metrics_submitted_to_process</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_crucible_jobs"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.crucible_backend.get_crucible_jobs">[docs]</a><span class="k">def</span> <span class="nf">get_crucible_jobs</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get a list of all the metrics passed and generate Crucible check files for</span>
+<span class="sd">    each</span>
+
+<span class="sd">    :param requested_timestamp: the training data timestamp</span>
+<span class="sd">    :param context: the request context, training_data or features_profiles</span>
+<span class="sd">    :type requested_timestamp: str</span>
+<span class="sd">    :type context: str</span>
+<span class="sd">    :return: tuple of lists</span>
+<span class="sd">    :rtype:  (list, list, list, list)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">fail_msg</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">trace</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">crucible_jobs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1"># metrics = []</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">[root@skyline-1 ~] ls -al /opt/skyline/crucible/jobs/vista.test-prometheus.prometheus.node_load1</span>
+<span class="sd">total 784</span>
+<span class="sd">drwxr-xr-x.   2 skyline skyline   4096 Mar 28 14:05 .</span>
+<span class="sd">drwxr-xr-x. 439 skyline skyline  53248 Mar 30 08:56 ..</span>
+<span class="sd">-rw-r--r--.   1 skyline skyline  17612 Mar 28 14:05 detect_drop_off_cliff.png</span>
+<span class="sd">-rw-r--r--.   1 skyline skyline  18504 Mar 28 13:55 first_hour_average.DETECTED.png</span>
+<span class="sd">-rw-r--r--.   1 skyline skyline  17612 Mar 28 13:56 grubbs.png</span>
+<span class="sd">-rw-r--r--.   1 skyline skyline  18682 Mar 28 13:54 histogram_bins.DETECTED.png</span>
+<span class="sd">-rw-r--r--.   1 skyline skyline  17612 Mar 28 13:57 ks_test.png</span>
+<span class="sd">-rw-r--r--.   1 skyline skyline  17612 Mar 28 14:04 least_squares.png</span>
+<span class="sd">-rw-r--r--.   1 skyline skyline  18431 Mar 28 13:58 mean_subtraction_cumulation.DETECTED.png</span>
+<span class="sd">-rw-r--r--.   1 skyline skyline  18605 Mar 28 13:59 median_absolute_deviation.DETECTED.png</span>
+<span class="sd">-rw-r--r--.   1 skyline skyline 437652 Mar 28 13:53 vista.test-prometheus.prometheus.node_load1.json</span>
+<span class="sd">-rw-rw-rw-.   1 skyline skyline     83 Mar 28 14:05 vista.test-prometheus.prometheus.node_load1.json.gz</span>
+<span class="sd">-rw-r--r--.   1 skyline skyline  21857 Mar 28 13:53 vista.test-prometheus.prometheus.node_load1.png</span>
+<span class="sd">-rw-r--r--.   1 skyline skyline    821 Mar 28 14:05 vista.test-prometheus.prometheus.node_load1.txt</span>
+<span class="sd">-rw-r--r--.   1 skyline skyline  22022 Mar 28 14:05 skyline.anomalies.csv</span>
+<span class="sd">-rw-r--r--.   1 skyline skyline  23824 Mar 28 14:05 skyline.anomalies_score.txt</span>
+<span class="sd">-rw-r--r--.   1 skyline skyline  18056 Mar 28 14:05 skyline.consensus.anomalies.png</span>
+<span class="sd">-rw-r--r--.   1 skyline skyline  18504 Mar 28 13:56 stddev_from_average.DETECTED.png</span>
+<span class="sd">-rw-r--r--.   1 skyline skyline  18836 Mar 28 14:01 stddev_from_moving_average.DETECTED.png</span>
+<span class="sd">[root@skyline-1 ~]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">crucible_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">CRUCIBLE_DATA_FOLDER</span><span class="p">)</span>
+        <span class="n">data_dir</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/jobs&#39;</span> <span class="o">%</span> <span class="n">crucible_path</span>
+        <span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">walk</span><span class="p">(</span><span class="n">data_dir</span><span class="p">):</span>
+            <span class="n">has_anomalies</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">completed_job</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">panorama_done</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">add_metric</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">skyline_anomalies</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">skyline_consensus_anomalies</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">skyline_consensus_anomalies_present</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">files</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.DETECTED.png&#39;</span><span class="p">):</span>
+                        <span class="n">has_anomalies</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="s1">&#39;skyline.anomalies_score.txt&#39;</span> <span class="o">==</span> <span class="n">file</span><span class="p">:</span>
+                        <span class="n">completed_job</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="n">skyline_anomalies_score_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">skyline_anomalies_score_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                                <span class="n">output</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+                            <span class="n">skyline_anomalies</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+                            <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: failed to get skyline_anomalies from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">skyline_anomalies_score_file</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
+                            <span class="n">skyline_anomalies</span> <span class="o">=</span> <span class="kc">None</span>
+                        <span class="k">if</span> <span class="n">skyline_anomalies</span><span class="p">:</span>
+                            <span class="c1"># skyline_anomalies format</span>
+                            <span class="c1"># [timestamp, value, anomaly_score, triggered_algorithms]</span>
+                            <span class="c1"># [skyline_anomaly[0], skyline_anomaly[1], skyline_anomaly[2], skyline_anomaly[3]]</span>
+                            <span class="c1"># [1583234400.0, 44.39999999990687, 2, [&#39;histogram_bins&#39;, &#39;median_absolute_deviation&#39;]],</span>
+                            <span class="c1"># Convert float timestamp from Graphite to int</span>
+                            <span class="k">for</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">anomaly_score</span><span class="p">,</span> <span class="n">triggered_algorithms</span> <span class="ow">in</span> <span class="n">skyline_anomalies</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="n">anomaly_score</span> <span class="o">&gt;=</span> <span class="n">settings</span><span class="o">.</span><span class="n">CONSENSUS</span><span class="p">:</span>
+                                    <span class="n">skyline_consensus_anomalies</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">timestamp</span><span class="p">),</span> <span class="n">value</span><span class="p">,</span> <span class="n">anomaly_score</span><span class="p">,</span> <span class="n">triggered_algorithms</span><span class="p">])</span>
+                            <span class="k">del</span> <span class="n">skyline_anomalies</span>
+                    <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.json.gz&#39;</span><span class="p">):</span>
+                        <span class="n">completed_job</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.sent_to_panorama.txt&#39;</span><span class="p">):</span>
+                        <span class="n">completed_job</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="n">panorama_done</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.txt&#39;</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="s1">&#39;skyline.anomalies_score.txt&#39;</span> <span class="ow">in</span> <span class="n">file</span><span class="p">:</span>
+                            <span class="n">completed_job</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="k">elif</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.sent_to_panorama.txt&#39;</span><span class="p">):</span>
+                            <span class="n">add_metric</span> <span class="o">=</span> <span class="kc">True</span>
+                            <span class="n">has_anomalies</span> <span class="o">=</span> <span class="kc">True</span>
+                            <span class="n">completed_job</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">metric_name</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+                            <span class="n">add_metric</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.json&#39;</span><span class="p">):</span>
+                        <span class="n">metric_name</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.json&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+                        <span class="n">add_metric</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.json.gz&#39;</span><span class="p">):</span>
+                        <span class="n">completed_job</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="n">add_metric</span><span class="p">:</span>
+                <span class="n">crucible_job_id</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+                <span class="n">crucible_job_id_check</span> <span class="o">=</span> <span class="n">crucible_job_id</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">d</span><span class="si">{14}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">crucible_job_id_check</span><span class="p">):</span>
+                    <span class="n">add_metric</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">crucible_job_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+                    <span class="n">crucible_job_id</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">crucible_job_dir</span><span class="p">)</span>
+                <span class="n">crucible_jobid_datetimestamp</span> <span class="o">=</span> <span class="n">crucible_job_id</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">py_date</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">crucible_jobid_datetimestamp</span><span class="p">,</span> <span class="s1">&#39;%Y%m</span><span class="si">%d</span><span class="s1">%H%M%S&#39;</span><span class="p">)</span>
+                <span class="n">human_date</span> <span class="o">=</span> <span class="n">py_date</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-</span><span class="si">%d</span><span class="s1"> %H:%M:%S&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">skyline_consensus_anomalies</span><span class="p">:</span>
+                    <span class="n">skyline_consensus_anomalies_present</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">skyline_consensus_anomalies</span><span class="p">)</span>
+                    <span class="k">del</span> <span class="n">skyline_consensus_anomalies</span>
+                <span class="n">crucible_jobs</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">metric_name</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">crucible_job_id</span><span class="p">,</span> <span class="n">human_date</span><span class="p">,</span> <span class="n">completed_job</span><span class="p">,</span> <span class="n">has_anomalies</span><span class="p">,</span> <span class="n">panorama_done</span><span class="p">,</span> <span class="n">skyline_consensus_anomalies_present</span><span class="p">])</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: failed to create the crucible job directory&#39;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">crucible_jobs</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_crucible_job"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.crucible_backend.get_crucible_job">[docs]</a><span class="k">def</span> <span class="nf">get_crucible_job</span><span class="p">(</span><span class="n">crucible_job_id</span><span class="p">,</span> <span class="n">metric</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get the crucible data for a Crucible analysis</span>
+
+<span class="sd">    :param crucible_job_id: the crucible_job_id</span>
+<span class="sd">    :param metric: the metric name</span>
+<span class="sd">    :type crucible_job_id: str</span>
+<span class="sd">    :type metric: str</span>
+<span class="sd">    :return: tuple of lists</span>
+<span class="sd">    :rtype:  (list, boolean, boolean, list, list, list, list, str, str, str)</span>
+
+<span class="sd">    Returns (crucible_job_details, completed_job, has_anomalies, skyline_anomalies, skyline_consensus_anomalies, panorama_done, panorama_done_timestamp, panorama_done_user_id, image_files, image_file_names, graph_image_file, fail_msg, trace)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">fail_msg</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">trace</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">has_anomalies</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">completed_job</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">crucible_job_details</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">skyline_anomalies</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">skyline_consensus_anomalies</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">image_files</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">image_file_names</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">crucible_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">CRUCIBLE_DATA_FOLDER</span><span class="p">)</span>
+    <span class="n">jobs_data_dir</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/jobs&#39;</span> <span class="o">%</span> <span class="n">crucible_path</span>
+    <span class="n">data_dir</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">jobs_data_dir</span><span class="p">,</span> <span class="n">crucible_job_id</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span>
+    <span class="n">crucible_job_details_filename</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.txt&#39;</span> <span class="o">%</span> <span class="n">metric</span>
+    <span class="n">crucible_job_details_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="n">crucible_job_details_filename</span><span class="p">)</span>
+    <span class="n">skyline_anomalies_score_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/skyline.anomalies_score.txt&#39;</span> <span class="o">%</span> <span class="n">data_dir</span>
+    <span class="n">graph_image_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.png&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span>
+    <span class="n">crucible_job_sent_to_panorama_file_pattern</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.sent_to_panorama.txt&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="n">crucible_job_id</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span>
+    <span class="n">panorama_done</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">panorama_done_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">panorama_done_user_id</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;get_crucible_job :: </span><span class="si">%s</span><span class="s1"> for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">crucible_job_id</span><span class="p">,</span> <span class="n">metric</span><span class="p">))</span>
+
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">[root@skyline-1 ~] ls -al /opt/skyline/crucible/jobs/vista.test-prometheus.prometheus.node_load1</span>
+<span class="sd">total 784</span>
+<span class="sd">drwxr-xr-x.   2 skyline skyline   4096 Mar 28 14:05 .</span>
+<span class="sd">drwxr-xr-x. 439 skyline skyline  53248 Mar 30 08:56 ..</span>
+<span class="sd">-rw-r--r--.   1 skyline skyline  17612 Mar 28 14:05 detect_drop_off_cliff.png</span>
+<span class="sd">-rw-r--r--.   1 skyline skyline  18504 Mar 28 13:55 first_hour_average.DETECTED.png</span>
+<span class="sd">-rw-r--r--.   1 skyline skyline  17612 Mar 28 13:56 grubbs.png</span>
+<span class="sd">-rw-r--r--.   1 skyline skyline  18682 Mar 28 13:54 histogram_bins.DETECTED.png</span>
+<span class="sd">-rw-r--r--.   1 skyline skyline  17612 Mar 28 13:57 ks_test.png</span>
+<span class="sd">-rw-r--r--.   1 skyline skyline  17612 Mar 28 14:04 least_squares.png</span>
+<span class="sd">-rw-r--r--.   1 skyline skyline  18431 Mar 28 13:58 mean_subtraction_cumulation.DETECTED.png</span>
+<span class="sd">-rw-r--r--.   1 skyline skyline  18605 Mar 28 13:59 median_absolute_deviation.DETECTED.png</span>
+<span class="sd">-rw-r--r--.   1 skyline skyline 437652 Mar 28 13:53 vista.test-prometheus.prometheus.node_load1.json</span>
+<span class="sd">-rw-rw-rw-.   1 skyline skyline     83 Mar 28 14:05 vista.test-prometheus.prometheus.node_load1.json.gz</span>
+<span class="sd">-rw-r--r--.   1 skyline skyline  21857 Mar 28 13:53 vista.test-prometheus.prometheus.node_load1.png</span>
+<span class="sd">-rw-r--r--.   1 skyline skyline    821 Mar 28 14:05 vista.test-prometheus.prometheus.node_load1.txt</span>
+<span class="sd">-rw-r--r--.   1 skyline skyline  22022 Mar 28 14:05 skyline.anomalies.csv</span>
+<span class="sd">-rw-r--r--.   1 skyline skyline  23824 Mar 28 14:05 skyline.anomalies_score.txt</span>
+<span class="sd">-rw-r--r--.   1 skyline skyline  18056 Mar 28 14:05 skyline.consensus.anomalies.png</span>
+<span class="sd">-rw-r--r--.   1 skyline skyline  18504 Mar 28 13:56 stddev_from_average.DETECTED.png</span>
+<span class="sd">-rw-r--r--.   1 skyline skyline  18836 Mar 28 14:01 stddev_from_moving_average.DETECTED.png</span>
+<span class="sd">[root@skyline-1 ~]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;get_crucible_job :: walking </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">data_dir</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">root</span><span class="p">,</span> <span class="n">dirs</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">walk</span><span class="p">(</span><span class="n">data_dir</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;get_crucible_job :: checking file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">file</span><span class="p">))</span>
+                <span class="n">append_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="n">file</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">file</span> <span class="o">==</span> <span class="n">crucible_job_details_filename</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;get_crucible_job :: getting crucible_job_details from file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">file</span><span class="p">))</span>
+                        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">crucible_job_details_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+                                <span class="n">no_new_line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+                                <span class="n">no_equal_line</span> <span class="o">=</span> <span class="n">no_new_line</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; = &#39;</span><span class="p">,</span> <span class="s1">&#39;,&#39;</span><span class="p">)</span>
+                                <span class="n">array</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">no_equal_line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+                                <span class="n">add_line</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
+                                <span class="n">crucible_job_details</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">add_line</span><span class="p">)</span>
+                        <span class="c1"># with open(crucible_job_details_file) as f:</span>
+                        <span class="c1">#     output = f.read()</span>
+                        <span class="c1"># crucible_job_details = literal_eval(output)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+                        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: failed to get crucible_job_details from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">file</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
+                        <span class="n">crucible_job_details</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.png&#39;</span><span class="p">):</span>
+                    <span class="n">image_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">append_file</span><span class="p">)</span>
+                    <span class="n">image_file_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.DETECTED.png&#39;</span><span class="p">):</span>
+                    <span class="n">has_anomalies</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="n">crucible_job_sent_to_panorama_file_pattern</span><span class="p">):</span>
+                    <span class="n">panorama_done</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">append_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                            <span class="n">output</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+                        <span class="n">panorama_done</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+                        <span class="n">panorama_done_timestamp</span> <span class="o">=</span> <span class="n">panorama_done</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="n">panorama_done_user_id</span> <span class="o">=</span> <span class="n">panorama_done</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+                        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: failed to get panorama_done from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">append_file</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">file</span> <span class="o">==</span> <span class="s1">&#39;skyline.anomalies_score.txt&#39;</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">skyline_anomalies_score_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                            <span class="n">output</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+                        <span class="n">skyline_anomalies</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+                        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: failed to get crucible_job_details from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">file</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
+                        <span class="n">skyline_anomalies</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="n">skyline_anomalies_int_ts</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">skyline_consensus_anomalies</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">if</span> <span class="n">skyline_anomalies</span><span class="p">:</span>
+                        <span class="c1"># skyline_anomalies format</span>
+                        <span class="c1"># [timestamp, value, anomaly_score, triggered_algorithms]</span>
+                        <span class="c1"># [skyline_anomaly[0], skyline_anomaly[1], skyline_anomaly[2], skyline_anomaly[3]]</span>
+                        <span class="c1"># [1583234400.0, 44.39999999990687, 2, [&#39;histogram_bins&#39;, &#39;median_absolute_deviation&#39;]],</span>
+                        <span class="c1"># Convert float timestamp from Graphite to int</span>
+                        <span class="k">for</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">anomaly_score</span><span class="p">,</span> <span class="n">triggered_algorithms</span> <span class="ow">in</span> <span class="n">skyline_anomalies</span><span class="p">:</span>
+                            <span class="n">skyline_anomalies_int_ts</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">timestamp</span><span class="p">),</span> <span class="n">value</span><span class="p">,</span> <span class="n">anomaly_score</span><span class="p">,</span> <span class="n">triggered_algorithms</span><span class="p">])</span>
+                            <span class="k">if</span> <span class="n">anomaly_score</span> <span class="o">&gt;=</span> <span class="n">settings</span><span class="o">.</span><span class="n">CONSENSUS</span><span class="p">:</span>
+                                <span class="n">skyline_consensus_anomalies</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">timestamp</span><span class="p">),</span> <span class="n">value</span><span class="p">,</span> <span class="n">anomaly_score</span><span class="p">,</span> <span class="n">triggered_algorithms</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="n">skyline_anomalies_int_ts</span><span class="p">:</span>
+                        <span class="n">skyline_anomalies</span> <span class="o">=</span> <span class="n">skyline_anomalies_int_ts</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="k">del</span> <span class="n">skyline_anomalies_int_ts</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="k">pass</span>
+                <span class="k">if</span> <span class="n">file</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.json.gz&#39;</span><span class="p">):</span>
+                    <span class="n">completed_job</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: failed to create the crucible job directory&#39;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">crucible_job_details</span><span class="p">,</span> <span class="n">completed_job</span><span class="p">,</span> <span class="n">has_anomalies</span><span class="p">,</span> <span class="n">skyline_anomalies</span><span class="p">,</span> <span class="n">skyline_consensus_anomalies</span><span class="p">,</span> <span class="n">panorama_done</span><span class="p">,</span> <span class="n">panorama_done_timestamp</span><span class="p">,</span> <span class="n">panorama_done_user_id</span><span class="p">,</span> <span class="n">image_files</span><span class="p">,</span> <span class="n">image_file_names</span><span class="p">,</span> <span class="n">graph_image_file</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="send_crucible_job_metric_to_panorama"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.crucible_backend.send_crucible_job_metric_to_panorama">[docs]</a><span class="k">def</span> <span class="nf">send_crucible_job_metric_to_panorama</span><span class="p">(</span><span class="n">crucible_job_id</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="n">skyline_consensus_anomalies</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Send the Crucible Skyline CONSENSUS anomalies for a crucible_job and metric</span>
+<span class="sd">    to Panorama to insert into the anomalies database.</span>
+
+<span class="sd">    :param crucible_job_id: the crucible_job_id</span>
+<span class="sd">    :param base_name: the metric name</span>
+<span class="sd">    :param user_id: the user_id</span>
+<span class="sd">    :param user: the username</span>
+<span class="sd">    :param skyline_consensus_anomalies: the Crucible Skyline CONSENSUS anomalies</span>
+<span class="sd">    :type crucible_job_id: str</span>
+<span class="sd">    :type base_name: str</span>
+<span class="sd">    :type user_id: int</span>
+<span class="sd">    :type user: str</span>
+<span class="sd">    :type skyline_consensus_anomalies: list</span>
+
+<span class="sd">    :return: tuple of lists</span>
+<span class="sd">    :rtype:  (int, str, str)</span>
+
+<span class="sd">    Returns (len(skyline_consensus_anomalies), fail_msg, trace)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">fail_msg</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">trace</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">added_at</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
+    <span class="n">crucible_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">CRUCIBLE_DATA_FOLDER</span><span class="p">)</span>
+    <span class="n">jobs_data_dir</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/jobs&#39;</span> <span class="o">%</span> <span class="n">crucible_path</span>
+    <span class="n">data_dir</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">jobs_data_dir</span><span class="p">,</span> <span class="n">crucible_job_id</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
+    <span class="n">crucible_job_details_filename</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.txt&#39;</span> <span class="o">%</span> <span class="n">base_name</span>
+    <span class="n">crucible_job_details_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">data_dir</span><span class="p">,</span> <span class="n">crucible_job_details_filename</span><span class="p">)</span>
+    <span class="n">crucible_job_details</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;send_crucible_job_metric_to_panorama :: getting crucible_job_details from file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">crucible_job_details_file</span><span class="p">))</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">crucible_job_details_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">no_new_line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+                <span class="n">no_equal_line</span> <span class="o">=</span> <span class="n">no_new_line</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; = &#39;</span><span class="p">,</span> <span class="s1">&#39;,&#39;</span><span class="p">)</span>
+                <span class="n">array</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">no_equal_line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+                <span class="n">add_line</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
+                <span class="n">crucible_job_details</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">add_line</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: send_crucible_job_metric_to_panorama - failed to get crucible_job_details from file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">crucible_job_details_file</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">timestamp_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">crucible_job_details</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">new_timestamp_str</span> <span class="o">=</span> <span class="n">timestamp_str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+        <span class="n">from_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">new_timestamp_str</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: send_crucible_job_metric_to_panorama - failed to determine from_timestamp from get crucible_job_details&#39;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
+
+    <span class="n">label</span> <span class="o">=</span> <span class="s1">&#39;Crucible job </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">crucible_job_id</span><span class="p">)</span>
+    <span class="n">sane_metricname</span> <span class="o">=</span> <span class="n">filesafe_metricname</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">))</span>
+
+    <span class="c1"># skyline_consensus_anomalies format</span>
+    <span class="c1"># [timestamp, value, anomaly_score, triggered_algorithms]</span>
+    <span class="c1"># [skyline_anomaly[0], skyline_anomaly[1], skyline_anomaly[2], skyline_anomaly[3]]</span>
+    <span class="c1"># [1583234400, 44.39999999990687, 2, [&#39;histogram_bins&#39;, &#39;median_absolute_deviation&#39;]],</span>
+    <span class="k">for</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">datapoint</span><span class="p">,</span> <span class="n">anomaly_score</span><span class="p">,</span> <span class="n">triggered_algorithms</span> <span class="ow">in</span> <span class="n">skyline_consensus_anomalies</span><span class="p">:</span>
+        <span class="c1"># To allow multiple Panorama anomaly files to added quickly just</span>
+        <span class="c1"># increment the added_at by 1 seconds so that all the files have a</span>
+        <span class="c1"># unique name</span>
+        <span class="n">added_at</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="c1"># Note:</span>
+        <span class="c1"># The values are enclosed is single quoted intentionally</span>
+        <span class="c1"># as the imp.load_source used results in a shift in the</span>
+        <span class="c1"># decimal position when double quoted, e.g.</span>
+        <span class="c1"># value = &quot;5622.0&quot; gets imported as</span>
+        <span class="c1"># 2016-03-02 12:53:26 :: 28569 :: metric variable - value - 562.2</span>
+        <span class="c1"># single quoting results in the desired,</span>
+        <span class="c1"># 2016-03-02 13:16:17 :: 1515 :: metric variable - value - 5622.0</span>
+        <span class="n">source</span> <span class="o">=</span> <span class="s1">&#39;graphite&#39;</span>
+        <span class="n">panaroma_anomaly_data</span> <span class="o">=</span> <span class="s1">&#39;metric = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                                <span class="s1">&#39;value = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                                <span class="s1">&#39;from_timestamp = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                                <span class="s1">&#39;metric_timestamp = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                                <span class="s1">&#39;algorithms = </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> \
+                                <span class="s1">&#39;triggered_algorithms = </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> \
+                                <span class="s1">&#39;app = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                                <span class="s1">&#39;source = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                                <span class="s1">&#39;added_by = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                                <span class="s1">&#39;added_at = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                                <span class="s1">&#39;label = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                                <span class="s1">&#39;user_id = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+            <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">datapoint</span><span class="p">),</span> <span class="n">from_timestamp</span><span class="p">,</span>
+               <span class="nb">str</span><span class="p">(</span><span class="n">timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">ALGORITHMS</span><span class="p">),</span>
+               <span class="n">triggered_algorithms</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span>
+               <span class="n">this_host</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">added_at</span><span class="p">),</span> <span class="n">label</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">user_id</span><span class="p">))</span>
+        <span class="c1"># Create an anomaly file with details about the anomaly</span>
+        <span class="n">panaroma_anomaly_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.txt&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_CHECK_PATH</span><span class="p">,</span> <span class="n">added_at</span><span class="p">,</span> <span class="n">sane_metricname</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">write_data_to_file</span><span class="p">(</span>
+                <span class="n">skyline_app</span><span class="p">,</span> <span class="n">panaroma_anomaly_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span>
+                <span class="n">panaroma_anomaly_data</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;send_crucible_job_metric_to_panorama - added panorama anomaly file :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">panaroma_anomaly_file</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: send_crucible_job_metric_to_panorama - failed to add panorama anomaly file :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">panaroma_anomaly_file</span><span class="p">))</span>
+
+    <span class="n">crucible_job_sent_to_panorama_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.sent_to_panorama.txt&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="n">data_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">added_at</span><span class="p">),</span> <span class="n">crucible_job_id</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
+    <span class="n">panorama_done_data</span> <span class="o">=</span> <span class="p">[</span><span class="n">added_at</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">user_id</span><span class="p">),</span> <span class="n">skyline_consensus_anomalies</span><span class="p">]</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">write_data_to_file</span><span class="p">(</span>
+            <span class="n">skyline_app</span><span class="p">,</span> <span class="n">crucible_job_sent_to_panorama_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">panorama_done_data</span><span class="p">))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;send_crucible_job_metric_to_panorama - added set to panorama crucible job file :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">crucible_job_sent_to_panorama_file</span><span class="p">))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;send_crucible_job_metric_to_panorama - with contents :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">panorama_done_data</span><span class="p">))</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: send_crucible_job_metric_to_panorama - failed to add panorama crucible job file :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">crucible_job_sent_to_panorama_file</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">skyline_consensus_anomalies</span><span class="p">),</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'2.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

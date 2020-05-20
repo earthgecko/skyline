@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>crucible.crucible_algorithms &mdash; Skyline 1.3.0 documentation</title>
+  <title>crucible.crucible_algorithms &mdash; Skyline 2.0.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.3.0 documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 2.0.0 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                1.3
+                2.0
               </div>
             
           
@@ -90,10 +90,12 @@
 <li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
@@ -177,38 +179,39 @@
 <span class="kn">from</span> <span class="nn">matplotlib</span> <span class="k">import</span> <span class="n">use</span> <span class="k">as</span> <span class="n">matplotlib_use</span>
 <span class="n">matplotlib_use</span><span class="p">(</span><span class="s1">&#39;Agg&#39;</span><span class="p">)</span>
 
-<span class="kn">import</span> <span class="nn">pandas</span>
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">scipy</span>
-<span class="kn">import</span> <span class="nn">statsmodels.api</span> <span class="k">as</span> <span class="nn">sm</span>
-<span class="c1"># @modified 20160821 - Issue #23 Test dependency updates</span>
-<span class="c1"># Use Agg for matplotlib==1.5.2 upgrade, backwards compatibile</span>
-<span class="c1"># @modified 20180910 - Task #2588: Update dependencies</span>
-<span class="c1"># import matplotlib</span>
-<span class="c1"># matplotlib.use(&#39;Agg&#39;)</span>
-<span class="kn">import</span> <span class="nn">matplotlib</span>
-<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">import</span> <span class="nn">traceback</span>
-<span class="kn">import</span> <span class="nn">logging</span>
-<span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">import</span> <span class="nn">time</span>
-<span class="kn">from</span> <span class="nn">sys</span> <span class="k">import</span> <span class="n">version_info</span>
+<span class="k">if</span> <span class="kc">True</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">pandas</span>
+    <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+    <span class="kn">import</span> <span class="nn">scipy</span>
+    <span class="kn">import</span> <span class="nn">statsmodels.api</span> <span class="k">as</span> <span class="nn">sm</span>
+    <span class="c1"># @modified 20160821 - Issue #23 Test dependency updates</span>
+    <span class="c1"># Use Agg for matplotlib==1.5.2 upgrade, backwards compatibile</span>
+    <span class="c1"># @modified 20180910 - Task #2588: Update dependencies</span>
+    <span class="c1"># import matplotlib</span>
+    <span class="c1"># matplotlib.use(&#39;Agg&#39;)</span>
+    <span class="kn">import</span> <span class="nn">matplotlib</span>
+    <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+    <span class="kn">import</span> <span class="nn">traceback</span>
+    <span class="kn">import</span> <span class="nn">logging</span>
+    <span class="kn">import</span> <span class="nn">os</span>
+    <span class="kn">import</span> <span class="nn">time</span>
+    <span class="kn">from</span> <span class="nn">sys</span> <span class="k">import</span> <span class="n">version_info</span>
 
-<span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">join</span>
+    <span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">join</span>
 
-<span class="kn">import</span> <span class="nn">sys</span>
-<span class="kn">import</span> <span class="nn">os.path</span>
-<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)),</span> <span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">))</span>
-<span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
+    <span class="kn">import</span> <span class="nn">sys</span>
+    <span class="kn">import</span> <span class="nn">os.path</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)),</span> <span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">))</span>
+    <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
 
-<span class="kn">from</span> <span class="nn">settings</span> <span class="k">import</span> <span class="p">(</span>
-    <span class="n">ALGORITHMS</span><span class="p">,</span>
-    <span class="n">MIRAGE_ALGORITHMS</span><span class="p">,</span>
-    <span class="n">PANDAS_VERSION</span><span class="p">,</span>
-    <span class="c1"># @added 20190611 - Feature #3106: crucible - skyline.consensus.anomalies.png</span>
-    <span class="n">CONSENSUS</span><span class="p">,</span>
-<span class="p">)</span>
-<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="n">write_data_to_file</span>
+    <span class="kn">from</span> <span class="nn">settings</span> <span class="k">import</span> <span class="p">(</span>
+        <span class="n">ALGORITHMS</span><span class="p">,</span>
+        <span class="n">MIRAGE_ALGORITHMS</span><span class="p">,</span>
+        <span class="n">PANDAS_VERSION</span><span class="p">,</span>
+        <span class="c1"># @added 20190611 - Feature #3106: crucible - skyline.consensus.anomalies.png</span>
+        <span class="n">CONSENSUS</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="n">write_data_to_file</span>
 
 <span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;crucible&#39;</span>
 <span class="n">skyline_app_logger</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">Log&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span>
@@ -289,8 +292,16 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">series</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">])</span>
-        <span class="n">stdDev</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">series</span><span class="p">)</span>
+
+        <span class="c1"># @modified 20191011 - Update least_squares &amp; grubbs algorithms by using sample standard deviation PR #124</span>
+        <span class="c1">#                      Task #3256: Review and test PR 124</span>
+        <span class="c1"># Change from using scipy/numpy std which calculates the population</span>
+        <span class="c1"># standard deviation to using pandas.std which calculates the sample</span>
+        <span class="c1"># standard deviation which is more appropriate for time series data</span>
+        <span class="c1"># series = scipy.array([x[1] for x in timeseries])</span>
+        <span class="c1"># stdDev = scipy.std(series)</span>
+        <span class="n">series</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">)</span>
+        <span class="n">stdDev</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
 
         <span class="c1"># Issue #27 - Handle z_score agent.py RuntimeWarning - https://github.com/earthgecko/skyline/issues/27</span>
         <span class="c1"># This change avoids spewing warnings on agent.py tests:</span>
@@ -435,21 +446,51 @@
         <span class="c1"># @modified 20160814 - pyflaked</span>
         <span class="c1"># results = np.linalg.lstsq(A, y)</span>
         <span class="c1"># residual = results[1]</span>
-        <span class="n">m</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">lstsq</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">y</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c1"># @modified 20200422 - Feature #3500: webapp - crucible_process_metrics</span>
+        <span class="c1">#                      Task #2588: Update dependencies</span>
+        <span class="c1"># Changed in version numpy 1.14.0: If not set, a FutureWarning is given.</span>
+        <span class="c1"># The previous default of -1 will use the machine precision as rcond</span>
+        <span class="c1"># parameter, the new default will use the machine precision times</span>
+        <span class="c1"># max(M, N). To silence the warning and use the new default, use</span>
+        <span class="c1"># rcond=None, to keep using the old behavior, use rcond=-1.</span>
+        <span class="c1"># Tested with time series - /opt/skyline/ionosphere/features_profiles/stats/statsd/processing_time/1491468474/stats.statsd.processing_time.mirage.redis.24h.json</span>
+        <span class="c1"># new rcond=None resulted in:</span>
+        <span class="c1"># np.linalg.lstsq(A, y, rcond=None)[0]</span>
+        <span class="c1"># &gt;&gt;&gt; array([3.85656116e-11, 2.58582310e-20])</span>
+        <span class="c1"># Original default results in:</span>
+        <span class="c1"># np.linalg.lstsq(A, y, rcond=-1)[0]</span>
+        <span class="c1"># &gt;&gt;&gt; array([ 4.10251589e-07, -6.11801949e+02])</span>
+        <span class="c1"># Changed to pass rcond=-1</span>
+        <span class="c1"># m, c = np.linalg.lstsq(A, y)[0]</span>
+        <span class="n">m</span><span class="p">,</span> <span class="n">c</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">lstsq</span><span class="p">(</span><span class="n">A</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">rcond</span><span class="o">=-</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
         <span class="n">errors</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="c1"># Evaluate append once, not every time in the loop - this gains ~0.020 s on</span>
-        <span class="c1"># every timeseries potentially</span>
+        <span class="c1"># every timeseries potentially @earthgecko #1310</span>
         <span class="n">append_error</span> <span class="o">=</span> <span class="n">errors</span><span class="o">.</span><span class="n">append</span>
+
+        <span class="c1"># Further a question exists related to performance and accruracy with</span>
+        <span class="c1"># regards to how many datapoints are in the sample, currently all datapoints</span>
+        <span class="c1"># are used but this may not be the ideal or most efficient computation or</span>
+        <span class="c1"># fit for a timeseries... @earthgecko is checking graphite...</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">y</span><span class="p">):</span>
             <span class="n">projected</span> <span class="o">=</span> <span class="n">m</span> <span class="o">*</span> <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">c</span>
             <span class="n">error</span> <span class="o">=</span> <span class="n">value</span> <span class="o">-</span> <span class="n">projected</span>
-            <span class="c1"># errors.append(error)</span>
+            <span class="c1"># errors.append(error) # @earthgecko #1310</span>
             <span class="n">append_error</span><span class="p">(</span><span class="n">error</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">False</span>
 
-        <span class="n">std_dev</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span>
+        <span class="c1"># @modified 20191011 - Update least_squares &amp; grubbs algorithms by using sample standard deviation PR #124</span>
+        <span class="c1">#                      Task #3256: Review and test PR 124</span>
+        <span class="c1"># Change from using scipy/numpy std which calculates the population</span>
+        <span class="c1"># standard deviation to using pandas.std which calculates the sample</span>
+        <span class="c1"># standard deviation which is more appropriate for time series data</span>
+        <span class="c1"># std_dev = scipy.std(errors)</span>
+        <span class="n">series</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">errors</span><span class="p">)</span>
+        <span class="n">std_dev</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+
         <span class="n">t</span> <span class="o">=</span> <span class="p">(</span><span class="n">errors</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">errors</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">errors</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">])</span> <span class="o">/</span> <span class="mi">3</span>
 
         <span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">std_dev</span> <span class="o">*</span> <span class="mi">3</span> <span class="ow">and</span> <span class="nb">round</span><span class="p">(</span><span class="n">std_dev</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">round</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span>
@@ -611,9 +652,16 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 
+<span class="c1"># @modified 20200421 - Feature #3500: webapp - crucible_process_metrics</span>
+<span class="c1">#                      Feature #1448: Crucible web UI</span>
+<span class="c1"># Added alert_interval and add_to_panaroma</span>
+<span class="c1"># @modified 20200422 - Feature #3500: webapp - crucible_process_metrics</span>
+<span class="c1">#                      Feature #1448: Crucible web UI</span>
+<span class="c1"># Added padded_timeseries</span>
 <div class="viewcode-block" id="run_algorithms"><a class="viewcode-back" href="../../skyline.crucible.html#crucible.crucible_algorithms.run_algorithms">[docs]</a><span class="k">def</span> <span class="nf">run_algorithms</span><span class="p">(</span>
         <span class="n">timeseries</span><span class="p">,</span> <span class="n">timeseries_name</span><span class="p">,</span> <span class="n">end_timestamp</span><span class="p">,</span> <span class="n">full_duration</span><span class="p">,</span>
-        <span class="n">timeseries_file</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">,</span> <span class="n">algorithms</span><span class="p">):</span>
+        <span class="n">timeseries_file</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">,</span> <span class="n">algorithms</span><span class="p">,</span> <span class="n">alert_interval</span><span class="p">,</span>
+        <span class="n">add_to_panorama</span><span class="p">,</span> <span class="n">padded_timeseries</span><span class="p">,</span> <span class="n">from_timestamp</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Iteratively run algorithms.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -627,6 +675,11 @@
 
     <span class="n">triggered_algorithms</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="c1"># @added 20200427 - Feature #3500: webapp - crucible_process_metrics</span>
+    <span class="c1">#                   Feature #1448: Crucible web UI</span>
+    <span class="c1"># Added default alert_interval_discarded_anomalies_count so run_algorithms</span>
+    <span class="c1"># does not return as failed</span>
+    <span class="n">alert_interval_discarded_anomalies_count</span> <span class="o">=</span> <span class="mi">0</span>
 
     <span class="n">check_algorithms</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">algorithms</span><span class="p">)</span> <span class="o">==</span> <span class="s2">&quot;[&#39;all&#39;]&quot;</span><span class="p">:</span>
@@ -653,11 +706,26 @@
         <span class="n">check_algorithms</span> <span class="o">=</span> <span class="n">ALGORITHMS</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;check_algorithms - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">check_algorithms</span><span class="p">)))</span>
 
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;checking algorithms - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">check_algorithms</span><span class="p">)))</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;checking algorithms - </span><span class="si">%s</span><span class="s1"> on </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">check_algorithms</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">timeseries_file</span><span class="p">)))</span>
 
     <span class="c1"># @added 20190611 - Feature #3106: crucible - skyline.consensus.anomalies.png</span>
     <span class="c1"># Plot Skyline anomalies if CONSENSUS is achieved</span>
     <span class="n">anomalies</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># @added 20200422 - Feature #3500: webapp - crucible_process_metrics</span>
+    <span class="c1">#                      Feature #1448: Crucible web UI</span>
+    <span class="c1"># Added padded_timeseries.  If the time series is padded then set</span>
+    <span class="c1"># the range appropriately so that the padded period data points are not</span>
+    <span class="c1"># analysed for anomalies</span>
+    <span class="n">default_range</span> <span class="o">=</span> <span class="mi">10</span>
+    <span class="k">if</span> <span class="n">padded_timeseries</span><span class="p">:</span>
+        <span class="n">default_range</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">ts</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">ts</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">from_timestamp</span><span class="p">:</span>
+                <span class="n">default_range</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">break</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;padded_timeseries - default range set to </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">default_range</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">timeseries_file</span><span class="p">)))</span>
 
     <span class="k">for</span> <span class="n">algorithm</span> <span class="ow">in</span> <span class="n">check_algorithms</span><span class="p">:</span>
         <span class="n">detected</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
@@ -669,7 +737,12 @@
             <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x_vals</span><span class="p">,</span> <span class="n">y_vals</span><span class="p">)</span>
 
             <span class="c1"># Start a couple datapoints in for the tail average</span>
-            <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)):</span>
+            <span class="c1"># @modified 20200422 - Feature #3500: webapp - crucible_process_metrics</span>
+            <span class="c1">#                      Feature #1448: Crucible web UI</span>
+            <span class="c1"># If the time series is padded then use the appropriate range so</span>
+            <span class="c1"># that the padded period data points are not analysed for anomalies</span>
+            <span class="c1"># for index in range(10, len(timeseries)):</span>
+            <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">default_range</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)):</span>
                 <span class="n">sliced</span> <span class="o">=</span> <span class="n">timeseries</span><span class="p">[:</span><span class="n">index</span><span class="p">]</span>
                 <span class="n">anomaly</span> <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">algorithm</span><span class="p">](</span><span class="n">sliced</span><span class="p">,</span> <span class="n">end_timestamp</span><span class="p">,</span> <span class="n">full_duration</span><span class="p">)</span>
 
@@ -684,21 +757,27 @@
 
             <span class="k">if</span> <span class="n">detected</span> <span class="o">==</span> <span class="s2">&quot;DETECTED&quot;</span><span class="p">:</span>
                 <span class="n">results_filename</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">results_dir</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">algorithm</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span> <span class="o">+</span> <span class="n">detected</span> <span class="o">+</span> <span class="s2">&quot;.png&quot;</span><span class="p">)</span>
-    <span class="c1">#                logger.info(&#39;ANOMALY DETECTED :: %s&#39; % (algorithm))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ANOMALY DETECTED :: with </span><span class="si">%s</span><span class="s1"> on </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">algorithm</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">timeseries_file</span><span class="p">)))</span>
                 <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="n">triggered_algorithms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">algorithm</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">results_filename</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">results_dir</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">algorithm</span> <span class="o">+</span> <span class="s2">&quot;.png&quot;</span><span class="p">)</span>
 
-            <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">results_filename</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
-    <span class="c1">#            logger.info(&#39;%s :: %s&#39; % (algorithm, results_filename))</span>
-            <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">results_filename</span><span class="p">,</span> <span class="mi">0644</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">results_filename</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o644</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">results_filename</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;saved </span><span class="si">%s</span><span class="s1"> plot :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">algorithm</span><span class="p">,</span> <span class="n">results_filename</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="c1"># @modified 20200327 - Branch #3262: py3</span>
+                    <span class="c1"># os.chmod(results_filename, 0644)</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">results_filename</span><span class="p">,</span> <span class="mo">0o644</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">results_filename</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o644</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to save </span><span class="si">%s</span><span class="s1"> for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">results_filename</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">timeseries_file</span><span class="p">)))</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()))</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;info :: error thrown in algorithm running and plotting - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">algorithm</span><span class="p">)))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: error thrown in algorithm running and plotting - </span><span class="si">%s</span><span class="s1"> on </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">algorithm</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">timeseries_file</span><span class="p">)))</span>
 
     <span class="n">end_analysis</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
     <span class="c1"># @modified 20160814 - pyflaked</span>
@@ -707,29 +786,128 @@
 <span class="c1">#        &#39;analysis of %s at a full duration of %s took %s seconds&#39; %</span>
 <span class="c1">#        (timeseries_name, str(full_duration), str(seconds_to_run)))</span>
 
+    <span class="c1"># @added 20200421 - Feature #3500: webapp - crucible_process_metrics</span>
+    <span class="c1">#                   Feature #1448: Crucible web UI</span>
+    <span class="c1"># Added last_anomaly_timestamp to apply alert_interval against and</span>
+    <span class="c1"># alert_interval_discarded_anomalies.  If the alert interval is passed</span>
+    <span class="c1"># Crucible will only report Skyline CONSENSUS anomalies if the time between</span>
+    <span class="c1"># the last anomaly is not alert_interval less than the specified</span>
+    <span class="c1"># alert_interval period.  This enables Crucible to mimic Analyzer and Mirage</span>
+    <span class="c1"># and apply a EXPIRATION_TIME type methodology to identifying anomalies like</span>
+    <span class="c1"># Analyzer would.  This makes Crucible work SOMEWHAT like Analyzer, however</span>
+    <span class="c1"># is still a bit different as with Crucible the time series grows, like a</span>
+    <span class="c1"># new metric would.</span>
+    <span class="c1"># Set the last_anomaly_timestamp to the appropriate timestamp before the</span>
+    <span class="c1"># alert_interval if alert_interval is set, if it is not it does not matter</span>
+    <span class="c1"># as alert_interval and alert_interval_discarded_anomalies will not be</span>
+    <span class="c1"># applied.</span>
+    <span class="c1"># @modified 20200427 - Feature #3500: webapp - crucible_process_metrics</span>
+    <span class="c1">#                      Feature #1448: Crucible web UI</span>
+    <span class="c1"># Wrap timeseries_start_timestamp variable in try so on fail the process</span>
+    <span class="c1"># does not hang</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">timeseries_start_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to determine timeseries_start_timestamp from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">timeseries_file</span><span class="p">))</span>
+        <span class="n">timeseries_start_timestamp</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># @modified 20200427 - Feature #3500: webapp - crucible_process_metrics</span>
+    <span class="c1">#                      Feature #1448: Crucible web UI</span>
+    <span class="c1"># if alert_interval:</span>
+    <span class="n">last_anomaly_timestamp</span> <span class="o">=</span> <span class="n">timeseries_start_timestamp</span>
+    <span class="k">if</span> <span class="n">alert_interval</span> <span class="ow">and</span> <span class="n">timeseries_start_timestamp</span><span class="p">:</span>
+        <span class="n">last_anomaly_timestamp</span> <span class="o">=</span> <span class="n">timeseries_start_timestamp</span> <span class="o">-</span> <span class="p">(</span><span class="n">alert_interval</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">last_anomaly_timestamp</span> <span class="o">=</span> <span class="n">timeseries_start_timestamp</span>
+    <span class="n">alert_interval_discarded_anomalies</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1"># To apply alert_interval the anomalies object needs to be sorted by</span>
+    <span class="c1"># timestamp as the anomalies are added per algorithm so they are not</span>
+    <span class="c1"># timestamp ordered, but timestamp ordered per algorithm</span>
+    <span class="k">if</span> <span class="n">anomalies</span> <span class="ow">and</span> <span class="n">alert_interval</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;info :: last_anomaly_timestamp set to </span><span class="si">%s</span><span class="s1"> for alert_interval check on </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">last_anomaly_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">timeseries_file</span><span class="p">)))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;info :: sorting anomalies </span><span class="si">%s</span><span class="s1"> to apply alert_interval check on </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">anomalies</span><span class="p">)),</span> <span class="nb">str</span><span class="p">(</span><span class="n">timeseries_file</span><span class="p">)))</span>
+            <span class="n">sorted_anomalies</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">anomalies</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">anomalies</span> <span class="o">=</span> <span class="n">sorted_anomalies</span>
+            <span class="k">del</span> <span class="n">sorted_anomalies</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: falied to create sorted_anomalies on </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">timeseries_file</span><span class="p">))</span>
+
     <span class="c1"># @added 20190611 - Feature #3106: crucible - skyline.consensus.anomalies.png</span>
     <span class="c1"># Plot Skyline anomalies where CONSENSUS achieved and create file resources</span>
     <span class="c1"># skyline.anomalies_score.txt and skyline.anomalies.csv</span>
     <span class="n">anomalies_score</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">if</span> <span class="n">anomalies</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">ts</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">algo</span> <span class="ow">in</span> <span class="n">anomalies</span><span class="p">:</span>
-            <span class="n">processed</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="n">algorithms_triggered</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">if</span> <span class="n">anomalies_score</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">anomalies_score</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">ts</span><span class="p">:</span>
-                        <span class="n">processed</span> <span class="o">=</span> <span class="kc">True</span>
-                        <span class="k">continue</span>
-            <span class="k">if</span> <span class="n">processed</span><span class="p">:</span>
-                <span class="k">continue</span>
-            <span class="k">for</span> <span class="n">w_ts</span><span class="p">,</span> <span class="n">w_value</span><span class="p">,</span> <span class="n">w_algo</span> <span class="ow">in</span> <span class="n">anomalies</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">w_ts</span> <span class="o">==</span> <span class="n">ts</span><span class="p">:</span>
-                    <span class="n">algorithms_triggered</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">w_algo</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">algorithms_triggered</span><span class="p">:</span>
-                <span class="n">consensus</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">algorithms_triggered</span><span class="p">)</span>
-                <span class="n">anomalies_score</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">ts</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">consensus</span><span class="p">,</span> <span class="n">algorithms_triggered</span><span class="p">])</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">processed</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">algorithms_triggered</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">if</span> <span class="n">anomalies_score</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">anomalies_score</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">ts</span><span class="p">:</span>
+                            <span class="n">processed</span> <span class="o">=</span> <span class="kc">True</span>
+                            <span class="k">continue</span>
+                <span class="k">if</span> <span class="n">processed</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="k">for</span> <span class="n">w_ts</span><span class="p">,</span> <span class="n">w_value</span><span class="p">,</span> <span class="n">w_algo</span> <span class="ow">in</span> <span class="n">anomalies</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">w_ts</span> <span class="o">==</span> <span class="n">ts</span><span class="p">:</span>
+                        <span class="n">algorithms_triggered</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">w_algo</span><span class="p">)</span>
+                <span class="c1"># @added 20200421 - Feature #3500: webapp - crucible_process_metrics</span>
+                <span class="c1">#                      Feature #1448: Crucible web UI</span>
+                <span class="c1"># Added last_anomaly_timestamp to apply alert_interval against and</span>
+                <span class="c1"># alert_interval_discarded_anomalies.  If the alert interval is passed</span>
+                <span class="n">append_anomaly</span> <span class="o">=</span> <span class="kc">True</span>
+
+                <span class="k">if</span> <span class="n">algorithms_triggered</span><span class="p">:</span>
+                    <span class="n">consensus</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">algorithms_triggered</span><span class="p">)</span>
+
+                    <span class="c1"># @added 20200421 - Feature #3500: webapp - crucible_process_metrics</span>
+                    <span class="c1">#                      Feature #1448: Crucible web UI</span>
+                    <span class="c1"># Added last_anomaly_timestamp to apply alert_interval against and</span>
+                    <span class="c1"># alert_interval_discarded_anomalies.  If the alert interval is passed</span>
+                    <span class="k">if</span> <span class="n">consensus</span> <span class="o">&gt;=</span> <span class="n">CONSENSUS</span><span class="p">:</span>
+                        <span class="n">current_anomaly_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ts</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">alert_interval</span> <span class="ow">and</span> <span class="n">last_anomaly_timestamp</span><span class="p">:</span>
+                            <span class="n">time_between_anomalies</span> <span class="o">=</span> <span class="n">current_anomaly_timestamp</span> <span class="o">-</span> <span class="n">last_anomaly_timestamp</span>
+                            <span class="k">if</span> <span class="n">time_between_anomalies</span> <span class="o">&lt;</span> <span class="n">alert_interval</span><span class="p">:</span>
+                                <span class="k">try</span><span class="p">:</span>
+                                    <span class="n">discard_anomaly</span> <span class="o">=</span> <span class="p">[</span><span class="n">ts</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">consensus</span><span class="p">,</span> <span class="n">algorithms_triggered</span><span class="p">]</span>
+                                    <span class="c1"># This logs a lot if enabled</span>
+                                    <span class="c1"># logger.info(&#39;debug :: time_between_anomalies %s is less than alert_interval %s, last_anomaly_timestamp set to %s and current_anomaly_timestamp is %s - discarding %s&#39; % (</span>
+                                    <span class="c1">#     str(time_between_anomalies), str(alert_interval),</span>
+                                    <span class="c1">#     str(last_anomaly_timestamp),</span>
+                                    <span class="c1">#     str(current_anomaly_timestamp), str(discard_anomaly)))</span>
+                                    <span class="n">alert_interval_discarded_anomalies</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">discard_anomaly</span><span class="p">)</span>
+                                    <span class="n">append_anomaly</span> <span class="o">=</span> <span class="kc">False</span>
+                                <span class="k">except</span><span class="p">:</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: falied to append to alert_interval_discarded_anomalies on </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">timeseries_file</span><span class="p">))</span>
+
+                    <span class="c1"># @modified 20200421 -  Feature #3500: webapp - crucible_process_metrics</span>
+                    <span class="c1">#                       Feature #1448: Crucible web UI</span>
+                    <span class="c1"># Only append if append_anomaly</span>
+                    <span class="c1"># anomalies_score.append([ts, value, consensus, algorithms_triggered])</span>
+                    <span class="k">if</span> <span class="n">append_anomaly</span><span class="p">:</span>
+                        <span class="n">anomalies_score</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">ts</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">consensus</span><span class="p">,</span> <span class="n">algorithms_triggered</span><span class="p">])</span>
+                        <span class="k">if</span> <span class="n">consensus</span> <span class="o">&gt;=</span> <span class="n">CONSENSUS</span><span class="p">:</span>
+                            <span class="n">last_anomaly_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ts</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: falied to process anomalies entry on </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">timeseries_file</span><span class="p">))</span>
+
+        <span class="c1"># @added 20200421 - Feature #3500: webapp - crucible_process_metrics</span>
+        <span class="c1">#                   Feature #1448: Crucible web UI</span>
+        <span class="c1"># Added alert_interval_discarded_anomalies</span>
+        <span class="k">if</span> <span class="n">alert_interval</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">alert_interval_discarded_anomalies</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;info :: discarded </span><span class="si">%s</span><span class="s1"> anomalies due to them being within the alert_interval period on </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">alert_interval_discarded_anomalies</span><span class="p">)),</span> <span class="nb">str</span><span class="p">(</span><span class="n">timeseries_file</span><span class="p">)))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;info :: no anomalies were discarded due to them being within the alert_interval period on </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">timeseries_file</span><span class="p">))</span>
+
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;info :: plotting skyline.consensus.anomalies.png&#39;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;info :: plotting skyline.consensus.anomalies.png for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">timeseries_file</span><span class="p">))</span>
             <span class="n">x_vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">))</span>
             <span class="n">y_vals</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">])</span>
             <span class="c1"># Match default graphite graph size</span>
@@ -749,15 +927,25 @@
             <span class="n">results_filename</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">results_dir</span> <span class="o">+</span> <span class="s2">&quot;/skyline.consensus.anomalies.png&quot;</span><span class="p">)</span>
             <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">results_filename</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">results_filename</span><span class="p">,</span> <span class="mi">0644</span><span class="p">)</span>
+                <span class="c1"># @modified 20200327 - Branch #3262: py3</span>
+                <span class="c1"># os.chmod(results_filename, 0644)</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">results_filename</span><span class="p">,</span> <span class="mo">0o644</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
                 <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">results_filename</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o644</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()))</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: falied plotting skyline.consensus.anomalies.png&#39;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed plotting skyline.consensus.anomalies.png for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">timeseries_file</span><span class="p">))</span>
+
         <span class="n">anomalies_filename</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">results_dir</span> <span class="o">+</span> <span class="s2">&quot;/skyline.anomalies_score.txt&quot;</span><span class="p">)</span>
-        <span class="n">write_data_to_file</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">anomalies_filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomalies_score</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;info :: creating anomalies_filename - </span><span class="si">%s</span><span class="s1"> for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">anomalies_filename</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">timeseries_file</span><span class="p">)))</span>
+            <span class="n">write_data_to_file</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">anomalies_filename</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomalies_score</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed creating anomalies_filename - </span><span class="si">%s</span><span class="s1"> for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">anomalies_filename</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">timeseries_file</span><span class="p">)))</span>
+
         <span class="n">anomalies_csv</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">results_dir</span> <span class="o">+</span> <span class="s2">&quot;/skyline.anomalies.csv&quot;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;info :: creating anomalies_csv - </span><span class="si">%s</span><span class="s1"> for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">anomalies_csv</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">timeseries_file</span><span class="p">)))</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">anomalies_csv</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
                 <span class="n">fh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;timstamp,value,consensus_count,triggered_algorithms</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
@@ -770,16 +958,48 @@
                         <span class="n">fh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
                 <span class="k">except</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not write to file </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">anomalies_csv</span><span class="p">))</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not write to file </span><span class="si">%s</span><span class="s1"> for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">anomalies_csv</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">timeseries_file</span><span class="p">)))</span>
             <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">anomalies_csv</span><span class="p">,</span> <span class="mi">0644</span><span class="p">)</span>
+                <span class="c1"># @modified 20200327 - Branch #3262: py3</span>
+                <span class="c1"># os.chmod(anomalies_csv, 0644)</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">anomalies_csv</span><span class="p">,</span> <span class="mo">0o644</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
                 <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">anomalies_csv</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o644</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not write to file </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">anomalies_csv</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not write to file </span><span class="si">%s</span><span class="s1"> for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">anomalies_csv</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">timeseries_file</span><span class="p">)))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;info :: created anomalies_csv OK for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">timeseries_file</span><span class="p">))</span>
+        <span class="c1"># @added 20200421 - Feature #3500: webapp - crucible_process_metrics</span>
+        <span class="c1">#                      Feature #1448: Crucible web UI</span>
+        <span class="c1"># Added alert_interval_discarded_anomalies</span>
+        <span class="n">alert_interval_discarded_anomalies_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">alert_interval_discarded_anomalies</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">alert_interval_discarded_anomalies</span><span class="p">:</span>
+            <span class="n">alert_interval_discarded_anomalies_csv</span> <span class="o">=</span> <span class="n">join</span><span class="p">(</span><span class="n">results_dir</span> <span class="o">+</span> <span class="s1">&#39;/skyline.alert_interval_discarded_anomalies.csv&#39;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;info :: writing </span><span class="si">%s</span><span class="s1"> alert_interval discarded anomalies to </span><span class="si">%s</span><span class="s1"> for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">alert_interval_discarded_anomalies</span><span class="p">)),</span> <span class="n">alert_interval_discarded_anomalies_csv</span><span class="p">,</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">timeseries_file</span><span class="p">)))</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">alert_interval_discarded_anomalies_csv</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+                    <span class="n">fh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;timstamp,value,consensus,triggered_algorithms</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">ts</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">consensus</span><span class="p">,</span> <span class="n">algorithms_triggered</span> <span class="ow">in</span> <span class="n">alert_interval_discarded_anomalies</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">line</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">,</span><span class="si">%s</span><span class="s1">,</span><span class="si">%s</span><span class="s1">,</span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ts</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">consensus</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">algorithms_triggered</span><span class="p">))</span>
+                        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">alert_interval_discarded_anomalies_csv</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+                            <span class="n">fh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not write to file </span><span class="si">%s</span><span class="s1"> for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">alert_interval_discarded_anomalies_csv</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">timeseries_file</span><span class="p">)))</span>
+                <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">alert_interval_discarded_anomalies_csv</span><span class="p">,</span> <span class="mo">0o644</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">alert_interval_discarded_anomalies_csv</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o644</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not write to file </span><span class="si">%s</span><span class="s1"> for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">alert_interval_discarded_anomalies_csv</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">timeseries_file</span><span class="p">)))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;0 anomalies found for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">timeseries_file</span><span class="p">))</span>
 
-    <span class="k">return</span> <span class="n">anomalous</span><span class="p">,</span> <span class="n">triggered_algorithms</span></div>
+    <span class="k">return</span> <span class="n">anomalous</span><span class="p">,</span> <span class="n">triggered_algorithms</span><span class="p">,</span> <span class="n">alert_interval_discarded_anomalies_count</span></div>
 </pre></div>
 
            </div>
@@ -791,7 +1011,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2019, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
 
     </p>
   </div>
@@ -813,7 +1033,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.3.0',
+            VERSION:'2.0.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

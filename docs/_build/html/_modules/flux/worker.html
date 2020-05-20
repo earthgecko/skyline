@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>flux.worker &mdash; Skyline 1.3.0 documentation</title>
+  <title>flux.worker &mdash; Skyline 2.0.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.3.0 documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 2.0.0 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                1.3
+                2.0
               </div>
             
           
@@ -90,10 +90,12 @@
 <li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
@@ -175,7 +177,10 @@
 <span class="kn">import</span> <span class="nn">os.path</span>
 <span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">kill</span>
 <span class="kn">import</span> <span class="nn">traceback</span>
-<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="k">import</span> <span class="n">Queue</span><span class="p">,</span> <span class="n">Process</span>
+<span class="c1"># @modified 20191115 - Branch #3262: py3</span>
+<span class="c1"># from multiprocessing import Queue, Process</span>
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="k">import</span> <span class="n">Process</span>
+
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">Queue</span> <span class="k">import</span> <span class="n">Empty</span>  <span class="c1"># Python 2.7</span>
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
@@ -183,16 +188,28 @@
 <span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">sleep</span><span class="p">,</span> <span class="n">time</span>
 <span class="kn">from</span> <span class="nn">ast</span> <span class="k">import</span> <span class="n">literal_eval</span>
 
-<span class="kn">from</span> <span class="nn">redis</span> <span class="k">import</span> <span class="n">StrictRedis</span>
+<span class="c1"># from redis import StrictRedis</span>
 <span class="kn">import</span> <span class="nn">graphyte</span>
 <span class="kn">import</span> <span class="nn">statsd</span>
 
 <span class="kn">from</span> <span class="nn">logger</span> <span class="k">import</span> <span class="n">set_up_logging</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)),</span> <span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">))</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
-<span class="kn">import</span> <span class="nn">settings</span>
 
-<span class="n">logger</span> <span class="o">=</span> <span class="n">set_up_logging</span><span class="p">(</span><span class="s1">&#39;worker&#39;</span><span class="p">)</span>
+<span class="c1"># @modified 20191115 - Branch #3262: py3</span>
+<span class="c1"># This prevents flake8 E402 - module level import not at top of file</span>
+<span class="k">if</span> <span class="kc">True</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">settings</span>
+    <span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="p">(</span>
+        <span class="n">send_graphite_metric</span><span class="p">,</span>
+        <span class="c1"># @added 20191111 - Bug #3266: py3 Redis binary objects not strings</span>
+        <span class="c1">#                   Branch #3262: py3</span>
+        <span class="n">get_redis_conn</span><span class="p">,</span> <span class="n">get_redis_conn_decoded</span><span class="p">)</span>
+
+<span class="c1"># @modified 20191129 - Branch #3262: py3</span>
+<span class="c1"># Consolidate flux logging</span>
+<span class="c1"># logger = set_up_logging(&#39;worker&#39;)</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">set_up_logging</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
 
 <span class="k">try</span><span class="p">:</span>
     <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">SERVER_METRICS_NAME</span>
@@ -202,7 +219,14 @@
     <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
 
 <span class="n">parent_skyline_app</span> <span class="o">=</span> <span class="s1">&#39;flux&#39;</span>
+
+<span class="c1"># @added 20191010 - Feature #3250: Allow Skyline to send metrics to another Carbon host</span>
+<span class="c1"># Added missing skyline_app required for send_graphite_metric</span>
+<span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;flux&#39;</span>
+
 <span class="n">skyline_app_graphite_namespace</span> <span class="o">=</span> <span class="s1">&#39;skyline.</span><span class="si">%s%s</span><span class="s1">.worker&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">parent_skyline_app</span><span class="p">,</span> <span class="n">SERVER_METRIC_PATH</span><span class="p">)</span>
+
+<span class="n">LOCAL_DEBUG</span> <span class="o">=</span> <span class="kc">False</span>
 
 <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">FLUX_SEND_TO_CARBON</span><span class="p">:</span>
     <span class="n">GRAPHITE_METRICS_PREFIX</span> <span class="o">=</span> <span class="kc">None</span>
@@ -237,10 +261,17 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">queue</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Worker</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">password</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">,</span> <span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+        <span class="c1"># @modified 20191115 - Bug #3266: py3 Redis binary objects not strings</span>
+        <span class="c1">#                      Branch #3262: py3</span>
+        <span class="c1"># if settings.REDIS_PASSWORD:</span>
+        <span class="c1">#     self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)</span>
+        <span class="c1"># else:</span>
+        <span class="c1">#     self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)</span>
+        <span class="c1"># @added 20191115 - Bug #3266: py3 Redis binary objects not strings</span>
+        <span class="c1">#                   Branch #3262: py3</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">get_redis_conn</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span> <span class="o">=</span> <span class="n">get_redis_conn_decoded</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">q</span> <span class="o">=</span> <span class="n">queue</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parent_pid</span> <span class="o">=</span> <span class="n">parent_pid</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="kc">True</span>
@@ -277,10 +308,24 @@
                 <span class="k">except</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;worker :: cannot connect to redis at socket path </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">))</span>
                     <span class="n">sleep</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">:</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">password</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">,</span> <span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+                    <span class="c1"># @modified 20191115 - Bug #3266: py3 Redis binary objects not strings</span>
+                    <span class="c1">#                      Branch #3262: py3</span>
+                    <span class="c1"># Use get_redis_conn and get_redis_conn_decoded</span>
+                    <span class="c1"># if settings.REDIS_PASSWORD:</span>
+                    <span class="c1">#     self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)</span>
+                    <span class="c1"># else:</span>
+                    <span class="c1">#     self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">get_redis_conn</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span> <span class="o">=</span> <span class="n">get_redis_conn_decoded</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">metric_data_queue_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">q</span><span class="o">.</span><span class="n">qsize</span><span class="p">()</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;worker :: debug :: flux.httpMetricDataQueue queue size - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_data_queue_size</span><span class="p">))</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: worker :: failed to determine size of queue flux.httpMetricDataQueue&#39;</span><span class="p">)</span>
+
             <span class="n">metric_data</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="c1"># Get a metric from the queue with a 1 second timeout, each</span>
@@ -300,11 +345,20 @@
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: worker :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
 
+            <span class="c1"># @added 20200206 - Feature #3444: Allow flux to backfill</span>
+            <span class="c1"># Added backfill</span>
+            <span class="n">backfill</span> <span class="o">=</span> <span class="kc">False</span>
+
             <span class="k">if</span> <span class="n">metric_data</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">metric</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
                     <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">metric_data</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
                     <span class="n">timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_data</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+                    <span class="c1"># @added 20200206 - Feature #3444: Allow flux to backfill</span>
+                    <span class="c1"># Added backfill</span>
+                    <span class="n">backfill</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_data</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;worker :: debug :: queue item found - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_data</span><span class="p">))</span>
                 <span class="k">except</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: worker :: failed to interpolate metric, value, timestamp from metric_data - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_data</span><span class="p">))</span>
@@ -313,23 +367,38 @@
                 <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">FLUX_SEND_TO_CARBON</span><span class="p">:</span>
                     <span class="c1"># Best effort de-duplicate the data</span>
                     <span class="n">valid_data</span> <span class="o">=</span> <span class="kc">True</span>
-                    <span class="n">cache_key</span> <span class="o">=</span> <span class="s1">&#39;flux.last.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric</span>
-                    <span class="n">last_metric_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
-                    <span class="k">try</span><span class="p">:</span>
-                        <span class="n">redis_last_metric_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span>
-                        <span class="n">last_metric_data</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">redis_last_metric_data</span><span class="p">)</span>
-                        <span class="n">last_metric_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">last_metric_data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-                    <span class="k">except</span><span class="p">:</span>
-                        <span class="n">last_metric_timestamp</span> <span class="o">=</span> <span class="kc">False</span>
-                    <span class="k">if</span> <span class="n">last_metric_timestamp</span><span class="p">:</span>
-                        <span class="k">if</span> <span class="n">timestamp</span> <span class="o">&lt;=</span> <span class="n">last_metric_timestamp</span><span class="p">:</span>
-                            <span class="n">valid_data</span> <span class="o">=</span> <span class="kc">False</span>
+
+                    <span class="c1"># @modified 20200206 - Feature #3444: Allow flux to backfill</span>
+                    <span class="c1"># Only check flux.last key if this is not backfill</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">backfill</span><span class="p">:</span>
+                        <span class="n">cache_key</span> <span class="o">=</span> <span class="s1">&#39;flux.last.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric</span>
+                        <span class="n">last_metric_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="c1"># @modified 20191128 - Bug #3266: py3 Redis binary objects not strings</span>
+                            <span class="c1">#                      Branch #3262: py3</span>
+                            <span class="c1"># redis_last_metric_data = self.redis_conn.get(cache_key)</span>
+                            <span class="n">redis_last_metric_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span>
+                            <span class="n">last_metric_data</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">redis_last_metric_data</span><span class="p">)</span>
+                            <span class="n">last_metric_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">last_metric_data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                            <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;worker :: debug :: last_metric_timestamp for </span><span class="si">%s</span><span class="s1"> from </span><span class="si">%s</span><span class="s1"> is </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">cache_key</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">last_metric_timestamp</span><span class="p">)))</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: worker :: failed to determine last_metric_timestamp from Redis key </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">cache_key</span><span class="p">))</span>
+                            <span class="n">last_metric_timestamp</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="k">if</span> <span class="n">last_metric_timestamp</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">timestamp</span> <span class="o">&lt;=</span> <span class="n">last_metric_timestamp</span><span class="p">:</span>
+                                <span class="n">valid_data</span> <span class="o">=</span> <span class="kc">False</span>
+                                <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;worker :: debug :: not valid data - the queue data timestamp </span><span class="si">%s</span><span class="s1"> is &lt;= to the last_metric_timestamp </span><span class="si">%s</span><span class="s1"> for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                        <span class="nb">str</span><span class="p">(</span><span class="n">timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">last_metric_timestamp</span><span class="p">),</span> <span class="n">metric</span><span class="p">))</span>
+
                     <span class="k">if</span> <span class="n">valid_data</span><span class="p">:</span>
                         <span class="n">submittedToGraphite</span> <span class="o">=</span> <span class="kc">False</span>
                         <span class="k">try</span><span class="p">:</span>
                             <span class="n">graphyte</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">)</span>
                             <span class="n">submittedToGraphite</span> <span class="o">=</span> <span class="kc">True</span>
-                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;worker :: sent </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1"> to Graphite&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)))</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;worker :: sent </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1"> to Graphite&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)))</span>
                             <span class="n">metrics_sent_to_graphite</span> <span class="o">+=</span> <span class="mi">1</span>
                         <span class="k">except</span><span class="p">:</span>
                             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
@@ -337,11 +406,34 @@
                             <span class="n">metric</span> <span class="o">=</span> <span class="kc">None</span>
                         <span class="k">if</span> <span class="n">submittedToGraphite</span><span class="p">:</span>
                             <span class="c1"># Update the metric Redis flux key</span>
-                            <span class="n">metric_data</span> <span class="o">=</span> <span class="p">[</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">value</span><span class="p">]</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_data</span><span class="p">))</span>
+                            <span class="c1"># @modified 20200206 - Feature #3444: Allow flux to backfill</span>
+                            <span class="c1"># Only update the flux.last key if this is not backfill</span>
+                            <span class="k">if</span> <span class="ow">not</span> <span class="n">backfill</span><span class="p">:</span>
+                                <span class="n">metric_data</span> <span class="o">=</span> <span class="p">[</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">value</span><span class="p">]</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_data</span><span class="p">))</span>
+                            <span class="c1"># @added 20200213 - Bug #3448: Repeated airgapped_metrics</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="c1"># @added 20200213 - Bug #3448: Repeated airgapped_metrics</span>
+                                <span class="c1"># Add a flux.filled key to Redis with a expiry</span>
+                                <span class="c1"># set to FULL_DURATION so that Analyzer knows to</span>
+                                <span class="c1"># sort and deduplicate the Redis time series</span>
+                                <span class="c1"># data as carbon-relay will send it to Horizon</span>
+                                <span class="c1"># and the datapoints will be out of order in the</span>
+                                <span class="c1"># Redis key</span>
+                                <span class="k">try</span><span class="p">:</span>
+                                    <span class="n">flux_filled_key</span> <span class="o">=</span> <span class="s1">&#39;flux.filled.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span>
+                                        <span class="n">flux_filled_key</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span><span class="p">,</span>
+                                        <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">()))</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;worker :: set Redis key </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">flux_filled_key</span><span class="p">)))</span>
+                                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to could not set Redis derivative_metric key: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
                     <span class="k">else</span><span class="p">:</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;worker discarded </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1"> as a data point for </span><span class="si">%s</span><span class="s1"> has already been submitted to Graphite&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                            <span class="n">metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)))</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;worker :: discarded </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1"> as a data point for </span><span class="si">%s</span><span class="s1"> has already been submitted to Graphite&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;worker :: settings.FLUX_SEND_TO_CARBON is set to </span><span class="si">%s</span><span class="s1">, discarded </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FLUX_SEND_TO_CARBON</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)))</span>
 
                 <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">FLUX_SEND_TO_STATSD</span><span class="p">:</span>
                     <span class="n">statsd_conn</span><span class="o">.</span><span class="n">incr</span><span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">)</span>
@@ -352,7 +444,9 @@
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;worker :: metrics_sent_to_graphite in last 60 seconds - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metrics_sent_to_graphite</span><span class="p">))</span>
                 <span class="n">skyline_metric</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.metrics_sent_to_graphite&#39;</span> <span class="o">%</span> <span class="n">skyline_app_graphite_namespace</span>
                 <span class="k">try</span><span class="p">:</span>
-                    <span class="n">graphyte</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">skyline_metric</span><span class="p">,</span> <span class="n">metrics_sent_to_graphite</span><span class="p">,</span> <span class="n">time_now</span><span class="p">)</span>
+                    <span class="c1"># @modified 20191008 - Feature #3250: Allow Skyline to send metrics to another Carbon host</span>
+                    <span class="c1"># graphyte.send(skyline_metric, metrics_sent_to_graphite, time_now)</span>
+                    <span class="n">send_graphite_metric</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">skyline_metric</span><span class="p">,</span> <span class="n">metrics_sent_to_graphite</span><span class="p">)</span>
                     <span class="n">last_sent_to_graphite</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
                     <span class="n">metrics_sent_to_graphite</span> <span class="o">=</span> <span class="mi">0</span>
                 <span class="k">except</span><span class="p">:</span>
@@ -370,7 +464,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2019, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
 
     </p>
   </div>
@@ -392,7 +486,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.3.0',
+            VERSION:'2.0.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

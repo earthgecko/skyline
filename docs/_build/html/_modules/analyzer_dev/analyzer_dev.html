@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>analyzer_dev.analyzer_dev &mdash; Skyline 1.3.0 documentation</title>
+  <title>analyzer_dev.analyzer_dev &mdash; Skyline 2.0.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.3.0 documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 2.0.0 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                1.3
+                2.0
               </div>
             
           
@@ -90,10 +90,12 @@
 <li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
@@ -203,7 +205,9 @@
     <span class="n">send_graphite_metric</span><span class="p">,</span> <span class="n">write_data_to_file</span><span class="p">,</span> <span class="n">send_anomalous_metric_to</span><span class="p">,</span> <span class="n">mkdir_p</span><span class="p">,</span>
     <span class="n">filesafe_metricname</span><span class="p">,</span>
     <span class="c1"># @added 20170602 - Feature #2034: analyse_derivatives</span>
-    <span class="n">nonNegativeDerivative</span><span class="p">,</span> <span class="n">strictly_increasing_monotonicity</span><span class="p">,</span> <span class="n">in_list</span><span class="p">)</span>
+    <span class="n">nonNegativeDerivative</span><span class="p">,</span> <span class="n">strictly_increasing_monotonicity</span><span class="p">,</span> <span class="n">in_list</span><span class="p">,</span>
+    <span class="c1"># @added 20200506 - Feature #3532: Sort all time series</span>
+    <span class="n">sort_timeseries</span><span class="p">)</span>
 
 <span class="kn">from</span> <span class="nn">alerters</span> <span class="k">import</span> <span class="n">trigger_alert</span>
 <span class="kn">from</span> <span class="nn">algorithms_dev</span> <span class="k">import</span> <span class="n">run_selected_algorithm</span>
@@ -613,6 +617,15 @@
                 <span class="n">timeseries</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">unpacker</span><span class="p">)</span>
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">timeseries</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="c1"># @added 20200507 - Feature #3532: Sort all time series</span>
+            <span class="c1"># To ensure that there are no unordered timestamps in the time</span>
+            <span class="c1"># series which are artefacts of the collector or carbon-relay, sort</span>
+            <span class="c1"># all time series by timestamp before analysis.</span>
+            <span class="n">original_timeseries</span> <span class="o">=</span> <span class="n">timeseries</span>
+            <span class="k">if</span> <span class="n">original_timeseries</span><span class="p">:</span>
+                <span class="n">timeseries</span> <span class="o">=</span> <span class="n">sort_timeseries</span><span class="p">(</span><span class="n">original_timeseries</span><span class="p">)</span>
+                <span class="k">del</span> <span class="n">original_timeseries</span>
 
             <span class="c1"># @added 20170602 - Feature #2034: analyse_derivatives</span>
             <span class="c1"># In order to convert monotonic, incrementing metrics to a deriative</span>
@@ -1043,6 +1056,16 @@
                 <span class="n">unpacker</span> <span class="o">=</span> <span class="n">Unpacker</span><span class="p">(</span><span class="n">use_list</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
                 <span class="n">unpacker</span><span class="o">.</span><span class="n">feed</span><span class="p">(</span><span class="n">raw_series</span><span class="p">)</span>
                 <span class="n">timeseries</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">unpacker</span><span class="p">)</span>
+
+                <span class="c1"># @added 20200507 - Feature #3532: Sort all time series</span>
+                <span class="c1"># To ensure that there are no unordered timestamps in the time</span>
+                <span class="c1"># series which are artefacts of the collector or carbon-relay, sort</span>
+                <span class="c1"># all time series by timestamp before analysis.</span>
+                <span class="n">original_timeseries</span> <span class="o">=</span> <span class="n">timeseries</span>
+                <span class="k">if</span> <span class="n">original_timeseries</span><span class="p">:</span>
+                    <span class="n">timeseries</span> <span class="o">=</span> <span class="n">sort_timeseries</span><span class="p">(</span><span class="n">original_timeseries</span><span class="p">)</span>
+                    <span class="k">del</span> <span class="n">original_timeseries</span>
+
                 <span class="n">time_human</span> <span class="o">=</span> <span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">timeseries</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="mi">3600</span>
                 <span class="n">projected</span> <span class="o">=</span> <span class="mi">24</span> <span class="o">*</span> <span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">now</span><span class="p">)</span> <span class="o">/</span> <span class="n">time_human</span>
 
@@ -1089,7 +1112,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2019, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
 
     </p>
   </div>
@@ -1111,7 +1134,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.3.0',
+            VERSION:'2.0.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

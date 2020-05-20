@@ -9,8 +9,8 @@ submits them to Graphite, so they can be pickled to Skyline for analysis in near
 real time via the normal Skyline pipeline.
 
 Flux uses falcon the bare-metal web API framework for Python to serve the API
-via gunicorn.  The normal Apache reverse proxy Skyline vhost is used to serve
-the /flux endpoint and proxy requests to flux.
+via gunicorn.  The normal Apache/nginx reverse proxy Skyline vhost is used to
+serve the /flux endpoint and proxy requests to flux.
 
 It is preferable to use the POST Flux endpoint to submit metrics so that the
 Skyline flux API key can be encrypted via SSL in the POST data.
@@ -87,3 +87,50 @@ the Skyline node to connect to the Graphite node on this port.
 
 The populate_metric_worker applies resampling at 1Min, but see Vista
 populate_at_resolutions for more detailed information.
+
+Process uploaded data
+---------------------
+
+Skyline Flux can be enabled to process data uploaded via the webapp and submit
+data to Graphite.  This allows for the automated uploading and processing of
+batched measurements data and reports to time series data which is analysed in
+the normal Skyline workflow.  An example use case would be if you had an hourly
+report of wind related metrics that had a reading every 5 minutes for an hour
+period, for x number of stations.  As long as the data is in uploaded in an
+acceptable format, it can be preprocessed by flux and submitted to Graphite.
+The metric namespace/s need be declared as batch processing metrics in
+:mod:`settings.BATCH_PROCESSING_NAMESPACES` and :mod:`settings.BATCH_PROCESSING`
+has to be enabled.
+
+By default flux is not enabled to process uploaded data and the webapp is not
+configured to accept uploaded data.
+
+To enable Flux to process uploaded data the following settings need to be set
+and services running:
+
+- analyzer_batch needs to be enabled and running, see `Analyzer - analyzer_batch <analyzer.html#analyzer_batch>`__.
+- :mod:`settings.BATCH_PROCESSING` need to be set to `True`
+- The `parent_metric_namespace` or all the metric namespace in question relating
+  to the specific data being uploaded need to be declared in
+  :mod:`settings.BATCH_PROCESSING_NAMESPACES`
+- :mod:`settings.DATA_UPLOADS_PATH` is required
+- :mod:`settings.WEBAPP_ACCEPT_DATA_UPLOADS` must be enabled
+- :mod:`settings.FLUX_PROCESS_UPLOADS` must be enabled
+- If the data is being uploaded ia an automated process, curl, etc the
+  `parent_metric_namespace` needs a key set in the
+  :mod:`settings.FLUX_UPLOADS_KEYS` dictionary e.g.
+
+.. code-block:: python
+
+    FLUX_UPLOADS_KEYS = {
+        'temp_monitoring.warehouse.2.012383': '484166bf-df66-4f7d-ad4a-9336da9ef620',
+    }
+
+
+- Optionally :mod:`settings.FLUX_SAVE_UPLOADS` and
+  :mod:`settings.FLUX_SAVE_UPLOADS_PATH` can be used if you wish to save the
+  uploaded data.
+
+For specific details about the data formats and methods for uploading and
+processing data files see the `upload_data to Flux <uploa-data-to-flux.html>`__
+page.

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>analyzer.alerters &mdash; Skyline 1.3.0 documentation</title>
+  <title>analyzer.alerters &mdash; Skyline 2.0.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.3.0 documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 2.0.0 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                1.3
+                2.0
               </div>
             
           
@@ -90,10 +90,12 @@
 <li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
@@ -181,18 +183,34 @@
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">urllib.request</span>
     <span class="kn">import</span> <span class="nn">urllib.error</span>
+
+<span class="c1"># @added 20191023 - Task #3290: Handle urllib2 in py3</span>
+<span class="c1">#                   Branch #3262: py3</span>
+<span class="c1"># Use urlretrieve</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">urllib2</span> <span class="k">as</span> <span class="nn">urllib</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">urllib</span> <span class="k">import</span> <span class="n">request</span> <span class="k">as</span> <span class="n">urllib</span>
+
 <span class="kn">from</span> <span class="nn">ast</span> <span class="k">import</span> <span class="n">literal_eval</span>
 <span class="kn">from</span> <span class="nn">requests.utils</span> <span class="k">import</span> <span class="n">quote</span>
 
 <span class="c1"># Added for graphs showing Redis data</span>
 <span class="kn">import</span> <span class="nn">traceback</span>
-<span class="kn">import</span> <span class="nn">redis</span>
+<span class="c1"># import redis</span>
 <span class="kn">from</span> <span class="nn">msgpack</span> <span class="k">import</span> <span class="n">Unpacker</span>
 <span class="kn">import</span> <span class="nn">datetime</span> <span class="k">as</span> <span class="nn">dt</span>
 <span class="c1"># @added 20180809 - Bug #2498: Incorrect scale in some graphs</span>
 <span class="c1"># @modified 20181025 - Feature #2618: alert_slack</span>
 <span class="c1"># Added gmtime and strftime</span>
-<span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="p">(</span><span class="n">time</span><span class="p">,</span> <span class="n">gmtime</span><span class="p">,</span> <span class="n">strftime</span><span class="p">)</span>
+<span class="c1"># @modified 20191030 - Branch #3262: py3</span>
+<span class="c1"># from time import (time, gmtime, strftime)</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">gmtime</span><span class="p">,</span> <span class="n">strftime</span><span class="p">,</span> <span class="n">time</span>
+<span class="kn">from</span> <span class="nn">email</span> <span class="k">import</span> <span class="n">charset</span>
+
+<span class="c1"># @added 20200116: Feature #3396: http_alerter</span>
+<span class="kn">import</span> <span class="nn">requests</span>
+
 <span class="c1"># @modified 20160820 - Issue #23 Test dependency updates</span>
 <span class="c1"># Use Agg for matplotlib==1.5.2 upgrade, backwards compatibile</span>
 <span class="kn">import</span> <span class="nn">matplotlib</span>
@@ -203,7 +221,8 @@
     <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
     <span class="kn">from</span> <span class="nn">matplotlib.pylab</span> <span class="k">import</span> <span class="n">rcParams</span>
     <span class="kn">from</span> <span class="nn">matplotlib.dates</span> <span class="k">import</span> <span class="n">DateFormatter</span>
-    <span class="kn">import</span> <span class="nn">io</span>
+    <span class="c1"># @modified 20191030 - Branch #3262: py3</span>
+    <span class="c1"># import io</span>
     <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
     <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
     <span class="kn">import</span> <span class="nn">syslog</span>
@@ -219,7 +238,6 @@
     <span class="kn">from</span> <span class="nn">email.MIMEMultipart</span> <span class="k">import</span> <span class="n">MIMEMultipart</span>
     <span class="kn">from</span> <span class="nn">email.MIMEText</span> <span class="k">import</span> <span class="n">MIMEText</span>
     <span class="kn">from</span> <span class="nn">email.MIMEImage</span> <span class="k">import</span> <span class="n">MIMEImage</span>
-    <span class="kn">from</span> <span class="nn">email</span> <span class="k">import</span> <span class="n">charset</span>
 <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">email.mime.multipart</span> <span class="k">import</span> <span class="n">MIMEMultipart</span>
     <span class="kn">from</span> <span class="nn">email.mime.text</span> <span class="k">import</span> <span class="n">MIMEText</span>
@@ -233,7 +251,23 @@
     <span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="p">(</span>
         <span class="n">write_data_to_file</span><span class="p">,</span> <span class="n">mkdir_p</span><span class="p">,</span>
         <span class="c1"># @added 20170603 - Feature #2034: analyse_derivatives</span>
-        <span class="n">nonNegativeDerivative</span><span class="p">,</span> <span class="n">in_list</span><span class="p">)</span>
+        <span class="c1"># nonNegativeDerivative, in_list,</span>
+        <span class="n">nonNegativeDerivative</span><span class="p">,</span>
+        <span class="c1"># @added 20191030 - Bug #3266: py3 Redis binary objects not strings</span>
+        <span class="c1">#                   Branch #3262: py3</span>
+        <span class="c1"># Added a single functions to deal with Redis connection and the</span>
+        <span class="c1"># charset=&#39;utf-8&#39;, decode_responses=True arguments required in py3</span>
+        <span class="n">get_redis_conn</span><span class="p">,</span> <span class="n">is_derivative_metric</span><span class="p">,</span>
+        <span class="c1"># @modified 20191105 - Task #3290: Handle urllib2 in py3</span>
+        <span class="c1">#                      Branch #3262: py3</span>
+        <span class="n">get_graphite_graph_image</span><span class="p">,</span>
+        <span class="c1"># @modified 20191105 - Branch #3002: docker</span>
+        <span class="c1">#                      Branch #3262: py3</span>
+        <span class="n">get_graphite_port</span><span class="p">,</span> <span class="n">get_graphite_render_uri</span><span class="p">,</span> <span class="n">get_graphite_custom_headers</span><span class="p">,</span>
+        <span class="c1"># @added 20200116: Feature #3396: http_alerter</span>
+        <span class="n">get_redis_conn_decoded</span><span class="p">,</span>
+        <span class="c1"># @added 20200507 - Feature #3532: Sort all time series</span>
+        <span class="n">sort_timeseries</span><span class="p">)</span>
 
 <span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;analyzer&#39;</span>
 <span class="n">skyline_app_logger</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">Log&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span>
@@ -241,6 +275,8 @@
 <span class="n">skyline_app_logfile</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.log&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">)</span>
 
 <span class="n">skyline_version</span> <span class="o">=</span> <span class="n">skyline_version</span><span class="o">.</span><span class="n">__absolute_version__</span>
+
+<span class="n">LOCAL_DEBUG</span> <span class="o">=</span> <span class="kc">False</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">Create any alerter you want here. The function will be invoked from</span>
@@ -273,44 +309,6 @@
     <span class="n">DOCKER_FAKE_EMAIL_ALERTS</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">DOCKER_FAKE_EMAIL_ALERTS</span>
 <span class="k">except</span><span class="p">:</span>
     <span class="n">DOCKER_FAKE_EMAIL_ALERTS</span> <span class="o">=</span> <span class="kc">False</span>
-
-
-<div class="viewcode-block" id="get_graphite_port"><a class="viewcode-back" href="../../skyline.analyzer.html#analyzer.alerters.get_graphite_port">[docs]</a><span class="k">def</span> <span class="nf">get_graphite_port</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Returns graphite port based on configuration in settings.py</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PROTOCOL</span> <span class="o">==</span> <span class="s1">&#39;http&#39;</span><span class="p">:</span>
-        <span class="n">graphite_port</span> <span class="o">=</span> <span class="s1">&#39;80&#39;</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">graphite_port</span> <span class="o">=</span> <span class="s1">&#39;443&#39;</span>
-    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PORT</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
-        <span class="n">graphite_port</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PORT</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">graphite_port</span></div>
-
-
-<div class="viewcode-block" id="get_graphite_render_uri"><a class="viewcode-back" href="../../skyline.analyzer.html#analyzer.alerters.get_graphite_render_uri">[docs]</a><span class="k">def</span> <span class="nf">get_graphite_render_uri</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Returns graphite render uri based on configuration in settings.py</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">graphite_render_uri</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_RENDER_URI</span><span class="p">)</span>
-    <span class="k">except</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;get_graphite_render_uri :: GRAPHITE_RENDER_URI is not declared in settings.py, using default of </span><span class="se">\&#39;</span><span class="s1">render</span><span class="se">\&#39;</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="n">graphite_render_uri</span> <span class="o">=</span> <span class="s1">&#39;render&#39;</span>
-    <span class="k">return</span> <span class="n">graphite_render_uri</span></div>
-
-
-<div class="viewcode-block" id="get_graphite_custom_headers"><a class="viewcode-back" href="../../skyline.analyzer.html#analyzer.alerters.get_graphite_custom_headers">[docs]</a><span class="k">def</span> <span class="nf">get_graphite_custom_headers</span><span class="p">():</span>
-    <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Returns custom http headers</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">headers</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">headers</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_CUSTOM_HEADERS</span>
-    <span class="k">except</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;get_graphite_custom_headers :: GRAPHITE_CUSTOM_HEADERS is not declared in settings.py, using default of \{\}&#39;</span><span class="p">)</span>
-        <span class="n">headers</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-    <span class="k">return</span> <span class="n">headers</span></div>
 
 
 <div class="viewcode-block" id="alert_smtp"><a class="viewcode-back" href="../../skyline.analyzer.html#analyzer.alerters.alert_smtp">[docs]</a><span class="k">def</span> <span class="nf">alert_smtp</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
@@ -407,11 +405,39 @@
 
     <span class="c1"># @modified 20161229 - Feature #1830: Ionosphere alerts</span>
     <span class="c1"># Ionosphere alerts</span>
+    <span class="c1"># @added 20191002 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings</span>
+    <span class="c1"># Added as it was not interpolated in v1.3.0 and v1.3.1</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">main_alert_title</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">CUSTOM_ALERT_OPTS</span><span class="p">[</span><span class="s1">&#39;main_alert_title&#39;</span><span class="p">]</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">main_alert_title</span> <span class="o">=</span> <span class="s1">&#39;Skyline&#39;</span>
+    <span class="n">alert_context</span> <span class="o">=</span> <span class="n">context</span>
+    <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;Analyzer&#39;</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">alert_context</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">CUSTOM_ALERT_OPTS</span><span class="p">[</span><span class="s1">&#39;analyzer_alert_heading&#39;</span><span class="p">]</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">alert_context</span> <span class="o">=</span> <span class="s1">&#39;Ionosphere&#39;</span>
+    <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;Analyzer&#39;</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">alert_context</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">CUSTOM_ALERT_OPTS</span><span class="p">[</span><span class="s1">&#39;analyzer_alert_heading&#39;</span><span class="p">]</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">alert_context</span> <span class="o">=</span> <span class="s1">&#39;Analyzer&#39;</span>
+    <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;Ionosphere&#39;</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">alert_context</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">CUSTOM_ALERT_OPTS</span><span class="p">[</span><span class="s1">&#39;ionosphere_alert_heading&#39;</span><span class="p">]</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">alert_context</span> <span class="o">=</span> <span class="s1">&#39;Ionosphere&#39;</span>
+
     <span class="c1"># @modified 20190820 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings</span>
     <span class="c1"># unencoded_graph_title = &#39;Skyline %s - ALERT at %s hours - %s&#39; % (</span>
     <span class="c1">#     context, str(int(full_duration_in_hours)), str(metric[0]))</span>
+    <span class="c1"># @modified 20191002 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings</span>
+    <span class="c1"># Use alert_context</span>
+    <span class="c1"># unencoded_graph_title = &#39;%s %s - ALERT at %s hours - %s&#39; % (</span>
+    <span class="c1">#     main_alert_title, context, str(int(full_duration_in_hours)),</span>
+    <span class="c1">#     str(metric[0]))</span>
     <span class="n">unencoded_graph_title</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> - ALERT at </span><span class="si">%s</span><span class="s1"> hours - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-        <span class="n">main_alert_title</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">full_duration_in_hours</span><span class="p">)),</span>
+        <span class="n">main_alert_title</span><span class="p">,</span> <span class="n">alert_context</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">full_duration_in_hours</span><span class="p">)),</span>
         <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
     <span class="c1"># @modified 20170603 - Feature #2034: analyse_derivatives</span>
     <span class="c1"># Added deriative functions to convert the values of metrics strictly</span>
@@ -420,31 +446,47 @@
     <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="c1"># @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow</span>
-        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">:</span>
-            <span class="n">REDIS_ALERTER_CONN</span> <span class="o">=</span> <span class="n">redis</span><span class="o">.</span><span class="n">StrictRedis</span><span class="p">(</span><span class="n">password</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">,</span> <span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">REDIS_ALERTER_CONN</span> <span class="o">=</span> <span class="n">redis</span><span class="o">.</span><span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+        <span class="c1"># @modified 20191030 - Bug #3266: py3 Redis binary objects not strings</span>
+        <span class="c1">#                      Branch #3262: py3</span>
+        <span class="c1"># Use get_redis_conn_decoded</span>
+        <span class="c1"># if settings.REDIS_PASSWORD:</span>
+        <span class="c1">#     REDIS_ALERTER_CONN = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)</span>
+        <span class="c1"># else:</span>
+        <span class="c1">#     REDIS_ALERTER_CONN = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)</span>
+        <span class="n">REDIS_ALERTER_CONN</span> <span class="o">=</span> <span class="n">get_redis_conn</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_smtp - redis connection failed&#39;</span><span class="p">)</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">derivative_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">REDIS_ALERTER_CONN</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;derivative_metrics&#39;</span><span class="p">))</span>
-    <span class="k">except</span><span class="p">:</span>
-        <span class="n">derivative_metrics</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">redis_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">))</span>
-    <span class="k">if</span> <span class="n">redis_metric_name</span> <span class="ow">in</span> <span class="n">derivative_metrics</span><span class="p">:</span>
-        <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="c1"># @modified 20191030 - Bug #3266: py3 Redis binary objects not strings</span>
+    <span class="c1">#                      Branch #3262: py3</span>
+    <span class="c1"># Use is_derivative_metric function</span>
+    <span class="c1"># try:</span>
+    <span class="c1">#    derivative_metrics = list(REDIS_ALERTER_CONN.smembers(&#39;derivative_metrics&#39;))</span>
+    <span class="c1"># except:</span>
+    <span class="c1">#     derivative_metrics = []</span>
+    <span class="c1"># redis_metric_name = &#39;%s%s&#39; % (settings.FULL_NAMESPACE, str(base_name))</span>
+    <span class="c1"># if redis_metric_name in derivative_metrics:</span>
+    <span class="c1">#    known_derivative_metric = True</span>
+    <span class="c1"># if known_derivative_metric:</span>
+    <span class="c1">#     try:</span>
+    <span class="c1">#         non_derivative_monotonic_metrics = settings.NON_DERIVATIVE_MONOTONIC_METRICS</span>
+    <span class="c1">#     except:</span>
+    <span class="c1">#         non_derivative_monotonic_metrics = []</span>
+    <span class="c1">#     skip_derivative = in_list(redis_metric_name, non_derivative_monotonic_metrics)</span>
+    <span class="c1">#     if skip_derivative:</span>
+    <span class="c1">#         known_derivative_metric = False</span>
+
+    <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="n">is_derivative_metric</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
+
     <span class="k">if</span> <span class="n">known_derivative_metric</span><span class="p">:</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">non_derivative_monotonic_metrics</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">NON_DERIVATIVE_MONOTONIC_METRICS</span>
-        <span class="k">except</span><span class="p">:</span>
-            <span class="n">non_derivative_monotonic_metrics</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">skip_derivative</span> <span class="o">=</span> <span class="n">in_list</span><span class="p">(</span><span class="n">redis_metric_name</span><span class="p">,</span> <span class="n">non_derivative_monotonic_metrics</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">skip_derivative</span><span class="p">:</span>
-            <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="k">if</span> <span class="n">known_derivative_metric</span><span class="p">:</span>
-        <span class="n">unencoded_graph_title</span> <span class="o">=</span> <span class="s1">&#39;Skyline </span><span class="si">%s</span><span class="s1"> - ALERT at </span><span class="si">%s</span><span class="s1"> hours - derivative graph - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-            <span class="n">context</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">full_duration_in_hours</span><span class="p">)),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="c1"># @modified 20191002 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings</span>
+        <span class="c1"># Use main_alert_title and alert_context</span>
+        <span class="c1"># unencoded_graph_title = &#39;Skyline %s - ALERT at %s hours - derivative graph - %s&#39; % (</span>
+        <span class="c1">#     context, str(int(full_duration_in_hours)), str(metric[0]))</span>
+        <span class="n">unencoded_graph_title</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> - ALERT at </span><span class="si">%s</span><span class="s1"> hours - derivative graph - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">main_alert_title</span><span class="p">,</span> <span class="n">alert_context</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">full_duration_in_hours</span><span class="p">)),</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
 
     <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span> <span class="ow">or</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - unencoded_graph_title: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">unencoded_graph_title</span><span class="p">)</span>
@@ -467,9 +509,9 @@
     <span class="n">from_timestamp</span> <span class="o">=</span> <span class="n">until_timestamp</span> <span class="o">-</span> <span class="n">full_duration_seconds</span>
 
     <span class="c1"># @added 20190518 - Branch #3002: docker</span>
-    <span class="n">graphite_port</span> <span class="o">=</span> <span class="n">get_graphite_port</span><span class="p">()</span>
-    <span class="n">graphite_render_uri</span> <span class="o">=</span> <span class="n">get_graphite_render_uri</span><span class="p">()</span>
-    <span class="n">graphite_custom_headers</span> <span class="o">=</span> <span class="n">get_graphite_custom_headers</span><span class="p">()</span>
+    <span class="n">graphite_port</span> <span class="o">=</span> <span class="n">get_graphite_port</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+    <span class="n">graphite_render_uri</span> <span class="o">=</span> <span class="n">get_graphite_render_uri</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+    <span class="n">graphite_custom_headers</span> <span class="o">=</span> <span class="n">get_graphite_custom_headers</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
 
     <span class="n">graphite_from</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">from_timestamp</span><span class="p">))</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%H:%M_%Y%m</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;graphite_from - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_from</span><span class="p">))</span>
@@ -487,7 +529,9 @@
     <span class="c1">#     settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, graphite_port,</span>
     <span class="c1">#     str(graphite_from), str(graphite_until), metric[1],</span>
     <span class="c1">#     settings.GRAPHITE_GRAPH_SETTINGS, graph_title)</span>
-    <span class="n">link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">?from=</span><span class="si">%s</span><span class="s1">&amp;until=</span><span class="si">%s</span><span class="s1">&amp;target=cactiStyle(</span><span class="si">%s</span><span class="s1">)</span><span class="si">%s%s</span><span class="s1">&amp;colorList=orange&#39;</span> <span class="o">%</span> <span class="p">(</span>
+    <span class="c1"># @modified 20191106 - Task #3294: py3 - handle system parameter in Graphite cactiStyle</span>
+    <span class="c1"># link = &#39;%s://%s:%s/%s?from=%s&amp;until=%s&amp;target=cactiStyle(%s)%s%s&amp;colorList=orange&#39; % (</span>
+    <span class="n">link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">?from=</span><span class="si">%s</span><span class="s1">&amp;until=</span><span class="si">%s</span><span class="s1">&amp;target=cactiStyle(</span><span class="si">%s</span><span class="s1">,</span><span class="si">%%</span><span class="s1">27si</span><span class="si">%%</span><span class="s1">27)</span><span class="si">%s%s</span><span class="s1">&amp;colorList=orange&#39;</span> <span class="o">%</span> <span class="p">(</span>
         <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PROTOCOL</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span> <span class="n">graphite_port</span><span class="p">,</span>
         <span class="n">graphite_render_uri</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_from</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_until</span><span class="p">),</span>
         <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_GRAPH_SETTINGS</span><span class="p">,</span> <span class="n">graph_title</span><span class="p">)</span>
@@ -505,7 +549,9 @@
         <span class="c1">#     settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,</span>
         <span class="c1">#     graphite_port, str(graphite_from), str(graphite_until), metric[1],</span>
         <span class="c1">#     settings.GRAPHITE_GRAPH_SETTINGS, graph_title)</span>
-        <span class="n">link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">?from=</span><span class="si">%s</span><span class="s1">&amp;until=</span><span class="si">%s</span><span class="s1">&amp;target=cactiStyle(nonNegativeDerivative(</span><span class="si">%s</span><span class="s1">))</span><span class="si">%s%s</span><span class="s1">&amp;colorList=orange&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="c1"># @modified 20191106 - Task #3294: py3 - handle system parameter in Graphite cactiStyle</span>
+        <span class="c1"># link = &#39;%s://%s:%s/%s?from=%s&amp;until=%s&amp;target=cactiStyle(nonNegativeDerivative(%s))%s%s&amp;colorList=orange&#39; % (</span>
+        <span class="n">link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">?from=</span><span class="si">%s</span><span class="s1">&amp;until=</span><span class="si">%s</span><span class="s1">&amp;target=cactiStyle(nonNegativeDerivative(</span><span class="si">%s</span><span class="s1">),</span><span class="si">%%</span><span class="s1">27si</span><span class="si">%%</span><span class="s1">27)</span><span class="si">%s%s</span><span class="s1">&amp;colorList=orange&#39;</span> <span class="o">%</span> <span class="p">(</span>
             <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PROTOCOL</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span> <span class="n">graphite_port</span><span class="p">,</span>
             <span class="n">graphite_render_uri</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_from</span><span class="p">),</span>
             <span class="nb">str</span><span class="p">(</span><span class="n">graphite_until</span><span class="p">),</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_GRAPH_SETTINGS</span><span class="p">,</span>
@@ -518,7 +564,10 @@
         <span class="c1"># Use existing data if files exist</span>
         <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">graphite_image_file</span><span class="p">):</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">graphite_image_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="c1"># @added 20191107 - Branch #3262: py3</span>
+                <span class="c1"># Open in binary mode for py3</span>
+                <span class="c1"># with open(graphite_image_file, &#39;r&#39;) as f:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">graphite_image_file</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                     <span class="n">image_data</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alert_smtp - using existing png - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">graphite_image_file</span><span class="p">)</span>
             <span class="k">except</span><span class="p">:</span>
@@ -527,6 +576,24 @@
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_smtp - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">link</span><span class="p">))</span>
                 <span class="n">image_data</span> <span class="o">=</span> <span class="kc">None</span>
 
+        <span class="c1"># @added 20191105 - Task #3290: Handle urllib2 in py3</span>
+        <span class="c1">#                   Branch #3262: py3</span>
+        <span class="k">if</span> <span class="n">image_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">get_graphite_graph_image</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">link</span><span class="p">,</span> <span class="n">graphite_image_file</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">graphite_image_file</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="c1"># @modified 20191107 - Branch #3262: py3</span>
+                    <span class="c1"># Open in binary mode for py3</span>
+                    <span class="c1"># with open(graphite_image_file, &#39;r&#39;) as f:</span>
+                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">graphite_image_file</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                        <span class="n">image_data</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alert_smtp - using existing png - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">graphite_image_file</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_smtp - failed to read image data from existing png - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">graphite_image_file</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_smtp - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">link</span><span class="p">))</span>
+                    <span class="n">image_data</span> <span class="o">=</span> <span class="kc">None</span>
+
         <span class="k">if</span> <span class="n">image_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="c1"># @modified 20170913 - Task #2160: Test skyline with bandit</span>
@@ -534,13 +601,34 @@
                 <span class="c1"># @modified 20190520 - Branch #3002: docker</span>
                 <span class="c1"># image_data = urllib2.urlopen(link).read()  # nosec</span>
                 <span class="k">if</span> <span class="n">graphite_custom_headers</span><span class="p">:</span>
-                    <span class="n">request</span> <span class="o">=</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">Request</span><span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">graphite_custom_headers</span><span class="p">)</span>
+                    <span class="c1"># @modified 20191021 - Task #3290: Handle urllib2 in py3</span>
+                    <span class="c1">#                      Branch #3262: py3</span>
+                    <span class="c1"># request = urllib2.Request(link, headers=graphite_custom_headers)</span>
+                    <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                        <span class="n">request</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">Request</span><span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">graphite_custom_headers</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                        <span class="n">request</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">graphite_custom_headers</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">request</span> <span class="o">=</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">Request</span><span class="p">(</span><span class="n">link</span><span class="p">)</span>
-                <span class="n">image_data</span> <span class="o">=</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">request</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>  <span class="c1"># nosec</span>
+                    <span class="c1"># @modified 20191021 - Task #3290: Handle urllib2 in py3</span>
+                    <span class="c1">#                      Branch #3262: py3</span>
+                    <span class="c1"># request = urllib2.Request(link)</span>
+                    <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                        <span class="n">request</span> <span class="o">=</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">Request</span><span class="p">(</span><span class="n">link</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                        <span class="n">request</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">link</span><span class="p">)</span>
+                <span class="c1"># @modified 20191021 - Task #3290: Handle urllib2 in py3</span>
+                <span class="c1">#                      Branch #3262: py3</span>
+                <span class="c1"># image_data = urllib2.urlopen(request).read()  # nosec</span>
+                <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="n">image_data</span> <span class="o">=</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">request</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>  <span class="c1"># nosec</span>
+                <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                    <span class="n">image_data</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">request</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>  <span class="c1"># nosec</span>
                 <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span> <span class="ow">or</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - image data OK&#39;</span><span class="p">)</span>
-            <span class="k">except</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">URLError</span><span class="p">:</span>
+            <span class="c1"># @modified 20191021 - Task #3290: Handle urllib2 in py3</span>
+            <span class="c1">#                      Branch #3262: py3</span>
+            <span class="c1"># except urllib2.URLError:</span>
+            <span class="k">except</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_smtp - failed to get image graph&#39;</span><span class="p">)</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_smtp - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">link</span><span class="p">))</span>
@@ -613,8 +701,18 @@
             <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - Memory usage after get Redis timeseries data: </span><span class="si">%s</span><span class="s1"> (kb)&#39;</span> <span class="o">%</span> <span class="n">resource</span><span class="o">.</span><span class="n">getrusage</span><span class="p">(</span><span class="n">resource</span><span class="o">.</span><span class="n">RUSAGE_SELF</span><span class="p">)</span><span class="o">.</span><span class="n">ru_maxrss</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_smtp - unpack timeseries failed&#39;</span><span class="p">)</span>
             <span class="n">timeseries</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># @added 20200507 - Feature #3532: Sort all time series</span>
+        <span class="c1"># To ensure that there are no unordered timestamps in the time</span>
+        <span class="c1"># series which are artefacts of the collector or carbon-relay, sort</span>
+        <span class="c1"># all time series by timestamp before analysis.</span>
+        <span class="n">original_timeseries</span> <span class="o">=</span> <span class="n">timeseries</span>
+        <span class="k">if</span> <span class="n">original_timeseries</span><span class="p">:</span>
+            <span class="n">timeseries</span> <span class="o">=</span> <span class="n">sort_timeseries</span><span class="p">(</span><span class="n">original_timeseries</span><span class="p">)</span>
+            <span class="k">del</span> <span class="n">original_timeseries</span>
 
         <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_ENABLED</span> <span class="ow">and</span> <span class="n">timeseries</span><span class="p">:</span>
             <span class="sd">&#39;&#39;&#39;</span>
@@ -672,6 +770,15 @@
                         <span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> failed to read timeseries data from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">anomaly_json</span><span class="p">))</span>
                     <span class="n">timeseries</span> <span class="o">=</span> <span class="kc">None</span>
 
+                <span class="c1"># @added 20200507 - Feature #3532: Sort all time series</span>
+                <span class="c1"># To ensure that there are no unordered timestamps in the time</span>
+                <span class="c1"># series which are artefacts of the collector or carbon-relay, sort</span>
+                <span class="c1"># all time series by timestamp before analysis.</span>
+                <span class="n">original_timeseries</span> <span class="o">=</span> <span class="n">timeseries</span>
+                <span class="k">if</span> <span class="n">original_timeseries</span><span class="p">:</span>
+                    <span class="n">timeseries</span> <span class="o">=</span> <span class="n">sort_timeseries</span><span class="p">(</span><span class="n">original_timeseries</span><span class="p">)</span>
+                    <span class="k">del</span> <span class="n">original_timeseries</span>
+
         <span class="c1"># @added 20170603 - Feature #2034: analyse_derivatives</span>
         <span class="k">if</span> <span class="n">known_derivative_metric</span><span class="p">:</span>
 
@@ -695,10 +802,12 @@
         <span class="c1"># If the nonNegativeDerivative has been calculated we need to reset the</span>
         <span class="c1"># x and y as nonNegativeDerivative has to discard the first value as it</span>
         <span class="c1"># has no delta for it so the timeseries is 1 item less.</span>
-        <span class="n">timeseries_x</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">]</span>
-        <span class="n">timeseries_y</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">timeseries</span><span class="p">:</span>
+            <span class="n">timeseries_x</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">]</span>
+            <span class="n">timeseries_y</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">]</span>
 
         <span class="n">pd_series_values</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">mean_series</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">timeseries</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
@@ -752,7 +861,10 @@
                 <span class="n">mean_series</span> <span class="o">=</span> <span class="kc">None</span>
 
         <span class="k">if</span> <span class="n">mean_series</span><span class="p">:</span>
-            <span class="n">graph_title</span> <span class="o">=</span> <span class="s1">&#39;Skyline </span><span class="si">%s</span><span class="s1"> - ALERT - at </span><span class="si">%s</span><span class="s1"> hours - Redis data</span><span class="se">\n</span><span class="si">%s</span><span class="s1"> - anomalous value: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">full_duration_in_hours</span><span class="p">)),</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+            <span class="c1"># @modified 20191003 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings</span>
+            <span class="c1"># Use main_alert_title and alert_context</span>
+            <span class="c1"># graph_title = &#39;Skyline %s - ALERT - at %s hours - Redis data\n%s - anomalous value: %s&#39; % (context, str(int(full_duration_in_hours)), metric[1], str(metric[0]))</span>
+            <span class="n">graph_title</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> - ALERT - at </span><span class="si">%s</span><span class="s1"> hours - Redis data</span><span class="se">\n</span><span class="si">%s</span><span class="s1"> - anomalous value: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">main_alert_title</span><span class="p">,</span> <span class="n">alert_context</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">full_duration_in_hours</span><span class="p">)),</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
             <span class="c1"># @added 20170603 - Feature #2034: analyse_derivatives</span>
             <span class="k">if</span> <span class="n">known_derivative_metric</span><span class="p">:</span>
                 <span class="n">graph_title</span> <span class="o">=</span> <span class="s1">&#39;Skyline </span><span class="si">%s</span><span class="s1"> - ALERT - at </span><span class="si">%s</span><span class="s1"> hours - Redis data (derivative graph)</span><span class="se">\n</span><span class="si">%s</span><span class="s1"> - anomalous value: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">full_duration_in_hours</span><span class="p">)),</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
@@ -919,7 +1031,13 @@
     <span class="n">alerted_at</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">utcfromtimestamp</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">2</span><span class="p">])))</span>
 
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">body</span> <span class="o">=</span> <span class="s1">&#39;&lt;h3&gt;&lt;font color=&quot;#dd3023&quot;&gt;Sky&lt;/font&gt;&lt;font color=&quot;#6698FF&quot;&gt;line&lt;/font&gt;&lt;font color=&quot;black&quot;&gt; </span><span class="si">%s</span><span class="s1"> alert&lt;/font&gt;&lt;/h3&gt;&lt;br&gt;&#39;</span> <span class="o">%</span> <span class="n">context</span>
+        <span class="c1"># @modified 20191002 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings</span>
+        <span class="c1"># Use main_alert_title</span>
+        <span class="c1"># body = &#39;&lt;h3&gt;&lt;font color=&quot;#dd3023&quot;&gt;Sky&lt;/font&gt;&lt;font color=&quot;#6698FF&quot;&gt;line&lt;/font&gt;&lt;font color=&quot;black&quot;&gt; %s alert&lt;/font&gt;&lt;/h3&gt;&lt;br&gt;&#39; % context</span>
+        <span class="k">if</span> <span class="n">main_alert_title</span> <span class="o">==</span> <span class="s1">&#39;Skyline&#39;</span><span class="p">:</span>
+            <span class="n">body</span> <span class="o">=</span> <span class="s1">&#39;&lt;h3&gt;&lt;font color=&quot;#dd3023&quot;&gt;Sky&lt;/font&gt;&lt;font color=&quot;#6698FF&quot;&gt;line&lt;/font&gt;&lt;font color=&quot;black&quot;&gt; </span><span class="si">%s</span><span class="s1"> alert&lt;/font&gt;&lt;/h3&gt;&lt;br&gt;&#39;</span> <span class="o">%</span> <span class="n">alert_context</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">body</span> <span class="o">=</span> <span class="s1">&#39;&lt;h3&gt;</span><span class="si">%s</span><span class="s1">&lt;font color=&quot;black&quot;&gt; </span><span class="si">%s</span><span class="s1"> alert&lt;/font&gt;&lt;/h3&gt;&lt;br&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">main_alert_title</span><span class="p">,</span> <span class="n">alert_context</span><span class="p">)</span>
         <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;font color=&quot;black&quot;&gt;metric: &lt;b&gt;</span><span class="si">%s</span><span class="s1">&lt;/b&gt;&lt;/font&gt;&lt;br&gt;&#39;</span> <span class="o">%</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;font color=&quot;black&quot;&gt;Anomalous value: </span><span class="si">%s</span><span class="s1">&lt;/font&gt;&lt;br&gt;&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="n">body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;font color=&quot;black&quot;&gt;Anomaly timestamp: </span><span class="si">%s</span><span class="s1">&lt;/font&gt;&lt;br&gt;&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
@@ -937,10 +1055,35 @@
             <span class="c1"># @modified 20170823 - Bug #2142: 7bit SMTP encoding breaking long urls</span>
             <span class="c1"># Broke body into body and more_body to workaround the 990 character</span>
             <span class="c1"># limit per line for SMTP</span>
-            <span class="n">more_body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;h3&gt;&lt;font color=&quot;#dd3023&quot;&gt;Ionosphere :: &lt;/font&gt;&lt;font color=&quot;#6698FF&quot;&gt;training data&lt;/font&gt;&lt;font color=&quot;black&quot;&gt;&lt;/font&gt;&lt;/h3&gt;&#39;</span>
-            <span class="n">ionosphere_link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/ionosphere?timestamp=</span><span class="si">%s</span><span class="s1">&amp;metric=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                <span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_URL</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">2</span><span class="p">])),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
-            <span class="n">more_body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;font color=&quot;black&quot;&gt;To use this timeseries to train Skyline that this is not anomalous manage this training data at:&lt;br&gt;&#39;</span>
+            <span class="c1"># @modified 20191002 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings</span>
+            <span class="c1"># Use main_alert_title</span>
+            <span class="c1"># more_body += &#39;&lt;h3&gt;&lt;font color=&quot;#dd3023&quot;&gt;Ionosphere :: &lt;/font&gt;&lt;font color=&quot;#6698FF&quot;&gt;training data&lt;/font&gt;&lt;font color=&quot;black&quot;&gt;&lt;/font&gt;&lt;/h3&gt;&#39;</span>
+            <span class="k">if</span> <span class="n">main_alert_title</span> <span class="o">==</span> <span class="s1">&#39;Skyline&#39;</span><span class="p">:</span>
+                <span class="n">more_body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;h3&gt;&lt;font color=&quot;#dd3023&quot;&gt;Ionosphere :: &lt;/font&gt;&lt;font color=&quot;#6698FF&quot;&gt;training data&lt;/font&gt;&lt;font color=&quot;black&quot;&gt;&lt;/font&gt;&lt;/h3&gt;&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">more_body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;h3&gt;</span><span class="si">%s</span><span class="s1"> :: &lt;font color=&quot;#6698FF&quot;&gt;training data&lt;/font&gt;&lt;font color=&quot;black&quot;&gt;&lt;/font&gt;&lt;/h3&gt;&#39;</span> <span class="o">%</span> <span class="n">main_alert_title</span>
+
+            <span class="c1"># @added 20191011 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">ionosphere_link_path</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">CUSTOM_ALERT_OPTS</span><span class="p">[</span><span class="s1">&#39;ionosphere_link_path&#39;</span><span class="p">]</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">ionosphere_link_path</span> <span class="o">=</span> <span class="s1">&#39;ionosphere&#39;</span>
+
+            <span class="c1"># @modified 20191011 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings</span>
+            <span class="c1"># ionosphere_link = &#39;%s/ionosphere?timestamp=%s&amp;metric=%s&#39; % (</span>
+            <span class="c1">#     settings.SKYLINE_URL, str(int(metric[2])), str(metric[1]))</span>
+            <span class="n">ionosphere_link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">?timestamp=</span><span class="si">%s</span><span class="s1">&amp;metric=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_URL</span><span class="p">,</span> <span class="n">ionosphere_link_path</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">2</span><span class="p">])),</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+
+            <span class="c1"># @modified 20191002 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings</span>
+            <span class="c1"># Use main_alert_title</span>
+            <span class="c1"># more_body += &#39;&lt;font color=&quot;black&quot;&gt;To use this timeseries to train Skyline that this is not anomalous manage this training data at:&lt;br&gt;&#39;</span>
+            <span class="k">if</span> <span class="n">main_alert_title</span> <span class="o">==</span> <span class="s1">&#39;Skyline&#39;</span><span class="p">:</span>
+                <span class="n">more_body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;font color=&quot;black&quot;&gt;To use this timeseries to train Skyline that this is not anomalous manage this training data at:&lt;br&gt;&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">more_body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;font color=&quot;black&quot;&gt;To use this timeseries to train </span><span class="si">%s</span><span class="s1"> that this is not anomalous manage this training data at:&lt;br&gt;&#39;</span> <span class="o">%</span> <span class="n">main_alert_title</span>
+
             <span class="n">more_body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;a href=&quot;</span><span class="si">%s</span><span class="s1">&quot;&gt;</span><span class="si">%s</span><span class="s1">&lt;/a&gt;&lt;/font&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ionosphere_link</span><span class="p">,</span> <span class="n">ionosphere_link</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">redis_image_data</span><span class="p">:</span>
             <span class="n">more_body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;font color=&quot;black&quot;&gt;min: </span><span class="si">%s</span><span class="s1">  | max: </span><span class="si">%s</span><span class="s1">   | mean: </span><span class="si">%s</span><span class="s1"> &lt;br&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span>
@@ -955,10 +1098,16 @@
             <span class="n">more_body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;div dir=&quot;ltr&quot;&gt;&lt;a href=&quot;</span><span class="si">%s</span><span class="s1">&quot;&gt;</span><span class="si">%s</span><span class="s1">&lt;/a&gt;&lt;br&gt;&lt;/div&gt;&lt;br&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="n">img_tag</span><span class="p">)</span>
             <span class="n">more_body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;font color=&quot;black&quot;&gt;Clicking on the above graph will open to the Graphite graph with current data&lt;/font&gt;&lt;br&gt;&#39;</span>
         <span class="k">if</span> <span class="n">redis_image_data</span><span class="p">:</span>
-            <span class="n">more_body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;font color=&quot;black&quot;&gt;To disable the Redis data graph view, set PLOT_REDIS_DATA to False in your settings.py, if the Graphite graph is sufficient for you,&lt;br&gt;&#39;</span>
-            <span class="n">more_body</span> <span class="o">+=</span> <span class="s1">&#39;however do note that will remove the 3-sigma and mean value too.&lt;/font&gt;&#39;</span>
+            <span class="c1"># @modified 20191002 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings</span>
+            <span class="c1"># Use if main_alert_title</span>
+            <span class="k">if</span> <span class="n">main_alert_title</span> <span class="o">==</span> <span class="s1">&#39;Skyline&#39;</span><span class="p">:</span>
+                <span class="n">more_body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;font color=&quot;black&quot;&gt;To disable the Redis data graph view, set PLOT_REDIS_DATA to False in your settings.py, if the Graphite graph is sufficient for you,&lt;br&gt;&#39;</span>
+                <span class="n">more_body</span> <span class="o">+=</span> <span class="s1">&#39;however do note that will remove the 3-sigma and mean value too.&lt;/font&gt;&#39;</span>
         <span class="n">more_body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;br&gt;&#39;</span>
-        <span class="n">more_body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;div dir=&quot;ltr&quot; align=&quot;right&quot;&gt;&lt;font color=&quot;#dd3023&quot;&gt;Sky&lt;/font&gt;&lt;font color=&quot;#6698FF&quot;&gt;line&lt;/font&gt;&lt;font color=&quot;black&quot;&gt; version :: </span><span class="si">%s</span><span class="s1">&lt;/font&gt;&lt;/div&gt;&lt;br&gt;&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">skyline_version</span><span class="p">)</span>
+        <span class="c1"># @modified 20191002 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings</span>
+        <span class="c1"># Use main_alert_title</span>
+        <span class="k">if</span> <span class="n">main_alert_title</span> <span class="o">==</span> <span class="s1">&#39;Skyline&#39;</span><span class="p">:</span>
+            <span class="n">more_body</span> <span class="o">+=</span> <span class="s1">&#39;&lt;div dir=&quot;ltr&quot; align=&quot;right&quot;&gt;&lt;font color=&quot;#dd3023&quot;&gt;Sky&lt;/font&gt;&lt;font color=&quot;#6698FF&quot;&gt;line&lt;/font&gt;&lt;font color=&quot;black&quot;&gt; version :: </span><span class="si">%s</span><span class="s1">&lt;/font&gt;&lt;/div&gt;&lt;br&gt;&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">skyline_version</span><span class="p">)</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_smtp - could not build body&#39;</span><span class="p">)</span>
@@ -984,7 +1133,11 @@
             <span class="n">cs_</span><span class="o">.</span><span class="n">body_encoding</span> <span class="o">=</span> <span class="n">charset</span><span class="o">.</span><span class="n">QP</span>
             <span class="n">msg</span><span class="o">.</span><span class="n">set_charset</span><span class="p">(</span><span class="n">cs_</span><span class="p">)</span>
 
-            <span class="n">msg</span><span class="p">[</span><span class="s1">&#39;Subject&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;[Skyline alert] - </span><span class="si">%s</span><span class="s1"> ALERT - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="c1"># @modified 20191002 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings</span>
+            <span class="c1"># Use main_alert_title and alert_context</span>
+            <span class="c1"># msg[&#39;Subject&#39;] = &#39;[Skyline alert] - %s ALERT - %s&#39; % (context, metric[1])</span>
+            <span class="n">msg</span><span class="p">[</span><span class="s1">&#39;Subject&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;[</span><span class="si">%s</span><span class="s1"> alert] - </span><span class="si">%s</span><span class="s1"> ALERT - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">main_alert_title</span><span class="p">,</span> <span class="n">alert_context</span><span class="p">,</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
             <span class="n">msg</span><span class="p">[</span><span class="s1">&#39;From&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sender</span>
             <span class="c1"># @modified 20180524 - Task #2384: Change alerters to cc other recipients</span>
             <span class="c1"># msg[&#39;To&#39;] = recipient</span>
@@ -1010,7 +1163,10 @@
                     <span class="c1"># msg_plot_attachment = MIMEImage(buf.read())</span>
                     <span class="c1"># msg_plot_attachment = MIMEImage(buf.read())</span>
                     <span class="k">try</span><span class="p">:</span>
-                        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                        <span class="c1"># @added 20191107 - Branch #3262: py3</span>
+                        <span class="c1"># Open in binary mode for py3</span>
+                        <span class="c1"># with open(buf, &#39;r&#39;) as f:</span>
+                        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">buf</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                             <span class="n">plot_image_data</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
                         <span class="k">try</span><span class="p">:</span>
                             <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
@@ -1033,6 +1189,7 @@
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_smtp - msg_plot_attachment&#39;</span><span class="p">)</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
 
+            <span class="n">msg_attachment</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">if</span> <span class="n">image_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">msg_attachment</span> <span class="o">=</span> <span class="n">MIMEImage</span><span class="p">(</span><span class="n">image_data</span><span class="p">)</span>
@@ -1155,7 +1312,32 @@
     <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">PAGERDUTY_ENABLED</span><span class="p">:</span>
         <span class="kn">import</span> <span class="nn">pygerduty</span>
         <span class="n">pager</span> <span class="o">=</span> <span class="n">pygerduty</span><span class="o">.</span><span class="n">PagerDuty</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">PAGERDUTY_OPTS</span><span class="p">[</span><span class="s1">&#39;subdomain&#39;</span><span class="p">],</span> <span class="n">settings</span><span class="o">.</span><span class="n">PAGERDUTY_OPTS</span><span class="p">[</span><span class="s1">&#39;auth_token&#39;</span><span class="p">])</span>
-        <span class="n">pager</span><span class="o">.</span><span class="n">trigger_incident</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">PAGERDUTY_OPTS</span><span class="p">[</span><span class="s1">&#39;key&#39;</span><span class="p">],</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> alert - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+
+        <span class="c1"># @added 20191008 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">main_alert_title</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">CUSTOM_ALERT_OPTS</span><span class="p">[</span><span class="s1">&#39;main_alert_title&#39;</span><span class="p">]</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">main_alert_title</span> <span class="o">=</span> <span class="s1">&#39;Skyline&#39;</span>
+        <span class="n">alert_context</span> <span class="o">=</span> <span class="n">context</span>
+        <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;Analyzer&#39;</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">alert_context</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">CUSTOM_ALERT_OPTS</span><span class="p">[</span><span class="s1">&#39;analyzer_alert_heading&#39;</span><span class="p">]</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">alert_context</span> <span class="o">=</span> <span class="s1">&#39;Analyzer&#39;</span>
+        <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;Mirage&#39;</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">alert_context</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">CUSTOM_ALERT_OPTS</span><span class="p">[</span><span class="s1">&#39;mirage_alert_heading&#39;</span><span class="p">]</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">alert_context</span> <span class="o">=</span> <span class="s1">&#39;Mirage&#39;</span>
+        <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;Ionosphere&#39;</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">alert_context</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">CUSTOM_ALERT_OPTS</span><span class="p">[</span><span class="s1">&#39;ionosphere_alert_heading&#39;</span><span class="p">]</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">alert_context</span> <span class="o">=</span> <span class="s1">&#39;Ionosphere&#39;</span>
+
+        <span class="c1"># @modified 20191008 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings</span>
+        <span class="c1"># pager.trigger_incident(settings.PAGERDUTY_OPTS[&#39;key&#39;], &#39;%s alert - %s - %s&#39; % (context, str(metric[0]), metric[1]))</span>
+        <span class="n">pager</span><span class="o">.</span><span class="n">trigger_incident</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">PAGERDUTY_OPTS</span><span class="p">[</span><span class="s1">&#39;key&#39;</span><span class="p">],</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1"> alert - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">main_alert_title</span><span class="p">,</span> <span class="n">alert_context</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span></div>
 
@@ -1196,10 +1378,12 @@
         <span class="n">graphite_until</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">until_timestamp</span><span class="p">))</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%H:%M_%Y%m</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;graphite_until - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_until</span><span class="p">))</span>
 
-        <span class="n">graphite_port</span> <span class="o">=</span> <span class="n">get_graphite_port</span><span class="p">()</span>
-        <span class="n">graphite_render_uri</span> <span class="o">=</span> <span class="n">get_graphite_render_uri</span><span class="p">()</span>
+        <span class="n">graphite_port</span> <span class="o">=</span> <span class="n">get_graphite_port</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+        <span class="n">graphite_render_uri</span> <span class="o">=</span> <span class="n">get_graphite_render_uri</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
 
-        <span class="n">link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">?from=</span><span class="si">%s</span><span class="s1">&amp;until=</span><span class="si">%s</span><span class="s1">&amp;target=cactiStyle(</span><span class="si">%s</span><span class="s1">)</span><span class="si">%s%s</span><span class="s1">&amp;colorList=orange&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="c1"># @modified 20191106 - Task #3294: py3 - handle system parameter in Graphite cactiStyle</span>
+        <span class="c1"># link = &#39;%s://%s:%s/%s?from=%s&amp;until=%s&amp;target=cactiStyle(%s)%s%s&amp;colorList=orange&#39; % (</span>
+        <span class="n">link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">?from=</span><span class="si">%s</span><span class="s1">&amp;until=</span><span class="si">%s</span><span class="s1">&amp;target=cactiStyle(</span><span class="si">%s</span><span class="s1">,</span><span class="si">%%</span><span class="s1">27si</span><span class="si">%%</span><span class="s1">27)</span><span class="si">%s%s</span><span class="s1">&amp;colorList=orange&#39;</span> <span class="o">%</span> <span class="p">(</span>
             <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PROTOCOL</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span>
             <span class="n">graphite_port</span><span class="p">,</span> <span class="n">graphite_render_uri</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_from</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_until</span><span class="p">),</span>
             <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_GRAPH_SETTINGS</span><span class="p">,</span> <span class="n">graph_title</span><span class="p">)</span>
@@ -1218,7 +1402,7 @@
 
 <div class="viewcode-block" id="alert_syslog"><a class="viewcode-back" href="../../skyline.analyzer.html#analyzer.alerters.alert_syslog">[docs]</a><span class="k">def</span> <span class="nf">alert_syslog</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Called by :func:`~trigger_alert` and log anomalies to syslog.</span>
+<span class="sd">    Called by :func:`~trigger_alert` and logs anomalies to syslog.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">SYSLOG_ENABLED</span><span class="p">:</span>
@@ -1311,6 +1495,17 @@
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alert_smtp - DOCKER_FAKE_EMAIL_ALERTS is set to </span><span class="si">%s</span><span class="s1">, not sending email alert&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">DOCKER_FAKE_EMAIL_ALERTS</span><span class="p">))</span>
         <span class="n">send_email_alert</span> <span class="o">=</span> <span class="kc">False</span>
 
+    <span class="c1"># @added 20200122 - Feature #3406: Allow for no_email SMTP_OPTS</span>
+    <span class="n">no_email</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">sender</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;no_email&#39;</span><span class="p">:</span>
+        <span class="n">send_email_alert</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">no_email</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">recipient</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;no_email&#39;</span><span class="p">:</span>
+        <span class="n">send_email_alert</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">no_email</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="n">no_email</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alert_smtp - no_email is set in SMTP_OPTS, not executing SMTP command&#39;</span><span class="p">)</span>
+
     <span class="c1"># @modified 20190517 - Branch #3002: docker</span>
     <span class="c1"># Wrap the smtp block based on whether to actually send mail or not.</span>
     <span class="c1"># This allows for all the steps to be processed in the testing or docker</span>
@@ -1373,41 +1568,84 @@
     <span class="c1"># safe.</span>
     <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">:</span>
-            <span class="n">REDIS_ALERTER_CONN</span> <span class="o">=</span> <span class="n">redis</span><span class="o">.</span><span class="n">StrictRedis</span><span class="p">(</span><span class="n">password</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">,</span> <span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">REDIS_ALERTER_CONN</span> <span class="o">=</span> <span class="n">redis</span><span class="o">.</span><span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+        <span class="c1"># @modified 20191030 - Bug #3266: py3 Redis binary objects not strings</span>
+        <span class="c1">#                      Branch #3262: py3</span>
+        <span class="c1"># Use get_redis_conn_decoded</span>
+        <span class="c1"># if settings.REDIS_PASSWORD:</span>
+        <span class="c1">#     REDIS_ALERTER_CONN = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)</span>
+        <span class="c1"># else:</span>
+        <span class="c1">#     REDIS_ALERTER_CONN = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)</span>
+        <span class="n">REDIS_ALERTER_CONN</span> <span class="o">=</span> <span class="n">get_redis_conn</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_slack - redis connection failed&#39;</span><span class="p">)</span>
+
+    <span class="c1"># try:</span>
+    <span class="c1">#     derivative_metrics = list(REDIS_ALERTER_CONN.smembers(&#39;derivative_metrics&#39;))</span>
+    <span class="c1"># except:</span>
+    <span class="c1">#     derivative_metrics = []</span>
+    <span class="c1"># redis_metric_name = &#39;%s%s&#39; % (settings.FULL_NAMESPACE, str(base_name))</span>
+    <span class="c1"># if redis_metric_name in derivative_metrics:</span>
+    <span class="c1">#     known_derivative_metric = True</span>
+    <span class="c1"># if known_derivative_metric:</span>
+    <span class="c1">#     try:</span>
+    <span class="c1">#         non_derivative_monotonic_metrics = settings.NON_DERIVATIVE_MONOTONIC_METRICS</span>
+    <span class="c1">#     except:</span>
+    <span class="c1">#         non_derivative_monotonic_metrics = []</span>
+    <span class="c1">#     skip_derivative = in_list(redis_metric_name, non_derivative_monotonic_metrics)</span>
+    <span class="c1">#     if skip_derivative:</span>
+    <span class="c1">#         known_derivative_metric = False</span>
+
+    <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="n">is_derivative_metric</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
+
+    <span class="c1"># @added 20191008 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">derivative_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">REDIS_ALERTER_CONN</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;derivative_metrics&#39;</span><span class="p">))</span>
+        <span class="n">main_alert_title</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">CUSTOM_ALERT_OPTS</span><span class="p">[</span><span class="s1">&#39;main_alert_title&#39;</span><span class="p">]</span>
     <span class="k">except</span><span class="p">:</span>
-        <span class="n">derivative_metrics</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">redis_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">))</span>
-    <span class="k">if</span> <span class="n">redis_metric_name</span> <span class="ow">in</span> <span class="n">derivative_metrics</span><span class="p">:</span>
-        <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="k">if</span> <span class="n">known_derivative_metric</span><span class="p">:</span>
+        <span class="n">main_alert_title</span> <span class="o">=</span> <span class="s1">&#39;Skyline&#39;</span>
+    <span class="n">alert_context</span> <span class="o">=</span> <span class="n">context</span>
+    <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;Analyzer&#39;</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">non_derivative_monotonic_metrics</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">NON_DERIVATIVE_MONOTONIC_METRICS</span>
+            <span class="n">alert_context</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">CUSTOM_ALERT_OPTS</span><span class="p">[</span><span class="s1">&#39;analyzer_alert_heading&#39;</span><span class="p">]</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="n">non_derivative_monotonic_metrics</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">skip_derivative</span> <span class="o">=</span> <span class="n">in_list</span><span class="p">(</span><span class="n">redis_metric_name</span><span class="p">,</span> <span class="n">non_derivative_monotonic_metrics</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">skip_derivative</span><span class="p">:</span>
-            <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">alert_context</span> <span class="o">=</span> <span class="s1">&#39;Analyzer&#39;</span>
+    <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;Mirage&#39;</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">alert_context</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">CUSTOM_ALERT_OPTS</span><span class="p">[</span><span class="s1">&#39;mirage_alert_heading&#39;</span><span class="p">]</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">alert_context</span> <span class="o">=</span> <span class="s1">&#39;Mirage&#39;</span>
+    <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;Ionosphere&#39;</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">alert_context</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">CUSTOM_ALERT_OPTS</span><span class="p">[</span><span class="s1">&#39;ionosphere_alert_heading&#39;</span><span class="p">]</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">alert_context</span> <span class="o">=</span> <span class="s1">&#39;Ionosphere&#39;</span>
 
     <span class="k">if</span> <span class="n">known_derivative_metric</span><span class="p">:</span>
-        <span class="n">unencoded_graph_title</span> <span class="o">=</span> <span class="s1">&#39;Skyline </span><span class="si">%s</span><span class="s1"> - ALERT at </span><span class="si">%s</span><span class="s1"> hours - derivative graph - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-            <span class="n">context</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">full_duration_in_hours</span><span class="p">)),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
-        <span class="n">slack_title</span> <span class="o">=</span> <span class="s1">&#39;*Skyline </span><span class="si">%s</span><span class="s1"> - ALERT* on </span><span class="si">%s</span><span class="s1"> at </span><span class="si">%s</span><span class="s1"> hours - derivative graph - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-            <span class="n">context</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">full_duration_in_hours</span><span class="p">)),</span>
+        <span class="c1"># @modified 20191008 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings</span>
+        <span class="c1"># unencoded_graph_title = &#39;Skyline %s - ALERT at %s hours - derivative graph - %s&#39; % (</span>
+        <span class="c1">#     context, str(int(full_duration_in_hours)), str(metric[0]))</span>
+        <span class="c1"># slack_title = &#39;*Skyline %s - ALERT* on %s at %s hours - derivative graph - %s&#39; % (</span>
+        <span class="c1">#     context, str(metric[1]), str(int(full_duration_in_hours)),</span>
+        <span class="c1">#     str(metric[0]))</span>
+        <span class="n">unencoded_graph_title</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> - ALERT at </span><span class="si">%s</span><span class="s1"> hours - derivative graph - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">main_alert_title</span><span class="p">,</span> <span class="n">alert_context</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">full_duration_in_hours</span><span class="p">)),</span>
             <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="n">slack_title</span> <span class="o">=</span> <span class="s1">&#39;*</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> - ALERT* on </span><span class="si">%s</span><span class="s1"> at </span><span class="si">%s</span><span class="s1"> hours - derivative graph - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">main_alert_title</span><span class="p">,</span> <span class="n">alert_context</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+            <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">full_duration_in_hours</span><span class="p">)),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">unencoded_graph_title</span> <span class="o">=</span> <span class="s1">&#39;Skyline </span><span class="si">%s</span><span class="s1"> - ALERT at </span><span class="si">%s</span><span class="s1"> hours - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-            <span class="n">context</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">full_duration_in_hours</span><span class="p">)),</span>
+        <span class="c1"># @modified 20191008 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings</span>
+        <span class="c1"># unencoded_graph_title = &#39;Skyline %s - ALERT at %s hours - %s&#39; % (</span>
+        <span class="c1">#     context, str(int(full_duration_in_hours)),</span>
+        <span class="c1">#     str(metric[0]))</span>
+        <span class="c1"># slack_title = &#39;*Skyline %s - ALERT* on %s at %s hours - %s&#39; % (</span>
+        <span class="c1">#     context, str(metric[1]), str(int(full_duration_in_hours)),</span>
+        <span class="c1">#     str(metric[0]))</span>
+        <span class="n">unencoded_graph_title</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> - ALERT at </span><span class="si">%s</span><span class="s1"> hours - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">main_alert_title</span><span class="p">,</span> <span class="n">alert_context</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">full_duration_in_hours</span><span class="p">)),</span>
             <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
-        <span class="n">slack_title</span> <span class="o">=</span> <span class="s1">&#39;*Skyline </span><span class="si">%s</span><span class="s1"> - ALERT* on </span><span class="si">%s</span><span class="s1"> at </span><span class="si">%s</span><span class="s1"> hours - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-            <span class="n">context</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">full_duration_in_hours</span><span class="p">)),</span>
-            <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="n">slack_title</span> <span class="o">=</span> <span class="s1">&#39;*</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> - ALERT* on </span><span class="si">%s</span><span class="s1"> at </span><span class="si">%s</span><span class="s1"> hours - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">main_alert_title</span><span class="p">,</span> <span class="n">alert_context</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+            <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">full_duration_in_hours</span><span class="p">)),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
 
     <span class="n">graph_title_string</span> <span class="o">=</span> <span class="n">quote</span><span class="p">(</span><span class="n">unencoded_graph_title</span><span class="p">,</span> <span class="n">safe</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
     <span class="n">graph_title</span> <span class="o">=</span> <span class="s1">&#39;&amp;title=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">graph_title_string</span>
@@ -1427,18 +1665,23 @@
     <span class="n">human_anomaly_time</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">until_timestamp</span><span class="p">))</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%c</span><span class="s1">&#39;</span><span class="p">)</span>
     <span class="n">slack_time_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">human_anomaly_time</span><span class="p">,</span> <span class="n">timezone</span><span class="p">)</span>
 
-    <span class="n">graphite_port</span> <span class="o">=</span> <span class="n">get_graphite_port</span><span class="p">()</span>
-    <span class="n">graphite_render_uri</span> <span class="o">=</span> <span class="n">get_graphite_render_uri</span><span class="p">()</span>
-    <span class="n">graphite_custom_headers</span> <span class="o">=</span> <span class="n">get_graphite_custom_headers</span><span class="p">()</span>
+    <span class="n">graphite_port</span> <span class="o">=</span> <span class="n">get_graphite_port</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+    <span class="n">graphite_render_uri</span> <span class="o">=</span> <span class="n">get_graphite_render_uri</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+    <span class="n">graphite_custom_headers</span> <span class="o">=</span> <span class="n">get_graphite_custom_headers</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">known_derivative_metric</span><span class="p">:</span>
-        <span class="n">link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">?from=</span><span class="si">%s</span><span class="s1">&amp;until=</span><span class="si">%s</span><span class="s1">&amp;target=cactiStyle(nonNegativeDerivative(</span><span class="si">%s</span><span class="s1">))</span><span class="si">%s%s</span><span class="s1">&amp;colorList=orange&#39;</span> <span class="o">%</span> <span class="p">(</span>
+
+        <span class="c1"># @modified 20191106 - Task #3294: py3 - handle system parameter in Graphite cactiStyle</span>
+        <span class="c1"># link = &#39;%s://%s:%s/%s?from=%s&amp;until=%s&amp;target=cactiStyle(nonNegativeDerivative(%s))%s%s&amp;colorList=orange&#39; % (</span>
+        <span class="n">link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">?from=</span><span class="si">%s</span><span class="s1">&amp;until=</span><span class="si">%s</span><span class="s1">&amp;target=cactiStyle(nonNegativeDerivative(</span><span class="si">%s</span><span class="s1">),</span><span class="si">%%</span><span class="s1">27si</span><span class="si">%%</span><span class="s1">27)</span><span class="si">%s%s</span><span class="s1">&amp;colorList=orange&#39;</span> <span class="o">%</span> <span class="p">(</span>
             <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PROTOCOL</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span>
             <span class="n">graphite_port</span><span class="p">,</span> <span class="n">graphite_render_uri</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span>
                 <span class="n">graphite_from</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_until</span><span class="p">),</span>
             <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_GRAPH_SETTINGS</span><span class="p">,</span> <span class="n">graph_title</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">?from=</span><span class="si">%s</span><span class="s1">&amp;until=</span><span class="si">%s</span><span class="s1">&amp;target=cactiStyle(</span><span class="si">%s</span><span class="s1">)</span><span class="si">%s%s</span><span class="s1">&amp;colorList=orange&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="c1"># @modified 20191106 - Task #3294: py3 - handle system parameter in Graphite cactiStyle</span>
+        <span class="c1"># link = &#39;%s://%s:%s/%s?from=%s&amp;until=%s&amp;target=cactiStyle(%s)%s%s&amp;colorList=orange&#39; % (</span>
+        <span class="n">link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">://</span><span class="si">%s</span><span class="s1">:</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">?from=</span><span class="si">%s</span><span class="s1">&amp;until=</span><span class="si">%s</span><span class="s1">&amp;target=cactiStyle(</span><span class="si">%s</span><span class="s1">,</span><span class="si">%%</span><span class="s1">27si</span><span class="si">%%</span><span class="s1">27)</span><span class="si">%s%s</span><span class="s1">&amp;colorList=orange&#39;</span> <span class="o">%</span> <span class="p">(</span>
             <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PROTOCOL</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span><span class="p">,</span>
             <span class="n">graphite_port</span><span class="p">,</span> <span class="n">graphite_render_uri</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span>
                 <span class="n">graphite_from</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_until</span><span class="p">),</span>
@@ -1463,6 +1706,10 @@
         <span class="n">graphite_image_file</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alert_slack - no Ionosphere Graphite image interpolated&#39;</span><span class="p">)</span>
 
+    <span class="c1"># @added 20191105 - Task #3290: Handle urllib2 in py3</span>
+    <span class="c1">#                   Branch #3262: py3</span>
+    <span class="n">image_data</span> <span class="o">=</span> <span class="n">get_graphite_graph_image</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">link</span><span class="p">,</span> <span class="n">graphite_image_file</span><span class="p">)</span>
+
     <span class="k">if</span> <span class="n">graphite_image_file</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">graphite_image_file</span><span class="p">):</span>
             <span class="n">image_file</span> <span class="o">=</span> <span class="n">graphite_image_file</span>
@@ -1478,15 +1725,39 @@
             <span class="c1"># @modified 20190520 - Branch #3002: docker</span>
             <span class="c1"># image_data = urllib2.urlopen(link).read()  # nosec</span>
             <span class="k">if</span> <span class="n">graphite_custom_headers</span><span class="p">:</span>
-                <span class="n">request</span> <span class="o">=</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">Request</span><span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">graphite_custom_headers</span><span class="p">)</span>
+                <span class="c1"># @modified 20191021 - Task #3290: Handle urllib2 in py3</span>
+                <span class="c1">#                      Branch #3262: py3</span>
+                <span class="c1"># request = urllib2.Request(link, headers=graphite_custom_headers)</span>
+                <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="n">request</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">Request</span><span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">graphite_custom_headers</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                    <span class="n">request</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">graphite_custom_headers</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">request</span> <span class="o">=</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">Request</span><span class="p">(</span><span class="n">link</span><span class="p">)</span>
-            <span class="n">image_data</span> <span class="o">=</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">request</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>  <span class="c1"># nosec</span>
-        <span class="k">except</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">URLError</span><span class="p">:</span>
+                <span class="c1"># @modified 20191021 - Task #3290: Handle urllib2 in py3</span>
+                <span class="c1">#                      Branch #3262: py3</span>
+                <span class="c1"># request = urllib2.Request(link)</span>
+                <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="n">request</span> <span class="o">=</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">Request</span><span class="p">(</span><span class="n">link</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                    <span class="n">request</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">link</span><span class="p">)</span>
+            <span class="c1"># @modified 20191021 - Task #3290: Handle urllib2 in py3</span>
+            <span class="c1">#                      Branch #3262: py3</span>
+            <span class="c1"># image_data = urllib2.urlopen(request).read()  # nosec</span>
+            <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">image_data</span> <span class="o">=</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">request</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>  <span class="c1"># nosec</span>
+            <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                <span class="n">image_data</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">request</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>  <span class="c1"># nosec</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span> <span class="ow">or</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_smtp - image data OK&#39;</span><span class="p">)</span>
+        <span class="c1"># @modified 20191021 - Task #3290: Handle urllib2 in py3</span>
+        <span class="c1">#                      Branch #3262: py3</span>
+        <span class="c1"># except urllib2.URLError:</span>
+        <span class="k">except</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_slack - failed to get image graph&#39;</span><span class="p">)</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_slack - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">link</span><span class="p">))</span>
             <span class="n">image_data</span> <span class="o">=</span> <span class="kc">None</span>
+
         <span class="k">if</span> <span class="n">image_data</span><span class="p">:</span>
             <span class="n">image_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.graphite.</span><span class="si">%s</span><span class="s1">h.png&#39;</span> <span class="o">%</span> <span class="p">(</span>
                 <span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_TMP_DIR</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">,</span>
@@ -1514,8 +1785,20 @@
     <span class="k">try</span><span class="p">:</span>
         <span class="n">channels</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SLACK_OPTS</span><span class="p">[</span><span class="s1">&#39;channels&#39;</span><span class="p">][</span><span class="n">alert</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
     <span class="k">except</span><span class="p">:</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_slack - could not determine channel&#39;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="kc">False</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alert_slack - could not determine channel for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">alert</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="c1"># return False</span>
+        <span class="n">channels</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># @added 20191106 - Branch #3262: py3</span>
+    <span class="c1"># If no channel could be determined use the default_channel</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">channels</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">default_channel</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SLACK_OPTS</span><span class="p">[</span><span class="s1">&#39;default_channel&#39;</span><span class="p">]</span>
+            <span class="n">channels</span> <span class="o">=</span> <span class="p">[</span><span class="n">default_channel</span><span class="p">]</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alert_slack - using default_channel </span><span class="si">%s</span><span class="s1"> for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">default_channel</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">alert</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_slack - could not determine default_channel&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
 
     <span class="k">try</span><span class="p">:</span>
         <span class="n">icon_emoji</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SLACK_OPTS</span><span class="p">[</span><span class="s1">&#39;icon_emoji&#39;</span><span class="p">]</span>
@@ -1529,8 +1812,18 @@
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_slack - could not initiate SlackClient&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">False</span>
 
-    <span class="n">ionosphere_link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/ionosphere?timestamp=</span><span class="si">%s</span><span class="s1">&amp;metric=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-        <span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_URL</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">2</span><span class="p">])),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+    <span class="c1"># @added 20191011 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">ionosphere_link_path</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">CUSTOM_ALERT_OPTS</span><span class="p">[</span><span class="s1">&#39;ionosphere_link_path&#39;</span><span class="p">]</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">ionosphere_link_path</span> <span class="o">=</span> <span class="s1">&#39;ionosphere&#39;</span>
+
+    <span class="c1"># @modified 20191011 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings</span>
+    <span class="c1"># ionosphere_link = &#39;%s/ionosphere?timestamp=%s&amp;metric=%s&#39; % (</span>
+    <span class="c1">#     settings.SKYLINE_URL, str(int(metric[2])), str(metric[1]))</span>
+    <span class="n">ionosphere_link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">?timestamp=</span><span class="si">%s</span><span class="s1">&amp;metric=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_URL</span><span class="p">,</span> <span class="n">ionosphere_link_path</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">2</span><span class="p">])),</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
 
     <span class="c1"># This block is not used but left here as it is the pattern for sending</span>
     <span class="c1"># messages using the chat.postMessage methods and could possibly be the</span>
@@ -1567,7 +1860,12 @@
             <span class="c1"># Added date and time info so you do not have to mouseover the slack</span>
             <span class="c1"># message to determine the time at which the alert came in</span>
             <span class="c1"># initial_comment = slack_title + &#39; :: &lt;&#39; + link  + &#39;|graphite image link&gt;\n*Ionosphere training dir* :: &lt;&#39; + ionosphere_link + &#39;|training data link&gt;&#39;</span>
-            <span class="n">initial_comment</span> <span class="o">=</span> <span class="n">slack_title</span> <span class="o">+</span> <span class="s1">&#39; :: &lt;&#39;</span> <span class="o">+</span> <span class="n">link</span> <span class="o">+</span> <span class="s1">&#39;|graphite image link&gt;</span><span class="se">\n</span><span class="s1">*Ionosphere training dir* :: &lt;&#39;</span> <span class="o">+</span> <span class="n">ionosphere_link</span> <span class="o">+</span> <span class="s1">&#39;|training data link&gt; :: for anomaly at &#39;</span> <span class="o">+</span> <span class="n">slack_time_string</span>
+            <span class="c1"># @modified 20191008 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings</span>
+            <span class="c1"># initial_comment = slack_title + &#39; :: &lt;&#39; + link + &#39;|graphite image link&gt;\n*Ionosphere training dir* :: &lt;&#39; + ionosphere_link + &#39;|training data link&gt; :: for anomaly at &#39; + slack_time_string</span>
+            <span class="k">if</span> <span class="n">main_alert_title</span> <span class="o">==</span> <span class="s1">&#39;Skyline&#39;</span><span class="p">:</span>
+                <span class="n">initial_comment</span> <span class="o">=</span> <span class="n">slack_title</span> <span class="o">+</span> <span class="s1">&#39; :: &lt;&#39;</span> <span class="o">+</span> <span class="n">link</span> <span class="o">+</span> <span class="s1">&#39;|graphite image link&gt;</span><span class="se">\n</span><span class="s1">*Ionosphere training dir* :: &lt;&#39;</span> <span class="o">+</span> <span class="n">ionosphere_link</span> <span class="o">+</span> <span class="s1">&#39;|training data link&gt; :: for anomaly at &#39;</span> <span class="o">+</span> <span class="n">slack_time_string</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">initial_comment</span> <span class="o">=</span> <span class="n">slack_title</span> <span class="o">+</span> <span class="s1">&#39; :: &lt;&#39;</span> <span class="o">+</span> <span class="n">link</span> <span class="o">+</span> <span class="s1">&#39;|graphite image link&gt;</span><span class="se">\n</span><span class="s1">*Training dir* :: &lt;&#39;</span> <span class="o">+</span> <span class="n">ionosphere_link</span> <span class="o">+</span> <span class="s1">&#39;|training data link&gt; :: for anomaly at &#39;</span> <span class="o">+</span> <span class="n">slack_time_string</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># initial_comment = slack_title + &#39; :: &lt;&#39; + link  + &#39;|graphite image link&gt;&#39;</span>
             <span class="n">initial_comment</span> <span class="o">=</span> <span class="n">slack_title</span> <span class="o">+</span> <span class="s1">&#39; :: &lt;&#39;</span> <span class="o">+</span> <span class="n">link</span> <span class="o">+</span> <span class="s1">&#39;|graphite image link&gt;</span><span class="se">\n</span><span class="s1">For anomaly at &#39;</span> <span class="o">+</span> <span class="n">slack_time_string</span>
@@ -1637,7 +1935,9 @@
                         <span class="n">slack_group_trace_groups</span> <span class="o">=</span> <span class="kc">None</span>
                         <span class="n">slack_group_trace_channels</span> <span class="o">=</span> <span class="kc">None</span>
                         <span class="k">try</span><span class="p">:</span>
-                            <span class="n">slack_group</span> <span class="o">=</span> <span class="n">slack_file_upload</span><span class="p">[</span><span class="s1">&#39;file&#39;</span><span class="p">][</span><span class="s1">&#39;groups&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+                            <span class="c1"># @modified 20191106 - Branch #3262: py3</span>
+                            <span class="c1"># slack_group = slack_file_upload[&#39;file&#39;][&#39;groups&#39;][0].encode(&#39;utf-8&#39;)</span>
+                            <span class="n">slack_group</span> <span class="o">=</span> <span class="n">slack_file_upload</span><span class="p">[</span><span class="s1">&#39;file&#39;</span><span class="p">][</span><span class="s1">&#39;groups&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
                             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alert_slack - slack group has been set from </span><span class="se">\&#39;</span><span class="s1">groups</span><span class="se">\&#39;</span><span class="s1"> as </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                                 <span class="nb">str</span><span class="p">(</span><span class="n">slack_group</span><span class="p">)))</span>
                             <span class="n">slack_group_list</span> <span class="o">=</span> <span class="n">slack_file_upload</span><span class="p">[</span><span class="s1">&#39;file&#39;</span><span class="p">][</span><span class="s1">&#39;shares&#39;</span><span class="p">][</span><span class="s1">&#39;private&#39;</span><span class="p">][</span><span class="n">slack_group</span><span class="p">]</span>
@@ -1650,7 +1950,9 @@
                         <span class="k">if</span> <span class="ow">not</span> <span class="n">slack_group</span><span class="p">:</span>
                             <span class="c1"># Try by channel</span>
                             <span class="k">try</span><span class="p">:</span>
-                                <span class="n">slack_group</span> <span class="o">=</span> <span class="n">slack_file_upload</span><span class="p">[</span><span class="s1">&#39;file&#39;</span><span class="p">][</span><span class="s1">&#39;channels&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+                                <span class="c1"># @modified 20191106 - Branch #3262: py3</span>
+                                <span class="c1"># slack_group = slack_file_upload[&#39;file&#39;][&#39;channels&#39;][0].encode(&#39;utf-8&#39;)</span>
+                                <span class="n">slack_group</span> <span class="o">=</span> <span class="n">slack_file_upload</span><span class="p">[</span><span class="s1">&#39;file&#39;</span><span class="p">][</span><span class="s1">&#39;channels&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
                                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alert_slack - slack group has been set from </span><span class="se">\&#39;</span><span class="s1">channels</span><span class="se">\&#39;</span><span class="s1"> as </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                                     <span class="nb">str</span><span class="p">(</span><span class="n">slack_group</span><span class="p">)))</span>
                             <span class="k">except</span><span class="p">:</span>
@@ -1691,7 +1993,9 @@
                                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_slack - faied to determine slack_thread_ts&#39;</span><span class="p">)</span>
                         <span class="k">if</span> <span class="n">slack_group_list</span><span class="p">:</span>
                             <span class="k">try</span><span class="p">:</span>
-                                <span class="n">slack_thread_ts</span> <span class="o">=</span> <span class="n">slack_group_list</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;ts&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+                                <span class="c1"># @modified 20191106 - Branch #3262: py3</span>
+                                <span class="c1"># slack_thread_ts = slack_group_list[0][&#39;ts&#39;].encode(&#39;utf-8&#39;)</span>
+                                <span class="n">slack_thread_ts</span> <span class="o">=</span> <span class="n">slack_group_list</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;ts&#39;</span><span class="p">]</span>
                                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alert_slack - slack group is </span><span class="si">%s</span><span class="s1"> and the slack_thread_ts is </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                                     <span class="nb">str</span><span class="p">(</span><span class="n">slack_group</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">slack_thread_ts</span><span class="p">)))</span>
                             <span class="k">except</span><span class="p">:</span>
@@ -1732,12 +2036,17 @@
         <span class="k">if</span> <span class="n">add_to_panorama</span><span class="p">:</span>
             <span class="n">REDIS_ALERTER_CONN</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">:</span>
-                    <span class="n">REDIS_ALERTER_CONN</span> <span class="o">=</span> <span class="n">redis</span><span class="o">.</span><span class="n">StrictRedis</span><span class="p">(</span><span class="n">password</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">,</span> <span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">REDIS_ALERTER_CONN</span> <span class="o">=</span> <span class="n">redis</span><span class="o">.</span><span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+                <span class="c1"># @modified 20191106 - Bug #3266: py3 Redis binary objects not strings</span>
+                <span class="c1">#                      Branch #3262: py3</span>
+                <span class="c1"># Use get_redis_conn_decoded</span>
+                <span class="c1"># if settings.REDIS_PASSWORD:</span>
+                <span class="c1">#     REDIS_ALERTER_CONN = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)</span>
+                <span class="c1"># else:</span>
+                <span class="c1">#     REDIS_ALERTER_CONN = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)</span>
+                <span class="n">REDIS_ALERTER_CONN</span> <span class="o">=</span> <span class="n">get_redis_conn</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_slack - redis connection failed&#39;</span><span class="p">)</span>
+
             <span class="n">metric_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
             <span class="n">cache_key</span> <span class="o">=</span> <span class="s1">&#39;panorama.slack_thread_ts.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">),</span> <span class="n">base_name</span><span class="p">)</span>
 
@@ -1756,7 +2065,9 @@
                 <span class="c1"># @modified 20190719 - Bug #3110: webapp - slack_response boolean object</span>
                 <span class="c1"># Wrapped in if key_exists, only add a Panorama Redis key if one</span>
                 <span class="c1"># has not been added.</span>
-                <span class="n">cache_key_value</span> <span class="o">=</span> <span class="p">[</span><span class="n">base_name</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">,</span> <span class="n">slack_thread_ts</span><span class="p">]</span>
+                <span class="c1"># @modified 20191106 - Branch #3262: py3</span>
+                <span class="c1"># cache_key_value = [base_name, metric_timestamp, slack_thread_ts]</span>
+                <span class="n">cache_key_value</span> <span class="o">=</span> <span class="p">[</span><span class="n">base_name</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">slack_thread_ts</span><span class="p">)]</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">REDIS_ALERTER_CONN</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span>
                         <span class="n">cache_key</span><span class="p">,</span> <span class="mi">86400</span><span class="p">,</span>
@@ -1769,6 +2080,245 @@
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
                         <span class="s1">&#39;error :: failed to add Panorama slack_thread_ts Redis key - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>
                         <span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">cache_key_value</span><span class="p">)))</span></div>
+
+
+<span class="c1"># @added 20200116: Feature #3396: http_alerter</span>
+<div class="viewcode-block" id="alert_http"><a class="viewcode-back" href="../../skyline.analyzer.html#analyzer.alerters.alert_http">[docs]</a><span class="k">def</span> <span class="nf">alert_http</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Called by :func:`~trigger_alert` and sends and resend anomalies to a http</span>
+<span class="sd">    endpoint.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">HTTP_ALERTERS_ENABLED</span><span class="p">:</span>
+        <span class="n">alerter_name</span> <span class="o">=</span> <span class="n">alert</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">alerter_enabled</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">alerter_enabled</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">HTTP_ALERTERS_OPTS</span><span class="p">[</span><span class="n">alerter_name</span><span class="p">][</span><span class="s1">&#39;enabled&#39;</span><span class="p">]</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_http failed to determine the enabled from settings.HTTP_ALERTERS_OPTS for alert - </span><span class="si">%s</span><span class="s1"> and metric </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">alert</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">alerter_enabled</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alert_http - </span><span class="si">%s</span><span class="s1"> enabled </span><span class="si">%s</span><span class="s1">, not alerting&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">alerter_name</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">alerter_enabled</span><span class="p">)))</span>
+            <span class="k">return</span>
+        <span class="n">alerter_endpoint</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">alerter_endpoint</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">HTTP_ALERTERS_OPTS</span><span class="p">[</span><span class="n">alerter_name</span><span class="p">][</span><span class="s1">&#39;endpoint&#39;</span><span class="p">]</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_http failed to determine the endpoint from settings.HTTP_ALERTERS_OPTS for alert - </span><span class="si">%s</span><span class="s1"> and metric </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">alert</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">alerter_endpoint</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;alert_http - no endpoint set for </span><span class="si">%s</span><span class="s1">, not alerting&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">alerter_name</span><span class="p">)))</span>
+            <span class="k">return</span>
+
+        <span class="n">alerter_token</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">alerter_token</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">HTTP_ALERTERS_OPTS</span><span class="p">[</span><span class="n">alerter_name</span><span class="p">][</span><span class="s1">&#39;token&#39;</span><span class="p">]</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="c1"># Test for mirage second_order_resolution_hours tuple</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">full_duration</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">alert</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span> <span class="o">*</span> <span class="mi">3600</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">full_duration</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span>
+
+        <span class="n">source</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="n">metric_alert_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">alert_data_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">metric_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+            <span class="n">timestamp_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span>
+            <span class="n">value_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+            <span class="n">full_duration_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">full_duration</span><span class="p">))</span>
+            <span class="n">expiry_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">alert</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+            <span class="n">metric_alert_dict</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s2">&quot;metric&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+                <span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="n">timestamp_str</span><span class="p">,</span>
+                <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="n">value_str</span><span class="p">,</span>
+                <span class="s2">&quot;full_duration&quot;</span><span class="p">:</span> <span class="n">full_duration_str</span><span class="p">,</span>
+                <span class="s2">&quot;expiry&quot;</span><span class="p">:</span> <span class="n">expiry_str</span><span class="p">,</span>
+                <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">source</span><span class="p">),</span>
+                <span class="s2">&quot;token&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">alerter_token</span><span class="p">)</span>
+            <span class="p">}</span>
+            <span class="c1"># @modified 20200302: Feature #3396: http_alerter</span>
+            <span class="c1"># Add the token as an independent entity from the alert</span>
+            <span class="c1"># alert_data_dict = {&quot;status&quot;: {}, &quot;data&quot;: {&quot;alert&quot;: metric_alert_dict}}</span>
+            <span class="n">alerter_token_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">alerter_token</span><span class="p">)</span>
+            <span class="n">alert_data_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="p">{},</span> <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;token&quot;</span><span class="p">:</span> <span class="n">alerter_token_str</span><span class="p">,</span> <span class="s2">&quot;alert&quot;</span><span class="p">:</span> <span class="n">metric_alert_dict</span><span class="p">}}</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alert_http :: alert_data_dict to send - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">alert_data_dict</span><span class="p">))</span>
+            <span class="c1"># Allow requests to send as json</span>
+            <span class="c1"># alert_data = json.dumps(alert_data_dict)</span>
+            <span class="c1"># logger.info(&#39;alert_http :: alert_data to send - %s&#39; % str(alert_data))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_http failed to construct the alert data for </span><span class="si">%s</span><span class="s1"> from alert - </span><span class="si">%s</span><span class="s1"> and metric - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">alerter_name</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">alert</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">)))</span>
+            <span class="k">return</span>
+
+        <span class="n">in_resend_queue</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">redis_set</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.http_alerter.queue&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
+        <span class="n">resend_queue</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">previous_attempts</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">REDIS_HTTP_ALERTER_CONN_DECODED</span> <span class="o">=</span> <span class="n">get_redis_conn_decoded</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">resend_queue</span> <span class="o">=</span> <span class="n">REDIS_HTTP_ALERTER_CONN_DECODED</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="n">redis_set</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_http :: could not query Redis for </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">redis_set</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">REDIS_HTTP_ALERTER_CONN_DECODED</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">REDIS_HTTP_ALERTER_CONN_DECODED</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+        <span class="k">if</span> <span class="n">resend_queue</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">resend_item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">resend_queue</span><span class="p">):</span>
+                    <span class="n">resend_item_list</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">resend_item</span><span class="p">)</span>
+                    <span class="c1"># resend_alert = literal_eval(resend_item_list[0])</span>
+                    <span class="c1"># resend_metric = literal_eval(resend_item_list[1])</span>
+                    <span class="n">resend_metric_alert_dict</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">resend_item_list</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="n">resend_metric_alert_dict</span><span class="p">[</span><span class="s1">&#39;metric&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">metric_name</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">resend_metric_alert_dict</span><span class="p">[</span><span class="s1">&#39;timestamp&#39;</span><span class="p">])</span> <span class="o">==</span> <span class="n">timestamp</span><span class="p">:</span>
+                            <span class="n">previous_attempts</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">resend_metric_alert_dict</span><span class="p">[</span><span class="s1">&#39;attempts&#39;</span><span class="p">])</span>
+                            <span class="n">in_resend_queue</span> <span class="o">=</span> <span class="kc">True</span>
+                            <span class="k">break</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_http failed iterate to resend_queue&#39;</span><span class="p">)</span>
+        <span class="n">REDIS_HTTP_ALERTER_CONN</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># if in_resend_queue:</span>
+        <span class="c1">#    REDIS_HTTP_ALERTER_CONN = get_redis_conn(skyline_app)</span>
+        <span class="n">REDIS_HTTP_ALERTER_CONN</span> <span class="o">=</span> <span class="n">get_redis_conn</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+
+        <span class="n">add_to_resend_queue</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">fail_alerter</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">alert_data_dict</span> <span class="ow">and</span> <span class="n">alerter_endpoint</span><span class="p">:</span>
+            <span class="c1"># @modified 20200403 - Feature #3396: http_alerter</span>
+            <span class="c1"># Changed timeouts from 2, 2 to 5, 20</span>
+            <span class="n">connect_timeout</span> <span class="o">=</span> <span class="mi">5</span>
+            <span class="n">read_timeout</span> <span class="o">=</span> <span class="mi">20</span>
+            <span class="k">if</span> <span class="n">requests</span><span class="o">.</span><span class="n">__version__</span> <span class="o">&gt;=</span> <span class="s1">&#39;2.4.0&#39;</span><span class="p">:</span>
+                <span class="n">use_timeout</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">connect_timeout</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">read_timeout</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">use_timeout</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">connect_timeout</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: use_timeout - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">use_timeout</span><span class="p">)))</span>
+            <span class="c1"># headers = {&#39;Content-type&#39;: &#39;application/json&#39;, &#39;Accept&#39;: &#39;text/plain&#39;}</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># response = requests.post(alerter_endpoint, data=alert_data, headers=headers, timeout=use_timeout)</span>
+                <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">alerter_endpoint</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">alert_data_dict</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">use_timeout</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to post alert to </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">alerter_name</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">alert_data_dict</span><span class="p">)))</span>
+                <span class="n">add_to_resend_queue</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">response</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="k">if</span> <span class="n">in_resend_queue</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">REDIS_HTTP_ALERTER_CONN</span><span class="o">.</span><span class="n">srem</span><span class="p">(</span><span class="n">redis_set</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">resend_item</span><span class="p">))</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alert_http :: alert removed from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">redis_set</span><span class="p">)))</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_http :: failed remove </span><span class="si">%s</span><span class="s1"> from Redis set </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">resend_item</span><span class="p">),</span> <span class="n">redis_set</span><span class="p">))</span>
+
+            <span class="c1"># @added 20200310 - Feature #3396: http_alerter</span>
+            <span class="c1"># When the response code is 401 the response object appears to be</span>
+            <span class="c1"># False, although the response.code and response.reason are set</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">!=</span> <span class="mi">200</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_http :: </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> responded with status code </span><span class="si">%s</span><span class="s1"> and reason </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">alerter_name</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">alerter_endpoint</span><span class="p">),</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">reason</span><span class="p">)))</span>
+                    <span class="n">add_to_resend_queue</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">fail_alerter</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_http :: failed determine response.status_code&#39;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">response</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alert_http :: alert sent to </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">alerter_endpoint</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">alert_data_dict</span><span class="p">)))</span>
+                    <span class="k">if</span> <span class="n">in_resend_queue</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alert_http :: alert removed from </span><span class="si">%s</span><span class="s1"> after </span><span class="si">%s</span><span class="s1"> attempts to send&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">redis_set</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">previous_attempts</span><span class="p">)))</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="k">del</span> <span class="n">REDIS_HTTP_ALERTER_CONN</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="k">pass</span>
+                    <span class="k">return</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_http :: </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> responded with status code </span><span class="si">%s</span><span class="s1"> and reason </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">alerter_name</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">alerter_endpoint</span><span class="p">),</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">reason</span><span class="p">)))</span>
+                    <span class="n">add_to_resend_queue</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">fail_alerter</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_http :: </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> did not respond as expected&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">alerter_name</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">alerter_endpoint</span><span class="p">)))</span>
+                <span class="n">add_to_resend_queue</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">fail_alerter</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="n">number_of_send_attempts</span> <span class="o">=</span> <span class="n">previous_attempts</span> <span class="o">+</span> <span class="mi">1</span>
+            <span class="n">metric_alert_dict</span><span class="p">[</span><span class="s1">&#39;attempts&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">number_of_send_attempts</span>
+            <span class="k">if</span> <span class="n">add_to_resend_queue</span><span class="p">:</span>
+                <span class="n">alert_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">alert</span><span class="p">)</span>
+                <span class="n">metric_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">alert_str</span><span class="p">,</span> <span class="n">metric_str</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_alert_dict</span><span class="p">)]</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alert_http :: adding alert to </span><span class="si">%s</span><span class="s1"> after </span><span class="si">%s</span><span class="s1"> attempts to send - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">redis_set</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">number_of_send_attempts</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_alert_dict</span><span class="p">)))</span>
+                <span class="c1"># try:</span>
+                <span class="c1">#     REDIS_HTTP_ALERTER_CONN</span>
+                <span class="c1"># except:</span>
+                <span class="c1">#     REDIS_HTTP_ALERTER_CONN = get_redis_conn(skyline_app)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="c1"># redis_conn.sadd(redis_set, str(metric_alert_dict))</span>
+                    <span class="n">REDIS_HTTP_ALERTER_CONN</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="n">redis_set</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_http :: failed to add </span><span class="si">%s</span><span class="s1"> from Redis set </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">metric_alert_dict</span><span class="p">),</span> <span class="n">redis_set</span><span class="p">))</span>
+
+            <span class="c1"># Create a Redis if there was a bad or no response from the</span>
+            <span class="c1"># alerter_endpoint, to ensure that Analyzer does not loop through</span>
+            <span class="c1"># every alert in the queue for an alerter_endpoint, if the</span>
+            <span class="c1"># alerter_endpoint is down</span>
+            <span class="k">if</span> <span class="n">fail_alerter</span><span class="p">:</span>
+                <span class="n">alerter_endpoint_cache_key</span> <span class="o">=</span> <span class="s1">&#39;http_alerter.down.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">alerter_name</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_http :: alerter_endpoint </span><span class="si">%s</span><span class="s1"> failed adding Redis key </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">alerter_endpoint</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">alerter_endpoint_cache_key</span><span class="p">)))</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">REDIS_HTTP_ALERTER_CONN</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">REDIS_HTTP_ALERTER_CONN</span> <span class="o">=</span> <span class="n">get_redis_conn</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_http :: failed to get_redis_conn to add key </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">alerter_endpoint_cache_key</span><span class="p">))</span>
+                        <span class="n">REDIS_HTTP_ALERTER_CONN</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="n">REDIS_HTTP_ALERTER_CONN</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">failed_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
+                        <span class="n">REDIS_HTTP_ALERTER_CONN</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="n">alerter_endpoint_cache_key</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="n">failed_timestamp</span><span class="p">)</span>
+                        <span class="k">del</span> <span class="n">REDIS_HTTP_ALERTER_CONN</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to set Redis key </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">alerter_endpoint_cache_key</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">REDIS_HTTP_ALERTER_CONN</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alert_http :: settings.HTTP_ALERTERS_ENABLED not enabled nothing to do&#39;</span><span class="p">)</span>
+        <span class="k">return</span></div>
 
 
 <div class="viewcode-block" id="trigger_alert"><a class="viewcode-back" href="../../skyline.analyzer.html#analyzer.alerters.trigger_alert">[docs]</a><span class="k">def</span> <span class="nf">trigger_alert</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
@@ -1798,9 +2348,12 @@
 
     <span class="k">if</span> <span class="s1">&#39;@&#39;</span> <span class="ow">in</span> <span class="n">alert</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
         <span class="n">strategy</span> <span class="o">=</span> <span class="s1">&#39;alert_smtp&#39;</span>
+    <span class="c1"># @added 20200116: Feature #3396: http_alerter</span>
+    <span class="c1"># Added http_alerter</span>
+    <span class="k">elif</span> <span class="s1">&#39;http_alerter&#39;</span> <span class="ow">in</span> <span class="n">alert</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+        <span class="n">strategy</span> <span class="o">=</span> <span class="s1">&#39;alert_http&#39;</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">strategy</span> <span class="o">=</span> <span class="s1">&#39;alert_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">alert</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
-
     <span class="k">try</span><span class="p">:</span>
         <span class="nb">getattr</span><span class="p">(</span><span class="n">alerters</span><span class="p">,</span> <span class="n">strategy</span><span class="p">)(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
     <span class="k">except</span><span class="p">:</span>
@@ -1817,7 +2370,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2019, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
 
     </p>
   </div>
@@ -1839,7 +2392,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.3.0',
+            VERSION:'2.0.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

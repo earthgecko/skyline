@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>vista.fetcher &mdash; Skyline 1.3.0 documentation</title>
+  <title>vista.fetcher &mdash; Skyline 2.0.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.3.0 documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 2.0.0 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                1.3
+                2.0
               </div>
             
           
@@ -90,10 +90,12 @@
 <li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
@@ -178,7 +180,9 @@
 <span class="kn">from</span> <span class="nn">threading</span> <span class="k">import</span> <span class="n">Thread</span>
 <span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="k">import</span> <span class="n">Process</span>
 <span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">kill</span><span class="p">,</span> <span class="n">getpid</span>
+<span class="c1"># @modified 20191115 - Branch #3262: py3</span>
+<span class="c1"># from os import kill, getpid</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">kill</span>
 <span class="kn">import</span> <span class="nn">traceback</span>
 <span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">from</span> <span class="nn">sys</span> <span class="k">import</span> <span class="n">version_info</span>
@@ -189,13 +193,19 @@
 <span class="k">except</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">urllib</span> <span class="k">import</span> <span class="n">quote</span>
 
-<span class="kn">from</span> <span class="nn">redis</span> <span class="k">import</span> <span class="n">StrictRedis</span>
+<span class="c1"># @modified 20191115 - Branch #3262: py3</span>
+<span class="c1"># from redis import StrictRedis</span>
 <span class="kn">import</span> <span class="nn">requests</span>
 
 <span class="kn">import</span> <span class="nn">settings</span>
 <span class="n">python_version</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="p">(</span>
-    <span class="n">send_graphite_metric</span><span class="p">,</span> <span class="n">filesafe_metricname</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="kc">True</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="p">(</span>
+        <span class="n">send_graphite_metric</span><span class="p">,</span> <span class="n">filesafe_metricname</span><span class="p">,</span>
+        <span class="c1"># @added 20191111 - Bug #3266: py3 Redis binary objects not strings</span>
+        <span class="c1">#                   Branch #3262: py3</span>
+        <span class="n">get_redis_conn</span><span class="p">,</span> <span class="n">get_redis_conn_decoded</span><span class="p">)</span>
 
 <span class="n">parent_skyline_app</span> <span class="o">=</span> <span class="s1">&#39;vista&#39;</span>
 <span class="n">child_skyline_app</span> <span class="o">=</span> <span class="s1">&#39;fetcher&#39;</span>
@@ -226,7 +236,7 @@
     <span class="n">VISTA_ENABLED</span> <span class="o">=</span> <span class="kc">False</span>
 
 <span class="n">USE_FLUX</span> <span class="o">=</span> <span class="kc">False</span>
-<span class="n">LOCAL_DEBUG</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">LOCAL_DEBUG</span> <span class="o">=</span> <span class="kc">False</span>
 
 
 <div class="viewcode-block" id="Fetcher"><a class="viewcode-back" href="../../skyline.vista.html#vista.fetcher.Fetcher">[docs]</a><span class="k">class</span> <span class="nc">Fetcher</span><span class="p">(</span><span class="n">Thread</span><span class="p">):</span>
@@ -239,10 +249,19 @@
         <span class="nb">super</span><span class="p">(</span><span class="n">Fetcher</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parent_pid</span> <span class="o">=</span> <span class="n">parent_pid</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="kc">True</span>
-        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">password</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">,</span> <span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+
+        <span class="c1"># @modified 20191111 - Bug #3266: py3 Redis binary objects not strings</span>
+        <span class="c1">#                      Branch #3262: py3</span>
+        <span class="c1"># if settings.REDIS_PASSWORD:</span>
+        <span class="c1">#     self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)</span>
+        <span class="c1"># else:</span>
+        <span class="c1">#     self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)</span>
+        <span class="c1"># @added 20191111 - Bug #3266: py3 Redis binary objects not strings</span>
+        <span class="c1">#                   Branch #3262: py3</span>
+        <span class="c1"># Added a single functions to deal with Redis connection and the</span>
+        <span class="c1"># charset=&#39;utf-8&#39;, decode_responses=True arguments required in py3</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">get_redis_conn</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span> <span class="o">=</span> <span class="n">get_redis_conn_decoded</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Fetcher.check_if_parent_is_alive"><a class="viewcode-back" href="../../skyline.vista.html#vista.fetcher.Fetcher.check_if_parent_is_alive">[docs]</a>    <span class="k">def</span> <span class="nf">check_if_parent_is_alive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -262,31 +281,180 @@
         <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: metrics_to_fetch - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metrics_to_fetch</span><span class="p">))</span>
 
+        <span class="c1"># @added 20191127 - Feature #3338: Vista - batch Graphite requests</span>
+        <span class="k">def</span> <span class="nf">param_value_from_url</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">param_name</span><span class="p">):</span>
+            <span class="n">param_value</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">url</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;?&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;&amp;&#39;</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">i</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">param_name</span> <span class="o">+</span> <span class="s1">&#39;=&#39;</span><span class="p">):</span>
+                    <span class="n">param_value</span> <span class="o">=</span> <span class="n">i</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">param_value</span>
+
+        <span class="c1"># @added 20191127 - Feature #3338: Vista - batch Graphite requests</span>
+        <span class="c1"># Fetch metrics from the same Graphite host that have the same from</span>
+        <span class="c1"># parameter in batches</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">graphite_batch_target_count</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">VISTA_GRAPHITE_BATCH_SIZE</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">graphite_batch_target_count</span> <span class="o">=</span> <span class="mi">20</span>
+        <span class="n">graphite_batches</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># [batch_no, remote_host, from_timestamp, url]</span>
+        <span class="n">in_batch_responses</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">batch_number</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">remote_host_type</span><span class="p">,</span> <span class="n">frequency</span><span class="p">,</span> <span class="n">remote_target</span><span class="p">,</span> <span class="n">graphite_target</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">namespace_prefix</span><span class="p">,</span> <span class="n">api_key</span><span class="p">,</span> <span class="n">token</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="n">password</span> <span class="ow">in</span> <span class="n">metrics_to_fetch</span><span class="p">:</span>
-            <span class="n">success</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">remote_host_type</span> <span class="o">!=</span> <span class="s1">&#39;graphite&#39;</span><span class="p">:</span>
+                <span class="k">continue</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: getting data from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">url</span><span class="p">))</span>
-                <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
-                    <span class="n">success</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">url_elements</span> <span class="o">=</span> <span class="n">url</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+                <span class="n">remote_host</span> <span class="o">=</span> <span class="n">url_elements</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: fetcher :: http status code - </span><span class="si">%s</span><span class="s1">, reason - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                    <span class="nb">str</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">reason</span><span class="p">)))</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: fetcher :: failed to get data from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">url</span><span class="p">))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: fetcher :: failed to determine the remote_host from the url - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">url</span><span class="p">))</span>
+            <span class="n">from_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">from_timestamp_str</span> <span class="o">=</span> <span class="n">param_value_from_url</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="s1">&#39;from&#39;</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">from_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">from_timestamp_str</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">from_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: fetcher :: failed to determine the timestamp from the from url parameter - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">url</span><span class="p">))</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">from_timestamp</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">target</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">target</span> <span class="o">=</span> <span class="n">param_value_from_url</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="s1">&#39;target&#39;</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: fetcher :: failed to determine the metric from the target url parameter - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">url</span><span class="p">))</span>
+            <span class="n">added_to_batch</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">add_to_batch</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">for</span> <span class="n">batch_number</span><span class="p">,</span> <span class="n">batch_remote_host</span><span class="p">,</span> <span class="n">batch_from_timestamp</span><span class="p">,</span> <span class="n">batch_url</span> <span class="ow">in</span> <span class="n">graphite_batches</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">added_to_batch</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">remote_host</span> <span class="o">==</span> <span class="n">batch_remote_host</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">from_timestamp</span><span class="p">)</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">batch_from_timestamp</span><span class="p">):</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="n">batch_url</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="s1">&#39;target&#39;</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">graphite_batch_target_count</span><span class="p">:</span>
+                                    <span class="n">add_to_batch</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">batch_number</span><span class="p">)</span>
+                            <span class="k">except</span><span class="p">:</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: fetcher :: failed to determine whether to add to batch&#39;</span><span class="p">)</span>
+                                <span class="k">continue</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: fetcher :: failed to determine whether to add to batch&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">add_to_batch</span><span class="p">:</span>
+                <span class="n">batch_number</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">batch_url</span> <span class="o">=</span> <span class="n">url</span>
+                <span class="n">batch_data</span> <span class="o">=</span> <span class="p">[</span><span class="n">batch_number</span><span class="p">,</span> <span class="n">remote_host</span><span class="p">,</span> <span class="n">from_timestamp_str</span><span class="p">,</span> <span class="n">url</span><span class="p">]</span>
+                <span class="n">graphite_batches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">batch_data</span><span class="p">)</span>
+                <span class="n">added_to_batch</span> <span class="o">=</span> <span class="n">batch_number</span>
+            <span class="k">if</span> <span class="n">add_to_batch</span><span class="p">:</span>
+                <span class="n">new_graphite_batches</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">batch_number</span><span class="p">,</span> <span class="n">batch_remote_host</span><span class="p">,</span> <span class="n">batch_from_timestamp</span><span class="p">,</span> <span class="n">batch_url</span> <span class="ow">in</span> <span class="n">graphite_batches</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">batch_number</span> <span class="o">==</span> <span class="n">add_to_batch</span><span class="p">:</span>
+                        <span class="n">new_end</span> <span class="o">=</span> <span class="s1">&#39;&amp;target=</span><span class="si">%s</span><span class="s1">&amp;format=json&#39;</span> <span class="o">%</span> <span class="n">remote_target</span>
+                        <span class="n">new_url</span> <span class="o">=</span> <span class="n">batch_url</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&amp;format=json&#39;</span><span class="p">,</span> <span class="n">new_end</span><span class="p">)</span>
+                        <span class="n">batch_url</span> <span class="o">=</span> <span class="n">new_url</span>
+                        <span class="n">added_to_batch</span> <span class="o">=</span> <span class="n">batch_number</span>
+                    <span class="n">batch_data</span> <span class="o">=</span> <span class="p">[</span><span class="n">batch_number</span><span class="p">,</span> <span class="n">batch_remote_host</span><span class="p">,</span> <span class="n">batch_from_timestamp</span><span class="p">,</span> <span class="n">batch_url</span><span class="p">]</span>
+                    <span class="n">new_graphite_batches</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">batch_data</span><span class="p">)</span>
+                <span class="n">graphite_batches</span> <span class="o">=</span> <span class="n">new_graphite_batches</span>
+            <span class="k">if</span> <span class="n">added_to_batch</span><span class="p">:</span>
+                <span class="n">in_batch_responses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+        <span class="n">batch_responses</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">start_batch_fetches</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">batch_number</span><span class="p">,</span> <span class="n">remote_host</span><span class="p">,</span> <span class="n">from_timestamp_str</span><span class="p">,</span> <span class="n">url</span> <span class="ow">in</span> <span class="n">graphite_batches</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">batch_response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+                <span class="n">batch_js</span> <span class="o">=</span> <span class="n">batch_response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+                <span class="n">batch_responses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">batch_js</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: fetcher :: failed to get valid response for batch request </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">url</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">batch_responses</span><span class="p">:</span>
+            <span class="n">end_batch_fetches</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
+            <span class="n">time_to_fetch_batches</span> <span class="o">=</span> <span class="n">end_batch_fetches</span> <span class="o">-</span> <span class="n">start_batch_fetches</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: </span><span class="si">%s</span><span class="s1"> metric batch requests of </span><span class="si">%s</span><span class="s1"> metrics per batch were fetched in </span><span class="si">%s</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">batch_responses</span><span class="p">)),</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_batch_target_count</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">time_to_fetch_batches</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="n">in_batch_responses</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: </span><span class="si">%s</span><span class="s1"> metrics were fetched in batch requests&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">in_batch_responses</span><span class="p">)))</span>
+
+        <span class="k">for</span> <span class="n">remote_host_type</span><span class="p">,</span> <span class="n">frequency</span><span class="p">,</span> <span class="n">remote_target</span><span class="p">,</span> <span class="n">graphite_target</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">url</span><span class="p">,</span> <span class="n">namespace_prefix</span><span class="p">,</span> <span class="n">api_key</span><span class="p">,</span> <span class="n">token</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="n">password</span> <span class="ow">in</span> <span class="n">metrics_to_fetch</span><span class="p">:</span>
+            <span class="n">success</span> <span class="o">=</span> <span class="kc">False</span>
+
+            <span class="c1"># @added 20191127 - Feature #3338: Vista - batch Graphite requests</span>
+            <span class="c1"># Get the metric timeseries from the batch responses and if it is</span>
+            <span class="c1"># not found no js variable will be set and the metric will be</span>
+            <span class="c1"># requested individually as per the default behaviour</span>
+            <span class="n">js</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">batched_response</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">remote_target</span> <span class="ow">in</span> <span class="n">in_batch_responses</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">responses</span> <span class="ow">in</span> <span class="n">batch_responses</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">responses</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">[</span><span class="s1">&#39;target&#39;</span><span class="p">])</span> <span class="o">==</span> <span class="n">remote_target</span><span class="p">:</span>
+                                <span class="n">js</span> <span class="o">=</span> <span class="n">i</span>
+                                <span class="n">batched_response</span> <span class="o">=</span> <span class="kc">True</span>
+                                <span class="n">success</span> <span class="o">=</span> <span class="kc">True</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: data for </span><span class="si">%s</span><span class="s1"> was fetched in a batch&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">remote_target</span><span class="p">))</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: fetcher :: failed to detemine if </span><span class="si">%s</span><span class="s1"> was in batch_responses&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">remote_target</span><span class="p">))</span>
+
+            <span class="c1"># @modified 20191127 - Feature #3338: Vista - batch Graphite requests</span>
+            <span class="c1"># Wrapped in if not success</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">success</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="c1"># @modified 20191011 - Task #3258: Reduce vista logging</span>
+                    <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: getting data from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">url</span><span class="p">))</span>
+                    <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
+                        <span class="n">success</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="c1"># @modified 20191115 - Branch #3262: py3</span>
+                    <span class="c1"># Do not report last response data</span>
+                    <span class="c1"># logger.error(&#39;error :: fetcher :: http status code - %s, reason - %s&#39; % (</span>
+                    <span class="c1">#     str(response.status_code), str(response.reason)))</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: fetcher :: failed to get data from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">url</span><span class="p">))</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">success</span><span class="p">:</span>
                 <span class="k">continue</span>
 
+            <span class="c1"># @added 20191111 - Bug #3312: flux - populate_metric_worker - handle None in datapoints</span>
+            <span class="c1"># And set flux.last key is the returned value from the remote is</span>
+            <span class="c1"># null so that time series that are mostly null do not keep on</span>
+            <span class="c1"># getting added to flux populate_metric by Vista</span>
+            <span class="n">raw_timeseries</span> <span class="o">=</span> <span class="p">[]</span>
+
             <span class="n">datapoints</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">js</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+                <span class="c1"># @modified 20191127 - Feature #3338: Vista - batch Graphite requests</span>
+                <span class="c1"># js = response.json()</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">js</span><span class="p">:</span>
+                    <span class="n">js</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: data for </span><span class="si">%s</span><span class="s1"> was fetched in a batch&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">remote_target</span><span class="p">))</span>
+
                 <span class="k">if</span> <span class="n">remote_host_type</span> <span class="o">==</span> <span class="s1">&#39;graphite&#39;</span><span class="p">:</span>
-                    <span class="n">datapoints</span> <span class="o">=</span> <span class="n">js</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;datapoints&#39;</span><span class="p">]</span>
+                    <span class="c1"># @modified 20191127 - Feature #3338: Vista - batch Graphite requests</span>
+                    <span class="c1"># datapoints = js[0][&#39;datapoints&#39;]</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">batched_response</span><span class="p">:</span>
+                        <span class="n">datapoints</span> <span class="o">=</span> <span class="n">js</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;datapoints&#39;</span><span class="p">]</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">datapoints</span> <span class="o">=</span> <span class="n">js</span><span class="p">[</span><span class="s1">&#39;datapoints&#39;</span><span class="p">]</span>
+
                 <span class="k">if</span> <span class="n">remote_host_type</span> <span class="o">==</span> <span class="s1">&#39;prometheus&#39;</span><span class="p">:</span>
+                    <span class="c1"># TODO:</span>
+                    <span class="c1"># Maybe iterate through multiple metrics if response has more than one metric</span>
+                    <span class="c1"># for some public lab metrics</span>
                     <span class="n">datapoints</span> <span class="o">=</span> <span class="n">js</span><span class="p">[</span><span class="s1">&#39;data&#39;</span><span class="p">][</span><span class="s1">&#39;result&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="s1">&#39;values&#39;</span><span class="p">]</span>
                 <span class="n">datapoints_fetched</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">datapoints</span><span class="p">)</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: retrieved </span><span class="si">%s</span><span class="s1"> data points from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                    <span class="nb">str</span><span class="p">(</span><span class="n">datapoints_fetched</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">url</span><span class="p">)))</span>
+                <span class="c1"># @modified 20191011 - Task #3258: Reduce vista logging</span>
+                <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: retrieved </span><span class="si">%s</span><span class="s1"> data points from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">datapoints_fetched</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">url</span><span class="p">)))</span>
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: fetcher :: failed to get data from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">url</span><span class="p">))</span>
@@ -300,6 +468,39 @@
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: failed to get any data from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">url</span><span class="p">))</span>
                 <span class="k">continue</span>
 
+            <span class="c1"># @added 20191111 - Bug #3312: flux - populate_metric_worker - handle None in datapoints</span>
+            <span class="n">valid_datapoints</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">datapoint</span> <span class="ow">in</span> <span class="n">datapoints</span><span class="p">:</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="n">remote_host_type</span> <span class="o">==</span> <span class="s1">&#39;graphite&#39;</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="c1"># @added 20191111 - Bug #3312: flux - populate_metric_worker - handle None in datapoints</span>
+                        <span class="n">raw_timeseries</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">datapoint</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">datapoint</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+
+                        <span class="n">raw_value</span> <span class="o">=</span> <span class="n">datapoint</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="k">if</span> <span class="n">raw_value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                            <span class="k">continue</span>
+                        <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">datapoint</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                        <span class="n">timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">datapoint</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                        <span class="n">valid_datapoints</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">value</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">])</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="k">continue</span>
+                <span class="k">if</span> <span class="n">remote_host_type</span> <span class="o">==</span> <span class="s1">&#39;prometheus&#39;</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="c1"># @added 20191111 - Bug #3312: flux - populate_metric_worker - handle None in datapoints</span>
+                        <span class="n">raw_timeseries</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">datapoint</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">datapoint</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span>
+
+                        <span class="n">raw_value</span> <span class="o">=</span> <span class="n">datapoint</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                        <span class="k">if</span> <span class="n">raw_value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                            <span class="k">continue</span>
+                        <span class="n">timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">datapoint</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                        <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">datapoint</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="k">continue</span>
+                    <span class="n">valid_datapoints</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">value</span><span class="p">])</span>
+            <span class="n">datapoints</span> <span class="o">=</span> <span class="n">valid_datapoints</span>
+
             <span class="c1"># Order the time series by timestamp as the tuple can shift</span>
             <span class="c1"># order resulting in more recent data being added before older</span>
             <span class="c1"># data</span>
@@ -310,12 +511,14 @@
             <span class="c1"># for he metric</span>
             <span class="n">last_flux_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="n">redis_last_flux_metric_data</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">cache_key</span> <span class="o">=</span> <span class="s1">&#39;flux.last.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">cache_key</span> <span class="o">=</span> <span class="s1">&#39;flux.last.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric</span>
-                <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-                    <span class="n">redis_last_flux_metric_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">redis_last_flux_metric_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span>
+                <span class="c1"># if python_version == 3:</span>
+                <span class="c1">#     redis_last_flux_metric_data = self.redis_conn.get(cache_key).decode(&#39;utf-8&#39;)</span>
+                <span class="c1"># else:</span>
+                <span class="c1">#     redis_last_flux_metric_data = self.redis_conn.get(cache_key)</span>
+                <span class="n">redis_last_flux_metric_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span>
+
                 <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">redis_last_flux_metric_data</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: Redis key </span><span class="si">%s</span><span class="s1"> is present&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">cache_key</span><span class="p">))</span>
@@ -378,8 +581,50 @@
                 <span class="k">except</span><span class="p">:</span>  <span class="c1"># nosec</span>
                     <span class="n">datapoints_with_no_value</span> <span class="o">+=</span> <span class="mi">1</span>
                     <span class="k">continue</span>
+
+            <span class="c1"># @added 20191111 - Bug #3312: flux - populate_metric_worker - handle None in datapoints</span>
+            <span class="c1"># And set flux.last key is the returned value from the remote is</span>
+            <span class="c1"># null so that time series that are mostly null do not keep on</span>
+            <span class="c1"># getting added to flux populate_metric by Vista</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">timeseries</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: no data in the timeseries list for the time series for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric</span><span class="p">)</span>
+                <span class="n">set_flux_key</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">last_ts</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">sorted_raw_timeseries</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">raw_timeseries</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="n">last_ts</span> <span class="o">=</span> <span class="n">sorted_raw_timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">last_ts</span><span class="p">)</span> <span class="o">&gt;</span> <span class="p">(</span><span class="n">fetch_process_start</span> <span class="o">-</span> <span class="mi">120</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="n">sorted_raw_timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                            <span class="n">set_flux_key</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: fetcher :: failed to determine if last value was null&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">set_flux_key</span><span class="p">:</span>
+                    <span class="n">cache_key</span> <span class="o">=</span> <span class="s1">&#39;flux.last.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="c1"># Update Redis flux key</span>
+                        <span class="n">metric_data</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">last_ts</span><span class="p">),</span> <span class="kc">None</span><span class="p">]</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_data</span><span class="p">))</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: even though no data points so as to not loop round on this metric, set the metric Redis key - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">cache_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_data</span><span class="p">)))</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: fetcher :: even though no data points, failed to set Redis key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">cache_key</span><span class="p">))</span>
+                    <span class="c1"># Adding to the vista.fetcher.unique_metrics Redis set</span>
+                    <span class="n">redis_set</span> <span class="o">=</span> <span class="s1">&#39;vista.fetcher.unique_metrics&#39;</span>
+                    <span class="n">data</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="n">redis_set</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: even though no data points, added </span><span class="si">%s</span><span class="s1"> to Redis set </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">remote_target</span><span class="p">,</span> <span class="n">redis_set</span><span class="p">))</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: fetcher :: even though no data points, failed to add </span><span class="si">%s</span><span class="s1"> to Redis set </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">redis_set</span><span class="p">)))</span>
+                    <span class="k">continue</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">timeseries</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: no new data in the timeseries list for the time series for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric</span><span class="p">)</span>
                 <span class="k">continue</span>
 
             <span class="c1"># Order the time series by timestamp as the tuple can shift</span>
@@ -416,7 +661,7 @@
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: added data from </span><span class="si">%s</span><span class="s1"> to Redis set </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                         <span class="nb">str</span><span class="p">(</span><span class="n">url</span><span class="p">),</span> <span class="n">redis_set</span><span class="p">))</span>
             <span class="k">except</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add </span><span class="si">%s</span><span class="s1"> to Redis set </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                     <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">redis_set</span><span class="p">)))</span>
             <span class="n">redis_set</span> <span class="o">=</span> <span class="s1">&#39;vista.fetcher.metrics.fetched&#39;</span>
@@ -425,7 +670,7 @@
             <span class="k">try</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="n">redis_set</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
             <span class="k">except</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add </span><span class="si">%s</span><span class="s1"> to Redis set </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                     <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">redis_set</span><span class="p">)))</span>
         <span class="n">fetch_process_end</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
@@ -510,10 +755,14 @@
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: fetcher :: cannot connect to redis at socket path </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
                     <span class="n">sleep</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
                     <span class="k">try</span><span class="p">:</span>
-                        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">:</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">password</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">,</span> <span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
-                        <span class="k">else</span><span class="p">:</span>
-                            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+                        <span class="c1"># @modified 20191111 - Bug #3266: py3 Redis binary objects not strings</span>
+                        <span class="c1">#                      Branch #3262: py3</span>
+                        <span class="c1"># if settings.REDIS_PASSWORD:</span>
+                        <span class="c1">#     self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)</span>
+                        <span class="c1"># else:</span>
+                        <span class="c1">#     self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">get_redis_conn</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span> <span class="o">=</span> <span class="n">get_redis_conn_decoded</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
                     <span class="k">except</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: fetcher :: cannot connect to redis at socket path </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
@@ -531,14 +780,21 @@
             <span class="n">vista_fetcher_unique_metrics</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="n">redis_set</span> <span class="o">=</span> <span class="s1">&#39;vista.fetcher.unique_metrics&#39;</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">vista_fetcher_unique_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="n">redis_set</span><span class="p">))</span>
+                <span class="c1"># @modified 20191111 - Bug #3266: py3 Redis binary objects not strings</span>
+                <span class="c1">#                      Branch #3262: py3</span>
+                <span class="c1"># vista_fetcher_unique_metrics = list(self.redis_conn.smembers(redis_set))</span>
+                <span class="n">vista_fetcher_unique_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="n">redis_set</span><span class="p">))</span>
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: fetcher :: could not determine vista_fetcher_unique_metrics from the Redis set </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">redis_set</span><span class="p">)</span>
                 <span class="n">vista_fetcher_unique_metrics</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="n">vista_unique_metrics</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">if</span> <span class="n">vista_fetcher_unique_metrics</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">vista_fetcher_unique_metrics</span><span class="p">:</span>
-                    <span class="n">metric_str</span> <span class="o">=</span> <span class="n">metric</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+                    <span class="c1"># @modified 20191111 - Bug #3266: py3 Redis binary objects not strings</span>
+                    <span class="c1">#                      Branch #3262: py3</span>
+                    <span class="c1"># metric_str = metric.decode(&#39;utf-8&#39;)</span>
+                    <span class="n">metric_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
+
                     <span class="n">vista_unique_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric_str</span><span class="p">)</span>
 
             <span class="c1"># Determine metrics to fetch</span>
@@ -574,6 +830,7 @@
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: processing </span><span class="si">%s</span><span class="s1"> remote_target </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                             <span class="nb">str</span><span class="p">(</span><span class="n">remote_host_type</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">remote_target</span><span class="p">)))</span>
 
+                    <span class="n">remote_graphite_host</span> <span class="o">=</span> <span class="kc">None</span>
                     <span class="k">if</span> <span class="n">remote_host_type</span> <span class="o">==</span> <span class="s1">&#39;graphite&#39;</span><span class="p">:</span>
                         <span class="n">remote_graphite_host</span> <span class="o">=</span> <span class="n">remote_host</span>
                         <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">remote_graphite_host</span><span class="p">,</span> <span class="n">uri</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">remote_target</span><span class="p">))</span>
@@ -581,7 +838,8 @@
                             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: with url </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">url</span><span class="p">))</span>
 
                     <span class="n">default_prometheus_uri</span> <span class="o">=</span> <span class="kc">False</span>
-                    <span class="n">passed_uri</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="n">remote_prometheus_host</span> <span class="o">=</span> <span class="kc">None</span>
+
                     <span class="k">if</span> <span class="n">remote_host_type</span> <span class="o">==</span> <span class="s1">&#39;prometheus&#39;</span><span class="p">:</span>
                         <span class="n">remote_prometheus_host</span> <span class="o">=</span> <span class="n">remote_host</span>
                         <span class="c1"># Hardcode the Prometheus api uri</span>
@@ -595,8 +853,6 @@
                             <span class="n">uri</span> <span class="o">=</span> <span class="s1">&#39;/api/v1/query_range?query=</span><span class="si">%s</span><span class="s1">&amp;start=</span><span class="si">%s</span><span class="s1">&amp;end=</span><span class="si">%s</span><span class="s1">&amp;step=60s&#39;</span> <span class="o">%</span> <span class="p">(</span>
                                 <span class="nb">str</span><span class="p">(</span><span class="n">urlencoded_remote_target</span><span class="p">),</span>
                                 <span class="nb">str</span><span class="p">(</span><span class="n">start_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">end_timestamp</span><span class="p">))</span>
-                        <span class="k">else</span><span class="p">:</span>
-                            <span class="n">passed_uri</span> <span class="o">=</span> <span class="n">uri</span>
                         <span class="n">url</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">remote_prometheus_host</span><span class="p">,</span> <span class="n">uri</span><span class="p">)</span>
                         <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
                             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: with url </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">url</span><span class="p">))</span>
@@ -645,11 +901,11 @@
                 <span class="k">if</span> <span class="n">remote_target</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">vista_unique_metrics</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">remote_host_type</span> <span class="o">==</span> <span class="s1">&#39;graphite&#39;</span> <span class="ow">and</span> <span class="n">populate_at_resolutions</span><span class="p">:</span>
                         <span class="n">pre_populate_graphite_metric</span> <span class="o">=</span> <span class="kc">True</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: attempting to pre-propulate Graphite metric - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: attempting to pre-populate Graphite metric - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                             <span class="n">metric</span><span class="p">))</span>
                     <span class="k">if</span> <span class="n">remote_host_type</span> <span class="o">==</span> <span class="s1">&#39;prometheus&#39;</span> <span class="ow">and</span> <span class="n">populate_at_resolutions</span><span class="p">:</span>
                         <span class="n">pre_populate_graphite_metric</span> <span class="o">=</span> <span class="kc">True</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: attempting to pre-propulate Prometheus metric - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: attempting to pre-populate Prometheus metric - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                             <span class="n">metric</span><span class="p">))</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
@@ -660,12 +916,19 @@
                 <span class="c1"># for he metric</span>
                 <span class="n">last_flux_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
                 <span class="n">redis_last_flux_metric_data</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">cache_key</span> <span class="o">=</span> <span class="kc">None</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">cache_key</span> <span class="o">=</span> <span class="s1">&#39;flux.last.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric</span>
-                    <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-                        <span class="n">redis_last_flux_metric_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="n">redis_last_flux_metric_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span>
+                    <span class="c1"># @modified 20191111 - Bug #3266: py3 Redis binary objects not strings</span>
+                    <span class="c1">#                      Branch #3262: py3</span>
+                    <span class="c1"># @modified 20191128 - Bug #3266: py3 Redis binary objects not strings</span>
+                    <span class="c1">#                      Branch #3262: py3</span>
+                    <span class="c1"># if python_version == 3:</span>
+                    <span class="c1">#     redis_last_flux_metric_data = self.redis_conn.get(cache_key).decode(&#39;utf-8&#39;)</span>
+                    <span class="c1"># else:</span>
+                    <span class="c1">#     redis_last_flux_metric_data = self.redis_conn.get(cache_key)</span>
+                    <span class="n">redis_last_flux_metric_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span>
+
                     <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
                         <span class="k">if</span> <span class="n">redis_last_flux_metric_data</span><span class="p">:</span>
                             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: Redis key </span><span class="si">%s</span><span class="s1"> is present&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">cache_key</span><span class="p">))</span>
@@ -694,22 +957,64 @@
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: fetch :: failed determining last_flux_timestamp&#39;</span><span class="p">)</span>
                         <span class="n">last_flux_timestamp</span> <span class="o">=</span> <span class="kc">False</span>
 
+                <span class="n">time_now</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
                 <span class="k">if</span> <span class="n">last_flux_timestamp</span><span class="p">:</span>
-                    <span class="n">time_now</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
                     <span class="n">last_fetch</span> <span class="o">=</span> <span class="n">time_now</span> <span class="o">-</span> <span class="n">last_flux_timestamp</span>
                     <span class="k">if</span> <span class="n">last_fetch</span> <span class="o">&lt;</span> <span class="n">frequency</span><span class="p">:</span>
                         <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
                             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: last fetch was </span><span class="si">%s</span><span class="s1"> seconds ago, less than frequency </span><span class="si">%s</span><span class="s1"> seconds, not fetching&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">last_fetch</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">frequency</span><span class="p">)))</span>
                         <span class="k">continue</span>
 
+                <span class="c1"># @added 20200107 - Task #3376: Enable vista and flux to deal with lower frequency data</span>
+                <span class="c1"># Determine the last known resolution of the metric</span>
+                <span class="n">last_vista_metric_resolution</span> <span class="o">=</span> <span class="n">frequency</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">cache_key</span> <span class="o">=</span> <span class="s1">&#39;vista.last.resolution.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric</span>
+                    <span class="n">last_vista_metric_resolution_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">last_vista_metric_resolution_data</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="n">last_vista_metric_resolution_int</span> <span class="o">=</span> <span class="n">last_vista_metric_resolution</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">last_vista_metric_resolution_int</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">last_vista_metric_resolution_data</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">last_vista_metric_resolution_int</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">last_vista_metric_resolution</span> <span class="o">=</span> <span class="n">last_vista_metric_resolution_int</span>
+                    <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">last_vista_metric_resolution</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: Redis key </span><span class="si">%s</span><span class="s1"> is present&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">cache_key</span><span class="p">))</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: Redis key </span><span class="si">%s</span><span class="s1"> is not present&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">cache_key</span><span class="p">))</span>
+                <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: Redis key </span><span class="si">%s</span><span class="s1"> is not present&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">cache_key</span><span class="p">))</span>
+                    <span class="n">last_vista_metric_resolution</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: fetcher :: retrieving Redis key </span><span class="si">%s</span><span class="s1"> data - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">cache_key</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
+                    <span class="n">last_vista_metric_resolution</span> <span class="o">=</span> <span class="kc">False</span>
+
                 <span class="k">if</span> <span class="n">remote_target</span> <span class="ow">in</span> <span class="n">vista_unique_metrics</span> <span class="ow">and</span> <span class="n">last_flux_timestamp</span><span class="p">:</span>
-                    <span class="n">last_expected_fetch_time</span> <span class="o">=</span> <span class="n">time_now</span> <span class="o">-</span> <span class="p">(</span><span class="n">frequency</span> <span class="o">+</span> <span class="mi">300</span><span class="p">)</span>
+                    <span class="n">last_expected_fetch_time</span> <span class="o">=</span> <span class="n">time_now</span> <span class="o">-</span> <span class="p">(</span><span class="n">frequency</span> <span class="o">+</span> <span class="mi">420</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">last_flux_timestamp</span> <span class="o">&lt;</span> <span class="n">last_expected_fetch_time</span><span class="p">:</span>
-                        <span class="k">if</span> <span class="n">populate_at_resolutions</span><span class="p">:</span>
+
+                        <span class="c1"># @added 20200107 - Task #3376: Enable vista and flux to deal with lower frequency data</span>
+                        <span class="c1"># Added older_than_resolution</span>
+                        <span class="n">older_than_resolution</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="k">if</span> <span class="n">last_vista_metric_resolution</span><span class="p">:</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="n">last_expected_data_time</span> <span class="o">=</span> <span class="n">time_now</span> <span class="o">-</span> <span class="p">(</span><span class="n">frequency</span> <span class="o">+</span> <span class="mi">420</span> <span class="o">+</span> <span class="n">last_vista_metric_resolution</span><span class="p">)</span>
+                                <span class="k">if</span> <span class="n">last_flux_timestamp</span> <span class="o">&gt;</span> <span class="n">last_expected_data_time</span><span class="p">:</span>
+                                    <span class="n">older_than_resolution</span> <span class="o">=</span> <span class="kc">False</span>
+                            <span class="k">except</span><span class="p">:</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: fetch :: failed determining last_expected_data_time&#39;</span><span class="p">)</span>
+
+                        <span class="c1"># @modified 20200107 - Task #3376: Enable vista and flux to deal with lower frequency data</span>
+                        <span class="c1"># Added older_than_resolution</span>
+                        <span class="c1"># if populate_at_resolutions:</span>
+                        <span class="k">if</span> <span class="n">populate_at_resolutions</span> <span class="ow">and</span> <span class="n">older_than_resolution</span><span class="p">:</span>
                             <span class="k">if</span> <span class="n">remote_host_type</span> <span class="o">==</span> <span class="s1">&#39;graphite&#39;</span> <span class="ow">or</span> <span class="n">remote_host_type</span> <span class="o">==</span> <span class="s1">&#39;prometheus&#39;</span><span class="p">:</span>
                                 <span class="n">pre_populate_graphite_metric</span> <span class="o">=</span> <span class="kc">True</span>
                                 <span class="n">behind_by_seconds</span> <span class="o">=</span> <span class="n">time_now</span> <span class="o">-</span> <span class="n">last_flux_timestamp</span>
-                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: last_flux_timestamp is behind by </span><span class="si">%s</span><span class="s1"> seconds, attempting to pre-propulate </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: last_flux_timestamp is behind by </span><span class="si">%s</span><span class="s1"> seconds, attempting to pre-populate </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                                     <span class="nb">str</span><span class="p">(</span><span class="n">behind_by_seconds</span><span class="p">),</span> <span class="n">metric</span><span class="p">))</span>
 
                 <span class="k">if</span> <span class="n">remote_target</span> <span class="ow">in</span> <span class="n">vista_unique_metrics</span><span class="p">:</span>
@@ -725,7 +1030,7 @@
                             <span class="n">pre_populate_graphite_metric</span> <span class="o">=</span> <span class="kc">True</span>
 
                 <span class="k">if</span> <span class="n">pre_populate_graphite_metric</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: attempting to build the pre-propulate Graphite metric urls - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: attempting to build the pre-populate Graphite metric urls - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                         <span class="n">metric</span><span class="p">))</span>
                 <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: pre_populate_graphite_metric - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
@@ -735,7 +1040,7 @@
 
                 <span class="c1"># Build remote Graphite URLs</span>
                 <span class="k">if</span> <span class="n">remote_host_type</span> <span class="o">==</span> <span class="s1">&#39;graphite&#39;</span> <span class="ow">and</span> <span class="n">pre_populate_graphite_metric</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: building the pre-propulate Graphite metric urls - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: building the pre-populate Graphite metric urls - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                         <span class="n">metric</span><span class="p">))</span>
                     <span class="k">try</span><span class="p">:</span>
                         <span class="c1"># Build URLs to submit to flux/HttpPopulateMetric</span>
@@ -835,6 +1140,14 @@
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: fetcher :: could not determine the required resolutions for values in VISTA_FETCH_METRICS tuple for - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                             <span class="nb">str</span><span class="p">(</span><span class="n">remote_target</span><span class="p">)))</span>
 
+                <span class="c1"># @added 20200108 - Task #3376: Enable vista and flux to deal with lower frequency data</span>
+                <span class="c1"># Prometheus metrics that use a custom uri cannot be pre populated</span>
+                <span class="k">if</span> <span class="n">remote_host_type</span> <span class="o">==</span> <span class="s1">&#39;prometheus&#39;</span> <span class="ow">and</span> <span class="n">pre_populate_graphite_metric</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">default_prometheus_uri</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: cannot pre populate Prometheus metric </span><span class="si">%s</span><span class="s1"> as it uses a custom uri&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">metric</span><span class="p">))</span>
+                        <span class="n">pre_populate_graphite_metric</span> <span class="o">=</span> <span class="kc">False</span>
+
                 <span class="c1"># Build remote Prometheus URLs</span>
                 <span class="k">if</span> <span class="n">remote_host_type</span> <span class="o">==</span> <span class="s1">&#39;prometheus&#39;</span> <span class="ow">and</span> <span class="n">pre_populate_graphite_metric</span><span class="p">:</span>
                     <span class="c1"># Assuming Prometheus only has a single retention (resolution)</span>
@@ -911,15 +1224,31 @@
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: fetcher :: could not build the payload json&#39;</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">flux_url</span> <span class="ow">and</span> <span class="n">payload</span><span class="p">:</span>
                     <span class="k">try</span><span class="p">:</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: calling </span><span class="si">%s</span><span class="s1"> with payload - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                            <span class="n">flux_url</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">payload</span><span class="p">)))</span>
+                        <span class="c1"># @modified 20191011 - Task #3258: Reduce vista logging</span>
+                        <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: calling </span><span class="si">%s</span><span class="s1"> with payload - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="n">flux_url</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">payload</span><span class="p">)))</span>
                         <span class="n">response</span> <span class="o">=</span> <span class="n">requests</span><span class="o">.</span><span class="n">post</span><span class="p">(</span><span class="n">flux_url</span><span class="p">,</span> <span class="n">json</span><span class="o">=</span><span class="n">payload</span><span class="p">)</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: flux /populate_metric response code - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                            <span class="nb">str</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">)))</span>
+                        <span class="c1"># @modified 20191011 - Task #3258: Reduce vista logging</span>
+                        <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: flux /populate_metric response code - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">)))</span>
+                        <span class="c1"># @added 20191011 - Task #3258: Reduce vista logging</span>
+                        <span class="n">good_response</span> <span class="o">=</span> <span class="kc">False</span>
+
                         <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">200</span><span class="p">:</span>
                             <span class="n">fetcher_sent_to_flux</span> <span class="o">+=</span> <span class="mi">1</span>
+                            <span class="c1"># @added 20191011 - Task #3258: Reduce vista logging</span>
+                            <span class="n">good_response</span> <span class="o">=</span> <span class="kc">True</span>
                         <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">status_code</span> <span class="o">==</span> <span class="mi">204</span><span class="p">:</span>
                             <span class="n">fetcher_sent_to_flux</span> <span class="o">+=</span> <span class="mi">1</span>
+                            <span class="c1"># @added 20191011 - Task #3258: Reduce vista logging</span>
+                            <span class="n">good_response</span> <span class="o">=</span> <span class="kc">True</span>
+
+                        <span class="c1"># @added 20191011 - Task #3258: Reduce vista logging</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">good_response</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;fetcher :: flux /populate_metric did not respond with 200 or 204, status code - </span><span class="si">%s</span><span class="s1"> for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status_code</span><span class="p">),</span> <span class="n">flux_url</span><span class="p">))</span>
                     <span class="k">except</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: fetcher :: could not post data to flux URL - </span><span class="si">%s</span><span class="s1">, data - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
@@ -932,7 +1261,7 @@
                             <span class="n">url_from</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;^.*from=[-]&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">url</span><span class="p">)</span>
                             <span class="n">url_period</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;&amp;.*&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">url_from</span><span class="p">)</span>
                             <span class="k">if</span> <span class="s1">&#39;days&#39;</span> <span class="ow">in</span> <span class="n">url_period</span><span class="p">:</span>
-                                <span class="n">resolution_days</span> <span class="o">=</span> <span class="n">url_period</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;days&#39;</span><span class="p">)</span>
+                                <span class="n">resolution_days</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">url_period</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;days&#39;</span><span class="p">))</span>
                                 <span class="n">d</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">today</span><span class="p">()</span> <span class="o">-</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="n">resolution_days</span><span class="p">)</span>
                             <span class="k">if</span> <span class="s1">&#39;hours&#39;</span> <span class="ow">in</span> <span class="n">url_period</span><span class="p">:</span>
                                 <span class="n">resolution_hours</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">url_period</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;hours&#39;</span><span class="p">))</span>
@@ -1023,6 +1352,7 @@
 
             <span class="c1"># Sleep if it went too fast</span>
             <span class="n">process_runtime</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span> <span class="o">-</span> <span class="n">begin_fetcher_run</span>
+            <span class="n">metrics_fetched_count</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">process_runtime</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">60</span><span class="p">:</span>
                 <span class="n">next_run</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">begin_fetcher_run</span><span class="p">)</span> <span class="o">+</span> <span class="mi">60</span>
                 <span class="n">time_now</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
@@ -1042,10 +1372,13 @@
                 <span class="k">except</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: fetcher :: failed to del time_now&#39;</span><span class="p">)</span>
                 <span class="n">metrics_fetched</span> <span class="o">=</span> <span class="p">[]</span>
-                <span class="n">metrics_fetched_count</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="c1"># metrics_fetched_count = 0</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">redis_set</span> <span class="o">=</span> <span class="s1">&#39;vista.fetcher.metrics.fetched&#39;</span>
-                    <span class="n">metrics_fetched</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="n">redis_set</span><span class="p">)</span>
+                    <span class="c1"># @modified 20191111 - Bug #3266: py3 Redis binary objects not strings</span>
+                    <span class="c1">#                      Branch #3262: py3</span>
+                    <span class="c1"># metrics_fetched = self.redis_conn.smembers(redis_set)</span>
+                    <span class="n">metrics_fetched</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="n">redis_set</span><span class="p">)</span>
                     <span class="n">metrics_fetched_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">metrics_fetched</span><span class="p">))</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: </span><span class="si">%s</span><span class="s1"> metrics were fetched&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metrics_fetched_count</span><span class="p">))</span>
                 <span class="k">except</span><span class="p">:</span>
@@ -1062,8 +1395,11 @@
                     <span class="n">timestamps</span> <span class="o">=</span> <span class="p">[]</span>
                     <span class="k">for</span> <span class="n">str_metric_fetched</span> <span class="ow">in</span> <span class="n">metrics_fetched</span><span class="p">:</span>
                         <span class="k">try</span><span class="p">:</span>
-                            <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-                                <span class="n">str_metric_fetched</span> <span class="o">=</span> <span class="n">str_metric_fetched</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;UTF-8&#39;</span><span class="p">)</span>
+                            <span class="c1"># @modified 20191111 - Bug #3266: py3 Redis binary objects not strings</span>
+                            <span class="c1">#                      Branch #3262: py3</span>
+                            <span class="c1"># Use get_redis_conn_decoded</span>
+                            <span class="c1"># if python_version == 3:</span>
+                            <span class="c1">#     str_metric_fetched = str_metric_fetched.decode(&#39;UTF-8&#39;)</span>
                             <span class="n">metric_fetched</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">str_metric_fetched</span><span class="p">)</span>
                             <span class="n">timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_fetched</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
                             <span class="n">timestamps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span>
@@ -1080,13 +1416,17 @@
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: fetcher :: failed to last_fetch_timestamp from timestamps&#39;</span><span class="p">)</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">redis_set</span> <span class="o">=</span> <span class="s1">&#39;vista.worker.to.process&#39;</span>
-                    <span class="n">metrics_count_for_workers</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="n">redis_set</span><span class="p">)))</span>
+                    <span class="c1"># @modified 20191111 - Bug #3266: py3 Redis binary objects not strings</span>
+                    <span class="c1">#                      Branch #3262: py3</span>
+                    <span class="c1"># metrics_count_for_workers = len(list(self.redis_conn.smembers(redis_set)))</span>
+                    <span class="n">metrics_count_for_workers</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="n">redis_set</span><span class="p">)))</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: </span><span class="si">%s</span><span class="s1"> of the metrics fetched from this run still need to be processed by a worker&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metrics_count_for_workers</span><span class="p">))</span>
                 <span class="k">except</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: fetcher :: could not get Redis set </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">redis_set</span><span class="p">)</span>
+
+            <span class="n">send_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.sent_to_flux&#39;</span> <span class="o">%</span> <span class="n">skyline_app_graphite_namespace</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">send_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.sent_to_flux&#39;</span> <span class="o">%</span> <span class="n">skyline_app_graphite_namespace</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: sending Graphite - </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                     <span class="n">send_metric_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">fetcher_sent_to_flux</span><span class="p">)))</span>
                 <span class="n">fetcher_sent_to_flux_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">fetcher_sent_to_flux</span><span class="p">)</span>
@@ -1094,6 +1434,40 @@
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: fetcher :: could not send </span><span class="si">%s</span><span class="s1"> to Graphite&#39;</span> <span class="o">%</span> <span class="n">send_metric_name</span><span class="p">)</span>
+
+            <span class="c1"># @added 20191011 - Feature #3260: vista - fetcher add time_to_fetch metric</span>
+            <span class="c1"># Added time_to_fetch, metrics_to_fetch, metrics_fetched</span>
+            <span class="n">send_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.time_to_fetch&#39;</span> <span class="o">%</span> <span class="n">skyline_app_graphite_namespace</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: sending Graphite - </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">send_metric_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">process_runtime</span><span class="p">)))</span>
+                <span class="n">fetcher_time_to_fetch_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">process_runtime</span><span class="p">)</span>
+                <span class="n">send_graphite_metric</span><span class="p">(</span><span class="n">parent_skyline_app</span><span class="p">,</span> <span class="n">send_metric_name</span><span class="p">,</span> <span class="n">fetcher_time_to_fetch_str</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: fetcher :: could not send </span><span class="si">%s</span><span class="s1"> to Graphite&#39;</span> <span class="o">%</span> <span class="n">send_metric_name</span><span class="p">)</span>
+
+            <span class="n">metrics_to_fetch_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">metrics_to_fetch</span><span class="p">)</span>
+            <span class="n">send_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.metrics_to_fetch&#39;</span> <span class="o">%</span> <span class="n">skyline_app_graphite_namespace</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: sending Graphite - </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">send_metric_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metrics_to_fetch_count</span><span class="p">)))</span>
+                <span class="n">fetcher_metrics_to_fetch_count_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metrics_to_fetch_count</span><span class="p">)</span>
+                <span class="n">send_graphite_metric</span><span class="p">(</span><span class="n">parent_skyline_app</span><span class="p">,</span> <span class="n">send_metric_name</span><span class="p">,</span> <span class="n">fetcher_metrics_to_fetch_count_str</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: fetcher :: could not send </span><span class="si">%s</span><span class="s1"> to Graphite&#39;</span> <span class="o">%</span> <span class="n">send_metric_name</span><span class="p">)</span>
+
+            <span class="n">send_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.metrics_fetched&#39;</span> <span class="o">%</span> <span class="n">skyline_app_graphite_namespace</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fetcher :: sending Graphite - </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">send_metric_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metrics_fetched_count</span><span class="p">)))</span>
+                <span class="n">fetcher_metrics_fetched_count_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metrics_fetched_count</span><span class="p">)</span>
+                <span class="n">send_graphite_metric</span><span class="p">(</span><span class="n">parent_skyline_app</span><span class="p">,</span> <span class="n">send_metric_name</span><span class="p">,</span> <span class="n">fetcher_metrics_fetched_count_str</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: fetcher :: could not send </span><span class="si">%s</span><span class="s1"> to Graphite&#39;</span> <span class="o">%</span> <span class="n">send_metric_name</span><span class="p">)</span>
+
             <span class="k">try</span><span class="p">:</span>
                 <span class="k">del</span> <span class="n">process_runtime</span>
             <span class="k">except</span><span class="p">:</span>
@@ -1109,7 +1483,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2019, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
 
     </p>
   </div>
@@ -1131,7 +1505,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.3.0',
+            VERSION:'2.0.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

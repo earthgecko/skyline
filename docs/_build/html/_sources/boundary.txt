@@ -66,6 +66,8 @@ terms of number of variables that have to be declared in the alert tuples, e.g:
         ('nometric.other', 'greater_than', 3600, 0, 0, 100000, 1, 'smtp'),
     )
 
+For all the specific alert configurations see the `Alerts <alerts.html>`__ page.
+
 Once ``settings.py`` has all the Boundary configuration done, start
 Boundary:
 

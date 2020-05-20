@@ -4,6 +4,7 @@ Upgrading
 
 .. toctree::
 
+  py2-to-py3.rst
 	crucible-to-ionosphere.rst
 	etsy-to-ionosphere.rst
 	etsy-to-crucible.rst

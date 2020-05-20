@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Analyzer &mdash; Skyline 1.3.0 documentation</title>
+  <title>Analyzer &mdash; Skyline 2.0.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.3.0 documentation" href="index.html"/>
+    <link rel="top" title="Skyline 2.0.0 documentation" href="index.html"/>
         <link rel="next" title="Analyzer Optimizations" href="analyzer-optimizations.html"/>
         <link rel="prev" title="Horizon" href="horizon.html"/> 
 
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                1.3
+                2.0
               </div>
             
           
@@ -91,10 +91,12 @@
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monotonic-metrics.html">Strictly increasing monotonicity</a></li>
@@ -106,6 +108,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#metrics-monotonicity">Metrics monotonicity</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#push-to-mirage">Push to Mirage</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#push-to-ionosphere">Push to Ionosphere</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#analyzer-batch">analyzer_batch</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#analyzer-settings-alerts">Analyzer <code class="docutils literal"><span class="pre">settings.ALERTS</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#order-matters">Order Matters</a></li>
 </ul>
@@ -195,13 +198,14 @@ a very simple divide-and-conquer strategy. It first checks Redis to get
 the total number of metrics stored, and then it fires up a number of
 processes equal to <a class="reference internal" href="skyline.html#settings.ANALYZER_PROCESSES" title="settings.ANALYZER_PROCESSES"><code class="xref py py-mod docutils literal"><span class="pre">settings.ANALYZER_PROCESSES</span></code></a>, assigning each
 processes a number of metrics. Analyzing a metric is a very
-CPU-intensive process, because each timeseries must be decoded from
-Messagepack and then run through the algorithms.  Analyzer is also routes
+CPU-intensive process, because each time series must be decoded from
+Messagepack and then run through the algorithms.  Analyzer also routes
 metric checks to other services (Mirage, Panorama and Ionosphere) for
-further analysis or recording an anomaly event, as appropriately.</p>
-<p>Due to Analyzer being the most CPU-intensive Skyline process, it is advisable to
-set <a class="reference internal" href="skyline.html#settings.ANALYZER_PROCESSES" title="settings.ANALYZER_PROCESSES"><code class="xref py py-mod docutils literal"><span class="pre">settings.ANALYZER_PROCESSES</span></code></a> to about the number of cores you have -
-leaving a few for the Skyline services and Redis.</p>
+further analysis or recording an anomaly event, as appropriately, more on that
+later.</p>
+<p>Due to Analyzer being one of the most CPU-intensive Skyline process, it is
+advisable to set <a class="reference internal" href="skyline.html#settings.ANALYZER_PROCESSES" title="settings.ANALYZER_PROCESSES"><code class="xref py py-mod docutils literal"><span class="pre">settings.ANALYZER_PROCESSES</span></code></a> to about the number of cores
+you have - leaving a few for the Skyline services and Redis.</p>
 <p>The original documentation and settings for skyline were based on:</p>
 <blockquote>
 <div>a flow of about 5k metrics coming in every second on average (with
@@ -218,7 +222,7 @@ then the optimum settings will most likely be something similar to:</p>
 <span class="n">ANALYZER_OPTIMUM_RUN_DURATION</span> <span class="o">=</span> <span class="mi">60</span>
 </pre></div>
 </div>
-<p>Python multiprocessing is not very efficient if it is not need, in fact
+<p>Python multiprocessing is not very efficient if it is not needed, in fact
 the overall overhead of the spawned processes ends up greater than the
 overhead of processing with a single process.</p>
 <p>See <a class="reference external" href="analyzer-optimizations.html#optimizations-results">Optimizations results</a>
@@ -248,22 +252,22 @@ sure to update the <a class="reference internal" href="skyline.html#settings.CON
 </div>
 <div class="section" id="algorithm-philosophy">
 <h2>Algorithm philosophy<a class="headerlink" href="#algorithm-philosophy" title="Permalink to this headline">¶</a></h2>
-<p>The basic algorithm is based on 3-sigma, derived from Shewhart&#8217;s
+<p>The basic algorithms are based on 3-sigma, derived from Shewhart&#8217;s
 <a class="reference external" href="http://en.wikipedia.org/wiki/Statistical_process_control">statistical process
 control</a>.
 However, you are not limited to 3-sigma based algorithms if you do not
 want to use them - as long as you return a boolean, you can add any sort
-of algorithm you like to run on timeseries and vote.</p>
+of algorithm you like to run on time series and vote.</p>
 </div>
 <div class="section" id="explanation-of-exceptions">
 <h2>Explanation of Exceptions<a class="headerlink" href="#explanation-of-exceptions" title="Permalink to this headline">¶</a></h2>
-<p><strong>TooShort</strong>: The timeseries was too short, as defined in
+<p><strong>TooShort</strong>: The time series was too short, as defined in
 <a class="reference internal" href="skyline.html#settings.MIN_TOLERABLE_LENGTH" title="settings.MIN_TOLERABLE_LENGTH"><code class="xref py py-mod docutils literal"><span class="pre">settings.MIN_TOLERABLE_LENGTH</span></code></a></p>
-<p><strong>Incomplete</strong>: The timeseries was less than <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a>
+<p><strong>Incomplete</strong>: The time series was less than <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a>
 seconds long</p>
-<p><strong>Stale</strong>: The timeseries has not received a new metric in more than
+<p><strong>Stale</strong>: The time series has not received a new metric in more than
 <a class="reference internal" href="skyline.html#settings.STALE_PERIOD" title="settings.STALE_PERIOD"><code class="xref py py-mod docutils literal"><span class="pre">settings.STALE_PERIOD</span></code></a> seconds</p>
-<p><strong>Boring</strong>: The timeseries has been the same value for the past
+<p><strong>Boring</strong>: The time series has been the same value for the past
 <a class="reference internal" href="skyline.html#settings.MAX_TOLERABLE_BOREDOM" title="settings.MAX_TOLERABLE_BOREDOM"><code class="xref py py-mod docutils literal"><span class="pre">settings.MAX_TOLERABLE_BOREDOM</span></code></a> seconds</p>
 <p><strong>Other</strong>: There&#8217;s probably an error in the code, if you&#8217;ve been making
 changes or we have.</p>
@@ -285,11 +289,34 @@ service, see <a class="reference external" href="mirage.html">Mirage</a>.</p>
 <h2>Push to Ionosphere<a class="headerlink" href="#push-to-ionosphere" title="Permalink to this headline">¶</a></h2>
 <p>Analyzer pushes anomalous metrics that are ionosphere_enabled to Ionosphere
 to check if the anomalous time series is known to be NOT ANOMALOUS due to it&#8217;s
-features profile matching a known NOT ANOMALOUS features profile see
-<a class="reference external" href="ionosphere.html">Ionosphere</a>.</p>
+features profile matching a known NOT ANOMALOUS trained or learnt features
+profile see <a class="reference external" href="ionosphere.html">Ionosphere</a>.</p>
+</div>
+<div class="section" id="analyzer-batch">
+<h2>analyzer_batch<a class="headerlink" href="#analyzer-batch" title="Permalink to this headline">¶</a></h2>
+<p>analyzer_batch is a submodule of Analyzer that runs as an independent service
+with the sole purpose of handling and analysing metrics that are not streamed in
+real time but are updated in batches, every x minutes or hour/s.
+It is a &#8220;lite&#8221; and slightly modified version of analyzer that works in
+conjunction with analyzer to handle batch metrics.
+By default analyzer_batch and <a class="reference internal" href="skyline.html#settings.BATCH_PROCESSING" title="settings.BATCH_PROCESSING"><code class="xref py py-mod docutils literal"><span class="pre">settings.BATCH_PROCESSING</span></code></a> related settings
+are disabled.</p>
+<p>It should only be enabled if you have metrics that are received in infrequent
+batches, metrics feed per minute do not require batch processing.  For example
+if a metric/s are sent to Skyline every 15 minutes with a data point for each
+minute in the period, Analyzer&#8217;s default analysis would only analyse the latest
+data point against the metric time series data and not all the 14 data points
+since the last analysis, analyzer_batch does.</p>
+<p>It is not default Analyzer behaviour as it adds unnecessary computational
+overhead on analysing real time metrics, therefore it is only implemented if
+required.</p>
+<p>analyzer_batch and <a class="reference internal" href="skyline.html#settings.BATCH_PROCESSING" title="settings.BATCH_PROCESSING"><code class="xref py py-mod docutils literal"><span class="pre">settings.BATCH_PROCESSING</span></code></a> needs to be enabled if you
+wish to use Flux to process uploaded data files, see
+<a class="reference external" href="flux.html">Flux</a>.</p>
 </div>
 <div class="section" id="analyzer-settings-alerts">
 <h2>Analyzer <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALERTS</span></code></a><a class="headerlink" href="#analyzer-settings-alerts" title="Permalink to this headline">¶</a></h2>
+<p>For all the specific alert configurations see the <a class="reference external" href="alerts.html">Alerts</a> page.</p>
 <div class="section" id="order-matters">
 <h3>Order Matters<a class="headerlink" href="#order-matters" title="Permalink to this headline">¶</a></h3>
 <p>In terms of the <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALERTS</span></code></a> order matters in Analyzer and in the
@@ -334,24 +361,25 @@ biggercheese_customer alert tuples as in the above example the
 evaluated and the bigcheese metrics would be alerted on every 60 mins instead of
 the desired every 10 minutes.</p>
 <p>Please refer to <a class="reference external" href="mirage.html#order-matters">Mirage - Order Matters</a> section
-for a similar example of how order matters in the Mirage context.</p>
+for a similar example of how order matters in the Mirage context and how to
+define a metric namespace as a Mirage metric.</p>
 </div>
 </div>
 <div class="section" id="analyzer-smtp-alert-graphs">
 <h2>Analyzer SMTP alert graphs<a class="headerlink" href="#analyzer-smtp-alert-graphs" title="Permalink to this headline">¶</a></h2>
 <p>Analyzer by default now sends 2 graphs in any SMTP alert.  The original Graphite
 graph is sent and an additional graph image is sent that is plotted using the
-actual Redis timeseries data for the metric.</p>
+actual Redis time series data for the metric.</p>
 <p>The Redis data graph has been added to make it specifically clear as to the data
 that Analyzer is alerting on.  Often your metrics are aggregated in Graphite and
-a Graphite graph is not the exact representation of the timeseries data that
+a Graphite graph is not the exact representation of the time series data that
 triggered the alert, so having both is clearer.</p>
 <p>The Redis data graph also adds the mean and the 3-sigma boundaries to the plot,
 which is useful for brain training.  This goes against the &#8220;less is more
 (effective)&#8221; data visualization philosophy, however if the human neocortex is
 presented with 3-sigma boundaries enough times, it will probably eventually be
-able to calculate 3-sigma boundaries in any timeseries, reasonably well.</p>
-<p>Bearing in mind that when we view anomalous timeseries in the UI we are
+able to calculate 3-sigma boundaries in any time series, reasonably well.</p>
+<p>Bearing in mind that when we view anomalous time series in the UI we are
 presented with a red line depicting the anomalous range, this graph just does
 the similar in the alert context.</p>
 <p>Should you wish to disable the Redis data graph and simply have the Graphite
@@ -375,9 +403,9 @@ matplotlib plots the alerts and the alert email larger in size.</p>
 <li>Analyzer determines all unique metrics in Redis and divides them
 between <a class="reference internal" href="skyline.html#settings.ANALYZER_PROCESSES" title="settings.ANALYZER_PROCESSES"><code class="xref py py-mod docutils literal"><span class="pre">settings.ANALYZER_PROCESSES</span></code></a> to be analysed between
 <code class="docutils literal"><span class="pre">spin_process</span></code> processes.</li>
-<li>The spawned <code class="docutils literal"><span class="pre">spin_process</span></code> processes pull the all timeseries for
+<li>The spawned <code class="docutils literal"><span class="pre">spin_process</span></code> processes pull the all time series for
 their <code class="docutils literal"><span class="pre">assigned_metrics</span></code> they have been assigned from Redis and
-iterate through each metric and analyze the timeseries against the
+iterate through each metric and analyse the time series against the
 <a class="reference internal" href="skyline.html#settings.ALGORITHMS" title="settings.ALGORITHMS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALGORITHMS</span></code></a> declared in the settings.py</li>
 <li>The <code class="docutils literal"><span class="pre">spin_process</span></code> will add any metric that it finds anomalous
 (triggers <a class="reference internal" href="skyline.html#settings.CONSENSUS" title="settings.CONSENSUS"><code class="xref py py-mod docutils literal"><span class="pre">settings.CONSENSUS</span></code></a> number of algorithms) to a list of
@@ -385,16 +413,16 @@ anomalous_metrics.</li>
 <li>The parent Analyzer process will then check every metric in the
 anomalous_metrics list to see if:<ul>
 <li>If the metric matches an <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALERTS</span></code></a> tuple in settings.py</li>
-<li>If a Mirage parameter is set in the tuple, then Analyzer does not
-alert, but hands the metric off to Mirage by adding a Mirage check
-file.</li>
-<li>If a metric is an Ionosphere enabled metric, then Analyzer does not alert,
-but hands the metric off to Ionosphere by adding an Ionosphere check
-file.</li>
-<li>If <code class="docutils literal"><span class="pre">ENABLE_CRUCIBLE</span></code> is True, Analyzer adds timeseries as a json
+<li>If a Mirage SECOND_ORDER_RESOLUTION_HOURS parameter is set in the tuple,
+then Analyzer does not alert, but hands the metric off to Mirage by adding
+a Mirage check file.</li>
+<li>If a metric is an Ionosphere enabled metric (and not a Mirage metric), then
+Analyzer does not alert, but sends the metric to Ionosphere by adding an
+Ionosphere check file.</li>
+<li>If <code class="docutils literal"><span class="pre">ENABLE_CRUCIBLE</span></code> is True, Analyzer adds the time series as a json
 file and a Crucible check file.</li>
-<li>If no Mirage parameter, but the metric matches an <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALERTS</span></code></a> tuple
-namespace, Analyzer then checks if an Analyzer alert key exists for
+<li>If no Mirage parameter, but the metric matches an <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALERTS</span></code></a>
+tuple namespace, Analyzer then checks if an Analyzer alert key exists for
 the metric by querying the metric&#8217;s Analyzer alert key in Redis.</li>
 <li>If no alert key, Analyzer sends alert/s to the configured alerters
 and sets the metric&#8217;s Analyzer alert key for <code class="xref py py-mod docutils literal"><span class="pre">settings.EXPIRATION_TIME</span></code>
@@ -427,7 +455,7 @@ layers.</li>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2019, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
 
     </p>
   </div>
@@ -449,7 +477,7 @@ layers.</li>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.3.0',
+            VERSION:'2.0.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

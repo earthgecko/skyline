@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>webapp.ionosphere_backend &mdash; Skyline 1.3.0 documentation</title>
+  <title>webapp.ionosphere_backend &mdash; Skyline 2.0.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.3.0 documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 2.0.0 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                1.3
+                2.0
               </div>
             
           
@@ -90,10 +90,12 @@
 <li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
@@ -183,6 +185,7 @@
 <span class="kn">import</span> <span class="nn">shutil</span>
 <span class="kn">import</span> <span class="nn">glob</span>
 <span class="kn">from</span> <span class="nn">ast</span> <span class="k">import</span> <span class="n">literal_eval</span>
+<span class="kn">from</span> <span class="nn">sys</span> <span class="k">import</span> <span class="n">version_info</span>
 
 <span class="kn">import</span> <span class="nn">traceback</span>
 <span class="kn">from</span> <span class="nn">flask</span> <span class="k">import</span> <span class="n">request</span>
@@ -224,6 +227,10 @@
 <span class="p">)</span>
 <span class="c1"># @added 20190502 - Branch #2646: slack</span>
 <span class="kn">from</span> <span class="nn">slack_functions</span> <span class="k">import</span> <span class="n">slack_post_message</span><span class="p">,</span> <span class="n">slack_post_reaction</span>
+
+<span class="c1"># @added 20200512 - Bug #2534: Ionosphere - fluid approximation - IONOSPHERE_MINMAX_SCALING_RANGE_TOLERANCE on low ranges</span>
+<span class="c1">#                   Feature #2404: Ionosphere - fluid approximation</span>
+<span class="kn">from</span> <span class="nn">ionosphere_functions</span> <span class="k">import</span> <span class="n">create_fp_ts_graph</span>
 
 <span class="n">skyline_version</span> <span class="o">=</span> <span class="n">skyline_version</span><span class="o">.</span><span class="n">__absolute_version__</span>
 <span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;webapp&#39;</span>
@@ -270,6 +277,16 @@
         <span class="n">throw_exception_on_default_channel</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">if</span> <span class="n">channel_id</span> <span class="o">==</span> <span class="s1">&#39;YOUR_default_slack_channel_id&#39;</span><span class="p">:</span>
         <span class="n">throw_exception_on_default_channel</span> <span class="o">=</span> <span class="kc">True</span>
+
+<span class="c1"># @added 20191029 - Branch #3262: py3</span>
+<span class="c1"># Allow for the use of self signed SSL certificates even if not running on</span>
+<span class="c1"># docker.</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">overall_verify_ssl</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">VERIFY_SSL</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">overall_verify_ssl</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="k">if</span> <span class="n">overall_verify_ssl</span><span class="p">:</span>
+    <span class="n">logging</span><span class="o">.</span><span class="n">captureWarnings</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="ionosphere_get_metrics_dir"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.ionosphere_backend.ionosphere_get_metrics_dir">[docs]</a><span class="k">def</span> <span class="nf">ionosphere_get_metrics_dir</span><span class="p">(</span><span class="n">requested_timestamp</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
@@ -697,7 +714,7 @@
             <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">metric_vars_file</span><span class="p">):</span>
                 <span class="n">metric_vars_file_exists</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: metric_vars_file </span><span class="si">%s</span><span class="s1"> ws not found&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_vars_file</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: metric_vars_file </span><span class="si">%s</span><span class="s1"> was not found&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_vars_file</span><span class="p">))</span>
 
     <span class="c1"># @modified 20181114 - Bug #2684: ionosphere_backend.py - metric_vars_file not set</span>
     <span class="c1"># if path.isfile(metric_vars_file):</span>
@@ -783,10 +800,45 @@
     <span class="c1"># Return the anomalous_timeseries as an array to sample and just use the</span>
     <span class="c1"># ts_json file if there is no ionosphere_json_file</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">anomalous_timeseries</span><span class="p">:</span>
-        <span class="k">with</span> <span class="nb">open</span><span class="p">((</span><span class="n">ts_json_file</span><span class="p">),</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-            <span class="n">raw_timeseries</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-        <span class="n">timeseries_array_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">raw_timeseries</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">,</span> <span class="s1">&#39;[&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;)&#39;</span><span class="p">,</span> <span class="s1">&#39;]&#39;</span><span class="p">)</span>
-        <span class="n">anomalous_timeseries</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">timeseries_array_str</span><span class="p">)</span>
+        <span class="c1"># @modified 20191018 - Bug #3286: ionosphere_backend.py fallback to available ts_json</span>
+        <span class="c1"># Wrapped in try except</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">((</span><span class="n">ts_json_file</span><span class="p">),</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">raw_timeseries</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            <span class="n">timeseries_array_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">raw_timeseries</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">,</span> <span class="s1">&#39;[&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;)&#39;</span><span class="p">,</span> <span class="s1">&#39;]&#39;</span><span class="p">)</span>
+            <span class="n">anomalous_timeseries</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">timeseries_array_str</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ionosphere_backend :: no time series json found at </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ts_json_file</span><span class="p">)</span>
+
+    <span class="c1"># @added 20191018 - Bug #3286: ionosphere_backend.py fallback to available ts_json</span>
+    <span class="c1"># If no ts_json file has been found, use metric.analyzer.redis.FULL_DURATION.json</span>
+    <span class="c1"># if it is available.  This is the fallback if no metric.json or</span>
+    <span class="c1"># metric.mirage.redis.FULL_DURATION.json exists in the case of Analyzer only</span>
+    <span class="c1"># metrics and raise if no anomalous_timeseries</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">anomalous_timeseries</span><span class="p">:</span>
+        <span class="n">full_duration_in_hours</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span><span class="p">)</span> <span class="o">/</span> <span class="mi">3600</span>
+        <span class="n">fallback_json_filename</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.analyzer.redis.</span><span class="si">%s</span><span class="s1">h.json&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">full_duration_in_hours</span><span class="p">)))</span>
+        <span class="n">fallback_json_file</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
+        <span class="n">fallback_json_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_data_dir</span><span class="p">,</span> <span class="n">fallback_json_filename</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ionosphere_backend :: trying fallback_json_file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fallback_json_file</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">fallback_json_file</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">((</span><span class="n">fallback_json_file</span><span class="p">),</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="n">raw_timeseries</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+                <span class="n">timeseries_array_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">raw_timeseries</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">,</span> <span class="s1">&#39;[&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;)&#39;</span><span class="p">,</span> <span class="s1">&#39;]&#39;</span><span class="p">)</span>
+                <span class="n">anomalous_timeseries</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">timeseries_array_str</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ionosphere_backend :: loaded data from fallback_json_file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fallback_json_file</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+                <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: ionosphere_backend :: failed to load any time series data after trying to load the fallback_json_file&#39;</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+                <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">anomalous_timeseries</span><span class="p">:</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: ionosphere_backend :: failed to load any time series data form json files&#39;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
 
     <span class="c1"># @added 20170308 - Feature #1960: ionosphere_layers</span>
     <span class="k">if</span> <span class="n">layers_id_matched_file</span><span class="p">:</span>
@@ -858,6 +910,16 @@
     <span class="k">except</span><span class="p">:</span>
         <span class="n">running_on_docker</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">if</span> <span class="n">running_on_docker</span><span class="p">:</span>
+        <span class="n">verify_ssl</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="c1"># @added 20191029 - Branch #3262: py3</span>
+    <span class="c1"># Allow for the use of self signed SSL certificates even if not running on</span>
+    <span class="c1"># docker.</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">overall_verify_ssl</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">VERIFY_SSL</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">overall_verify_ssl</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">overall_verify_ssl</span><span class="p">:</span>
         <span class="n">verify_ssl</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">WEBAPP_AUTH_ENABLED</span><span class="p">:</span>
@@ -1399,8 +1461,17 @@
     <span class="c1"># possible_options = [</span>
     <span class="c1">#     &#39;full_duration&#39;, &#39;enabled&#39;, &#39;tsfresh_version&#39;, &#39;generation&#39;, &#39;count&#39;]</span>
 
-    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;determining search parameters&#39;</span><span class="p">)</span>
+    <span class="c1"># @modified 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries</span>
+    <span class="c1"># added some additional logging to debug built queries</span>
+    <span class="c1"># logger.info(&#39;determining search parameters&#39;)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;determining search parameters - with default_query: </span><span class="si">%s</span><span class="s1">, search_query - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">default_query</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">search_query</span><span class="p">)))</span>
+
     <span class="n">query_string</span> <span class="o">=</span> <span class="s1">&#39;SELECT * FROM ionosphere&#39;</span>
+
+    <span class="c1"># @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;starting with default query_string of &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">query_string</span><span class="p">)</span>
+
 <span class="c1"># id, metric_id, full_duration, anomaly_timestamp, enabled, tsfresh_version,</span>
 <span class="c1"># calc_time, features_sum, matched_count, last_matched, created_timestamp,</span>
 <span class="c1"># last_checked, checked_count, parent_id, generation</span>
@@ -1419,6 +1490,8 @@
             <span class="n">count_by_metric</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">features_profiles_count</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="n">query_string</span> <span class="o">=</span> <span class="s1">&#39;SELECT COUNT(*), metric_id FROM ionosphere GROUP BY metric_id&#39;</span>
+            <span class="c1"># @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;query_string now &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">query_string</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">count_by_metric</span> <span class="o">=</span> <span class="kc">False</span>
 
@@ -1431,6 +1504,8 @@
             <span class="n">matched_count</span> <span class="o">=</span> <span class="p">[]</span>
 <span class="c1">#            query_string = &#39;SELECT COUNT(*), id FROM ionosphere GROUP BY matched_count ORDER BY COUNT(*)&#39;</span>
             <span class="n">query_string</span> <span class="o">=</span> <span class="s1">&#39;SELECT matched_count, id FROM ionosphere ORDER BY matched_count&#39;</span>
+            <span class="c1"># @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;query_string now &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">query_string</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">count_by_matched</span> <span class="o">=</span> <span class="kc">False</span>
 
@@ -1443,6 +1518,8 @@
             <span class="n">checked_count</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="n">query_string</span> <span class="o">=</span> <span class="s1">&#39;SELECT COUNT(*), id FROM ionosphere GROUP BY checked_count ORDER BY COUNT(*)&#39;</span>
             <span class="n">query_string</span> <span class="o">=</span> <span class="s1">&#39;SELECT checked_count, id FROM ionosphere ORDER BY checked_count&#39;</span>
+            <span class="c1"># @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;query_string now &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">query_string</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">count_by_checked</span> <span class="o">=</span> <span class="kc">False</span>
 
@@ -1454,6 +1531,8 @@
             <span class="n">count_by_generation</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">generation_count</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="n">query_string</span> <span class="o">=</span> <span class="s1">&#39;SELECT COUNT(*), generation FROM ionosphere GROUP BY generation ORDER BY COUNT(*)&#39;</span>
+            <span class="c1"># @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;query_string now &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">query_string</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">count_by_generation</span> <span class="o">=</span> <span class="kc">False</span>
 
@@ -1467,10 +1546,14 @@
                 <span class="n">get_metric_profiles</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="n">query_string</span> <span class="o">=</span> <span class="s1">&#39;SELECT * FROM ionosphere WHERE metric_id=REPLACE_WITH_METRIC_ID&#39;</span>
                 <span class="n">needs_and</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="c1"># @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;query_string now &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">query_string</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">new_query_string</span> <span class="o">=</span> <span class="s1">&#39;SELECT * FROM ionosphere WHERE metric_id=REPLACE_WITH_METRIC_ID&#39;</span>
                 <span class="n">query_string</span> <span class="o">=</span> <span class="n">new_query_string</span>
                 <span class="n">needs_and</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="c1"># @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;query_string now &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">query_string</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="s1">&#39;from_timestamp&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
         <span class="n">from_timestamp</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;from_timestamp&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
@@ -1501,6 +1584,8 @@
                 <span class="n">new_query_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> AND anomaly_timestamp &gt;= </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">query_string</span><span class="p">,</span> <span class="n">validate_from_timestamp</span><span class="p">)</span>
                 <span class="n">query_string</span> <span class="o">=</span> <span class="n">new_query_string</span>
                 <span class="n">needs_and</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="c1"># @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;query_string now &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">query_string</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># @modified 20190116 - Mutliple SQL Injection Security Vulnerabilities #86</span>
                 <span class="c1">#                      Bug #2818: Mutliple SQL Injection Security Vulnerabilities</span>
@@ -1509,6 +1594,8 @@
                 <span class="n">new_query_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> WHERE anomaly_timestamp &gt;= </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">query_string</span><span class="p">,</span> <span class="n">validated_from_timestamp</span><span class="p">)</span>
                 <span class="n">query_string</span> <span class="o">=</span> <span class="n">new_query_string</span>
                 <span class="n">needs_and</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="c1"># @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;query_string now &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">query_string</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="s1">&#39;until_timestamp&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
         <span class="n">until_timestamp</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;until_timestamp&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
@@ -1539,6 +1626,8 @@
                 <span class="n">new_query_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> AND anomaly_timestamp &lt;= </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">query_string</span><span class="p">,</span> <span class="n">validated_until_timestamp</span><span class="p">)</span>
                 <span class="n">query_string</span> <span class="o">=</span> <span class="n">new_query_string</span>
                 <span class="n">needs_and</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="c1"># @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;query_string now &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">query_string</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># @modified 20190116 - Mutliple SQL Injection Security Vulnerabilities #86</span>
                 <span class="c1">#                      Bug #2818: Mutliple SQL Injection Security Vulnerabilities</span>
@@ -1547,6 +1636,8 @@
                 <span class="n">new_query_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> WHERE anomaly_timestamp &lt;= </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">query_string</span><span class="p">,</span> <span class="n">validated_until_timestamp</span><span class="p">)</span>
                 <span class="n">query_string</span> <span class="o">=</span> <span class="n">new_query_string</span>
                 <span class="n">needs_and</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="c1"># @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;query_string now &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">query_string</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="s1">&#39;generation_greater_than&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
         <span class="n">generation_greater_than</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;generation_greater_than&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
@@ -1573,6 +1664,8 @@
                 <span class="n">new_query_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> AND generation &gt; </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">query_string</span><span class="p">,</span> <span class="n">validated_generation_greater_than</span><span class="p">)</span>
                 <span class="n">query_string</span> <span class="o">=</span> <span class="n">new_query_string</span>
                 <span class="n">needs_and</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="c1"># @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;query_string now &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">query_string</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># @modified 20190116 - Mutliple SQL Injection Security Vulnerabilities #86</span>
                 <span class="c1">#                      Bug #2818: Mutliple SQL Injection Security Vulnerabilities</span>
@@ -1581,6 +1674,8 @@
                 <span class="n">new_query_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> WHERE generation &gt; </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">query_string</span><span class="p">,</span> <span class="n">validated_generation_greater_than</span><span class="p">)</span>
                 <span class="n">query_string</span> <span class="o">=</span> <span class="n">new_query_string</span>
                 <span class="n">needs_and</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="c1"># @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;query_string now &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">query_string</span><span class="p">)</span>
 
     <span class="c1"># @added 20170315 - Feature #1960: ionosphere_layers</span>
     <span class="k">if</span> <span class="s1">&#39;layers_id_greater_than&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
@@ -1608,6 +1703,8 @@
                 <span class="n">new_query_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> AND layers_id &gt; </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">query_string</span><span class="p">,</span> <span class="n">validated_layers_id_greater_than</span><span class="p">)</span>
                 <span class="n">query_string</span> <span class="o">=</span> <span class="n">new_query_string</span>
                 <span class="n">needs_and</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="c1"># @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;query_string now &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">query_string</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># @modified 20190116 - Mutliple SQL Injection Security Vulnerabilities #86</span>
                 <span class="c1">#                      Bug #2818: Mutliple SQL Injection Security Vulnerabilities</span>
@@ -1616,6 +1713,8 @@
                 <span class="n">new_query_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> WHERE layers_id &gt; </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">query_string</span><span class="p">,</span> <span class="n">validated_layers_id_greater_than</span><span class="p">)</span>
                 <span class="n">query_string</span> <span class="o">=</span> <span class="n">new_query_string</span>
                 <span class="n">needs_and</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="c1"># @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;query_string now &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">query_string</span><span class="p">)</span>
 
     <span class="c1"># @added 20170402 - Feature #2000: Ionosphere - validated</span>
     <span class="k">if</span> <span class="s1">&#39;validated_equals&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
@@ -1629,10 +1728,14 @@
                 <span class="n">new_query_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> AND </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">query_string</span><span class="p">,</span> <span class="n">validate_string</span><span class="p">)</span>
                 <span class="n">query_string</span> <span class="o">=</span> <span class="n">new_query_string</span>
                 <span class="n">needs_and</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="c1"># @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;query_string now &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">query_string</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">new_query_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> WHERE </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">query_string</span><span class="p">,</span> <span class="n">validate_string</span><span class="p">)</span>
                 <span class="n">query_string</span> <span class="o">=</span> <span class="n">new_query_string</span>
                 <span class="n">needs_and</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="c1"># @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;query_string now &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">query_string</span><span class="p">)</span>
 
     <span class="c1"># @added 20170518 - Feature #1996: Ionosphere - matches page - matched_greater_than</span>
     <span class="k">if</span> <span class="s1">&#39;matched_greater_than&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
@@ -1660,6 +1763,8 @@
                 <span class="n">new_query_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> AND matched_count &gt; </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">query_string</span><span class="p">,</span> <span class="n">validated_matched_greater_than</span><span class="p">)</span>
                 <span class="n">query_string</span> <span class="o">=</span> <span class="n">new_query_string</span>
                 <span class="n">needs_and</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="c1"># @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;query_string now &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">query_string</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># @modified 20190116 - Mutliple SQL Injection Security Vulnerabilities #86</span>
                 <span class="c1">#                      Bug #2818: Mutliple SQL Injection Security Vulnerabilities</span>
@@ -1668,6 +1773,8 @@
                 <span class="n">new_query_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> WHERE matched_count &gt; </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">query_string</span><span class="p">,</span> <span class="n">validated_matched_greater_than</span><span class="p">)</span>
                 <span class="n">query_string</span> <span class="o">=</span> <span class="n">new_query_string</span>
                 <span class="n">needs_and</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="c1"># @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;query_string now &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">query_string</span><span class="p">)</span>
 
     <span class="c1"># @added 20170913 - Feature #2056: ionosphere - disabled_features_profiles</span>
     <span class="c1"># Added enabled query modifier to search and display enabled or disabled</span>
@@ -1688,9 +1795,13 @@
             <span class="k">if</span> <span class="n">needs_and</span><span class="p">:</span>
                 <span class="n">new_query_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> AND enabled = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">query_string</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">enabled_query_value</span><span class="p">))</span>
                 <span class="n">query_string</span> <span class="o">=</span> <span class="n">new_query_string</span>
+                <span class="c1"># @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;query_string now &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">query_string</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">new_query_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> WHERE enabled = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">query_string</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">enabled_query_value</span><span class="p">))</span>
                 <span class="n">query_string</span> <span class="o">=</span> <span class="n">new_query_string</span>
+                <span class="c1"># @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;query_string now &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">query_string</span><span class="p">)</span>
             <span class="n">needs_and</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="c1"># @modified 20180414 - Feature #1862: Ionosphere features profiles search page</span>
@@ -1747,8 +1858,14 @@
             <span class="c1"># logger.info(&#39;executing metrics_like_query - %s&#39; % metrics_like_query)</span>
             <span class="c1"># like_string_var = str(metric_like_str)</span>
             <span class="n">metrics_like_query</span> <span class="o">=</span> <span class="n">text</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;SELECT id FROM metrics WHERE metric LIKE :like_string&quot;&quot;&quot;</span><span class="p">)</span>
+            <span class="c1"># @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metrics_like_query - &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">metrics_like_query</span><span class="p">)</span>
+
             <span class="n">metric_ids</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
             <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metrics_like_query running query&#39;</span><span class="p">)</span>
+
                 <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
                 <span class="c1"># @modified 20190116 - Mutliple SQL Injection Security Vulnerabilities #86</span>
                 <span class="c1">#                      Bug #2818: Mutliple SQL Injection Security Vulnerabilities</span>
@@ -1762,6 +1879,9 @@
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">new_metric_ids</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_ids</span><span class="p">,</span> <span class="n">metric_id</span><span class="p">)</span>
                         <span class="n">metric_ids</span> <span class="o">=</span> <span class="n">new_metric_ids</span>
+                <span class="c1"># @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metrics_like_query done&#39;</span><span class="p">)</span>
+
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
@@ -1773,9 +1893,13 @@
             <span class="k">if</span> <span class="n">needs_and</span><span class="p">:</span>
                 <span class="n">new_query_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> AND metric_id IN (</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">query_string</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_ids</span><span class="p">))</span>
                 <span class="n">query_string</span> <span class="o">=</span> <span class="n">new_query_string</span>
+                <span class="c1"># @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;query_string now &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">query_string</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">new_query_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> WHERE metric_id IN (</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">query_string</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_ids</span><span class="p">))</span>
                 <span class="n">query_string</span> <span class="o">=</span> <span class="n">new_query_string</span>
+                <span class="c1"># @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;query_string now &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">query_string</span><span class="p">)</span>
             <span class="n">needs_and</span> <span class="o">=</span> <span class="kc">True</span>
 
     <span class="n">ordered_by</span> <span class="o">=</span> <span class="kc">None</span>
@@ -1792,6 +1916,8 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">new_query_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> ORDER BY id </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">query_string</span><span class="p">,</span> <span class="n">ordered_by</span><span class="p">)</span>
         <span class="n">query_string</span> <span class="o">=</span> <span class="n">new_query_string</span>
+        <span class="c1"># @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;query_string now &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">query_string</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="s1">&#39;limit&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
         <span class="n">limit</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;limit&#39;</span><span class="p">,</span> <span class="s1">&#39;30&#39;</span><span class="p">)</span>
@@ -1803,13 +1929,35 @@
                 <span class="c1"># new_query_string = &#39;%s LIMIT %s&#39; % (query_string, str(limit))</span>
                 <span class="n">new_query_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> LIMIT </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">query_string</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">validate_limit</span><span class="p">))</span>
                 <span class="n">query_string</span> <span class="o">=</span> <span class="n">new_query_string</span>
+                <span class="c1"># @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;query_string now &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">query_string</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: limit is not an integer - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">limit</span><span class="p">))</span>
 
+    <span class="c1"># @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries</span>
+    <span class="c1"># To ensure that not all metrics and features profiles are queried on a</span>
+    <span class="c1"># default Ionosphere search, identify this requests and do not query all</span>
+    <span class="c1"># metrics and features profiles.</span>
+    <span class="c1"># TODO: determine what other contexts are using this increasingly inefficient</span>
+    <span class="c1"># methods and fix those to as the more metrics and more features profiles</span>
+    <span class="c1"># that are added increases the size of these objects and iterations over</span>
+    <span class="c1"># them.  This method is not scaleable with 100s of 1000s of metrics or</span>
+    <span class="c1"># features profiles</span>
+    <span class="n">default_ionosphere_search</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="s1">&#39;SELECT * FROM ionosphere ORDER BY id DESC LIMIT&#39;</span> <span class="ow">in</span> <span class="n">query_string</span><span class="p">:</span>
+        <span class="n">default_ionosphere_search</span> <span class="o">=</span> <span class="kc">True</span>
+
     <span class="n">metrics</span> <span class="o">=</span> <span class="p">[]</span>
+
     <span class="k">try</span><span class="p">:</span>
         <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
         <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">metrics_table</span><span class="p">])</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">metrics_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">id</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="c1"># @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;selecting all metrics with id &gt; 0&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">default_ionosphere_search</span><span class="p">:</span>
+            <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">metrics_table</span><span class="p">])</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">metrics_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;defult Ionosphere search some not selecting all metrics&#39;</span><span class="p">)</span>
+
         <span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
             <span class="n">metric_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
@@ -1826,6 +1974,8 @@
         <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
             <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
         <span class="k">raise</span>
+    <span class="c1"># @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;selected all metrics with id &gt; 0&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">get_metric_profiles</span><span class="p">:</span>
         <span class="n">metrics_id</span> <span class="o">=</span> <span class="kc">None</span>
@@ -1852,10 +2002,51 @@
         <span class="k">raise</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: ionosphere_table OK&#39;</span> <span class="o">%</span> <span class="n">function_str</span><span class="p">)</span>
 
+    <span class="c1"># @added 20200505 - Task #3464: Optimise ionosphere_backend ionosphere_search queries</span>
+    <span class="n">apply_metric_id</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">get_metric_profiles</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">apply_metric_id</span> <span class="o">=</span> <span class="n">metrics_id</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">apply_metric_id</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="c1"># @added 20200505 - Task #3464: Optimise ionosphere_backend ionosphere_search queries</span>
+    <span class="n">find_unvalidated</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="s1">&#39;fp_validate&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+        <span class="n">fp_validate_arg</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;fp_validate&#39;</span><span class="p">,</span> <span class="s1">&#39;false&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">fp_validate_arg</span> <span class="o">==</span> <span class="s1">&#39;true&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;metric&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+                <span class="n">metric_arg</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;metric&#39;</span><span class="p">,</span> <span class="s1">&#39;none&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">metric_arg</span> <span class="o">==</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+                    <span class="n">find_unvalidated</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="k">if</span> <span class="n">get_metric_profiles</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">apply_metric_id</span> <span class="o">=</span> <span class="n">metrics_id</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">apply_metric_id</span> <span class="o">=</span> <span class="kc">False</span>
+
     <span class="n">all_fps</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
-        <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">ionosphere_table</span><span class="p">])</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">ionosphere_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">id</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="c1"># @modified 20200505 - Task #3464: Optimise ionosphere_backend ionosphere_search queries</span>
+        <span class="c1"># apply_metric_id if known</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">apply_metric_id</span><span class="p">:</span>
+            <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">ionosphere_table</span><span class="p">])</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">ionosphere_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">id</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="c1"># @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;selecting all features profiles with id &gt; 0&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">default_ionosphere_search</span><span class="p">:</span>
+                <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">ionosphere_table</span><span class="p">])</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">ionosphere_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;default Ionosphere search so not selecting all features profiles&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># @added 20200505 - Task #3464: Optimise ionosphere_backend ionosphere_search queries</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;optimised - selecting all features profiles with metric_id == </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">apply_metric_id</span><span class="p">))</span>
+            <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">ionosphere_table</span><span class="p">])</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">ionosphere_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">metric_id</span> <span class="o">==</span> <span class="n">apply_metric_id</span><span class="p">)</span>
+        <span class="c1"># @added 20200506 - Task #3464: Optimise ionosphere_backend ionosphere_search queries</span>
+        <span class="k">if</span> <span class="n">find_unvalidated</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;optimised - selecting all features profiles with validated == 0&#39;</span><span class="p">)</span>
+            <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">ionosphere_table</span><span class="p">])</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">ionosphere_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">validated</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+
         <span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
@@ -1916,6 +2107,14 @@
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: bad row data&#39;</span><span class="p">)</span>
         <span class="k">raise</span>
 
+    <span class="c1"># @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries</span>
+    <span class="c1"># @modified 20200506 - Task #3464: Optimise ionosphere_backend ionosphere_search queries</span>
+    <span class="c1"># apply_metric_id if known</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">apply_metric_id</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;selected all features profiles with id &gt; 0&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;selected all features profiles with metric_id == </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">apply_metric_id</span><span class="p">))</span>
+
     <span class="k">if</span> <span class="n">count_request</span> <span class="ow">and</span> <span class="n">search_query</span><span class="p">:</span>
         <span class="n">features_profiles</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">features_profiles_count</span> <span class="o">=</span> <span class="kc">None</span>
@@ -1928,6 +2127,9 @@
         <span class="n">features_profiles_count</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="n">engine_needed</span> <span class="ow">and</span> <span class="n">engine</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;count_by_metric and search_query running query - &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">query_string</span><span class="p">)</span>
+
                 <span class="n">stmt</span> <span class="o">=</span> <span class="n">query_string</span>
                 <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
                 <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">engine</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">):</span>
@@ -1954,6 +2156,8 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">count_by_metric</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">engine_needed</span> <span class="ow">and</span> <span class="n">engine</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
+                    <span class="c1"># @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;count_request and search_query -  running query - &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">query_string</span><span class="p">)</span>
                     <span class="n">stmt</span> <span class="o">=</span> <span class="n">query_string</span>
                     <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
                     <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">engine</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">):</span>
@@ -2010,12 +2214,76 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">get_metric_profiles</span><span class="p">:</span>
+                <span class="c1"># @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;engine_needed and engine and search_query - get_metric_profiles - running query&#39;</span><span class="p">)</span>
+
                 <span class="c1"># stmt = select([ionosphere_table]).where(ionosphere_table.c.metric_id == int(metric_id))</span>
                 <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">ionosphere_table</span><span class="p">])</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">ionosphere_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">metric_id</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">metrics_id</span><span class="p">))</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: stmt - is abstracted&#39;</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
+
+                <span class="c1"># @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries</span>
+                <span class="c1"># Only queries the metrics with ids returned by the default LIMIT</span>
+                <span class="c1"># search, instead of raising all the metrics in the metrics query</span>
+                <span class="c1"># further above, just inefficient</span>
+                <span class="k">if</span> <span class="n">default_ionosphere_search</span><span class="p">:</span>
+                    <span class="n">stmt</span> <span class="o">=</span> <span class="n">query_string</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: stmt - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">stmt</span><span class="p">)</span>
+                    <span class="n">default_search_metric_ids</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
+                        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: MySQL query failed&#39;</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+                            <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+                        <span class="k">raise</span>
+                    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">metric_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;metric_id&#39;</span><span class="p">])</span>
+                            <span class="n">default_search_metric_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric_id</span><span class="p">)</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: bad row data&#39;</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;engine_needed and engine and search_query - determined </span><span class="si">%s</span><span class="s1"> metric ids for the default Ionosphere search&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">default_search_metric_ids</span><span class="p">)))</span>
+                    <span class="n">metrics</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">select_metric_ids</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+                    <span class="k">for</span> <span class="n">default_search_metric_id</span> <span class="ow">in</span> <span class="n">default_search_metric_ids</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">select_metric_ids</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+                            <span class="n">select_metric_ids</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">default_search_metric_id</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">select_metric_ids</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">select_metric_ids</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">default_search_metric_id</span><span class="p">))</span>
+                    <span class="n">select_metric_ids_stmt</span> <span class="o">=</span> <span class="s1">&#39;SELECT * FROM metrics WHERE id in (</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="n">select_metric_ids</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">metrics_result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">select_metric_ids_stmt</span><span class="p">)</span>
+                        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">metrics_result</span><span class="p">:</span>
+                            <span class="n">metric_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
+                            <span class="n">metric_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;metric&#39;</span><span class="p">])</span>
+                            <span class="n">metrics</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">metric_id</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">])</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;engine_needed and engine and search_query - determined </span><span class="si">%s</span><span class="s1"> metric objects for the default Ionosphere search&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">metrics</span><span class="p">)))</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
+                        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: MySQL query failed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">select_metric_ids_stmt</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+                            <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+                        <span class="k">raise</span>
+
+                <span class="c1"># @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;engine_needed and engine and search_query - not get_metric_profiles - running query&#39;</span><span class="p">)</span>
+
                 <span class="n">stmt</span> <span class="o">=</span> <span class="n">query_string</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: stmt - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">stmt</span><span class="p">)</span>
+
+            <span class="c1"># @added 20200506 - Task #3464: Optimise ionosphere_backend ionosphere_search queries</span>
+            <span class="k">if</span> <span class="n">find_unvalidated</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;optimised - selecting all features profiles with validated == 0&#39;</span><span class="p">)</span>
+                <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">ionosphere_table</span><span class="p">])</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">ionosphere_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">validated</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">)</span>
             <span class="k">except</span><span class="p">:</span>
@@ -2026,7 +2294,6 @@
                 <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
                     <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
                 <span class="k">raise</span>
-
             <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">fp_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
@@ -2102,6 +2369,8 @@
             <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
             <span class="n">features_profiles</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">itemgetter</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="mi">0</span><span class="p">)))</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: features_profiles length - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">features_profiles</span><span class="p">)))</span>
+            <span class="c1"># @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;engine_needed and engine and search_query - got features_profiles&#39;</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
@@ -2118,11 +2387,11 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="n">ionosphere_layers_table</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">ionosphere_layers_table_meta</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">log_msg</span><span class="p">)</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ionosphere_layers OK&#39;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;features_profiles and layers_present - ionosphere_layers OK&#39;</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
-            <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: failed to get ionosphere_layers meta&#39;</span>
+            <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: features_profiles and layers_present - failed to get ionosphere_layers meta&#39;</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
             <span class="c1"># @added 20170806 - Bug #2130: MySQL - Aborted_clients</span>
             <span class="c1"># Added missing disposal</span>
@@ -2132,10 +2401,14 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">get_metric_profiles</span><span class="p">:</span>
+                <span class="c1"># @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;features_profiles and layers_present - get_metric_profiles - running query&#39;</span><span class="p">)</span>
                 <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">ionosphere_layers_table</span><span class="p">])</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">ionosphere_layers_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">metric_id</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">metrics_id</span><span class="p">))</span>
                 <span class="c1"># logger.debug(&#39;debug :: stmt - is abstracted&#39;)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">layers_query_string</span> <span class="o">=</span> <span class="s1">&#39;SELECT * FROM ionosphere_layers&#39;</span>
+                <span class="c1"># @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;features_profiles and layers_present - not get_metric_profiles - running query - &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">layers_query_string</span><span class="p">)</span>
                 <span class="n">stmt</span> <span class="o">=</span> <span class="n">layers_query_string</span>
                 <span class="c1"># logger.debug(&#39;debug :: stmt - %s&#39; % stmt)</span>
             <span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">)</span>
@@ -2167,7 +2440,7 @@
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: bad row data&#39;</span><span class="p">)</span>
             <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
             <span class="n">features_profiles_layers</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">itemgetter</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="mi">0</span><span class="p">)))</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: features_profiles length - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">features_profiles</span><span class="p">)))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: features_profiles and layers_present - features_profiles length - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">features_profiles</span><span class="p">)))</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
@@ -2243,6 +2516,8 @@
                 <span class="c1"># @modified 20170913 - Task #2160: Test skyline with bandit</span>
                 <span class="c1"># Added nosec to exclude from bandit tests</span>
                 <span class="n">stmt</span> <span class="o">=</span> <span class="s1">&#39;SELECT </span><span class="si">%s</span><span class="s1"> FROM ionosphere WHERE enabled=1&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">required_option</span><span class="p">)</span>  <span class="c1"># nosec</span>
+                <span class="c1"># @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;engine_needed and engine and default_query - running query - &quot;</span><span class="si">%s</span><span class="s1">&quot;&#39;</span> <span class="o">%</span> <span class="n">stmt</span><span class="p">)</span>
                 <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
                 <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">engine</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">):</span>
                     <span class="n">value</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">required_option</span><span class="p">)]</span>
@@ -3926,6 +4201,20 @@
             <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
         <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
 
+    <span class="c1"># @added 20200516 - Bug #3546: Change ionosphere_enabled if all features profiles are disabled</span>
+    <span class="c1"># Disable any related layers as well</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">ionosphere_layers_table</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">ionosphere_layers_table_meta</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: ionosphere_backend :: failed to get ionosphere_layers_table meta for disable_features_profile_family_tree&#39;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+            <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+        <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
+
     <span class="c1"># @added 20190503 - Branch #2646: slack</span>
     <span class="n">message_on_features_profile_disabled</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">if</span> <span class="n">slack_thread_updates</span> <span class="ow">and</span> <span class="n">SLACK_ENABLED</span><span class="p">:</span>
@@ -3953,6 +4242,30 @@
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">fp_id</span> <span class="ow">in</span> <span class="n">fp_ids</span><span class="p">:</span>
+
+        <span class="c1"># @added 20200516 - Bug #3546: Change ionosphere_enabled if all features profiles are disabled</span>
+        <span class="c1"># Disable any related layers as well</span>
+        <span class="n">layers_disabled</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">layer_ids</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+            <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">ionosphere_layers_table</span><span class="p">])</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">ionosphere_layers_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">fp_id</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">fp_id</span><span class="p">))</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+                <span class="n">layer_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
+                <span class="n">layer_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">layer_id</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;disable_features_profile_family_tree :: found layer id </span><span class="si">%s</span><span class="s1"> for fp id </span><span class="si">%s</span><span class="s1"> to disabled&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">layer_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">)))</span>
+            <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not determine layers to disable for fp_id </span><span class="si">%s</span><span class="s1"> &#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">))</span>
+            <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: could not determine layers to disable for fp_id </span><span class="si">%s</span><span class="s1"> &#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+                <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+            <span class="k">raise</span>
+
         <span class="k">try</span><span class="p">:</span>
             <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
             <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
@@ -3969,6 +4282,28 @@
             <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
                 <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
             <span class="k">raise</span>
+
+        <span class="c1"># @added 20200516 - Bug #3546: Change ionosphere_enabled if all features profiles are disabled</span>
+        <span class="c1"># Disable any related layers as well</span>
+        <span class="k">if</span> <span class="n">layer_ids</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">layer_id</span> <span class="ow">in</span> <span class="n">layer_ids</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+                    <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                        <span class="n">ionosphere_layers_table</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                            <span class="n">ionosphere_layers_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">layer_id</span><span class="p">))</span><span class="o">.</span>
+                        <span class="n">values</span><span class="p">(</span><span class="n">enabled</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+                    <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;updated enabled for layer id </span><span class="si">%s</span><span class="s1"> to 0&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">layer_id</span><span class="p">)))</span>
+                    <span class="n">layers_disabled</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not update enabled for layer id </span><span class="si">%s</span><span class="s1"> &#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">layer_id</span><span class="p">))</span>
+                    <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: could not update enabled for layer id </span><span class="si">%s</span><span class="s1"> &#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">layer_id</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+                        <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+                    <span class="k">raise</span>
 
         <span class="c1"># @added 20190503 - Branch #2646: slack</span>
         <span class="k">if</span> <span class="n">message_on_features_profile_disabled</span><span class="p">:</span>
@@ -4008,8 +4343,13 @@
             <span class="k">if</span> <span class="n">base_name</span><span class="p">:</span>
                 <span class="n">ionosphere_link</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/ionosphere?fp_view=true&amp;fp_id=</span><span class="si">%s</span><span class="s1">&amp;metric=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                     <span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_URL</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="n">base_name</span><span class="p">)</span>
-                <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;*DISABLED* - features profile id </span><span class="si">%s</span><span class="s1"> was disabled for </span><span class="si">%s</span><span class="s1"> via </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                    <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">),</span> <span class="n">skyline_app</span><span class="p">,</span> <span class="n">ionosphere_link</span><span class="p">)</span>
+                <span class="c1"># @added 20200516 - Bug #3546: Change ionosphere_enabled if all features profiles are disabled</span>
+                <span class="c1"># Disable any related layers as well</span>
+                <span class="c1"># message = &#39;*DISABLED* - features profile id %s was disabled for %s via %s - %s&#39; % (</span>
+                <span class="c1">#     str(fp_id), str(base_name), skyline_app, ionosphere_link)</span>
+                <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;*DISABLED* - features profile id </span><span class="si">%s</span><span class="s1"> and </span><span class="si">%s</span><span class="s1"> related layers were disabled for </span><span class="si">%s</span><span class="s1"> via </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">layers_disabled</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">),</span>
+                    <span class="n">skyline_app</span><span class="p">,</span> <span class="n">ionosphere_link</span><span class="p">)</span>
 
                 <span class="k">if</span> <span class="n">throw_exception_on_default_channel</span><span class="p">:</span>
                     <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: disable_features_profile_family_tree :: the default_channel or default_channel_id from settings.SLACK_OPTS is set to the default, please replace these with your channel details or set SLACK_ENABLED or SLACK_OPTS[</span><span class="se">\&#39;</span><span class="s1">thread_updates</span><span class="se">\&#39;</span><span class="s1">] to False and restart webapp&#39;</span>
@@ -4131,6 +4471,15 @@
         <span class="nb">str</span><span class="p">(</span><span class="n">sort</span><span class="p">)))</span>
     <span class="n">trace</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
     <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
+
+    <span class="c1"># @added 20200113 - Feature #3390: luminosity related anomalies</span>
+    <span class="c1">#                   Branch #2270: luminosity</span>
+    <span class="n">get_related_matches</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">metric</span> <span class="o">==</span> <span class="s1">&#39;get_related_matches&#39;</span><span class="p">:</span>
+        <span class="n">get_related_matches</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">metric</span> <span class="o">=</span> <span class="s1">&#39;all&#39;</span>
+        <span class="n">related_from_timestamp</span> <span class="o">=</span> <span class="n">from_timestamp</span>
+        <span class="n">related_until_timestamp</span> <span class="o">=</span> <span class="n">until_timestamp</span>
 
     <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHE_ENABLED</span><span class="p">:</span>
         <span class="n">memcache_client</span> <span class="o">=</span> <span class="n">pymemcache_Client</span><span class="p">((</span><span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHED_SERVER_IP</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHED_SERVER_PORT</span><span class="p">),</span> <span class="n">connect_timeout</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
@@ -4385,15 +4734,39 @@
         <span class="k">except</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: limit is not an integer - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">limit</span><span class="p">))</span>
 
+    <span class="c1"># @added 20200113 - Feature #3390: luminosity related anomalies</span>
+    <span class="c1">#                   Branch #2270: luminosity</span>
+    <span class="k">if</span> <span class="n">get_related_matches</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">query_string</span> <span class="o">=</span> <span class="s1">&#39;SELECT * FROM ionosphere_matched WHERE metric_timestamp &gt; </span><span class="si">%s</span><span class="s1"> AND metric_timestamp &lt;= </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">related_from_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">related_until_timestamp</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not generate query_string for get_related_matches&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+                <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span>
+
     <span class="c1"># Get ionosphere_summary memcache object from which metric names will be</span>
     <span class="c1"># determined</span>
     <span class="n">memcache_result</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">ionosphere_summary_list</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHE_ENABLED</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">memcache_result</span> <span class="o">=</span> <span class="n">memcache_client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ionosphere_summary_list&#39;</span><span class="p">)</span>
+
+            <span class="c1"># @modified 20191029 - Task #3304: py3 - handle pymemcache bytes not str</span>
+            <span class="c1"># memcache_result = memcache_client.get(&#39;ionosphere_summary_list&#39;)</span>
+            <span class="n">python_version</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">memcache_result</span> <span class="o">=</span> <span class="n">memcache_client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ionosphere_summary_list&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">memcache_result</span> <span class="o">=</span> <span class="n">memcache_client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ionosphere_summary_list&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get ionosphere_summary_list from memcache&#39;</span><span class="p">)</span>
+            <span class="c1"># @modified 20200507 - stop reporting this as an error</span>
+            <span class="c1"># it can be expected to happen from time to time</span>
+            <span class="c1"># logger.error(&#39;error :: failed to get ionosphere_summary_list from memcache&#39;)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;failed to get ionosphere_summary_list from memcache, will query DB&#39;</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">memcache_client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="c1"># Added nosec to exclude from bandit tests</span>
@@ -4488,6 +4861,8 @@
 <span class="c1"># e.g.</span>
 <span class="c1"># [[1505560867, 39793, &#39;features_profile&#39;, 782, &#39;None&#39;, &#39;stats.skyline-dev-3-40g-gra1.vda.ioInProgress&#39;, &#39;ionosphere?fp_matched=true...&#39;],</span>
 <span class="c1"># [1505561823, 25069, &#39;layers&#39;, 1108, 24, &#39;stats.controller-dev-3-40g-sbg1.apache.sending&#39;, &#39;ionosphere?fp_matched=true...&#39;]]</span>
+
+    <span class="n">metric_list</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">if</span> <span class="n">get_features_profiles_matched</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
@@ -4836,6 +5211,24 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">graph_image</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;failed getting Graphite graph&#39;</span><span class="p">)</span>
             <span class="n">graph_image_file</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># @added 20200512 - Bug #2534: Ionosphere - fluid approximation - IONOSPHERE_MINMAX_SCALING_RANGE_TOLERANCE on low ranges</span>
+    <span class="c1">#                   Feature #2404: Ionosphere - fluid approximation</span>
+    <span class="c1"># Due to the loss of resolution in the Graphite graph images due</span>
+    <span class="c1"># to their size, create a matplotlib graph for the DB fp time</span>
+    <span class="c1"># series data for more accurate validation</span>
+    <span class="n">fp_ts_graph_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.fp_id_ts.</span><span class="si">%s</span><span class="s1">.matplotlib.png&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="n">metric_data_dir</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">))</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">fp_ts_graph_file</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">no_timeseries</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">created_fp_ts_graph</span> <span class="o">=</span> <span class="n">create_fp_ts_graph</span><span class="p">(</span><span class="s1">&#39;webapp&#39;</span><span class="p">,</span> <span class="n">metric_data_dir</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">),</span> <span class="n">no_timeseries</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">created_fp_ts_graph</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;get_matched_id_resources :: created_fp_ts_graph for </span><span class="si">%s</span><span class="s1"> fp id </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">)))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: get_matched_id_resources :: failed to created_fp_ts_graph for </span><span class="si">%s</span><span class="s1"> fp id </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">)))</span>
 
     <span class="k">return</span> <span class="n">matched_details</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span><span class="p">,</span> <span class="n">matched_details_object</span><span class="p">,</span> <span class="n">graph_image_file</span></div>
 
@@ -5551,6 +5944,171 @@
         <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="kc">True</span></div>
+
+
+<span class="c1"># @added 20200226: Ideas #2476: Label and relate anomalies</span>
+<span class="c1">#                  Feature #2516: Add label to features profile</span>
+<div class="viewcode-block" id="label_anomalies"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.ionosphere_backend.label_anomalies">[docs]</a><span class="k">def</span> <span class="nf">label_anomalies</span><span class="p">(</span><span class="n">start_timestamp</span><span class="p">,</span> <span class="n">end_timestamp</span><span class="p">,</span> <span class="n">metrics</span><span class="p">,</span> <span class="n">namespaces</span><span class="p">,</span> <span class="n">label</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Label all anomalies from start_timestamp to end_timestamp for metrics and</span>
+<span class="sd">    and metric namespaces with the given label.</span>
+
+<span class="sd">    :param start_timestamp: the start timestamp</span>
+<span class="sd">    :param end_timestamp: the end timestamp</span>
+<span class="sd">    :param metrics: a list of metric names</span>
+<span class="sd">    :param namespaces: a list of namespaces</span>
+<span class="sd">    :type start_timestamp: int</span>
+<span class="sd">    :type end_timestamp: int</span>
+<span class="sd">    :type metrics: list</span>
+<span class="sd">    :type namespace: list</span>
+<span class="sd">    :return: boolean</span>
+<span class="sd">    :rtype:  (list, list, list, list)</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+        <span class="s1">&#39;label_anomalies :: determine metric ids for label anomalies between </span><span class="si">%s</span><span class="s1"> and </span><span class="si">%s</span><span class="s1"> with label </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">start_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">end_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">label</span><span class="p">)))</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;getting MySQL engine&#39;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">engine</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">get_an_engine</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not get a MySQL engine to get fp_ids&#39;</span><span class="p">)</span>
+        <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">engine</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: engine not obtained&#39;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">raise</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">metrics_table</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">metrics_table_meta</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">log_msg</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metrics_table OK&#39;</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get metrics_table meta&#39;</span><span class="p">)</span>
+
+        <span class="c1"># @added 20170806 - Bug #2130: MySQL - Aborted_clients</span>
+        <span class="c1"># Added missing disposal</span>
+        <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+            <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+        <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
+
+    <span class="n">metric_ids</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;label_anomalies :: </span><span class="si">%s</span><span class="s1"> metrics passed&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">metrics</span><span class="p">)))</span>
+    <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">metrics</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+            <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">metrics_table</span><span class="p">])</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">metrics_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">metric</span> <span class="o">==</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">))</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+                <span class="n">metric_id</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span>
+                <span class="n">metric_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">metric_id</span><span class="p">))</span>
+            <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not determine metric id from metrics for metric </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">))</span>
+            <span class="c1"># @added 20170806 - Bug #2130: MySQL - Aborted_clients</span>
+            <span class="c1"># Added missing disposal and raise</span>
+            <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+                <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+            <span class="k">raise</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;label_anomalies :: </span><span class="si">%s</span><span class="s1"> metric ids determined from passed namespaces&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">metric_ids</span><span class="p">)))</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;label_anomalies :: </span><span class="si">%s</span><span class="s1"> namespaces passed&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">namespaces</span><span class="p">)))</span>
+    <span class="k">if</span> <span class="n">namespaces</span><span class="p">:</span>
+        <span class="n">metrics_like_query</span> <span class="o">=</span> <span class="n">text</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;SELECT id FROM metrics WHERE metric LIKE :like_string&quot;&quot;&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">namespace</span> <span class="ow">in</span> <span class="n">namespaces</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># @added 20200425 - Ideas #2476: Label and relate anomalies</span>
+                <span class="c1"># Added missing namespace_like</span>
+                <span class="n">namespace_str</span> <span class="o">=</span> <span class="n">namespace</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+                <span class="n">wildcard</span> <span class="o">=</span> <span class="s1">&#39;%&#39;</span>
+                <span class="n">namespace_like</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">namespace_str</span><span class="p">,</span> <span class="n">wildcard</span><span class="p">)</span>
+
+                <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+                <span class="c1"># @modified 20200425 - Ideas #2476: Label and relate anomalies</span>
+                <span class="c1"># Use namespace_like</span>
+                <span class="c1"># results = connection.execute(metrics_like_query, like_string=str(namespace))</span>
+                <span class="n">results</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">metrics_like_query</span><span class="p">,</span> <span class="n">like_string</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">namespace_like</span><span class="p">))</span>
+                <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+                    <span class="n">metric_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="n">metric_ids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">metric_id</span><span class="p">))</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not determine ids from metrics table&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+                    <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+                <span class="k">raise</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;label_anomalies :: </span><span class="si">%s</span><span class="s1"> metric ids determined from passed namespaces&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">metric_ids</span><span class="p">)))</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">anomalies_table</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">anomalies_table_meta</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">log_msg</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;anomalies_table OK&#39;</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get anomalies_table meta&#39;</span><span class="p">)</span>
+        <span class="c1"># @added 20170806 - Bug #2130: MySQL - Aborted_clients</span>
+        <span class="c1"># Added missing disposal</span>
+        <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+            <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+        <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
+
+    <span class="n">anomaly_ids_to_label</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">all_anomalies</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+        <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">anomalies_table</span><span class="p">])</span><span class="o">.</span>\
+            <span class="n">where</span><span class="p">(</span><span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">anomaly_timestamp</span> <span class="o">&gt;=</span> <span class="n">start_timestamp</span><span class="p">)</span><span class="o">.</span>\
+            <span class="n">where</span><span class="p">(</span><span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">anomaly_timestamp</span> <span class="o">&lt;=</span> <span class="n">end_timestamp</span><span class="p">)</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+            <span class="n">anomaly_id</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span>
+            <span class="n">metric_id</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;metric_id&#39;</span><span class="p">]</span>
+            <span class="n">all_anomalies</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">))</span>
+            <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_id</span><span class="p">)</span> <span class="ow">in</span> <span class="n">metric_ids</span><span class="p">:</span>
+                <span class="n">anomaly_ids_to_label</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">))</span>
+        <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not determine anomaly ids&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+            <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+        <span class="k">raise</span>
+
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;label_anomalies :: a total of </span><span class="si">%s</span><span class="s1"> anomalies were found in the specific time period&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_anomalies</span><span class="p">)))</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;label_anomalies :: </span><span class="si">%s</span><span class="s1"> of these anomalies were related to the specified metrics/namespaces&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">anomaly_ids_to_label</span><span class="p">)))</span>
+
+    <span class="c1"># Label anomalies</span>
+    <span class="k">for</span> <span class="n">anomaly_id</span> <span class="ow">in</span> <span class="n">anomaly_ids_to_label</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+            <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                <span class="n">anomalies_table</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                    <span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">))</span><span class="o">.</span>
+                <span class="n">values</span><span class="p">(</span><span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">))</span>
+            <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not update label for anomaly_id </span><span class="si">%s</span><span class="s1"> &#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">))</span>
+            <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: could not update label for anomaly </span><span class="si">%s</span><span class="s1"> &#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+                <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+            <span class="k">raise</span>
+
+    <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+        <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">anomaly_ids_to_label</span><span class="p">)</span></div>
 </pre></div>
 
            </div>
@@ -5562,7 +6120,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2019, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
 
     </p>
   </div>
@@ -5584,7 +6142,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.3.0',
+            VERSION:'2.0.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

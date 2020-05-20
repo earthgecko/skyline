@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>luminosity.luminosity &mdash; Skyline 1.3.0 documentation</title>
+  <title>luminosity.luminosity &mdash; Skyline 2.0.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.3.0 documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 2.0.0 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                1.3
+                2.0
               </div>
             
           
@@ -90,10 +90,12 @@
 <li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
@@ -176,10 +178,13 @@
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">kill</span><span class="p">,</span> <span class="n">getpid</span>
 <span class="kn">from</span> <span class="nn">sys</span> <span class="k">import</span> <span class="n">version_info</span>
-<span class="k">try</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">Queue</span> <span class="k">import</span> <span class="n">Empty</span>
-<span class="k">except</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">queue</span> <span class="k">import</span> <span class="n">Empty</span>
+
+<span class="c1"># @modified 20191115 - Branch #3262: py3</span>
+<span class="c1"># try:</span>
+<span class="c1">#     from Queue import Empty</span>
+<span class="c1"># except:</span>
+<span class="c1">#     from queue import Empty</span>
+
 <span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">time</span><span class="p">,</span> <span class="n">sleep</span>
 <span class="kn">from</span> <span class="nn">threading</span> <span class="k">import</span> <span class="n">Thread</span>
 <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
@@ -187,14 +192,20 @@
 <span class="c1"># processes</span>
 <span class="c1"># from multiprocessing import Process, Manager</span>
 <span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="k">import</span> <span class="n">Process</span>
-<span class="kn">from</span> <span class="nn">redis</span> <span class="k">import</span> <span class="n">StrictRedis</span>
+<span class="c1"># from redis import StrictRedis</span>
 <span class="kn">import</span> <span class="nn">traceback</span>
 <span class="kn">import</span> <span class="nn">mysql.connector</span>
 <span class="kn">from</span> <span class="nn">pymemcache.client.base</span> <span class="k">import</span> <span class="n">Client</span> <span class="k">as</span> <span class="n">pymemcache_Client</span>
 
 <span class="kn">import</span> <span class="nn">settings</span>
 <span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="p">(</span>
-    <span class="n">mysql_select</span><span class="p">,</span> <span class="n">send_graphite_metric</span><span class="p">)</span>
+    <span class="n">mysql_select</span><span class="p">,</span> <span class="n">send_graphite_metric</span><span class="p">,</span>
+    <span class="c1"># @added 20191030 - Bug #3266: py3 Redis binary objects not strings</span>
+    <span class="c1">#                   Branch #3262: py3</span>
+    <span class="c1"># Added a single functions to deal with Redis connection and the</span>
+    <span class="c1"># charset=&#39;utf-8&#39;, decode_responses=True arguments required in py3</span>
+    <span class="n">get_redis_conn</span><span class="p">,</span> <span class="n">get_redis_conn_decoded</span><span class="p">)</span>
+
 <span class="kn">from</span> <span class="nn">database</span> <span class="k">import</span> <span class="n">get_engine</span>
 <span class="c1"># from process_correlations import *</span>
 
@@ -303,10 +314,22 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Luminosity</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="c1"># @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow</span>
-        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">password</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">,</span> <span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+        <span class="c1"># @modified 20191030 - Bug #3266: py3 Redis binary objects not strings</span>
+        <span class="c1">#                      Branch #3262: py3</span>
+        <span class="c1"># Use get_redis_conn and get_redis_conn_decoded to use on Redis sets when the bytes</span>
+        <span class="c1"># types need to be decoded as utf-8 to str</span>
+        <span class="c1"># if settings.REDIS_PASSWORD:</span>
+        <span class="c1">#     self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)</span>
+        <span class="c1"># else:</span>
+        <span class="c1">#     self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)</span>
+
+        <span class="c1"># @added 20191030 - Bug #3266: py3 Redis binary objects not strings</span>
+        <span class="c1">#                   Branch #3262: py3</span>
+        <span class="c1"># Added a single functions to deal with Redis connection and the</span>
+        <span class="c1"># charset=&#39;utf-8&#39;, decode_responses=True arguments required in py3</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">get_redis_conn</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span> <span class="o">=</span> <span class="n">get_redis_conn_decoded</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parent_pid</span> <span class="o">=</span> <span class="n">parent_pid</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">current_pid</span> <span class="o">=</span> <span class="n">getpid</span><span class="p">()</span>
@@ -657,10 +680,19 @@
                     <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">))</span>
                 <span class="n">sleep</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>
                 <span class="c1"># @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow</span>
-                <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">password</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">,</span> <span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+                <span class="c1"># @modified 20191115 - Bug #3266: py3 Redis binary objects not strings</span>
+                <span class="c1">#                      Branch #3262: py3</span>
+                <span class="c1"># Use get_redis_conn and get_redis_conn_decoded to use on Redis sets when the bytes</span>
+                <span class="c1"># types need to be decoded as utf-8 to str</span>
+                <span class="c1"># if settings.REDIS_PASSWORD:</span>
+                <span class="c1">#     self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)</span>
+                <span class="c1"># else:</span>
+                <span class="c1">#     self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)</span>
+                <span class="c1"># @added 20191115 - Bug #3266: py3 Redis binary objects not strings</span>
+                <span class="c1">#                   Branch #3262: py3</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">get_redis_conn</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span> <span class="o">=</span> <span class="n">get_redis_conn_decoded</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+
                 <span class="k">continue</span>
 
             <span class="c1"># Report app up</span>
@@ -688,11 +720,19 @@
                 <span class="n">memcache_key</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.last.processed.anomaly.id&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span>
                 <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHE_ENABLED</span><span class="p">:</span>
                     <span class="k">try</span><span class="p">:</span>
-                        <span class="n">last_processed_anomaly_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">memcache_client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">memcache_key</span><span class="p">)</span>
+                        <span class="c1"># @modified 20191029 - Task #3304: py3 - handle pymemcache bytes not str</span>
+                        <span class="c1"># last_processed_anomaly_id = self.memcache_client.get(memcache_key)</span>
+                        <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                            <span class="n">last_processed_anomaly_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">memcache_client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">memcache_key</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">last_processed_anomaly_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">memcache_client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">memcache_key</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
                         <span class="c1"># if memcache does not have the key the response to the</span>
                         <span class="c1"># client is None, it does not except</span>
                     <span class="k">except</span><span class="p">:</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get </span><span class="si">%s</span><span class="s1"> from memcache&#39;</span> <span class="o">%</span> <span class="n">memcache_key</span><span class="p">)</span>
+                        <span class="c1"># @modified 20200507 - stop reporting this as an error</span>
+                        <span class="c1"># it can be expected to happen from time to time</span>
+                        <span class="c1"># logger.error(&#39;error :: failed to get %s from memcache&#39; % memcache_key)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;failed to get </span><span class="si">%s</span><span class="s1"> from memcache, will query DB&#39;</span> <span class="o">%</span> <span class="n">memcache_key</span><span class="p">)</span>
                     <span class="k">try</span><span class="p">:</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">memcache_client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
                     <span class="k">except</span><span class="p">:</span>
@@ -809,7 +849,10 @@
                     <span class="k">try</span><span class="p">:</span>
                         <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
                         <span class="c1"># correlations = str(len(self.correlations))</span>
-                        <span class="n">correlations</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;luminosity.correlations&#39;</span><span class="p">))))</span>
+                        <span class="c1"># @modified 20191030 - Bug #3266: py3 Redis binary objects not strings</span>
+                        <span class="c1">#                      Branch #3262: py3</span>
+                        <span class="c1"># correlations = str(len(list(self.redis_conn.smembers(&#39;luminosity.correlations&#39;))))</span>
+                        <span class="n">correlations</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;luminosity.correlations&#39;</span><span class="p">))))</span>
                     <span class="k">except</span><span class="p">:</span>
                         <span class="n">correlations</span> <span class="o">=</span> <span class="s1">&#39;0&#39;</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;correlations       :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">correlations</span><span class="p">)</span>
@@ -818,7 +861,10 @@
 
                     <span class="c1"># @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
                     <span class="k">try</span><span class="p">:</span>
-                        <span class="n">runtimes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;luminosity.runtimes&#39;</span><span class="p">))</span>
+                        <span class="c1"># @modified 20191030 - Bug #3266: py3 Redis binary objects not strings</span>
+                        <span class="c1">#                      Branch #3262: py3</span>
+                        <span class="c1"># runtimes = list(self.redis_conn.smembers(&#39;luminosity.runtimes&#39;))</span>
+                        <span class="n">runtimes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;luminosity.runtimes&#39;</span><span class="p">))</span>
                     <span class="k">except</span><span class="p">:</span>
                         <span class="n">runtimes</span> <span class="o">=</span> <span class="p">[]</span>
 
@@ -844,7 +890,10 @@
                     <span class="k">try</span><span class="p">:</span>
                         <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
                         <span class="c1"># metrics_checked_for_correlation = str(sum(self.metrics_checked_for_correlation))</span>
-                        <span class="n">metrics_checked_for_correlation</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;luminosity.metrics_checked_for_correlation&#39;</span><span class="p">))))</span>
+                        <span class="c1"># @modified 20191030 - Bug #3266: py3 Redis binary objects not strings</span>
+                        <span class="c1">#                      Branch #3262: py3</span>
+                        <span class="c1"># metrics_checked_for_correlation = str(len(list(self.redis_conn.smembers(&#39;luminosity.metrics_checked_for_correlation&#39;))))</span>
+                        <span class="n">metrics_checked_for_correlation</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;luminosity.metrics_checked_for_correlation&#39;</span><span class="p">))))</span>
                     <span class="k">except</span><span class="p">:</span>
                         <span class="n">metrics_checked_for_correlation</span> <span class="o">=</span> <span class="s1">&#39;0&#39;</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metrics_checked_for_correlation   :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metrics_checked_for_correlation</span><span class="p">)</span>
@@ -990,7 +1039,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2019, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
 
     </p>
   </div>
@@ -1012,7 +1061,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.3.0',
+            VERSION:'2.0.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

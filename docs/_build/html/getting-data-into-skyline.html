@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Getting data into Skyline &mdash; Skyline 1.3.0 documentation</title>
+  <title>Getting data into Skyline &mdash; Skyline 2.0.0 documentation</title>
   
 
   
@@ -35,9 +35,9 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.3.0 documentation" href="index.html"/>
+    <link rel="top" title="Skyline 2.0.0 documentation" href="index.html"/>
         <link rel="next" title="Alert testing" href="alert-testing.html"/>
-        <link rel="prev" title="Upgrading - Etsy to Crucible" href="upgrading/etsy-to-crucible.html"/> 
+        <link rel="prev" title="Upgrading - py2 to py3" href="upgrading/py2-to-py3.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                1.3
+                2.0
               </div>
             
           
@@ -91,19 +91,26 @@
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Getting data into Skyline</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#firstly-a-note-on-time-snyc">Firstly a note on time snyc</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#secondly-a-note-on-the-reliability-of-metric-data">Secondly a note on the reliability of metric data</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#now-getting-the-data-in">Now getting the data in</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#tcp-pickles">TCP pickles</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#udp-messagepack">UDP messagepack</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#now-getting-the-data-in">Now getting the data in</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#horizon-tcp-pickles">Horizon - TCP pickles</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#horizon-udp-messagepack">Horizon - UDP messagepack</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#flux">Flux</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#upload-data-to-flux">upload_data to Flux</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#vista">Vista</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="#adding-a-listener">Adding a Listener</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#settings-full-duration"><code class="docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monotonic-metrics.html">Strictly increasing monotonicity</a></li>
@@ -211,11 +218,10 @@ sensu is good for server metrics and there are lots of options.</p>
 </div>
 <div class="section" id="now-getting-the-data-in">
 <h2>Now getting the data in<a class="headerlink" href="#now-getting-the-data-in" title="Permalink to this headline">¶</a></h2>
-<p>You currently have two options to get data into Skyline, via the Horizon
-service:</p>
-</div>
-<div class="section" id="tcp-pickles">
-<h2>TCP pickles<a class="headerlink" href="#tcp-pickles" title="Permalink to this headline">¶</a></h2>
+<p>You currently have a number of options to get data into Skyline, via the
+Horizon, Vista and Flux services and via file upload:</p>
+<div class="section" id="horizon-tcp-pickles">
+<h3>Horizon - TCP pickles<a class="headerlink" href="#horizon-tcp-pickles" title="Permalink to this headline">¶</a></h3>
 <p>Horizon was designed to support a stream of pickles from the Graphite
 carbon-relay service, over port 2024 by default. Carbon relay is a
 feature of Graphite that immediately forwards all incoming metrics to
@@ -261,15 +267,30 @@ for a primer on Carbon relay.</p>
 pack and pickle your data correctly (you&#8217;ll need to look at the source
 code for the exact protocol), you&#8217;ll be able to stream to this listener.</p>
 </div>
-<div class="section" id="udp-messagepack">
-<h2>UDP messagepack<a class="headerlink" href="#udp-messagepack" title="Permalink to this headline">¶</a></h2>
-<p>Genreally do not use this.  It is UDP, but has not been removed.</p>
+<div class="section" id="horizon-udp-messagepack">
+<h3>Horizon - UDP messagepack<a class="headerlink" href="#horizon-udp-messagepack" title="Permalink to this headline">¶</a></h3>
+<p>Generally do not use this.  It is UDP, but has not been removed.</p>
 <p>Horizon also accepts metrics in the form of messagepack encoded strings
 over UDP, on port 2025. The format is
 <code class="docutils literal"><span class="pre">[&lt;metric</span> <span class="pre">name&gt;,</span> <span class="pre">[&lt;timestamp&gt;,</span> <span class="pre">&lt;value&gt;]]</span></code>. Simply encode your metrics
 as messagepack and send them on their way.</p>
 <p>However a quick note, on the transport any metrics data over UDP....
 sorry if did you not get that.</p>
+</div>
+<div class="section" id="flux">
+<h3>Flux<a class="headerlink" href="#flux" title="Permalink to this headline">¶</a></h3>
+<p>Metrics to be submitted to Flux via HTTP/S which feeds Graphite with pickles to
+Skyline, see the <a class="reference external" href="flux.html">Flux</a> page.</p>
+</div>
+<div class="section" id="upload-data-to-flux">
+<h3>upload_data to Flux<a class="headerlink" href="#upload-data-to-flux" title="Permalink to this headline">¶</a></h3>
+<p>See the <a class="reference external" href="upload-data-to-flux.html">upload_data to Flux</a> page.</p>
+</div>
+<div class="section" id="vista">
+<h3>Vista<a class="headerlink" href="#vista" title="Permalink to this headline">¶</a></h3>
+<p>Metrics to be fetched by Vista which submits to Flux, see the
+<a class="reference external" href="vista.html">Vista</a> page.</p>
+</div>
 </div>
 <div class="section" id="adding-a-listener">
 <h2>Adding a Listener<a class="headerlink" href="#adding-a-listener" title="Permalink to this headline">¶</a></h2>
@@ -306,7 +327,7 @@ into Redis.</p>
         <a href="alert-testing.html" class="btn btn-neutral float-right" title="Alert testing" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="upgrading/etsy-to-crucible.html" class="btn btn-neutral" title="Upgrading - Etsy to Crucible" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="upgrading/py2-to-py3.html" class="btn btn-neutral" title="Upgrading - py2 to py3" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -315,7 +336,7 @@ into Redis.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2019, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
 
     </p>
   </div>
@@ -337,7 +358,7 @@ into Redis.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.3.0',
+            VERSION:'2.0.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

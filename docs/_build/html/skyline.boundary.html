@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>skyline.boundary package &mdash; Skyline 1.3.0 documentation</title>
+  <title>skyline.boundary package &mdash; Skyline 2.0.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.3.0 documentation" href="index.html"/>
+    <link rel="top" title="Skyline 2.0.0 documentation" href="index.html"/>
         <link rel="up" title="skyline package" href="skyline.html"/>
         <link rel="next" title="skyline.crucible package" href="skyline.crucible.html"/>
         <link rel="prev" title="skyline.analyzer_dev package" href="skyline.analyzer_dev.html"/> 
@@ -66,7 +66,7 @@
             
             
               <div class="version">
-                1.3
+                2.0
               </div>
             
           
@@ -92,10 +92,12 @@
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monotonic-metrics.html">Strictly increasing monotonicity</a></li>
@@ -154,9 +156,11 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-algorithm_exceptions">skyline.algorithm_exceptions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-create_matplotlib_graph">skyline.create_matplotlib_graph module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-database">skyline.database module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-features_profile">skyline.features_profile module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-ionosphere_functions">skyline.ionosphere_functions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-matched_or_regexed_in_list">skyline.matched_or_regexed_in_list module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-settings">skyline.settings module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-skyline_functions">skyline.skyline_functions module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-skyline_version">skyline.skyline_version module</a></li>
@@ -279,38 +283,45 @@
 <dt id="boundary.boundary_alerters.skyline_app_logfile">
 <code class="descname">skyline_app_logfile</code><em class="property"> = '/var/log/skyline/boundary.log'</em><a class="headerlink" href="#boundary.boundary_alerters.skyline_app_logfile" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create any alerter you want here. The function is invoked from trigger_alert.
-4 arguments will be passed in as strings:
-datapoint, metric_name, expiration_time, algorithm</p>
+7 arguments will be passed in as strings:
+alerter, datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="boundary.boundary_alerters.alert_smtp">
-<code class="descname">alert_smtp</code><span class="sig-paren">(</span><em>datapoint</em>, <em>metric_name</em>, <em>expiration_time</em>, <em>metric_trigger</em>, <em>algorithm</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/boundary/boundary_alerters.html#alert_smtp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#boundary.boundary_alerters.alert_smtp" title="Permalink to this definition">¶</a></dt>
+<code class="descname">alert_smtp</code><span class="sig-paren">(</span><em>datapoint</em>, <em>metric_name</em>, <em>expiration_time</em>, <em>metric_trigger</em>, <em>algorithm</em>, <em>metric_timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/boundary/boundary_alerters.html#alert_smtp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#boundary.boundary_alerters.alert_smtp" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="boundary.boundary_alerters.alert_pagerduty">
-<code class="descname">alert_pagerduty</code><span class="sig-paren">(</span><em>datapoint</em>, <em>metric_name</em>, <em>expiration_time</em>, <em>metric_trigger</em>, <em>algorithm</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/boundary/boundary_alerters.html#alert_pagerduty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#boundary.boundary_alerters.alert_pagerduty" title="Permalink to this definition">¶</a></dt>
+<code class="descname">alert_pagerduty</code><span class="sig-paren">(</span><em>datapoint</em>, <em>metric_name</em>, <em>expiration_time</em>, <em>metric_trigger</em>, <em>algorithm</em>, <em>metric_timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/boundary/boundary_alerters.html#alert_pagerduty"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#boundary.boundary_alerters.alert_pagerduty" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="boundary.boundary_alerters.alert_hipchat">
-<code class="descname">alert_hipchat</code><span class="sig-paren">(</span><em>datapoint</em>, <em>metric_name</em>, <em>expiration_time</em>, <em>metric_trigger</em>, <em>algorithm</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/boundary/boundary_alerters.html#alert_hipchat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#boundary.boundary_alerters.alert_hipchat" title="Permalink to this definition">¶</a></dt>
+<code class="descname">alert_hipchat</code><span class="sig-paren">(</span><em>datapoint</em>, <em>metric_name</em>, <em>expiration_time</em>, <em>metric_trigger</em>, <em>algorithm</em>, <em>metric_timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/boundary/boundary_alerters.html#alert_hipchat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#boundary.boundary_alerters.alert_hipchat" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="boundary.boundary_alerters.alert_syslog">
-<code class="descname">alert_syslog</code><span class="sig-paren">(</span><em>datapoint</em>, <em>metric_name</em>, <em>expiration_time</em>, <em>metric_trigger</em>, <em>algorithm</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/boundary/boundary_alerters.html#alert_syslog"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#boundary.boundary_alerters.alert_syslog" title="Permalink to this definition">¶</a></dt>
+<code class="descname">alert_syslog</code><span class="sig-paren">(</span><em>datapoint</em>, <em>metric_name</em>, <em>expiration_time</em>, <em>metric_trigger</em>, <em>algorithm</em>, <em>metric_timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/boundary/boundary_alerters.html#alert_syslog"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#boundary.boundary_alerters.alert_syslog" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
 <dt id="boundary.boundary_alerters.alert_slack">
-<code class="descname">alert_slack</code><span class="sig-paren">(</span><em>datapoint</em>, <em>metric_name</em>, <em>expiration_time</em>, <em>metric_trigger</em>, <em>algorithm</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/boundary/boundary_alerters.html#alert_slack"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#boundary.boundary_alerters.alert_slack" title="Permalink to this definition">¶</a></dt>
+<code class="descname">alert_slack</code><span class="sig-paren">(</span><em>datapoint</em>, <em>metric_name</em>, <em>expiration_time</em>, <em>metric_trigger</em>, <em>algorithm</em>, <em>metric_timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/boundary/boundary_alerters.html#alert_slack"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#boundary.boundary_alerters.alert_slack" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="function">
+<dt id="boundary.boundary_alerters.alert_http">
+<code class="descname">alert_http</code><span class="sig-paren">(</span><em>alerter</em>, <em>datapoint</em>, <em>metric_name</em>, <em>expiration_time</em>, <em>metric_trigger</em>, <em>algorithm</em>, <em>metric_timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/boundary/boundary_alerters.html#alert_http"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#boundary.boundary_alerters.alert_http" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called by <a class="reference internal" href="#boundary.boundary_alerters.trigger_alert" title="boundary.boundary_alerters.trigger_alert"><code class="xref py py-func docutils literal"><span class="pre">trigger_alert()</span></code></a> and sends and resend anomalies to a http
+endpoint.</p>
+</dd></dl>
+
+<dl class="function">
 <dt id="boundary.boundary_alerters.trigger_alert">
-<code class="descname">trigger_alert</code><span class="sig-paren">(</span><em>alerter</em>, <em>datapoint</em>, <em>metric_name</em>, <em>expiration_time</em>, <em>metric_trigger</em>, <em>algorithm</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/boundary/boundary_alerters.html#trigger_alert"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#boundary.boundary_alerters.trigger_alert" title="Permalink to this definition">¶</a></dt>
+<code class="descname">trigger_alert</code><span class="sig-paren">(</span><em>alerter</em>, <em>datapoint</em>, <em>metric_name</em>, <em>expiration_time</em>, <em>metric_trigger</em>, <em>algorithm</em>, <em>metric_timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/boundary/boundary_alerters.html#trigger_alert"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#boundary.boundary_alerters.trigger_alert" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>
@@ -390,7 +401,7 @@ lower value datapoints, but it still matches drops off cliffs.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2019, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
 
     </p>
   </div>
@@ -412,7 +423,7 @@ lower value datapoints, but it still matches drops off cliffs.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.3.0',
+            VERSION:'2.0.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

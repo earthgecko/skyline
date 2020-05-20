@@ -389,6 +389,9 @@ So in this instance when these metrics are first added to Vista, Vista will
 submit a request to /flux/populate_metric for the metric to populate the metric
 at the resolutions defined in the  `populate_at_resolutions` tuple.
 
+NOTE - Prometheus metrics that do not use the default uri parameter but use a
+custom uri cannot be pre-populated.
+
 It must be noted that the pre-populating of Prometheus metrics is done using a
 resample of the raw data.  In all other instances, Vista uses the Prometheus
 `query_range` API method with a `step=60s`, where Prometheus does the resampling.

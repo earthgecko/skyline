@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>flux.listen &mdash; Skyline 1.3.0 documentation</title>
+  <title>flux.listen &mdash; Skyline 2.0.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.3.0 documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 2.0.0 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                1.3
+                2.0
               </div>
             
           
@@ -90,10 +90,12 @@
 <li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
@@ -183,13 +185,19 @@
 
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)),</span> <span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">))</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
-<span class="kn">import</span> <span class="nn">settings</span>
-<span class="kn">import</span> <span class="nn">flux</span>
 
-<span class="n">logger</span> <span class="o">=</span> <span class="n">set_up_logging</span><span class="p">(</span><span class="s1">&#39;listen&#39;</span><span class="p">)</span>
+<span class="c1"># @modified 20191115 - Branch #3262: py3</span>
+<span class="c1"># This prevents flake8 E402 - module level import not at top of file</span>
+<span class="k">if</span> <span class="kc">True</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">settings</span>
+    <span class="kn">import</span> <span class="nn">flux</span>
 
-<span class="c1"># LOCAL_DEBUG = False</span>
-<span class="n">LOCAL_DEBUG</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="c1"># @modified 20191129 - Branch #3262: py3</span>
+<span class="c1"># Consolidate flux logging</span>
+<span class="c1"># logger = set_up_logging(&#39;listen&#39;)</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">set_up_logging</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+
+<span class="n">LOCAL_DEBUG</span> <span class="o">=</span> <span class="kc">False</span>
 
 
 <div class="viewcode-block" id="validate_key"><a class="viewcode-back" href="../../skyline.flux.html#flux.listen.validate_key">[docs]</a><span class="k">def</span> <span class="nf">validate_key</span><span class="p">(</span><span class="n">caller</span><span class="p">,</span> <span class="n">apikey</span><span class="p">):</span>
@@ -231,7 +239,19 @@
                 <span class="n">caller</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)))</span>
             <span class="k">return</span> <span class="kc">False</span>
         <span class="n">now</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
-        <span class="n">tooOld</span> <span class="o">=</span> <span class="n">now</span> <span class="o">-</span> <span class="n">settings</span><span class="o">.</span><span class="n">STALE_PERIOD</span>
+
+        <span class="c1"># @added 20200107 - Task #3376: Enable vista and flux to deal with lower frequency data</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">flux_max_age</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">FLUX_MAX_AGE</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: validate_timestamp FLUX_MAX_AGE is not set in settings.py, set to the default 3600&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">caller</span><span class="p">))</span>
+            <span class="n">flux_max_age</span> <span class="o">=</span> <span class="mi">3600</span>
+
+        <span class="c1"># @modified 20200107 - Task #3376: Enable vista and flux to deal with lower frequency data</span>
+        <span class="c1"># tooOld = now - settings.STALE_PERIOD</span>
+        <span class="n">tooOld</span> <span class="o">=</span> <span class="n">now</span> <span class="o">-</span> <span class="n">flux_max_age</span>
+
         <span class="n">timestampValid</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">timestampInvalidReason</span> <span class="o">=</span> <span class="s1">&#39;None&#39;</span>
         <span class="k">if</span> <span class="n">timestamp</span> <span class="o">&lt;</span> <span class="n">tooOld</span><span class="p">:</span>
@@ -256,16 +276,22 @@
 <div class="viewcode-block" id="MetricData.on_get"><a class="viewcode-back" href="../../skyline.flux.html#flux.listen.MetricData.on_get">[docs]</a>    <span class="k">def</span> <span class="nf">on_get</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">,</span> <span class="n">resp</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The /flux/metric_data endpoint is called via a GET with the URI</span>
-<span class="sd">        parameters as defined below:</span>
-<span class="sd">        /flux/metric_data?metric=&lt;metric|str&gt;&amp;timestamp=&lt;timestamp|int&gt;&amp;value=&lt;value|float&gt;&amp;key=&lt;key|str&gt;</span>
+<span class="sd">        parameters as defined below, with the optional fill parameter to allow</span>
+<span class="sd">        flux to backfill airgap data for a metric:</span>
+<span class="sd">        /flux/metric_data?metric=&lt;metric|str&gt;&amp;timestamp=&lt;timestamp|int&gt;&amp;value=&lt;value|float&gt;&amp;key=&lt;key|str&gt;[&amp;fill=true]</span>
 <span class="sd">        For example:</span>
 <span class="sd">        /flux/metric_data?metric=vista.nodes.skyline-1.cpu.user&amp;timestamp=1478021700&amp;value=1.0&amp;key=YOURown32charSkylineAPIkeySecret</span>
+<span class="sd">        /flux/metric_data?metric=vista.nodes.skyline-1.cpu.user&amp;timestamp=1478021700&amp;value=1.0&amp;key=YOURown32charSkylineAPIkeySecret&amp;fill=true</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;listen :: GET request - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">req</span><span class="o">.</span><span class="n">query_string</span><span class="p">))</span>
 
-        <span class="n">validGetArguments</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;key&#39;</span><span class="p">,</span> <span class="s1">&#39;metric&#39;</span><span class="p">,</span> <span class="s1">&#39;value&#39;</span><span class="p">,</span> <span class="s1">&#39;timestamp&#39;</span><span class="p">]</span>
+        <span class="c1"># @modified 20200115 - Feature #3394: flux health check</span>
+        <span class="c1"># Added status parameter so that the flux listen process can be monitored</span>
+        <span class="c1"># @modified 20200206 - Feature #3444: Allow flux to backfill</span>
+        <span class="c1"># Added the fill parameter</span>
+        <span class="n">validGetArguments</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;key&#39;</span><span class="p">,</span> <span class="s1">&#39;metric&#39;</span><span class="p">,</span> <span class="s1">&#39;value&#39;</span><span class="p">,</span> <span class="s1">&#39;timestamp&#39;</span><span class="p">,</span> <span class="s1">&#39;status&#39;</span><span class="p">,</span> <span class="s1">&#39;fill&#39;</span><span class="p">]</span>
 
         <span class="n">payload</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">payload</span><span class="p">[</span><span class="s1">&#39;query_string&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">req</span><span class="o">.</span><span class="n">query_string</span><span class="p">)</span>
@@ -275,6 +301,23 @@
         <span class="n">value</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">valid_value</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="n">timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># @added 20200206 - Feature #3444: Allow flux to backfill</span>
+        <span class="c1"># This needs to be iterated amd determined before the timestamp is</span>
+        <span class="c1"># checked</span>
+        <span class="n">backfill</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">request_param_key</span><span class="p">,</span> <span class="n">request_param_value</span> <span class="ow">in</span> <span class="n">req</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">request_param_key</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;fill&#39;</span><span class="p">:</span>
+                    <span class="n">fill</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">request_param_value</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">fill</span> <span class="o">==</span> <span class="s1">&#39;true&#39;</span><span class="p">:</span>
+                        <span class="n">backfill</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: listen :: could not validate the fill key GET request argument - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">req</span><span class="o">.</span><span class="n">query_string</span><span class="p">)))</span>
+                <span class="n">resp</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">falcon</span><span class="o">.</span><span class="n">HTTP_400</span>
+                <span class="k">return</span>
 
         <span class="k">for</span> <span class="n">request_param_key</span><span class="p">,</span> <span class="n">request_param_value</span> <span class="ow">in</span> <span class="n">req</span><span class="o">.</span><span class="n">params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">try</span><span class="p">:</span>
@@ -286,6 +329,22 @@
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: listen :: validating request arguments - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">req</span><span class="o">.</span><span class="n">query_string</span><span class="p">)))</span>
+                <span class="n">resp</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">falcon</span><span class="o">.</span><span class="n">HTTP_400</span>
+                <span class="k">return</span>
+
+            <span class="c1"># @added 20200115 - Feature #3394: flux health check</span>
+            <span class="c1"># Added status parameter</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">request_param_key</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;status&#39;</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;listen :: GET </span><span class="si">%s</span><span class="s1"> - ok&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">req</span><span class="o">.</span><span class="n">query_string</span><span class="p">))</span>
+                    <span class="n">body</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;ok&quot;</span><span class="p">}</span>
+                    <span class="n">resp</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+                    <span class="n">resp</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">falcon</span><span class="o">.</span><span class="n">HTTP_200</span>
+                    <span class="k">return</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: listen :: could not validate the status key GET request argument - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                     <span class="nb">str</span><span class="p">(</span><span class="n">req</span><span class="o">.</span><span class="n">query_string</span><span class="p">)))</span>
                 <span class="n">resp</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">falcon</span><span class="o">.</span><span class="n">HTTP_400</span>
                 <span class="k">return</span>
@@ -308,7 +367,12 @@
 
             <span class="k">try</span><span class="p">:</span>
                 <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">request_param_key</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;timestamp&#39;</span><span class="p">:</span>
-                    <span class="n">valid_timestamp</span> <span class="o">=</span> <span class="n">validate_timestamp</span><span class="p">(</span><span class="s1">&#39;listen :: MetricData GET&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">request_param_value</span><span class="p">))</span>
+                    <span class="c1"># @modified 20200206 - Feature #3444: Allow flux to backfill</span>
+                    <span class="c1"># Only valid_timestamp is this is not a backfill request</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">backfill</span><span class="p">:</span>
+                        <span class="n">valid_timestamp</span> <span class="o">=</span> <span class="n">validate_timestamp</span><span class="p">(</span><span class="s1">&#39;listen :: MetricData GET&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">request_param_value</span><span class="p">))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">valid_timestamp</span> <span class="o">=</span> <span class="kc">True</span>
                     <span class="k">if</span> <span class="n">valid_timestamp</span><span class="p">:</span>
                         <span class="n">timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">request_param_value</span><span class="p">)</span>
                     <span class="k">else</span><span class="p">:</span>
@@ -372,7 +436,9 @@
             <span class="n">timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
 
         <span class="c1"># metric to add to queue</span>
-        <span class="n">metric_data</span> <span class="o">=</span> <span class="p">[</span><span class="n">metric</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">]</span>
+        <span class="c1"># @modified 20200206 - Feature #3444: Allow flux to backfill</span>
+        <span class="c1"># Added backfill</span>
+        <span class="n">metric_data</span> <span class="o">=</span> <span class="p">[</span><span class="n">metric</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">backfill</span><span class="p">]</span>
         <span class="n">payload</span><span class="p">[</span><span class="s1">&#39;metric_data&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_data</span><span class="p">)</span>
 
         <span class="c1"># Queue the metric</span>
@@ -384,6 +450,14 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: listen :: failed to add GET request data to flux.httpMetricDataQueue - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_data</span><span class="p">))</span>
             <span class="n">resp</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">falcon</span><span class="o">.</span><span class="n">HTTP_500</span>
             <span class="k">return</span>
+
+        <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">queue_size</span> <span class="o">=</span> <span class="n">flux</span><span class="o">.</span><span class="n">httpMetricDataQueue</span><span class="o">.</span><span class="n">qsize</span><span class="p">()</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;listen :: flux.httpMetricDataQueue.qsize - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">queue_size</span><span class="p">))</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: listen :: failed to determine flux.httpMetricDataQueue.qsize&#39;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
             <span class="n">resp</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
@@ -398,14 +472,17 @@
 <div class="viewcode-block" id="MetricDataPost.on_post"><a class="viewcode-back" href="../../skyline.flux.html#flux.listen.MetricDataPost.on_post">[docs]</a>    <span class="k">def</span> <span class="nf">on_post</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">,</span> <span class="n">resp</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        The /flux/metric_data_post endpoint is called via a POST with a json</span>
-<span class="sd">        object as defined below</span>
+<span class="sd">        object as defined below, with the optional fill parameter to allow</span>
+<span class="sd">        flux to backfill airgap data for a metric:</span>
+
 <span class="sd">        For example::</span>
 
 <span class="sd">            {</span>
 <span class="sd">                &quot;metric&quot;: &quot;metric|str&quot;,</span>
 <span class="sd">                &quot;timestamp&quot;: &quot;timestamp|int&quot;,</span>
 <span class="sd">                &quot;value&quot;: &quot;value|float&quot;,</span>
-<span class="sd">                &quot;key&quot;: &quot;api_key|str&quot;</span>
+<span class="sd">                &quot;key&quot;: &quot;api_key|str&quot;,</span>
+<span class="sd">                &quot;fill&quot;: &quot;boolean|optional&quot;</span>
 <span class="sd">            }</span>
 
 <span class="sd">        For example::</span>
@@ -415,6 +492,14 @@
 <span class="sd">                &quot;timestamp&quot;: &quot;1478021700&quot;,</span>
 <span class="sd">                &quot;value&quot;: &quot;1.0&quot;,</span>
 <span class="sd">                &quot;key&quot;: &quot;YOURown32charSkylineAPIkeySecret&quot;</span>
+<span class="sd">            }</span>
+
+<span class="sd">            {</span>
+<span class="sd">                &quot;metric&quot;: &quot;vista.nodes.skyline-1.cpu.user&quot;,</span>
+<span class="sd">                &quot;timestamp&quot;: &quot;1478021700&quot;,</span>
+<span class="sd">                &quot;value&quot;: &quot;1.0&quot;,</span>
+<span class="sd">                &quot;key&quot;: &quot;YOURown32charSkylineAPIkeySecret&quot;,</span>
+<span class="sd">                &quot;fill&quot;: &quot;true&quot;</span>
 <span class="sd">            }</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -441,6 +526,29 @@
         <span class="n">value</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">valid_value</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">key</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># @added 20200206 - Feature #3444: Allow flux to backfill</span>
+        <span class="n">backfill</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="c1"># @added 20200115 - Feature #3394: flux health check</span>
+        <span class="c1"># Added status parameter so that the flux listen process can be monitored</span>
+        <span class="n">status</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">status</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">postData</span><span class="p">[</span><span class="s1">&#39;status&#39;</span><span class="p">])</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">if</span> <span class="n">status</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;worker :: POST status - ok&#39;</span><span class="p">)</span>
+                <span class="n">body</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="s2">&quot;ok&quot;</span><span class="p">}</span>
+                <span class="n">resp</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+                <span class="n">resp</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">falcon</span><span class="o">.</span><span class="n">HTTP_200</span>
+                <span class="k">return</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: worker :: could not validate the status key POST request argument - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">req</span><span class="o">.</span><span class="n">query_string</span><span class="p">)))</span>
+                <span class="n">resp</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">falcon</span><span class="o">.</span><span class="n">HTTP_400</span>
+                <span class="k">return</span>
 
         <span class="k">try</span><span class="p">:</span>
             <span class="n">key</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">postData</span><span class="p">[</span><span class="s1">&#39;key&#39;</span><span class="p">])</span>
@@ -467,13 +575,26 @@
             <span class="n">resp</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">falcon</span><span class="o">.</span><span class="n">HTTP_400</span>
             <span class="k">return</span>
 
+        <span class="c1"># @added 20200206 - Feature #3444: Allow flux to backfill</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">fill</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">postData</span><span class="p">[</span><span class="s1">&#39;fill&#39;</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">fill</span> <span class="o">==</span> <span class="s1">&#39;true&#39;</span><span class="p">:</span>
+                <span class="n">backfill</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">backfill</span> <span class="o">=</span> <span class="kc">False</span>
+
         <span class="k">try</span><span class="p">:</span>
             <span class="n">timestamp_present</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">postData</span><span class="p">[</span><span class="s1">&#39;timestamp&#39;</span><span class="p">])</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">timestamp_present</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="n">timestamp_present</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">valid_timestamp</span> <span class="o">=</span> <span class="n">validate_timestamp</span><span class="p">(</span><span class="s1">&#39;listen :: MetricDataPOST POST&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">postData</span><span class="p">[</span><span class="s1">&#39;timestamp&#39;</span><span class="p">]))</span>
+                <span class="c1"># @modified 20200206 - Feature #3444: Allow flux to backfill</span>
+                <span class="c1"># Only valid_timestamp is this is not a backfill request</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">backfill</span><span class="p">:</span>
+                    <span class="n">valid_timestamp</span> <span class="o">=</span> <span class="n">validate_timestamp</span><span class="p">(</span><span class="s1">&#39;listen :: MetricDataPOST POST&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">postData</span><span class="p">[</span><span class="s1">&#39;timestamp&#39;</span><span class="p">]))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">valid_timestamp</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="k">if</span> <span class="n">valid_timestamp</span><span class="p">:</span>
                     <span class="n">timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">postData</span><span class="p">[</span><span class="s1">&#39;timestamp&#39;</span><span class="p">])</span>
                 <span class="k">else</span><span class="p">:</span>
@@ -522,7 +643,9 @@
 
         <span class="c1"># Queue the metric</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">metric_data</span> <span class="o">=</span> <span class="p">[</span><span class="n">metric</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">]</span>
+            <span class="c1"># @modified 20200206 - Feature #3444: Allow flux to backfill</span>
+            <span class="c1"># Added backfill</span>
+            <span class="n">metric_data</span> <span class="o">=</span> <span class="p">[</span><span class="n">metric</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">backfill</span><span class="p">]</span>
             <span class="n">flux</span><span class="o">.</span><span class="n">httpMetricDataQueue</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">metric_data</span><span class="p">,</span> <span class="n">block</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;listen :: POST data added to flux.httpMetricDataQueue - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_data</span><span class="p">))</span>
         <span class="k">except</span><span class="p">:</span>
@@ -553,7 +676,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2019, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
 
     </p>
   </div>
@@ -575,7 +698,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.3.0',
+            VERSION:'2.0.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

@@ -1,0 +1,1492 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>analyzer.analyzer_batch &mdash; Skyline 2.0.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
+  
+
+  
+        <link rel="index" title="Index"
+              href="../../genindex.html"/>
+        <link rel="search" title="Search" href="../../search.html"/>
+    <link rel="top" title="Skyline 2.0.0 documentation" href="../../index.html"/>
+        <link rel="up" title="Module code" href="../index.html"/> 
+
+  
+  <script src="../../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Skyline
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../docker.html">docker - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html#reliability">Reliability</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../skyline.html">skyline package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../../index.html">Skyline</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="../index.html">Module code</a> &raquo;</li>
+      
+    <li>analyzer.analyzer_batch</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for analyzer.analyzer_batch</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">Queue</span> <span class="k">import</span> <span class="n">Empty</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">queue</span> <span class="k">import</span> <span class="n">Empty</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">time</span><span class="p">,</span> <span class="n">sleep</span>
+<span class="kn">from</span> <span class="nn">threading</span> <span class="k">import</span> <span class="n">Thread</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">defaultdict</span>
+<span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+<span class="c1"># Use Redis sets in place of Manager().list to reduce memory and number of</span>
+<span class="c1"># processes</span>
+<span class="c1"># from multiprocessing import Process, Manager, Queue</span>
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="k">import</span> <span class="n">Process</span><span class="p">,</span> <span class="n">Queue</span>
+<span class="kn">from</span> <span class="nn">msgpack</span> <span class="k">import</span> <span class="n">Unpacker</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">kill</span><span class="p">,</span> <span class="n">getpid</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">from</span> <span class="nn">sys</span> <span class="k">import</span> <span class="n">version_info</span>
+<span class="kn">import</span> <span class="nn">os.path</span>
+<span class="kn">from</span> <span class="nn">ast</span> <span class="k">import</span> <span class="n">literal_eval</span>
+
+<span class="kn">import</span> <span class="nn">settings</span>
+<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">write_data_to_file</span><span class="p">,</span> <span class="n">send_anomalous_metric_to</span><span class="p">,</span> <span class="n">mkdir_p</span><span class="p">,</span>
+    <span class="n">filesafe_metricname</span><span class="p">,</span>
+    <span class="c1"># @added 20170602 - Feature #2034: analyse_derivatives</span>
+    <span class="n">nonNegativeDerivative</span><span class="p">,</span> <span class="n">strictly_increasing_monotonicity</span><span class="p">,</span> <span class="n">in_list</span><span class="p">,</span>
+    <span class="c1"># @added 20191030 - Bug #3266: py3 Redis binary objects not strings</span>
+    <span class="c1">#                   Branch #3262: py3</span>
+    <span class="c1"># Added a single functions to deal with Redis connection and the</span>
+    <span class="c1"># charset=&#39;utf-8&#39;, decode_responses=True arguments required in py3</span>
+    <span class="n">get_redis_conn</span><span class="p">,</span> <span class="n">get_redis_conn_decoded</span><span class="p">,</span>
+    <span class="c1"># @added 20200506 - Feature #3532: Sort all time series</span>
+    <span class="n">sort_timeseries</span><span class="p">)</span>
+
+<span class="c1"># @added 20200425 - Feature #3512: matched_or_regexed_in_list function</span>
+<span class="c1">#                   Feature #3508: ionosphere_untrainable_metrics</span>
+<span class="c1">#                   Feature #3486: analyzer_batch</span>
+<span class="kn">from</span> <span class="nn">matched_or_regexed_in_list</span> <span class="k">import</span> <span class="n">matched_or_regexed_in_list</span>
+
+<span class="c1"># @modified 20200423 - Feature #3504: Handle airgaps in batch metrics</span>
+<span class="c1">#                      Feature #3480: batch_processing</span>
+<span class="c1">#                      Feature #3486: analyzer_batch</span>
+<span class="c1"># Changed to algoritms_batch so there is no pollution and</span>
+<span class="c1"># analyzer and analyzer_batch are totally independent</span>
+<span class="c1"># from algorithms import run_selected_algorithm</span>
+<span class="kn">from</span> <span class="nn">algorithms_batch</span> <span class="k">import</span> <span class="n">run_selected_batch_algorithm</span>
+
+<span class="kn">from</span> <span class="nn">algorithm_exceptions</span> <span class="k">import</span> <span class="n">TooShort</span><span class="p">,</span> <span class="n">Stale</span><span class="p">,</span> <span class="n">Boring</span>
+
+<span class="c1"># TODO if settings.ENABLE_CRUCIBLE: and ENABLE_PANORAMA</span>
+<span class="c1">#    from spectrum import push_to_crucible</span>
+
+<span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;analyzer_batch&#39;</span>
+<span class="n">skyline_app_logger</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">Log&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">skyline_app_logger</span><span class="p">)</span>
+<span class="n">skyline_app_logfile</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.log&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">)</span>
+<span class="n">skyline_app_loglock</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.lock&#39;</span> <span class="o">%</span> <span class="n">skyline_app_logfile</span>
+<span class="n">skyline_app_logwait</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.wait&#39;</span> <span class="o">%</span> <span class="n">skyline_app_logfile</span>
+
+<span class="n">python_version</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+<span class="n">this_host</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">uname</span><span class="p">()[</span><span class="mi">1</span><span class="p">])</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">SERVER_METRICS_NAME</span>
+    <span class="k">if</span> <span class="n">SERVER_METRIC_PATH</span> <span class="o">==</span> <span class="s1">&#39;.&#39;</span><span class="p">:</span>
+        <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
+<span class="c1"># @added 20190410 - Feature #2916: ANALYZER_ENABLED setting</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">ANALYZER_ENABLED</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">ANALYZER_ENABLED</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ANALYZER_ENABLED is set to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">ANALYZER_ENABLED</span><span class="p">))</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">ANALYZER_ENABLED</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;warning :: ANALYZER_ENABLED is not declared in settings.py, defaults to True&#39;</span><span class="p">)</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">settings</span> <span class="k">import</span> <span class="n">BATCH_PROCESSING</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">BATCH_PROCESSING</span> <span class="o">=</span> <span class="kc">None</span>
+
+<span class="c1"># @added 20200425 - Feature #3508: ionosphere.untrainable_metrics</span>
+<span class="c1"># Determine if any metrcs have negatives values some they can be</span>
+<span class="c1"># added to the ionosphere.untrainable_metrics Redis set</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">settings</span> <span class="k">import</span> <span class="n">KNOWN_NEGATIVE_METRICS</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">KNOWN_NEGATIVE_METRICS</span> <span class="o">=</span> <span class="p">[]</span>
+
+
+<span class="n">skyline_app_graphite_namespace</span> <span class="o">=</span> <span class="s1">&#39;skyline.</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">SERVER_METRIC_PATH</span><span class="p">)</span>
+
+<span class="n">LOCAL_DEBUG</span> <span class="o">=</span> <span class="kc">False</span>
+
+
+<div class="viewcode-block" id="AnalyzerBatch"><a class="viewcode-back" href="../../skyline.analyzer.html#analyzer.analyzer_batch.AnalyzerBatch">[docs]</a><span class="k">class</span> <span class="nc">AnalyzerBatch</span><span class="p">(</span><span class="n">Thread</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    The AnalyzerBatch class which controls the analyzer.batch thread and spawned</span>
+<span class="sd">    processes.</span>
+
+<span class="sd">    Made with love to the analyzer_batch playlist:</span>
+<span class="sd">    https://soundcloud.com/earthgecko/sets/analyzer_batch</span>
+<span class="sd">    https://soundcloud.com/thedeltariggs/ode-to-jeremiah (I can&#39;t tell what I&#39;ve seen..)</span>
+<span class="sd">    https://soundcloud.com/egroove/premiere-francesco-chiocci-feat-black-soda-musumeci-remix-connaisseur-recordings (picking up pieces of my weary mind)</span>
+<span class="sd">    https://soundcloud.com/when-we-dip/premiere-francesco-chiocci-ft-black-soda-black-sunrise-peter-pardeike-remix</span>
+<span class="sd">    https://soundcloud.com/timgreen/atelier-francesco-manuel-feat-astrid-dead-end-tim-green-remixcityfox-1</span>
+<span class="sd">    https://soundcloud.com/imbernonmusic/edu-imbernon-fixing-fires</span>
+<span class="sd">    https://soundcloud.com/deep-house-amsterdam/oliver-koletzki-deep-house-amsterdam-dgtl-podcast-007</span>
+<span class="sd">    https://soundcloud.com/crosstownrebels/crm140-damian-lazarus-the-ancient-moons-vermillion-agoria-remix-1</span>
+<span class="sd">    https://soundcloud.com/wiewouwat/joy-wellboy-before-the-sunrise</span>
+<span class="sd">    https://soundcloud.com/agoria/damian-lazarus-the-ancent-moons-vermillion-agoria-remix</span>
+<span class="sd">    https://soundcloud.com/wearesoundspace/premiere-just-her-feat-kieran-fowkes-let-myself-go</span>
+<span class="sd">    https://soundcloud.com/watergaterecords/matthias-meyer-november-rain</span>
+<span class="sd">    https://soundcloud.com/musicthatmakesmewannasurf/mixtape-2-w-kosson</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Initialize the AnalyzerBatch</span>
+
+<span class="sd">        Create the :obj:`self.batch_exceptions_q` queue</span>
+<span class="sd">        Create the :obj:`self.batch_anomaly_breakdown_q` queue</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">AnalyzerBatch</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">get_redis_conn</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span> <span class="o">=</span> <span class="n">get_redis_conn_decoded</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent_pid</span> <span class="o">=</span> <span class="n">parent_pid</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">current_pid</span> <span class="o">=</span> <span class="n">getpid</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batch_exceptions_q</span> <span class="o">=</span> <span class="n">Queue</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">batch_anomaly_breakdown_q</span> <span class="o">=</span> <span class="n">Queue</span><span class="p">()</span>
+
+<div class="viewcode-block" id="AnalyzerBatch.check_if_parent_is_alive"><a class="viewcode-back" href="../../skyline.analyzer.html#analyzer.analyzer_batch.AnalyzerBatch.check_if_parent_is_alive">[docs]</a>    <span class="k">def</span> <span class="nf">check_if_parent_is_alive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Self explanatory</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">kill</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">current_pid</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">kill</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent_pid</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="AnalyzerBatch.spin_batch_process"><a class="viewcode-back" href="../../skyline.analyzer.html#analyzer.analyzer_batch.AnalyzerBatch.spin_batch_process">[docs]</a>    <span class="k">def</span> <span class="nf">spin_batch_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">run_timestamp</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">last_analyzed_timestamp</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Assign a metric and last_analyzed_timestamp for a process to analyze.</span>
+
+<span class="sd">        :param i: python process id</span>
+<span class="sd">        :param run_timestamp: the epoch timestamp at which this process was called</span>
+<span class="sd">        :param metric_name: the FULL_NAMESPACE metric name as keyed in Redis</span>
+<span class="sd">        :param last_analyzed_timestamp: the last analysed timestamp as recorded</span>
+<span class="sd">            in the Redis key last_timestamp.basename key.</span>
+
+<span class="sd">        :return: returns True</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">spin_start</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+        <span class="n">child_batch_process_pid</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;child_batch_process_pid - </span><span class="si">%s</span><span class="s1">, processing </span><span class="si">%s</span><span class="s1"> from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">child_batch_process_pid</span><span class="p">),</span> <span class="n">metric_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">last_analyzed_timestamp</span><span class="p">)))</span>
+
+        <span class="c1"># Identify last timestamp</span>
+        <span class="n">metric_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># Identify anomalies</span>
+        <span class="c1"># Handle EXPIRATION_TIME</span>
+        <span class="c1"># Ship to Analyzer, Mirage or Ionosphere</span>
+
+        <span class="n">raw_series</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">raw_series</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">metric_name</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get </span><span class="si">%s</span><span class="s1"> from Redis&#39;</span> <span class="o">%</span> <span class="n">metric_name</span><span class="p">)</span>
+            <span class="n">raw_series</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># Make process-specific dicts</span>
+        <span class="n">exceptions</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">anomaly_breakdown</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">raw_series</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;No raw_series defined, returning&#39;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="c1"># Determine the unique Mirage and Ionosphere metrics once, which are</span>
+        <span class="c1"># used later to determine how Analyzer should handle/route anomalies</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">mirage_unique_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;mirage.unique_metrics&#39;</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">mirage_unique_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">ionosphere_unique_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;ionosphere.unique_metrics&#39;</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">ionosphere_unique_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># In order to convert monotonic, incrementing metrics to a deriative</span>
+        <span class="c1"># metric</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">derivative_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;derivative_metrics&#39;</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">derivative_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">non_derivative_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;non_derivative_metrics&#39;</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">non_derivative_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">non_derivative_monotonic_metrics</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">NON_DERIVATIVE_MONOTONIC_METRICS</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">non_derivative_monotonic_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">non_smtp_alerter_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">non_smtp_alerter_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;analyzer.non_smtp_alerter_metrics&#39;</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">non_smtp_alerter_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">unpacker</span> <span class="o">=</span> <span class="n">Unpacker</span><span class="p">(</span><span class="n">use_list</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">unpacker</span><span class="o">.</span><span class="n">feed</span><span class="p">(</span><span class="n">raw_series</span><span class="p">)</span>
+            <span class="n">timeseries</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">unpacker</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">timeseries</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># @added 20200506 - Feature #3532: Sort all time series</span>
+        <span class="c1"># To ensure that there are no unordered timestamps in the time</span>
+        <span class="c1"># series which are artefacts of the collector or carbon-relay, sort</span>
+        <span class="c1"># all time series by timestamp before analysis.</span>
+        <span class="n">original_timeseries</span> <span class="o">=</span> <span class="n">timeseries</span>
+        <span class="k">if</span> <span class="n">original_timeseries</span><span class="p">:</span>
+            <span class="n">timeseries</span> <span class="o">=</span> <span class="n">sort_timeseries</span><span class="p">(</span><span class="n">original_timeseries</span><span class="p">)</span>
+            <span class="k">del</span> <span class="n">original_timeseries</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">raw_series</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="n">timestamps_to_analyse</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="c1"># Reverse the time series so that only the first (last) items now to be</span>
+        <span class="c1"># iterated and break after the necessary iterations so the entire</span>
+        <span class="c1"># time series is not iterated over.</span>
+        <span class="n">reversed_timeseries</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="n">timeseries</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">reversed_timeseries</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">last_analyzed_timestamp</span><span class="p">:</span>
+                <span class="n">timestamps_to_analyse</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">timestamp</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">break</span>
+        <span class="k">del</span> <span class="n">reversed_timeseries</span>
+        <span class="n">timestamps_to_analyse</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="n">timestamps_to_analyse</span><span class="p">))</span>
+
+        <span class="c1"># @added 20200413 - Feature #3486: analyzer_batch</span>
+        <span class="c1">#                   Feature #3480: batch_processing</span>
+        <span class="c1"># Handle there being no timestamps_to_analyse and report such as</span>
+        <span class="c1"># otherwise the only info logged is that the work key just gets removed</span>
+        <span class="c1"># 2020-04-14 12:57:25 :: 3222 :: there are 1 metrics to process in the analyzer.batch Redis set</span>
+        <span class="c1"># 2020-04-14 12:57:25 :: 3222 :: processing - [&#39;vista.demo_robustperception_io.prometheus.node_disk_read_time_seconds_total&#39;, 1586868000]</span>
+        <span class="c1"># 2020-04-14 12:57:25 :: 3222 :: starting 1 of 1 spin_batch_process</span>
+        <span class="c1"># 2020-04-14 12:57:25 :: 7852 :: batch :: child_batch_process_pid - 7852, processing vista.demo_robustperception_io.prometheus.node_disk_read_time_seconds_total from 1586868000</span>
+        <span class="c1"># 2020-04-14 12:57:25 :: 7852 :: analyzer_batch :: removed work item - [&#39;vista.demo_robustperception_io.prometheus.node_disk_read_time_seconds_total&#39;, 1586868000] - from Redis set - analyzer.batch</span>
+        <span class="c1"># 2020-04-14 12:57:25 :: 7852 :: spin_batch_process took 0.04 seconds</span>
+        <span class="c1"># 2020-04-14 12:57:25 :: 3222 :: 1 spin_batch_process completed in 0.10 seconds</span>
+        <span class="c1"># 2020-04-14 12:57:25 :: 3222 :: exceptions - Stale: 9, Boring: 6, TooShort: 0, Other: 0</span>
+        <span class="c1"># 2020-04-14 12:57:25 :: 3222 :: anomaly_breakdown - histogram_bins: 0, first_hour_average: 0, stddev_from_average: 0, grubbs: 0, ks_test: 0, mean_subtraction_cumulation: 0, median_absolute_deviation: 0, stddev_from_moving_average: 0, least_squares: 0</span>
+        <span class="n">number_of_timestamps_to_analyze</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">timestamps_to_analyse</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">number_of_timestamps_to_analyze</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;no timestamps were found to analyze for </span><span class="si">%s</span><span class="s1"> from </span><span class="si">%s</span><span class="s1">, nothing to do&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">metric_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">last_analyzed_timestamp</span><span class="p">)))</span>
+
+            <span class="c1"># @added 20200424 - Feature #3486: analyzer_batch</span>
+            <span class="c1">#                   Feature #3480: batch_processing</span>
+            <span class="c1">#                   Feature #3504: Handle airgaps in batch metrics</span>
+            <span class="c1"># If there are no data points to analyze remove from the set</span>
+            <span class="n">redis_set</span> <span class="o">=</span> <span class="s1">&#39;analyzer.batch&#39;</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">metric_name</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">last_analyzed_timestamp</span><span class="p">)]</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">srem</span><span class="p">(</span><span class="n">redis_set</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;analyzer_batch :: removed batch metric item - </span><span class="si">%s</span><span class="s1"> - from Redis set - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">redis_set</span><span class="p">))</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: analyzer_batch :: failed to remove batch metric item - </span><span class="si">%s</span><span class="s1"> - from Redis set - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">redis_set</span><span class="p">))</span>
+
+            <span class="c1"># Clean up and return</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">timeseries</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">timestamps_to_analyse</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">batch_timeseries</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">mirage_unique_metrics</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">ionosphere_unique_metrics</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">derivative_metrics</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">non_derivative_metrics</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">non_derivative_monotonic_metrics</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">non_smtp_alerter_metrics</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">return</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">last_redis_data_timestamp</span> <span class="o">=</span> <span class="n">timestamps_to_analyse</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> timestamps were found to analyze for </span><span class="si">%s</span><span class="s1"> from </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">number_of_timestamps_to_analyze</span><span class="p">),</span> <span class="n">metric_name</span><span class="p">,</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">last_analyzed_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">last_redis_data_timestamp</span><span class="p">)))</span>
+
+        <span class="n">base_name</span> <span class="o">=</span> <span class="n">metric_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># @added 20200425 - Feature #3508: ionosphere.untrainable_metrics</span>
+        <span class="c1"># Determine if any metrcs have negatives values some they can be</span>
+        <span class="c1"># added to the ionosphere_untrainable_metrics Redis set</span>
+        <span class="n">run_negatives_present</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_ENABLED</span><span class="p">:</span>
+            <span class="n">run_negatives_present</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">known_negative_metric_matched_by</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">known_negative_metric</span><span class="p">,</span> <span class="n">known_negative_metric_matched_by</span> <span class="o">=</span> <span class="n">matched_or_regexed_in_list</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">KNOWN_NEGATIVE_METRICS</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">known_negative_metric</span><span class="p">:</span>
+                    <span class="n">run_negatives_present</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">run_negatives_present</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="c1"># @added 20170602 - Feature #2034: analyse_derivatives</span>
+        <span class="c1"># In order to convert monotonic, incrementing metrics to a deriative</span>
+        <span class="c1"># metric</span>
+        <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">unknown_deriv_status</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">metric_name</span> <span class="ow">in</span> <span class="n">non_derivative_metrics</span><span class="p">:</span>
+            <span class="n">unknown_deriv_status</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">unknown_deriv_status</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">metric_name</span> <span class="ow">in</span> <span class="n">derivative_metrics</span><span class="p">:</span>
+                <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">unknown_deriv_status</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="c1"># First check if it has its own Redis z.derivative_metric key</span>
+        <span class="c1"># that has not expired</span>
+        <span class="n">derivative_metric_key</span> <span class="o">=</span> <span class="s1">&#39;z.derivative_metric.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">unknown_deriv_status</span><span class="p">:</span>
+            <span class="c1"># @added 20170617 - Bug #2050: analyse_derivatives - change in monotonicity</span>
+            <span class="n">last_derivative_metric_key</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">last_derivative_metric_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">derivative_metric_key</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not query Redis for last_derivative_metric_key: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+
+            <span class="c1"># Determine if it is a strictly increasing monotonically metric</span>
+            <span class="c1"># or has been in last FULL_DURATION via its z.derivative_metric</span>
+            <span class="c1"># key</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">last_derivative_metric_key</span><span class="p">:</span>
+                <span class="n">is_strictly_increasing_monotonically</span> <span class="o">=</span> <span class="n">strictly_increasing_monotonicity</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># Until the z.derivative_metric key expires, it is classed</span>
+                <span class="c1"># as such</span>
+                <span class="n">is_strictly_increasing_monotonically</span> <span class="o">=</span> <span class="kc">True</span>
+
+            <span class="n">skip_derivative</span> <span class="o">=</span> <span class="n">in_list</span><span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="n">non_derivative_monotonic_metrics</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">skip_derivative</span><span class="p">:</span>
+                <span class="n">is_strictly_increasing_monotonically</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">is_strictly_increasing_monotonically</span><span class="p">:</span>
+                <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="s1">&#39;derivative_metrics&#39;</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add metric to Redis derivative_metrics set&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="s1">&#39;non_derivative_metrics&#39;</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add metric to Redis non_derivative_metrics set&#39;</span><span class="p">)</span>
+
+        <span class="c1"># Distill timeseries strings into lists</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">batch_timestamp</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">timestamps_to_analyse</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">check_if_parent_is_alive</span><span class="p">()</span>
+
+            <span class="n">batch_timeseries</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">batch_timestamp</span><span class="p">:</span>
+                    <span class="n">batch_timeseries</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">value</span><span class="p">])</span>
+
+            <span class="k">if</span> <span class="n">known_derivative_metric</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">derivative_timeseries</span> <span class="o">=</span> <span class="n">nonNegativeDerivative</span><span class="p">(</span><span class="n">batch_timeseries</span><span class="p">)</span>
+                    <span class="n">batch_timeseries</span> <span class="o">=</span> <span class="n">derivative_timeseries</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: nonNegativeDerivative failed&#39;</span><span class="p">)</span>
+
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># Allow for testing.  If you want to test a metric and then stop</span>
+                <span class="c1"># the metric sending data to carbon-relay (use a vista metric).</span>
+                <span class="c1"># Determine a timestamp that will fall into the stopped period</span>
+                <span class="c1"># Add the timestamp to a Redis key called</span>
+                <span class="c1"># analyzer_batch.test.&lt;metric_name&gt;</span>
+                <span class="c1"># Start the metric sending data again (re-enable in vista)</span>
+                <span class="c1"># vista/flux will fill the missing data, when analyzer pushes</span>
+                <span class="c1"># the metric to analyzer_batch to process, if analyzer_batch</span>
+                <span class="c1"># is set to test_anomaly True and finds the key, if the</span>
+                <span class="c1"># timestamp matches the timestamp in the key, analyzer_batch</span>
+                <span class="c1"># will multiply the timestamp data point by 15, this should</span>
+                <span class="c1"># trigger an anomaly.  Ensure you use a metric which will</span>
+                <span class="c1"># trigger, a load related metric is usually adequate.</span>
+                <span class="n">test_anomaly</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">test_anomaly_at</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">test_anomaly_batch_timeseries</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">if</span> <span class="n">test_anomaly</span><span class="p">:</span>
+                    <span class="n">test_anomaly_at</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="n">test_anomaly_key</span> <span class="o">=</span> <span class="s1">&#39;analyzer_batch.test.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric_name</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">test_anomaly_at</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">test_anomaly_key</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">test_anomaly_at</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="k">if</span> <span class="n">test_anomaly_at</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">test_anomaly_at</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">batch_timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]):</span>
+                            <span class="k">for</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">batch_timeseries</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">test_anomaly_at</span><span class="p">):</span>
+                                    <span class="n">anomaly_value</span> <span class="o">=</span> <span class="n">value</span> <span class="o">*</span> <span class="mi">10</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;test_anomaly - replacing value </span><span class="si">%s</span><span class="s1"> with anomaly_value of </span><span class="si">%s</span><span class="s1"> at </span><span class="si">%s</span><span class="s1"> in </span><span class="si">%s</span><span class="s1"> timeseries&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                        <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_value</span><span class="p">),</span>
+                                        <span class="nb">str</span><span class="p">(</span><span class="n">test_anomaly_at</span><span class="p">),</span> <span class="n">metric_name</span><span class="p">))</span>
+                                    <span class="n">value</span> <span class="o">=</span> <span class="n">anomaly_value</span>
+                                <span class="n">test_anomaly_batch_timeseries</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">value</span><span class="p">])</span>
+                            <span class="k">if</span> <span class="n">test_anomaly_batch_timeseries</span><span class="p">:</span>
+                                <span class="n">batch_timeseries</span> <span class="o">=</span> <span class="n">test_anomaly_batch_timeseries</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;test_anomaly - replaced </span><span class="si">%s</span><span class="s1"> timeseries with anomaly value in it&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                    <span class="n">metric_name</span><span class="p">))</span>
+                                <span class="k">try</span><span class="p">:</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">test_anomaly_key</span><span class="p">)</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;test_anomaly - deleted test_anomaly Redis key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">test_anomaly_key</span><span class="p">))</span>
+                                <span class="k">except</span><span class="p">:</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to delete test_anomaly Redis key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">test_anomaly_key</span><span class="p">))</span>
+
+                <span class="c1"># @modified 20200423 - Feature #3504: Handle airgaps in batch metrics</span>
+                <span class="c1">#                      Feature #3480: batch_processing</span>
+                <span class="c1">#                      Feature #3486: analyzer_batch</span>
+                <span class="c1"># Changed to algoritms_batch so there is no pollution and</span>
+                <span class="c1"># analyzer and analyzer_batch are totally independent</span>
+                <span class="c1"># metric_airgaps = []</span>
+                <span class="c1"># anomalous, ensemble, datapoint = run_selected_algorithm(batch_timeseries, metric_name, metric_airgaps)</span>
+                <span class="c1"># @modified 20200425 - Feature #3508: ionosphere.untrainable_metrics</span>
+                <span class="c1"># Added run_negatives_present and added negatives_found</span>
+                <span class="c1"># anomalous, ensemble, datapoint = run_selected_batch_algorithm(batch_timeseries, metric_name)</span>
+                <span class="n">anomalous</span><span class="p">,</span> <span class="n">ensemble</span><span class="p">,</span> <span class="n">datapoint</span><span class="p">,</span> <span class="n">negatives_found</span> <span class="o">=</span> <span class="n">run_selected_batch_algorithm</span><span class="p">(</span><span class="n">batch_timeseries</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">run_negatives_present</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">test_anomaly_batch_timeseries</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;test_anomaly - analyzed </span><span class="si">%s</span><span class="s1"> data with anomaly value in it and anomalous = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">metric_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomalous</span><span class="p">)))</span>
+
+                <span class="c1"># Update the last_timestamp metric Redis key</span>
+                <span class="n">last_metric_timestamp_key</span> <span class="o">=</span> <span class="s1">&#39;last_timestamp.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span>
+                <span class="n">redis_key_set</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">int_metric_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">batch_timestamp</span><span class="p">)</span>
+                    <span class="c1"># @modified 20200503 - Feature #3504: Handle airgaps in batch metrics</span>
+                    <span class="c1">#                      Feature #3480: batch_processing</span>
+                    <span class="c1">#                      Feature #3486: analyzer_batch</span>
+                    <span class="c1"># Set the last_timestamp expiry time to 1 month rather than</span>
+                    <span class="c1"># settings.FULL_DURATION</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span>
+                        <span class="n">last_metric_timestamp_key</span><span class="p">,</span> <span class="mi">2592000</span><span class="p">,</span> <span class="n">int_metric_timestamp</span><span class="p">)</span>
+                    <span class="n">redis_key_set</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to set Redis key </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">last_metric_timestamp_key</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">anomalous</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">redis_key_set</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;anomalous :: anomaly detected on </span><span class="si">%s</span><span class="s1"> at </span><span class="si">%s</span><span class="s1"> with </span><span class="si">%s</span><span class="s1">, set Redis key </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">int_metric_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">datapoint</span><span class="p">),</span>
+                            <span class="n">last_metric_timestamp_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">int_metric_timestamp</span><span class="p">)))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;anomalous :: anomaly detected on </span><span class="si">%s</span><span class="s1"> at </span><span class="si">%s</span><span class="s1"> with </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">int_metric_timestamp</span><span class="p">),</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">datapoint</span><span class="p">)))</span>
+
+                    <span class="c1"># @added 20200425 - Feature #3508: ionosphere.untrainable_metrics</span>
+                    <span class="c1"># Determine if any metrcs have negatives values some they can be</span>
+                    <span class="c1"># added to the ionosphere.untrainable_metrics Redis set</span>
+                    <span class="k">if</span> <span class="n">run_negatives_present</span> <span class="ow">and</span> <span class="n">negatives_found</span><span class="p">:</span>
+                        <span class="n">redis_set</span> <span class="o">=</span> <span class="s1">&#39;ionosphere.untrainable_metrics&#39;</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">last_negative_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">negatives_found</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                            <span class="n">last_negative_value</span> <span class="o">=</span> <span class="n">negatives_found</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+                            <span class="n">remove_after_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">last_negative_timestamp</span> <span class="o">+</span> <span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span><span class="p">)</span>
+                            <span class="n">data</span> <span class="o">=</span> <span class="nb">str</span><span class="p">([</span><span class="n">metric_name</span><span class="p">,</span> <span class="n">batch_timestamp</span><span class="p">,</span> <span class="n">datapoint</span><span class="p">,</span> <span class="n">last_negative_timestamp</span><span class="p">,</span> <span class="n">last_negative_value</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span><span class="p">,</span> <span class="n">remove_after_timestamp</span><span class="p">])</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="n">redis_set</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add data to Redis set </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">redis_set</span><span class="p">)))</span>
+
+                    <span class="c1"># Added a Redis key for Mirage, Panorama and Ionosphere to</span>
+                    <span class="c1"># query to identify if an anomaly has been added by</span>
+                    <span class="c1"># analyzer_batch and set a longish TTL as if multiple</span>
+                    <span class="c1"># anomalies for multiple metrics in a batch are sent to</span>
+                    <span class="c1"># Ionosphere it could take Ionosphere a while to analyze</span>
+                    <span class="c1"># them all.  This key circumvents the requirement of each</span>
+                    <span class="c1"># app to determine if a metric is a batch metric, as this</span>
+                    <span class="c1"># is only created for batch metric anomalies.</span>
+                    <span class="n">analyzer_batch_metric_anomaly_key</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.anomaly.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">int_metric_timestamp</span><span class="p">),</span> <span class="n">base_name</span><span class="p">)</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">int_metric_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">batch_timestamp</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span>
+                            <span class="n">analyzer_batch_metric_anomaly_key</span><span class="p">,</span>
+                            <span class="mi">3600</span><span class="p">,</span> <span class="n">int_metric_timestamp</span><span class="p">)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;set Redis key </span><span class="si">%s</span><span class="s1"> with </span><span class="si">%s</span><span class="s1"> for other apps to identify this as an analyzer_batch anomaly&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">analyzer_batch_metric_anomaly_key</span><span class="p">,</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">int_metric_timestamp</span><span class="p">)))</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to set Redis key </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">analyzer_batch_metric_anomaly_key</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">redis_key_set</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;not anomalous :: </span><span class="si">%s</span><span class="s1"> at </span><span class="si">%s</span><span class="s1"> with </span><span class="si">%s</span><span class="s1">, set Redis key </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">int_metric_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">datapoint</span><span class="p">),</span>
+                            <span class="n">last_metric_timestamp_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">int_metric_timestamp</span><span class="p">)))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;not anomalous :: </span><span class="si">%s</span><span class="s1"> at </span><span class="si">%s</span><span class="s1"> with </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">int_metric_timestamp</span><span class="p">),</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">datapoint</span><span class="p">)))</span>
+
+                <span class="c1"># @added 20190408 - Feature #2882: Mirage - periodic_check</span>
+                <span class="c1"># Add for Mirage periodic - is really anomalous add to</span>
+                <span class="c1"># real_anomalous_metrics and if in mirage_periodic_check_metric_list</span>
+                <span class="c1"># add as anomalous</span>
+                <span class="k">if</span> <span class="n">anomalous</span><span class="p">:</span>
+                    <span class="n">metric_timestamp</span> <span class="o">=</span> <span class="n">batch_timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">metric</span> <span class="o">=</span> <span class="p">[</span><span class="n">datapoint</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">]</span>
+
+                    <span class="c1"># Get the anomaly breakdown - who returned True?</span>
+                    <span class="n">triggered_algorithms</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ensemble</span><span class="p">):</span>
+                        <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
+                            <span class="n">algorithm</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">ALGORITHMS</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+                            <span class="n">anomaly_breakdown</span><span class="p">[</span><span class="n">algorithm</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                            <span class="n">triggered_algorithms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">algorithm</span><span class="p">)</span>
+
+                    <span class="c1"># @added 20170206 - Bug #1904: Handle non filesystem friendly metric names in check files</span>
+                    <span class="n">sane_metricname</span> <span class="o">=</span> <span class="n">filesafe_metricname</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">))</span>
+
+                    <span class="c1"># If Panorama is enabled determine details</span>
+                    <span class="n">determine_anomaly_details</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_ENABLED</span><span class="p">:</span>
+                        <span class="n">determine_anomaly_details</span> <span class="o">=</span> <span class="kc">True</span>
+
+                    <span class="c1"># If Ionosphere is enabled determine details</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">ionosphere_enabled</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_ENABLED</span>
+                        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_ENABLED</span><span class="p">:</span>
+                            <span class="n">determine_anomaly_details</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">ionosphere_enabled</span> <span class="o">=</span> <span class="kc">False</span>
+
+                    <span class="k">if</span> <span class="n">determine_anomaly_details</span><span class="p">:</span>
+                        <span class="n">metric_timestamp</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">batch_timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]))</span>
+                        <span class="n">from_timestamp</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">batch_timeseries</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]))</span>
+                        <span class="n">timeseries_dir</span> <span class="o">=</span> <span class="n">base_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">)</span>
+
+                    <span class="n">send_back_to_analyzer</span> <span class="o">=</span> <span class="kc">None</span>
+
+                    <span class="c1"># @added 20161119 - Branch #922: ionosphere</span>
+                    <span class="c1">#                   Task #1718: review.tsfresh</span>
+                    <span class="c1"># Set defaults which can be used later to determine how</span>
+                    <span class="c1"># Analyzer should handle/route anomalies</span>
+                    <span class="n">analyzer_metric</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">mirage_metric</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="n">ionosphere_metric</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="n">send_to_ionosphere</span> <span class="o">=</span> <span class="kc">False</span>
+
+                    <span class="k">if</span> <span class="n">metric_name</span> <span class="ow">in</span> <span class="n">ionosphere_unique_metrics</span><span class="p">:</span>
+                        <span class="n">ionosphere_metric</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="n">send_to_ionosphere</span> <span class="o">=</span> <span class="kc">True</span>
+
+                    <span class="k">if</span> <span class="n">metric_name</span> <span class="ow">in</span> <span class="n">mirage_unique_metrics</span><span class="p">:</span>
+                        <span class="n">analyzer_metric</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="n">ionosphere_metric</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="n">mirage_metric</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="n">send_to_ionosphere</span> <span class="o">=</span> <span class="kc">False</span>
+
+                    <span class="c1"># @added 20170108 - Feature #1830: Ionosphere alerts</span>
+                    <span class="c1"># Only send smtp_alerter_metrics to Ionosphere</span>
+                    <span class="n">smtp_alert_enabled_metric</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">if</span> <span class="n">base_name</span> <span class="ow">in</span> <span class="n">non_smtp_alerter_metrics</span><span class="p">:</span>
+                        <span class="n">smtp_alert_enabled_metric</span> <span class="o">=</span> <span class="kc">False</span>
+
+                    <span class="k">if</span> <span class="n">ionosphere_enabled</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">analyzer_metric</span><span class="p">:</span>
+                            <span class="c1"># We do not want send all anomalous metrics to</span>
+                            <span class="c1"># Ionosphere if they are not being alerted on as</span>
+                            <span class="c1"># they will be pointless they will have no alert if</span>
+                            <span class="c1"># it is within the EXPIRATION_TIME and there will be</span>
+                            <span class="c1"># no reference graphs from an alert for the user to</span>
+                            <span class="c1"># action.</span>
+                            <span class="n">cache_key</span> <span class="o">=</span> <span class="s1">&#39;last_alert.smtp.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+                            <span class="n">last_alert</span> <span class="o">=</span> <span class="kc">False</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="n">last_alert</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span>
+                            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not query Redis for cache_key: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+
+                            <span class="k">if</span> <span class="ow">not</span> <span class="n">last_alert</span><span class="p">:</span>
+                                <span class="n">send_to_ionosphere</span> <span class="o">=</span> <span class="kc">True</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">send_to_ionosphere</span> <span class="o">=</span> <span class="kc">False</span>
+                                <span class="k">if</span> <span class="n">ionosphere_metric</span><span class="p">:</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;not sending to Ionosphere - alert key exists - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">))</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">mirage_metric</span><span class="p">:</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;not sending to Ionosphere - Mirage metric - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">))</span>
+                                <span class="n">send_to_ionosphere</span> <span class="o">=</span> <span class="kc">False</span>
+
+                                <span class="c1"># analyzer_batch sends Analyzer and Mirage</span>
+                                <span class="c1"># metrics back to analyzer</span>
+                                <span class="n">send_back_to_analyzer</span> <span class="o">=</span> <span class="kc">True</span>
+
+                                <span class="c1"># @added 20170306 - Feature #1960: ionosphere_layers</span>
+                                <span class="c1"># Ionosphere layers require the timeseries at</span>
+                                <span class="c1"># FULL_DURATION so if this is a Mirage and</span>
+                                <span class="c1"># Ionosphere metric, Analyzer needs to provide</span>
+                                <span class="c1"># the timeseries file for later (within 60</span>
+                                <span class="c1"># seconds) analysis, however we want the data</span>
+                                <span class="c1"># that triggered the anomaly, as before this was</span>
+                                <span class="c1"># only created by Mirage if an alert was</span>
+                                <span class="c1"># triggered, but Ionosphere layers now require</span>
+                                <span class="c1"># this file before an alert is triggered</span>
+                                <span class="n">timeseries_dir</span> <span class="o">=</span> <span class="n">base_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">)</span>
+                                <span class="n">training_dir</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                    <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_DATA_FOLDER</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">),</span>
+                                    <span class="nb">str</span><span class="p">(</span><span class="n">timeseries_dir</span><span class="p">))</span>
+                                <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">training_dir</span><span class="p">):</span>
+                                    <span class="n">mkdir_p</span><span class="p">(</span><span class="n">training_dir</span><span class="p">)</span>
+                                <span class="n">full_duration_in_hours</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span><span class="p">)</span> <span class="o">/</span> <span class="mi">3600</span>
+                                <span class="n">ionosphere_json_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.mirage.redis.</span><span class="si">%s</span><span class="s1">h.json&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                    <span class="n">training_dir</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span>
+                                    <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">full_duration_in_hours</span><span class="p">)))</span>
+                                <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">ionosphere_json_file</span><span class="p">):</span>
+                                    <span class="n">timeseries_json</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">batch_timeseries</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;[&#39;</span><span class="p">,</span> <span class="s1">&#39;(&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;]&#39;</span><span class="p">,</span> <span class="s1">&#39;)&#39;</span><span class="p">)</span>
+                                    <span class="k">try</span><span class="p">:</span>
+                                        <span class="n">write_data_to_file</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">ionosphere_json_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">timeseries_json</span><span class="p">)</span>
+                                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> added Ionosphere Mirage </span><span class="si">%s</span><span class="s1">h Redis data timeseries json file :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                            <span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">full_duration_in_hours</span><span class="p">)),</span> <span class="n">ionosphere_json_file</span><span class="p">))</span>
+                                    <span class="k">except</span><span class="p">:</span>
+                                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add </span><span class="si">%s</span><span class="s1"> Ionosphere Mirage Redis data timeseries json file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">ionosphere_json_file</span><span class="p">))</span>
+
+                    <span class="c1"># @modified 20170108 - Feature #1830: Ionosphere alerts</span>
+                    <span class="c1"># Only send smtp_alerter_metrics to Ionosphere</span>
+                    <span class="c1"># if send_to_ionosphere:</span>
+                    <span class="k">if</span> <span class="n">send_to_ionosphere</span> <span class="ow">and</span> <span class="n">smtp_alert_enabled_metric</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">metric_name</span> <span class="ow">in</span> <span class="n">ionosphere_unique_metrics</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;sending an ionosphere metric to Ionosphere - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">))</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;sending an analyzer metric to Ionosphere for training - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">))</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="c1"># @modified 20161228 Feature #1828: ionosphere - mirage Redis data features</span>
+                            <span class="c1"># Added full_duration</span>
+                            <span class="c1"># @modified 20170127 - Feature #1886: Ionosphere learn - child like parent with evolutionary maturity</span>
+                            <span class="c1"># Added ionosphere_parent_id, always zero from Analyzer and Mirage</span>
+                            <span class="n">ionosphere_parent_id</span> <span class="o">=</span> <span class="mi">0</span>
+                            <span class="n">send_anomalous_metric_to</span><span class="p">(</span>
+                                <span class="n">skyline_app</span><span class="p">,</span> <span class="s1">&#39;ionosphere&#39;</span><span class="p">,</span> <span class="n">timeseries_dir</span><span class="p">,</span>
+                                <span class="n">metric_timestamp</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">datapoint</span><span class="p">),</span>
+                                <span class="n">from_timestamp</span><span class="p">,</span> <span class="n">triggered_algorithms</span><span class="p">,</span>
+                                <span class="n">batch_timeseries</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span><span class="p">),</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">ionosphere_parent_id</span><span class="p">))</span>
+                            <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+                            <span class="c1"># Moved to Redis key block below</span>
+                            <span class="c1"># self.sent_to_ionosphere.append(base_name)</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to send_anomalous_metric_to to ionosphere&#39;</span><span class="p">)</span>
+
+                        <span class="c1"># @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+                        <span class="n">redis_set</span> <span class="o">=</span> <span class="s1">&#39;analyzer.batch.sent_to_ionosphere&#39;</span>
+                        <span class="n">data</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="n">redis_set</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add </span><span class="si">%s</span><span class="s1"> to Redis set </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">redis_set</span><span class="p">)))</span>
+
+                        <span class="c1"># @added 20170403 - Feature #1994: Ionosphere training_dir keys</span>
+                        <span class="c1">#                   Feature #2000: Ionosphere - validated</span>
+                        <span class="c1">#                   Feature #1996: Ionosphere - matches page</span>
+                        <span class="c1"># The addition of this key data could be done in</span>
+                        <span class="c1"># skyline_function.py, however that would introduce</span>
+                        <span class="c1"># Redis requirements in the send_anomalous_metric_to</span>
+                        <span class="c1"># function, which is not desirable I think. So this is</span>
+                        <span class="c1"># a non-KISS pattern that is replicated in mirage.py as</span>
+                        <span class="c1"># well.</span>
+                        <span class="c1"># Each training_dir and data set is now Redis keyed to increase efficiency</span>
+                        <span class="c1"># in terms of disk I/O for ionosphere.py and making keyed data</span>
+                        <span class="c1"># available for each training_dir data set so that transient matched data</span>
+                        <span class="c1"># can be surfaced for the webapp along with directory paths, etc</span>
+                        <span class="n">ionosphere_training_data_key</span> <span class="o">=</span> <span class="s1">&#39;ionosphere.training_data.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">),</span> <span class="n">base_name</span><span class="p">)</span>
+                        <span class="n">ionosphere_training_data_key_data</span> <span class="o">=</span> <span class="p">[</span>
+                            <span class="p">[</span><span class="s1">&#39;metric_timestamp&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">)],</span>
+                            <span class="p">[</span><span class="s1">&#39;base_name&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">)],</span>
+                            <span class="p">[</span><span class="s1">&#39;timeseries_dir&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">timeseries_dir</span><span class="p">)],</span>
+                            <span class="p">[</span><span class="s1">&#39;added_by&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)]</span>
+                        <span class="p">]</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span>
+                                <span class="n">ionosphere_training_data_key</span><span class="p">,</span>
+                                <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR</span><span class="p">,</span>
+                                <span class="c1"># @modified 20190413 - Task #2824: Test redis-py upgrade</span>
+                                <span class="c1">#                      Task #2926: Update dependencies</span>
+                                <span class="c1"># redis-py 3.x only accepts user data as bytes, strings or</span>
+                                <span class="c1"># numbers (ints, longs and floats).  All 2.X users should</span>
+                                <span class="c1"># make sure that the keys and values they pass into redis-py</span>
+                                <span class="c1"># are either bytes, strings or numbers. Use str</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">ionosphere_training_data_key_data</span><span class="p">))</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to set Redis key </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ionosphere_training_data_key</span><span class="p">)</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="k">del</span> <span class="n">ionosphere_training_data_key_data</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="k">pass</span>
+
+                    <span class="k">if</span> <span class="n">ionosphere_metric</span><span class="p">:</span>
+                        <span class="n">analyzer_metric</span> <span class="o">=</span> <span class="kc">False</span>
+
+                    <span class="c1"># Only send Analyzer metrics</span>
+                    <span class="k">if</span> <span class="n">analyzer_metric</span> <span class="ow">and</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_ENABLED</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_CHECK_PATH</span><span class="p">):</span>
+                            <span class="n">mkdir_p</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_CHECK_PATH</span><span class="p">)</span>
+
+                        <span class="c1"># Note:</span>
+                        <span class="c1"># The values are enclosed is single quoted intentionally</span>
+                        <span class="c1"># as the imp.load_source used results in a shift in the</span>
+                        <span class="c1"># decimal position when double quoted, e.g.</span>
+                        <span class="c1"># value = &quot;5622.0&quot; gets imported as</span>
+                        <span class="c1"># 2016-03-02 12:53:26 :: 28569 :: metric variable - value - 562.2</span>
+                        <span class="c1"># single quoting results in the desired,</span>
+                        <span class="c1"># 2016-03-02 13:16:17 :: 1515 :: metric variable - value - 5622.0</span>
+                        <span class="n">added_at</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">()))</span>
+                        <span class="n">source</span> <span class="o">=</span> <span class="s1">&#39;graphite&#39;</span>
+                        <span class="n">panorama_anomaly_data</span> <span class="o">=</span> <span class="s1">&#39;metric = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                                                <span class="s1">&#39;value = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                                                <span class="s1">&#39;from_timestamp = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                                                <span class="s1">&#39;metric_timestamp = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                                                <span class="s1">&#39;algorithms = </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> \
+                                                <span class="s1">&#39;triggered_algorithms = </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> \
+                                                <span class="s1">&#39;app = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                                                <span class="s1">&#39;source = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                                                <span class="s1">&#39;added_by = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                                                <span class="s1">&#39;added_at = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                            <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">datapoint</span><span class="p">),</span> <span class="n">from_timestamp</span><span class="p">,</span>
+                               <span class="n">metric_timestamp</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">ALGORITHMS</span><span class="p">),</span>
+                               <span class="n">triggered_algorithms</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span>
+                               <span class="n">this_host</span><span class="p">,</span> <span class="n">added_at</span><span class="p">)</span>
+
+                        <span class="c1"># Create an anomaly file with details about the anomaly</span>
+                        <span class="n">panorama_anomaly_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.txt&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_CHECK_PATH</span><span class="p">,</span> <span class="n">added_at</span><span class="p">,</span>
+                            <span class="n">sane_metricname</span><span class="p">)</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">write_data_to_file</span><span class="p">(</span>
+                                <span class="n">skyline_app</span><span class="p">,</span> <span class="n">panorama_anomaly_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span>
+                                <span class="n">panorama_anomaly_data</span><span class="p">)</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;added panorama anomaly file :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">panorama_anomaly_file</span><span class="p">))</span>
+                            <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
+                            <span class="c1"># Moved to Redis set block below</span>
+                            <span class="c1"># self.sent_to_panorama.append(base_name)</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add panorama anomaly file :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">panorama_anomaly_file</span><span class="p">))</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="k">del</span> <span class="n">panorama_anomaly_data</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="k">pass</span>
+
+                        <span class="n">redis_set</span> <span class="o">=</span> <span class="s1">&#39;analyzer_batch.sent_to_panorama&#39;</span>
+                        <span class="n">data</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="n">redis_set</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add </span><span class="si">%s</span><span class="s1"> to Redis set </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">redis_set</span><span class="p">)))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="c1"># @modified 20160207 - Branch #922: Ionosphere</span>
+                        <span class="c1"># Handle if all other apps are not enabled</span>
+                        <span class="n">other_app</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
+                        <span class="k">if</span> <span class="n">mirage_metric</span><span class="p">:</span>
+                            <span class="n">other_app</span> <span class="o">=</span> <span class="s1">&#39;Mirage&#39;</span>
+                        <span class="k">if</span> <span class="n">ionosphere_metric</span><span class="p">:</span>
+                            <span class="n">other_app</span> <span class="o">=</span> <span class="s1">&#39;Ionosphere&#39;</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;not adding panorama anomaly file for </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">other_app</span><span class="p">,</span> <span class="n">metric</span><span class="p">))</span>
+
+                    <span class="c1"># Send back to Analyzer to alert</span>
+                    <span class="k">if</span> <span class="n">analyzer_metric</span><span class="p">:</span>
+                        <span class="n">send_back_to_analyzer</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">if</span> <span class="n">send_back_to_analyzer</span><span class="p">:</span>
+                        <span class="n">cache_key</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.alert.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
+                        <span class="n">cache_key_value</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">datapoint</span><span class="p">),</span> <span class="n">base_name</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">),</span> <span class="n">triggered_algorithms</span><span class="p">]</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span>
+                                <span class="n">cache_key</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">cache_key_value</span><span class="p">))</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                                <span class="s1">&#39;add Redis alert key - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span>
+                                <span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">cache_key_value</span><span class="p">)))</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                                <span class="s1">&#39;error :: failed to add Redis key - </span><span class="si">%s</span><span class="s1"> - [</span><span class="si">%s</span><span class="s1">, </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">]&#39;</span> <span class="o">%</span>
+                                <span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">datapoint</span><span class="p">),</span> <span class="n">base_name</span><span class="p">,</span>
+                                    <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">)),</span>
+                                    <span class="nb">str</span><span class="p">(</span><span class="n">triggered_algorithms</span><span class="p">)))</span>
+
+            <span class="c1"># It could have been deleted by the Roomba</span>
+            <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+                <span class="c1"># @added 20200430 - Feature #3480: batch_processing</span>
+                <span class="c1"># Added logging here as the DeletedByRoomba exception is</span>
+                <span class="c1"># generally not related to that but related to some other fail</span>
+                <span class="c1"># in the processing of the run algorithms phase</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: added as DeletedByRoomba but possibly not see traceback above&#39;</span><span class="p">)</span>
+
+                <span class="n">exceptions</span><span class="p">[</span><span class="s1">&#39;DeletedByRoomba&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="c1"># @added 20200423 - Feature #3504: Handle airgaps in batch metrics</span>
+                <span class="c1">#                   Feature #3480: batch_processing</span>
+                <span class="c1">#                   Feature #3486: analyzer_batch</span>
+                <span class="c1"># Handle analyzer_batch work being added over and over every</span>
+                <span class="c1"># minute by also updating the last_timestamp key if stale,</span>
+                <span class="c1"># boring, etc</span>
+                <span class="n">last_metric_timestamp_key</span> <span class="o">=</span> <span class="s1">&#39;last_timestamp.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">int_metric_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span>
+                        <span class="n">last_metric_timestamp_key</span><span class="p">,</span> <span class="mi">2592000</span><span class="p">,</span> <span class="n">int_metric_timestamp</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;set Redis key </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1">, even though it has been deleted by Roomba&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">last_metric_timestamp_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">int_metric_timestamp</span><span class="p">)))</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to set Redis key </span><span class="si">%s</span><span class="s1">, even though it is has been deleted by Roomba&#39;</span> <span class="o">%</span> <span class="n">last_metric_timestamp_key</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">TooShort</span><span class="p">:</span>
+                <span class="n">exceptions</span><span class="p">[</span><span class="s1">&#39;TooShort&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="c1"># @added 20200423 - Feature #3504: Handle airgaps in batch metrics</span>
+                <span class="c1">#                   Feature #3480: batch_processing</span>
+                <span class="c1">#                   Feature #3486: analyzer_batch</span>
+                <span class="n">last_metric_timestamp_key</span> <span class="o">=</span> <span class="s1">&#39;last_timestamp.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">int_metric_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">batch_timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span>
+                        <span class="n">last_metric_timestamp_key</span><span class="p">,</span> <span class="mi">2592000</span><span class="p">,</span>
+                        <span class="n">int_metric_timestamp</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;set Redis key </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1">, even though it is too short&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">last_metric_timestamp_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">int_metric_timestamp</span><span class="p">)))</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to set Redis key </span><span class="si">%s</span><span class="s1">, even though it is too short&#39;</span> <span class="o">%</span> <span class="n">last_metric_timestamp_key</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">Stale</span><span class="p">:</span>
+                <span class="n">exceptions</span><span class="p">[</span><span class="s1">&#39;Stale&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="c1"># @added 20200423 - Feature #3504: Handle airgaps in batch metrics</span>
+                <span class="c1">#                   Feature #3480: batch_processing</span>
+                <span class="c1">#                   Feature #3486: analyzer_batch</span>
+                <span class="n">last_metric_timestamp_key</span> <span class="o">=</span> <span class="s1">&#39;last_timestamp.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">int_metric_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">batch_timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span>
+                        <span class="n">last_metric_timestamp_key</span><span class="p">,</span> <span class="mi">2592000</span><span class="p">,</span>
+                        <span class="n">int_metric_timestamp</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;set Redis key </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1">, even though it is stale&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">last_metric_timestamp_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">int_metric_timestamp</span><span class="p">)))</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to set Redis key </span><span class="si">%s</span><span class="s1">, even though it is stale&#39;</span> <span class="o">%</span> <span class="n">last_metric_timestamp_key</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">Boring</span><span class="p">:</span>
+                <span class="n">exceptions</span><span class="p">[</span><span class="s1">&#39;Boring&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="c1"># @added 20200423 - Feature #3504: Handle airgaps in batch metrics</span>
+                <span class="c1">#                   Feature #3480: batch_processing</span>
+                <span class="c1">#                   Feature #3486: analyzer_batch</span>
+                <span class="n">last_metric_timestamp_key</span> <span class="o">=</span> <span class="s1">&#39;last_timestamp.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">int_metric_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">batch_timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span>
+                        <span class="n">last_metric_timestamp_key</span><span class="p">,</span> <span class="mi">2592000</span><span class="p">,</span>
+                        <span class="n">int_metric_timestamp</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;set Redis key </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1">, even though it is boring&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">last_metric_timestamp_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">int_metric_timestamp</span><span class="p">)))</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to set Redis key </span><span class="si">%s</span><span class="s1">, even though it is boring&#39;</span> <span class="o">%</span> <span class="n">last_metric_timestamp_key</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error - Other error reported&#39;</span><span class="p">)</span>
+                <span class="n">exceptions</span><span class="p">[</span><span class="s1">&#39;Other&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="c1"># @added 20200423 - Feature #3504: Handle airgaps in batch metrics</span>
+                <span class="c1">#                   Feature #3480: batch_processing</span>
+                <span class="c1">#                   Feature #3486: analyzer_batch</span>
+                <span class="n">last_metric_timestamp_key</span> <span class="o">=</span> <span class="s1">&#39;last_timestamp.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">int_metric_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span>
+                        <span class="n">last_metric_timestamp_key</span><span class="p">,</span> <span class="mi">2592000</span><span class="p">,</span>
+                        <span class="n">int_metric_timestamp</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: set Redis key </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1">, even though it an other error has been thrown&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">last_metric_timestamp_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">int_metric_timestamp</span><span class="p">)))</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to set Redis key </span><span class="si">%s</span><span class="s1">, when other exception was thrown&#39;</span> <span class="o">%</span> <span class="n">last_metric_timestamp_key</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">timeseries</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">timestamps_to_analyse</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">batch_timeseries</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">mirage_unique_metrics</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">ionosphere_unique_metrics</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">derivative_metrics</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">non_derivative_metrics</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">non_derivative_monotonic_metrics</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">non_smtp_alerter_metrics</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="c1"># Add values to the queue so the parent process can collate</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">anomaly_breakdown</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">batch_anomaly_breakdown_q</span><span class="o">.</span><span class="n">put</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">batch_exceptions_q</span><span class="o">.</span><span class="n">put</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+
+        <span class="c1"># Remove for work list</span>
+        <span class="n">redis_set</span> <span class="o">=</span> <span class="s1">&#39;analyzer.batch&#39;</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">metric_name</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">last_analyzed_timestamp</span><span class="p">)]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">srem</span><span class="p">(</span><span class="n">redis_set</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;analyzer_batch :: removed batch metric item - </span><span class="si">%s</span><span class="s1"> - from Redis set - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">redis_set</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: analyzer_batch :: failed to remove batch metric item - </span><span class="si">%s</span><span class="s1"> - from Redis set - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">redis_set</span><span class="p">))</span>
+
+        <span class="n">spin_end</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">spin_start</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;spin_batch_process took </span><span class="si">%.2f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="n">spin_end</span><span class="p">)</span>
+        <span class="k">return</span></div>
+
+<div class="viewcode-block" id="AnalyzerBatch.run"><a class="viewcode-back" href="../../skyline.analyzer.html#analyzer.analyzer_batch.AnalyzerBatch.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        - Called when the process intializes.</span>
+
+<span class="sd">        - Determine if Redis is up and discover the number of `unique metrics`.</span>
+
+<span class="sd">        - Divide the `unique_metrics` between the number of `ANALYZER_PROCESSES`</span>
+<span class="sd">          and assign each process a set of metrics to analyse for anomalies.</span>
+
+<span class="sd">        - Wait for the processes to finish.</span>
+
+<span class="sd">        - Determine whether if any anomalous metrics require:</span>
+
+<span class="sd">            - Alerting on (and set `EXPIRATION_TIME` key in Redis for alert).</span>
+<span class="sd">            - Feed to another module e.g. mirage.</span>
+<span class="sd">            - Alert to syslog.</span>
+
+<span class="sd">        - Populate the webapp json with the anomalous_metrics details.</span>
+
+<span class="sd">        - Log the details about the run to the skyline analyzer log.</span>
+
+<span class="sd">        - Send skyline.analyzer metrics to `GRAPHITE_HOST`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Log management to prevent overwriting</span>
+        <span class="c1"># Allow the bin/&lt;skyline_app&gt;.d to manage the log</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">skyline_app_logwait</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">skyline_app_logwait</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error - failed to remove </span><span class="si">%s</span><span class="s1">, continuing&#39;</span> <span class="o">%</span> <span class="n">skyline_app_logwait</span><span class="p">)</span>
+                <span class="k">pass</span>
+
+        <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+        <span class="n">log_wait_for</span> <span class="o">=</span> <span class="n">now</span> <span class="o">+</span> <span class="mi">5</span>
+        <span class="k">while</span> <span class="n">now</span> <span class="o">&lt;</span> <span class="n">log_wait_for</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">skyline_app_loglock</span><span class="p">):</span>
+                <span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">now</span> <span class="o">=</span> <span class="n">log_wait_for</span> <span class="o">+</span> <span class="mi">1</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;starting </span><span class="si">%s</span><span class="s1"> run&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">skyline_app_loglock</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error - bin/</span><span class="si">%s</span><span class="s1">.d log management seems to have failed, continuing&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">skyline_app_loglock</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;log lock file removed&#39;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error - failed to remove </span><span class="si">%s</span><span class="s1">, continuing&#39;</span> <span class="o">%</span> <span class="n">skyline_app_loglock</span><span class="p">)</span>
+                <span class="k">pass</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;bin/</span><span class="si">%s</span><span class="s1">.d log management done&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
+
+        <span class="c1"># @added 20190417 - Feature #2950: Report defaulted settings to log</span>
+        <span class="c1"># Added all the globally declared settings to enable reporting in the</span>
+        <span class="c1"># log the state of each setting.</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">SERVER_METRICS_NAME</span>
+            <span class="k">if</span> <span class="n">SERVER_METRIC_PATH</span> <span class="o">==</span> <span class="s1">&#39;.&#39;</span><span class="p">:</span>
+                <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;SERVER_METRIC_PATH is set from settings.py to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">SERVER_METRIC_PATH</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;warning :: SERVER_METRIC_PATH is not declared in settings.py, defaults to </span><span class="se">\&#39;\&#39;</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;skyline_app_graphite_namespace is set to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">skyline_app_graphite_namespace</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">ANALYZER_ENABLED</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">ANALYZER_ENABLED</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ANALYZER_ENABLED is set to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">ANALYZER_ENABLED</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">ANALYZER_ENABLED</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;warning :: ANALYZER_ENABLED is not declared in settings.py, defaults to True&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_TMP_DIR</span><span class="p">):</span>
+            <span class="c1"># @modified 20160803 - Adding additional exception handling to Analyzer</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">mkdir_p</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_TMP_DIR</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to create </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_TMP_DIR</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+
+        <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+            <span class="c1"># Make sure Redis is up</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">ping</span><span class="p">()</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: Analyzer cannot connect to redis at socket path </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">sleep</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">get_redis_conn</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="c1"># logger.error(&#39;error :: Analyzer cannot connect to redis at socket path %s&#39; % settings.REDIS_SOCKET_PATH)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: Analyzer cannot connect to get_redis_conn&#39;</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">ping</span><span class="p">()</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: Analyzer batch cannot connect to redis at socket path </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">sleep</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span> <span class="o">=</span> <span class="n">get_redis_conn_decoded</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="c1"># logger.error(&#39;error :: Analyzer cannot connect to redis at socket path %s&#39; % settings.REDIS_SOCKET_PATH)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: Analyzer batch cannot connect to get_redis_conn&#39;</span><span class="p">)</span>
+                <span class="k">continue</span>
+
+            <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">            Determine if any metric has been added to process</span>
+<span class="sd">            &quot;&quot;&quot;</span>
+            <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+
+                <span class="c1"># Report app up</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="mi">120</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">now</span><span class="p">))</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: Analyzer batch could not update the Redis </span><span class="si">%s</span><span class="s1"> key&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+
+                <span class="c1"># Discover metrics to analyze</span>
+                <span class="n">analyzer_batch_work</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">redis_set</span> <span class="o">=</span> <span class="s1">&#39;analyzer.batch&#39;</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">analyzer_batch_work</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="n">redis_set</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not query Redis for set </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">redis_set</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">analyzer_batch_work</span><span class="p">:</span>
+                    <span class="n">analyzer_batch_work_queue_items</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">analyzer_batch_work</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">analyzer_batch_work_queue_items</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;there are </span><span class="si">%s</span><span class="s1"> metrics to process in the </span><span class="si">%s</span><span class="s1"> Redis set&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">analyzer_batch_work_queue_items</span><span class="p">),</span> <span class="n">redis_set</span><span class="p">))</span>
+                        <span class="k">break</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;there are no batch metrics to process&#39;</span><span class="p">)</span>
+                    <span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="n">metric_name</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">last_analyzed_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">analyzer_batch</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">analyzer_batch_work</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">batch_processing_metric</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">analyzer_batch</span><span class="p">)</span>
+                    <span class="n">metric_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">batch_processing_metric</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="n">last_analyzed_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">batch_processing_metric</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                    <span class="k">break</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not determine details from analyzer_batch entry&#39;</span><span class="p">)</span>
+                    <span class="n">metric_name</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="n">last_analyzed_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="n">batch_processing_metric</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">metric_name</span><span class="p">:</span>
+                <span class="k">break</span>
+
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;processing - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">batch_processing_metric</span><span class="p">))</span>
+
+            <span class="c1"># Spawn processes</span>
+            <span class="n">batch_pids</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">spawned_batch_pids</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">batch_pid_count</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">run_timestamp</span> <span class="o">=</span> <span class="n">now</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
+                <span class="n">batch_p</span> <span class="o">=</span> <span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">spin_batch_process</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">run_timestamp</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">last_analyzed_timestamp</span><span class="p">))</span>
+                <span class="n">batch_pids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">batch_p</span><span class="p">)</span>
+                <span class="n">batch_pid_count</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;starting 1 of </span><span class="si">%s</span><span class="s1"> spin_batch_process&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">batch_pid_count</span><span class="p">)))</span>
+                <span class="n">batch_p</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+                <span class="n">spawned_batch_pids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">batch_p</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+
+            <span class="c1"># Send wait signal to zombie processes</span>
+            <span class="c1"># for p in pids:</span>
+            <span class="c1">#     p.join()</span>
+            <span class="c1"># Self monitor processes and terminate if any spin_batch_process</span>
+            <span class="c1"># that has run for longer than 300 seconds</span>
+            <span class="n">p_starts</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+            <span class="k">while</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">p_starts</span> <span class="o">&lt;=</span> <span class="mi">300</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">batch_pids</span><span class="p">):</span>
+                    <span class="c1"># Just to avoid hogging the CPU</span>
+                    <span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># All the processes are done, break now.</span>
+                    <span class="n">time_to_run</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">p_starts</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;1 spin_batch_process completed in </span><span class="si">%.2f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">time_to_run</span><span class="p">))</span>
+                    <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># We only enter this if we didn&#39;t &#39;break&#39; above.</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;timed out, killing all spin_batch_process processes&#39;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">batch_pids</span><span class="p">:</span>
+                    <span class="n">p</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+                    <span class="c1"># p.join()</span>
+
+            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">batch_pids</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">():</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;stopping spin_process - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">())))</span>
+                    <span class="n">p</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+
+            <span class="c1"># Grab data from the queue and populate dictionaries</span>
+            <span class="n">exceptions</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+            <span class="n">anomaly_breakdown</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+            <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_anomaly_breakdown_q</span><span class="o">.</span><span class="n">get_nowait</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">anomaly_breakdown</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                        <span class="n">anomaly_breakdown</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">anomaly_breakdown</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">+=</span> <span class="n">value</span>
+                <span class="k">except</span> <span class="n">Empty</span><span class="p">:</span>
+                    <span class="k">break</span>
+
+            <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_exceptions_q</span><span class="o">.</span><span class="n">get_nowait</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                        <span class="n">exceptions</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">exceptions</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">+=</span> <span class="n">value</span>
+                <span class="k">except</span> <span class="n">Empty</span><span class="p">:</span>
+                    <span class="k">break</span>
+
+            <span class="c1"># @added 20191021 - Bug #3288: Always send anomaly_breakdown and exception metrics</span>
+            <span class="c1">#                   Branch #3262: py3</span>
+            <span class="n">exceptions_metrics</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Boring&#39;</span><span class="p">,</span> <span class="s1">&#39;Stale&#39;</span><span class="p">,</span> <span class="s1">&#39;TooShort&#39;</span><span class="p">,</span> <span class="s1">&#39;Other&#39;</span><span class="p">]</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">i_exception</span> <span class="ow">in</span> <span class="n">exceptions_metrics</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">i_exception</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                        <span class="n">exceptions</span><span class="p">[</span><span class="n">i_exception</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">for</span> <span class="n">i_anomaly_breakdown</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">ALGORITHMS</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">i_anomaly_breakdown</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">anomaly_breakdown</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                        <span class="n">anomaly_breakdown</span><span class="p">[</span><span class="n">i_anomaly_breakdown</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+
+                <span class="n">exceptions_string</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+                <span class="k">for</span> <span class="n">i_exception</span> <span class="ow">in</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                    <span class="k">if</span> <span class="n">exceptions_string</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+                        <span class="n">exceptions_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i_exception</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">exceptions</span><span class="p">[</span><span class="n">i_exception</span><span class="p">]))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">exceptions_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">exceptions_string</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">i_exception</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">exceptions</span><span class="p">[</span><span class="n">i_exception</span><span class="p">]))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;exceptions - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">exceptions_string</span><span class="p">))</span>
+
+                <span class="n">anomaly_breakdown_string</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+                <span class="k">if</span> <span class="n">anomaly_breakdown</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">i_anomaly_breakdown</span> <span class="ow">in</span> <span class="n">anomaly_breakdown</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                        <span class="k">if</span> <span class="n">anomaly_breakdown_string</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+                            <span class="n">anomaly_breakdown_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i_anomaly_breakdown</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_breakdown</span><span class="p">[</span><span class="n">i_anomaly_breakdown</span><span class="p">]))</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">anomaly_breakdown_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">anomaly_breakdown_string</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">i_anomaly_breakdown</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_breakdown</span><span class="p">[</span><span class="n">i_anomaly_breakdown</span><span class="p">]))</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;anomaly_breakdown - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_breakdown_string</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;anomaly_breakdown - none, no anomalies&#39;</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not exceptions and anomaly_breakdown details&#39;</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">exceptions</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">anomaly_breakdown</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_exceptions_q</span><span class="o">.</span><span class="n">mutex</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">batch_exceptions_q</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">batch_anomaly_breakdown_q</span><span class="o">.</span><span class="n">mutex</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">batch_anomaly_breakdown_q</span><span class="o">.</span><span class="n">queue</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span></div></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../../',
+            VERSION:'2.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../../_static/jquery.js"></script>
+      <script type="text/javascript" src="../../_static/underscore.js"></script>
+      <script type="text/javascript" src="../../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>
