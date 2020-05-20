@@ -32,7 +32,6 @@ validArguments = ['remote_target', 'metric', 'namespace_prefix', 'key', 'user']
 skyline_app = 'flux'
 
 LOCAL_DEBUG = False
-# LOCAL_DEBUG = True
 
 GRAPHITE_METRICS_PREFIX = None
 CARBON_HOST = settings.FLUX_CARBON_HOST

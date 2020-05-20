@@ -52,3 +52,5 @@ urllib3==1.25.3
 graphyte==1.6.0
 statsd==3.3.0
 falcon==2.0.0
+xlrd==1.2.0
+pandas_log==0.1.7; python_version >= '3.2'
