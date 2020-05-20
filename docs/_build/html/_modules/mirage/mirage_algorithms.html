@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>mirage.mirage_algorithms &mdash; Skyline 1.3.0 documentation</title>
+  <title>mirage.mirage_algorithms &mdash; Skyline 2.0.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.3.0 documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 2.0.0 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                1.3
+                2.0
               </div>
             
           
@@ -90,10 +90,12 @@
 <li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
@@ -186,19 +188,23 @@
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)),</span> <span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">))</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
 
-<span class="kn">from</span> <span class="nn">settings</span> <span class="k">import</span> <span class="p">(</span>
-    <span class="n">MIRAGE_ALGORITHMS</span><span class="p">,</span>
-    <span class="n">MIRAGE_CONSENSUS</span><span class="p">,</span>
-    <span class="n">MIRAGE_DATA_FOLDER</span><span class="p">,</span>
-    <span class="n">MIRAGE_ENABLE_SECOND_ORDER</span><span class="p">,</span>
-    <span class="n">PANDAS_VERSION</span><span class="p">,</span>
-    <span class="n">RUN_OPTIMIZED_WORKFLOW</span><span class="p">,</span>
-    <span class="n">SKYLINE_TMP_DIR</span><span class="p">,</span>
-    <span class="n">REDIS_SOCKET_PATH</span><span class="p">,</span>
-    <span class="n">REDIS_PASSWORD</span><span class="p">,</span>
-<span class="p">)</span>
-
-<span class="kn">from</span> <span class="nn">algorithm_exceptions</span> <span class="k">import</span> <span class="o">*</span>
+<span class="c1"># @modified 20191115 - Branch #3262: py3</span>
+<span class="c1"># This prevents flake8 E402 - module level import not at top of file</span>
+<span class="k">if</span> <span class="kc">True</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">settings</span> <span class="k">import</span> <span class="p">(</span>
+        <span class="n">MIRAGE_ALGORITHMS</span><span class="p">,</span>
+        <span class="n">MIRAGE_CONSENSUS</span><span class="p">,</span>
+        <span class="c1"># @modified 20191115 - Branch #3262: py3</span>
+        <span class="c1"># MIRAGE_DATA_FOLDER,</span>
+        <span class="n">MIRAGE_ENABLE_SECOND_ORDER</span><span class="p">,</span>
+        <span class="n">PANDAS_VERSION</span><span class="p">,</span>
+        <span class="c1"># @modified 20191115 - Branch #3262: py3</span>
+        <span class="c1"># RUN_OPTIMIZED_WORKFLOW,</span>
+        <span class="n">SKYLINE_TMP_DIR</span><span class="p">,</span>
+        <span class="n">REDIS_SOCKET_PATH</span><span class="p">,</span>
+        <span class="n">REDIS_PASSWORD</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="c1"># from algorithm_exceptions import *</span>
 
 <span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;mirage&#39;</span>
 <span class="n">skyline_app_logger</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">Log&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span>
@@ -295,8 +301,15 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">series</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">])</span>
-        <span class="n">stdDev</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">series</span><span class="p">)</span>
+        <span class="c1"># @modified 20191011 - Update least_squares &amp; grubbs algorithms by using sample standard deviation PR #124</span>
+        <span class="c1">#                      Task #3256: Review and test PR 124</span>
+        <span class="c1"># Change from using scipy/numpy std which calculates the population</span>
+        <span class="c1"># standard deviation to using pandas.std which calculates the sample</span>
+        <span class="c1"># standard deviation which is more appropriate for time series data</span>
+        <span class="c1"># series = scipy.array([x[1] for x in timeseries])</span>
+        <span class="c1"># stdDev = scipy.std(series)</span>
+        <span class="n">series</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">)</span>
+        <span class="n">stdDev</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
 
         <span class="c1"># Issue #27 - Handle z_score agent.py RuntimeWarning - https://github.com/earthgecko/skyline/issues/27</span>
         <span class="c1"># This change avoids spewing warnings on agent.py tests:</span>
@@ -463,7 +476,15 @@
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">False</span>
 
-        <span class="n">std_dev</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span>
+        <span class="c1"># @modified 20191011 - Update least_squares &amp; grubbs algorithms by using sample standard deviation PR #124</span>
+        <span class="c1">#                      Task #3256: Review and test PR 124</span>
+        <span class="c1"># Change from using scipy/numpy std which calculates the population</span>
+        <span class="c1"># standard deviation to using pandas.std which calculates the sample</span>
+        <span class="c1"># standard deviation which is more appropriate for time series data</span>
+        <span class="c1"># std_dev = scipy.std(errors)</span>
+        <span class="n">series</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">errors</span><span class="p">)</span>
+        <span class="n">std_dev</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+
         <span class="n">t</span> <span class="o">=</span> <span class="p">(</span><span class="n">errors</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">errors</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">errors</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">])</span> <span class="o">/</span> <span class="mi">3</span>
 
         <span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">std_dev</span> <span class="o">*</span> <span class="mi">3</span> <span class="ow">and</span> <span class="nb">round</span><span class="p">(</span><span class="n">std_dev</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">round</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span>
@@ -615,6 +636,29 @@
     <span class="k">return</span> <span class="kc">False</span></div>
 
 
+<span class="c1"># @added 20200425 - Feature #3508: ionosphere.untrainable_metrics</span>
+<div class="viewcode-block" id="negatives_present"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_algorithms.negatives_present">[docs]</a><span class="k">def</span> <span class="nf">negatives_present</span><span class="p">(</span><span class="n">timeseries</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Determine if there are negative number present in a time series</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">np_array</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">])</span>
+        <span class="n">lowest_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">np_array</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">lowest_value</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">negatives</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">ts</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">v</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">negatives</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">ts</span><span class="p">,</span> <span class="n">v</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">negatives</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">traceback_format_exc_string</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">algorithm_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">get_function_name</span><span class="p">())</span>
+        <span class="n">record_algorithm_error</span><span class="p">(</span><span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback_format_exc_string</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="kc">False</span></div>
+
+
 <div class="viewcode-block" id="is_anomalously_anomalous"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_algorithms.is_anomalously_anomalous">[docs]</a><span class="k">def</span> <span class="nf">is_anomalously_anomalous</span><span class="p">(</span><span class="n">metric_name</span><span class="p">,</span> <span class="n">ensemble</span><span class="p">,</span> <span class="n">datapoint</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This method runs a meta-analysis on the metric to determine whether the</span>
@@ -655,24 +699,61 @@
     <span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="n">intervals</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">mean</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">stdDev</span></div>
 
 
-<div class="viewcode-block" id="run_selected_algorithm"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_algorithms.run_selected_algorithm">[docs]</a><span class="k">def</span> <span class="nf">run_selected_algorithm</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">):</span>
+<span class="c1"># @modified 20200423 - Feature #3508: ionosphere.untrainable_metrics</span>
+<span class="c1"># Added run_negatives_present</span>
+<span class="c1"># def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seconds):</span>
+<div class="viewcode-block" id="run_selected_algorithm"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage_algorithms.run_selected_algorithm">[docs]</a><span class="k">def</span> <span class="nf">run_selected_algorithm</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">,</span> <span class="n">run_negatives_present</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Run selected algorithms</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># @added 20200425 - Feature #3508: ionosphere.untrainable_metrics</span>
+    <span class="c1"># Added negatives_found for run_negatives_present</span>
+    <span class="n">negatives_found</span> <span class="o">=</span> <span class="kc">False</span>
+
     <span class="k">try</span><span class="p">:</span>
         <span class="n">ensemble</span> <span class="o">=</span> <span class="p">[</span><span class="nb">globals</span><span class="p">()[</span><span class="n">algorithm</span><span class="p">](</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">)</span> <span class="k">for</span> <span class="n">algorithm</span> <span class="ow">in</span> <span class="n">MIRAGE_ALGORITHMS</span><span class="p">]</span>
         <span class="n">threshold</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ensemble</span><span class="p">)</span> <span class="o">-</span> <span class="n">MIRAGE_CONSENSUS</span>
         <span class="k">if</span> <span class="n">ensemble</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">threshold</span><span class="p">:</span>
+
+            <span class="c1"># @added 20200425 - Feature #3508: ionosphere.untrainable_metrics</span>
+            <span class="c1"># Only run a negatives_present check if it is anomalous, there</span>
+            <span class="c1"># is no need to check unless it is related to an anomaly</span>
+            <span class="k">if</span> <span class="n">run_negatives_present</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">negatives_found</span> <span class="o">=</span> <span class="n">negatives_present</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">negatives_found</span><span class="p">:</span>
+                        <span class="n">number_of_negatives_found</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">negatives_found</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">number_of_negatives_found</span> <span class="o">=</span> <span class="mi">0</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> negative values found for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">number_of_negatives_found</span><span class="p">),</span> <span class="n">metric_name</span><span class="p">))</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Algorithm error: negatives_present :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">negatives_found</span> <span class="o">=</span> <span class="kc">False</span>
+
             <span class="k">if</span> <span class="n">MIRAGE_ENABLE_SECOND_ORDER</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">is_anomalously_anomalous</span><span class="p">(</span><span class="n">metric_name</span><span class="p">,</span> <span class="n">ensemble</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]):</span>
-                    <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="n">ensemble</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="c1"># @modified 20200425 - Feature #3508: ionosphere.untrainable_metrics</span>
+                    <span class="c1"># Added negatives_found</span>
+                    <span class="c1"># return True, ensemble, timeseries[-1][1]</span>
+                    <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="n">ensemble</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">negatives_found</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="n">ensemble</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+                <span class="c1"># @modified 20200425 - Feature #3508: ionosphere.untrainable_metrics</span>
+                <span class="c1"># Added negatives_found</span>
+                <span class="c1"># return True, ensemble, timeseries[-1][1]</span>
+                <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="n">ensemble</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">negatives_found</span>
 
-        <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">ensemble</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+        <span class="c1"># @modified 20200425 - Feature #3508: ionosphere.untrainable_metrics</span>
+        <span class="c1"># Added negatives_found</span>
+        <span class="c1"># return False, ensemble, timeseries[-1][1]</span>
+        <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">ensemble</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">negatives_found</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Algorithm error: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-        <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="p">[],</span> <span class="mi">1</span></div>
+        <span class="c1"># @modified 20200425 - Feature #3508: ionosphere.untrainable_metrics</span>
+        <span class="c1"># Added negatives_found</span>
+        <span class="c1"># return False, [], 1</span>
+        <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="p">[],</span> <span class="mi">1</span><span class="p">,</span> <span class="kc">False</span></div>
 </pre></div>
 
            </div>
@@ -684,7 +765,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2019, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
 
     </p>
   </div>
@@ -706,7 +787,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.3.0',
+            VERSION:'2.0.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>crucible.crucible &mdash; Skyline 1.3.0 documentation</title>
+  <title>crucible.crucible &mdash; Skyline 2.0.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.3.0 documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 2.0.0 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                1.3
+                2.0
               </div>
             
           
@@ -90,10 +90,12 @@
 <li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
@@ -177,7 +179,7 @@
 <span class="k">except</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">queue</span> <span class="k">import</span> <span class="n">Empty</span>
 <span class="kn">from</span> <span class="nn">redis</span> <span class="k">import</span> <span class="n">StrictRedis</span>
-<span class="kn">import</span> <span class="nn">time</span>
+<span class="c1"># import time</span>
 <span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">time</span><span class="p">,</span> <span class="n">sleep</span>
 <span class="kn">from</span> <span class="nn">threading</span> <span class="k">import</span> <span class="n">Thread</span>
 <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
@@ -195,15 +197,28 @@
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">gzip</span>
 <span class="kn">import</span> <span class="nn">requests</span>
+
+<span class="c1"># @modified 20200328 - Task #3290: Handle urllib2 in py3</span>
+<span class="c1">#                      Branch #3262: py3</span>
+<span class="c1"># Use urlretrieve</span>
+<span class="c1"># try:</span>
+<span class="c1">#     import urlparse</span>
+<span class="c1"># except ImportError:</span>
+<span class="c1">#     import urllib.parse</span>
+<span class="c1"># try:</span>
+<span class="c1">#     import urllib2</span>
+<span class="c1"># except ImportError:</span>
+<span class="c1">#     import urllib.request</span>
+<span class="c1">#     import urllib.error</span>
 <span class="k">try</span><span class="p">:</span>
-    <span class="kn">import</span> <span class="nn">urlparse</span>
-<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-    <span class="kn">import</span> <span class="nn">urllib.parse</span>
-<span class="k">try</span><span class="p">:</span>
-    <span class="kn">import</span> <span class="nn">urllib2</span>
-<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">urllib</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="c1"># For backwards compatibility with py2 load urlib.request as urllib so</span>
+    <span class="c1"># that urllib.urlretrieve is available to both as the same module.</span>
+    <span class="c1"># from urllib import request as urllib</span>
     <span class="kn">import</span> <span class="nn">urllib.request</span>
     <span class="kn">import</span> <span class="nn">urllib.error</span>
+
 <span class="kn">import</span> <span class="nn">errno</span>
 <span class="kn">import</span> <span class="nn">datetime</span>
 <span class="kn">import</span> <span class="nn">shutil</span>
@@ -215,7 +230,16 @@
 <span class="kn">from</span> <span class="nn">ast</span> <span class="k">import</span> <span class="n">literal_eval</span>
 
 <span class="kn">import</span> <span class="nn">settings</span>
-<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="n">load_metric_vars</span><span class="p">,</span> <span class="n">fail_check</span><span class="p">,</span> <span class="n">mkdir_p</span>
+
+<span class="c1"># @modified 20200327 - Branch #3262: py3</span>
+<span class="c1"># from skyline_functions import load_metric_vars, fail_check, mkdir_p</span>
+<span class="c1"># @modified 20200428 - Feature #3500: webapp - crucible_process_metrics</span>
+<span class="c1">#                      Feature #1448: Crucible web UI</span>
+<span class="c1"># Added write_data_to_file and filesafe_metricname to send to Panorama</span>
+<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">fail_check</span><span class="p">,</span> <span class="n">mkdir_p</span><span class="p">,</span> <span class="n">write_data_to_file</span><span class="p">,</span> <span class="n">filesafe_metricname</span><span class="p">,</span>
+    <span class="c1"># @added 20200506 - Feature #3532: Sort all time series</span>
+    <span class="n">sort_timeseries</span><span class="p">)</span>
 
 <span class="kn">from</span> <span class="nn">crucible_algorithms</span> <span class="k">import</span> <span class="n">run_algorithms</span>
 
@@ -280,6 +304,93 @@
         <span class="k">except</span><span class="p">:</span>
             <span class="n">exit</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
 
+    <span class="c1"># @added 20200327 - Branch #3262: py3</span>
+    <span class="c1"># Get rid of the skyline_functions imp as imp is deprecated in py3 anyway</span>
+<div class="viewcode-block" id="Crucible.new_load_metric_vars"><a class="viewcode-back" href="../../skyline.crucible.html#crucible.crucible.Crucible.new_load_metric_vars">[docs]</a>    <span class="k">def</span> <span class="nf">new_load_metric_vars</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metric_vars_file</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Load the metric variables for a check from a metric check variables file</span>
+
+<span class="sd">        :param metric_vars_file: the path and filename to the metric variables files</span>
+<span class="sd">        :type metric_vars_file: str</span>
+<span class="sd">        :return: the metric_vars list or ``False``</span>
+<span class="sd">        :rtype: list</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">metric_vars_file</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                <span class="s1">&#39;loading metric variables from metric_check_file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">metric_vars_file</span><span class="p">)))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s1">&#39;error :: loading metric variables from metric_check_file - file not found - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">metric_vars_file</span><span class="p">)))</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="n">metric_vars</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">metric_vars_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">no_new_line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+                <span class="n">no_equal_line</span> <span class="o">=</span> <span class="n">no_new_line</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39; = &#39;</span><span class="p">,</span> <span class="s1">&#39;,&#39;</span><span class="p">)</span>
+                <span class="n">array</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">no_equal_line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+                <span class="n">add_line</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
+                <span class="n">metric_vars</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">add_line</span><span class="p">)</span>
+
+        <span class="n">string_keys</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s1">&#39;metric&#39;</span><span class="p">,</span> <span class="s1">&#39;anomaly_dir&#39;</span><span class="p">,</span> <span class="s1">&#39;added_by&#39;</span><span class="p">,</span> <span class="s1">&#39;app&#39;</span><span class="p">,</span> <span class="s1">&#39;run_script&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;graphite_override_uri_parameters&#39;</span><span class="p">]</span>
+        <span class="n">float_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span>
+        <span class="c1"># @modified 20170127 - Feature #1886: Ionosphere learn - child like parent with evolutionary maturity</span>
+        <span class="c1"># Added ionosphere_parent_id, always zero from Analyzer and Mirage</span>
+        <span class="c1"># @modified 20200420 - Feature #3500: webapp - crucible_process_metrics</span>
+        <span class="c1">#                      Feature #1448: Crucible web UI</span>
+        <span class="c1"># Added alert_interval to int_keys and add_to_panorama to the boolean_keys</span>
+        <span class="n">int_keys</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="s1">&#39;from_timestamp&#39;</span><span class="p">,</span> <span class="s1">&#39;metric_timestamp&#39;</span><span class="p">,</span> <span class="s1">&#39;added_at&#39;</span><span class="p">,</span> <span class="s1">&#39;full_duration&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;ionosphere_parent_id&#39;</span><span class="p">,</span> <span class="s1">&#39;alert_interval&#39;</span><span class="p">]</span>
+        <span class="n">array_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;triggered_algorithms&#39;</span><span class="p">,</span> <span class="s1">&#39;algorithms&#39;</span><span class="p">]</span>
+        <span class="n">boolean_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;graphite_metric&#39;</span><span class="p">,</span> <span class="s1">&#39;run_crucible_tests&#39;</span><span class="p">,</span> <span class="s1">&#39;add_to_panorama&#39;</span><span class="p">]</span>
+
+        <span class="n">metric_vars_array</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">var_array</span> <span class="ow">in</span> <span class="n">metric_vars</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">var_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">string_keys</span><span class="p">:</span>
+                <span class="n">key</span> <span class="o">=</span> <span class="n">var_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">value_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">var_array</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value_str</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">var_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;metric&#39;</span><span class="p">:</span>
+                    <span class="n">metric</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="k">if</span> <span class="n">var_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">float_keys</span><span class="p">:</span>
+                <span class="n">key</span> <span class="o">=</span> <span class="n">var_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">value_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">var_array</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value_str</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">var_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">int_keys</span><span class="p">:</span>
+                <span class="n">key</span> <span class="o">=</span> <span class="n">var_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">value_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">var_array</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value_str</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">var_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">array_keys</span><span class="p">:</span>
+                <span class="n">key</span> <span class="o">=</span> <span class="n">var_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">var_array</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+            <span class="k">if</span> <span class="n">var_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">boolean_keys</span><span class="p">:</span>
+                <span class="n">key</span> <span class="o">=</span> <span class="n">var_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">var_array</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">==</span> <span class="s1">&#39;True&#39;</span><span class="p">:</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">key</span><span class="p">:</span>
+                <span class="n">metric_vars_array</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">])</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">metric_vars_array</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                    <span class="s1">&#39;error :: loading metric variables - none found&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">metric_vars_file</span><span class="p">)))</span>
+                <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: metric_vars for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_vars_array</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">metric_vars_array</span></div>
+
 <div class="viewcode-block" id="Crucible.spin_process"><a class="viewcode-back" href="../../skyline.crucible.html#crucible.crucible.Crucible.spin_process">[docs]</a>    <span class="k">def</span> <span class="nf">spin_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">run_timestamp</span><span class="p">,</span> <span class="n">metric_check_file</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Assign a metric for a process to analyze.</span>
@@ -331,8 +442,11 @@
 
         <span class="c1"># Load and validate metric variables</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">metric_vars</span> <span class="o">=</span> <span class="n">load_metric_vars</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="c1"># @modified 20200327 - Branch #3262: py3</span>
+            <span class="c1"># metric_vars = load_metric_vars(skyline_app, str(metric_check_file))</span>
+            <span class="n">metric_vars_array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">new_load_metric_vars</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
         <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to import metric variables from check file -  </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
             <span class="n">fail_check</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_failed_check_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
             <span class="c1"># TBD - a failed check Panorama update will go here, perhaps txt</span>
@@ -354,143 +468,270 @@
 
         <span class="c1"># if len(str(metric_vars.metric)) == 0:</span>
         <span class="c1"># if not metric_vars.metric:</span>
+<span class="c1">#        try:</span>
+<span class="c1">#            metric_vars.metric</span>
+<span class="c1">#        except:</span>
+<span class="c1">#            logger.error(&#39;error :: failed to read metric variable from check file -  %s&#39; % (metric_check_file))</span>
+<span class="c1">#            fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))</span>
+<span class="c1">#            return</span>
+<span class="c1">#        else:</span>
+<span class="c1">#            metric = str(metric_vars.metric)</span>
+<span class="c1">#            if settings.ENABLE_CRUCIBLE_DEBUG:</span>
+<span class="c1">#                logger.info(&#39;metric variable - metric - %s&#39; % metric)</span>
+        <span class="n">metric</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">metric_vars</span><span class="o">.</span><span class="n">metric</span>
+            <span class="c1"># metric_vars.metric</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;metric&#39;</span>
+            <span class="n">value_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">var_array</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">var_array</span> <span class="ow">in</span> <span class="n">metric_vars_array</span> <span class="k">if</span> <span class="n">var_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">key</span><span class="p">]</span>
+            <span class="n">metric</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: metric variable - metric - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to read metric variable from check file -  </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to read metric variable from check file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="n">metric</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">metric</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to load metric variable from check file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
             <span class="n">fail_check</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_failed_check_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
             <span class="k">return</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">metric</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_vars</span><span class="o">.</span><span class="n">metric</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metric variable - metric - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric</span><span class="p">)</span>
 
         <span class="c1"># if len(metric_vars.value) == 0:</span>
         <span class="c1"># if not metric_vars.value:</span>
+<span class="c1">#        try:</span>
+<span class="c1">#            metric_vars.value</span>
+<span class="c1">#        except:</span>
+<span class="c1">#            logger.error(&#39;error :: failed to read value variable from check file -  %s&#39; % (metric_check_file))</span>
+<span class="c1">#            fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))</span>
+<span class="c1">#            return</span>
+<span class="c1">#        else:</span>
+<span class="c1">#            value = str(metric_vars.value)</span>
+<span class="c1">#            if settings.ENABLE_CRUCIBLE_DEBUG:</span>
+<span class="c1">#                logger.info(&#39;metric variable - value - %s&#39; % (value))</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">metric_vars</span><span class="o">.</span><span class="n">value</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;value&#39;</span>
+            <span class="n">value_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">var_array</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">var_array</span> <span class="ow">in</span> <span class="n">metric_vars_array</span> <span class="k">if</span> <span class="n">var_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">key</span><span class="p">]</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">value_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to read value variable from check file -  </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
-            <span class="n">fail_check</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_failed_check_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
-            <span class="k">return</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_vars</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metric variable - value - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to read value variable from check file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">value</span><span class="p">:</span>
+            <span class="c1"># @modified 20181119 - Bug #2708: Failing to load metric vars</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="mf">0.0</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to load value variable from check file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+                <span class="n">fail_check</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_failed_check_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+                <span class="k">return</span>
 
         <span class="c1"># if len(metric_vars.from_timestamp) == 0:</span>
         <span class="c1"># if not metric_vars.from_timestamp:</span>
+<span class="c1">#        try:</span>
+<span class="c1">#            metric_vars.from_timestamp</span>
+<span class="c1">#        except:</span>
+<span class="c1">#            logger.error(&#39;error :: failed to read from_timestamp variable from check file -  %s&#39; % (metric_check_file))</span>
+<span class="c1">#            fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))</span>
+<span class="c1">#            return</span>
+<span class="c1">#        else:</span>
+<span class="c1">#            from_timestamp = str(metric_vars.from_timestamp)</span>
+<span class="c1">#            if settings.ENABLE_CRUCIBLE_DEBUG:</span>
+<span class="c1">#                logger.info(&#39;metric variable - from_timestamp - %s&#39; % from_timestamp)</span>
+        <span class="n">from_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">metric_vars</span><span class="o">.</span><span class="n">from_timestamp</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;from_timestamp&#39;</span>
+            <span class="n">value_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">var_array</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">var_array</span> <span class="ow">in</span> <span class="n">metric_vars_array</span> <span class="k">if</span> <span class="n">var_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">key</span><span class="p">]</span>
+            <span class="n">from_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to read from_timestamp variable from check file -  </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to read from_timestamp variable from check file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
             <span class="n">fail_check</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_failed_check_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
             <span class="k">return</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">from_timestamp</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_vars</span><span class="o">.</span><span class="n">from_timestamp</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metric variable - from_timestamp - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">from_timestamp</span><span class="p">)</span>
 
         <span class="c1"># if len(metric_vars.metric_timestamp) == 0:</span>
         <span class="c1"># if not metric_vars.metric_timestamp:</span>
+<span class="c1">#        try:</span>
+<span class="c1">#            metric_vars.metric_timestamp</span>
+<span class="c1">#        except:</span>
+<span class="c1">#            logger.error(&#39;error :: failed to read metric_timestamp variable from check file -  %s&#39; % (metric_check_file))</span>
+<span class="c1">#            fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))</span>
+<span class="c1">#            return</span>
+<span class="c1">#        else:</span>
+<span class="c1">#            metric_timestamp = str(metric_vars.metric_timestamp)</span>
+<span class="c1">#            if settings.ENABLE_CRUCIBLE_DEBUG:</span>
+<span class="c1">#                logger.info(&#39;metric variable - metric_timestamp - %s&#39; % metric_timestamp)</span>
+        <span class="n">metric_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">metric_vars</span><span class="o">.</span><span class="n">metric_timestamp</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;metric_timestamp&#39;</span>
+            <span class="n">value_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">var_array</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">var_array</span> <span class="ow">in</span> <span class="n">metric_vars_array</span> <span class="k">if</span> <span class="n">var_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">key</span><span class="p">]</span>
+            <span class="n">metric_timestamp</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to read metric_timestamp variable from check file -  </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to read metric_timestamp variable from check file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
             <span class="n">fail_check</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_failed_check_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
             <span class="k">return</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">metric_timestamp</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_vars</span><span class="o">.</span><span class="n">metric_timestamp</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metric variable - metric_timestamp - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric_timestamp</span><span class="p">)</span>
 
         <span class="c1"># if len(metric_vars.algorithms) == 0:</span>
         <span class="c1"># if not metric_vars.algorithms:</span>
+<span class="c1">#        algorithms = []</span>
+<span class="c1">#        try:</span>
+<span class="c1">#            metric_vars.algorithms</span>
+<span class="c1">#        except:</span>
+<span class="c1">#            logger.error(&#39;error :: failed to read algorithms variable from check file setting to all&#39;)</span>
+<span class="c1">#            algorithms = [&#39;all&#39;]</span>
+<span class="c1"># #        if not algorithms:</span>
+<span class="c1"># #            algorithms = []</span>
+<span class="c1"># #            for i_algorithm in metric_vars.algorithms:</span>
+<span class="c1"># #                algorithms.append(i_algorithm)</span>
+<span class="c1">#        if settings.ENABLE_CRUCIBLE_DEBUG:</span>
+<span class="c1">#            logger.info(&#39;metric variable - algorithms - %s&#39; % str(algorithms))</span>
         <span class="n">algorithms</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">metric_vars</span><span class="o">.</span><span class="n">algorithms</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;algorithms&#39;</span>
+            <span class="n">value_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">var_array</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">var_array</span> <span class="ow">in</span> <span class="n">metric_vars_array</span> <span class="k">if</span> <span class="n">var_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">key</span><span class="p">]</span>
+            <span class="n">algorithms</span> <span class="o">=</span> <span class="n">value_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to read algorithms variable from check file setting to all&#39;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;failed to read algorithms variable from check file setting to all&#39;</span><span class="p">)</span>
             <span class="n">algorithms</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;all&#39;</span><span class="p">]</span>
-<span class="c1">#        if not algorithms:</span>
-<span class="c1">#            algorithms = []</span>
-<span class="c1">#            for i_algorithm in metric_vars.algorithms:</span>
-<span class="c1">#                algorithms.append(i_algorithm)</span>
-        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metric variable - algorithms - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">algorithms</span><span class="p">))</span>
 
         <span class="c1"># if len(metric_vars.anomaly_dir) == 0:</span>
         <span class="c1"># if not metric_vars.anomaly_dir:</span>
+<span class="c1">#        try:</span>
+<span class="c1">#            metric_vars.anomaly_dir</span>
+<span class="c1">#        except:</span>
+<span class="c1">#            logger.error(&#39;error :: failed to read anomaly_dir variable from check file -  %s&#39; % (metric_check_file))</span>
+<span class="c1">#            fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))</span>
+<span class="c1">#            return</span>
+<span class="c1">#        else:</span>
+<span class="c1">#            anomaly_dir = str(metric_vars.anomaly_dir)</span>
+<span class="c1">#            if settings.ENABLE_CRUCIBLE_DEBUG:</span>
+<span class="c1">#                logger.info(&#39;metric variable - anomaly_dir - %s&#39; % anomaly_dir)</span>
+        <span class="n">anomaly_dir</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">metric_vars</span><span class="o">.</span><span class="n">anomaly_dir</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;anomaly_dir&#39;</span>
+            <span class="n">value_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">var_array</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">var_array</span> <span class="ow">in</span> <span class="n">metric_vars_array</span> <span class="k">if</span> <span class="n">var_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">key</span><span class="p">]</span>
+            <span class="n">anomaly_dir</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to read anomaly_dir variable from check file -  </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;failed to read anomaly_dir variable from check file setting to all&#39;</span><span class="p">)</span>
             <span class="n">fail_check</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_failed_check_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
             <span class="k">return</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">anomaly_dir</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_vars</span><span class="o">.</span><span class="n">anomaly_dir</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metric variable - anomaly_dir - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">anomaly_dir</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metric variable - anomaly_dir - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">anomaly_dir</span><span class="p">)</span>
 
         <span class="c1"># if len(str(metric_vars.graphite_metric)) == 0:</span>
+<span class="c1">#        try:</span>
+<span class="c1">#            metric_vars.graphite_metric</span>
+<span class="c1">#        except:</span>
+<span class="c1">#            logger.info(&#39;failed to read graphite_metric variable from check file setting to False&#39;)</span>
+<span class="c1">#            # yes this is a string</span>
+<span class="c1">#            graphite_metric = &#39;False&#39;</span>
+<span class="c1">#        else:</span>
+<span class="c1">#            graphite_metric = str(metric_vars.graphite_metric)</span>
+<span class="c1">#            if settings.ENABLE_CRUCIBLE_DEBUG:</span>
+<span class="c1">#                logger.info(&#39;metric variable - graphite_metric - %s&#39; % graphite_metric)</span>
+        <span class="n">graphite_metric</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">metric_vars</span><span class="o">.</span><span class="n">graphite_metric</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;graphite_metric&#39;</span>
+            <span class="n">value_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">var_array</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">var_array</span> <span class="ow">in</span> <span class="n">metric_vars_array</span> <span class="k">if</span> <span class="n">var_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">key</span><span class="p">]</span>
+            <span class="n">graphite_metric</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;failed to read graphite_metric variable from check file setting to False&#39;</span><span class="p">)</span>
             <span class="c1"># yes this is a string</span>
             <span class="n">graphite_metric</span> <span class="o">=</span> <span class="s1">&#39;False&#39;</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">graphite_metric</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_vars</span><span class="o">.</span><span class="n">graphite_metric</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metric variable - graphite_metric - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">graphite_metric</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metric variable - graphite_metric - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">graphite_metric</span><span class="p">)</span>
 
         <span class="c1"># if len(str(metric_vars.run_crucible_tests)) == 0:</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">metric_vars</span><span class="o">.</span><span class="n">run_crucible_tests</span>
+            <span class="c1"># metric_vars.run_crucible_tests</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;run_crucible_tests&#39;</span>
+            <span class="n">value_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">var_array</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">var_array</span> <span class="ow">in</span> <span class="n">metric_vars_array</span> <span class="k">if</span> <span class="n">var_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">key</span><span class="p">]</span>
+            <span class="n">run_crucible_tests</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;failed to read run_crucible_tests variable from check file setting to False&#39;</span><span class="p">)</span>
             <span class="c1"># yes this is a string</span>
             <span class="n">run_crucible_tests</span> <span class="o">=</span> <span class="s1">&#39;False&#39;</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">run_crucible_tests</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_vars</span><span class="o">.</span><span class="n">run_crucible_tests</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metric variable - run_crucible_tests - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">run_crucible_tests</span><span class="p">)</span>
+<span class="c1">#        else:</span>
+<span class="c1">#            run_crucible_tests = str(metric_vars.run_crucible_tests)</span>
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metric variable - run_crucible_tests - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">run_crucible_tests</span><span class="p">)</span>
 
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">metric_vars</span><span class="o">.</span><span class="n">added_by</span>
+            <span class="c1"># metric_vars.added_by</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;added_by&#39;</span>
+            <span class="n">value_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">var_array</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">var_array</span> <span class="ow">in</span> <span class="n">metric_vars_array</span> <span class="k">if</span> <span class="n">var_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">key</span><span class="p">]</span>
+            <span class="n">added_by</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;failed to read added_by variable from check file setting to crucible - set to crucible&#39;</span><span class="p">)</span>
             <span class="n">added_by</span> <span class="o">=</span> <span class="s1">&#39;crucible&#39;</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">added_by</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_vars</span><span class="o">.</span><span class="n">added_by</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metric variable - added_by - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">added_by</span><span class="p">)</span>
+<span class="c1">#        else:</span>
+<span class="c1">#            added_by = str(metric_vars.added_by)</span>
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metric variable - added_by - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">added_by</span><span class="p">)</span>
 
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">metric_vars</span><span class="o">.</span><span class="n">run_script</span>
+            <span class="c1"># metric_vars.run_script</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;run_script&#39;</span>
+            <span class="n">value_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">var_array</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">var_array</span> <span class="ow">in</span> <span class="n">metric_vars_array</span> <span class="k">if</span> <span class="n">var_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">key</span><span class="p">]</span>
+            <span class="n">run_script</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">run_script</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metric variable - run_script - not present set to False&#39;</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">run_script</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_vars</span><span class="o">.</span><span class="n">run_script</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metric variable - run_script - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">run_script</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metric variable - run_script - not present set to False&#39;</span><span class="p">)</span>
+<span class="c1">#        else:</span>
+<span class="c1">#            run_script = str(metric_vars.run_script)</span>
+<span class="c1">#            if settings.ENABLE_CRUCIBLE_DEBUG:</span>
+<span class="c1">#                logger.info(&#39;metric variable - run_script - %s&#39; % run_script)</span>
 
         <span class="c1"># @added 20190612 - Feature #3108: crucible - graphite_override_uri_parameters_specific_url</span>
         <span class="c1"># This metric variable is used to to declare absolute graphite uri</span>
         <span class="c1"># parameters</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">metric_vars</span><span class="o">.</span><span class="n">graphite_override_uri_parameters</span>
+            <span class="c1"># metric_vars.graphite_override_uri_parameters</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;graphite_override_uri_parameters&#39;</span>
+            <span class="n">value_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">var_array</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">var_array</span> <span class="ow">in</span> <span class="n">metric_vars_array</span> <span class="k">if</span> <span class="n">var_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">key</span><span class="p">]</span>
+            <span class="n">graphite_override_uri_parameters</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;failed to read graphite_override_uri_parameters variable from check file setting to False&#39;</span><span class="p">)</span>
             <span class="c1"># yes this is a string</span>
             <span class="n">graphite_override_uri_parameters</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">graphite_override_uri_parameters</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_vars</span><span class="o">.</span><span class="n">graphite_override_uri_parameters</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metric variable - graphite_override_uri_parameters - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">graphite_override_uri_parameters</span><span class="p">)</span>
+<span class="c1">#        else:</span>
+<span class="c1">#            graphite_override_uri_parameters = str(metric_vars.graphite_override_uri_parameters)</span>
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metric variable - graphite_override_uri_parameters - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">graphite_override_uri_parameters</span><span class="p">)</span>
+
+        <span class="n">add_to_panorama</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;add_to_panorama&#39;</span>
+            <span class="n">value_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">var_array</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">var_array</span> <span class="ow">in</span> <span class="n">metric_vars_array</span> <span class="k">if</span> <span class="n">var_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">key</span><span class="p">]</span>
+            <span class="n">add_to_panorama</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">add_to_panorama</span> <span class="o">==</span> <span class="s1">&#39;True&#39;</span><span class="p">:</span>
+                <span class="n">add_to_panorama</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">add_to_panorama</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;failed to read add_to_panorama variable from check file setting to False&#39;</span><span class="p">)</span>
+            <span class="n">add_to_panorama</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metric variable - add_to_panorama - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">add_to_panorama</span><span class="p">))</span>
+
+        <span class="c1"># @modified 20200420 - Feature #3500: webapp - crucible_process_metrics</span>
+        <span class="c1">#                      Feature #1448: Crucible web UI</span>
+        <span class="c1"># Added alert_interval</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;alert_interval&#39;</span>
+            <span class="n">value_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">var_array</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">var_array</span> <span class="ow">in</span> <span class="n">metric_vars_array</span> <span class="k">if</span> <span class="n">var_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">key</span><span class="p">]</span>
+            <span class="n">alert_interval</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">value_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;failed to read alert_interval variable from check file setting to 0&#39;</span><span class="p">)</span>
+            <span class="n">alert_interval</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metric variable - alert_interval - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">alert_interval</span><span class="p">))</span>
+
+        <span class="c1"># @added 20200422 - Feature #3500: webapp - crucible_process_metrics</span>
+        <span class="c1">#                   Feature #1448: Crucible web UI</span>
+        <span class="c1"># In order for metrics to be analysed in Crucible like the</span>
+        <span class="c1"># Analyzer or Mirage analysis, the time series data needs to</span>
+        <span class="c1"># be padded.  Added pad_timeseries in the webapp.</span>
+        <span class="n">padded_timeseries</span> <span class="o">=</span> <span class="kc">False</span>
 
         <span class="c1"># Only check if the metric does not a EXPIRATION_TIME key set, crucible</span>
         <span class="c1"># uses the alert EXPIRATION_TIME for the relevant alert setting contexts</span>
@@ -544,6 +785,13 @@
                             <span class="n">check_expired</span> <span class="o">=</span> <span class="kc">True</span>
                             <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
                                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;the check is older than EXPIRATION_TIME for the metric - not checking - check_expired&#39;</span><span class="p">)</span>
+
+        <span class="c1"># @added 20200421 - Feature #3500: webapp - crucible_process_metrics</span>
+        <span class="c1">#                   Feature #1448: Crucible web UI</span>
+        <span class="c1"># If the check is added by the webapp explicitly set the check_expired</span>
+        <span class="c1"># to True so that analysis will run</span>
+        <span class="k">if</span> <span class="n">added_by</span> <span class="o">==</span> <span class="s1">&#39;webapp&#39;</span><span class="p">:</span>
+            <span class="n">check_expired</span> <span class="o">=</span> <span class="kc">True</span>
 
         <span class="n">cache_key</span> <span class="o">=</span> <span class="s1">&#39;crucible.last_check.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">source_app</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
@@ -700,7 +948,7 @@
             <span class="c1"># @added 20190612 - Feature #3108: crucible - graphite_override_uri_parameters</span>
             <span class="c1"># This metric variable is used to to declare absolute graphite uri</span>
             <span class="c1"># parameters</span>
-            <span class="c1">#from=00%3A00_20190527&amp;until=23%3A59_20190612&amp;target=movingMedian(nonNegativeDerivative(stats.zpf-watcher-prod-1-30g-doa2.vda.readTime)%2C24)</span>
+            <span class="c1"># from=00%3A00_20190527&amp;until=23%3A59_20190612&amp;target=movingMedian(nonNegativeDerivative(stats.zpf-watcher-prod-1-30g-doa2.vda.readTime)%2C24)</span>
             <span class="k">if</span> <span class="n">graphite_override_uri_parameters</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PORT</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
                     <span class="n">url</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PROTOCOL</span> <span class="o">+</span> <span class="s1">&#39;://&#39;</span> <span class="o">+</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span> <span class="o">+</span> <span class="s1">&#39;:&#39;</span> <span class="o">+</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PORT</span> <span class="o">+</span> <span class="s1">&#39;/render/?&#39;</span> <span class="o">+</span> <span class="n">graphite_override_uri_parameters</span> <span class="o">+</span> <span class="s1">&#39;&amp;format=json&#39;</span>
@@ -712,8 +960,6 @@
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;graphite url - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">url</span><span class="p">))</span>
 
             <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">anomaly_graph</span><span class="p">):</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;retrieving png - surfacing </span><span class="si">%s</span><span class="s1"> graph from graphite from </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="n">graphite_from</span><span class="p">,</span> <span class="n">graphite_until</span><span class="p">))</span>
-
                 <span class="n">image_url</span> <span class="o">=</span> <span class="n">url</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;&amp;format=json&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
                 <span class="n">graphite_image_file</span> <span class="o">=</span> <span class="n">anomaly_dir</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">metric</span> <span class="o">+</span> <span class="s1">&#39;.png&#39;</span>
                 <span class="k">if</span> <span class="s1">&#39;width&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">image_url</span><span class="p">:</span>
@@ -722,29 +968,65 @@
                     <span class="n">image_url</span> <span class="o">+=</span> <span class="s1">&#39;&amp;height=308&#39;</span>
                 <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;graphite image url - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">image_url</span><span class="p">))</span>
-                <span class="n">image_url_timeout</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">connect_timeout</span><span class="p">)</span>
 
-                <span class="n">image_data</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="c1"># @modified 20200327 - Feature #3108: crucible - graphite_override_uri_parameters</span>
+                <span class="c1">#                      Branch #3262: py3</span>
+                <span class="c1"># Added graphite_override_uri_parameters conditional</span>
+                <span class="k">if</span> <span class="n">graphite_override_uri_parameters</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;retrieving png - surfacing </span><span class="si">%s</span><span class="s1"> graph from graphite with </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="n">url</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;retrieving png - surfacing </span><span class="si">%s</span><span class="s1"> graph from graphite from </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="n">graphite_from</span><span class="p">,</span> <span class="n">graphite_until</span><span class="p">))</span>
+
+                <span class="c1"># @modified 20200328 - Task #3290: Handle urllib2 in py3</span>
+                <span class="c1">#                      Branch #3262: py3</span>
+                <span class="c1"># Use urlretrieve - image_url_timeout and image_data not longer</span>
+                <span class="c1"># required</span>
+                <span class="c1"># image_url_timeout = int(connect_timeout)</span>
+                <span class="c1"># image_data = None</span>
 
                 <span class="k">try</span><span class="p">:</span>
                     <span class="c1"># @modified 20170913 - Task #2160: Test skyline with bandit</span>
                     <span class="c1"># Added nosec to exclude from bandit tests</span>
-                    <span class="n">image_data</span> <span class="o">=</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">image_url</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">image_url_timeout</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>  <span class="c1"># nosec</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;url OK - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">image_url</span><span class="p">))</span>
-                <span class="k">except</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">URLError</span><span class="p">:</span>
-                    <span class="n">image_data</span> <span class="o">=</span> <span class="kc">None</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: url bad - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">image_url</span><span class="p">))</span>
-
-                <span class="k">if</span> <span class="n">image_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">graphite_image_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-                        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">image_data</span><span class="p">)</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;retrieved - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">anomaly_graph</span><span class="p">))</span>
+                    <span class="c1"># @modified 20200328 - Task #3290: Handle urllib2 in py3</span>
+                    <span class="c1">#                      Branch #3262: py3</span>
+                    <span class="c1"># Use urlretrieve</span>
+                    <span class="c1"># image_data = urllib2.urlopen(image_url, timeout=image_url_timeout).read()  # nosec</span>
                     <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                        <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">graphite_image_file</span><span class="p">,</span> <span class="mi">0644</span><span class="p">)</span>
+                        <span class="n">urllib</span><span class="o">.</span><span class="n">urlretrieve</span><span class="p">(</span><span class="n">image_url</span><span class="p">,</span> <span class="n">graphite_image_file</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                        <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlretrieve</span><span class="p">(</span><span class="n">image_url</span><span class="p">,</span> <span class="n">graphite_image_file</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;url OK - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">image_url</span><span class="p">))</span>
+                <span class="c1"># except urllib2.URLError:</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: url bad - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">image_url</span><span class="p">))</span>
+                    <span class="c1"># image_data = None</span>
+
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                        <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">graphite_image_file</span><span class="p">,</span> <span class="mo">0o644</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
                         <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">graphite_image_file</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o644</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to retrieved - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">anomaly_graph</span><span class="p">))</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;graphite_image_file permissions set OK - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">graphite_image_file</span><span class="p">))</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: graphite_image_file permissions could not be set - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">graphite_image_file</span><span class="p">))</span>
+
+                <span class="c1"># @modified 20200328 - Task #3290: Handle urllib2 in py3</span>
+                <span class="c1">#                      Branch #3262: py3</span>
+                <span class="c1"># Use urlretrieve so no need to write data to file</span>
+                <span class="c1"># if image_data is not None:</span>
+                <span class="c1">#    with open(graphite_image_file, &#39;w&#39;) as f:</span>
+                <span class="c1">#        f.write(image_data)</span>
+                <span class="c1">#    logger.info(&#39;retrieved - %s&#39; % (anomaly_graph))</span>
+                <span class="c1">#    if python_version == 2:</span>
+                <span class="c1">#        # @modified 20200327 - Branch #3262: py3</span>
+                <span class="c1">#        # os.chmod(graphite_image_file, 0644)</span>
+                <span class="c1">#        os.chmod(graphite_image_file, 0o644)</span>
+                <span class="c1">#    if python_version == 3:</span>
+                <span class="c1">#        os.chmod(graphite_image_file, mode=0o644)</span>
+                <span class="c1"># else:</span>
+                <span class="c1">#    logger.error(&#39;error :: failed to retrieved - %s&#39; % (anomaly_graph))</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;anomaly_graph file exists - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_graph</span><span class="p">))</span>
@@ -784,15 +1066,31 @@
                         <span class="k">except</span><span class="p">:</span>  <span class="c1"># nosec</span>
                             <span class="k">continue</span>
 
-                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">anomaly_json</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
-                        <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">converted</span><span class="p">))</span>
-                    <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                        <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">anomaly_json</span><span class="p">,</span> <span class="mi">0644</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-                        <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">anomaly_json</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o644</span><span class="p">)</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">anomaly_json</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">converted</span><span class="p">))</span>
+                        <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                            <span class="c1"># @modified 20200327 - Branch #3262: py3</span>
+                            <span class="c1"># os.chmod(anomaly_json, 0644)</span>
+                            <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">anomaly_json</span><span class="p">,</span> <span class="mo">0o644</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                            <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">anomaly_json</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o644</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;json file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">anomaly_json</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to write or chmod anomaly_json - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">anomaly_json</span><span class="p">))</span>
 
-                    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;json file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">anomaly_json</span><span class="p">)</span>
+                    <span class="c1"># @added 20200422 - Feature #3500: webapp - crucible_process_metrics</span>
+                    <span class="c1">#                   Feature #1448: Crucible web UI</span>
+                    <span class="c1"># Clean up converted</span>
+                    <span class="k">if</span> <span class="n">converted</span><span class="p">:</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="k">del</span> <span class="n">converted</span>
+                            <span class="k">del</span> <span class="n">js</span>
+                            <span class="k">del</span> <span class="n">datapoints</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="k">pass</span>
 
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">anomaly_json</span><span class="p">):</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to surface </span><span class="si">%s</span><span class="s1"> json from graphite&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">))</span>
@@ -839,7 +1137,9 @@
                     <span class="n">f_in</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
                     <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">anomaly_json</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                        <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">anomaly_json_gz</span><span class="p">,</span> <span class="mi">0644</span><span class="p">)</span>
+                        <span class="c1"># @modified 20200327 - Branch #3262: py3</span>
+                        <span class="c1"># os.chmod(anomaly_json_gz, 0644)</span>
+                        <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">anomaly_json_gz</span><span class="p">,</span> <span class="mo">0o644</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
                         <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">anomaly_json_gz</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o644</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
@@ -884,8 +1184,8 @@
                     <span class="n">raw_timeseries</span> <span class="o">=</span> <span class="n">fr</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
                     <span class="n">fr</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
                 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">())</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not ungzip </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">anomaly_json_gz</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
-                    <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()</span>
                 <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ungzipped&#39;</span><span class="p">)</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;writing to - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">anomaly_json</span><span class="p">)</span>
@@ -894,7 +1194,9 @@
                 <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;anomaly_json done&#39;</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                    <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">anomaly_json</span><span class="p">,</span> <span class="mi">0644</span><span class="p">)</span>
+                    <span class="c1"># @modified 20200327 - Branch #3262: py3</span>
+                    <span class="c1"># os.chmod(anomaly_json, 0644)</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">anomaly_json</span><span class="p">,</span> <span class="mo">0o644</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
                     <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">anomaly_json</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o644</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -941,7 +1243,9 @@
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: file not found - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">anomaly_json</span><span class="p">)</span>
                 <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">,</span> <span class="n">failed_check_file</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                    <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">failed_check_file</span><span class="p">,</span> <span class="mi">0644</span><span class="p">)</span>
+                    <span class="c1"># @modified 20200327 - Branch #3262: py3</span>
+                    <span class="c1"># os.chmod(failed_check_file, 0644)</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">failed_check_file</span><span class="p">,</span> <span class="mo">0o644</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
                     <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">failed_check_file</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o644</span><span class="p">)</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;moved check file to - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">failed_check_file</span><span class="p">)</span>
@@ -949,6 +1253,31 @@
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to move check file to - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">failed_check_file</span><span class="p">)</span>
                 <span class="k">pass</span>
             <span class="k">return</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">timeseries</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;failing check, no time series from - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">anomaly_json</span><span class="p">)</span>
+                <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">,</span> <span class="n">failed_check_file</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="c1"># @modified 20200327 - Branch #3262: py3</span>
+                    <span class="c1"># os.chmod(failed_check_file, 0644)</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">failed_check_file</span><span class="p">,</span> <span class="mo">0o644</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">failed_check_file</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o644</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;moved check file to - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">failed_check_file</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to move check file to - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">failed_check_file</span><span class="p">)</span>
+                <span class="k">pass</span>
+            <span class="k">return</span>
+
+        <span class="c1"># @added 20200507 - Feature #3532: Sort all time series</span>
+        <span class="c1"># To ensure that there are no unordered timestamps in the time</span>
+        <span class="c1"># series which are artefacts of the collector or carbon-relay, sort</span>
+        <span class="c1"># all time series by timestamp before analysis.</span>
+        <span class="n">original_timeseries</span> <span class="o">=</span> <span class="n">timeseries</span>
+        <span class="k">if</span> <span class="n">original_timeseries</span><span class="p">:</span>
+            <span class="n">timeseries</span> <span class="o">=</span> <span class="n">sort_timeseries</span><span class="p">(</span><span class="n">original_timeseries</span><span class="p">)</span>
+            <span class="k">del</span> <span class="n">original_timeseries</span>
 
         <span class="n">start_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
         <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
@@ -961,18 +1290,59 @@
         <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;full_duration - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">full_duration</span><span class="p">))</span>
 
+        <span class="c1"># @added 20200422 - Feature #3500: webapp - crucible_process_metrics</span>
+        <span class="c1">#                   Feature #1448: Crucible web UI</span>
+        <span class="c1"># In order for metrics to be analysed in Crucible like the</span>
+        <span class="c1"># Analyzer or Mirage analysis, the time series data needs to</span>
+        <span class="c1"># be padded.  Added pad_timeseries in the webapp so check</span>
+        <span class="c1"># here if the time series is padded</span>
+        <span class="k">if</span> <span class="n">graphite_override_uri_parameters</span> <span class="ow">and</span> <span class="n">added_by</span> <span class="o">==</span> <span class="s1">&#39;webapp&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">start_timestamp</span> <span class="o">&lt;</span> <span class="n">from_timestamp</span><span class="p">:</span>
+                <span class="n">padded_timeseries</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">padded_with</span> <span class="o">=</span> <span class="n">from_timestamp</span> <span class="o">-</span> <span class="n">start_timestamp</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;padded time series identified, padded with </span><span class="si">%s</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">padded_with</span><span class="p">))</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">check_if_parent_is_alive</span><span class="p">()</span>
 
         <span class="n">run_algorithms_start_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
         <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;run_algorithms_start_timestamp - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">run_algorithms_start_timestamp</span><span class="p">))</span>
 
+        <span class="c1"># @added 20200427 - Feature #3500: webapp - crucible_process_metrics</span>
+        <span class="c1">#                   Feature #1448: Crucible web UI</span>
+        <span class="c1"># Set variables so on fail the process does not hang</span>
+        <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">ensemble</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">alert_interval_discarded_anomalies_count</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="c1"># For debug only but do not remove as this is an item in the final</span>
+        <span class="c1"># return</span>
+        <span class="n">nothing_to_do</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
         <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE_DEBUG</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;run_algorithms - </span><span class="si">%s</span><span class="s1">,</span><span class="si">%s</span><span class="s1">,</span><span class="si">%s</span><span class="s1">,</span><span class="si">%s</span><span class="s1">,</span><span class="si">%s</span><span class="s1">,</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">end_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">full_duration</span><span class="p">),</span> <span class="n">anomaly_json</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">algorithms</span><span class="p">)))</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">anomalous</span><span class="p">,</span> <span class="n">ensemble</span> <span class="o">=</span> <span class="n">run_algorithms</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">),</span> <span class="n">end_timestamp</span><span class="p">,</span> <span class="n">full_duration</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_json</span><span class="p">),</span> <span class="n">skyline_app</span><span class="p">,</span> <span class="n">algorithms</span><span class="p">)</span>
+            <span class="c1"># @modified 20200421 - Feature #3500: webapp - crucible_process_metrics</span>
+            <span class="c1">#                      Feature #1448: Crucible web UI</span>
+            <span class="c1"># Pass alert_interval, add_to_panaroma and alert_interval_discarded_anomalies_count</span>
+            <span class="c1"># anomalous, ensemble = run_algorithms(timeseries, str(metric), end_timestamp, full_duration, str(anomaly_json), skyline_app, algorithms)</span>
+            <span class="c1"># @modified 20200422 - Feature #3500: webapp - crucible_process_metrics</span>
+            <span class="c1">#                      Feature #1448: Crucible web UI</span>
+            <span class="c1"># Added padded_timeseries and from_timestamp</span>
+            <span class="n">anomalous</span><span class="p">,</span> <span class="n">ensemble</span><span class="p">,</span> <span class="n">alert_interval_discarded_anomalies_count</span> <span class="o">=</span> <span class="n">run_algorithms</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">),</span> <span class="n">end_timestamp</span><span class="p">,</span> <span class="n">full_duration</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_json</span><span class="p">),</span> <span class="n">skyline_app</span><span class="p">,</span> <span class="n">algorithms</span><span class="p">,</span> <span class="n">alert_interval</span><span class="p">,</span> <span class="n">add_to_panorama</span><span class="p">,</span> <span class="n">padded_timeseries</span><span class="p">,</span> <span class="n">from_timestamp</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: run_algorithms failed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()))</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">shutil</span><span class="o">.</span><span class="n">move</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">,</span> <span class="n">failed_check_file</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">failed_check_file</span><span class="p">,</span> <span class="mo">0o644</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">failed_check_file</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o644</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;moved check file to - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">failed_check_file</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to move check file to - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">failed_check_file</span><span class="p">)</span>
+                <span class="k">pass</span>
+            <span class="k">return</span>
 
         <span class="n">run_algorithms_end_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
         <span class="n">run_algorithms_seconds</span> <span class="o">=</span> <span class="n">run_algorithms_end_timestamp</span> <span class="o">-</span> <span class="n">run_algorithms_start_timestamp</span>
@@ -988,15 +1358,23 @@
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;run_algorithms took </span><span class="si">%s</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">run_algorithms_seconds</span><span class="p">))</span>
 
         <span class="c1"># Update anomaly file</span>
-        <span class="n">crucible_data</span> <span class="o">=</span> <span class="s1">&#39;crucible_tests_run = &quot;</span><span class="si">%s</span><span class="s1">&quot;</span><span class="se">\n</span><span class="s1">&#39;</span> \
+        <span class="c1"># @modified 20200421 - Feature #3500: webapp - crucible_process_metrics</span>
+        <span class="c1">#                      Feature #1448: Crucible web UI</span>
+        <span class="c1"># Added run_algorithms_seconds and alert_interval_discarded_anomalies</span>
+        <span class="n">crucible_data</span> <span class="o">=</span> <span class="s1">&#39;crucible_tests_run = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
                         <span class="s1">&#39;crucible_triggered_algorithms = </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> \
-                        <span class="s1">&#39;tested_by = &quot;</span><span class="si">%s</span><span class="s1">&quot;</span><span class="se">\n</span><span class="s1">&#39;</span> \
-            <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">run_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">ensemble</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">this_host</span><span class="p">))</span>
+                        <span class="s1">&#39;tested_by = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                        <span class="s1">&#39;run_algorithms_seconds = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                        <span class="s1">&#39;alert_interval_discarded_anomalies = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+            <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">run_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">ensemble</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">this_host</span><span class="p">),</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">run_algorithms_seconds</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">alert_interval_discarded_anomalies_count</span><span class="p">))</span>
         <span class="n">crucible_anomaly_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.txt&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">anomaly_dir</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">crucible_anomaly_file</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
             <span class="n">fh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">crucible_data</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">crucible_anomaly_file</span><span class="p">,</span> <span class="mi">0644</span><span class="p">)</span>
+            <span class="c1"># @modified 20200327 - Branch #3262: py3</span>
+            <span class="c1"># os.chmod(crucible_anomaly_file, 0644)</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">crucible_anomaly_file</span><span class="p">,</span> <span class="mo">0o644</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
             <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">crucible_anomaly_file</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o644</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;updated crucible anomaly file - </span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.txt&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">anomaly_dir</span><span class="p">,</span> <span class="n">metric</span><span class="p">))</span>
@@ -1004,20 +1382,33 @@
         <span class="c1"># gzip the json timeseries data after analysis</span>
         <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">anomaly_json</span><span class="p">):</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">anomaly_json_gz</span><span class="p">):</span>
+                <span class="n">remove_json</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">f_in</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">anomaly_json</span><span class="p">)</span>
                     <span class="n">f_out</span> <span class="o">=</span> <span class="n">gzip</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">anomaly_json_gz</span><span class="p">,</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span>
                     <span class="n">f_out</span><span class="o">.</span><span class="n">writelines</span><span class="p">(</span><span class="n">f_in</span><span class="p">)</span>
                     <span class="n">f_out</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
                     <span class="n">f_in</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-                    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">anomaly_json</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                        <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">anomaly_json_gz</span><span class="p">,</span> <span class="mi">0644</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-                        <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">anomaly_json_gz</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o644</span><span class="p">)</span>
+                    <span class="n">remove_json</span> <span class="o">=</span> <span class="kc">True</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;gzipped - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">anomaly_json_gz</span><span class="p">))</span>
                 <span class="k">except</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: Failed to gzip data file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()))</span>
+                <span class="k">if</span> <span class="n">remove_json</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                            <span class="c1"># @modified 20200327 - Branch #3262: py3</span>
+                            <span class="c1"># os.chmod(anomaly_json_gz, 0644)</span>
+                            <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">anomaly_json_gz</span><span class="p">,</span> <span class="mo">0o644</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                            <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">anomaly_json_gz</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o644</span><span class="p">)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;gzipped - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">anomaly_json_gz</span><span class="p">))</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: Failed to chmod anomaly_json_gz file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()))</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">anomaly_json</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: Failed to remove anomaly_json file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">()))</span>
+
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">anomaly_json</span><span class="p">)</span>
 
@@ -1028,8 +1419,89 @@
                 <span class="c1"># Added nosec to exclude from bandit tests</span>
                 <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">run_script</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">crucible_anomaly_file</span><span class="p">)))</span>  <span class="c1"># nosec</span>
 
-        <span class="c1"># Remove metric check file</span>
-        <span class="n">nothing_to_do</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="c1"># @added 20200428 - Feature #3500: webapp - crucible_process_metrics</span>
+        <span class="c1">#                   Feature #1448: Crucible web UI</span>
+        <span class="c1"># Send Skyline consensus anomalie to Panorama</span>
+        <span class="k">if</span> <span class="n">add_to_panorama</span><span class="p">:</span>
+            <span class="n">added_to_panorama</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">user_id</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">skyline_anomalies_score_file</span> <span class="o">=</span> <span class="n">anomaly_dir</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="s1">&#39;skyline.anomalies_score.txt&#39;</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">skyline_anomalies_score_file</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">skyline_anomalies_score_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                        <span class="n">output</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+                    <span class="n">skyline_anomalies</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get Skyline anomalies scores from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">skyline_anomalies_score_file</span><span class="p">)</span>
+                    <span class="n">skyline_anomalies</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">skyline_consensus_anomalies</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">if</span> <span class="n">skyline_anomalies</span><span class="p">:</span>
+                    <span class="c1"># skyline_anomalies format</span>
+                    <span class="c1"># [timestamp, value, anomaly_score, triggered_algorithms]</span>
+                    <span class="c1"># [1583234400.0, 44.39999999990687, 2, [&#39;histogram_bins&#39;, &#39;median_absolute_deviation&#39;]],</span>
+                    <span class="c1"># Convert float timestamp from Graphite to int</span>
+                    <span class="k">for</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">anomaly_score</span><span class="p">,</span> <span class="n">triggered_algorithms</span> <span class="ow">in</span> <span class="n">skyline_anomalies</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">anomaly_score</span> <span class="o">&gt;=</span> <span class="n">settings</span><span class="o">.</span><span class="n">CONSENSUS</span><span class="p">:</span>
+                            <span class="n">skyline_consensus_anomalies</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">timestamp</span><span class="p">),</span> <span class="n">value</span><span class="p">,</span> <span class="n">anomaly_score</span><span class="p">,</span> <span class="n">triggered_algorithms</span><span class="p">])</span>
+                    <span class="k">del</span> <span class="n">skyline_anomalies</span>
+                <span class="n">added_at</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
+                <span class="k">if</span> <span class="n">skyline_consensus_anomalies</span><span class="p">:</span>
+                    <span class="n">sane_metricname</span> <span class="o">=</span> <span class="n">filesafe_metricname</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">))</span>
+                    <span class="k">for</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">datapoint</span><span class="p">,</span> <span class="n">anomaly_score</span><span class="p">,</span> <span class="n">triggered_algorithms</span> <span class="ow">in</span> <span class="n">skyline_consensus_anomalies</span><span class="p">:</span>
+                        <span class="c1"># To allow multiple Panorama anomaly files to added quickly just</span>
+                        <span class="c1"># increment the added_at by 1 seconds so that all the files have a</span>
+                        <span class="c1"># unique name</span>
+                        <span class="n">added_at</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="c1"># Note:</span>
+                        <span class="c1"># The values are enclosed is single quoted intentionally</span>
+                        <span class="c1"># as the imp.load_source used results in a shift in the</span>
+                        <span class="c1"># decimal position when double quoted, e.g.</span>
+                        <span class="c1"># value = &quot;5622.0&quot; gets imported as</span>
+                        <span class="c1"># 2016-03-02 12:53:26 :: 28569 :: metric variable - value - 562.2</span>
+                        <span class="c1"># single quoting results in the desired,</span>
+                        <span class="c1"># 2016-03-02 13:16:17 :: 1515 :: metric variable - value - 5622.0</span>
+                        <span class="n">source</span> <span class="o">=</span> <span class="s1">&#39;graphite&#39;</span>
+                        <span class="n">panaroma_anomaly_data</span> <span class="o">=</span> <span class="s1">&#39;metric = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                                                <span class="s1">&#39;value = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                                                <span class="s1">&#39;from_timestamp = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                                                <span class="s1">&#39;metric_timestamp = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                                                <span class="s1">&#39;algorithms = </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> \
+                                                <span class="s1">&#39;triggered_algorithms = </span><span class="si">%s</span><span class="se">\n</span><span class="s1">&#39;</span> \
+                                                <span class="s1">&#39;app = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                                                <span class="s1">&#39;source = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                                                <span class="s1">&#39;added_by = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                                                <span class="s1">&#39;added_at = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                                                <span class="s1">&#39;label = </span><span class="se">\&#39;</span><span class="s1">added by Crucible</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                                                <span class="s1">&#39;user_id = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                            <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">datapoint</span><span class="p">),</span> <span class="n">from_timestamp</span><span class="p">,</span>
+                               <span class="nb">str</span><span class="p">(</span><span class="n">timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">ALGORITHMS</span><span class="p">),</span>
+                               <span class="n">triggered_algorithms</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span>
+                               <span class="n">this_host</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">added_at</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">user_id</span><span class="p">))</span>
+                        <span class="c1"># Create an anomaly file with details about the anomaly</span>
+                        <span class="n">panaroma_anomaly_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.txt&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_CHECK_PATH</span><span class="p">,</span> <span class="n">added_at</span><span class="p">,</span> <span class="n">sane_metricname</span><span class="p">)</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">write_data_to_file</span><span class="p">(</span>
+                                <span class="n">skyline_app</span><span class="p">,</span> <span class="n">panaroma_anomaly_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span>
+                                <span class="n">panaroma_anomaly_data</span><span class="p">)</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;added panorama anomaly file :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">panaroma_anomaly_file</span><span class="p">))</span>
+                            <span class="n">added_to_panorama</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: send_crucible_job_metric_to_panorama - failed to add panorama anomaly file :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">panaroma_anomaly_file</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">added_to_panorama</span><span class="p">:</span>
+                <span class="n">crucible_sent_to_panorama_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.sent_to_panorama.txt&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">anomaly_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">added_at</span><span class="p">),</span> <span class="n">sane_metricname</span><span class="p">)</span>
+                <span class="n">panorama_done_data</span> <span class="o">=</span> <span class="p">[</span><span class="n">added_at</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">user_id</span><span class="p">),</span> <span class="n">skyline_consensus_anomalies</span><span class="p">]</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">write_data_to_file</span><span class="p">(</span>
+                        <span class="n">skyline_app</span><span class="p">,</span> <span class="n">crucible_sent_to_panorama_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">panorama_done_data</span><span class="p">))</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;added panorama crucible job file :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">crucible_sent_to_panorama_file</span><span class="p">))</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: crucible send to panorama - failed to add panorama file :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">crucible_sent_to_panorama_file</span><span class="p">))</span>
 
         <span class="k">try</span><span class="p">:</span>
             <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">)</span>
@@ -1115,6 +1587,30 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="mi">120</span><span class="p">,</span> <span class="n">now</span><span class="p">)</span>
 
                 <span class="n">metric_var_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">listdir</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">CRUCIBLE_CHECK_PATH</span><span class="p">)</span> <span class="k">if</span> <span class="n">isfile</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">CRUCIBLE_CHECK_PATH</span><span class="p">,</span> <span class="n">f</span><span class="p">))]</span>
+
+                <span class="c1"># @added 20200428 - Feature #3500: webapp - crucible_process_metrics</span>
+                <span class="c1">#                   Feature #1448: Crucible web UI</span>
+                <span class="c1"># If crucible is busy, stop processing around midnight to allow</span>
+                <span class="c1"># for log rotation as log rotation can make the process hang if</span>
+                <span class="c1"># running</span>
+                <span class="n">pause_for_log_rotation</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">current_now</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
+                <span class="n">current_hour</span> <span class="o">=</span> <span class="n">current_now</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%H&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">current_hour</span> <span class="o">==</span> <span class="s1">&#39;23&#39;</span><span class="p">:</span>
+                    <span class="n">current_minute</span> <span class="o">=</span> <span class="n">current_now</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%M&#39;</span><span class="p">)</span>
+                    <span class="n">before_midnight_minutes</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;55&#39;</span><span class="p">,</span> <span class="s1">&#39;56&#39;</span><span class="p">,</span> <span class="s1">&#39;57&#39;</span><span class="p">,</span> <span class="s1">&#39;58&#39;</span><span class="p">,</span> <span class="s1">&#39;59&#39;</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">current_minute</span> <span class="ow">in</span> <span class="n">before_midnight_minutes</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;setting metric_var_files to [] for log rotation&#39;</span><span class="p">)</span>
+                        <span class="n">metric_var_files</span> <span class="o">=</span> <span class="p">[]</span>
+                        <span class="n">pause_for_log_rotation</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">if</span> <span class="n">current_hour</span> <span class="o">==</span> <span class="s1">&#39;00&#39;</span><span class="p">:</span>
+                    <span class="n">current_minute</span> <span class="o">=</span> <span class="n">current_now</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%M&#39;</span><span class="p">)</span>
+                    <span class="n">after_midnight_minutes</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;00&#39;</span><span class="p">,</span> <span class="s1">&#39;01&#39;</span><span class="p">,</span> <span class="s1">&#39;02&#39;</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">current_minute</span> <span class="ow">in</span> <span class="n">after_midnight_minutes</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;setting metric_var_files to [] for log rotation&#39;</span><span class="p">)</span>
+                        <span class="n">metric_var_files</span> <span class="o">=</span> <span class="p">[]</span>
+                        <span class="n">pause_for_log_rotation</span> <span class="o">=</span> <span class="kc">True</span>
+
 <span class="c1">#                if len(metric_var_files) == 0:</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">metric_var_files</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;sleeping 10 no metric check files&#39;</span><span class="p">)</span>
@@ -1123,12 +1619,22 @@
                 <span class="c1"># Discover metric to analyze</span>
                 <span class="n">metric_var_files</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
                 <span class="n">metric_var_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">listdir</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">CRUCIBLE_CHECK_PATH</span><span class="p">)</span> <span class="k">if</span> <span class="n">isfile</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">CRUCIBLE_CHECK_PATH</span><span class="p">,</span> <span class="n">f</span><span class="p">))]</span>
+
+                <span class="k">if</span> <span class="n">pause_for_log_rotation</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;setting metric_var_files to [] for log rotation&#39;</span><span class="p">)</span>
+                    <span class="n">metric_var_files</span> <span class="o">=</span> <span class="p">[]</span>
+
 <span class="c1">#                if len(metric_var_files) &gt; 0:</span>
                 <span class="k">if</span> <span class="n">metric_var_files</span><span class="p">:</span>
                     <span class="k">break</span>
 
             <span class="n">metric_var_files_sorted</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">metric_var_files</span><span class="p">)</span>
             <span class="n">metric_check_file</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">CRUCIBLE_CHECK_PATH</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_var_files_sorted</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+            <span class="c1"># @added 20200421 - Feature #3516: Handle multiple CRUCIBLE_PROCESSES</span>
+            <span class="c1"># TODO</span>
+            <span class="c1"># Handled multiple processes</span>
+            <span class="c1"># Prioritise current metrics over webapp metrics</span>
 
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;assigning check for processing - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_var_files_sorted</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
 
@@ -1144,11 +1650,34 @@
             <span class="n">spawned_pids</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="n">pid_count</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="n">run_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">now</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">CRUCIBLE_PROCESSES</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+
+            <span class="c1"># @modified 20200427 - Feature #3516: Handle multiple CRUCIBLE_PROCESSES</span>
+            <span class="n">use_range</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">metric_var_files_sorted</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">CRUCIBLE_PROCESSES</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">metric_var_files_sorted</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">settings</span><span class="o">.</span><span class="n">CRUCIBLE_PROCESSES</span><span class="p">:</span>
+                        <span class="n">use_range</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">CRUCIBLE_PROCESSES</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">metric_var_files_sorted</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">use_range</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">CRUCIBLE_PROCESSES</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;dynamically determined to submit to and use </span><span class="si">%s</span><span class="s1"> processors&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">use_range</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;will use </span><span class="si">%s</span><span class="s1"> processors&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">use_range</span><span class="p">))</span>
+
+            <span class="c1"># @modified 20200427 - Feature #3516: Handle multiple CRUCIBLE_PROCESSES</span>
+            <span class="c1"># for i in range(1, settings.CRUCIBLE_PROCESSES + 1):</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">use_range</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                <span class="c1"># @added 20200427 - Feature #3516: Handle multiple CRUCIBLE_PROCESSES</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">metric_var_files_sorted</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">use_range</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                            <span class="n">list_element</span> <span class="o">=</span> <span class="n">i</span> <span class="o">-</span> <span class="mi">1</span>
+                            <span class="n">metric_check_file</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">CRUCIBLE_CHECK_PATH</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_var_files_sorted</span><span class="p">[</span><span class="n">list_element</span><span class="p">])</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;assigning additional check to processor </span><span class="si">%s</span><span class="s1"> for processing - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_var_files_sorted</span><span class="p">[</span><span class="n">list_element</span><span class="p">])))</span>
                 <span class="n">p</span> <span class="o">=</span> <span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">spin_process</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">run_timestamp</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">)))</span>
                 <span class="n">pids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
                 <span class="n">pid_count</span> <span class="o">+=</span> <span class="mi">1</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;starting </span><span class="si">%s</span><span class="s1"> of </span><span class="si">%s</span><span class="s1"> spin_process/es&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">pid_count</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">CRUCIBLE_PROCESSES</span><span class="p">)))</span>
+                <span class="c1"># @modified 20200427 - Feature #3516: Handle multiple CRUCIBLE_PROCESSES</span>
+                <span class="c1"># logger.info(&#39;starting %s of %s spin_process/es&#39; % (str(pid_count), str(settings.CRUCIBLE_PROCESSES)))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;starting </span><span class="si">%s</span><span class="s1"> of </span><span class="si">%s</span><span class="s1"> spin_process/es&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">pid_count</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">use_range</span><span class="p">)))</span>
                 <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
                 <span class="n">spawned_pids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
 
@@ -1158,14 +1687,22 @@
             <span class="c1"># Self monitor processes and terminate if any spin_process has run</span>
             <span class="c1"># for longer than CRUCIBLE_TESTS_TIMEOUT</span>
             <span class="n">p_starts</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+            <span class="n">sleep_count</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="k">while</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">p_starts</span> <span class="o">&lt;=</span> <span class="n">settings</span><span class="o">.</span><span class="n">CRUCIBLE_TESTS_TIMEOUT</span><span class="p">:</span>
                 <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">):</span>
                     <span class="c1"># Just to avoid hogging the CPU</span>
                     <span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="c1"># @added 20200421 - Feature #3500: webapp - crucible_process_metrics</span>
+                    <span class="c1">#                   Feature #1448: Crucible web UI</span>
+                    <span class="n">sleep_count</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="n">sleep_count</span> <span class="o">%</span> <span class="mi">100</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: spin_process/es still running pid/s - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">pids</span><span class="p">)))</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="c1"># All the processes are done, break now.</span>
                     <span class="n">time_to_run</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">p_starts</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: </span><span class="si">%s</span><span class="s1"> spin_process/es completed in </span><span class="si">%.2f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">CRUCIBLE_PROCESSES</span><span class="p">),</span> <span class="n">time_to_run</span><span class="p">))</span>
+                    <span class="c1"># @modified 20200427 - Feature #3516: Handle multiple CRUCIBLE_PROCESSES</span>
+                    <span class="c1"># logger.info(&#39;%s :: %s spin_process/es completed in %.2f seconds&#39; % (skyline_app, str(settings.CRUCIBLE_PROCESSES), time_to_run))</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: </span><span class="si">%s</span><span class="s1"> spin_process/es completed in </span><span class="si">%.2f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">use_range</span><span class="p">),</span> <span class="n">time_to_run</span><span class="p">))</span>
                     <span class="k">break</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># We only enter this if we didn&#39;t &#39;break&#39; above.</span>
@@ -1192,7 +1729,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2019, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
 
     </p>
   </div>
@@ -1214,7 +1751,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.3.0',
+            VERSION:'2.0.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

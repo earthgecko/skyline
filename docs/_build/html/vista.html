@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Vista &mdash; Skyline 1.3.0 documentation</title>
+  <title>Vista &mdash; Skyline 2.0.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.3.0 documentation" href="index.html"/>
+    <link rel="top" title="Skyline 2.0.0 documentation" href="index.html"/>
         <link rel="next" title="Redis integration" href="redis-integration.html"/>
         <link rel="prev" title="Flux" href="flux.html"/> 
 
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                1.3
+                2.0
               </div>
             
           
@@ -91,10 +91,12 @@
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monotonic-metrics.html">Strictly increasing monotonicity</a></li>
@@ -396,7 +398,7 @@ described below.</p>
 <div class="section" id="settings-vista-fetch-metrics">
 <h3>settings.VISTA_FETCH_METRICS<a class="headerlink" href="#settings-vista-fetch-metrics" title="Permalink to this headline">¶</a></h3>
 <p>The metrics you want Vista to fetch from remote sources are defined in the
-<code class="xref py py-mod docutils literal"><span class="pre">settings.VISTA_FETCH_METRICS</span></code> tuple.</p>
+<a class="reference internal" href="skyline.html#settings.VISTA_FETCH_METRICS" title="settings.VISTA_FETCH_METRICS"><code class="xref py py-mod docutils literal"><span class="pre">settings.VISTA_FETCH_METRICS</span></code></a> tuple.</p>
 <p>The setting consists of a tuple of tuples, like the Analyzer
 <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALERTS</span></code></a> tuple.</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">VISTA_FETCH_METRICS</span> <span class="o">=</span> <span class="p">(</span>
@@ -412,7 +414,7 @@ described below.</p>
 </pre></div>
 </div>
 <p>Each of the tuple parameters are documented directly in the docstrings
-documentation (<a class="reference internal" href="skyline.html#settings.VISTA_FETCH_GRAPHITE_METRICS" title="settings.VISTA_FETCH_GRAPHITE_METRICS"><code class="xref py py-mod docutils literal"><span class="pre">settings.VISTA_FETCH_GRAPHITE_METRICS</span></code></a>), however some of
+documentation (<code class="xref py py-mod docutils literal"><span class="pre">settings.VISTA_FETCH_GRAPHITE_METRICS</span></code>), however some of
 these settings are further described below in more detail to clarify how some of
 them work.</p>
 <div class="admonition note">
@@ -508,7 +510,7 @@ space on your Graphite:</p>
 <p>You may wish to pre-populate your Graphite with historic data for metrics so
 that Skyline can immediately begin analysing the metric with historic data and
 seasonality patterns.</p>
-<p>In the <code class="xref py py-mod docutils literal"><span class="pre">settings.VISTA_FETCH_METRICS</span></code> tuple the final element in the tuple
+<p>In the <a class="reference internal" href="skyline.html#settings.VISTA_FETCH_METRICS" title="settings.VISTA_FETCH_METRICS"><code class="xref py py-mod docutils literal"><span class="pre">settings.VISTA_FETCH_METRICS</span></code></a> tuple the final element in the tuple
 is a tuple referred to as <cite>populate_at_resolutions</cite>, in this tuple you can
 define resolutions that you want to pre-populate your Graphite with.  If you do
 not want to pre-populate Graphite then do not use a tuple simply set this to
@@ -523,6 +525,8 @@ not want to pre-populate Graphite then do not use a tuple simply set this to
 <p>So in this instance when these metrics are first added to Vista, Vista will
 submit a request to /flux/populate_metric for the metric to populate the metric
 at the resolutions defined in the  <cite>populate_at_resolutions</cite> tuple.</p>
+<p>NOTE - Prometheus metrics that do not use the default uri parameter but use a
+custom uri cannot be pre-populated.</p>
 <p>It must be noted that the pre-populating of Prometheus metrics is done using a
 resample of the raw data.  In all other instances, Vista uses the Prometheus
 <cite>query_range</cite> API method with a <cite>step=60s</cite>, where Prometheus does the resampling.
@@ -587,7 +591,7 @@ which is better than air gaps.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2019, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
 
     </p>
   </div>
@@ -609,7 +613,7 @@ which is better than air gaps.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.3.0',
+            VERSION:'2.0.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

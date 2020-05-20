@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>mirage.mirage &mdash; Skyline 1.3.0 documentation</title>
+  <title>mirage.mirage &mdash; Skyline 2.0.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.3.0 documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 2.0.0 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                1.3
+                2.0
               </div>
             
           
@@ -90,10 +90,12 @@
 <li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
@@ -176,7 +178,7 @@
     <span class="kn">from</span> <span class="nn">Queue</span> <span class="k">import</span> <span class="n">Empty</span>
 <span class="k">except</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">queue</span> <span class="k">import</span> <span class="n">Empty</span>
-<span class="kn">from</span> <span class="nn">redis</span> <span class="k">import</span> <span class="n">StrictRedis</span>
+<span class="c1"># from redis import StrictRedis</span>
 <span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">time</span><span class="p">,</span> <span class="n">sleep</span>
 <span class="kn">from</span> <span class="nn">threading</span> <span class="k">import</span> <span class="n">Thread</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">defaultdict</span>
@@ -197,7 +199,10 @@
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">urlparse</span>
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-    <span class="kn">import</span> <span class="nn">urllib.parse</span>
+    <span class="c1"># @modified 20191113 - Branch #3262: py3</span>
+    <span class="c1"># import urllib.parse</span>
+    <span class="kn">import</span> <span class="nn">urllib.parse</span> <span class="k">as</span> <span class="nn">urlparse</span>
+
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="c1"># import errno</span>
 <span class="c1"># import imp</span>
@@ -216,7 +221,17 @@
     <span class="n">write_data_to_file</span><span class="p">,</span> <span class="n">fail_check</span><span class="p">,</span> <span class="n">send_anomalous_metric_to</span><span class="p">,</span>
     <span class="n">mkdir_p</span><span class="p">,</span> <span class="n">send_graphite_metric</span><span class="p">,</span> <span class="n">filesafe_metricname</span><span class="p">,</span>
     <span class="c1"># @added 20170603 - Feature #2034: analyse_derivatives</span>
-    <span class="n">nonNegativeDerivative</span><span class="p">,</span> <span class="n">in_list</span><span class="p">)</span>
+    <span class="n">nonNegativeDerivative</span><span class="p">,</span> <span class="n">in_list</span><span class="p">,</span>
+    <span class="c1"># @added 20191030 - Bug #3266: py3 Redis binary objects not strings</span>
+    <span class="c1">#                   Branch #3262: py3</span>
+    <span class="c1"># Added a single functions to deal with Redis connection and the</span>
+    <span class="c1"># charset=&#39;utf-8&#39;, decode_responses=True arguments required in py3</span>
+    <span class="n">get_redis_conn</span><span class="p">,</span> <span class="n">get_redis_conn_decoded</span><span class="p">)</span>
+
+<span class="c1"># @added 20200425 - Feature #3512: matched_or_regexed_in_list function</span>
+<span class="c1">#                   Feature #3508: ionosphere.untrainable_metrics</span>
+<span class="c1">#                   Feature #3486: analyzer_batch</span>
+<span class="kn">from</span> <span class="nn">matched_or_regexed_in_list</span> <span class="k">import</span> <span class="n">matched_or_regexed_in_list</span>
 
 <span class="kn">from</span> <span class="nn">mirage_alerters</span> <span class="k">import</span> <span class="n">trigger_alert</span>
 <span class="kn">from</span> <span class="nn">negaters</span> <span class="k">import</span> <span class="n">trigger_negater</span>
@@ -267,8 +282,34 @@
 <span class="k">except</span><span class="p">:</span>
     <span class="n">SERVER_METRIC_PATH</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
 
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">MIRAGE_PERIODIC_CHECK</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">MIRAGE_PERIODIC_CHECK</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">MIRAGE_PERIODIC_CHECK</span> <span class="o">=</span> <span class="kc">False</span>
+
+<span class="c1"># @added 20200413 - Feature #3486: analyzer_batch</span>
+<span class="c1">#                   Feature #3480: batch_processing</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">settings</span> <span class="k">import</span> <span class="n">BATCH_PROCESSING</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">BATCH_PROCESSING</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">settings</span> <span class="k">import</span> <span class="n">BATCH_PROCESSING_NAMESPACES</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">BATCH_PROCESSING_NAMESPACES</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="c1"># @added 20200425 - Feature #3508: ionosphere.untrainable_metrics</span>
+<span class="c1"># Determine if any metrcs have negatives values some they can be</span>
+<span class="c1"># added to the ionosphere.untrainable_metrics Redis set</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">settings</span> <span class="k">import</span> <span class="n">KNOWN_NEGATIVE_METRICS</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">KNOWN_NEGATIVE_METRICS</span> <span class="o">=</span> <span class="p">[]</span>
+
 <span class="n">skyline_app_graphite_namespace</span> <span class="o">=</span> <span class="s1">&#39;skyline.</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">SERVER_METRIC_PATH</span><span class="p">)</span>
 <span class="n">failed_checks_dir</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">_failed&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">MIRAGE_CHECK_PATH</span>
+<span class="c1"># @added 20191107 - Branch #3262: py3</span>
+<span class="n">alert_test_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">_alert_test.txt&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_TMP_DIR</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="Mirage"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage.Mirage">[docs]</a><span class="k">class</span> <span class="nc">Mirage</span><span class="p">(</span><span class="n">Thread</span><span class="p">):</span>
@@ -299,13 +340,24 @@
         <span class="c1"># self.sent_to_ionosphere = Manager().list()</span>
         <span class="c1"># @added 20170603 - Feature #2034: analyse_derivatives</span>
         <span class="c1"># @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow</span>
-        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span>
-                <span class="n">password</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">,</span>
-                <span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span>
-                <span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+        <span class="c1"># @modified 20191030 - Bug #3266: py3 Redis binary objects not strings</span>
+        <span class="c1">#                      Branch #3262: py3</span>
+        <span class="c1"># Use get_redis_conn and get_redis_conn_decoded to use on Redis sets when the bytes</span>
+        <span class="c1"># types need to be decoded as utf-8 to str</span>
+        <span class="c1"># if settings.REDIS_PASSWORD:</span>
+        <span class="c1">#     self.redis_conn = StrictRedis(</span>
+        <span class="c1">#         password=settings.REDIS_PASSWORD,</span>
+        <span class="c1">#         unix_socket_path=settings.REDIS_SOCKET_PATH)</span>
+        <span class="c1"># else:</span>
+        <span class="c1">#     self.redis_conn = StrictRedis(</span>
+        <span class="c1">#         unix_socket_path=settings.REDIS_SOCKET_PATH)</span>
+
+        <span class="c1"># @added 20191030 - Bug #3266: py3 Redis binary objects not strings</span>
+        <span class="c1">#                   Branch #3262: py3</span>
+        <span class="c1"># Added a single functions to deal with Redis connection and the</span>
+        <span class="c1"># charset=&#39;utf-8&#39;, decode_responses=True arguments required in py3</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">get_redis_conn</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span> <span class="o">=</span> <span class="n">get_redis_conn_decoded</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Mirage.check_if_parent_is_alive"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage.Mirage.check_if_parent_is_alive">[docs]</a>    <span class="k">def</span> <span class="nf">check_if_parent_is_alive</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -336,8 +388,11 @@
 
         <span class="c1"># @added 20160803 - Unescaped Graphite target - https://github.com/earthgecko/skyline/issues/20</span>
         <span class="c1">#                   bug1546: Unescaped Graphite target</span>
-        <span class="n">new_metric_namespace</span> <span class="o">=</span> <span class="n">metric_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">,</span> <span class="s1">&#39;\:&#39;</span><span class="p">)</span>
-        <span class="n">metric_namespace</span> <span class="o">=</span> <span class="n">new_metric_namespace</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">,</span> <span class="s1">&#39;\(&#39;</span><span class="p">)</span>
+        <span class="c1"># @modified 20191107 - Branch #3263: py3</span>
+        <span class="c1"># Commented out colon</span>
+        <span class="c1"># new_metric_namespace = metric_name.replace(&#39;:&#39;, &#39;\:&#39;)</span>
+        <span class="c1"># metric_namespace = new_metric_namespace.replace(&#39;(&#39;, &#39;\(&#39;)</span>
+        <span class="n">metric_namespace</span> <span class="o">=</span> <span class="n">metric_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">,</span> <span class="s1">&#39;\(&#39;</span><span class="p">)</span>
         <span class="n">metric_name</span> <span class="o">=</span> <span class="n">metric_namespace</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;)&#39;</span><span class="p">,</span> <span class="s1">&#39;\)&#39;</span><span class="p">)</span>
 
         <span class="k">try</span><span class="p">:</span>
@@ -427,6 +482,38 @@
                 <span class="n">array</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">no_equal_line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
                 <span class="n">add_line</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
                 <span class="n">metric_vars</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">add_line</span><span class="p">)</span>
+
+        <span class="c1"># @added 20200429 - Feature #3486: analyzer_batch</span>
+        <span class="c1">#                   Feature #3480: batch_processing</span>
+        <span class="c1"># Allow the check file to already hold a valid python list on one line</span>
+        <span class="c1"># so that a check can be added by simply echoing to debug metric_vars</span>
+        <span class="c1"># line from to log for any failed checks into a new Mirage check file</span>
+        <span class="c1"># The original above pattern is still the default, this is for the check</span>
+        <span class="c1"># files to be added by the operator from the log or for debugging.</span>
+        <span class="n">try_literal_eval</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">metric_vars</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">metric_vars</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="k">pass</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">try_literal_eval</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metric_vars is not a list, set to try_literal_eval&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">metric_vars</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">try_literal_eval</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metric_vars is not a list of lists, set to try_literal_eval&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">try_literal_eval</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metric_vars is not defined, set to try_literal_eval&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">try_literal_eval</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">metric_vars_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+                        <span class="n">metric_vars</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">metric_vars</span><span class="p">:</span>
+                            <span class="k">break</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;metric_vars not loaded with literal_eval&#39;</span><span class="p">)</span>
+                <span class="n">metric_vars</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="n">string_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;metric&#39;</span><span class="p">]</span>
         <span class="n">float_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span>
@@ -568,6 +655,17 @@
 <span class="c1">#            logger.info(&#39;debug :: added metric_name %s from check file - %s&#39; % (metric_name, metric_check_file))</span>
 
         <span class="n">metric</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># @added 20200106 - Branch #3262: py3</span>
+        <span class="c1">#                   Task #3034: Reduce multiprocessing Manager list usage</span>
+        <span class="n">redis_set_to_delete</span> <span class="o">=</span> <span class="s1">&#39;mirage.metric_variables&#39;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">redis_set_to_delete</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;deleted Redis set - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">redis_set_to_delete</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to delete Redis set - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">redis_set_to_delete</span><span class="p">)</span>
+
         <span class="k">try</span><span class="p">:</span>
             <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;metric&#39;</span>
             <span class="n">value_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">var_array</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">var_array</span> <span class="ow">in</span> <span class="n">metric_vars_array</span> <span class="k">if</span> <span class="n">var_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">key</span><span class="p">]</span>
@@ -688,6 +786,45 @@
         <span class="n">int_metric_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">)</span>
         <span class="n">int_run_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">run_timestamp</span><span class="p">)</span>
         <span class="n">metric_timestamp_age</span> <span class="o">=</span> <span class="n">int_run_timestamp</span> <span class="o">-</span> <span class="n">int_metric_timestamp</span>
+
+        <span class="n">periodic_mirage_check</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">if</span> <span class="n">MIRAGE_PERIODIC_CHECK</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">mirage_periodic_check_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;mirage.periodic_check.metrics&#39;</span><span class="p">))</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get mirage_periodic_check_metrics from Redis&#39;</span><span class="p">)</span>
+                <span class="n">mirage_periodic_check_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">redis_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">redis_metric_name</span> <span class="ow">in</span> <span class="n">mirage_periodic_check_metrics</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;this is a periodic Mirage check for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric</span><span class="p">)</span>
+                <span class="n">periodic_mirage_check</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="c1"># @added 20200413 - Feature #3486: analyzer_batch</span>
+        <span class="c1">#                   Feature #3480: batch_processing</span>
+        <span class="c1"># Do not evaluate batch metrics against MIRAGE_STALE_SECONDS</span>
+        <span class="k">if</span> <span class="n">BATCH_PROCESSING</span><span class="p">:</span>
+            <span class="c1"># Is this a analyzer_batch related anomaly</span>
+            <span class="n">analyzer_batch_anomaly</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">analyzer_batch_metric_anomaly_key</span> <span class="o">=</span> <span class="s1">&#39;analyzer_batch.anomaly.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">),</span> <span class="n">metric</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># analyzer_batch_anomaly = self.redis_conn.get(analyzer_batch_metric_anomaly_key)</span>
+                <span class="n">analyzer_batch_anomaly</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">analyzer_batch_metric_anomaly_key</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                    <span class="s1">&#39;error :: could not query cache_key - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">analyzer_batch_metric_anomaly_key</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                <span class="n">analyzer_batch_anomaly</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">analyzer_batch_anomaly</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;batch processing - identified as an analyzer_batch triggered anomaly from the presence of the Redis key </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">analyzer_batch_metric_anomaly_key</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;batch processing - not identified as an analyzer_batch triggered anomaly as no Redis key found - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">analyzer_batch_metric_anomaly_key</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">analyzer_batch_anomaly</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;batch processing - setting metric_timestamp_age from </span><span class="si">%s</span><span class="s1"> to 1 so that will not be discarded as stale on </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">metric_timestamp_age</span><span class="p">),</span> <span class="n">metric</span><span class="p">))</span>
+                <span class="n">metric_timestamp_age</span> <span class="o">=</span> <span class="mi">1</span>
+
         <span class="k">if</span> <span class="n">metric_timestamp_age</span> <span class="o">&gt;</span> <span class="n">settings</span><span class="o">.</span><span class="n">MIRAGE_STALE_SECONDS</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;stale check :: </span><span class="si">%s</span><span class="s1"> check request is </span><span class="si">%s</span><span class="s1"> seconds old - discarding&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_timestamp_age</span><span class="p">)))</span>
             <span class="c1"># Remove metric check file</span>
@@ -729,14 +866,22 @@
 
         <span class="c1"># Get data from graphite</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-            <span class="s1">&#39;retrieve data :: surfacing </span><span class="si">%s</span><span class="s1"> timeseries from graphite for </span><span class="si">%s</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                <span class="n">metric</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">))</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">surface_graphite_metric_data</span><span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="n">graphite_from</span><span class="p">,</span> <span class="n">graphite_until</span><span class="p">)</span>
+            <span class="s1">&#39;retrieve data :: surfacing </span><span class="si">%s</span><span class="s1"> time series from graphite for </span><span class="si">%s</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">second_order_resolution_seconds</span><span class="p">)))</span>
+
+        <span class="c1"># @modified 20191113 - Branch #3262: py3</span>
+        <span class="c1"># Wrapped in try</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">surface_graphite_metric_data</span><span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="n">graphite_from</span><span class="p">,</span> <span class="n">graphite_until</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to surface_graphite_metric_data to populate </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">metric_json_file</span><span class="p">)))</span>
 
         <span class="c1"># Check there is a json timeseries file to test</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">metric_json_file</span><span class="p">):</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                <span class="s1">&#39;error :: retrieve failed - failed to surface </span><span class="si">%s</span><span class="s1"> timeseries from graphite&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="s1">&#39;error :: retrieve failed - failed to surface </span><span class="si">%s</span><span class="s1"> time series from graphite&#39;</span> <span class="o">%</span> <span class="p">(</span>
                     <span class="n">metric</span><span class="p">))</span>
             <span class="c1"># Remove metric check file</span>
             <span class="k">try</span><span class="p">:</span>
@@ -749,11 +894,10 @@
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;removed data dir - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric_data_dir</span><span class="p">)</span>
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to rmtree </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric_data_dir</span><span class="p">)</span>
-
             <span class="k">return</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;retrieved data :: for </span><span class="si">%s</span><span class="s1"> at </span><span class="si">%s</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                <span class="n">metric</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">))</span>
+                <span class="n">metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">second_order_resolution_seconds</span><span class="p">)))</span>
 
         <span class="c1"># Make process-specific dicts</span>
         <span class="n">exceptions</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
@@ -763,7 +907,7 @@
 
         <span class="k">with</span> <span class="nb">open</span><span class="p">((</span><span class="n">metric_json_file</span><span class="p">),</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">timeseries</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;data points surfaced :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;data points surfaced :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">))))</span>
 
         <span class="c1"># @added 20170212 - Feature #1886: Ionosphere learn</span>
         <span class="c1"># Only process if the metric has sufficient data</span>
@@ -784,7 +928,10 @@
         <span class="c1"># to their deriative products</span>
         <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">derivative_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;derivative_metrics&#39;</span><span class="p">))</span>
+            <span class="c1"># @modified 20191022 - Bug #3266: py3 Redis binary objects not strings</span>
+            <span class="c1">#                      Branch #3262: py3</span>
+            <span class="c1"># derivative_metrics = list(self.redis_conn.smembers(&#39;derivative_metrics&#39;))</span>
+            <span class="n">derivative_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;derivative_metrics&#39;</span><span class="p">))</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">derivative_metrics</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">redis_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">))</span>
@@ -798,23 +945,49 @@
             <span class="n">skip_derivative</span> <span class="o">=</span> <span class="n">in_list</span><span class="p">(</span><span class="n">redis_metric_name</span><span class="p">,</span> <span class="n">non_derivative_monotonic_metrics</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">skip_derivative</span><span class="p">:</span>
                 <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">False</span>
-        <span class="k">if</span> <span class="n">known_derivative_metric</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">known_derivative_metric</span> <span class="ow">and</span> <span class="n">valid_mirage_timeseries</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">derivative_timeseries</span> <span class="o">=</span> <span class="n">nonNegativeDerivative</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span>
                 <span class="n">timeseries</span> <span class="o">=</span> <span class="n">derivative_timeseries</span>
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: nonNegativeDerivative failed&#39;</span><span class="p">)</span>
 
+        <span class="c1"># @added 20200425 - Feature #3508: ionosphere.untrainable_metrics</span>
+        <span class="c1"># Determine if any metrcs have negatives values some they can be</span>
+        <span class="c1"># added to the ionosphere.untrainable_metrics Redis set</span>
+        <span class="n">run_negatives_present</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_ENABLED</span> <span class="ow">and</span> <span class="n">valid_mirage_timeseries</span><span class="p">:</span>
+            <span class="n">run_negatives_present</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">known_negative_metric_matched_by</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">known_negative_metric</span><span class="p">,</span> <span class="n">known_negative_metric_matched_by</span> <span class="o">=</span> <span class="n">matched_or_regexed_in_list</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">KNOWN_NEGATIVE_METRICS</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">known_negative_metric</span><span class="p">:</span>
+                <span class="n">run_negatives_present</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;will not check </span><span class="si">%s</span><span class="s1"> for negative values&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;will check </span><span class="si">%s</span><span class="s1"> for negative values&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">))</span>
+
         <span class="k">try</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">valid_mirage_timeseries</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;analyzing :: </span><span class="si">%s</span><span class="s1"> at </span><span class="si">%s</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">))</span>
-                <span class="n">anomalous</span><span class="p">,</span> <span class="n">ensemble</span><span class="p">,</span> <span class="n">datapoint</span> <span class="o">=</span> <span class="n">run_selected_algorithm</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">)</span>
+                <span class="c1"># @modified 20200425 - Feature #3508: ionosphere.untrainable_metrics</span>
+                <span class="c1"># Added run_negatives_present and negatives_found</span>
+                <span class="c1"># anomalous, ensemble, datapoint = run_selected_algorithm(timeseries, metric, second_order_resolution_seconds)</span>
+                <span class="n">anomalous</span><span class="p">,</span> <span class="n">ensemble</span><span class="p">,</span> <span class="n">datapoint</span><span class="p">,</span> <span class="n">negatives_found</span> <span class="o">=</span> <span class="n">run_selected_algorithm</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">,</span> <span class="n">run_negatives_present</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;not analyzing :: </span><span class="si">%s</span><span class="s1"> at </span><span class="si">%s</span><span class="s1"> seconds as there is not sufficiently older datapoints in the timeseries - not valid_mirage_timeseries&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">))</span>
                 <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="n">datapoint</span> <span class="o">=</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
         <span class="c1"># It could have been deleted by the Roomba</span>
         <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+            <span class="c1"># @added 20200430 - Feature #3480: batch_processing</span>
+            <span class="c1"># Added logging here as the DeletedByRoomba exception is</span>
+            <span class="c1"># generally not related to that but related to some other fail</span>
+            <span class="c1"># in the processing of the run algorithms phase.</span>
+            <span class="c1"># It could have been deleted by the Roomba, but Mirage does not use</span>
+            <span class="c1"># Redis data so probably, definitely was not :)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: added as DeletedByRoomba but possibly not see traceback above&#39;</span><span class="p">)</span>
+
             <span class="n">exceptions</span><span class="p">[</span><span class="s1">&#39;DeletedByRoomba&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;exceptions        :: DeletedByRoomba&#39;</span><span class="p">)</span>
         <span class="k">except</span> <span class="n">TooShort</span><span class="p">:</span>
@@ -879,6 +1052,22 @@
             <span class="c1"># @added 20170206 - Bug #1904: Handle non filesystem friendly metric names in check files</span>
             <span class="n">sane_metricname</span> <span class="o">=</span> <span class="n">filesafe_metricname</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">))</span>
 
+            <span class="c1"># @added 20200425 - Feature #3508: ionosphere.untrainable_metrics</span>
+            <span class="c1"># Determine if any metrcs have negatives values some they can be</span>
+            <span class="c1"># added to the ionosphere.untrainable_metrics Redis set</span>
+            <span class="k">if</span> <span class="n">run_negatives_present</span> <span class="ow">and</span> <span class="n">negatives_found</span><span class="p">:</span>
+                <span class="n">redis_set</span> <span class="o">=</span> <span class="s1">&#39;ionosphere.untrainable_metrics&#39;</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">last_negative_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">negatives_found</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="n">last_negative_value</span> <span class="o">=</span> <span class="n">negatives_found</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="n">remove_after_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">last_negative_timestamp</span> <span class="o">+</span> <span class="n">second_order_resolution_seconds</span><span class="p">)</span>
+                    <span class="n">data</span> <span class="o">=</span> <span class="nb">str</span><span class="p">([</span><span class="n">base_name</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">,</span> <span class="n">datapoint</span><span class="p">,</span> <span class="n">last_negative_timestamp</span><span class="p">,</span> <span class="n">last_negative_value</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">,</span> <span class="n">remove_after_timestamp</span><span class="p">])</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="n">redis_set</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add </span><span class="si">%s</span><span class="s1"> to Redis set </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">redis_set</span><span class="p">)))</span>
+
             <span class="c1"># If Crucible or Panorama are enabled determine details</span>
             <span class="n">determine_anomaly_details</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE</span> <span class="ow">and</span> <span class="n">settings</span><span class="o">.</span><span class="n">MIRAGE_CRUCIBLE_ENABLED</span><span class="p">:</span>
@@ -909,7 +1098,10 @@
             <span class="c1"># @added 20170308 - Feature #1960: ionosphere_layers</span>
             <span class="c1"># Allow Ionosphere to send Panorama checks, it is an ionosphere_metric</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">ionosphere_unique_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;ionosphere.unique_metrics&#39;</span><span class="p">))</span>
+                <span class="c1"># @modified 20191022 - Bug #3266: py3 Redis binary objects not strings</span>
+                <span class="c1">#                      Branch #3262: py3</span>
+                <span class="c1"># ionosphere_unique_metrics = list(self.redis_conn.smembers(&#39;ionosphere.unique_metrics&#39;))</span>
+                <span class="n">ionosphere_unique_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;ionosphere.unique_metrics&#39;</span><span class="p">))</span>
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">ionosphere_unique_metrics</span> <span class="o">=</span> <span class="p">[]</span>
 
@@ -1122,23 +1314,17 @@
         <span class="c1"># @added 20190408 - Feature #2882: Mirage - periodic_check</span>
         <span class="c1"># Remove the training_dir for mirage_periodic_check_metrics if not</span>
         <span class="c1"># anomalous</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">anomalous</span><span class="p">:</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">mirage_periodic_check_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;mirage.periodic_check.metrics&#39;</span><span class="p">))</span>
-            <span class="k">except</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get mirage_periodic_check_metrics from Redis&#39;</span><span class="p">)</span>
-                <span class="n">mirage_periodic_check_metrics</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">if</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">mirage_periodic_check_metrics</span><span class="p">:</span>
-                <span class="n">timeseries_dir</span> <span class="o">=</span> <span class="n">base_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">)</span>
-                <span class="n">training_dir</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                    <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_DATA_FOLDER</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">),</span>
-                    <span class="nb">str</span><span class="p">(</span><span class="n">timeseries_dir</span><span class="p">))</span>
-                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">training_dir</span><span class="p">):</span>
-                    <span class="k">try</span><span class="p">:</span>
-                        <span class="n">rmtree</span><span class="p">(</span><span class="n">training_dir</span><span class="p">)</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;removed Mirage periodic check training_data dir - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">training_dir</span><span class="p">)</span>
-                    <span class="k">except</span><span class="p">:</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to rmtree  Mirage periodic check training_dir - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">training_dir</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">anomalous</span> <span class="ow">and</span> <span class="n">periodic_mirage_check</span><span class="p">:</span>
+            <span class="n">timeseries_dir</span> <span class="o">=</span> <span class="n">base_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">)</span>
+            <span class="n">training_dir</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_DATA_FOLDER</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">),</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">timeseries_dir</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">training_dir</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">rmtree</span><span class="p">(</span><span class="n">training_dir</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;removed Mirage periodic check training_data dir - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">training_dir</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to rmtree Mirage periodic check training_dir - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">training_dir</span><span class="p">)</span>
             <span class="k">del</span> <span class="n">mirage_periodic_check_metrics</span></div>
 
 <div class="viewcode-block" id="Mirage.run"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage.Mirage.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1261,10 +1447,17 @@
                 <span class="n">sleep</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;connecting to redis at socket path </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
                 <span class="c1"># @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow</span>
-                <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">password</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">,</span> <span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+                <span class="c1"># @modified 20191113 - Bug #3266: py3 Redis binary objects not strings</span>
+                <span class="c1">#                      Branch #3262: py3</span>
+                <span class="c1"># if settings.REDIS_PASSWORD:</span>
+                <span class="c1">#     self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)</span>
+                <span class="c1"># else:</span>
+                <span class="c1">#     self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">get_redis_conn</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span> <span class="o">=</span> <span class="n">get_redis_conn_decoded</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;falied to connect to Redis&#39;</span><span class="p">)</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">ping</span><span class="p">():</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;connected to redis&#39;</span><span class="p">)</span>
                 <span class="k">continue</span>
@@ -1293,7 +1486,10 @@
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">ionosphere_alerts_returned</span><span class="p">:</span>
                     <span class="c1"># @modified 20161228 - Feature #1830: Ionosphere alerts</span>
                     <span class="k">try</span><span class="p">:</span>
-                        <span class="n">ionosphere_alerts</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">scan_iter</span><span class="p">(</span><span class="n">match</span><span class="o">=</span><span class="s1">&#39;ionosphere.mirage.alert.*&#39;</span><span class="p">))</span>
+                        <span class="c1"># @modified 20200430 - Bug #3266: py3 Redis binary objects not strings</span>
+                        <span class="c1">#                      Branch #3262: py3</span>
+                        <span class="c1"># ionosphere_alerts = list(self.redis_conn.scan_iter(match=&#39;ionosphere.mirage.alert.*&#39;))</span>
+                        <span class="n">ionosphere_alerts</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">scan_iter</span><span class="p">(</span><span class="n">match</span><span class="o">=</span><span class="s1">&#39;ionosphere.mirage.alert.*&#39;</span><span class="p">))</span>
                         <span class="n">ionosphere_alerts_returned</span> <span class="o">=</span> <span class="kc">True</span>
                     <span class="k">except</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
@@ -1311,6 +1507,41 @@
                     <span class="c1"># if not ionosphere_alerts_returned:</span>
                     <span class="c1">#     logger.info(&#39;sleeping no metrics...&#39;)</span>
                     <span class="c1">#     sleep(10)</span>
+
+                <span class="c1"># @added 20191106 - Branch #3262: py3</span>
+                <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">alert_test_file</span><span class="p">):</span>
+                    <span class="n">test_alert</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="k">with</span> <span class="nb">open</span><span class="p">((</span><span class="n">alert_test_file</span><span class="p">),</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+                            <span class="n">raw_test_alert</span> <span class="o">=</span> <span class="n">fh</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+                        <span class="n">test_alert</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">raw_test_alert</span><span class="p">)</span>
+                        <span class="c1"># [metric, alerter]</span>
+                        <span class="c1"># e.g. [&#39;server-1.cpu.user&#39;, &#39;smtp&#39;]</span>
+                        <span class="c1"># e.g. [&#39;server-1.cpu.user&#39;, &#39;slack&#39;]</span>
+                        <span class="c1"># e.g. [&#39;skyline_test.alerters.test&#39;, &#39;smtp&#39;]</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not evaluate test_alert from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">alert_test_file</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">test_alert</span><span class="p">:</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;test alert metric found - alerting on </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">((</span><span class="n">test_alert</span><span class="p">)))</span>
+                            <span class="n">metric_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">test_alert</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                            <span class="n">test_alerter</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">test_alert</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                            <span class="n">metric</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">()))</span>
+                            <span class="n">alert</span> <span class="o">=</span> <span class="p">(</span><span class="n">metric_name</span><span class="p">,</span> <span class="n">test_alerter</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">SLACK_ENABLED</span> <span class="ow">and</span> <span class="n">test_alerter</span> <span class="o">==</span> <span class="s1">&#39;slack&#39;</span><span class="p">:</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;test alert to slack for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_name</span><span class="p">))</span>
+                                <span class="n">trigger_alert</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="mi">604800</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">test_alerter</span> <span class="o">==</span> <span class="s1">&#39;smtp&#39;</span><span class="p">:</span>
+                                <span class="n">smtp_trigger_alert</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="mi">604800</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">)</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: test trigger_alert - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to test trigger_alert :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric_name</span><span class="p">)</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">alert_test_file</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error - failed to remove </span><span class="si">%s</span><span class="s1">, continuing&#39;</span> <span class="o">%</span> <span class="n">alert_test_file</span><span class="p">)</span>
+                        <span class="k">pass</span>
 
                 <span class="c1"># @modified 20190408 - Bug #2904: Initial Ionosphere echo load and Ionosphere feedback</span>
                 <span class="c1">#                      Feature #2484: FULL_DURATION feature profiles</span>
@@ -1447,6 +1678,9 @@
                         <span class="k">else</span><span class="p">:</span>
                             <span class="n">anomaly_breakdown</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">+=</span> <span class="n">value</span>
                     <span class="k">except</span> <span class="n">Empty</span><span class="p">:</span>
+                        <span class="c1"># @added 20191113 - Branch #3262: py3</span>
+                        <span class="c1"># Log</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;anomaly_breakdown.keys are empty&#39;</span><span class="p">)</span>
                         <span class="k">break</span>
 
                 <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
@@ -1457,15 +1691,37 @@
                         <span class="k">else</span><span class="p">:</span>
                             <span class="n">exceptions</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">+=</span> <span class="n">value</span>
                     <span class="k">except</span> <span class="n">Empty</span><span class="p">:</span>
+                        <span class="c1"># @added 20191113 - Branch #3262: py3</span>
+                        <span class="c1"># Log</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;exceptions.keys are empty&#39;</span><span class="p">)</span>
                         <span class="k">break</span>
+
+                <span class="c1"># @added 20191021 - Bug #3288: Always send anomaly_breakdown and exception metrics</span>
+                <span class="c1">#                   Branch #3262: py3</span>
+                <span class="n">exceptions_metrics</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Boring&#39;</span><span class="p">,</span> <span class="s1">&#39;Stale&#39;</span><span class="p">,</span> <span class="s1">&#39;TooShort&#39;</span><span class="p">,</span> <span class="s1">&#39;Other&#39;</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">i_exception</span> <span class="ow">in</span> <span class="n">exceptions_metrics</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">i_exception</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                        <span class="n">exceptions</span><span class="p">[</span><span class="n">i_exception</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">for</span> <span class="n">i_anomaly_breakdown</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">MIRAGE_ALGORITHMS</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">i_anomaly_breakdown</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">anomaly_breakdown</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                        <span class="n">anomaly_breakdown</span><span class="p">[</span><span class="n">i_anomaly_breakdown</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
 
                 <span class="c1"># @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
                 <span class="c1"># Use Redis set and not self.metric_variables</span>
                 <span class="n">metric_variables</span> <span class="o">=</span> <span class="p">[]</span>
-                <span class="n">literal_metric_variables</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;mirage.metric_variables&#39;</span><span class="p">))</span>
+                <span class="c1"># @modified 20191022 - Bug #3266: py3 Redis binary objects not strings</span>
+                <span class="c1">#                      Branch #3262: py3</span>
+                <span class="c1"># literal_metric_variables = list(self.redis_conn.smembers(&#39;mirage.metric_variables&#39;))</span>
+                <span class="n">literal_metric_variables</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;mirage.metric_variables&#39;</span><span class="p">))</span>
                 <span class="k">for</span> <span class="n">item_list_string</span> <span class="ow">in</span> <span class="n">literal_metric_variables</span><span class="p">:</span>
                     <span class="n">list_item</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">item_list_string</span><span class="p">)</span>
                     <span class="n">metric_variables</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">list_item</span><span class="p">)</span>
+
+                <span class="c1"># @added 20191113 - Branch #3262: py3</span>
+                <span class="c1"># Set default values</span>
+                <span class="n">metric_name</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">metric_value</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">hours_to_resolve</span> <span class="o">=</span> <span class="mi">0</span>
 
                 <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
                 <span class="c1"># for metric_variable in self.metric_variables:</span>
@@ -1479,43 +1735,85 @@
                     <span class="c1"># if metric_variable[0] == &#39;metric_timestamp&#39;:</span>
                     <span class="c1">#     metric_timestamp = metric_variable[1]</span>
 
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;analysis done - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric_name</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;analysis done - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_name</span><span class="p">))</span>
 
                 <span class="c1"># Send alerts</span>
                 <span class="c1"># Calculate hours second order resolution to seconds</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;analyzed at </span><span class="si">%s</span><span class="s1"> hours resolution&#39;</span> <span class="o">%</span> <span class="n">hours_to_resolve</span><span class="p">)</span>
-                <span class="n">second_order_resolution_seconds</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">hours_to_resolve</span><span class="p">)</span> <span class="o">*</span> <span class="mi">3600</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;analyzed at </span><span class="si">%s</span><span class="s1"> seconds resolution&#39;</span> <span class="o">%</span> <span class="n">second_order_resolution_seconds</span><span class="p">)</span>
+                <span class="c1"># @modified 20191113 - Branch #3262: py3</span>
+                <span class="c1"># Only if set</span>
+                <span class="k">if</span> <span class="n">hours_to_resolve</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;analyzed at </span><span class="si">%s</span><span class="s1"> hours resolution&#39;</span> <span class="o">%</span> <span class="n">hours_to_resolve</span><span class="p">)</span>
+                    <span class="n">second_order_resolution_seconds</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">hours_to_resolve</span><span class="p">)</span> <span class="o">*</span> <span class="mi">3600</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;analyzed at </span><span class="si">%s</span><span class="s1"> seconds resolution&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">second_order_resolution_seconds</span><span class="p">))</span>
 
                 <span class="c1"># Remove metric check file</span>
-                <span class="n">metric_check_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">MIRAGE_CHECK_PATH</span><span class="p">,</span> <span class="n">processing_check_file</span><span class="p">)</span>
+                <span class="n">metric_check_file</span> <span class="o">=</span> <span class="s1">&#39;None&#39;</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">metric_check_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">MIRAGE_CHECK_PATH</span><span class="p">,</span> <span class="n">processing_check_file</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: interpolated metric_check_file to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric_check_file</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to interpolate metric_check_file&#39;</span><span class="p">)</span>
+
                 <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">):</span>
                     <span class="k">try</span><span class="p">:</span>
                         <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">)</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;removed check file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric_check_file</span><span class="p">)</span>
                     <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to remove metric_check_file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric_check_file</span><span class="p">)</span>
                         <span class="k">pass</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to remove metric_check_file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric_check_file</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: no metric_check_file to remove OK - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric_check_file</span><span class="p">)</span>
 
                 <span class="c1"># Remove the metric directory</span>
-                <span class="n">timeseries_dir</span> <span class="o">=</span> <span class="n">metric_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">)</span>
-                <span class="n">metric_data_dir</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">MIRAGE_CHECK_PATH</span><span class="p">,</span> <span class="n">timeseries_dir</span><span class="p">)</span>
+                <span class="c1"># @modified 20191113 - Branch #3262: py3</span>
+                <span class="c1"># Convert None to str</span>
+                <span class="c1"># timeseries_dir = metric_name.replace(&#39;.&#39;, &#39;/&#39;)</span>
+                <span class="n">metric_data_dir</span> <span class="o">=</span> <span class="s1">&#39;None&#39;</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">metric_name_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_name</span><span class="p">)</span>
+                    <span class="n">timeseries_dir</span> <span class="o">=</span> <span class="n">metric_name_str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">)</span>
+                    <span class="n">metric_data_dir</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">MIRAGE_CHECK_PATH</span><span class="p">,</span> <span class="n">timeseries_dir</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: metric_data_dir interpolated to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_data_dir</span><span class="p">))</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to interpolate metric_data_dir&#39;</span><span class="p">)</span>
+                    <span class="n">metric_data_dir</span> <span class="o">=</span> <span class="s1">&#39;None&#39;</span>
+
                 <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">metric_data_dir</span><span class="p">):</span>
                     <span class="k">try</span><span class="p">:</span>
                         <span class="n">rmtree</span><span class="p">(</span><span class="n">metric_data_dir</span><span class="p">)</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;removed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric_data_dir</span><span class="p">)</span>
                     <span class="k">except</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to rmtree </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric_data_dir</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: metric_data_dir does not exist - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_data_dir</span><span class="p">))</span>
 
+                <span class="n">ionosphere_unique_metrics</span> <span class="o">=</span> <span class="p">[]</span>
                 <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">MIRAGE_ENABLE_ALERTS</span><span class="p">:</span>
                     <span class="c1"># @added 20161228 - Feature #1830: Ionosphere alerts</span>
                     <span class="c1">#                   Branch #922: Ionosphere</span>
                     <span class="c1"># Bringing Ionosphere online - do alert on Ionosphere metrics</span>
                     <span class="k">try</span><span class="p">:</span>
-                        <span class="n">ionosphere_unique_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;ionosphere.unique_metrics&#39;</span><span class="p">))</span>
+                        <span class="c1"># @modified 20191022 - Bug #3266: py3 Redis binary objects not strings</span>
+                        <span class="c1">#                      Branch #3262: py3</span>
+                        <span class="c1"># ionosphere_unique_metrics = list(self.redis_conn.smembers(&#39;ionosphere.unique_metrics&#39;))</span>
+                        <span class="n">ionosphere_unique_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;ionosphere.unique_metrics&#39;</span><span class="p">))</span>
                     <span class="k">except</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get ionosphere.unique_metrics from Redis&#39;</span><span class="p">)</span>
                         <span class="n">ionosphere_unique_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: settings.MIRAGE_ENABLE_ALERTS is not True&#39;</span><span class="p">)</span>
 
             <span class="c1"># @added 20161228 - Feature #1830: Ionosphere alerts</span>
             <span class="c1">#                   Branch #922: Ionosphere</span>
@@ -1530,7 +1828,10 @@
                 <span class="c1"># Wrapped in try except</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">run_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
-                    <span class="n">ionosphere_alert_on</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">scan_iter</span><span class="p">(</span><span class="n">match</span><span class="o">=</span><span class="s1">&#39;ionosphere.mirage.alert.*&#39;</span><span class="p">))</span>
+                    <span class="c1"># @modified 20200430 - Bug #3266: py3 Redis binary objects not strings</span>
+                    <span class="c1">#                      Branch #3262: py3</span>
+                    <span class="c1"># ionosphere_alert_on = list(self.redis_conn.scan_iter(match=&#39;ionosphere.mirage.alert.*&#39;))</span>
+                    <span class="n">ionosphere_alert_on</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">scan_iter</span><span class="p">(</span><span class="n">match</span><span class="o">=</span><span class="s1">&#39;ionosphere.mirage.alert.*&#39;</span><span class="p">))</span>
                 <span class="k">except</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get ionosphere.mirage.alert.* from Redis key scan&#39;</span><span class="p">)</span>
@@ -1538,7 +1839,10 @@
 
                 <span class="k">for</span> <span class="n">cache_key</span> <span class="ow">in</span> <span class="n">ionosphere_alert_on</span><span class="p">:</span>
                     <span class="k">try</span><span class="p">:</span>
-                        <span class="n">alert_on</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span>
+                        <span class="c1"># @modified 20200322 - Bug #3266: py3 Redis binary objects not strings</span>
+                        <span class="c1">#                      Branch #3262: py3</span>
+                        <span class="c1"># alert_on = self.redis_conn.get(cache_key)</span>
+                        <span class="n">alert_on</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span>
                         <span class="n">send_alert_for</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">alert_on</span><span class="p">)</span>
                         <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">send_alert_for</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
                         <span class="n">base_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">send_alert_for</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
@@ -1563,7 +1867,13 @@
                         <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span>
                     <span class="k">except</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add an Ionosphere anomalous_metric for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
+                        <span class="c1"># @modified 20200322 - Bug #3266: py3 Redis binary objects not strings</span>
+                        <span class="c1">#                      Branch #3262: py3</span>
+                        <span class="c1"># logger.error(&#39;error :: failed to add an Ionosphere anomalous_metric for %s&#39; % base_name)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add an Ionosphere anomalous_metric for cache key </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">cache_key</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: no ionosphere_alerts_returned - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">ionosphere_alerts_returned</span><span class="p">))</span>
 
             <span class="c1"># @added 20181114 - Bug #2682: Reduce mirage ionosphere alert loop</span>
             <span class="c1"># To reduce the amount of I/O used by Mirage in this loop check</span>
@@ -1580,7 +1890,10 @@
             <span class="c1"># @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
             <span class="n">mirage_anomalous_metrics</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">literal_mirage_anomalous_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;mirage.anomalous_metrics&#39;</span><span class="p">))</span>
+                <span class="c1"># @modified 20191022 - Bug #3266: py3 Redis binary objects not strings</span>
+                <span class="c1">#                      Branch #3262: py3</span>
+                <span class="c1"># literal_mirage_anomalous_metrics = list(self.redis_conn.smembers(&#39;mirage.anomalous_metrics&#39;))</span>
+                <span class="n">literal_mirage_anomalous_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;mirage.anomalous_metrics&#39;</span><span class="p">))</span>
                 <span class="k">for</span> <span class="n">metric_list_string</span> <span class="ow">in</span> <span class="n">literal_mirage_anomalous_metrics</span><span class="p">:</span>
                     <span class="n">metric</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">metric_list_string</span><span class="p">)</span>
                     <span class="n">mirage_anomalous_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
@@ -1592,6 +1905,10 @@
             <span class="k">for</span> <span class="n">alert</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">ALERTS</span><span class="p">:</span>
                 <span class="c1"># @added 20181114 - Bug #2682: Reduce mirage ionosphere alert loop</span>
                 <span class="n">not_an_ionosphere_metric_check_done</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
+
+                <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> metrics in mirage_anomalous_metrics&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">mirage_anomalous_metrics</span><span class="p">)))</span>
+
                 <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
                 <span class="c1"># for metric in self.anomalous_metrics:</span>
                 <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">mirage_anomalous_metrics</span><span class="p">:</span>
@@ -1599,7 +1916,15 @@
                     <span class="c1">#                   Branch #922: Ionosphere</span>
                     <span class="c1"># Bringing Ionosphere online - do alert on Ionosphere</span>
                     <span class="c1"># metrics if Ionosphere is up</span>
-                    <span class="n">metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+                        <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: metric_name interpolated to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_name</span><span class="p">))</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: failed to interpolate metric_name&#39;</span><span class="p">)</span>
+
                     <span class="k">if</span> <span class="n">metric_name</span> <span class="ow">in</span> <span class="n">ionosphere_unique_metrics</span><span class="p">:</span>
                         <span class="c1"># @added 20181114 - Bug #2682: Reduce mirage ionosphere alert loop</span>
                         <span class="k">if</span> <span class="n">not_alerting_for_ionosphere</span> <span class="o">==</span> <span class="n">metric_name</span><span class="p">:</span>
@@ -1681,10 +2006,19 @@
                                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to set Redis key </span><span class="si">%s</span><span class="s1"> for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                                         <span class="nb">str</span><span class="p">(</span><span class="n">cache_key</span><span class="p">),</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
                                 <span class="c1"># trigger_alert(alert, metric, second_order_resolution_seconds, context)</span>
+
                                 <span class="k">try</span><span class="p">:</span>
                                     <span class="k">if</span> <span class="n">alert</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">&#39;smtp&#39;</span><span class="p">:</span>
+                                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;trigger_alert :: alert: </span><span class="si">%s</span><span class="s1">, metric: </span><span class="si">%s</span><span class="s1">, second_order_resolution_seconds: </span><span class="si">%s</span><span class="s1">, context: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                            <span class="nb">str</span><span class="p">(</span><span class="n">alert</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">),</span>
+                                            <span class="nb">str</span><span class="p">(</span><span class="n">second_order_resolution_seconds</span><span class="p">),</span>
+                                            <span class="nb">str</span><span class="p">(</span><span class="n">alert_context</span><span class="p">)))</span>
                                         <span class="n">trigger_alert</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">,</span> <span class="n">alert_context</span><span class="p">)</span>
                                     <span class="k">else</span><span class="p">:</span>
+                                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;smtp_trigger_alert :: alert: </span><span class="si">%s</span><span class="s1">, metric: </span><span class="si">%s</span><span class="s1">, second_order_resolution_seconds: </span><span class="si">%s</span><span class="s1">, context: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                            <span class="nb">str</span><span class="p">(</span><span class="n">alert</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">),</span>
+                                            <span class="nb">str</span><span class="p">(</span><span class="n">second_order_resolution_seconds</span><span class="p">),</span>
+                                            <span class="nb">str</span><span class="p">(</span><span class="n">alert_context</span><span class="p">)))</span>
                                         <span class="n">smtp_trigger_alert</span><span class="p">(</span><span class="n">alert</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">,</span> <span class="n">alert_context</span><span class="p">)</span>
                                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;sent </span><span class="si">%s</span><span class="s1"> alert: For </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">alert</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
                                 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
@@ -1698,7 +2032,10 @@
             <span class="c1"># @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
             <span class="n">mirage_not_anomalous_metrics</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">literal_mirage_not_anomalous_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;mirage.not_anomalous_metrics&#39;</span><span class="p">))</span>
+                <span class="c1"># @modified 20191022 - Bug #3266: py3 Redis binary objects not strings</span>
+                <span class="c1">#                      Branch #3262: py3</span>
+                <span class="c1"># literal_mirage_not_anomalous_metrics = list(self.redis_conn.smembers(&#39;mirage.not_anomalous_metrics&#39;))</span>
+                <span class="n">literal_mirage_not_anomalous_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;mirage.not_anomalous_metrics&#39;</span><span class="p">))</span>
                 <span class="k">for</span> <span class="n">metric_list_string</span> <span class="ow">in</span> <span class="n">literal_mirage_not_anomalous_metrics</span><span class="p">:</span>
                     <span class="n">metric</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">metric_list_string</span><span class="p">)</span>
                     <span class="n">mirage_not_anomalous_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
@@ -1734,8 +2071,8 @@
                 <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
                 <span class="c1"># logger.info(&#39;total anomalies    :: %d&#39; % len(self.anomalous_metrics))</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;total anomalies    :: </span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">len</span><span class="p">(</span><span class="n">mirage_anomalous_metrics</span><span class="p">))</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;exception stats    :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">exceptions</span><span class="p">)</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;anomaly breakdown  :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">anomaly_breakdown</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;exception stats    :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">exceptions</span><span class="p">))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;anomaly breakdown  :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_breakdown</span><span class="p">))</span>
 
             <span class="c1"># Log to Graphite</span>
             <span class="n">run_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">run_timestamp</span>
@@ -1747,8 +2084,11 @@
             <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE</span> <span class="ow">and</span> <span class="n">settings</span><span class="o">.</span><span class="n">MIRAGE_CRUCIBLE_ENABLED</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
-                    <span class="c1"># sent_to_crucible = str(len(self.sent_to_crucible))</span>
-                    <span class="n">sent_to_crucible</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;mirage.sent_to_crucible&#39;</span><span class="p">))))</span>
+                    <span class="c1"># sent_to_crucible = str(len(self.sent_to_crucible))#</span>
+                    <span class="c1"># @modified 20191022 - Bug #3266: py3 Redis binary objects not strings</span>
+                    <span class="c1">#                      Branch #3262: py3</span>
+                    <span class="c1"># sent_to_crucible = str(len(list(self.redis_conn.smembers(&#39;mirage.sent_to_crucible&#39;))))</span>
+                    <span class="n">sent_to_crucible</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;mirage.sent_to_crucible&#39;</span><span class="p">))))</span>
                 <span class="k">except</span><span class="p">:</span>
                     <span class="n">sent_to_crucible</span> <span class="o">=</span> <span class="s1">&#39;0&#39;</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;sent_to_crucible   :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">sent_to_crucible</span><span class="p">)</span>
@@ -1759,7 +2099,10 @@
                 <span class="k">try</span><span class="p">:</span>
                     <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
                     <span class="c1"># sent_to_panorama = str(len(self.sent_to_panorama))</span>
-                    <span class="n">sent_to_panorama</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;mirage.sent_to_panorama&#39;</span><span class="p">))))</span>
+                    <span class="c1"># @modified 20191022 - Bug #3266: py3 Redis binary objects not strings</span>
+                    <span class="c1">#                      Branch #3262: py3</span>
+                    <span class="c1"># sent_to_panorama = str(len(list(self.redis_conn.smembers(&#39;mirage.sent_to_panorama&#39;))))</span>
+                    <span class="n">sent_to_panorama</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;mirage.sent_to_panorama&#39;</span><span class="p">))))</span>
                 <span class="k">except</span><span class="p">:</span>
                     <span class="n">sent_to_panorama</span> <span class="o">=</span> <span class="s1">&#39;0&#39;</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;sent_to_panorama   :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">sent_to_panorama</span><span class="p">)</span>
@@ -1770,7 +2113,10 @@
                 <span class="k">try</span><span class="p">:</span>
                     <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
                     <span class="c1"># sent_to_ionosphere = str(len(self.sent_to_ionosphere))</span>
-                    <span class="n">sent_to_ionosphere</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;mirage.sent_to_ionosphere&#39;</span><span class="p">))))</span>
+                    <span class="c1"># @modified 20191022 - Bug #3266: py3 Redis binary objects not strings</span>
+                    <span class="c1">#                      Branch #3262: py3</span>
+                    <span class="c1"># sent_to_ionosphere = str(len(list(self.redis_conn.smembers(&#39;mirage.sent_to_ionosphere&#39;))))</span>
+                    <span class="n">sent_to_ionosphere</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;mirage.sent_to_ionosphere&#39;</span><span class="p">))))</span>
                 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not determine sent_to_ionosphere: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
                     <span class="n">sent_to_ionosphere</span> <span class="o">=</span> <span class="s1">&#39;0&#39;</span>
@@ -1861,7 +2207,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2019, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
 
     </p>
   </div>
@@ -1883,7 +2229,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.3.0',
+            VERSION:'2.0.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

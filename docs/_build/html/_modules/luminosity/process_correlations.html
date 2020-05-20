@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>luminosity.process_correlations &mdash; Skyline 1.3.0 documentation</title>
+  <title>luminosity.process_correlations &mdash; Skyline 2.0.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.3.0 documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 2.0.0 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                1.3
+                2.0
               </div>
             
           
@@ -90,10 +90,12 @@
 <li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
@@ -175,7 +177,9 @@
 <span class="kn">from</span> <span class="nn">redis</span> <span class="k">import</span> <span class="n">StrictRedis</span>
 <span class="kn">from</span> <span class="nn">msgpack</span> <span class="k">import</span> <span class="n">Unpacker</span>
 <span class="kn">import</span> <span class="nn">traceback</span>
-<span class="kn">from</span> <span class="nn">math</span> <span class="k">import</span> <span class="n">ceil</span>
+<span class="c1"># @modified 20191115 - Branch #3262: py3</span>
+<span class="c1"># from math import ceil</span>
+
 <span class="kn">from</span> <span class="nn">luminol.anomaly_detector</span> <span class="k">import</span> <span class="n">AnomalyDetector</span>
 <span class="kn">from</span> <span class="nn">luminol.correlator</span> <span class="k">import</span> <span class="n">Correlator</span>
 <span class="kn">from</span> <span class="nn">timeit</span> <span class="k">import</span> <span class="n">default_timer</span> <span class="k">as</span> <span class="n">timer</span>
@@ -184,9 +188,29 @@
 <span class="kn">import</span> <span class="nn">requests</span>
 <span class="kn">from</span> <span class="nn">ast</span> <span class="k">import</span> <span class="n">literal_eval</span>
 
+<span class="c1"># @added 20200428 - Feature #3510: Enable Luminosity to handle correlating namespaces only</span>
+<span class="c1">#                   Feature #3500: webapp - crucible_process_metrics</span>
+<span class="c1">#                   Feature #1448: Crucible web UI</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">time</span>
+
 <span class="kn">import</span> <span class="nn">settings</span>
-<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="p">(</span><span class="n">mysql_select</span><span class="p">,</span> <span class="n">is_derivative_metric</span><span class="p">,</span>
-                               <span class="n">nonNegativeDerivative</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">mysql_select</span><span class="p">,</span> <span class="n">is_derivative_metric</span><span class="p">,</span> <span class="n">nonNegativeDerivative</span><span class="p">,</span>
+    <span class="c1"># @added 20191030 - Bug #3266: py3 Redis binary objects not strings</span>
+    <span class="c1">#                   Branch #3262: py3</span>
+    <span class="c1"># Added a single functions to deal with Redis connection and the</span>
+    <span class="c1"># charset=&#39;utf-8&#39;, decode_responses=True arguments required in py3</span>
+    <span class="n">get_redis_conn</span><span class="p">,</span> <span class="n">get_redis_conn_decoded</span><span class="p">,</span>
+    <span class="c1"># @added 20200506 - Feature #3532: Sort all time series</span>
+    <span class="n">sort_timeseries</span><span class="p">)</span>
+
+<span class="c1"># @added 20200428 - Feature #3510: Enable Luminosity to handle correlating namespaces only</span>
+<span class="c1">#                   Feature #3512: matched_or_regexed_in_list function</span>
+<span class="kn">from</span> <span class="nn">matched_or_regexed_in_list</span> <span class="k">import</span> <span class="n">matched_or_regexed_in_list</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">correlate_namespaces_only</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">LUMINOSITY_CORRELATE_NAMESPACES_ONLY</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">correlate_namespaces_only</span> <span class="o">=</span> <span class="p">[]</span>
 
 <span class="c1"># Database configuration</span>
 <span class="n">config</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;user&#39;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_DBUSER</span><span class="p">,</span>
@@ -209,10 +233,21 @@
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">skyline_app_logger</span><span class="p">)</span>
 
 <span class="c1"># @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow</span>
-<span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">:</span>
-    <span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">password</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">,</span> <span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
-<span class="k">else</span><span class="p">:</span>
-    <span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+<span class="c1"># @modified 20191030 - Bug #3266: py3 Redis binary objects not strings</span>
+<span class="c1">#                      Branch #3262: py3</span>
+<span class="c1"># Use get_redis_conn and get_redis_conn_decoded to use on Redis sets when the bytes</span>
+<span class="c1"># types need to be decoded as utf-8 to str</span>
+<span class="c1"># if settings.REDIS_PASSWORD:</span>
+<span class="c1">#     redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)</span>
+<span class="c1"># else:</span>
+<span class="c1">#     redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)</span>
+
+<span class="c1"># @added 20191030 - Bug #3266: py3 Redis binary objects not strings</span>
+<span class="c1">#                   Branch #3262: py3</span>
+<span class="c1"># Added a single functions to deal with Redis connection and the</span>
+<span class="c1"># charset=&#39;utf-8&#39;, decode_responses=True arguments required in py3</span>
+<span class="n">redis_conn</span> <span class="o">=</span> <span class="n">get_redis_conn</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+<span class="n">redis_conn_decoded</span> <span class="o">=</span> <span class="n">get_redis_conn_decoded</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="get_anomaly"><a class="viewcode-back" href="../../skyline.luminosity.html#luminosity.process_correlations.get_anomaly">[docs]</a><span class="k">def</span> <span class="nf">get_anomaly</span><span class="p">(</span><span class="n">request_type</span><span class="p">):</span>
@@ -263,7 +298,17 @@
     <span class="c1"># Only correlate metrics with an alert setting</span>
     <span class="k">if</span> <span class="n">correlate_alerts_only</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">smtp_alerter_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;analyzer.smtp_alerter_metrics&#39;</span><span class="p">))</span>
+            <span class="c1"># @modified 20191030 - Bug #3266: py3 Redis binary objects not strings</span>
+            <span class="c1">#                      Branch #3262: py3</span>
+            <span class="c1"># smtp_alerter_metrics = list(redis_conn.smembers(&#39;analyzer.smtp_alerter_metrics&#39;))</span>
+            <span class="c1"># @modified 20200421 - Feature #3306: Record anomaly_end_timestamp</span>
+            <span class="c1">#                      Branch #2270: luminosity</span>
+            <span class="c1">#                      Branch #3262: py3</span>
+            <span class="c1"># Changed to use the aet Redis set, used to determine and record the</span>
+            <span class="c1"># anomaly_end_timestamp, some transient sets need to copied so that</span>
+            <span class="c1"># the data always exists, even if it is sourced from a transient set.</span>
+            <span class="c1"># smtp_alerter_metrics = list(redis_conn_decoded.smembers(&#39;analyzer.smtp_alerter_metrics&#39;))</span>
+            <span class="n">smtp_alerter_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;aet.analyzer.smtp_alerter_metrics&#39;</span><span class="p">))</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">smtp_alerter_metrics</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="n">base_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">smtp_alerter_metrics</span><span class="p">:</span>
@@ -277,7 +322,10 @@
     <span class="n">anomalous_metric</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
     <span class="n">unique_metrics</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">unique_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span> <span class="o">+</span> <span class="s1">&#39;unique_metrics&#39;</span><span class="p">))</span>
+        <span class="c1"># @modified 20191030 - Bug #3266: py3 Redis binary objects not strings</span>
+        <span class="c1">#                      Branch #3262: py3</span>
+        <span class="c1"># unique_metrics = list(redis_conn.smembers(settings.FULL_NAMESPACE + &#39;unique_metrics&#39;))</span>
+        <span class="n">unique_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span> <span class="o">+</span> <span class="s1">&#39;unique_metrics&#39;</span><span class="p">))</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: get_assigned_metrics :: no unique_metrics&#39;</span><span class="p">)</span>
@@ -347,6 +395,15 @@
         <span class="k">except</span><span class="p">:</span>
             <span class="n">timeseries</span> <span class="o">=</span> <span class="p">[]</span>
 
+        <span class="c1"># @added 20200507 - Feature #3532: Sort all time series</span>
+        <span class="c1"># To ensure that there are no unordered timestamps in the time</span>
+        <span class="c1"># series which are artefacts of the collector or carbon-relay, sort</span>
+        <span class="c1"># all time series by timestamp before analysis.</span>
+        <span class="n">original_timeseries</span> <span class="o">=</span> <span class="n">timeseries</span>
+        <span class="k">if</span> <span class="n">original_timeseries</span><span class="p">:</span>
+            <span class="n">timeseries</span> <span class="o">=</span> <span class="n">sort_timeseries</span><span class="p">(</span><span class="n">original_timeseries</span><span class="p">)</span>
+            <span class="k">del</span> <span class="n">original_timeseries</span>
+
     <span class="c1"># Convert the time series if this is a known_derivative_metric</span>
     <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="n">is_derivative_metric</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">known_derivative_metric</span><span class="p">:</span>
@@ -399,13 +456,56 @@
     <span class="k">return</span> <span class="n">anomalies</span></div>
 
 
-<div class="viewcode-block" id="get_assigned_metrics"><a class="viewcode-back" href="../../skyline.luminosity.html#luminosity.process_correlations.get_assigned_metrics">[docs]</a><span class="k">def</span> <span class="nf">get_assigned_metrics</span><span class="p">(</span><span class="n">i</span><span class="p">):</span>
+<span class="c1"># @modified 20200506 - Feature #3510: Enable Luminosity to handle correlating namespaces only</span>
+<span class="c1"># def get_assigned_metrics(i,):</span>
+<div class="viewcode-block" id="get_assigned_metrics"><a class="viewcode-back" href="../../skyline.luminosity.html#luminosity.process_correlations.get_assigned_metrics">[docs]</a><span class="k">def</span> <span class="nf">get_assigned_metrics</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">base_name</span><span class="p">):</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">unique_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span> <span class="o">+</span> <span class="s1">&#39;unique_metrics&#39;</span><span class="p">))</span>
+        <span class="c1"># @modified 20191030 - Bug #3266: py3 Redis binary objects not strings</span>
+        <span class="c1">#                      Branch #3262: py3</span>
+        <span class="c1"># unique_metrics = list(redis_conn.smembers(settings.FULL_NAMESPACE + &#39;unique_metrics&#39;))</span>
+        <span class="n">unique_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span> <span class="o">+</span> <span class="s1">&#39;unique_metrics&#39;</span><span class="p">))</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: get_assigned_metrics :: no unique_metrics&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">[]</span>
+
+    <span class="c1"># @added 20200506 - Feature #3510: Enable Luminosity to handle correlating namespaces only</span>
+    <span class="n">correlate_namespace_to</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">correlate_namespaces_only</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">correlate_namespace</span> <span class="ow">in</span> <span class="n">correlate_namespaces_only</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">correlate_namespace_matched_by</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">correlate_namespace_to</span><span class="p">,</span> <span class="n">correlate_namespace_matched_by</span> <span class="o">=</span> <span class="n">matched_or_regexed_in_list</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="p">[</span><span class="n">correlate_namespace</span><span class="p">])</span>
+                <span class="k">if</span> <span class="n">correlate_namespace_to</span><span class="p">:</span>
+                    <span class="k">break</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+    <span class="k">if</span> <span class="n">correlate_namespaces_only</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">correlate_namespace_to</span><span class="p">:</span>
+            <span class="n">correlate_with_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">metric_name</span> <span class="ow">in</span> <span class="n">unique_metrics</span><span class="p">:</span>
+                <span class="n">metric_base_name</span> <span class="o">=</span> <span class="n">metric_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="n">add_metric</span><span class="p">,</span> <span class="n">add_metric_matched_by</span> <span class="o">=</span> <span class="n">matched_or_regexed_in_list</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_base_name</span><span class="p">,</span> <span class="n">correlate_namespaces_only</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">add_metric</span><span class="p">:</span>
+                    <span class="n">correlate_with_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric_name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">correlate_with_metrics</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;get_asssigned_metrics :: replaced </span><span class="si">%s</span><span class="s1"> unique_metrics with </span><span class="si">%s</span><span class="s1"> correlate_with_metrics, excluding metrics from LUMINOSITY_CORRELATE_NAMESPACES_ONLY&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">unique_metrics</span><span class="p">)),</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">correlate_with_metrics</span><span class="p">))))</span>
+                <span class="n">unique_metrics</span> <span class="o">=</span> <span class="n">correlate_with_metrics</span>
+    <span class="k">if</span> <span class="n">correlate_namespace_to</span><span class="p">:</span>
+        <span class="n">correlate_with_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">correlate_with_namespace</span> <span class="o">=</span> <span class="n">correlate_namespace_matched_by</span><span class="p">[</span><span class="s1">&#39;matched_namespace&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">correlate_with_namespace</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">metric_name</span> <span class="ow">in</span> <span class="n">unique_metrics</span><span class="p">:</span>
+                <span class="n">metric_base_name</span> <span class="o">=</span> <span class="n">metric_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="n">add_metric</span><span class="p">,</span> <span class="n">add_metric_matched_by</span> <span class="o">=</span> <span class="n">matched_or_regexed_in_list</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_base_name</span><span class="p">,</span> <span class="p">[</span><span class="n">correlate_with_namespace</span><span class="p">])</span>
+                <span class="k">if</span> <span class="n">add_metric</span><span class="p">:</span>
+                    <span class="n">correlate_with_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric_name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">correlate_with_metrics</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;get_correlations :: replaced </span><span class="si">%s</span><span class="s1"> unique_metrics with </span><span class="si">%s</span><span class="s1"> correlate_with_metrics&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">unique_metrics</span><span class="p">)),</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">correlate_with_metrics</span><span class="p">))))</span>
+            <span class="n">unique_metrics</span> <span class="o">=</span> <span class="n">correlate_with_metrics</span>
+
     <span class="c1"># Discover assigned metrics</span>
     <span class="c1"># @modified 20180720 - Feature #2464: luminosity_remote_data</span>
     <span class="c1"># Use just 1 processor</span>
@@ -546,12 +646,26 @@
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: get_correlations :: no data&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">correlated_metrics</span><span class="p">,</span> <span class="n">correlations</span><span class="p">)</span>
 
+    <span class="c1"># @added 20200428 - Feature #3510: Enable Luminosity to handle correlating namespaces only</span>
+    <span class="c1">#                   Feature #3500: webapp - crucible_process_metrics</span>
+    <span class="c1">#                   Feature #1448: Crucible web UI</span>
+    <span class="c1"># Discard the check if the anomaly_timestamp is not in FULL_DURATION as it</span>
+    <span class="c1"># will have been added via the Crucible or webapp/crucible route</span>
+    <span class="n">start_timestamp_of_full_duration_data</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">anomaly_timestamp</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">start_timestamp_of_full_duration_data</span> <span class="o">+</span> <span class="mi">2000</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;get_correlations :: the anomaly_timestamp is too old not correlating&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">correlated_metrics</span><span class="p">,</span> <span class="n">correlations</span><span class="p">)</span>
+
     <span class="n">start_local_correlations</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
 
     <span class="n">local_redis_metrics_checked_count</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">local_redis_metrics_correlations_count</span> <span class="o">=</span> <span class="mi">0</span>
 
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;get_correlations :: the local Redis metric count is </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">assigned_metrics</span><span class="p">)))</span>
+
+    <span class="c1"># @added 20200428 - Feature #3510: Enable Luminosity to handle correlating namespaces only</span>
+    <span class="c1"># Removed here and handled in get_assigned_metrics</span>
+
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">metric_name</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">assigned_metrics</span><span class="p">):</span>
         <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="c1"># print(metric_name)</span>
@@ -573,6 +687,15 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">timeseries</span><span class="p">:</span>
             <span class="c1"># print(&#39;no time series data for %s&#39; % base_name)</span>
             <span class="k">continue</span>
+
+        <span class="c1"># @added 20200507 - Feature #3532: Sort all time series</span>
+        <span class="c1"># To ensure that there are no unordered timestamps in the time</span>
+        <span class="c1"># series which are artefacts of the collector or carbon-relay, sort</span>
+        <span class="c1"># all time series by timestamp before analysis.</span>
+        <span class="n">original_timeseries</span> <span class="o">=</span> <span class="n">timeseries</span>
+        <span class="k">if</span> <span class="n">original_timeseries</span><span class="p">:</span>
+            <span class="n">timeseries</span> <span class="o">=</span> <span class="n">sort_timeseries</span><span class="p">(</span><span class="n">original_timeseries</span><span class="p">)</span>
+            <span class="k">del</span> <span class="n">original_timeseries</span>
 
         <span class="c1"># Convert the time series if this is a known_derivative_metric</span>
         <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="n">is_derivative_metric</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_base_name</span><span class="p">)</span>
@@ -747,6 +870,19 @@
     <span class="n">start_process_correlations</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
 
     <span class="n">anomaly_id</span><span class="p">,</span> <span class="n">metric_id</span><span class="p">,</span> <span class="n">anomaly_timestamp</span><span class="p">,</span> <span class="n">base_name</span> <span class="o">=</span> <span class="n">get_anomaly</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">)</span>
+
+    <span class="c1"># @added 20200428 - Feature #3510: Enable Luminosity to handle correlating namespaces only</span>
+    <span class="c1">#                   Feature #3500: webapp - crucible_process_metrics</span>
+    <span class="c1">#                   Feature #1448: Crucible web UI</span>
+    <span class="c1"># Discard the check if the anomaly_timestamp is not in FULL_DURATION as it</span>
+    <span class="c1"># will have been added via the Crucible or webapp/crucible route</span>
+    <span class="n">start_timestamp_of_full_duration_data</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">anomaly_timestamp</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">start_timestamp_of_full_duration_data</span> <span class="o">+</span> <span class="mi">2000</span><span class="p">):</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;process_correlations :: the anomaly_timestamp </span><span class="si">%s</span><span class="s1"> is too old not correlating&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_timestamp</span><span class="p">))</span>
+        <span class="n">metrics_checked_for_correlation</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">runtime</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="n">anomaly_timestamp</span><span class="p">,</span> <span class="n">anomalies</span><span class="p">,</span> <span class="n">correlated_metrics</span><span class="p">,</span> <span class="n">correlations</span><span class="p">,</span> <span class="n">sorted_correlations</span><span class="p">,</span> <span class="n">metrics_checked_for_correlation</span><span class="p">,</span> <span class="n">runtime</span><span class="p">)</span>
+
     <span class="n">anomalous_ts</span> <span class="o">=</span> <span class="n">get_anomalous_ts</span><span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="n">anomaly_timestamp</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">anomalous_ts</span><span class="p">:</span>
         <span class="n">metrics_checked_for_correlation</span> <span class="o">=</span> <span class="mi">0</span>
@@ -757,7 +893,11 @@
         <span class="n">metrics_checked_for_correlation</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">runtime</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="n">anomaly_timestamp</span><span class="p">,</span> <span class="n">anomalies</span><span class="p">,</span> <span class="n">correlated_metrics</span><span class="p">,</span> <span class="n">correlations</span><span class="p">,</span> <span class="n">sorted_correlations</span><span class="p">,</span> <span class="n">metrics_checked_for_correlation</span><span class="p">,</span> <span class="n">runtime</span><span class="p">)</span>
-    <span class="n">assigned_metrics</span> <span class="o">=</span> <span class="n">get_assigned_metrics</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+
+    <span class="c1"># @modified 20200506 - Feature #3510: Enable Luminosity to handle correlating namespaces only</span>
+    <span class="c1"># assigned_metrics = get_assigned_metrics(i)</span>
+    <span class="n">assigned_metrics</span> <span class="o">=</span> <span class="n">get_assigned_metrics</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
+
     <span class="n">raw_assigned</span> <span class="o">=</span> <span class="n">redis_conn</span><span class="o">.</span><span class="n">mget</span><span class="p">(</span><span class="n">assigned_metrics</span><span class="p">)</span>
     <span class="c1"># @added 20180720 - Feature #2464: luminosity_remote_data</span>
     <span class="n">remote_assigned</span> <span class="o">=</span> <span class="p">[]</span>
@@ -784,7 +924,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2019, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
 
     </p>
   </div>
@@ -806,7 +946,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.3.0',
+            VERSION:'2.0.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

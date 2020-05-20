@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Crucible &mdash; Skyline 1.3.0 documentation</title>
+  <title>Crucible &mdash; Skyline 2.0.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.3.0 documentation" href="index.html"/>
+    <link rel="top" title="Skyline 2.0.0 documentation" href="index.html"/>
         <link rel="next" title="Panorama" href="panorama.html"/>
         <link rel="prev" title="Boundary" href="boundary.html"/> 
 
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                1.3
+                2.0
               </div>
             
           
@@ -91,10 +91,12 @@
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monotonic-metrics.html">Strictly increasing monotonicity</a></li>
@@ -236,8 +238,8 @@ outputted resources.  It will be created if it does not exist.</li>
 <li>graphite_metric [optional] - True or False</li>
 <li>run_crucible_tests [optional] - True or False</li>
 <li>added_by [optional] - string</li>
-<li>graphite_override_uri_parameters [optional] - True or False, default is False
-if set to True graphite_metric must be set to True too.</li>
+<li>graphite_override_uri_parameters [optional] - str or False, default is False
+if set to a str the graphite_metric must be set to True too.</li>
 </ul>
 <p>If the graphite_override_uri_parameters variable is set in the check file the
 graphite_metric variable must be set to True for it be take effect.  If the
@@ -249,7 +251,50 @@ graphite_override_uri_parameters would be:</p>
 <p><code class="docutils literal"><span class="pre">`&quot;from=00%3A00_20190527&amp;until=23%3A59_20190612&amp;target=movingMedian(nonNegativeDerivative(stats.machine-1.vda.readTime)%2C24)&quot;`</span></code></p>
 <p>The full graphite URL and render URI parameter must not be declared as Crucible
 will construct the full URL using normal settings.py GRAPHITE variables.</p>
-<p>Here are some examples of check files:</p>
+<p>Here are some examples of check files, the format has change between the Python
+2 and 3 versions.</p>
+<p>Example of current Python 3 format:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">metric</span> <span class="o">=</span> <span class="s1">&#39;telegraf.skyline-1.cpu-total.cpu.usage_user&#39;</span>
+<span class="n">value</span> <span class="o">=</span> <span class="s1">&#39;0&#39;</span>
+<span class="n">from_timestamp</span> <span class="o">=</span> <span class="s1">&#39;1577504411&#39;</span>
+<span class="n">metric_timestamp</span> <span class="o">=</span> <span class="s1">&#39;1585394411&#39;</span>
+<span class="n">triggered_algorithms</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;histogram_bins&#39;</span><span class="p">,</span> <span class="s1">&#39;first_hour_average&#39;</span><span class="p">,</span> <span class="s1">&#39;stddev_from_average&#39;</span><span class="p">,</span> <span class="s1">&#39;grubbs&#39;</span><span class="p">,</span> <span class="s1">&#39;ks_test&#39;</span><span class="p">,</span> <span class="s1">&#39;mean_subtraction_cumulation&#39;</span><span class="p">,</span> <span class="s1">&#39;median_absolute_deviation&#39;</span><span class="p">,</span> <span class="s1">&#39;stddev_from_moving_average&#39;</span><span class="p">,</span> <span class="s1">&#39;least_squares&#39;</span><span class="p">]</span>
+<span class="n">algorithms</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;histogram_bins&#39;</span><span class="p">,</span> <span class="s1">&#39;first_hour_average&#39;</span><span class="p">,</span> <span class="s1">&#39;stddev_from_average&#39;</span><span class="p">,</span> <span class="s1">&#39;grubbs&#39;</span><span class="p">,</span> <span class="s1">&#39;ks_test&#39;</span><span class="p">,</span> <span class="s1">&#39;mean_subtraction_cumulation&#39;</span><span class="p">,</span> <span class="s1">&#39;median_absolute_deviation&#39;</span><span class="p">,</span> <span class="s1">&#39;stddev_from_moving_average&#39;</span><span class="p">,</span> <span class="s1">&#39;least_squares&#39;</span><span class="p">,</span> <span class="s1">&#39;detect_drop_off_cliff&#39;</span><span class="p">]</span>
+<span class="n">anomaly_dir</span> <span class="o">=</span> <span class="s1">&#39;/tmp/crucible_testing/crucible&#39;</span>
+<span class="n">graphite_metric</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="n">run_crucible_tests</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="n">added_by</span> <span class="o">=</span> <span class="s1">&#39;earthgecko&#39;</span>
+<span class="n">graphite_override_uri_parameters</span> <span class="o">=</span> <span class="s1">&#39;from=-3months&amp;target=telegraf.skyline-1.cpu-total.cpu.usage_user&#39;</span>
+</pre></div>
+</div>
+<p>The creation of the above can be automated fairly easily assuming you are
+running Skyline as the skyline user, to analyze the last 3 months of data in
+Graphite for a metric:</p>
+<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nv">METRIC</span><span class="o">=</span><span class="s2">&quot;telegraf.skyline-1.cpu-total.cpu.usage_user&quot;</span>
+<span class="nv">WDIR</span><span class="o">=</span><span class="s2">&quot;/tmp/crucible_testing/crucible/</span><span class="nv">$METRIC</span><span class="s2">&quot;</span>
+mkdir -p <span class="nv">$WDIR</span>
+<span class="nv">UNTIL</span><span class="o">=</span><span class="k">$(</span>date +%s<span class="k">)</span>
+<span class="nv">FROM</span><span class="o">=</span><span class="k">$(</span><span class="nb">echo</span> <span class="s2">&quot;</span><span class="nv">$UNTIL</span><span class="s2"> - 7890000&quot;</span> <span class="p">|</span> bc<span class="k">)</span>
+<span class="nb">echo</span> <span class="s2">&quot;metric = &#39;</span><span class="nv">$METRIC</span><span class="s2">&#39;</span>
+<span class="s2">value = &#39;0&#39;</span>
+<span class="s2">from_timestamp = &#39;</span><span class="nv">$FROM</span><span class="s2">&#39;</span>
+<span class="s2">metric_timestamp = &#39;</span><span class="nv">$UNTIL</span><span class="s2">&#39;</span>
+<span class="s2">triggered_algorithms = [&#39;histogram_bins&#39;, &#39;first_hour_average&#39;, &#39;stddev_from_average&#39;, &#39;grubbs&#39;, &#39;ks_test&#39;, &#39;mean_subtraction_cumulation&#39;, &#39;median_absolute_deviation&#39;, &#39;stddev_from_moving_average&#39;, &#39;least_squares&#39;]</span>
+<span class="s2">algorithms = [&#39;histogram_bins&#39;, &#39;first_hour_average&#39;, &#39;stddev_from_average&#39;, &#39;grubbs&#39;, &#39;ks_test&#39;, &#39;mean_subtraction_cumulation&#39;, &#39;median_absolute_deviation&#39;, &#39;stddev_from_moving_average&#39;, &#39;least_squares&#39;, &#39;detect_drop_off_cliff&#39;]</span>
+<span class="s2">anomaly_dir = &#39;</span><span class="nv">$WDIR</span><span class="s2">&#39;</span>
+<span class="s2">graphite_metric = True</span>
+<span class="s2">run_crucible_tests = True</span>
+<span class="s2">added_by = &#39;earthgecko&#39;</span>
+<span class="s2">graphite_override_uri_parameters = &#39;from=-3months&amp;target=</span><span class="si">${</span><span class="nv">METRIC</span><span class="si">}</span><span class="s2">&#39;&quot;</span> &gt; <span class="nv">$WDIR</span>/<span class="nv">$METRIC</span>.txt
+
+chown -R skyline:skyline <span class="nv">$WDIR</span>
+cat <span class="nv">$WDIR</span>/<span class="nv">$METRIC</span>.txt &gt; /opt/skyline/crucible/check/<span class="nv">$METRIC</span>.txt
+chown skyline:skyline /opt/skyline/crucible/check/<span class="nv">$METRIC</span>
+
+systemctl start crucible
+</pre></div>
+</div>
+<p>Example of the old Python 2 format:</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">metric</span> <span class="o">=</span> <span class="s2">&quot;stats.machine-1.vda.readTime&quot;</span>
 <span class="n">value</span> <span class="o">=</span> <span class="s2">&quot;123.24&quot;</span>
 <span class="n">from_timestamp</span> <span class="o">=</span> <span class="s2">&quot;1558911600&quot;</span>
@@ -327,7 +372,7 @@ space.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2019, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
 
     </p>
   </div>
@@ -349,7 +394,7 @@ space.</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.3.0',
+            VERSION:'2.0.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

@@ -31,6 +31,14 @@ skyline.algorithm_exceptions module
     :undoc-members:
     :show-inheritance:
 
+skyline.create_matplotlib_graph module
+--------------------------------------
+
+.. automodule:: create_matplotlib_graph
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 skyline.database module
 -----------------------
 
@@ -51,6 +59,14 @@ skyline.ionosphere_functions module
 -----------------------------------
 
 .. automodule:: ionosphere_functions
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+skyline.matched_or_regexed_in_list module
+-----------------------------------------
+
+.. automodule:: matched_or_regexed_in_list
     :members:
     :undoc-members:
     :show-inheritance:

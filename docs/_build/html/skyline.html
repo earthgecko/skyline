@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>skyline package &mdash; Skyline 1.3.0 documentation</title>
+  <title>skyline package &mdash; Skyline 2.0.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.3.0 documentation" href="index.html"/>
+    <link rel="top" title="Skyline 2.0.0 documentation" href="index.html"/>
         <link rel="next" title="skyline.analyzer package" href="skyline.analyzer.html"/>
         <link rel="prev" title="Roadmap" href="roadmap.html"/> 
 
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                1.3
+                2.0
               </div>
             
           
@@ -91,10 +91,12 @@
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monotonic-metrics.html">Strictly increasing monotonicity</a></li>
@@ -145,9 +147,11 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-algorithm_exceptions">skyline.algorithm_exceptions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-create_matplotlib_graph">skyline.create_matplotlib_graph module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-database">skyline.database module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-features_profile">skyline.features_profile module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-ionosphere_functions">skyline.ionosphere_functions module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-matched_or_regexed_in_list">skyline.matched_or_regexed_in_list module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-settings">skyline.settings module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-skyline_functions">skyline.skyline_functions module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-skyline_version">skyline.skyline_version module</a></li>
@@ -210,9 +214,13 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline.analyzer.html">skyline.analyzer package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="skyline.analyzer.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.analyzer.html#module-analyzer.agent">skyline.analyzer.agent module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.analyzer.html#module-analyzer.agent_batch">skyline.analyzer.agent_batch module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.analyzer.html#module-analyzer.alerters">skyline.analyzer.alerters module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.analyzer.html#module-analyzer.algorithms">skyline.analyzer.algorithms module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.analyzer.html#module-analyzer.algorithms_batch">skyline.analyzer.algorithms_batch module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.analyzer.html#skyline-analyzer-analyzer-debug-nonnegativederivative-module">skyline.analyzer.analyzer.debug.nonNegativeDerivative module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.analyzer.html#module-analyzer.analyzer">skyline.analyzer.analyzer module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.analyzer.html#module-analyzer.analyzer_batch">skyline.analyzer.analyzer_batch module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.analyzer.html#module-analyzer">Module contents</a></li>
 </ul>
 </li>
@@ -239,6 +247,7 @@
 <li class="toctree-l2"><a class="reference internal" href="skyline.crucible.html#module-crucible.agent">skyline.crucible.agent module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.crucible.html#module-crucible.crucible">skyline.crucible.crucible module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.crucible.html#module-crucible.crucible_algorithms">skyline.crucible.crucible_algorithms module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.crucible.html#module-crucible.crucible_firings">skyline.crucible.crucible_firings module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.crucible.html#module-crucible">Module contents</a></li>
 </ul>
 </li>
@@ -250,6 +259,7 @@
 <li class="toctree-l2"><a class="reference internal" href="skyline.flux.html#module-flux.logger">skyline.flux.logger module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.flux.html#module-flux.populate_metric">skyline.flux.populate_metric module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.flux.html#module-flux.populate_metric_worker">skyline.flux.populate_metric_worker module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.flux.html#module-flux.uploaded_data_worker">skyline.flux.uploaded_data_worker module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.flux.html#module-flux.worker">skyline.flux.worker module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.flux.html#module-flux">Module contents</a></li>
 </ul>
@@ -317,6 +327,7 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline.webapp.html">skyline.webapp package</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="skyline.webapp.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.webapp.html#module-webapp.backend">skyline.webapp.backend module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.webapp.html#module-webapp.crucible_backend">skyline.webapp.crucible_backend module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.webapp.html#module-webapp.gunicorn">skyline.webapp.gunicorn module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.webapp.html#module-webapp.ionosphere_backend">skyline.webapp.ionosphere_backend module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.webapp.html#module-webapp.utilities">skyline.webapp.utilities module</a></li>
@@ -348,6 +359,39 @@
 <dt id="algorithm_exceptions.Boring">
 <em class="property">exception </em><code class="descname">Boring</code><a class="reference internal" href="_modules/algorithm_exceptions.html#Boring"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#algorithm_exceptions.Boring" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">exceptions.Exception</span></code></p>
+</dd></dl>
+
+</div>
+<div class="section" id="module-create_matplotlib_graph">
+<span id="skyline-create-matplotlib-graph-module"></span><h2>skyline.create_matplotlib_graph module<a class="headerlink" href="#module-create_matplotlib_graph" title="Permalink to this headline">¶</a></h2>
+<p>create_matplotlib_graph</p>
+<dl class="function">
+<dt id="create_matplotlib_graph.create_matplotlib_graph">
+<code class="descname">create_matplotlib_graph</code><span class="sig-paren">(</span><em>current_skyline_app</em>, <em>output_file</em>, <em>graph_title</em>, <em>timeseries</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/create_matplotlib_graph.html#create_matplotlib_graph"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#create_matplotlib_graph.create_matplotlib_graph" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a png graph image using the features profile time series data
+provided or from the features profile time seires data in the DB if an empty
+list is provided.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>current_skyline_app</strong> (<em>str</em>) &#8211; the Skyline app name calling the function</li>
+<li><strong>output_file</strong> (<em>str</em>) &#8211; full path and filename to output where the png image is
+to be saved to</li>
+<li><strong>graph_title</strong> (<em>str</em>) &#8211; the graph image title</li>
+<li><strong>timeseries</strong> (<em>list</em>) &#8211; the time series</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">(status, file)</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(boolean, str)</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>
@@ -496,6 +540,37 @@ webapp/ionosphere_backend</p>
 </dd></dl>
 
 <dl class="function">
+<dt id="ionosphere_functions.create_fp_ts_graph">
+<code class="descname">create_fp_ts_graph</code><span class="sig-paren">(</span><em>current_skyline_app</em>, <em>metric_data_dir</em>, <em>base_name</em>, <em>fp_id</em>, <em>anomaly_timestamp</em>, <em>timeseries</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere_functions.html#create_fp_ts_graph"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere_functions.create_fp_ts_graph" title="Permalink to this definition">¶</a></dt>
+<dd><p>Creates a png graph image using the features profile time series data
+provided or from the features profile time seires data in the DB if an empty
+list is provided.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>current_skyline_app</strong> (<em>str</em>) &#8211; the Skyline app name calling the function</li>
+<li><strong>metric_data_dir</strong> (<em>str</em>) &#8211; the training_data or features profile directory were
+the png image is to be saved to</li>
+<li><strong>base_name</strong> (<em>str</em>) &#8211; the base_name of the metric</li>
+<li><strong>fp_ip</strong> &#8211; the feature profile id</li>
+<li><strong>anomaly_timestamp</strong> (<em>int</em>) &#8211; the anomaly timestamp</li>
+<li><strong>timeseries</strong> (<em>list</em>) &#8211; the time series</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">boolean</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">boolean</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
 <dt id="ionosphere_functions.create_features_profile">
 <code class="descname">create_features_profile</code><span class="sig-paren">(</span><em>current_skyline_app</em>, <em>requested_timestamp</em>, <em>data_for_metric</em>, <em>context</em>, <em>ionosphere_job</em>, <em>fp_parent_id</em>, <em>fp_generation</em>, <em>fp_learn</em>, <em>slack_ionosphere_job</em>, <em>user_id</em>, <em>label</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere_functions.html#create_features_profile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere_functions.create_features_profile" title="Permalink to this definition">¶</a></dt>
 <dd><p>Add a features_profile to the Skyline ionosphere database table.</p>
@@ -544,7 +619,7 @@ features profile.</li>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
 <li><strong>current_skyline_app</strong> (<em>str</em>) &#8211; the Skyline app name calling the function</li>
-<li><strong>anomaly_id</strong> (<em>int</em>) &#8211; thee base_name of the metric</li>
+<li><strong>anomaly_id</strong> (<em>int</em>) &#8211; the panorama anomaly id</li>
 </ul>
 </td>
 </tr>
@@ -559,6 +634,68 @@ features profile.</li>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
+<dl class="function">
+<dt id="ionosphere_functions.get_related">
+<code class="descname">get_related</code><span class="sig-paren">(</span><em>current_skyline_app</em>, <em>anomaly_id</em>, <em>anomaly_timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere_functions.html#get_related"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere_functions.get_related" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get all the related anomalies from the database</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>current_skyline_app</strong> (<em>str</em>) &#8211; the Skyline app name calling the function</li>
+<li><strong>anomaly_id</strong> (<em>int</em>) &#8211; the panorama anomaly id</li>
+<li><strong>anomaly_timestamp</strong> (<em>int</em>) &#8211; the anomaly timestamp</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">list</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">[[metric_name, related_timestamp],[metric_name, related_timestamp],...]</p>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">[[str, int]]</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+</div>
+<div class="section" id="module-matched_or_regexed_in_list">
+<span id="skyline-matched-or-regexed-in-list-module"></span><h2>skyline.matched_or_regexed_in_list module<a class="headerlink" href="#module-matched_or_regexed_in_list" title="Permalink to this headline">¶</a></h2>
+<p>matched_or_regexed_in_list</p>
+<dl class="function">
+<dt id="matched_or_regexed_in_list.matched_or_regexed_in_list">
+<code class="descname">matched_or_regexed_in_list</code><span class="sig-paren">(</span><em>current_skyline_app</em>, <em>base_name</em>, <em>match_list</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/matched_or_regexed_in_list.html#matched_or_regexed_in_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#matched_or_regexed_in_list.matched_or_regexed_in_list" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine if a pattern is in a list as a:
+1) absolute match
+2) match been dotted elements
+3) matched by a regex</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>current_skyline_app</strong> (<em>str</em>) &#8211; the app calling the function so the function
+knows which log to write too.</li>
+<li><strong>metric_name</strong> (<em>str</em>) &#8211; the metric name</li>
+<li><strong>match_list</strong> (<em>list</em>) &#8211; the list of items to try and match the metric name in</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">False, {}</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(boolean, dict)</p>
+</td>
+</tr>
+</tbody>
+</table>
+<p>Returns (matched, matched_by)</p>
 </dd></dl>
 
 </div>
@@ -749,6 +886,21 @@ displayed in the Webapp &#8216;mini&#8217; view.</td>
 </dd></dl>
 
 <dl class="data">
+<dt id="settings.VERIFY_SSL">
+<code class="descname">VERIFY_SSL</code><em class="property"> = True</em><a class="headerlink" href="#settings.VERIFY_SSL" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.VERIFY_SSL" title="settings.VERIFY_SSL"><strong>VERIFY_SSL</strong></a> (<em>boolean</em>) &#8211; Whether to verify SSL certificates requestsed endpoints.  By
+defualt this is True, however this can be set to False to allow for the use
+of self signed SSL certificates.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
 <dt id="settings.GRAPHITE_AUTH_HEADER">
 <code class="descname">GRAPHITE_AUTH_HEADER</code><em class="property"> = False</em><a class="headerlink" href="#settings.GRAPHITE_AUTH_HEADER" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
@@ -913,7 +1065,7 @@ size graph sent with alerts.</p>
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.CARBON_HOST" title="settings.CARBON_HOST"><strong>CARBON_HOST</strong></a> &#8211; endpoint to send metrics that sould reach graphite if
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.CARBON_HOST" title="settings.CARBON_HOST"><strong>CARBON_HOST</strong></a> &#8211; endpoint to send metrics that should reach graphite if
 the CARBON_HOST is a different host to the GRAPHITE_HOST set it here.</td>
 </tr>
 </tbody>
@@ -928,6 +1080,36 @@ the CARBON_HOST is a different host to the GRAPHITE_HOST set it here.</td>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.CARBON_PORT" title="settings.CARBON_PORT"><strong>CARBON_PORT</strong></a> (<em>int</em>) &#8211; If you have a Graphite host set up, set its Carbon port.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.SKYLINE_METRICS_CARBON_HOST">
+<code class="descname">SKYLINE_METRICS_CARBON_HOST</code><em class="property"> = 'YOUR_GRAPHITE_HOST.example.com'</em><a class="headerlink" href="#settings.SKYLINE_METRICS_CARBON_HOST" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.SKYLINE_METRICS_CARBON_HOST" title="settings.SKYLINE_METRICS_CARBON_HOST"><strong>SKYLINE_METRICS_CARBON_HOST</strong></a> (<em>str</em>) &#8211; If you want to send the Skyline metrics to
+a different host other that the GRAPHITE_HOST, declare it here and see the
+SKYLINE_METRICS_CARBON_PORT setting below.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.SKYLINE_METRICS_CARBON_PORT">
+<code class="descname">SKYLINE_METRICS_CARBON_PORT</code><em class="property"> = 2003</em><a class="headerlink" href="#settings.SKYLINE_METRICS_CARBON_PORT" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.SKYLINE_METRICS_CARBON_PORT" title="settings.SKYLINE_METRICS_CARBON_PORT"><strong>SKYLINE_METRICS_CARBON_PORT</strong></a> (<em>int</em>) &#8211; If you want to send the Skyline metrics to
+a different SKYLINE_METRICS_CARBON_HOST host other than the GRAPHITE_HOST
+and it has a different port to the CARBON_PORT, declare it here.</td>
 </tr>
 </tbody>
 </table>
@@ -1046,6 +1228,23 @@ anomalies to for Panorama to check to a file on disk - absolute path</td>
 </dd></dl>
 
 <dl class="data">
+<dt id="settings.DATA_UPLOADS_PATH">
+<code class="descname">DATA_UPLOADS_PATH</code><em class="property"> = '/tmp/skyline/data_uploads'</em><a class="headerlink" href="#settings.DATA_UPLOADS_PATH" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.DATA_UPLOADS_PATH" title="settings.DATA_UPLOADS_PATH"><strong>DATA_UPLOADS_PATH</strong></a> (<em>str</em>) &#8211; The path that webapp writes uploaded data to and flux
+checks for data to process.  Note the parent directory must be writable to
+the user that the Skyline processes are running as.  This is related to the
+<a class="reference internal" href="#settings.FLUX_PROCESS_UPLOADS" title="settings.FLUX_PROCESS_UPLOADS"><code class="xref py py-mod docutils literal"><span class="pre">settings.FLUX_PROCESS_UPLOADS</span></code></a> and
+<a class="reference internal" href="#settings.WEBAPP_ACCEPT_DATA_UPLOADS" title="settings.WEBAPP_ACCEPT_DATA_UPLOADS"><code class="xref py py-mod docutils literal"><span class="pre">settings.WEBAPP_ACCEPT_DATA_UPLOADS</span></code></a> settings.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
 <dt id="settings.PANDAS_VERSION">
 <code class="descname">PANDAS_VERSION</code><em class="property"> = '0.18.1'</em><a class="headerlink" href="#settings.PANDAS_VERSION" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
@@ -1126,6 +1325,36 @@ by Panorama and this is the desired default.</td>
 <col class="field-body" />
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.SLACK_ENABLED" title="settings.SLACK_ENABLED"><strong>SLACK_ENABLED</strong></a> (<em>boolean</em>) &#8211; Enables the Slack alerter</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.HTTP_ALERTERS_ENABLED">
+<code class="descname">HTTP_ALERTERS_ENABLED</code><em class="property"> = False</em><a class="headerlink" href="#settings.HTTP_ALERTERS_ENABLED" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.HTTP_ALERTERS_ENABLED" title="settings.HTTP_ALERTERS_ENABLED"><strong>HTTP_ALERTERS_ENABLED</strong></a> (<em>boolean</em>) &#8211; Enables the http alerter</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.START_IF_NO_DB">
+<code class="descname">START_IF_NO_DB</code><em class="property"> = False</em><a class="headerlink" href="#settings.START_IF_NO_DB" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.START_IF_NO_DB" title="settings.START_IF_NO_DB"><strong>START_IF_NO_DB</strong></a> (<em>boolean</em>) &#8211; This allows the Skyline apps to start if there is a DB
+issue and/or the DB is not available.  By default the apps will not start if
+the DB is not available, but this is useful for testing and allowing the
+Skyline apps to continue to function and alert, even if it is in a limited
+fashion and defualts to nosiy 3-sigma alerting.</td>
 </tr>
 </tbody>
 </table>
@@ -1328,6 +1557,227 @@ timeseries that often oscillate between two values.</li>
 </dd></dl>
 
 <dl class="data">
+<dt id="settings.IDENTIFY_AIRGAPS">
+<code class="descname">IDENTIFY_AIRGAPS</code><em class="property"> = False</em><a class="headerlink" href="#settings.IDENTIFY_AIRGAPS" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IDENTIFY_AIRGAPS" title="settings.IDENTIFY_AIRGAPS"><strong>IDENTIFY_AIRGAPS</strong></a> (<em>boolean</em>) &#8211; Identify metrics which have air gaps and publish to the
+analyzer.airgapped_metrics Redis set which is exposed via the webapp on
+/api?airgapped_metrics [ADVANCED FEATURE]</td>
+</tr>
+</tbody>
+</table>
+<ul class="simple">
+<li>Note that the implementation of this feature has a computational cost and will
+increase analyzer.run_time and CPU usage.  If you are not back filling airgaps
+by via Flux or directly to carbon-relay DO NOT enable this.</li>
+<li>Enabling this also enables the IDENTIFY_UNORDERED_TIMESERIES features which is
+a part of the IDENTIFY_AIRGAPS functionality.</li>
+<li>If you do enable this, consider specifying specific metrics and/or namespaces
+in CHECK_AIRGAPS below to limit only checking metrics which will be back
+filled and not all your metrics.</li>
+</ul>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.MAX_AIRGAP_PERIOD">
+<code class="descname">MAX_AIRGAP_PERIOD</code><em class="property"> = 21600</em><a class="headerlink" href="#settings.MAX_AIRGAP_PERIOD" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.MAX_AIRGAP_PERIOD" title="settings.MAX_AIRGAP_PERIOD"><strong>MAX_AIRGAP_PERIOD</strong></a> (<em>int</em>) &#8211; If IDENTIFY_AIRGAPS is enabled Analyzer will only flag
+metric that have any air gaps in the last MAX_AIRGAP_PERIOD seconds as
+air gapped.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.CHECK_AIRGAPS">
+<code class="descname">CHECK_AIRGAPS</code><em class="property"> = []</em><a class="headerlink" href="#settings.CHECK_AIRGAPS" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.CHECK_AIRGAPS" title="settings.CHECK_AIRGAPS"><strong>CHECK_AIRGAPS</strong></a> (<em>list</em>) &#8211; If set to [] ALL metrics will be check.  List metrics and
+namespaces that you explicitly want to identify airgaps in, this is only
+applicable if you have IDENTIFY_AIRGAPS enabled.  If metrics and/or
+namespaces are listed here ONLY these will be checked.</td>
+</tr>
+</tbody>
+</table>
+<p>Seeing as IDENTIFY_AIRGAPS can be computationally expensive, this allows you to
+only check specific metrics for airgaps.</p>
+<p>The CHECK_AIRGAPS are also matched just dotted namespace elements too, if a match
+is not found in the string, then the dotted elements are compared.  For example
+if an item such as &#8216;skyline.analyzer.algorithm_breakdown&#8217; was added it would
+macth any metric that matched all 3 dotted namespace elements, so it would
+match:</p>
+<p>skyline.analyzer.skyline-1.algorithm_breakdown.histogram_bins.timing.median_time
+skyline.analyzer.skyline-1.algorithm_breakdown.histogram_bins.timing.times_run
+skyline.analyzer.skyline-1.algorithm_breakdown.ks_test.timing.times_run</p>
+<p>Example:</p>
+<dl class="docutils">
+<dt>CHECK_AIRGAPS = [</dt>
+<dd>&#8216;remote_hosts&#8217;,
+&#8216;external_hosts.dc1&#8217;,</dd>
+</dl>
+<p>]</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.SKIP_AIRGAPS">
+<code class="descname">SKIP_AIRGAPS</code><em class="property"> = []</em><a class="headerlink" href="#settings.SKIP_AIRGAPS" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.SKIP_AIRGAPS" title="settings.SKIP_AIRGAPS"><strong>SKIP_AIRGAPS</strong></a> (<em>list</em>) &#8211; List metrics that you you do not want to identify airgaps in,
+this is only applicable if you have IDENTIFY_AIRGAPS enabled.</td>
+</tr>
+</tbody>
+</table>
+<p>These are metrics that, for whatever reason, you do not want to check to see if
+any airgaps are present.</p>
+<p>The SKIP_AIRGAPS are also matched just dotted namespace elements too, if a match
+is not found in the string, then the dotted elements are compared.  For example
+if an item such as &#8216;skyline.analyzer.algorithm_breakdown&#8217; was added it would
+macth any metric that matched all 3 dotted namespace elements, so it would
+match:</p>
+<p>skyline.analyzer.skyline-1.algorithm_breakdown.histogram_bins.timing.median_time
+skyline.analyzer.skyline-1.algorithm_breakdown.histogram_bins.timing.times_run
+skyline.analyzer.skyline-1.algorithm_breakdown.ks_test.timing.times_run</p>
+<p>Example:</p>
+<dl class="docutils">
+<dt>SKIP_AIRGAPS = [</dt>
+<dd>&#8216;carbon&#8217;,
+&#8216;skyline&#8217;,
+&#8216;stats&#8217;,</dd>
+</dl>
+<p>]</p>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.IDENTIFY_UNORDERED_TIMESERIES">
+<code class="descname">IDENTIFY_UNORDERED_TIMESERIES</code><em class="property"> = False</em><a class="headerlink" href="#settings.IDENTIFY_UNORDERED_TIMESERIES" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IDENTIFY_UNORDERED_TIMESERIES" title="settings.IDENTIFY_UNORDERED_TIMESERIES"><strong>IDENTIFY_UNORDERED_TIMESERIES</strong></a> (<em>boolean</em>) &#8211; Identify metrics that are not ordered
+correctly via time stamps for Analyzer to sort and deduplicate and recreate
+the Redis metric data with the correctly sorted time series data, in a
+manner as to not lose any data.</td>
+</tr>
+</tbody>
+</table>
+<ul class="simple">
+<li>Note that the implementation of this feature has a small computational cost.
+If enabled it uses a small part of the IDENTIFY_AIRGAPS feature described
+above.</li>
+<li>If IDENTIFY_AIRGAPS is enabled this is enabled by default, even if
+IDENTIFY_UNORDERED_TIMESERIES = False</li>
+<li>This was introduced as external sources sending metrics via Flux could send
+metric data out of order, which Graphite will handle but will pickle to
+Horizon and make the metric Redis data unordered.  This definitely occurs if a
+metric is back filled via Flux or directly to carbon-relay.  Although Flux
+identifies these metrics for Analyzer via flux.filled Redis keys, Analyzer can
+undertake this check on its own to handle any cases where for whatever reason
+any metric data becomes unordered, even if IDENTIFY_AIRGAPS is not enabled.
+[ADVANCED FEATURE]</li>
+</ul>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.BATCH_PROCESSING">
+<code class="descname">BATCH_PROCESSING</code><em class="property"> = None</em><a class="headerlink" href="#settings.BATCH_PROCESSING" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.BATCH_PROCESSING" title="settings.BATCH_PROCESSING"><strong>BATCH_PROCESSING</strong></a> (<em>boolen</em>) &#8211; Whether to apply batch processing to metrics which are
+recieved in batches.  In general this should not be enabled for all metrics
+as it significantly increases the computational footprint and increases
+memory use and calls.  It should only be enabled if you have metrics that
+are receieved in infrequent batches, metrics feed per minute do not require
+batch processing.  For example if a metric/s are sent to Skyline every 15
+minutes with a data point for each minute in the period, Analyzer&#8217;s default
+analysis would only analyse the latest data point against the metric time
+series data.  With batch processing, Analyzer identifies batched metrics and
+when a batch of data is received Analyzer sends the metric/s to analyzer_batch
+to analyse.  To ensure that this can be achieved as computationally cheap as
+possible the BATCH_PROCESSING_NAMESPACES list can be applied, to reduce the
+footprint of this functionality</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.BATCH_PROCESSING_STALE_PERIOD">
+<code class="descname">BATCH_PROCESSING_STALE_PERIOD</code><em class="property"> = 86400</em><a class="headerlink" href="#settings.BATCH_PROCESSING_STALE_PERIOD" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.BATCH_PROCESSING_STALE_PERIOD" title="settings.BATCH_PROCESSING_STALE_PERIOD"><strong>BATCH_PROCESSING_STALE_PERIOD</strong></a> (<em>int</em>) &#8211; This is the duration, in seconds, for a
+metric to be deemed as stale and for the analyzer_batch to ignore it until
+new datapoints are added.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.BATCH_PROCESSING_DEBUG">
+<code class="descname">BATCH_PROCESSING_DEBUG</code><em class="property"> = None</em><a class="headerlink" href="#settings.BATCH_PROCESSING_DEBUG" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.BATCH_PROCESSING_DEBUG" title="settings.BATCH_PROCESSING_DEBUG"><strong>BATCH_PROCESSING_DEBUG</strong></a> (<em>boolen</em>) &#8211; Whether to log batch processing info from Analyzer.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.BATCH_PROCESSING_NAMESPACES">
+<code class="descname">BATCH_PROCESSING_NAMESPACES</code><em class="property"> = []</em><a class="headerlink" href="#settings.BATCH_PROCESSING_NAMESPACES" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.BATCH_PROCESSING_NAMESPACES" title="settings.BATCH_PROCESSING_NAMESPACES"><strong>BATCH_PROCESSING_NAMESPACES</strong></a> (<em>list</em>) &#8211; If BATCH_PROCESSING is eanbled to reduce the
+computational footprint of batch processing metric time series data, a list
+of metric namespaces which can be expected to be batch processed can be
+defined so that BATCH_PROCESSING keys, checks and resources are not applied
+to all metrics.  This list works in the same way that SKIP_LIST does, it
+matches in the string or dotted namespace elements.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.METRICS_INACTIVE_AFTER">
+<code class="descname">METRICS_INACTIVE_AFTER</code><em class="property"> = 82800</em><a class="headerlink" href="#settings.METRICS_INACTIVE_AFTER" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.METRICS_INACTIVE_AFTER" title="settings.METRICS_INACTIVE_AFTER"><strong>METRICS_INACTIVE_AFTER</strong></a> (<em>int</em>) &#8211; Identify metrics as inactive after the defined
+seconds.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
 <dt id="settings.CANARY_METRIC">
 <code class="descname">CANARY_METRIC</code><em class="property"> = 'statsd.numStats'</em><a class="headerlink" href="#settings.CANARY_METRIC" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
@@ -1341,7 +1791,9 @@ timeseries that often oscillate between two values.</li>
 <ul class="simple">
 <li>The canary metric should be a metric with a very high, reliable resolution
 that you can use to gauge the status of the system as a whole.  Like the
-<code class="docutils literal"><span class="pre">statsd.numStats</span></code> or a metric in the <code class="docutils literal"><span class="pre">carbon.</span></code> namespace</li>
+<code class="docutils literal"><span class="pre">statsd.numStats</span></code> or a metric in the <code class="docutils literal"><span class="pre">carbon.</span></code> namespace or a Skyline
+metric like:
+CANARY_METRIC = &#8216;skyline.%s.analyzer.run_time&#8217; % SERVER_METRICS_NAME</li>
 </ul>
 </dd></dl>
 
@@ -1481,7 +1933,7 @@ by default.</p>
 
 <dl class="data">
 <dt id="settings.ENABLE_FULL_DURATION_ALERTS">
-<code class="descname">ENABLE_FULL_DURATION_ALERTS</code><em class="property"> = True</em><a class="headerlink" href="#settings.ENABLE_FULL_DURATION_ALERTS" title="Permalink to this definition">¶</a></dt>
+<code class="descname">ENABLE_FULL_DURATION_ALERTS</code><em class="property"> = False</em><a class="headerlink" href="#settings.ENABLE_FULL_DURATION_ALERTS" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1529,7 +1981,7 @@ the <a class="reference internal" href="#settings.CRUCIBLE_DATA_FOLDER" title="s
 
 <dl class="data">
 <dt id="settings.ALERTS">
-<code class="descname">ALERTS</code><em class="property"> = (('horizon.udp.test', 'smtp', 30), ('skyline', 'smtp', 1800), ('skyline_test.alerters.test', 'smtp', 1800), ('skyline_test.alerters.test', 'hipchat', 1800), ('skyline_test.alerters.test', 'slack', 1800), ('skyline_test.alerters.test', 'pagerduty', 1800))</em><a class="headerlink" href="#settings.ALERTS" title="Permalink to this definition">¶</a></dt>
+<code class="descname">ALERTS</code><em class="property"> = (('skyline', 'smtp', 1800), ('skyline_test.alerters.test', 'smtp|http_alerter-mock_api_alerter_receiver', 1), ('horizon.test.udp', 'smtp|http_alerter-mock_api_alerter_receiver', 1), ('horizon.test.pickle', 'smtp|http_alerter-mock_api_alerter_receiver', 1), ('skyline_test.alerters.test', 'slack', 1), ('skyline_test.alerters.test', 'pagerduty', 1))</em><a class="headerlink" href="#settings.ALERTS" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1549,7 +2001,6 @@ trigger again.</p>
     <span class="p">(</span><span class="s1">&#39;metric1&#39;</span><span class="p">,</span> <span class="s1">&#39;smtp&#39;</span><span class="p">,</span> <span class="mi">1800</span><span class="p">),</span>
     <span class="p">(</span><span class="s1">&#39;important_metric.total&#39;</span><span class="p">,</span> <span class="s1">&#39;smtp&#39;</span><span class="p">,</span> <span class="mi">600</span><span class="p">),</span>
     <span class="p">(</span><span class="s1">&#39;important_metric.total&#39;</span><span class="p">,</span> <span class="s1">&#39;pagerduty&#39;</span><span class="p">,</span> <span class="mi">1800</span><span class="p">),</span>
-    <span class="p">(</span><span class="s1">&#39;metric3&#39;</span><span class="p">,</span> <span class="s1">&#39;hipchat&#39;</span><span class="p">,</span> <span class="mi">600</span><span class="p">),</span>
     <span class="c1"># Log all anomalies to syslog</span>
     <span class="p">(</span><span class="s1">&#39;stats.&#39;</span><span class="p">,</span> <span class="s1">&#39;syslog&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
     <span class="c1"># Wildcard namespaces can be used as well</span>
@@ -1560,6 +2011,7 @@ trigger again.</p>
     <span class="p">(</span><span class="s1">&#39;metric5.thing.*.rpm&#39;</span><span class="p">,</span> <span class="s1">&#39;smtp&#39;</span><span class="p">,</span> <span class="mi">900</span><span class="p">,</span> <span class="mi">168</span><span class="p">),</span>
     <span class="c1"># NOTE: all slack alert tuples MUST be declared AFTER smtp alert tuples</span>
     <span class="p">(</span><span class="s1">&#39;metric3&#39;</span><span class="p">,</span> <span class="s1">&#39;slack&#39;</span><span class="p">,</span> <span class="mi">600</span><span class="p">),</span>
+    <span class="p">(</span><span class="s1">&#39;stats.&#39;</span><span class="p">,</span> <span class="s1">&#39;http_alerter_external_endpoint&#39;</span><span class="p">,</span> <span class="mi">30</span><span class="p">),</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -1573,7 +2025,8 @@ trigger again.</p>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
 <li><strong>metric</strong> (<em>str</em>) &#8211; metric name.</li>
-<li><strong>alerter</strong> (<em>str</em>) &#8211; the alerter name e.g. smtp, syslog, hipchat, pagerduty</li>
+<li><strong>alerter</strong> (<em>str</em>) &#8211; the alerter name e.g. smtp, syslog, slack, pagerduty or
+http_alerter_&lt;name&gt;</li>
 <li><strong>EXPIRATION_TIME</strong> (<em>int</em>) &#8211; Alerts will not fire twice within this amount of
 seconds, even if they trigger again.</li>
 <li><strong>SECOND_ORDER_RESOLUTION_HOURS</strong> (<em>int</em>) &#8211; (optional) The number of hours that Mirage
@@ -1663,7 +2116,7 @@ elements.</p>
 
 <dl class="data">
 <dt id="settings.SMTP_OPTS">
-<code class="descname">SMTP_OPTS</code><em class="property"> = {'embed-images': True, 'default_recipient': ['you&#64;your_domain.com'], 'sender': 'skyline&#64;your_domain.com', 'recipients': {'skyline': ['you&#64;your_domain.com', 'them&#64;your_domain.com'], 'skyline_test.alerters.test': ['you&#64;your_domain.com']}}</em><a class="headerlink" href="#settings.SMTP_OPTS" title="Permalink to this definition">¶</a></dt>
+<code class="descname">SMTP_OPTS</code><em class="property"> = {'embed-images': True, 'default_recipient': ['you&#64;your_domain.com'], 'sender': 'skyline&#64;your_domain.com', 'recipients': {'skyline': ['you&#64;your_domain.com', 'them&#64;your_domain.com'], 'skyline_test.alerters.test': ['you&#64;your_domain.com'], 'horizon.test': ['you&#64;your_domain.com']}}</em><a class="headerlink" href="#settings.SMTP_OPTS" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1672,6 +2125,9 @@ elements.</p>
 </tr>
 </tbody>
 </table>
+<p>It is possible to set the email addresses to no_email if you do not wish to
+receive SMTP alerts, but smtp alerters are required see
+<a class="reference external" href="https://earthgecko-skyline.readthedocs.io/en/latest/alerts.html">https://earthgecko-skyline.readthedocs.io/en/latest/alerts.html</a></p>
 <div class="admonition note">
 <p class="first admonition-title">Note</p>
 <p class="last">For each alert tuple defined in <a class="reference internal" href="#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALERTS</span></code></a> you need a
@@ -1697,7 +2153,7 @@ defined.</p>
 
 <dl class="data">
 <dt id="settings.SLACK_OPTS">
-<code class="descname">SLACK_OPTS</code><em class="property"> = {'message_on_features_profile_learnt_reaction_emoji': 'heavy_check_mark', 'message_on_features_profile_created_reaction_emoji': 'thumbsup', 'message_on_validated_features_profiles': True, 'channels': {'horizon.udp.test': ('#skyline',), 'skyline': ('#skyline',), 'skyline_test.alerters.test': ('#skyline',)}, 'thread_updates': True, 'icon_emoji': ':chart_with_upwards_trend:', 'message_on_features_profile_disabled': True, 'default_channel_id': 'YOUR_default_slack_channel_id', 'message_on_training_data_viewed_reaction_emoji': 'eyes', 'message_on_features_profile_learnt': True, 'message_on_features_profile_disabled_reaction_emoji': 'x', 'message_on_training_data_viewed': True, 'bot_user_oauth_access_token': 'YOUR_slack_bot_user_oauth_access_token', 'default_channel': 'YOUR_default_slack_channel', 'message_on_features_profile_created': True}</em><a class="headerlink" href="#settings.SLACK_OPTS" title="Permalink to this definition">¶</a></dt>
+<code class="descname">SLACK_OPTS</code><em class="property"> = {'message_on_training_data_viewed_reaction_emoji': 'eyes', 'message_on_features_profile_learnt_reaction_emoji': 'heavy_check_mark', 'message_on_features_profile_learnt': True, 'message_on_features_profile_disabled_reaction_emoji': 'x', 'thread_updates': True, 'channel_ids': {'#skyline': 'YOUR_slack_channel_id', '#testing': 'YOUR_slack_other_channel_id'}, 'message_on_features_profile_created_reaction_emoji': 'thumbsup', 'message_on_training_data_viewed': True, 'message_on_validated_features_profiles': True, 'channels': {'horizon.udp.test': ('#skyline', '#testing'), 'skyline': ('#skyline',), 'skyline_test.alerters.test': ('#skyline',)}, 'bot_user_oauth_access_token': 'YOUR_slack_bot_user_oauth_access_token', 'default_channel': 'YOUR_default_slack_channel', 'icon_emoji': ':chart_with_upwards_trend:', 'message_on_features_profile_disabled': True, 'message_on_features_profile_created': True, 'default_channel_id': 'YOUR_default_slack_channel_id'}</em><a class="headerlink" href="#settings.SLACK_OPTS" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1741,8 +2197,43 @@ every anomaly into the syslog.</p>
 </dd></dl>
 
 <dl class="data">
+<dt id="settings.HTTP_ALERTERS_OPTS">
+<code class="descname">HTTP_ALERTERS_OPTS</code><em class="property"> = {}</em><a class="headerlink" href="#settings.HTTP_ALERTERS_OPTS" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.HTTP_ALERTERS_OPTS" title="settings.HTTP_ALERTERS_OPTS"><strong>HTTP_ALERTERS_OPTS</strong></a> (<em>dictionary</em>) &#8211; External alert endpoints.</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><p class="first"><strong>Dictionary example</strong>:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">HTTP_ALERTERS_OPTS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;http_alerter-mock_api_alerter_receiver&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;enabled&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s1">&#39;endpoint&#39;</span><span class="p">:</span> <span class="s1">&#39;http://127.0.0.1:1500/mock_api?alert_reciever&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;token&#39;</span><span class="p">:</span> <span class="kc">None</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;http_alerter-otherapp&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;enabled&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s1">&#39;endpoint&#39;</span><span class="p">:</span> <span class="s1">&#39;https://other-http-alerter.example.org/alerts&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;token&#39;</span><span class="p">:</span> <span class="s1">&#39;1234567890abcdefg&#39;</span>
+    <span class="p">},</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</li>
+</ul>
+<p>All http_alerter alert names must be prefixed with <cite>http_alerter</cite> followed by
+the name you want to assign to it.  HTTP_ALERTERS_OPTS is used by Analyzer (in
+<a class="reference internal" href="#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALERTS</span></code></a>) and Bounary (in <a class="reference internal" href="#settings.BOUNDARY_METRICS" title="settings.BOUNDARY_METRICS"><code class="xref py py-mod docutils literal"><span class="pre">settings.BOUNDARY_METRICS</span></code></a>) in
+conjunction with http_alerter defines,</p>
+</dd></dl>
+
+<dl class="data">
 <dt id="settings.CUSTOM_ALERT_OPTS">
-<code class="descname">CUSTOM_ALERT_OPTS</code><em class="property"> = {'analyzer_alert_heading': 'Analyzer', 'mirage_alert_heading': 'Mirage', 'boundary_alert_heading': 'Boundary', 'ionosphere_alert_heading': 'Ionosphere', 'append_environment': '', 'main_alert_title': 'Skyline'}</em><a class="headerlink" href="#settings.CUSTOM_ALERT_OPTS" title="Permalink to this definition">¶</a></dt>
+<code class="descname">CUSTOM_ALERT_OPTS</code><em class="property"> = {'analyzer_alert_heading': 'Analyzer', 'mirage_alert_heading': 'Mirage', 'append_environment': '', 'ionosphere_link_path': 'ionosphere', 'ionosphere_alert_heading': 'Ionosphere', 'boundary_alert_heading': 'Boundary', 'main_alert_title': 'Skyline'}</em><a class="headerlink" href="#settings.CUSTOM_ALERT_OPTS" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -1947,7 +2438,7 @@ skyline.analyzer.skyline-1.algorithm_breakdown.ks_test.timing.times_run</p>
 
 <dl class="data">
 <dt id="settings.DO_NOT_SKIP_LIST">
-<code class="descname">DO_NOT_SKIP_LIST</code><em class="property"> = ['skyline.analyzer.run_time', 'skyline.boundary.run_time', 'skyline.analyzer.ionosphere_metrics', 'skyline.analyzer.mirage_metrics', 'skyline.analyzer.total_analyzed', 'skyline.analyzer.total_anomalies']</em><a class="headerlink" href="#settings.DO_NOT_SKIP_LIST" title="Permalink to this definition">¶</a></dt>
+<code class="descname">DO_NOT_SKIP_LIST</code><em class="property"> = ['skyline.analyzer.run_time', 'skyline.boundary.run_time', 'skyline.analyzer.ionosphere_metrics', 'skyline.analyzer.mirage_metrics', 'skyline.analyzer.total_analyzed', 'skyline.analyzer.total_anomalies', 'skyline.exceptions']</em><a class="headerlink" href="#settings.DO_NOT_SKIP_LIST" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -2116,6 +2607,39 @@ restarted, the user can choose to discard older checks and miss anomalies
 being recorded if they so choose to, to prevent Panorama stampeding against
 MySQL if something went down and Panorama comes back online with lots of
 checks.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.PANORAMA_CHECK_INTERVAL">
+<code class="descname">PANORAMA_CHECK_INTERVAL</code><em class="property"> = 20</em><a class="headerlink" href="#settings.PANORAMA_CHECK_INTERVAL" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.PANORAMA_CHECK_INTERVAL" title="settings.PANORAMA_CHECK_INTERVAL"><strong>PANORAMA_CHECK_INTERVAL</strong></a> (<em>int</em>) &#8211; How often (in seconds) Panorama will check for
+anomalie1s to add to the database.  This allows you to configure Panorama to
+insert anomalies into the database every second if you so wish to, however
+in most cases every 20 seconds is sufficient.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.PANORAMA_INSERT_METRICS_IMMEDIATELY">
+<code class="descname">PANORAMA_INSERT_METRICS_IMMEDIATELY</code><em class="property"> = False</em><a class="headerlink" href="#settings.PANORAMA_INSERT_METRICS_IMMEDIATELY" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.PANORAMA_INSERT_METRICS_IMMEDIATELY" title="settings.PANORAMA_INSERT_METRICS_IMMEDIATELY"><strong>PANORAMA_INSERT_METRICS_IMMEDIATELY</strong></a> &#8211; Panorama will only insert a metric
+into the metrics database table when an anomaly is registered for the metric
+by default.  To have Panorama insert every metric into the database as soon
+as it appears in unique_metrics, set this to True.  This functionality is
+for development and testing purposes.</td>
 </tr>
 </tbody>
 </table>
@@ -2402,7 +2926,7 @@ the <a class="reference internal" href="#settings.CRUCIBLE_DATA_FOLDER" title="s
 
 <dl class="data">
 <dt id="settings.BOUNDARY_METRICS">
-<code class="descname">BOUNDARY_METRICS</code><em class="property"> = (('skyline_test.alerters.test', 'greater_than', 1, 0, 0, 0, 1, 'smtp'), ('metric1', 'detect_drop_off_cliff', 1800, 500, 3600, 0, 2, 'smtp|slack|pagerduty'), ('metric2.either', 'less_than', 3600, 0, 0, 15, 2, 'smtp|hipchat'), ('nometric.other', 'greater_than', 3600, 0, 0, 100000, 1, 'smtp'))</em><a class="headerlink" href="#settings.BOUNDARY_METRICS" title="Permalink to this definition">¶</a></dt>
+<code class="descname">BOUNDARY_METRICS</code><em class="property"> = (('skyline_test.alerters.test', 'greater_than', 1, 0, 0, 0, 1, 'smtp|http_alerter-mock_api_alerter_receiver'), ('skyline_test.alerters.test', 'detect_drop_off_cliff', 1800, 500, 3600, 0, 2, 'smtp|http_alerter-mock_api_alerter_receiver'), ('skyline_test.alerters.test', 'less_than', 3600, 0, 0, 15, 2, 'smtp|http_alerter-mock_api_alerter_receiver'), ('metric1', 'detect_drop_off_cliff', 1800, 500, 3600, 0, 2, 'smtp|slack|pagerduty'), ('metric2.either', 'less_than', 3600, 0, 0, 15, 2, 'smtp|hipchat'), ('nometric.other', 'greater_than', 3600, 0, 0, 100000, 1, 'smtp'), ('nometric.another', 'greater_than', 3600, 0, 0, 100000, 1, 'http_alerter-external_endpoint'))</em><a class="headerlink" href="#settings.BOUNDARY_METRICS" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -2464,8 +2988,8 @@ surpressed.  Try 1 if you are getting the occassional false positive, try 2.
 Note - Any <a class="reference internal" href="skyline.boundary.html#boundary.boundary_algorithms.greater_than" title="boundary.boundary_algorithms.greater_than"><code class="xref py py-func docutils literal"><span class="pre">boundary_algorithms.greater_than()</span></code></a> metrics should have
 this as 1.</li>
 <li><strong>ALERT_VIAS</strong> (<em>str</em>) &#8211; pipe separated alerters to send to, valid options smtp,
-pagerduty, hipchat and slack.  This could therefore be &#8216;smtp&#8217;, &#8216;smtp|slack&#8217;,
-&#8216;pagerduty|slack&#8217;, etc</li>
+pagerduty, http_alerter_&lt;name&gt; and slack.  This could therefore be &#8216;smtp&#8217;,
+&#8216;smtp|slack&#8217;, &#8216;pagerduty|slack&#8217;, etc</li>
 </ul>
 </td>
 </tr>
@@ -2842,6 +3366,21 @@ timezone so that the Webapp graphs are the same in any location.</p>
 </dd></dl>
 
 <dl class="data">
+<dt id="settings.WEBAPP_ACCEPT_DATA_UPLOADS">
+<code class="descname">WEBAPP_ACCEPT_DATA_UPLOADS</code><em class="property"> = False</em><a class="headerlink" href="#settings.WEBAPP_ACCEPT_DATA_UPLOADS" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.WEBAPP_ACCEPT_DATA_UPLOADS" title="settings.WEBAPP_ACCEPT_DATA_UPLOADS"><strong>WEBAPP_ACCEPT_DATA_UPLOADS</strong></a> (<em>boolean</em>) &#8211; Enables the webapp to accept data uploads for
+Flux to process.  This is related to <a class="reference internal" href="#settings.FLUX_PROCESS_UPLOADS" title="settings.FLUX_PROCESS_UPLOADS"><code class="xref py py-mod docutils literal"><span class="pre">settings.FLUX_PROCESS_UPLOADS</span></code></a>
+and uploads are saved to <a class="reference internal" href="#settings.DATA_UPLOADS_PATH" title="settings.DATA_UPLOADS_PATH"><code class="xref py py-mod docutils literal"><span class="pre">settings.DATA_UPLOADS_PATH</span></code></a></td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
 <dt id="settings.WEBAPP_JAVASCRIPT_DEBUG">
 <code class="descname">WEBAPP_JAVASCRIPT_DEBUG</code><em class="property"> = False</em><a class="headerlink" href="#settings.WEBAPP_JAVASCRIPT_DEBUG" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
@@ -3045,6 +3584,25 @@ being recorded if they so choose to, to prevent Ionosphere stampeding.</td>
 <tbody valign="top">
 <tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR" title="settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR"><strong>IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR</strong></a> (<em>int</em>) &#8211; Ionosphere will keep timeseries
 data files for this long, for the operator to review.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.IONOSPHERE_MANAGE_PURGE">
+<code class="descname">IONOSPHERE_MANAGE_PURGE</code><em class="property"> = True</em><a class="headerlink" href="#settings.IONOSPHERE_MANAGE_PURGE" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.IONOSPHERE_MANAGE_PURGE" title="settings.IONOSPHERE_MANAGE_PURGE"><strong>IONOSPHERE_MANAGE_PURGE</strong></a> (<em>boolean</em>) &#8211; Ionosphere will manage purging the training_data
+and learn data directories.  Under normal running conditions with a SSD hard
+drive this is perfectly acceptable, however if for some reason your file
+system is not purely SSD or you are using a distributed file system that is
+not extreme fast, managing purging via Ionosphere can cause Ionosphere
+analysis to lag.  This can be set to False and you can manage purging with
+your own script or method and Ionosphere will not purge data.</td>
 </tr>
 </tbody>
 </table>
@@ -3339,7 +3897,7 @@ Overridable per namespace in settings.IONOSPHERE_LEARN_NAMESPACE_CONFIG</td>
 
 <dl class="data">
 <dt id="settings.IONOSPHERE_LEARN_NAMESPACE_CONFIG">
-<code class="descname">IONOSPHERE_LEARN_NAMESPACE_CONFIG</code><em class="property"> = (('skyline_test.alerters.test', 30, 3661, 16, 100.0), ('\\*', 30, 3661, 16, 100.0))</em><a class="headerlink" href="#settings.IONOSPHERE_LEARN_NAMESPACE_CONFIG" title="Permalink to this definition">¶</a></dt>
+<code class="descname">IONOSPHERE_LEARN_NAMESPACE_CONFIG</code><em class="property"> = (('skyline_test.alerters.test', 30, 3661, 16, 100.0), ('.*', 30, 3661, 16, 100.0))</em><a class="headerlink" href="#settings.IONOSPHERE_LEARN_NAMESPACE_CONFIG" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
@@ -3605,6 +4163,39 @@ correlation</td>
 </dd></dl>
 
 <dl class="data">
+<dt id="settings.LUMINOSITY_RELATED_TIME_PERIOD">
+<code class="descname">LUMINOSITY_RELATED_TIME_PERIOD</code><em class="property"> = 240</em><a class="headerlink" href="#settings.LUMINOSITY_RELATED_TIME_PERIOD" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.LUMINOSITY_RELATED_TIME_PERIOD" title="settings.LUMINOSITY_RELATED_TIME_PERIOD"><strong>LUMINOSITY_RELATED_TIME_PERIOD</strong></a> (<em>int</em>) &#8211; The time period (in seconds) either side of
+the anomaly that should be checked to report possible related anomalies.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.LUMINOSITY_CORRELATE_NAMESPACES_ONLY">
+<code class="descname">LUMINOSITY_CORRELATE_NAMESPACES_ONLY</code><em class="property"> = []</em><a class="headerlink" href="#settings.LUMINOSITY_CORRELATE_NAMESPACES_ONLY" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.LUMINOSITY_CORRELATE_NAMESPACES_ONLY" title="settings.LUMINOSITY_CORRELATE_NAMESPACES_ONLY"><strong>LUMINOSITY_CORRELATE_NAMESPACES_ONLY</strong></a> &#8211; A list of namespaces that metrics in
+the same namespace should be correlated with.  The default is an empty list
+which results in all metrics being correlated with all metrics.  If
+namespaces are declared in the list, all metrics will be evaluated as to
+whether they are in the list.  Metrics in the list will only be correlated
+with metrics in the same namespace and excluded from correlations within
+ANY other namespace.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
 <dt id="settings.DOCKER">
 <code class="descname">DOCKER</code><em class="property"> = False</em><a class="headerlink" href="#settings.DOCKER" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
@@ -3721,6 +4312,21 @@ only affect servers under significant load.  As per
 </dd></dl>
 
 <dl class="data">
+<dt id="settings.FLUX_MAX_AGE">
+<code class="descname">FLUX_MAX_AGE</code><em class="property"> = 3600</em><a class="headerlink" href="#settings.FLUX_MAX_AGE" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.FLUX_MAX_AGE" title="settings.FLUX_MAX_AGE"><strong>FLUX_MAX_AGE</strong></a> (<em>int</em>) &#8211; The maximum age of a timestamp that flux will accept as valid.
+This can vary depending on retentions in question and this method may be
+altered in a future release.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
 <dt id="settings.FLUX_SEND_TO_CARBON">
 <code class="descname">FLUX_SEND_TO_CARBON</code><em class="property"> = False</em><a class="headerlink" href="#settings.FLUX_SEND_TO_CARBON" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
@@ -3774,6 +4380,80 @@ Graphite as per defined in Graphite&#8217;s carbon.conf</td>
 </tr>
 </tbody>
 </table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.FLUX_PROCESS_UPLOADS">
+<code class="descname">FLUX_PROCESS_UPLOADS</code><em class="property"> = False</em><a class="headerlink" href="#settings.FLUX_PROCESS_UPLOADS" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.FLUX_PROCESS_UPLOADS" title="settings.FLUX_PROCESS_UPLOADS"><strong>FLUX_PROCESS_UPLOADS</strong></a> (<em>boolean</em>) &#8211; Whether flux is enabled to process uploaded data
+files in <a class="reference internal" href="#settings.DATA_UPLOADS_PATH" title="settings.DATA_UPLOADS_PATH"><code class="xref py py-mod docutils literal"><span class="pre">settings.DATA_UPLOADS_PATH</span></code></a>.  This is related to the
+<a class="reference internal" href="#settings.WEBAPP_ACCEPT_DATA_UPLOADS" title="settings.WEBAPP_ACCEPT_DATA_UPLOADS"><code class="xref py py-mod docutils literal"><span class="pre">settings.WEBAPP_ACCEPT_DATA_UPLOADS</span></code></a> setting and files in
+<a class="reference internal" href="#settings.DATA_UPLOADS_PATH" title="settings.DATA_UPLOADS_PATH"><code class="xref py py-mod docutils literal"><span class="pre">settings.DATA_UPLOADS_PATH</span></code></a> are processed and the data is sent to
+Graphite.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.FLUX_SAVE_UPLOADS">
+<code class="descname">FLUX_SAVE_UPLOADS</code><em class="property"> = False</em><a class="headerlink" href="#settings.FLUX_SAVE_UPLOADS" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.FLUX_SAVE_UPLOADS" title="settings.FLUX_SAVE_UPLOADS"><strong>FLUX_SAVE_UPLOADS</strong></a> (<em>boolean</em>) &#8211; Whether flux should save processed upload data in
+<a class="reference internal" href="#settings.FLUX_SAVE_UPLOADS_PATH" title="settings.FLUX_SAVE_UPLOADS_PATH"><code class="xref py py-mod docutils literal"><span class="pre">settings.FLUX_SAVE_UPLOADS_PATH</span></code></a>.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.FLUX_SAVE_UPLOADS_PATH">
+<code class="descname">FLUX_SAVE_UPLOADS_PATH</code><em class="property"> = '/opt/skyline/flux/processed_uploads'</em><a class="headerlink" href="#settings.FLUX_SAVE_UPLOADS_PATH" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.FLUX_SAVE_UPLOADS_PATH" title="settings.FLUX_SAVE_UPLOADS_PATH"><strong>FLUX_SAVE_UPLOADS_PATH</strong></a> (<em>str</em>) &#8211; The path flux saves processed data to if
+<a class="reference internal" href="#settings.FLUX_SAVE_UPLOADS" title="settings.FLUX_SAVE_UPLOADS"><code class="xref py py-mod docutils literal"><span class="pre">settings.FLUX_SAVE_UPLOADS</span></code></a> is True.  Note that this directory must
+exist and be writable to the user that Skyline processes are running
+as. Or the parent directory must exist and be owned by the user that Skyline
+processes are running as.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.FLUX_UPLOADS_KEYS">
+<code class="descname">FLUX_UPLOADS_KEYS</code><em class="property"> = {}</em><a class="headerlink" href="#settings.FLUX_UPLOADS_KEYS" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.FLUX_UPLOADS_KEYS" title="settings.FLUX_UPLOADS_KEYS"><strong>FLUX_UPLOADS_KEYS</strong></a> (<em>dict</em>) &#8211; For each parent_metric_namespace a key must be assigned
+to the namespace as the upload_data endpoint is not authenticated.  For
+uploads via the webapp Flux page these are handled using the
+<a class="reference internal" href="#settings.FLUX_SELF_API_KEY" title="settings.FLUX_SELF_API_KEY"><code class="xref py py-mod docutils literal"><span class="pre">settings.FLUX_SELF_API_KEY</span></code></a> key.</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><p class="first"><strong>Example</strong>:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">FLUX_UPLOADS_KEYS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;remote_sites.warehouse.1&#39;</span><span class="p">:</span> <span class="s1">&#39;c65909df-9e06-41b7-a455-4f10b99aa741&#39;</span><span class="p">,</span>
+    <span class="s1">&#39;remote_sites.warehouse.2&#39;</span><span class="p">:</span> <span class="s1">&#39;1e8b1c63-10d3-4a24-bb27-d2513861dbf6&#39;</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</li>
+</ul>
 </dd></dl>
 
 <dl class="data">
@@ -3892,13 +4572,13 @@ data point which will result in false positives.</td>
 </dd></dl>
 
 <dl class="data">
-<dt id="settings.VISTA_FETCH_GRAPHITE_METRICS">
-<code class="descname">VISTA_FETCH_GRAPHITE_METRICS</code><em class="property"> = ()</em><a class="headerlink" href="#settings.VISTA_FETCH_GRAPHITE_METRICS" title="Permalink to this definition">¶</a></dt>
+<dt id="settings.VISTA_FETCH_METRICS">
+<code class="descname">VISTA_FETCH_METRICS</code><em class="property"> = ()</em><a class="headerlink" href="#settings.VISTA_FETCH_METRICS" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
 <col class="field-name" />
 <col class="field-body" />
 <tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><strong>VISTA_FETCH_METRICS</strong> (<em>tuple</em>) &#8211; Enables Skyline vista</td>
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.VISTA_FETCH_METRICS" title="settings.VISTA_FETCH_METRICS"><strong>VISTA_FETCH_METRICS</strong></a> (<em>tuple</em>) &#8211; Enables Skyline vista</td>
 </tr>
 </tbody>
 </table>
@@ -3911,8 +4591,8 @@ data point which will result in false positives.</td>
     <span class="p">(</span><span class="s1">&#39;https://graphite.example.org&#39;</span><span class="p">,</span> <span class="s1">&#39;graphite&#39;</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="s1">&#39;stats.web01.cpu.user&#39;</span><span class="p">,</span> <span class="s1">&#39;stats.web01.cpu.user&#39;</span><span class="p">,</span> <span class="s1">&#39;/render/?from=-10minutes&amp;format=json&amp;target=&#39;</span><span class="p">,</span> <span class="s1">&#39;vista.graphite_example_org&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;90days&#39;</span><span class="p">,</span> <span class="s1">&#39;7days&#39;</span><span class="p">,</span> <span class="s1">&#39;24hours&#39;</span><span class="p">,</span> <span class="s1">&#39;6hours&#39;</span><span class="p">)),</span>
     <span class="p">(</span><span class="s1">&#39;https://graphite.example.org&#39;</span><span class="p">,</span> <span class="s1">&#39;graphite&#39;</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="s1">&#39;sumSeries(stats.*.cpu.user)&#39;</span><span class="p">,</span> <span class="s1">&#39;stats.cumulative.cpu.user&#39;</span><span class="p">,</span> <span class="s1">&#39;/render/?from=-10minutes&amp;format=json&amp;target=&#39;</span><span class="p">,</span> <span class="s1">&#39;vista.graphite_example_org&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;90days&#39;</span><span class="p">,</span> <span class="s1">&#39;7days&#39;</span><span class="p">,</span> <span class="s1">&#39;24hours&#39;</span><span class="p">,</span> <span class="s1">&#39;6hours&#39;</span><span class="p">)),</span>
     <span class="p">(</span><span class="s1">&#39;https://graphite.example.org&#39;</span><span class="p">,</span> <span class="s1">&#39;graphite&#39;</span><span class="p">,</span> <span class="mi">3600</span><span class="p">,</span> <span class="s1">&#39;swell.tar.hm0&#39;</span><span class="p">,</span> <span class="s1">&#39;swell.tar.hm0&#39;</span><span class="p">,</span> <span class="s1">&#39;/render/?from=-120minutes&amp;format=json&amp;target=&#39;</span><span class="p">,</span> <span class="s1">&#39;graphite_example_org&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;90days&#39;</span><span class="p">,</span> <span class="s1">&#39;7days&#39;</span><span class="p">,</span> <span class="s1">&#39;24hours&#39;</span><span class="p">,</span> <span class="s1">&#39;6hours&#39;</span><span class="p">)),</span>
-    <span class="p">(</span><span class="s1">&#39;http://prometheus.example.org:9090&#39;</span><span class="p">,</span> <span class="s1">&#39;prometheus&#39;</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="s1">&#39;node_load1&#39;</span><span class="p">,</span> <span class="s1">&#39;node_load1&#39;</span><span class="p">,</span> <span class="s1">&#39;default&#39;</span><span class="p">,</span> <span class="s1">&#39;vista.prometheus_example_org&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">,</span> <span class="p">(</span><span class="s1">&#39;15d&#39;</span><span class="p">,))</span>
-    <span class="p">(</span><span class="s1">&#39;http://prometheus.example.org:9090&#39;</span><span class="p">,</span> <span class="s1">&#39;prometheus&#39;</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="s1">&#39;node_network_transmit_bytes_total{device=&quot;eth0&quot;}&#39;</span><span class="p">,</span> <span class="s1">&#39;node_network_transmit_bytes_total.eth0&#39;</span><span class="p">,</span> <span class="s1">&#39;/api/v1/query?query=node_network_transmit_bytes_total%7Bdevice%3D</span><span class="si">%22e</span><span class="s1">th0</span><span class="si">%22%</span><span class="s1">7D%5B5m%5D&#39;</span><span class="p">,</span> <span class="s1">&#39;vista.prometheus_example_org&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">,</span> <span class="p">(</span><span class="s1">&#39;15d&#39;</span><span class="p">,))</span>
+    <span class="p">(</span><span class="s1">&#39;http://prometheus.example.org:9090&#39;</span><span class="p">,</span> <span class="s1">&#39;prometheus&#39;</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="s1">&#39;node_load1&#39;</span><span class="p">,</span> <span class="s1">&#39;node_load1&#39;</span><span class="p">,</span> <span class="s1">&#39;default&#39;</span><span class="p">,</span> <span class="s1">&#39;vista.prometheus_example_org&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;15d&#39;</span><span class="p">,))</span>
+    <span class="p">(</span><span class="s1">&#39;http://prometheus.example.org:9090&#39;</span><span class="p">,</span> <span class="s1">&#39;prometheus&#39;</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="s1">&#39;node_network_transmit_bytes_total{device=&quot;eth0&quot;}&#39;</span><span class="p">,</span> <span class="s1">&#39;node_network_transmit_bytes_total.eth0&#39;</span><span class="p">,</span> <span class="s1">&#39;/api/v1/query?query=node_network_transmit_bytes_total%7Bdevice%3D</span><span class="si">%22e</span><span class="s1">th0</span><span class="si">%22%</span><span class="s1">7D%5B5m%5D&#39;</span><span class="p">,</span> <span class="s1">&#39;vista.prometheus_example_org&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
 <span class="p">)</span>
 </pre></div>
 </div>
@@ -3954,7 +4634,9 @@ names.  The namespace_prefix must NOT have a trailing dot.</li>
 <li><strong>populate_at_resolutions</strong> &#8211; if you want Vista to populate the metric with
 historic data this tuple allows you to declare at what resolutions to
 populate the data with.  If you do not want to pre-populated then do not
-declare a tuple and simply pass an empty tuple (). For a detailed
+declare a tuple and simply pass an empty tuple (). NOTE - you cannot declare
+a resolution from Prometheus metrics which use a custom uri, historic
+metrics cannot currently be pulled with a custom uri.  For a detailed
 description of this functionality please see the Vista documentation page
 at:
 <a class="reference external" href="https://earthgecko-skyline.readthedocs.io/en/latest/vista.html#pre-populating-metrics-with-historic-data">https://earthgecko-skyline.readthedocs.io/en/latest/vista.html#pre-populating-metrics-with-historic-data</a>
@@ -3966,11 +4648,62 @@ at:
 </table>
 </dd></dl>
 
+<dl class="data">
+<dt id="settings.VISTA_GRAPHITE_BATCH_SIZE">
+<code class="descname">VISTA_GRAPHITE_BATCH_SIZE</code><em class="property"> = 20</em><a class="headerlink" href="#settings.VISTA_GRAPHITE_BATCH_SIZE" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.VISTA_GRAPHITE_BATCH_SIZE" title="settings.VISTA_GRAPHITE_BATCH_SIZE"><strong>VISTA_GRAPHITE_BATCH_SIZE</strong></a> (<em>int</em>) &#8211; The number of metrics that Vista should retrieve
+from a Graphite host in a single request, if the metrics being requested are
+being requested with the same from parameter (timestamp).</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 </div>
 <div class="section" id="module-skyline_functions">
 <span id="skyline-skyline-functions-module"></span><h2>skyline.skyline_functions module<a class="headerlink" href="#module-skyline_functions" title="Permalink to this headline">¶</a></h2>
 <p>Skyline functions</p>
 <p>These are shared functions that are required in multiple modules.</p>
+<dl class="function">
+<dt id="skyline_functions.get_redis_conn">
+<code class="descname">get_redis_conn</code><span class="sig-paren">(</span><em>current_skyline_app</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/skyline_functions.html#get_redis_conn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skyline_functions.get_redis_conn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a Redis connection</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>current_skyline_app</strong> (<em>str</em>) &#8211; the skyline app using this function</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">REDIS_CONN</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="skyline_functions.get_redis_conn_decoded">
+<code class="descname">get_redis_conn_decoded</code><span class="sig-paren">(</span><em>current_skyline_app</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/skyline_functions.html#get_redis_conn_decoded"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skyline_functions.get_redis_conn_decoded" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a Redis connection with decoded responses, to read sets</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>current_skyline_app</strong> (<em>str</em>) &#8211; the skyline app using this function</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">REDIS_CONN_DECODED</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">object</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
 <dl class="function">
 <dt id="skyline_functions.send_graphite_metric">
 <code class="descname">send_graphite_metric</code><span class="sig-paren">(</span><em>current_skyline_app</em>, <em>metric</em>, <em>value</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/skyline_functions.html#send_graphite_metric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skyline_functions.send_graphite_metric" title="Permalink to this definition">¶</a></dt>
@@ -4008,6 +4741,34 @@ host is defined.</p>
 <tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>path</strong> (<em>str</em>) &#8211; directory path to create</td>
 </tr>
 <tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">returns True</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="skyline_functions.get_graphite_graph_image">
+<code class="descname">get_graphite_graph_image</code><span class="sig-paren">(</span><em>current_skyline_app</em>, <em>url=None</em>, <em>image_file=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/skyline_functions.html#get_graphite_graph_image"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skyline_functions.get_graphite_graph_image" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fetches a Graphite graph image of a metric and saves the image to the
+specified file.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>current_skyline_app</strong> (<em>str</em>) &#8211; the app calling the function so the function
+knows which log to write too.</li>
+<li><strong>url</strong> (<em>str</em>) &#8211; the graph URL</li>
+<li><strong>image_file</strong> (<em>str</em>) &#8211; the absolute path and file name to save the graph png image
+as.</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">True</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">boolean</p>
+</td>
 </tr>
 </tbody>
 </table>
@@ -4338,6 +5099,102 @@ knows which log to write too.</li>
 </table>
 </dd></dl>
 
+<dl class="function">
+<dt id="skyline_functions.get_graphite_port">
+<code class="descname">get_graphite_port</code><span class="sig-paren">(</span><em>current_skyline_app</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/skyline_functions.html#get_graphite_port"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skyline_functions.get_graphite_port" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns graphite port based on configuration in settings.py</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="skyline_functions.get_graphite_render_uri">
+<code class="descname">get_graphite_render_uri</code><span class="sig-paren">(</span><em>current_skyline_app</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/skyline_functions.html#get_graphite_render_uri"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skyline_functions.get_graphite_render_uri" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns graphite render uri based on configuration in settings.py</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="skyline_functions.get_graphite_custom_headers">
+<code class="descname">get_graphite_custom_headers</code><span class="sig-paren">(</span><em>current_skyline_app</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/skyline_functions.html#get_graphite_custom_headers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skyline_functions.get_graphite_custom_headers" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns custom http headers</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="skyline_functions.forward_alert">
+<code class="descname">forward_alert</code><span class="sig-paren">(</span><em>current_skyline_app</em>, <em>alert_data</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/skyline_functions.html#forward_alert"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skyline_functions.forward_alert" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sends alert data to a HTTP endpoint</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>current_skyline_app</strong> (<em>str</em>) &#8211; the app calling the function so the function
+knows which log to write too.</li>
+<li><strong>alert_data</strong> (<em>list</em>) &#8211; a list containing the alert data</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">tuple</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(boolean, str)</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="skyline_functions.is_batch_metric">
+<code class="descname">is_batch_metric</code><span class="sig-paren">(</span><em>current_skyline_app</em>, <em>base_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/skyline_functions.html#is_batch_metric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skyline_functions.is_batch_metric" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determine if the metric is designated as an analyzer batch processing metric</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>current_skyline_app</strong> (<em>str</em>) &#8211; the app calling the function so the function
+knows which log to write too.</li>
+<li><strong>metric_name</strong> (<em>str</em>) &#8211; the metric name</li>
+</ul>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">False</p>
+</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">boolean</p>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="skyline_functions.is_check_airgap_metric">
+<code class="descname">is_check_airgap_metric</code><span class="sig-paren">(</span><em>base_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/skyline_functions.html#is_check_airgap_metric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skyline_functions.is_check_airgap_metric" title="Permalink to this definition">¶</a></dt>
+<dd><p>Check if a metric matches a metric namespace in CHECK_AIRGAPS or one in
+SKIP_AIRGAPS.</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>base_name</strong> (<em>str</em>) &#8211; the metric base_name</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">False</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">boolean</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="function">
+<dt id="skyline_functions.sort_timeseries">
+<code class="descname">sort_timeseries</code><span class="sig-paren">(</span><em>timeseries</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/skyline_functions.html#sort_timeseries"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#skyline_functions.sort_timeseries" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function is used to sort a time series by timestamp to ensure that
+there are no unordered timestamps in the time series which are artefacts of
+the collector or carbon-relay. So all Redis time series are sorted by
+timestamp before analysis.</p>
+</dd></dl>
+
 </div>
 <div class="section" id="module-skyline_version">
 <span id="skyline-skyline-version-module"></span><h2>skyline.skyline_version module<a class="headerlink" href="#module-skyline_version" title="Permalink to this headline">¶</a></h2>
@@ -4506,7 +5363,7 @@ settings.py are valid</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2019, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
 
     </p>
   </div>
@@ -4528,7 +5385,7 @@ settings.py are valid</p>
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.3.0',
+            VERSION:'2.0.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

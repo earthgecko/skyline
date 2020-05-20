@@ -9,7 +9,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Index &mdash; Skyline 1.3.0 documentation</title>
+  <title>Index &mdash; Skyline 2.0.0 documentation</title>
   
 
   
@@ -36,7 +36,7 @@
         <link rel="index" title="Index"
               href="#"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.3.0 documentation" href="index.html"/> 
+    <link rel="top" title="Skyline 2.0.0 documentation" href="index.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                1.3
+                2.0
               </div>
             
           
@@ -90,10 +90,12 @@
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monotonic-metrics.html">Strictly increasing monotonicity</a></li>
@@ -221,6 +223,20 @@
 
       </dl></dd>
       
+  <dt><a href="skyline.analyzer.html#analyzer.alerters.alert_http">alert_http() (in module analyzer.alerters)</a>
+  </dt>
+
+      <dd><dl>
+        
+  <dt><a href="skyline.boundary.html#boundary.boundary_alerters.alert_http">(in module boundary.boundary_alerters)</a>
+  </dt>
+
+        
+  <dt><a href="skyline.mirage.html#mirage.mirage_alerters.alert_http">(in module mirage.mirage_alerters)</a>
+  </dt>
+
+      </dl></dd>
+      
   <dt><a href="skyline.html#settings.ALERT_ON_STALE_METRICS">ALERT_ON_STALE_METRICS (in module settings)</a>
   </dt>
 
@@ -316,12 +332,16 @@
   <dt><a href="skyline.html#module-algorithm_exceptions">algorithm_exceptions (module)</a>
   </dt>
 
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="skyline.html#settings.ALGORITHMS">ALGORITHMS (in module settings)</a>
   </dt>
 
+      
+  <dt><a href="skyline.webapp.html#webapp.webapp.allowed_file">allowed_file() (in module webapp.webapp)</a>
+  </dt>
+
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="skyline.html#settings.ALTERNATIVE_SKYLINE_URLS">ALTERNATIVE_SKYLINE_URLS (in module settings)</a>
   </dt>
@@ -339,6 +359,10 @@
   </dt>
 
       
+  <dt><a href="skyline.analyzer.html#module-analyzer.agent_batch">analyzer.agent_batch (module)</a>
+  </dt>
+
+      
   <dt><a href="skyline.analyzer.html#module-analyzer.alerters">analyzer.alerters (module)</a>
   </dt>
 
@@ -347,7 +371,15 @@
   </dt>
 
       
+  <dt><a href="skyline.analyzer.html#module-analyzer.algorithms_batch">analyzer.algorithms_batch (module)</a>
+  </dt>
+
+      
   <dt><a href="skyline.analyzer.html#module-analyzer.analyzer">analyzer.analyzer (module)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.analyzer.html#module-analyzer.analyzer_batch">analyzer.analyzer_batch (module)</a>
   </dt>
 
       
@@ -388,6 +420,14 @@
 
       
   <dt><a href="skyline.analyzer.html#analyzer.agent.AnalyzerAgent">AnalyzerAgent (class in analyzer.agent)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.analyzer.html#analyzer.analyzer_batch.AnalyzerBatch">AnalyzerBatch (class in analyzer.analyzer_batch)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.analyzer.html#analyzer.agent_batch.AnalyzerBatchAgent">AnalyzerBatchAgent (class in analyzer.agent_batch)</a>
   </dt>
 
       
@@ -437,6 +477,26 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%" valign="top"><dl>
       
+  <dt><a href="skyline.crucible.html#crucible.crucible_firings.Crucible_firings.batch_check_if_parent_is_alive">batch_check_if_parent_is_alive() (Crucible_firings method)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.html#settings.BATCH_PROCESSING">BATCH_PROCESSING (in module settings)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.html#settings.BATCH_PROCESSING_DEBUG">BATCH_PROCESSING_DEBUG (in module settings)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.html#settings.BATCH_PROCESSING_NAMESPACES">BATCH_PROCESSING_NAMESPACES (in module settings)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.html#settings.BATCH_PROCESSING_STALE_PERIOD">BATCH_PROCESSING_STALE_PERIOD (in module settings)</a>
+  </dt>
+
+      
   <dt><a href="skyline.html#settings.BOREDOM_SET_SIZE">BOREDOM_SET_SIZE (in module settings)</a>
   </dt>
 
@@ -472,6 +532,8 @@
   <dt><a href="skyline.html#settings.BOUNDARY_ALERTER_OPTS">BOUNDARY_ALERTER_OPTS (in module settings)</a>
   </dt>
 
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="skyline.html#settings.BOUNDARY_ALGORITHMS">BOUNDARY_ALGORITHMS (in module settings)</a>
   </dt>
@@ -480,8 +542,6 @@
   <dt><a href="skyline.html#settings.BOUNDARY_AUTOAGGRERATION">BOUNDARY_AUTOAGGRERATION (in module settings)</a>
   </dt>
 
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="skyline.html#settings.BOUNDARY_AUTOAGGRERATION_METRICS">BOUNDARY_AUTOAGGRERATION_METRICS (in module settings)</a>
   </dt>
@@ -553,6 +613,10 @@
   </dt>
 
       
+  <dt><a href="skyline.html#settings.CHECK_AIRGAPS">CHECK_AIRGAPS (in module settings)</a>
+  </dt>
+
+      
   <dt><a href="skyline.webapp.html#webapp.webapp.check_auth">check_auth() (in module webapp.webapp)</a>
   </dt>
 
@@ -561,6 +625,10 @@
   </dt>
 
       <dd><dl>
+        
+  <dt><a href="skyline.analyzer.html#analyzer.analyzer_batch.AnalyzerBatch.check_if_parent_is_alive">(AnalyzerBatch method)</a>
+  </dt>
+
         
   <dt><a href="skyline.analyzer_dev.html#analyzer_dev.analyzer_dev.AnalyzerDev.check_if_parent_is_alive">(AnalyzerDev method)</a>
   </dt>
@@ -606,6 +674,10 @@
   </dt>
 
         
+  <dt><a href="skyline.flux.html#flux.uploaded_data_worker.UploadedDataWorker.check_if_parent_is_alive">(UploadedDataWorker method)</a>
+  </dt>
+
+        
   <dt><a href="skyline.flux.html#flux.worker.Worker.check_if_parent_is_alive">(Worker method)</a>, <a href="skyline.horizon.html#horizon.worker.Worker.check_if_parent_is_alive">[1]</a>, <a href="skyline.vista.html#vista.worker.Worker.check_if_parent_is_alive">[2]</a>
   </dt>
 
@@ -629,7 +701,19 @@
   </dt>
 
       
+  <dt><a href="skyline.html#ionosphere_functions.create_fp_ts_graph">create_fp_ts_graph() (in module ionosphere_functions)</a>
+  </dt>
+
+      
   <dt><a href="skyline.webapp.html#webapp.ionosphere_backend.create_ionosphere_layers">create_ionosphere_layers() (in module webapp.ionosphere_backend)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.html#module-create_matplotlib_graph">create_matplotlib_graph (module)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.html#create_matplotlib_graph.create_matplotlib_graph">create_matplotlib_graph() (in module create_matplotlib_graph)</a>
   </dt>
 
       
@@ -657,11 +741,19 @@
   </dt>
 
       
+  <dt><a href="skyline.crucible.html#module-crucible.crucible_firings">crucible.crucible_firings (module)</a>
+  </dt>
+
+      
   <dt><a href="skyline.html#settings.CRUCIBLE_CHECK_PATH">CRUCIBLE_CHECK_PATH (in module settings)</a>
   </dt>
 
       
   <dt><a href="skyline.html#settings.CRUCIBLE_DATA_FOLDER">CRUCIBLE_DATA_FOLDER (in module settings)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.crucible.html#crucible.crucible_firings.Crucible_firings">Crucible_firings (class in crucible.crucible_firings)</a>
   </dt>
 
       
@@ -687,6 +779,10 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%" valign="top"><dl>
       
+  <dt><a href="skyline.html#settings.DATA_UPLOADS_PATH">DATA_UPLOADS_PATH (in module settings)</a>
+  </dt>
+
+      
   <dt><a href="skyline.html#module-database">database (module)</a>
   </dt>
 
@@ -708,11 +804,21 @@
   <dt><a href="skyline.analyzer.html#analyzer.algorithms.determine_array_median">determine_array_median() (in module analyzer.algorithms)</a>
   </dt>
 
+      <dd><dl>
+        
+  <dt><a href="skyline.analyzer.html#analyzer.algorithms_batch.determine_array_median">(in module analyzer.algorithms_batch)</a>
+  </dt>
+
+      </dl></dd>
       
   <dt><a href="skyline.analyzer.html#analyzer.algorithms.determine_median">determine_median() (in module analyzer.algorithms)</a>
   </dt>
 
       <dd><dl>
+        
+  <dt><a href="skyline.analyzer.html#analyzer.algorithms_batch.determine_median">(in module analyzer.algorithms_batch)</a>
+  </dt>
+
         
   <dt><a href="skyline.analyzer_dev.html#analyzer_dev.algorithms_dev.determine_median">(in module analyzer_dev.algorithms_dev)</a>
   </dt>
@@ -825,9 +931,15 @@
   </dt>
 
       
-  <dt><a href="skyline.webapp.html#webapp.ionosphere_backend.engine_disposal">engine_disposal() (in module webapp.ionosphere_backend)</a>
+  <dt><a href="skyline.webapp.html#webapp.crucible_backend.engine_disposal">engine_disposal() (in module webapp.crucible_backend)</a>
   </dt>
 
+      <dd><dl>
+        
+  <dt><a href="skyline.webapp.html#webapp.ionosphere_backend.engine_disposal">(in module webapp.ionosphere_backend)</a>
+  </dt>
+
+      </dl></dd>
   </dl></td>
 </tr></table>
 
@@ -884,6 +996,10 @@
 
       <dd><dl>
         
+  <dt><a href="skyline.analyzer.html#analyzer.algorithms_batch.first_hour_average">(in module analyzer.algorithms_batch)</a>
+  </dt>
+
+        
   <dt><a href="skyline.analyzer_dev.html#analyzer_dev.algorithms_dev.first_hour_average">(in module analyzer_dev.algorithms_dev)</a>
   </dt>
 
@@ -912,8 +1028,6 @@
   <dt><a href="skyline.flux.html#module-flux.listen">flux.listen (module)</a>
   </dt>
 
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="skyline.flux.html#module-flux.logger">flux.logger (module)</a>
   </dt>
@@ -926,6 +1040,12 @@
   <dt><a href="skyline.flux.html#module-flux.populate_metric_worker">flux.populate_metric_worker (module)</a>
   </dt>
 
+      
+  <dt><a href="skyline.flux.html#module-flux.uploaded_data_worker">flux.uploaded_data_worker (module)</a>
+  </dt>
+
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="skyline.flux.html#module-flux.worker">flux.worker (module)</a>
   </dt>
@@ -947,11 +1067,31 @@
   </dt>
 
       
+  <dt><a href="skyline.webapp.html#webapp.webapp.flux_frontend">flux_frontend() (in module webapp.webapp)</a>
+  </dt>
+
+      
   <dt><a href="skyline.html#settings.FLUX_IP">FLUX_IP (in module settings)</a>
   </dt>
 
       
+  <dt><a href="skyline.html#settings.FLUX_MAX_AGE">FLUX_MAX_AGE (in module settings)</a>
+  </dt>
+
+      
   <dt><a href="skyline.html#settings.FLUX_PORT">FLUX_PORT (in module settings)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.html#settings.FLUX_PROCESS_UPLOADS">FLUX_PROCESS_UPLOADS (in module settings)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.html#settings.FLUX_SAVE_UPLOADS">FLUX_SAVE_UPLOADS (in module settings)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.html#settings.FLUX_SAVE_UPLOADS_PATH">FLUX_SAVE_UPLOADS_PATH (in module settings)</a>
   </dt>
 
       
@@ -975,7 +1115,15 @@
   </dt>
 
       
+  <dt><a href="skyline.html#settings.FLUX_UPLOADS_KEYS">FLUX_UPLOADS_KEYS (in module settings)</a>
+  </dt>
+
+      
   <dt><a href="skyline.html#settings.FLUX_WORKERS">FLUX_WORKERS (in module settings)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.html#skyline_functions.forward_alert">forward_alert() (in module skyline_functions)</a>
   </dt>
 
       
@@ -1005,9 +1153,15 @@
   </dt>
 
       
-  <dt><a href="skyline.webapp.html#webapp.ionosphere_backend.get_an_engine">get_an_engine() (in module webapp.ionosphere_backend)</a>
+  <dt><a href="skyline.webapp.html#webapp.crucible_backend.get_an_engine">get_an_engine() (in module webapp.crucible_backend)</a>
   </dt>
 
+      <dd><dl>
+        
+  <dt><a href="skyline.webapp.html#webapp.ionosphere_backend.get_an_engine">(in module webapp.ionosphere_backend)</a>
+  </dt>
+
+      </dl></dd>
       
   <dt><a href="skyline.luminosity.html#luminosity.process_correlations.get_anomalous_ts">get_anomalous_ts() (in module luminosity.process_correlations)</a>
   </dt>
@@ -1043,6 +1197,14 @@
 
       </dl></dd>
       
+  <dt><a href="skyline.webapp.html#webapp.crucible_backend.get_crucible_job">get_crucible_job() (in module webapp.crucible_backend)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.webapp.html#webapp.crucible_backend.get_crucible_jobs">get_crucible_jobs() (in module webapp.crucible_backend)</a>
+  </dt>
+
+      
   <dt><a href="skyline.html#database.get_engine">get_engine() (in module database)</a>
   </dt>
 
@@ -1060,6 +1222,10 @@
 
       <dd><dl>
         
+  <dt><a href="skyline.analyzer.html#analyzer.algorithms_batch.get_function_name">(in module analyzer.algorithms_batch)</a>
+  </dt>
+
+        
   <dt><a href="skyline.analyzer_dev.html#analyzer_dev.algorithms_dev.get_function_name">(in module analyzer_dev.algorithms_dev)</a>
   </dt>
 
@@ -1069,7 +1235,11 @@
 
       </dl></dd>
       
-  <dt><a href="skyline.analyzer.html#analyzer.alerters.get_graphite_custom_headers">get_graphite_custom_headers() (in module analyzer.alerters)</a>
+  <dt><a href="skyline.html#skyline_functions.get_graphite_custom_headers">get_graphite_custom_headers() (in module skyline_functions)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.html#skyline_functions.get_graphite_graph_image">get_graphite_graph_image() (in module skyline_functions)</a>
   </dt>
 
       
@@ -1077,11 +1247,11 @@
   </dt>
 
       
-  <dt><a href="skyline.analyzer.html#analyzer.alerters.get_graphite_port">get_graphite_port() (in module analyzer.alerters)</a>
+  <dt><a href="skyline.html#skyline_functions.get_graphite_port">get_graphite_port() (in module skyline_functions)</a>
   </dt>
 
       
-  <dt><a href="skyline.analyzer.html#analyzer.alerters.get_graphite_render_uri">get_graphite_render_uri() (in module analyzer.alerters)</a>
+  <dt><a href="skyline.html#skyline_functions.get_graphite_render_uri">get_graphite_render_uri() (in module skyline_functions)</a>
   </dt>
 
       
@@ -1132,6 +1302,18 @@
 
       
   <dt><a href="skyline.webapp.html#webapp.webapp.get_redis">get_redis() (in module webapp.webapp)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.html#skyline_functions.get_redis_conn">get_redis_conn() (in module skyline_functions)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.html#skyline_functions.get_redis_conn_decoded">get_redis_conn_decoded() (in module skyline_functions)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.html#ionosphere_functions.get_related">get_related() (in module ionosphere_functions)</a>
   </dt>
 
       
@@ -1196,6 +1378,10 @@
 
       <dd><dl>
         
+  <dt><a href="skyline.analyzer.html#analyzer.algorithms_batch.grubbs">(in module analyzer.algorithms_batch)</a>
+  </dt>
+
+        
   <dt><a href="skyline.analyzer_dev.html#analyzer_dev.algorithms_dev.grubbs">(in module analyzer_dev.algorithms_dev)</a>
   </dt>
 
@@ -1232,6 +1418,10 @@
 
       <dd><dl>
         
+  <dt><a href="skyline.analyzer.html#analyzer.algorithms_batch.histogram_bins">(in module analyzer.algorithms_batch)</a>
+  </dt>
+
+        
   <dt><a href="skyline.analyzer_dev.html#analyzer_dev.algorithms_dev.histogram_bins">(in module analyzer_dev.algorithms_dev)</a>
   </dt>
 
@@ -1244,12 +1434,12 @@
   </dt>
 
       </dl></dd>
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="skyline.horizon.html#horizon.agent.Horizon">Horizon (class in horizon.agent)</a>
   </dt>
 
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="skyline.horizon.html#module-horizon">horizon (module)</a>
   </dt>
@@ -1274,12 +1464,32 @@
   <dt><a href="skyline.html#settings.HORIZON_IP">HORIZON_IP (in module settings)</a>
   </dt>
 
+      
+  <dt><a href="skyline.html#settings.HTTP_ALERTERS_ENABLED">HTTP_ALERTERS_ENABLED (in module settings)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.html#settings.HTTP_ALERTERS_OPTS">HTTP_ALERTERS_OPTS (in module settings)</a>
+  </dt>
+
   </dl></td>
 </tr></table>
 
 <h2 id="I">I</h2>
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="skyline.html#settings.IDENTIFY_AIRGAPS">IDENTIFY_AIRGAPS (in module settings)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.analyzer.html#analyzer.algorithms.identify_airgaps">identify_airgaps() (in module analyzer.algorithms)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.html#settings.IDENTIFY_UNORDERED_TIMESERIES">IDENTIFY_UNORDERED_TIMESERIES (in module settings)</a>
+  </dt>
+
       
   <dt><a href="skyline.html#skyline_functions.in_list">in_list() (in module skyline_functions)</a>
   </dt>
@@ -1290,6 +1500,10 @@
 
       
   <dt><a href="skyline.webapp.html#webapp.webapp.index">index() (in module webapp.webapp)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.panorama.html#panorama.panorama.Panorama.insert_new_metric">insert_new_metric() (Panorama method)</a>
   </dt>
 
       
@@ -1443,6 +1657,10 @@
   </dt>
 
       
+  <dt><a href="skyline.html#settings.IONOSPHERE_MANAGE_PURGE">IONOSPHERE_MANAGE_PURGE (in module settings)</a>
+  </dt>
+
+      
   <dt><a href="skyline.html#database.ionosphere_matched_table_meta">ionosphere_matched_table_meta() (in module database)</a>
   </dt>
 
@@ -1501,6 +1719,14 @@
 
       </dl></dd>
       
+  <dt><a href="skyline.html#skyline_functions.is_batch_metric">is_batch_metric() (in module skyline_functions)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.html#skyline_functions.is_check_airgap_metric">is_check_airgap_metric() (in module skyline_functions)</a>
+  </dt>
+
+      
   <dt><a href="skyline.html#skyline_functions.is_derivative_metric">is_derivative_metric() (in module skyline_functions)</a>
   </dt>
 
@@ -1515,6 +1741,10 @@
   </dt>
 
       <dd><dl>
+        
+  <dt><a href="skyline.analyzer.html#analyzer.algorithms_batch.ks_test">(in module analyzer.algorithms_batch)</a>
+  </dt>
+
         
   <dt><a href="skyline.analyzer_dev.html#analyzer_dev.algorithms_dev.ks_test">(in module analyzer_dev.algorithms_dev)</a>
   </dt>
@@ -1535,6 +1765,10 @@
 <table style="width: 100%" class="indextable genindextable"><tr>
   <td style="width: 33%" valign="top"><dl>
       
+  <dt><a href="skyline.webapp.html#webapp.ionosphere_backend.label_anomalies">label_anomalies() (in module webapp.ionosphere_backend)</a>
+  </dt>
+
+      
   <dt><a href="skyline.html#database.layers_algorithms_table_meta">layers_algorithms_table_meta() (in module database)</a>
   </dt>
 
@@ -1547,6 +1781,10 @@
   </dt>
 
       <dd><dl>
+        
+  <dt><a href="skyline.analyzer.html#analyzer.algorithms_batch.least_squares">(in module analyzer.algorithms_batch)</a>
+  </dt>
+
         
   <dt><a href="skyline.analyzer_dev.html#analyzer_dev.algorithms_dev.least_squares">(in module analyzer_dev.algorithms_dev)</a>
   </dt>
@@ -1584,12 +1822,22 @@
   <dt><a href="skyline.html#skyline_functions.load_metric_vars">load_metric_vars() (in module skyline_functions)</a>
   </dt>
 
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="skyline.horizon.html#horizon.listen.SafeUnpickler.loads">loads() (horizon.listen.SafeUnpickler class method)</a>
   </dt>
 
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="skyline.analyzer.html#analyzer.alerters.LOCAL_DEBUG">LOCAL_DEBUG (in module analyzer.alerters)</a>
+  </dt>
+
+      <dd><dl>
+        
+  <dt><a href="skyline.mirage.html#mirage.mirage_alerters.LOCAL_DEBUG">(in module mirage.mirage_alerters)</a>
+  </dt>
+
+      </dl></dd>
       
   <dt><a href="skyline.html#settings.LOG_PATH">LOG_PATH (in module settings)</a>
   </dt>
@@ -1619,7 +1867,15 @@
   </dt>
 
       
+  <dt><a href="skyline.html#settings.LUMINOSITY_CORRELATE_NAMESPACES_ONLY">LUMINOSITY_CORRELATE_NAMESPACES_ONLY (in module settings)</a>
+  </dt>
+
+      
   <dt><a href="skyline.html#settings.LUMINOSITY_PROCESSES">LUMINOSITY_PROCESSES (in module settings)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.html#settings.LUMINOSITY_RELATED_TIME_PERIOD">LUMINOSITY_RELATED_TIME_PERIOD (in module settings)</a>
   </dt>
 
       
@@ -1649,6 +1905,18 @@
   </dt>
 
       
+  <dt><a href="skyline.html#module-matched_or_regexed_in_list">matched_or_regexed_in_list (module)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.html#matched_or_regexed_in_list.matched_or_regexed_in_list">matched_or_regexed_in_list() (in module matched_or_regexed_in_list)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.html#settings.MAX_AIRGAP_PERIOD">MAX_AIRGAP_PERIOD (in module settings)</a>
+  </dt>
+
+      
   <dt><a href="skyline.html#settings.MAX_ANALYZER_PROCESS_RUNTIME">MAX_ANALYZER_PROCESS_RUNTIME (in module settings)</a>
   </dt>
 
@@ -1670,6 +1938,10 @@
 
       <dd><dl>
         
+  <dt><a href="skyline.analyzer.html#analyzer.algorithms_batch.mean_subtraction_cumulation">(in module analyzer.algorithms_batch)</a>
+  </dt>
+
+        
   <dt><a href="skyline.analyzer_dev.html#analyzer_dev.algorithms_dev.mean_subtraction_cumulation">(in module analyzer_dev.algorithms_dev)</a>
   </dt>
 
@@ -1687,6 +1959,10 @@
   </dt>
 
       <dd><dl>
+        
+  <dt><a href="skyline.analyzer.html#analyzer.algorithms_batch.median_absolute_deviation">(in module analyzer.algorithms_batch)</a>
+  </dt>
+
         
   <dt><a href="skyline.analyzer_dev.html#analyzer_dev.algorithms_dev.median_absolute_deviation">(in module analyzer_dev.algorithms_dev)</a>
   </dt>
@@ -1725,6 +2001,10 @@
   </dt>
 
       
+  <dt><a href="skyline.html#settings.METRICS_INACTIVE_AFTER">METRICS_INACTIVE_AFTER (in module settings)</a>
+  </dt>
+
+      
   <dt><a href="skyline.html#database.metrics_table_meta">metrics_table_meta() (in module database)</a>
   </dt>
 
@@ -1740,6 +2020,8 @@
   <dt><a href="skyline.html#settings.MINI_NAMESPACE">MINI_NAMESPACE (in module settings)</a>
   </dt>
 
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="skyline.ionosphere.html#ionosphere.common_functions.minmax_scale_check">minmax_scale_check() (in module ionosphere.common_functions)</a>
   </dt>
@@ -1752,8 +2034,6 @@
   <dt><a href="skyline.mirage.html#module-mirage">mirage (module)</a>
   </dt>
 
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="skyline.mirage.html#module-mirage.agent">mirage.agent (module)</a>
   </dt>
@@ -1837,6 +2117,10 @@
 
       </dl></dd>
       
+  <dt><a href="skyline.webapp.html#webapp.webapp.mock_api">mock_api() (in module webapp.webapp)</a>
+  </dt>
+
+      
   <dt><a href="skyline.html#skyline_functions.move_file">move_file() (in module skyline_functions)</a>
   </dt>
 
@@ -1887,17 +2171,35 @@
   </dt>
 
       
-  <dt><a href="skyline.ionosphere.html#ionosphere.ionosphere.Ionosphere.new_load_metric_vars">new_load_metric_vars() (Ionosphere method)</a>
+  <dt><a href="skyline.analyzer.html#analyzer.algorithms.negatives_present">negatives_present() (in module analyzer.algorithms)</a>
   </dt>
 
       <dd><dl>
         
-  <dt><a href="skyline.panorama.html#panorama.panorama.Panorama.new_load_metric_vars">(Panorama method)</a>
+  <dt><a href="skyline.analyzer.html#analyzer.algorithms_batch.negatives_present">(in module analyzer.algorithms_batch)</a>
+  </dt>
+
+        
+  <dt><a href="skyline.mirage.html#mirage.mirage_algorithms.negatives_present">(in module mirage.mirage_algorithms)</a>
   </dt>
 
       </dl></dd>
   </dl></td>
   <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="skyline.crucible.html#crucible.crucible.Crucible.new_load_metric_vars">new_load_metric_vars() (Crucible method)</a>
+  </dt>
+
+      <dd><dl>
+        
+  <dt><a href="skyline.ionosphere.html#ionosphere.ionosphere.Ionosphere.new_load_metric_vars">(Ionosphere method)</a>
+  </dt>
+
+        
+  <dt><a href="skyline.panorama.html#panorama.panorama.Panorama.new_load_metric_vars">(Panorama method)</a>
+  </dt>
+
+      </dl></dd>
       
   <dt><a href="skyline.html#settings.NON_DERIVATIVE_MONOTONIC_METRICS">NON_DERIVATIVE_MONOTONIC_METRICS (in module settings)</a>
   </dt>
@@ -1987,6 +2289,10 @@
   </dt>
 
       
+  <dt><a href="skyline.html#settings.PANORAMA_CHECK_INTERVAL">PANORAMA_CHECK_INTERVAL (in module settings)</a>
+  </dt>
+
+      
   <dt><a href="skyline.html#settings.PANORAMA_CHECK_MAX_AGE">PANORAMA_CHECK_MAX_AGE (in module settings)</a>
   </dt>
 
@@ -2022,6 +2328,10 @@
 
       
   <dt><a href="skyline.html#settings.PANORAMA_EXPIRY_TIME">PANORAMA_EXPIRY_TIME (in module settings)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.html#settings.PANORAMA_INSERT_METRICS_IMMEDIATELY">PANORAMA_INSERT_METRICS_IMMEDIATELY (in module settings)</a>
   </dt>
 
       
@@ -2118,6 +2428,10 @@
 
       <dd><dl>
         
+  <dt><a href="skyline.analyzer.html#analyzer.algorithms_batch.record_algorithm_error">(in module analyzer.algorithms_batch)</a>
+  </dt>
+
+        
   <dt><a href="skyline.mirage.html#mirage.mirage_algorithms.record_algorithm_error">(in module mirage.mirage_algorithms)</a>
   </dt>
 
@@ -2176,6 +2490,14 @@
   </dt>
 
         
+  <dt><a href="skyline.analyzer.html#analyzer.analyzer_batch.AnalyzerBatch.run">(AnalyzerBatch method)</a>
+  </dt>
+
+        
+  <dt><a href="skyline.analyzer.html#analyzer.agent_batch.AnalyzerBatchAgent.run">(AnalyzerBatchAgent method)</a>
+  </dt>
+
+        
   <dt><a href="skyline.analyzer_dev.html#analyzer_dev.analyzer_dev.AnalyzerDev.run">(AnalyzerDev method)</a>
   </dt>
 
@@ -2201,6 +2523,10 @@
 
         
   <dt><a href="skyline.crucible.html#crucible.agent.CrucibleAgent.run">(CrucibleAgent method)</a>
+  </dt>
+
+        
+  <dt><a href="skyline.crucible.html#crucible.crucible_firings.Crucible_firings.run">(Crucible_firings method)</a>
   </dt>
 
         
@@ -2256,6 +2582,10 @@
   </dt>
 
         
+  <dt><a href="skyline.flux.html#flux.uploaded_data_worker.UploadedDataWorker.run">(UploadedDataWorker method)</a>
+  </dt>
+
+        
   <dt><a href="skyline.vista.html#vista.agent.Vista.run">(Vista method)</a>
   </dt>
 
@@ -2265,6 +2595,10 @@
 
         
   <dt><a href="skyline.analyzer.html#analyzer.agent.run">(in module analyzer.agent)</a>
+  </dt>
+
+        
+  <dt><a href="skyline.analyzer.html#analyzer.agent_batch.run">(in module analyzer.agent_batch)</a>
   </dt>
 
         
@@ -2328,6 +2662,10 @@
   </dt>
 
       </dl></dd>
+      
+  <dt><a href="skyline.analyzer.html#analyzer.algorithms_batch.run_selected_batch_algorithm">run_selected_batch_algorithm() (in module analyzer.algorithms_batch)</a>
+  </dt>
+
   </dl></td>
 </tr></table>
 
@@ -2348,6 +2686,10 @@
 
       
   <dt><a href="skyline.html#skyline_functions.send_anomalous_metric_to">send_anomalous_metric_to() (in module skyline_functions)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.webapp.html#webapp.crucible_backend.send_crucible_job_metric_to_panorama">send_crucible_job_metric_to_panorama() (in module webapp.crucible_backend)</a>
   </dt>
 
       
@@ -2375,6 +2717,10 @@
   </dt>
 
       
+  <dt><a href="skyline.html#settings.SKIP_AIRGAPS">SKIP_AIRGAPS (in module settings)</a>
+  </dt>
+
+      
   <dt><a href="skyline.html#settings.SKIP_LIST">SKIP_LIST (in module settings)</a>
   </dt>
 
@@ -2395,6 +2741,14 @@
   </dt>
 
       
+  <dt><a href="skyline.html#settings.SKYLINE_METRICS_CARBON_HOST">SKYLINE_METRICS_CARBON_HOST (in module settings)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.html#settings.SKYLINE_METRICS_CARBON_PORT">SKYLINE_METRICS_CARBON_PORT (in module settings)</a>
+  </dt>
+
+      
   <dt><a href="skyline.html#settings.SKYLINE_TMP_DIR">SKYLINE_TMP_DIR (in module settings)</a>
   </dt>
 
@@ -2403,19 +2757,9 @@
   </dt>
 
       
-  <dt><a href="skyline.analyzer.html#analyzer.alerters.skyline_version">skyline_version (in module analyzer.alerters)</a>
+  <dt><a href="skyline.html#module-skyline_version">skyline_version (module)</a>
   </dt>
 
-      <dd><dl>
-        
-  <dt><a href="skyline.mirage.html#mirage.mirage_alerters.skyline_version">(in module mirage.mirage_alerters)</a>
-  </dt>
-
-        
-  <dt><a href="skyline.html#module-skyline_version">(module)</a>
-  </dt>
-
-      </dl></dd>
       
   <dt><a href="skyline.html#settings.SLACK_ENABLED">SLACK_ENABLED (in module settings)</a>
   </dt>
@@ -2440,8 +2784,10 @@
   <dt><a href="skyline.html#settings.SMTP_OPTS">SMTP_OPTS (in module settings)</a>
   </dt>
 
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
+      
+  <dt><a href="skyline.html#skyline_functions.sort_timeseries">sort_timeseries() (in module skyline_functions)</a>
+  </dt>
+
       
   <dt><a href="skyline.analyzer.html#analyzer.analyzer.Analyzer.spawn_alerter_process">spawn_alerter_process() (Analyzer method)</a>
   </dt>
@@ -2456,10 +2802,22 @@
   </dt>
 
       </dl></dd>
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="skyline.ionosphere.html#ionosphere.ionosphere.Ionosphere.spawn_learn_process">spawn_learn_process() (Ionosphere method)</a>
   </dt>
 
+      
+  <dt><a href="skyline.analyzer.html#analyzer.analyzer_batch.AnalyzerBatch.spin_batch_process">spin_batch_process() (AnalyzerBatch method)</a>
+  </dt>
+
+      <dd><dl>
+        
+  <dt><a href="skyline.crucible.html#crucible.crucible_firings.Crucible_firings.spin_batch_process">(Crucible_firings method)</a>
+  </dt>
+
+      </dl></dd>
       
   <dt><a href="skyline.analyzer.html#analyzer.analyzer.Analyzer.spin_process">spin_process() (Analyzer method)</a>
   </dt>
@@ -2503,10 +2861,18 @@
   </dt>
 
       
+  <dt><a href="skyline.html#settings.START_IF_NO_DB">START_IF_NO_DB (in module settings)</a>
+  </dt>
+
+      
   <dt><a href="skyline.analyzer.html#analyzer.algorithms.stddev_from_average">stddev_from_average() (in module analyzer.algorithms)</a>
   </dt>
 
       <dd><dl>
+        
+  <dt><a href="skyline.analyzer.html#analyzer.algorithms_batch.stddev_from_average">(in module analyzer.algorithms_batch)</a>
+  </dt>
+
         
   <dt><a href="skyline.analyzer_dev.html#analyzer_dev.algorithms_dev.stddev_from_average">(in module analyzer_dev.algorithms_dev)</a>
   </dt>
@@ -2526,6 +2892,10 @@
 
       <dd><dl>
         
+  <dt><a href="skyline.analyzer.html#analyzer.algorithms_batch.stddev_from_moving_average">(in module analyzer.algorithms_batch)</a>
+  </dt>
+
+        
   <dt><a href="skyline.analyzer_dev.html#analyzer_dev.algorithms_dev.stddev_from_moving_average">(in module analyzer_dev.algorithms_dev)</a>
   </dt>
 
@@ -2540,6 +2910,10 @@
       </dl></dd>
       
   <dt><a href="skyline.html#skyline_functions.strictly_increasing_monotonicity">strictly_increasing_monotonicity() (in module skyline_functions)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.webapp.html#webapp.crucible_backend.submit_crucible_job">submit_crucible_job() (in module webapp.crucible_backend)</a>
   </dt>
 
       
@@ -2565,6 +2939,10 @@
   </dt>
 
       <dd><dl>
+        
+  <dt><a href="skyline.analyzer.html#analyzer.algorithms_batch.tail_avg">(in module analyzer.algorithms_batch)</a>
+  </dt>
+
         
   <dt><a href="skyline.analyzer_dev.html#analyzer_dev.algorithms_dev.tail_avg">(in module analyzer_dev.algorithms_dev)</a>
   </dt>
@@ -2653,13 +3031,29 @@
   </dt>
 
       
+  <dt><a href="skyline.analyzer.html#analyzer.analyzer.Analyzer.uniq_datapoints">uniq_datapoints() (Analyzer method)</a>
+  </dt>
+
+      
   <dt><a href="skyline.boundary.html#boundary.boundary.Boundary.unique_noHash">unique_noHash() (Boundary method)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.panorama.html#panorama.panorama.Panorama.update_anomaly_end_timestamp">update_anomaly_end_timestamp() (Panorama method)</a>
   </dt>
 
   </dl></td>
   <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="skyline.panorama.html#panorama.panorama.Panorama.update_slack_thread_ts">update_slack_thread_ts() (Panorama method)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.webapp.html#webapp.webapp.upload_data">upload_data() (in module webapp.webapp)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.flux.html#flux.uploaded_data_worker.UploadedDataWorker">UploadedDataWorker (class in flux.uploaded_data_worker)</a>
   </dt>
 
       
@@ -2705,6 +3099,10 @@
   </dt>
 
       
+  <dt><a href="skyline.html#settings.VERIFY_SSL">VERIFY_SSL (in module settings)</a>
+  </dt>
+
+      
   <dt><a href="skyline.webapp.html#webapp.webapp.version">version() (in module webapp.webapp)</a>
   </dt>
 
@@ -2739,7 +3137,7 @@
   </dt>
 
       
-  <dt><a href="skyline.html#settings.VISTA_FETCH_GRAPHITE_METRICS">VISTA_FETCH_GRAPHITE_METRICS (in module settings)</a>
+  <dt><a href="skyline.html#settings.VISTA_FETCH_METRICS">VISTA_FETCH_METRICS (in module settings)</a>
   </dt>
 
       
@@ -2748,6 +3146,10 @@
 
       
   <dt><a href="skyline.html#settings.VISTA_FETCHER_PROCESSES">VISTA_FETCHER_PROCESSES (in module settings)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.html#settings.VISTA_GRAPHITE_BATCH_SIZE">VISTA_GRAPHITE_BATCH_SIZE (in module settings)</a>
   </dt>
 
       
@@ -2769,6 +3171,10 @@
   </dt>
 
       
+  <dt><a href="skyline.webapp.html#module-webapp.crucible_backend">webapp.crucible_backend (module)</a>
+  </dt>
+
+      
   <dt><a href="skyline.webapp.html#module-webapp.gunicorn">webapp.gunicorn (module)</a>
   </dt>
 
@@ -2782,6 +3188,10 @@
 
       
   <dt><a href="skyline.webapp.html#module-webapp.webapp">webapp.webapp (module)</a>
+  </dt>
+
+      
+  <dt><a href="skyline.html#settings.WEBAPP_ACCEPT_DATA_UPLOADS">WEBAPP_ACCEPT_DATA_UPLOADS (in module settings)</a>
   </dt>
 
       
@@ -2804,12 +3214,12 @@
   <dt><a href="skyline.html#settings.WEBAPP_FIXED_TIMEZONE">WEBAPP_FIXED_TIMEZONE (in module settings)</a>
   </dt>
 
+  </dl></td>
+  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="skyline.html#settings.WEBAPP_IP">WEBAPP_IP (in module settings)</a>
   </dt>
 
-  </dl></td>
-  <td style="width: 33%" valign="top"><dl>
       
   <dt><a href="skyline.html#settings.WEBAPP_IP_RESTRICTED">WEBAPP_IP_RESTRICTED (in module settings)</a>
   </dt>
@@ -2878,7 +3288,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2019, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
 
     </p>
   </div>
@@ -2900,7 +3310,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.3.0',
+            VERSION:'2.0.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

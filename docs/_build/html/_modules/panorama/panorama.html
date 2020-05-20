@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>panorama.panorama &mdash; Skyline 1.3.0 documentation</title>
+  <title>panorama.panorama &mdash; Skyline 2.0.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.3.0 documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 2.0.0 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                1.3
+                2.0
               </div>
             
           
@@ -90,10 +90,12 @@
 <li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
@@ -188,7 +190,7 @@
 <span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">join</span><span class="p">,</span> <span class="n">isfile</span>
 <span class="kn">from</span> <span class="nn">ast</span> <span class="k">import</span> <span class="n">literal_eval</span>
 
-<span class="kn">from</span> <span class="nn">redis</span> <span class="k">import</span> <span class="n">StrictRedis</span>
+<span class="c1"># from redis import StrictRedis</span>
 <span class="kn">from</span> <span class="nn">msgpack</span> <span class="k">import</span> <span class="n">Unpacker</span><span class="p">,</span> <span class="n">packb</span>
 <span class="kn">import</span> <span class="nn">traceback</span>
 <span class="kn">from</span> <span class="nn">sys</span> <span class="k">import</span> <span class="n">version_info</span>
@@ -199,7 +201,17 @@
 <span class="kn">from</span> <span class="nn">sqlalchemy.sql</span> <span class="k">import</span> <span class="n">select</span>
 
 <span class="kn">import</span> <span class="nn">settings</span>
-<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="n">fail_check</span><span class="p">,</span> <span class="n">mkdir_p</span>
+
+<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="n">fail_check</span><span class="p">,</span> <span class="n">mkdir_p</span><span class="p">,</span>
+    <span class="c1"># @added 20191031 - Bug #3266: py3 Redis binary objects not strings</span>
+    <span class="c1">#                   Branch #3262: py3</span>
+    <span class="c1"># Added a single functions to deal with Redis connection and the</span>
+    <span class="c1"># charset=&#39;utf-8&#39;, decode_responses=True arguments required in py3</span>
+    <span class="n">get_redis_conn</span><span class="p">,</span> <span class="n">get_redis_conn_decoded</span><span class="p">,</span>
+    <span class="c1"># @added 20200413 - Feature #3486: analyzer_batch</span>
+    <span class="c1">#                   Feature #3480: batch_processing</span>
+    <span class="n">is_batch_metric</span><span class="p">)</span>
 
 <span class="c1"># @added 20170115 - Feature #1854: Ionosphere learn - generations</span>
 <span class="c1"># Added determination of the learn related variables so that any new metrics</span>
@@ -263,6 +275,29 @@
     <span class="n">max_age_seconds</span> <span class="o">=</span> <span class="mi">0</span>
 <span class="n">expired_checks_dir</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">_expired&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_CHECK_PATH</span>
 
+<span class="c1"># @added 20200128 - Feature #3418: PANORAMA_CHECK_INTERVAL</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">PANORAMA_CHECK_INTERVAL</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_CHECK_INTERVAL</span><span class="p">)</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">PANORAMA_CHECK_INTERVAL</span> <span class="o">=</span> <span class="mi">20</span>
+
+<span class="c1"># @added 20200204 - Feature #3442: Panorama - add metric to metrics table immediately</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">PANORAMA_INSERT_METRICS_IMMEDIATELY</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_INSERT_METRICS_IMMEDIATELY</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">PANORAMA_INSERT_METRICS_IMMEDIATELY</span> <span class="o">=</span> <span class="kc">False</span>
+
+<span class="c1"># @added 20200413 - Feature #3486: analyzer_batch</span>
+<span class="c1">#                   Feature #3480: batch_processing</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">settings</span> <span class="k">import</span> <span class="n">BATCH_PROCESSING</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">BATCH_PROCESSING</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">settings</span> <span class="k">import</span> <span class="n">BATCH_PROCESSING_NAMESPACES</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">BATCH_PROCESSING_NAMESPACES</span> <span class="o">=</span> <span class="p">[]</span>
+
 <span class="c1"># Database configuration</span>
 <span class="n">config</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;user&#39;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_DBUSER</span><span class="p">,</span>
           <span class="s1">&#39;password&#39;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_DBUSERPASS</span><span class="p">,</span>
@@ -286,10 +321,21 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Panorama</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="c1"># @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow</span>
-        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">password</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">,</span> <span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+        <span class="c1"># @modified 20191031 - Bug #3266: py3 Redis binary objects not strings</span>
+        <span class="c1">#                      Branch #3262: py3</span>
+        <span class="c1"># Use get_redis_conn and get_redis_conn_decoded</span>
+        <span class="c1"># if settings.REDIS_PASSWORD:</span>
+        <span class="c1">#     self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)</span>
+        <span class="c1"># else:</span>
+        <span class="c1">#     self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)</span>
+
+        <span class="c1"># @added 20191031 - Bug #3266: py3 Redis binary objects not strings</span>
+        <span class="c1">#                   Branch #3262: py3</span>
+        <span class="c1"># Added a single functions to deal with Redis connection and the</span>
+        <span class="c1"># charset=&#39;utf-8&#39;, decode_responses=True arguments required in py3</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">get_redis_conn</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span> <span class="o">=</span> <span class="n">get_redis_conn_decoded</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parent_pid</span> <span class="o">=</span> <span class="n">parent_pid</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">current_pid</span> <span class="o">=</span> <span class="n">getpid</span><span class="p">()</span>
@@ -441,6 +487,54 @@
 
         <span class="k">return</span> <span class="kc">False</span></div>
 
+    <span class="c1"># @added 20200204 - Feature #3442: Panorama - add metric to metrics table immediately</span>
+<div class="viewcode-block" id="Panorama.insert_new_metric"><a class="viewcode-back" href="../../skyline.panorama.html#panorama.panorama.Panorama.insert_new_metric">[docs]</a>    <span class="k">def</span> <span class="nf">insert_new_metric</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Insert a new metric into the metrics tables.</span>
+
+<span class="sd">        :param metric_name: metric name</span>
+<span class="sd">        :type metric_name: str</span>
+<span class="sd">        :return: int or boolean</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Set defaults</span>
+        <span class="n">learn_full_duration_days</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS</span><span class="p">)</span>
+        <span class="n">valid_learning_duration</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_LEARN_DEFAULT_VALID_TIMESERIES_OLDER_THAN_SECONDS</span><span class="p">)</span>
+        <span class="n">max_generations</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_LEARN_DEFAULT_MAX_GENERATIONS</span><span class="p">)</span>
+        <span class="n">max_percent_diff_from_origin</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">use_full_duration</span><span class="p">,</span> <span class="n">valid_learning_duration</span><span class="p">,</span> <span class="n">use_full_duration_days</span><span class="p">,</span> <span class="n">max_generations</span><span class="p">,</span> <span class="n">max_percent_diff_from_origin</span> <span class="o">=</span> <span class="n">get_ionosphere_learn_details</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">)</span>
+            <span class="n">learn_full_duration_days</span> <span class="o">=</span> <span class="n">use_full_duration_days</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get_ionosphere_learn_details for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric_name</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metric learn details determined for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric_name</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;learn_full_duration_days     :: </span><span class="si">%s</span><span class="s1"> days&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">learn_full_duration_days</span><span class="p">)))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;valid_learning_duration      :: </span><span class="si">%s</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">valid_learning_duration</span><span class="p">)))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;max_generations              :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">max_generations</span><span class="p">)))</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;max_percent_diff_from_origin :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">max_percent_diff_from_origin</span><span class="p">)))</span>
+        <span class="n">insert_query_string</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> (</span><span class="si">%s</span><span class="s1">, learn_full_duration_days, learn_valid_ts_older_than, max_generations, max_percent_diff_from_origin) VALUES (</span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="s1">&#39;metrics&#39;</span><span class="p">,</span> <span class="s1">&#39;metric&#39;</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">learn_full_duration_days</span><span class="p">),</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">valid_learning_duration</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">max_generations</span><span class="p">),</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">max_percent_diff_from_origin</span><span class="p">))</span>
+        <span class="n">insert_query</span> <span class="o">=</span> <span class="s1">&#39;insert into </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">insert_query_string</span>  <span class="c1"># nosec</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;inserting </span><span class="si">%s</span><span class="s1"> into </span><span class="si">%s</span><span class="s1"> table&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_name</span><span class="p">,</span> <span class="s1">&#39;metrics&#39;</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mysql_insert</span><span class="p">(</span><span class="n">insert_query</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to determine the id of </span><span class="si">%s</span><span class="s1"> from the insert&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_name</span><span class="p">))</span>
+            <span class="k">raise</span>
+        <span class="n">determined_id</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">results</span><span class="p">:</span>
+            <span class="n">determined_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">results</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">determined_id</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: results not set&#39;</span><span class="p">)</span>
+            <span class="k">raise</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to determine the inserted id for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric_name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
     <span class="c1"># @added 20170101 - Feature #1830: Ionosphere alerts</span>
     <span class="c1">#                   Bug #1460: panorama check file fails</span>
     <span class="c1">#                   Panorama check file fails #24</span>
@@ -474,9 +568,45 @@
                 <span class="n">add_line</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
                 <span class="n">metric_vars</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">add_line</span><span class="p">)</span>
 
-        <span class="n">string_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;metric&#39;</span><span class="p">,</span> <span class="s1">&#39;anomaly_dir&#39;</span><span class="p">,</span> <span class="s1">&#39;added_by&#39;</span><span class="p">,</span> <span class="s1">&#39;app&#39;</span><span class="p">,</span> <span class="s1">&#39;source&#39;</span><span class="p">]</span>
+        <span class="c1"># @added 20200429 - Feature #3486: analyzer_batch</span>
+        <span class="c1">#                   Feature #3480: batch_processing</span>
+        <span class="c1"># Allow the check file to already hold a valid python list on one line</span>
+        <span class="c1"># so that a check can be added by simply echoing to debug metric_vars</span>
+        <span class="c1"># line from to log for any failed checks into a new Panorama check file</span>
+        <span class="c1"># The original above pattern is still the default, this is for the check</span>
+        <span class="c1"># files to be added by the operator from the log or for debugging.</span>
+        <span class="n">try_literal_eval</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">metric_vars</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">metric_vars</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="k">pass</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">try_literal_eval</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metric_vars is not a list, set to try_literal_eval&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">metric_vars</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">try_literal_eval</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metric_vars is not a list of lists, set to try_literal_eval&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">try_literal_eval</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metric_vars is not defined, set to try_literal_eval&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">try_literal_eval</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">metric_vars_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="p">:</span>
+                        <span class="n">metric_vars</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">metric_vars</span><span class="p">:</span>
+                            <span class="k">break</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;metric_vars not loaded with literal_eval&#39;</span><span class="p">)</span>
+                <span class="n">metric_vars</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1"># @modified 20200420 - Feature #3500: webapp - crucible_process_metrics</span>
+        <span class="c1">#                      Feature #1448: Crucible web UI</span>
+        <span class="c1">#                      Branch #868: crucible</span>
+        <span class="c1"># Added label to string_keys and user_id to int_keys</span>
+        <span class="n">string_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;metric&#39;</span><span class="p">,</span> <span class="s1">&#39;anomaly_dir&#39;</span><span class="p">,</span> <span class="s1">&#39;added_by&#39;</span><span class="p">,</span> <span class="s1">&#39;app&#39;</span><span class="p">,</span> <span class="s1">&#39;source&#39;</span><span class="p">,</span> <span class="s1">&#39;label&#39;</span><span class="p">]</span>
         <span class="n">float_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span>
-        <span class="n">int_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;from_timestamp&#39;</span><span class="p">,</span> <span class="s1">&#39;metric_timestamp&#39;</span><span class="p">,</span> <span class="s1">&#39;added_at&#39;</span><span class="p">,</span> <span class="s1">&#39;full_duration&#39;</span><span class="p">]</span>
+        <span class="n">int_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;from_timestamp&#39;</span><span class="p">,</span> <span class="s1">&#39;metric_timestamp&#39;</span><span class="p">,</span> <span class="s1">&#39;added_at&#39;</span><span class="p">,</span> <span class="s1">&#39;full_duration&#39;</span><span class="p">,</span> <span class="s1">&#39;user_id&#39;</span><span class="p">]</span>
         <span class="n">array_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;algorithms&#39;</span><span class="p">,</span> <span class="s1">&#39;triggered_algorithms&#39;</span><span class="p">]</span>
         <span class="n">boolean_keys</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;graphite_metric&#39;</span><span class="p">,</span> <span class="s1">&#39;run_crucible_tests&#39;</span><span class="p">]</span>
 
@@ -512,7 +642,7 @@
 
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">metric_vars_array</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                    <span class="s1">&#39;error :: loading metric variables - none found&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="s1">&#39;error :: loading metric variables - none found in </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                         <span class="nb">str</span><span class="p">(</span><span class="n">metric_vars_file</span><span class="p">)))</span>
                 <span class="k">return</span> <span class="kc">False</span>
 
@@ -647,6 +777,86 @@
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: update_slack_thread_ts :: failed to delete cache_key </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">cache_key</span><span class="p">)</span>
         <span class="k">return</span></div>
+
+    <span class="c1"># @added 20191107 - Feature #3306: Record anomaly_end_timestamp</span>
+    <span class="c1">#                   Branch #3262: py3</span>
+<div class="viewcode-block" id="Panorama.update_anomaly_end_timestamp"><a class="viewcode-back" href="../../skyline.panorama.html#panorama.panorama.Panorama.update_anomaly_end_timestamp">[docs]</a>    <span class="k">def</span> <span class="nf">update_anomaly_end_timestamp</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">anomaly_id</span><span class="p">,</span> <span class="n">anomaly_end_timestamp</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Update an anomaly record with the anomaly_end_timestamp.</span>
+
+<span class="sd">        :param self: self</span>
+<span class="sd">        :param i: python process id</span>
+<span class="sd">        :param anomaly_id: the anomaly id</span>
+<span class="sd">        :param anomaly_end_timestamp: the anomaly end timestamp</span>
+<span class="sd">        :type self: object</span>
+<span class="sd">        :type i: object</span>
+<span class="sd">        :type anomaly_id: int</span>
+<span class="sd">        :type anomaly_end_timestamp: int</span>
+<span class="sd">        :return: boolean</span>
+<span class="sd">        :rtype: boolean</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">get_an_engine</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">engine</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">get_engine</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">engine</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">log_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: update_anomaly_end_timestamp :: failed to get MySQL engine in update_anomaly_end_timestamp&#39;</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: update_anomaly_end_timestamp :: failed to get MySQL engine in update_anomaly_end_timestamp&#39;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span>
+
+        <span class="k">def</span> <span class="nf">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">engine</span><span class="o">.</span><span class="n">dispose</span><span class="p">()</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: update_anomaly_end_timestamp :: calling engine.dispose()&#39;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+        <span class="n">child_process_pid</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getpid</span><span class="p">()</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;update_anomaly_end_timestamp :: child_process_pid </span><span class="si">%s</span><span class="s1">, processing anomaly_id </span><span class="si">%s</span><span class="s1"> and setting anomaly_end_timestamp as </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">child_process_pid</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_end_timestamp</span><span class="p">)))</span>
+        <span class="n">updated_anomaly_record</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">engine</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">get_an_engine</span><span class="p">()</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: update_anomaly_end_timestamp :: could not get a MySQL engine to update slack_thread_ts in anomalies for anomaly_id </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">engine</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: update_anomaly_end_timestamp :: engine not obtained to update slack_thread_ts in anomalies for anomaly_id </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">)))</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">anomalies_table</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">anomalies_table_meta</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">log_msg</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;update_anomaly_end_timestamp :: anomalies_table OK&#39;</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: update_anomaly_end_timestamp :: failed to get anomalies_table meta for anomaly_id </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">))</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+            <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                <span class="n">anomalies_table</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                    <span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">anomaly_id</span><span class="p">)</span><span class="o">.</span>
+                <span class="n">values</span><span class="p">(</span><span class="n">anomaly_end_timestamp</span><span class="o">=</span><span class="n">anomaly_end_timestamp</span><span class="p">))</span>
+            <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="n">updated_anomaly_record</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;update_anomaly_end_timestamp :: updated anomaly_end_timestamp (</span><span class="si">%s</span><span class="s1">) for anomaly id </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_end_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">)))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: update_anomaly_end_timestamp :: could not update anomaly_end_timestamp (</span><span class="si">%s</span><span class="s1">) for anomaly id </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_end_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: update_anomaly_end_timestamp :: could not dispose engine&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">updated_anomaly_record</span></div>
 
 <div class="viewcode-block" id="Panorama.spin_process"><a class="viewcode-back" href="../../skyline.panorama.html#panorama.panorama.Panorama.spin_process">[docs]</a>    <span class="k">def</span> <span class="nf">spin_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">metric_check_file</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -915,6 +1125,31 @@
             <span class="n">fail_check</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_failed_check_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
             <span class="k">return</span>
 
+        <span class="c1"># @modified 20200420 - Feature #3500: webapp - crucible_process_metrics</span>
+        <span class="c1">#                      Feature #1448: Crucible web UI</span>
+        <span class="c1">#                      Branch #868: crucible</span>
+        <span class="c1"># Added label to string_keys and user_id to int_keys</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;label&#39;</span>
+            <span class="n">value_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">var_array</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">var_array</span> <span class="ow">in</span> <span class="n">metric_vars_array</span> <span class="k">if</span> <span class="n">var_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">key</span><span class="p">]</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_PANORAMA_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: metric variable - label - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">label</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_PANORAMA_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: metric variable - label was not found - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">label</span><span class="p">)</span>
+        <span class="n">user_id</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;user_id&#39;</span>
+            <span class="n">value_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">var_array</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">var_array</span> <span class="ow">in</span> <span class="n">metric_vars_array</span> <span class="k">if</span> <span class="n">var_array</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">key</span><span class="p">]</span>
+            <span class="n">user_id</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_PANORAMA_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: metric variable - user_id - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">user_id</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_PANORAMA_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: metric variable - user_id was not found - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">user_id</span><span class="p">)</span>
+
         <span class="n">record_anomaly</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">cache_key</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.last_check.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">app</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_PANORAMA_DEBUG</span><span class="p">:</span>
@@ -928,22 +1163,105 @@
                     <span class="n">skyline_app</span><span class="p">,</span> <span class="n">app</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
             <span class="n">last_check</span> <span class="o">=</span> <span class="kc">None</span>
 
+        <span class="c1"># @modified 20200420 - Feature #3500: webapp - crucible_process_metrics</span>
+        <span class="c1">#                      Feature #1448: Crucible web UI</span>
+        <span class="c1">#                      Branch #868: crucible</span>
+        <span class="c1"># Added label to string_keys and user_id to int_keys</span>
+        <span class="k">if</span> <span class="n">app</span> <span class="o">==</span> <span class="s1">&#39;webapp&#39;</span> <span class="ow">or</span> <span class="n">app</span> <span class="o">==</span> <span class="s1">&#39;crucible&#39;</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;anomaly added by </span><span class="si">%s</span><span class="s1"> recording anomaly unsetting last_check&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">app</span><span class="p">))</span>
+            <span class="n">last_check</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="c1"># @added 20200413 - Feature #3486: analyzer_batch</span>
+        <span class="c1">#                   Feature #3480: batch_processing</span>
+        <span class="c1"># Evaluate the reported anomaly timestamp to determine whether</span>
+        <span class="c1"># PANORAMA_EXPIRY_TIME should be applied to a batch metric</span>
+        <span class="n">batch_metric</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">BATCH_PROCESSING</span><span class="p">:</span>
+            <span class="n">batch_metric</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">batch_metric</span> <span class="o">=</span> <span class="n">is_batch_metric</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">batch_metric</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">batch_metric</span><span class="p">:</span>
+            <span class="c1"># Is this a analyzer_batch related anomaly</span>
+            <span class="n">analyzer_batch_anomaly</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">analyzer_batch_metric_anomaly_key</span> <span class="o">=</span> <span class="s1">&#39;analyzer_batch.anomaly.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">),</span> <span class="n">metric</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">analyzer_batch_anomaly</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">analyzer_batch_metric_anomaly_key</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                    <span class="s1">&#39;error :: could not query cache_key - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">analyzer_batch_metric_anomaly_key</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                <span class="n">analyzer_batch_anomaly</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">analyzer_batch_anomaly</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;identified as an analyzer_batch triggered anomaly from the presence of the Redis key </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">analyzer_batch_metric_anomaly_key</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;not identified as an analyzer_batch triggered anomaly as no Redis key found - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">analyzer_batch_metric_anomaly_key</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">last_check</span> <span class="ow">and</span> <span class="n">analyzer_batch_anomaly</span><span class="p">:</span>
+                <span class="n">last_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">last_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">last_check</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to determine last_timestamp for batch metric Panorama key- </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">cache_key</span><span class="p">)</span>
+                    <span class="n">last_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">seconds_between_batch_anomalies</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="n">last_timestamp</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">seconds_between_batch_anomalies</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">)</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">last_timestamp</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to determine seconds_between_batch_anomalies for batch metric Panorama key- </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">cache_key</span><span class="p">)</span>
+                        <span class="n">last_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="n">seconds_between_batch_anomalies</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">seconds_between_batch_anomalies</span> <span class="o">&gt;</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_EXPIRY_TIME</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;the difference between the last anomaly timestamp (</span><span class="si">%s</span><span class="s1">) and the current anomaly timestamp (</span><span class="si">%s</span><span class="s1">) for batch metric </span><span class="si">%s</span><span class="s1"> is greater than </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">last_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">),</span> <span class="n">metric</span><span class="p">,</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_EXPIRY_TIME</span><span class="p">)))</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;recording anomaly for batch metric </span><span class="si">%s</span><span class="s1">, so setting last_check to None&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">metric</span><span class="p">))</span>
+                        <span class="n">last_check</span> <span class="o">=</span> <span class="kc">None</span>
+
         <span class="k">if</span> <span class="n">last_check</span><span class="p">:</span>
             <span class="n">record_anomaly</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
                 <span class="s1">&#39;Panorama metric key not expired - </span><span class="si">%s</span><span class="s1">.last_check.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                     <span class="n">skyline_app</span><span class="p">,</span> <span class="n">app</span><span class="p">,</span> <span class="n">metric</span><span class="p">))</span>
 
+        <span class="c1"># @added 20200420 - Feature #3500: webapp - crucible_process_metrics</span>
+        <span class="c1">#                   Feature #1448: Crucible web UI</span>
+        <span class="c1">#                   Branch #868: crucible</span>
+        <span class="c1"># Added check_max_age</span>
+        <span class="n">check_max_age</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">set_anomaly_key</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">add_to_current_anomalies</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">app</span> <span class="o">==</span> <span class="s1">&#39;webapp&#39;</span> <span class="ow">or</span> <span class="n">app</span> <span class="o">==</span> <span class="s1">&#39;crucible&#39;</span><span class="p">:</span>
+            <span class="n">check_max_age</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">set_anomaly_key</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">add_to_current_anomalies</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">batch_metric</span><span class="p">:</span>
+            <span class="n">check_max_age</span> <span class="o">=</span> <span class="kc">False</span>
+
         <span class="c1"># @added 20160907 - Handle Panorama stampede on restart after not running #26</span>
         <span class="c1"># Allow to expire check if greater than PANORAMA_CHECK_MAX_AGE</span>
-        <span class="k">if</span> <span class="n">max_age</span><span class="p">:</span>
-            <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
-            <span class="n">anomaly_age</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">now</span><span class="p">)</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">anomaly_age</span> <span class="o">&gt;</span> <span class="n">max_age_seconds</span><span class="p">:</span>
-                <span class="n">record_anomaly</span> <span class="o">=</span> <span class="kc">False</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                    <span class="s1">&#39;Panorama check max age exceeded - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1"> seconds old, older than </span><span class="si">%s</span><span class="s1"> seconds discarding&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                        <span class="n">metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_age</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">max_age_seconds</span><span class="p">)))</span>
+        <span class="c1"># @modified 20200413 - Feature #3486: analyzer_batch</span>
+        <span class="c1">#                      Feature #3480: batch_processing</span>
+        <span class="c1"># Only evaluate max_age is the metric is not a batch metric</span>
+        <span class="c1"># @modied 20200420 - Feature #3500: webapp - crucible_process_metrics</span>
+        <span class="c1">#                   Feature #1448: Crucible web UI</span>
+        <span class="c1">#                   Branch #868: crucible</span>
+        <span class="c1"># if not batch_metric:</span>
+        <span class="k">if</span> <span class="n">check_max_age</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">max_age</span><span class="p">:</span>
+                <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+                <span class="n">anomaly_age</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">now</span><span class="p">)</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">anomaly_age</span> <span class="o">&gt;</span> <span class="n">max_age_seconds</span><span class="p">:</span>
+                    <span class="n">record_anomaly</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                        <span class="s1">&#39;Panorama check max age exceeded - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1"> seconds old, older than </span><span class="si">%s</span><span class="s1"> seconds discarding&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_age</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">max_age_seconds</span><span class="p">)))</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">record_anomaly</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;not recording anomaly for - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">))</span>
@@ -1181,10 +1499,14 @@
             <span class="k">return</span> <span class="kc">False</span>
 
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">columns</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="c1"># @modified 20200420 - Feature #3500: webapp - crucible_process_metrics</span>
+            <span class="c1">#                      Feature #1448: Crucible web UI</span>
+            <span class="c1">#                      Branch #868: crucible</span>
+            <span class="c1"># Added label and user_id</span>
+            <span class="n">columns</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                 <span class="s1">&#39;metric_id&#39;</span><span class="p">,</span> <span class="s1">&#39;host_id&#39;</span><span class="p">,</span> <span class="s1">&#39;app_id&#39;</span><span class="p">,</span> <span class="s1">&#39;source_id&#39;</span><span class="p">,</span>
                 <span class="s1">&#39;anomaly_timestamp&#39;</span><span class="p">,</span> <span class="s1">&#39;anomalous_datapoint&#39;</span><span class="p">,</span> <span class="s1">&#39;full_duration&#39;</span><span class="p">,</span>
-                <span class="s1">&#39;algorithms_run&#39;</span><span class="p">,</span> <span class="s1">&#39;triggered_algorithms&#39;</span><span class="p">)</span>
+                <span class="s1">&#39;algorithms_run&#39;</span><span class="p">,</span> <span class="s1">&#39;triggered_algorithms&#39;</span><span class="p">,</span> <span class="s1">&#39;label&#39;</span><span class="p">,</span> <span class="s1">&#39;user_id&#39;</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_PANORAMA_DEBUG</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: columns - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">columns</span><span class="p">))</span>
         <span class="k">except</span><span class="p">:</span>
@@ -1196,10 +1518,18 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="c1"># @modified 20170913 - Task #2160: Test skyline with bandit</span>
             <span class="c1"># Added nosec to exclude from bandit tests</span>
-            <span class="n">query_string</span> <span class="o">=</span> <span class="s1">&#39;(</span><span class="si">%s</span><span class="s1">) VALUES (</span><span class="si">%d</span><span class="s1">, </span><span class="si">%d</span><span class="s1">, </span><span class="si">%d</span><span class="s1">, </span><span class="si">%d</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%.6f</span><span class="s1">, </span><span class="si">%d</span><span class="s1">, </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1">, </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="c1"># @modified 20200420 - Feature #3500: webapp - crucible_process_metrics</span>
+            <span class="c1">#                      Feature #1448: Crucible web UI</span>
+            <span class="c1">#                      Branch #868: crucible</span>
+            <span class="c1"># Added label and user_id</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">user_id</span><span class="p">:</span>
+                <span class="c1"># User the Skyline user id</span>
+                <span class="n">user_id</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">query_string</span> <span class="o">=</span> <span class="s1">&#39;(</span><span class="si">%s</span><span class="s1">) VALUES (</span><span class="si">%d</span><span class="s1">, </span><span class="si">%d</span><span class="s1">, </span><span class="si">%d</span><span class="s1">, </span><span class="si">%d</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%.6f</span><span class="s1">, </span><span class="si">%d</span><span class="s1">, </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1">, </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1">, </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1">, </span><span class="si">%d</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span>
                 <span class="n">columns</span><span class="p">,</span> <span class="n">metric_id</span><span class="p">,</span> <span class="n">added_by_host_id</span><span class="p">,</span> <span class="n">app_id</span><span class="p">,</span> <span class="n">source_id</span><span class="p">,</span>
                 <span class="n">metric_timestamp</span><span class="p">,</span> <span class="n">anomalous_datapoint</span><span class="p">,</span> <span class="n">full_duration</span><span class="p">,</span>
-                <span class="n">algorithms_ids_csv</span><span class="p">,</span> <span class="n">triggered_algorithms_ids_csv</span><span class="p">)</span>
+                <span class="n">algorithms_ids_csv</span><span class="p">,</span> <span class="n">triggered_algorithms_ids_csv</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">label</span><span class="p">),</span>
+                <span class="nb">int</span><span class="p">(</span><span class="n">user_id</span><span class="p">))</span>
             <span class="n">query</span> <span class="o">=</span> <span class="s1">&#39;insert into anomalies </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">query_string</span>  <span class="c1"># nosec</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to construct insert query&#39;</span><span class="p">)</span>
@@ -1216,20 +1546,54 @@
                 <span class="n">anomaly_id</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">))</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to insert anomaly </span><span class="si">%s</span><span class="s1"> at </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                <span class="n">anomaly_id</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">))</span>
+                <span class="n">metric</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">))</span>
             <span class="n">fail_check</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_failed_check_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
             <span class="k">return</span> <span class="kc">False</span>
 
         <span class="c1"># Set anomaly record cache key</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span>
-                <span class="n">cache_key</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_EXPIRY_TIME</span><span class="p">,</span> <span class="n">packb</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;set cache_key - </span><span class="si">%s</span><span class="s1">.last_check.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                <span class="n">skyline_app</span><span class="p">,</span> <span class="n">app</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_EXPIRY_TIME</span><span class="p">)))</span>
-        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                <span class="s1">&#39;error :: could not query cache_key - </span><span class="si">%s</span><span class="s1">.last_check.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                    <span class="n">skyline_app</span><span class="p">,</span> <span class="n">app</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+        <span class="c1"># @modified 20200420 - Feature #3500: webapp - crucible_process_metrics</span>
+        <span class="c1">#                      Feature #1448: Crucible web UI</span>
+        <span class="c1">#                      Branch #868: crucible</span>
+        <span class="c1"># Only if it was not added_by webapp or crucible</span>
+        <span class="k">if</span> <span class="n">set_anomaly_key</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># @modified 20200413 - Feature #3486: analyzer_batch</span>
+                <span class="c1">#                   Feature #3480: batch_processing</span>
+                <span class="c1"># Set key to timestamp if a batch metric.  I have looked and cannot</span>
+                <span class="c1"># find where the panorama.last_check is used anyway else other than</span>
+                <span class="c1"># above in panorama its self and further it does not appear that the</span>
+                <span class="c1"># packb(value) is used at all, just the existence of the key its</span>
+                <span class="c1"># self.</span>
+                <span class="k">if</span> <span class="n">batch_metric</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span>
+                        <span class="n">cache_key</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_EXPIRY_TIME</span><span class="p">,</span>
+                        <span class="nb">int</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span>
+                        <span class="n">cache_key</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_EXPIRY_TIME</span><span class="p">,</span> <span class="n">packb</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;set cache_key - </span><span class="si">%s</span><span class="s1">.last_check.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">skyline_app</span><span class="p">,</span> <span class="n">app</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_EXPIRY_TIME</span><span class="p">)))</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                    <span class="s1">&#39;error :: could not query cache_key - </span><span class="si">%s</span><span class="s1">.last_check.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">skyline_app</span><span class="p">,</span> <span class="n">app</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+
+        <span class="c1"># @added 20191031 - Feature #3306: Record anomaly_end_timestamp</span>
+        <span class="c1"># Add to current anomalies set</span>
+        <span class="c1"># @modified 20200420 - Feature #3500: webapp - crucible_process_metrics</span>
+        <span class="c1">#                      Feature #1448: Crucible web UI</span>
+        <span class="c1">#                      Branch #868: crucible</span>
+        <span class="c1"># Only if it was not added_by webapp or crucible</span>
+        <span class="k">if</span> <span class="n">add_to_current_anomalies</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">redis_set</span> <span class="o">=</span> <span class="s1">&#39;current.anomalies&#39;</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">metric</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">,</span> <span class="n">anomaly_id</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="n">redis_set</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;added </span><span class="si">%s</span><span class="s1"> to Redis set </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">redis_set</span><span class="p">))</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                    <span class="s1">&#39;error :: could not add </span><span class="si">%s</span><span class="s1"> to Redis set </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">redis_set</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
 
         <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">)):</span>
             <span class="k">try</span><span class="p">:</span>
@@ -1302,10 +1666,13 @@
                     <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">))</span>
                 <span class="n">sleep</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>
                 <span class="c1"># @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow</span>
-                <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">password</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">,</span> <span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+                <span class="c1"># @modified 20191031 - Bug #3266: py3 Redis binary objects not strings</span>
+                <span class="c1">#                      Branch #3262: py3</span>
+                <span class="c1"># if settings.REDIS_PASSWORD:</span>
+                <span class="c1">#     self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)</span>
+                <span class="c1"># else:</span>
+                <span class="c1">#     self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">get_redis_conn</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
                 <span class="k">continue</span>
 
             <span class="c1"># Report app up</span>
@@ -1403,8 +1770,68 @@
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
 
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">metric_var_files</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;sleeping 20 no metric check files&#39;</span><span class="p">)</span>
-                    <span class="n">sleep</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+
+                    <span class="c1"># @added 20200204 - Feature #3442: Panorama - add metric to metrics table immediately</span>
+                    <span class="k">if</span> <span class="n">PANORAMA_INSERT_METRICS_IMMEDIATELY</span><span class="p">:</span>
+                        <span class="c1"># Only check once a minute</span>
+                        <span class="n">redis_insert_new_metrics_key</span> <span class="o">=</span> <span class="s1">&#39;panorama.insert_new_metrics&#39;</span>
+                        <span class="n">redis_insert_new_metrics_key_exists</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">redis_insert_new_metrics_key_exists</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">redis_insert_new_metrics_key</span><span class="p">)</span>
+                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not query Redis for key </span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">redis_insert_new_metrics_key</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                        <span class="n">check_metrics_to_insert</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">redis_insert_new_metrics_key_exists</span><span class="p">:</span>
+                            <span class="n">check_metrics_to_insert</span> <span class="o">=</span> <span class="kc">True</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;checking for new metrics to insert into the metrics table&#39;</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">check_metrics_to_insert</span><span class="p">:</span>
+                            <span class="n">redis_set</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">unique_metrics&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="n">unique_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="n">redis_set</span><span class="p">))</span>
+                            <span class="k">except</span><span class="p">:</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get data from </span><span class="si">%s</span><span class="s1"> Redis set&#39;</span> <span class="o">%</span> <span class="n">redis_set</span><span class="p">)</span>
+                                <span class="n">unique_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+                            <span class="n">db_fullnamespace_unique_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+                            <span class="n">results</span> <span class="o">=</span> <span class="kc">False</span>
+                            <span class="k">if</span> <span class="n">unique_metrics</span><span class="p">:</span>
+                                <span class="n">query</span> <span class="o">=</span> <span class="s1">&#39;SELECT metric FROM metrics&#39;</span>
+                                <span class="n">results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mysql_select</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
+                                <span class="k">if</span> <span class="n">results</span><span class="p">:</span>
+                                    <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+                                        <span class="n">db_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">result</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+                                        <span class="n">db_fullnamespace_unique_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">db_metric_name</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">unique_metrics</span> <span class="ow">and</span> <span class="n">db_fullnamespace_unique_metrics</span><span class="p">:</span>
+                                <span class="k">for</span> <span class="n">unique_metric</span> <span class="ow">in</span> <span class="n">unique_metrics</span><span class="p">:</span>
+                                    <span class="k">if</span> <span class="n">unique_metric</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">db_fullnamespace_unique_metrics</span><span class="p">:</span>
+                                        <span class="k">try</span><span class="p">:</span>
+                                            <span class="n">base_name</span> <span class="o">=</span> <span class="n">unique_metric</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                                            <span class="n">metric_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">insert_new_metric</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+                                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;inserted </span><span class="si">%s</span><span class="s1"> into metrics table, assigned id </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_id</span><span class="p">)))</span>
+                                        <span class="k">except</span><span class="p">:</span>
+                                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to insert </span><span class="si">%s</span><span class="s1"> into metrics table&#39;</span> <span class="o">%</span> <span class="n">unique_metric</span><span class="p">)</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="k">del</span> <span class="n">unique_metrics</span>
+                            <span class="k">except</span><span class="p">:</span>
+                                <span class="k">pass</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="k">del</span> <span class="n">results</span>
+                            <span class="k">except</span><span class="p">:</span>
+                                <span class="k">pass</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="n">redis_insert_new_metrics_key</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">()))</span>
+                            <span class="k">except</span><span class="p">:</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to set key :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">redis_insert_new_metrics_key</span><span class="p">)</span>
+
+                    <span class="c1"># @modified 20200128 - Feature #3418: PANORAMA_CHECK_INTERVAL</span>
+                    <span class="c1"># Allow Panaroma to check for anomalies more frequently.  At</span>
+                    <span class="c1"># some point TODO replace Panorama check files with Redis</span>
+                    <span class="c1"># keys or a set.</span>
+                    <span class="c1"># logger.info(&#39;sleeping 20 no metric check files&#39;)</span>
+                    <span class="c1"># sleep(20)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;sleeping for </span><span class="si">%s</span><span class="s1"> seconds - no metric check files&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">PANORAMA_CHECK_INTERVAL</span><span class="p">))</span>
+                    <span class="n">sleep</span><span class="p">(</span><span class="n">PANORAMA_CHECK_INTERVAL</span><span class="p">)</span>
 
                 <span class="c1"># Discover metric anomalies to insert</span>
                 <span class="n">metric_var_files</span> <span class="o">=</span> <span class="kc">False</span>
@@ -1417,6 +1844,92 @@
                 <span class="k">if</span> <span class="n">metric_var_files</span><span class="p">:</span>
                     <span class="k">break</span>
 
+                <span class="c1"># @added 20191107 - Feature #3306: Record anomaly_end_timestamp</span>
+                <span class="c1">#                   Branch #3262: py3</span>
+                <span class="c1"># Set the anomaly_end_timestamp for any metrics no longer anomalous</span>
+                <span class="n">redis_set</span> <span class="o">=</span> <span class="s1">&#39;current.anomalies&#39;</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">current_anomalies</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="n">redis_set</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get data from </span><span class="si">%s</span><span class="s1"> Redis set&#39;</span> <span class="o">%</span> <span class="n">redis_set</span><span class="p">)</span>
+                    <span class="n">current_anomalies</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">if</span> <span class="n">current_anomalies</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">current_anomalies</span><span class="p">:</span>
+                        <span class="n">remove_item</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">list_data</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+                            <span class="n">anomalous_metric</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">list_data</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                            <span class="n">anomaly_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">list_data</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="n">anomaly_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">list_data</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+                            <span class="k">except</span><span class="p">:</span>
+                                <span class="n">anomaly_id</span> <span class="o">=</span> <span class="kc">None</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="n">anomaly_end_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">list_data</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+                            <span class="k">except</span><span class="p">:</span>
+                                <span class="n">anomaly_end_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to evaluate data from item </span><span class="si">%s</span><span class="s1"> from Redis set </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">item</span><span class="p">),</span> <span class="n">redis_set</span><span class="p">))</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">anomaly_id</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">anomaly_timestamp</span> <span class="o">&gt;</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span> <span class="o">-</span> <span class="n">settings</span><span class="o">.</span><span class="n">STALE_PERIOD</span><span class="p">):</span>
+                                <span class="c1"># If no anomaly is has been created by now, it</span>
+                                <span class="c1"># never will be created.</span>
+                                <span class="n">remove_item</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">anomaly_end_timestamp</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="ow">not</span> <span class="n">remove_item</span><span class="p">:</span>
+                                <span class="k">continue</span>
+
+                        <span class="k">if</span> <span class="n">anomaly_id</span> <span class="ow">and</span> <span class="n">anomaly_end_timestamp</span><span class="p">:</span>
+                            <span class="c1"># Update SQL</span>
+                            <span class="c1"># Spawn update_anomaly_end_timestamp process</span>
+                            <span class="n">pids</span> <span class="o">=</span> <span class="p">[]</span>
+                            <span class="n">spawned_pids</span> <span class="o">=</span> <span class="p">[]</span>
+                            <span class="n">pid_count</span> <span class="o">=</span> <span class="mi">0</span>
+                            <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+                            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
+                                <span class="k">try</span><span class="p">:</span>
+                                    <span class="n">p</span> <span class="o">=</span> <span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">update_anomaly_end_timestamp</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">anomaly_id</span><span class="p">,</span> <span class="n">anomaly_end_timestamp</span><span class="p">))</span>
+                                    <span class="n">pids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+                                    <span class="n">pid_count</span> <span class="o">+=</span> <span class="mi">1</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;starting update_anomaly_end_timestamp&#39;</span><span class="p">)</span>
+                                    <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+                                    <span class="n">spawned_pids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+                                <span class="k">except</span><span class="p">:</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: to start update_anomaly_end_timestamp&#39;</span><span class="p">)</span>
+                                    <span class="k">continue</span>
+                            <span class="n">p_starts</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+                            <span class="c1"># If the Skyline MySQL database is on a remote host</span>
+                            <span class="c1"># 2 seconds here is sometimes not sufficient so</span>
+                            <span class="c1"># increased to 10</span>
+                            <span class="k">while</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">p_starts</span> <span class="o">&lt;=</span> <span class="mi">10</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">):</span>
+                                    <span class="c1"># Just to avoid hogging the CPU</span>
+                                    <span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
+                                <span class="k">else</span><span class="p">:</span>
+                                    <span class="c1"># All the processes are done, break now.</span>
+                                    <span class="n">time_to_run</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">p_starts</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                                        <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: update_anomaly_end_timestamp completed in </span><span class="si">%.2f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                            <span class="n">skyline_app</span><span class="p">,</span> <span class="n">time_to_run</span><span class="p">))</span>
+                                    <span class="n">remove_item</span> <span class="o">=</span> <span class="kc">True</span>
+                                    <span class="k">break</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="c1"># We only enter this if we didn&#39;t &#39;break&#39; above.</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: timed out, killing all update_anomaly_end_timestamp processes&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">))</span>
+                                <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">:</span>
+                                    <span class="n">p</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+                        <span class="k">if</span> <span class="n">remove_item</span><span class="p">:</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="n">redis_set</span> <span class="o">=</span> <span class="s1">&#39;current.anomalies&#39;</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">srem</span><span class="p">(</span><span class="n">redis_set</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">list_data</span><span class="p">))</span>
+                            <span class="k">except</span><span class="p">:</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to remove </span><span class="si">%s</span><span class="s1"> for Redis set </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">list_data</span><span class="p">),</span> <span class="n">redis_set</span><span class="p">))</span>
+
                 <span class="c1"># @added 20190501 - Branch #2646: slack</span>
                 <span class="c1"># Check if any Redis keys exist with a slack_thread_ts to update</span>
                 <span class="c1"># any anomaly records</span>
@@ -1426,7 +1939,10 @@
                 <span class="c1"># Only check if slack is enabled</span>
                 <span class="k">if</span> <span class="n">SLACK_ENABLED</span><span class="p">:</span>
                     <span class="k">try</span><span class="p">:</span>
-                        <span class="n">slack_thread_ts_updates</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">scan_iter</span><span class="p">(</span><span class="n">match</span><span class="o">=</span><span class="s1">&#39;panorama.slack_thread_ts.*&#39;</span><span class="p">))</span>
+                        <span class="c1"># @modified 20200430 - Bug #3266: py3 Redis binary objects not strings</span>
+                        <span class="c1">#                      Branch #3262: py3</span>
+                        <span class="c1"># slack_thread_ts_updates = list(self.redis_conn.scan_iter(match=&#39;panorama.slack_thread_ts.*&#39;))</span>
+                        <span class="n">slack_thread_ts_updates</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">scan_iter</span><span class="p">(</span><span class="n">match</span><span class="o">=</span><span class="s1">&#39;panorama.slack_thread_ts.*&#39;</span><span class="p">))</span>
                     <span class="k">except</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to scan panorama.slack_thread_ts.* from Redis&#39;</span><span class="p">)</span>
@@ -1440,7 +1956,10 @@
                         <span class="n">base_name</span> <span class="o">=</span> <span class="kc">None</span>
                         <span class="n">metric_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
                         <span class="k">try</span><span class="p">:</span>
-                            <span class="n">update_on</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span>
+                            <span class="c1"># @modified 20191106 - Bug #3266: py3 Redis binary objects not strings</span>
+                            <span class="c1">#                      Branch #3262: py3</span>
+                            <span class="c1"># update_on = self.redis_conn.get(cache_key)</span>
+                            <span class="n">update_on</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span>
                             <span class="c1"># cache_key_value = [base_name, metric_timestamp, slack_thread_ts]</span>
                             <span class="n">update_for</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">update_on</span><span class="p">)</span>
                             <span class="n">base_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">update_for</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
@@ -1582,7 +2101,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2019, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
 
     </p>
   </div>
@@ -1604,7 +2123,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.3.0',
+            VERSION:'2.0.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

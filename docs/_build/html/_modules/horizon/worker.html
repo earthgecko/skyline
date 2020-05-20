@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>horizon.worker &mdash; Skyline 1.3.0 documentation</title>
+  <title>horizon.worker &mdash; Skyline 2.0.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.3.0 documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 2.0.0 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                1.3
+                2.0
               </div>
             
           
@@ -90,10 +90,12 @@
 <li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
@@ -183,13 +185,17 @@
 <span class="kn">from</span> <span class="nn">msgpack</span> <span class="k">import</span> <span class="n">packb</span>
 <span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">time</span><span class="p">,</span> <span class="n">sleep</span>
 
-<span class="c1"># import traceback</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="c1"># import socket</span>
 
 <span class="c1"># import sys</span>
 <span class="kn">import</span> <span class="nn">os.path</span>
 <span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">remove</span> <span class="k">as</span> <span class="n">os_remove</span>
+
+<span class="c1"># @added 20190130 - Task #2690: Test Skyline on Python-3.6.7</span>
+<span class="c1">#                   Branch #3262: py3</span>
+<span class="kn">from</span> <span class="nn">sys</span> <span class="k">import</span> <span class="n">version_info</span>
 
 <span class="kn">import</span> <span class="nn">settings</span>
 <span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="n">send_graphite_metric</span>
@@ -213,13 +219,17 @@
 <span class="n">skyline_app_graphite_namespace</span> <span class="o">=</span> <span class="s1">&#39;skyline.</span><span class="si">%s%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
     <span class="n">parent_skyline_app</span><span class="p">,</span> <span class="n">SERVER_METRIC_PATH</span><span class="p">,</span> <span class="n">child_skyline_app</span><span class="p">)</span>
 
-<span class="n">WORKER_DEBUG</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="n">LOCAL_DEBUG</span> <span class="o">=</span> <span class="kc">False</span>
 
 <span class="c1"># @added 20170319 - Feature #1978: worker - DO_NOT_SKIP_LIST</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="n">DO_NOT_SKIP_LIST</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">DO_NOT_SKIP_LIST</span>
 <span class="k">except</span><span class="p">:</span>
     <span class="n">DO_NOT_SKIP_LIST</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="c1"># @added 20190130 - Task #2690: Test Skyline on Python-3.6.7</span>
+<span class="c1">#                   Branch #3262: py3</span>
+<span class="n">python_version</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
 
 <div class="viewcode-block" id="Worker"><a class="viewcode-back" href="../../skyline.horizon.html#horizon.worker.Worker">[docs]</a><span class="k">class</span> <span class="nc">Worker</span><span class="p">(</span><span class="n">Process</span><span class="p">):</span>
@@ -231,9 +241,13 @@
         <span class="nb">super</span><span class="p">(</span><span class="n">Worker</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="c1"># @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow</span>
         <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">password</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">,</span> <span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+            <span class="c1"># @modified 20191014 - Bug #3266: py3 Redis binary objects not strings</span>
+            <span class="c1">#                      Branch #3262: py3</span>
+            <span class="c1"># self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">password</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">,</span> <span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">,</span> <span class="n">charset</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">,</span> <span class="n">decode_responses</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+            <span class="c1"># self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">,</span> <span class="n">charset</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">,</span> <span class="n">decode_responses</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">q</span> <span class="o">=</span> <span class="n">queue</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parent_pid</span> <span class="o">=</span> <span class="n">parent_pid</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="kc">True</span>
@@ -265,6 +279,13 @@
         <span class="c1">#    if to_skip in metric_name:</span>
         <span class="c1">#        return True</span>
         <span class="c1"># return False</span>
+
+        <span class="c1"># @added 20190130 - Task #2690: Test Skyline on Python-3.6.7</span>
+        <span class="c1">#                   Branch #3262: py3</span>
+        <span class="c1">#                   Bug #3266: py3 Redis binary objects not strings</span>
+        <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">str_metric_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_name</span><span class="p">)</span>
+            <span class="n">metric_name</span> <span class="o">=</span> <span class="n">str_metric_name</span>
 
         <span class="n">metric_namespace_elements</span> <span class="o">=</span> <span class="n">metric_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
         <span class="n">process_metric</span> <span class="o">=</span> <span class="kc">True</span>
@@ -351,13 +372,17 @@
             <span class="k">try</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">ping</span><span class="p">()</span>
             <span class="k">except</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: can</span><span class="se">\&#39;</span><span class="s1">t connect to redis at socket path </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: cannot connect to Redis at socket path </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">))</span>
                 <span class="n">sleep</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
                 <span class="c1"># @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow</span>
                 <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">password</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">,</span> <span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+                    <span class="c1"># @modified 20191014 - Bug #3266: py3 Redis binary objects not strings</span>
+                    <span class="c1">#                      Branch #3262: py3</span>
+                    <span class="c1"># self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">password</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">,</span> <span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">,</span> <span class="n">charset</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">,</span> <span class="n">decode_responses</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+                    <span class="c1"># self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">,</span> <span class="n">charset</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">,</span> <span class="n">decode_responses</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                 <span class="n">pipe</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">pipeline</span><span class="p">()</span>
                 <span class="k">continue</span>
 
@@ -375,22 +400,59 @@
                         <span class="k">continue</span>
 
                     <span class="c1"># Bad data coming in</span>
-                    <span class="k">if</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">now</span> <span class="o">-</span> <span class="n">MAX_RESOLUTION</span><span class="p">:</span>
-                        <span class="k">continue</span>
+                    <span class="c1"># @modified 20190130 - Task #2690: Test Skyline on Python-3.6.7</span>
+                    <span class="c1">#                      Branch #3262: py3</span>
+                    <span class="c1">#                      Bug #3266: py3 Redis binary objects not strings</span>
+                    <span class="c1"># if metric[1][0] &lt; now - MAX_RESOLUTION:</span>
+                    <span class="c1">#     continue</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">&lt;</span> <span class="n">now</span> <span class="o">-</span> <span class="n">MAX_RESOLUTION</span><span class="p">:</span>
+                            <span class="k">continue</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="k">pass</span>
 
                     <span class="c1"># Append to messagepack main namespace</span>
-                    <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
-                    <span class="n">pipe</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">packb</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
-                    <span class="n">pipe</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="n">full_uniques</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+                    <span class="c1"># @modified 20190130 - Task #2690: Test Skyline on Python-3.6.7</span>
+                    <span class="c1">#                      Branch #3262: py3</span>
+                    <span class="c1">#                      Bug #3266: py3 Redis binary objects not strings</span>
+                    <span class="c1"># key = &#39;&#39;.join((FULL_NAMESPACE, metric[0]))</span>
+                    <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span>
+                    <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: worker :: adding metric Redis key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
+
+                    <span class="c1"># @modified 20190130 - Task #2690: Test Skyline on Python-3.6.7</span>
+                    <span class="c1">#                      Branch #3262: py3</span>
+                    <span class="c1">#                      Bug #3266: py3 Redis binary objects not strings</span>
+                    <span class="c1"># pipe.append(key, packb(metric[1]))</span>
+                    <span class="c1"># pipe.sadd(full_uniques, key)</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">pipe</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="n">packb</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: error on pipe.append: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="c1"># pipe.sadd(full_uniques, key)</span>
+                        <span class="n">pipe</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="n">full_uniques</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: error on pipe.sadd: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
 
                     <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">skip_mini</span><span class="p">:</span>
                         <span class="c1"># Append to mini namespace</span>
-                        <span class="n">mini_key</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">MINI_NAMESPACE</span><span class="p">,</span> <span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+                        <span class="c1"># @modified 20190130 - Task #2690: Test Skyline on Python-3.6.7</span>
+                        <span class="c1">#                      Branch #3262: py3</span>
+                        <span class="c1">#                      Bug #3266: py3 Redis binary objects not strings</span>
+                        <span class="c1"># mini_key = &#39;&#39;.join((MINI_NAMESPACE, metric[0]))</span>
+                        <span class="n">mini_key</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">MINI_NAMESPACE</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span>
                         <span class="n">pipe</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mini_key</span><span class="p">,</span> <span class="n">packb</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
                         <span class="n">pipe</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="n">mini_uniques</span><span class="p">,</span> <span class="n">mini_key</span><span class="p">)</span>
 
-                    <span class="n">pipe</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
-
+                    <span class="c1"># @modified 20190130 - Task #2690: Test Skyline on Python-3.6.7</span>
+                    <span class="c1">#                      Branch #3262: py3</span>
+                    <span class="c1">#                      Bug #3266: py3 Redis binary objects not strings</span>
+                    <span class="c1"># pipe.execute()</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">pipe</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: error on pipe.execute: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
             <span class="k">except</span> <span class="n">Empty</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: worker queue is empty and timed out&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
             <span class="k">except</span> <span class="n">WatchError</span><span class="p">:</span>
@@ -398,6 +460,11 @@
             <span class="k">except</span> <span class="ne">NotImplementedError</span><span class="p">:</span>
                 <span class="k">pass</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="c1"># @added 20190130 - Task #2690: Test Skyline on Python-3.6.7</span>
+                <span class="c1">#                   Branch #3262: py3</span>
+                <span class="c1">#                   Bug #3266: py3 Redis binary objects not strings</span>
+                <span class="c1"># Added traceback</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: error: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
 
             <span class="c1"># Log progress</span>
@@ -418,7 +485,7 @@
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: total queue values known for the last 10 seconds - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">number_queue_sizes</span><span class="p">)))</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: average queue size for the last 10 seconds - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">average_queue_size</span><span class="p">)))</span>
                     <span class="c1"># self.send_graphite_metric(&#39;skyline.horizon.&#39; + SERVER_METRIC_PATH + &#39;queue_size&#39;, self.q.qsize())</span>
-<span class="c1">#                    self.send_graphite_metric(&#39;queue_size&#39;, average_queue_size)</span>
+                    <span class="c1"># self.send_graphite_metric(&#39;queue_size&#39;, average_queue_size)</span>
                     <span class="n">send_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.queue_size&#39;</span> <span class="o">%</span> <span class="n">skyline_app_graphite_namespace</span>
                     <span class="n">send_graphite_metric</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">send_metric_name</span><span class="p">,</span> <span class="n">average_queue_size</span><span class="p">)</span>
 
@@ -436,7 +503,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2019, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
 
     </p>
   </div>
@@ -458,7 +525,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.3.0',
+            VERSION:'2.0.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

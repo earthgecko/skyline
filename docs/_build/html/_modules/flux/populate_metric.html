@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>flux.populate_metric &mdash; Skyline 1.3.0 documentation</title>
+  <title>flux.populate_metric &mdash; Skyline 2.0.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.3.0 documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 2.0.0 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                1.3
+                2.0
               </div>
             
           
@@ -90,10 +90,12 @@
 <li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
@@ -177,23 +179,34 @@
 <span class="kn">import</span> <span class="nn">traceback</span>
 <span class="kn">from</span> <span class="nn">ast</span> <span class="k">import</span> <span class="n">literal_eval</span>
 
-<span class="kn">from</span> <span class="nn">redis</span> <span class="k">import</span> <span class="n">StrictRedis</span>
+<span class="c1"># from redis import StrictRedis</span>
 <span class="kn">import</span> <span class="nn">falcon</span>
 <span class="kn">import</span> <span class="nn">graphyte</span>
 
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)),</span> <span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">))</span>
 <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
-<span class="kn">import</span> <span class="nn">settings</span>
-<span class="kn">from</span> <span class="nn">logger</span> <span class="k">import</span> <span class="n">set_up_logging</span>
-<span class="kn">import</span> <span class="nn">flux</span>
 
-<span class="n">logger</span> <span class="o">=</span> <span class="n">set_up_logging</span><span class="p">(</span><span class="s1">&#39;populate_metric&#39;</span><span class="p">)</span>
+<span class="k">if</span> <span class="kc">True</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">settings</span>
+    <span class="c1"># @added 20191111 - Bug #3266: py3 Redis binary objects not strings</span>
+    <span class="c1">#                   Branch #3262: py3</span>
+    <span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="n">get_redis_conn</span>
+
+    <span class="kn">from</span> <span class="nn">logger</span> <span class="k">import</span> <span class="n">set_up_logging</span>
+    <span class="kn">import</span> <span class="nn">flux</span>
+
+<span class="c1"># @modified 20191129 - Branch #3262: py3</span>
+<span class="c1"># Consolidate flux logging</span>
+<span class="c1"># logger = set_up_logging(&#39;populate_metric&#39;)</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">set_up_logging</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+
 <span class="c1"># URI arguments are solely used for identifying requests in the log, all the</span>
 <span class="c1"># required metric data is submitted via a POST with a json payload.</span>
 <span class="n">validArguments</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;remote_target&#39;</span><span class="p">,</span> <span class="s1">&#39;metric&#39;</span><span class="p">,</span> <span class="s1">&#39;namespace_prefix&#39;</span><span class="p">,</span> <span class="s1">&#39;key&#39;</span><span class="p">,</span> <span class="s1">&#39;user&#39;</span><span class="p">]</span>
 
+<span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;flux&#39;</span>
+
 <span class="n">LOCAL_DEBUG</span> <span class="o">=</span> <span class="kc">False</span>
-<span class="c1"># LOCAL_DEBUG = True</span>
 
 <span class="n">GRAPHITE_METRICS_PREFIX</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="n">CARBON_HOST</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">FLUX_CARBON_HOST</span>
@@ -211,10 +224,17 @@
             <span class="nb">str</span><span class="p">(</span><span class="n">CARBON_HOST</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">CARBON_PORT</span><span class="p">),</span>
             <span class="nb">str</span><span class="p">(</span><span class="n">GRAPHITE_METRICS_PREFIX</span><span class="p">)))</span>
 
-<span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">:</span>
-    <span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">password</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">,</span> <span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
-<span class="k">else</span><span class="p">:</span>
-    <span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+<span class="c1"># @modified 20191111 - Bug #3266: py3 Redis binary objects not strings</span>
+<span class="c1">#                      Branch #3262: py3</span>
+<span class="c1"># if settings.REDIS_PASSWORD:</span>
+<span class="c1">#     redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)</span>
+<span class="c1"># else:</span>
+<span class="c1">#     redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)</span>
+<span class="c1"># @added 20191111 - Bug #3266: py3 Redis binary objects not strings</span>
+<span class="c1">#                   Branch #3262: py3</span>
+<span class="c1"># Added a single functions to deal with Redis connection and the</span>
+<span class="c1"># charset=&#39;utf-8&#39;, decode_responses=True arguments required in py3</span>
+<span class="n">redis_conn</span> <span class="o">=</span> <span class="n">get_redis_conn</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="PopulateMetric"><a class="viewcode-back" href="../../skyline.flux.html#flux.populate_metric.PopulateMetric">[docs]</a><span class="k">class</span> <span class="nc">PopulateMetric</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
@@ -358,7 +378,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2019, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
 
     </p>
   </div>
@@ -380,7 +400,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.3.0',
+            VERSION:'2.0.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

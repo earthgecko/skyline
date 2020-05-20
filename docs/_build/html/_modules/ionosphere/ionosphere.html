@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ionosphere.ionosphere &mdash; Skyline 1.3.0 documentation</title>
+  <title>ionosphere.ionosphere &mdash; Skyline 2.0.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.3.0 documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 2.0.0 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                1.3
+                2.0
               </div>
             
           
@@ -90,10 +90,12 @@
 <li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
@@ -177,10 +179,13 @@
 <span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">kill</span><span class="p">,</span> <span class="n">getpid</span><span class="p">,</span> <span class="n">listdir</span>
 <span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">join</span><span class="p">,</span> <span class="n">isfile</span>
 <span class="kn">from</span> <span class="nn">sys</span> <span class="k">import</span> <span class="n">version_info</span>
-<span class="k">try</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">Queue</span> <span class="k">import</span> <span class="n">Empty</span>
-<span class="k">except</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">queue</span> <span class="k">import</span> <span class="n">Empty</span>
+
+<span class="c1"># @modified 20191115 - Branch #3262: py3</span>
+<span class="c1"># try:</span>
+<span class="c1">#     from Queue import Empty</span>
+<span class="c1"># except:</span>
+<span class="c1">#     from queue import Empty</span>
+
 <span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">time</span><span class="p">,</span> <span class="n">sleep</span>
 <span class="kn">from</span> <span class="nn">threading</span> <span class="k">import</span> <span class="n">Thread</span>
 <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
@@ -194,7 +199,7 @@
 <span class="kn">from</span> <span class="nn">ast</span> <span class="k">import</span> <span class="n">literal_eval</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">datetime</span>
 
-<span class="kn">from</span> <span class="nn">redis</span> <span class="k">import</span> <span class="n">StrictRedis</span>
+<span class="c1"># from redis import StrictRedis</span>
 <span class="kn">import</span> <span class="nn">traceback</span>
 <span class="kn">import</span> <span class="nn">mysql.connector</span>
 <span class="c1"># from mysql.connector import errorcode</span>
@@ -229,7 +234,12 @@
     <span class="c1"># @modified 20190408 - Feature #2484: FULL_DURATION feature profiles</span>
     <span class="c1"># Moved to common_functions</span>
     <span class="c1"># get_memcache_metric_object)</span>
-    <span class="n">mkdir_p</span><span class="p">)</span>
+    <span class="n">mkdir_p</span><span class="p">,</span>
+    <span class="c1"># @added 20191030 - Bug #3266: py3 Redis binary objects not strings</span>
+    <span class="c1">#                   Branch #3262: py3</span>
+    <span class="c1"># Added a single functions to deal with Redis connection and the</span>
+    <span class="c1"># charset=&#39;utf-8&#39;, decode_responses=True arguments required in py3</span>
+    <span class="n">get_redis_conn</span><span class="p">,</span> <span class="n">get_redis_conn_decoded</span><span class="p">)</span>
 
 <span class="c1"># @added 20161221 - calculate features for every anomaly, instead of making the</span>
 <span class="c1"># user do it in the frontend or calling the webapp constantly in a cron like</span>
@@ -244,7 +254,12 @@
     <span class="c1"># @modified 20190408 - Feature #2484: FULL_DURATION feature profiles</span>
     <span class="c1"># Moved to common_functions</span>
     <span class="c1"># metrics_table_meta,</span>
-    <span class="n">ionosphere_matched_table_meta</span><span class="p">)</span>
+    <span class="n">ionosphere_matched_table_meta</span><span class="p">,</span>
+    <span class="c1"># @added 20200516 - Bug #3546: Change ionosphere_enabled if all features profiles are disabled</span>
+    <span class="c1"># Readded metrics_table to set ionosphere_enabled to 0 if a metric has no</span>
+    <span class="c1"># fps enabled and has been willy nillied</span>
+    <span class="n">metrics_table_meta</span><span class="p">)</span>
+
 <span class="kn">from</span> <span class="nn">tsfresh_feature_names</span> <span class="k">import</span> <span class="n">TSFRESH_FEATURES</span>
 
 <span class="c1"># @added 20170114 - Feature #1854: Ionosphere learn</span>
@@ -322,6 +337,23 @@
     <span class="k">except</span><span class="p">:</span>
         <span class="n">SKYLINE_FEEDBACK_NAMESPACES</span> <span class="o">=</span> <span class="p">[</span><span class="n">this_host</span><span class="p">]</span>
 
+<span class="c1"># @added 20200330 - Feature #3462: Add IONOSPHERE_MANAGE_PURGE</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">IONOSPHERE_MANAGE_PURGE</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_MANAGE_PURGE</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">IONOSPHERE_MANAGE_PURGE</span> <span class="o">=</span> <span class="kc">True</span>
+
+<span class="c1"># @added 20200413 - Feature #3486: analyzer_batch</span>
+<span class="c1">#                   Feature #3480: batch_processing</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">settings</span> <span class="k">import</span> <span class="n">BATCH_PROCESSING</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">BATCH_PROCESSING</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">settings</span> <span class="k">import</span> <span class="n">BATCH_PROCESSING_NAMESPACES</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">BATCH_PROCESSING_NAMESPACES</span> <span class="o">=</span> <span class="p">[]</span>
+
 <span class="n">skyline_app_graphite_namespace</span> <span class="o">=</span> <span class="s1">&#39;skyline.</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">SERVER_METRIC_PATH</span><span class="p">)</span>
 
 <span class="n">max_age_seconds</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_CHECK_MAX_AGE</span>
@@ -355,10 +387,21 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Ionosphere</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="c1"># @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow</span>
-        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">password</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">,</span> <span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+        <span class="c1"># @modified 20191030 - Bug #3266: py3 Redis binary objects not strings</span>
+        <span class="c1">#                      Branch #3262: py3</span>
+        <span class="c1"># Use get_redis_conn and get_redis_conn_decoded</span>
+        <span class="c1"># if settings.REDIS_PASSWORD:</span>
+        <span class="c1">#     self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)</span>
+        <span class="c1"># else:</span>
+        <span class="c1">#     self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)</span>
+
+        <span class="c1"># @added 20191030 - Bug #3266: py3 Redis binary objects not strings</span>
+        <span class="c1">#                   Branch #3262: py3</span>
+        <span class="c1"># Added a single functions to deal with Redis connection and the</span>
+        <span class="c1"># charset=&#39;utf-8&#39;, decode_responses=True arguments required in py3</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">get_redis_conn</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span> <span class="o">=</span> <span class="n">get_redis_conn_decoded</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parent_pid</span> <span class="o">=</span> <span class="n">parent_pid</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">current_pid</span> <span class="o">=</span> <span class="n">getpid</span><span class="p">()</span>
@@ -460,6 +503,13 @@
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
             <span class="s1">&#39;Cleaning old training data from </span><span class="si">%s</span><span class="s1"> older than </span><span class="si">%s</span><span class="s1"> seconds&#39;</span> <span class="o">%</span>
             <span class="p">(</span><span class="n">dir_path</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">older_than</span><span class="p">)))</span>
+
+        <span class="c1"># @added 20200409 - Feature #3472: ionosphere.training_data Redis set</span>
+        <span class="c1">#                   Feature #3474: webapp api - training_data</span>
+        <span class="c1"># If training_data is not purged and contains the correct training_data</span>
+        <span class="c1"># files, add it to the list to be added to the Redis set</span>
+        <span class="n">training_data_list</span> <span class="o">=</span> <span class="p">[]</span>
+
         <span class="k">try</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">path</span><span class="p">,</span> <span class="n">folders</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">dir_path</span><span class="p">):</span>
                 <span class="k">for</span> <span class="n">folder</span> <span class="ow">in</span> <span class="n">folders</span><span class="p">[:]:</span>
@@ -474,9 +524,106 @@
                                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;removed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">folder_path</span><span class="p">)</span>
                             <span class="k">except</span><span class="p">:</span>
                                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to rmtree </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">folder_path</span><span class="p">)</span>
+                        <span class="c1"># @added 20200409 - Feature #3472: ionosphere.training_data Redis set</span>
+                        <span class="c1">#                   Feature #3474: webapp api - training_data</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_DATA_FOLDER</span> <span class="ow">in</span> <span class="n">folder_path</span><span class="p">:</span>
+                                <span class="n">training_data_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">folder_path</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: purge_old_data_dirs - os.walk&#39;</span><span class="p">)</span>
+
+        <span class="c1"># @added 20200409 - Feature #3472: ionosphere.training_data Redis set</span>
+        <span class="c1">#                   Feature #3474: webapp api - training_data</span>
+        <span class="k">if</span> <span class="n">training_data_list</span><span class="p">:</span>
+            <span class="n">training_data_instances</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">training_data_dir</span> <span class="ow">in</span> <span class="n">training_data_list</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">path</span><span class="p">,</span> <span class="n">folders</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">training_data_dir</span><span class="p">):</span>
+                    <span class="n">add_folder</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="n">metric</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="n">timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="k">if</span> <span class="n">files</span><span class="p">:</span>
+                        <span class="n">add_folder</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="n">metric</span> <span class="o">=</span> <span class="kc">None</span>
+                        <span class="n">timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+                        <span class="k">if</span> <span class="s1">&#39;/learn/&#39;</span> <span class="ow">in</span> <span class="n">path</span><span class="p">:</span>
+                            <span class="n">metric_file</span> <span class="o">=</span> <span class="kc">None</span>
+                            <span class="n">metric_file_path</span> <span class="o">=</span> <span class="kc">None</span>
+                            <span class="k">continue</span>
+                        <span class="k">for</span> <span class="n">ifile</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">ifile</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.png&#39;</span><span class="p">):</span>
+                                <span class="n">add_folder</span> <span class="o">=</span> <span class="kc">True</span>
+                            <span class="k">if</span> <span class="n">ifile</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.txt&#39;</span><span class="p">):</span>
+                                <span class="k">if</span> <span class="n">ifile</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.fp.details.txt&#39;</span><span class="p">):</span>
+                                    <span class="k">continue</span>
+                                <span class="k">if</span> <span class="n">ifile</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.fp.created.txt&#39;</span><span class="p">):</span>
+                                    <span class="k">continue</span>
+                                <span class="k">else</span><span class="p">:</span>
+                                    <span class="n">metric_file</span> <span class="o">=</span> <span class="n">ifile</span>
+                                    <span class="n">metric_file_path</span> <span class="o">=</span> <span class="n">path</span>
+                        <span class="k">if</span> <span class="n">add_folder</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">metric_file</span> <span class="ow">and</span> <span class="n">metric_file_path</span><span class="p">:</span>
+                                <span class="n">metric</span> <span class="o">=</span> <span class="n">metric_file</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                                <span class="n">path_elements</span> <span class="o">=</span> <span class="n">metric_file_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="p">)</span>
+                                <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">path_elements</span><span class="p">:</span>
+                                    <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s1">&#39;\d</span><span class="si">{10}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">element</span><span class="p">):</span>
+                                        <span class="n">timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">metric</span> <span class="ow">and</span> <span class="n">timestamp</span><span class="p">:</span>
+                                <span class="c1"># @added 20200425 - Feature #3508: ionosphere.untrainable_metrics</span>
+                                <span class="c1"># Determine and add resolution</span>
+                                <span class="n">resolution_seconds</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span>
+                                <span class="k">for</span> <span class="n">ifile</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+                                    <span class="k">if</span> <span class="n">ifile</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.png&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="s1">&#39;mirage&#39;</span> <span class="ow">in</span> <span class="n">ifile</span> <span class="ow">and</span> <span class="s1">&#39;graphite&#39;</span> <span class="ow">in</span> <span class="n">ifile</span><span class="p">:</span>
+                                        <span class="k">try</span><span class="p">:</span>
+                                            <span class="n">ifile_resolution_elements</span> <span class="o">=</span> <span class="n">ifile</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.png&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+                                            <span class="n">ifile_resolution_str</span> <span class="o">=</span> <span class="n">ifile_resolution_elements</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                                            <span class="n">ifile_resolution</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ifile_resolution_str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;h&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+                                            <span class="n">resolution_seconds</span> <span class="o">=</span> <span class="n">ifile_resolution</span> <span class="o">*</span> <span class="mi">3600</span>
+                                        <span class="k">except</span><span class="p">:</span>
+                                            <span class="k">pass</span>
+                                <span class="c1"># @modified 20200425 - Feature #3508: ionosphere.untrainable_metrics</span>
+                                <span class="c1"># Added resolution_seconds</span>
+                                <span class="c1"># training_data_instances.append([metric, timestamp])</span>
+                                <span class="n">training_data_instances</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">metric</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">resolution_seconds</span><span class="p">])</span>
+
+            <span class="k">if</span> <span class="n">training_data_instances</span><span class="p">:</span>
+                <span class="n">training_data_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">training_data_instances</span><span class="p">)</span>
+                <span class="n">redis_set</span> <span class="o">=</span> <span class="s1">&#39;ionosphere.training_data.new&#39;</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;creating Redis set </span><span class="si">%s</span><span class="s1"> with </span><span class="si">%s</span><span class="s1"> training_data instances&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">redis_set</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">training_data_count</span><span class="p">)))</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="c1"># Delete it if it exists and was not renamed for some reason</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">redis_set</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                        <span class="s1">&#39;deleted Redis set - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">redis_set</span><span class="p">))</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="k">pass</span>
+                <span class="c1"># @modified 20200425 - Feature #3508: ionosphere.untrainable_metrics</span>
+                <span class="c1"># Added resolution_seconds</span>
+                <span class="c1"># for metric, timestamp in training_data_instances:</span>
+                <span class="k">for</span> <span class="n">metric</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">resolution_seconds</span> <span class="ow">in</span> <span class="n">training_data_instances</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="c1"># @modified 20200425 - Feature #3508: ionosphere.untrainable_metrics</span>
+                        <span class="c1"># Added resolution_seconds</span>
+                        <span class="c1"># data = [metric, int(timestamp)]</span>
+                        <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">metric</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">timestamp</span><span class="p">),</span> <span class="n">resolution_seconds</span><span class="p">]</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="n">redis_set</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1"> Redis set&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">redis_set</span><span class="p">))</span>
+
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="c1"># Rename works to overwrite existing key fine</span>
+                    <span class="c1"># and ... https://redis.io/commands/rename</span>
+                    <span class="c1"># &gt; when this happens RENAME executes an implicit DEL operation, so if the</span>
+                    <span class="c1"># &gt; deleted key contains a very big value it may cause high latency even if RENAME</span>
+                    <span class="c1"># &gt; itself is usually a constant-time operation.</span>
+                    <span class="c1"># Does not apply, not as it is not MASSIVE set</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s1">&#39;ionosphere.training_data.new&#39;</span><span class="p">,</span> <span class="s1">&#39;ionosphere.training_data&#39;</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;replaced Redis ionosphere.training_data via a rename of ionosphere.training_data.new&#39;</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                        <span class="s1">&#39;error :: failed to rename ionosphere.training_data.new to ionosphere.training_data&#39;</span><span class="p">)</span>
 
         <span class="n">last_purge_ts</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
         <span class="k">try</span><span class="p">:</span>
@@ -508,7 +655,9 @@
 <span class="c1"># Bringing Ionosphere online - do alert on Ionosphere metrics</span>
 <div class="viewcode-block" id="Ionosphere.manage_ionosphere_unique_metrics"><a class="viewcode-back" href="../../skyline.ionosphere.html#ionosphere.ionosphere.Ionosphere.manage_ionosphere_unique_metrics">[docs]</a>    <span class="k">def</span> <span class="nf">manage_ionosphere_unique_metrics</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Create a Redis set of all Ionosphere enabled metrics.</span>
+<span class="sd">        - Create a Redis set of all Ionosphere enabled metrics.</span>
+<span class="sd">        - Manage the ionosphere.untrainable_metrics set, removing items when</span>
+<span class="sd">          they &#39;expire&#39;</span>
 
 <span class="sd">        :param i: python process id</span>
 <span class="sd">        :return: returns True</span>
@@ -531,7 +680,10 @@
         <span class="n">ionosphere_unique_metrics</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="c1"># ionosphere_unique_metrics = list(self.redis_conn.smembers(&#39;ionosphere.unique_metrics&#39;))</span>
-            <span class="n">redis_ionosphere_unique_metrics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;ionosphere.unique_metrics&#39;</span><span class="p">)</span>
+            <span class="c1"># @modified 20191030 - Bug #3266: py3 Redis binary objects not strings</span>
+            <span class="c1">#                      Branch #3262: py3</span>
+            <span class="c1"># redis_ionosphere_unique_metrics = self.redis_conn.smembers(&#39;ionosphere.unique_metrics&#39;)</span>
+            <span class="n">redis_ionosphere_unique_metrics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;ionosphere.unique_metrics&#39;</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get ionosphere.unique_metrics from Redis&#39;</span><span class="p">)</span>
@@ -638,7 +790,10 @@
             <span class="n">redis_ionosphere_unique_metrics</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="c1"># ionosphere_unique_metrics = list(self.redis_conn.smembers(&#39;ionosphere.unique_metrics&#39;))</span>
-                <span class="n">redis_ionosphere_unique_metrics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;ionosphere.unique_metrics&#39;</span><span class="p">)</span>
+                <span class="c1"># @modified 20191030 - Bug #3266: py3 Redis binary objects not strings</span>
+                <span class="c1">#                      Branch #3262: py3</span>
+                <span class="c1"># redis_ionosphere_unique_metrics = self.redis_conn.smembers(&#39;ionosphere.unique_metrics&#39;)</span>
+                <span class="n">redis_ionosphere_unique_metrics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;ionosphere.unique_metrics&#39;</span><span class="p">)</span>
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get ionosphere.unique_metrics from Redis&#39;</span><span class="p">)</span>
@@ -658,6 +813,32 @@
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: calling engine.dispose()&#39;</span><span class="p">)</span>
+
+        <span class="c1"># @added 20200425 - Feature #3508: ionosphere.untrainable_metrics</span>
+        <span class="c1"># Manage ionosphere_untrainable_metrics Redis set</span>
+        <span class="n">ionosphere_untrainable_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">ionosphere_untrainable_metrics_redis_set</span> <span class="o">=</span> <span class="s1">&#39;ionosphere.untrainable_metrics&#39;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">ionosphere_untrainable_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="n">ionosphere_untrainable_metrics_redis_set</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not get the ionosphere.untrainable_metrics set from Redis&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ionosphere_untrainable_metrics</span><span class="p">:</span>
+            <span class="n">ionosphere_untrainable_metrics_check_time</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
+            <span class="k">for</span> <span class="n">ionosphere_untrainable_metric_str</span> <span class="ow">in</span> <span class="n">ionosphere_untrainable_metrics</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">ionosphere_untrainable_metric</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">ionosphere_untrainable_metric_str</span><span class="p">)</span>
+                    <span class="n">ium_remove_after_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ionosphere_untrainable_metric</span><span class="p">[</span><span class="mi">6</span><span class="p">])</span>
+                    <span class="k">if</span> <span class="n">ionosphere_untrainable_metrics_check_time</span> <span class="o">&gt;=</span> <span class="n">ium_remove_after_timestamp</span><span class="p">:</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">srem</span><span class="p">(</span><span class="n">ionosphere_untrainable_metrics_redis_set</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">ionosphere_untrainable_metric</span><span class="p">))</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;removed item - </span><span class="si">%s</span><span class="s1"> - from Redis set - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ionosphere_untrainable_metric</span><span class="p">),</span> <span class="n">ionosphere_untrainable_metrics_redis_set</span><span class="p">))</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to remove item list from Redis set - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ionosphere_untrainable_metrics_redis_set</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to manage Redis set </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">ionosphere_untrainable_metrics_redis_set</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="kc">True</span></div>
 
@@ -803,8 +984,13 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="n">added_by</span><span class="p">:</span>
             <span class="k">return</span>
         <span class="k">if</span> <span class="n">added_by</span> <span class="o">!=</span> <span class="s1">&#39;mirage&#39;</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;process_ionosphere_echo :: only mirage metrics are processed not metrics added_by </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">added_by</span><span class="p">)</span>
-            <span class="k">return</span>
+            <span class="c1"># @modified 20200109 - Feature #3380: Create echo features profile when a Mirage features profile is created</span>
+            <span class="c1"># Allow to be added by webapp</span>
+            <span class="k">if</span> <span class="n">added_by</span> <span class="o">==</span> <span class="s1">&#39;webapp&#39;</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;process_ionosphere_echo :: metric added_by </span><span class="si">%s</span><span class="s1"> OK&#39;</span> <span class="o">%</span> <span class="n">added_by</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;process_ionosphere_echo :: only mirage metrics are processed not metrics added_by </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">added_by</span><span class="p">)</span>
+                <span class="k">return</span>
         <span class="n">metric</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="c1"># metric_vars.metric</span>
@@ -824,7 +1010,10 @@
         <span class="c1"># @added 20190413 - Feature #2484: FULL_DURATION feature profiles</span>
         <span class="c1"># Only process if it is an ionosphere enabled metric</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">ionosphere_unique_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;ionosphere.unique_metrics&#39;</span><span class="p">))</span>
+            <span class="c1"># @modified 20191030 - Bug #3266: py3 Redis binary objects not strings</span>
+            <span class="c1">#                      Branch #3262: py3</span>
+            <span class="c1"># ionosphere_unique_metrics = list(self.redis_conn.smembers(&#39;ionosphere.unique_metrics&#39;))</span>
+            <span class="n">ionosphere_unique_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;ionosphere.unique_metrics&#39;</span><span class="p">))</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get ionosphere.unique_metrics from Redis&#39;</span><span class="p">)</span>
@@ -839,8 +1028,15 @@
             <span class="c1"># @modified 20190522: Task #3034: Reduce multiprocessing Manager list usage</span>
             <span class="c1"># if not metric_name in ionosphere_unique_metrics:</span>
             <span class="k">if</span> <span class="n">metric_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ionosphere_unique_metrics</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;process_ionosphere_echo :: only ionosphere enabled metrics are processed, skipping </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric</span><span class="p">)</span>
-                <span class="k">return</span>
+                <span class="c1"># @modified 20200109 - Feature #3380: Create echo features profile when a Mirage features profile is created</span>
+                <span class="c1"># Allow metrics added by webapp to skip this check as they may</span>
+                <span class="c1"># be new ionosphere metrics and not be in the ionosphere.unique_metrics</span>
+                <span class="c1"># set yet</span>
+                <span class="k">if</span> <span class="n">added_by</span> <span class="o">==</span> <span class="s1">&#39;webapp&#39;</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;process_ionosphere_echo :: </span><span class="si">%s</span><span class="s1"> is not in ionosphere.unique_metrics but added by webapp so possibly a new metric&#39;</span> <span class="o">%</span> <span class="n">metric</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;process_ionosphere_echo :: only ionosphere enabled metrics are processed, skipping </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric</span><span class="p">)</span>
+                    <span class="k">return</span>
 
         <span class="n">full_duration</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">try</span><span class="p">:</span>
@@ -1133,6 +1329,15 @@
         <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">added_by</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;ionosphere_learn&#39;</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: metric variable - added_by - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">added_by</span><span class="p">)</span>
 
+        <span class="c1"># @added 20200413 - Feature #3486: analyzer_batch</span>
+        <span class="c1">#                   Feature #3480: batch_processing</span>
+        <span class="c1"># If added_by is analyzer_batch, log and change to analyzer so that</span>
+        <span class="c1"># Ionosphere routes any alerts back to anaylzer</span>
+        <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">added_by</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;analyzer_batch&#39;</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metric variable - added_by - </span><span class="si">%s</span><span class="s1">, now switching to analyzer to route alerts to anlayzer, thanks analyzer_batch&#39;</span> <span class="o">%</span> <span class="n">added_by</span><span class="p">)</span>
+            <span class="n">added_by</span> <span class="o">=</span> <span class="s1">&#39;analzyer&#39;</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metric variable - added_by - </span><span class="si">%s</span><span class="s1">, analyzer_batch checks will have alerts routed to analyzer&#39;</span> <span class="o">%</span> <span class="n">added_by</span><span class="p">)</span>
+
         <span class="k">try</span><span class="p">:</span>
             <span class="c1"># metric_vars.added_at</span>
             <span class="c1"># added_at = str(metric_vars.added_at)</span>
@@ -1189,7 +1394,7 @@
         <span class="c1"># Do not check the cache key or anomaly age if added by ionosphere_learn</span>
         <span class="k">if</span> <span class="n">added_by</span> <span class="o">!=</span> <span class="s1">&#39;ionosphere_learn&#39;</span><span class="p">:</span>
             <span class="c1"># @added 20170101 - Feature #1830: Ionosphere alerts</span>
-            <span class="c1"># Remove check file is an alert key exists</span>
+            <span class="c1"># Remove check file if an alert key exists</span>
             <span class="n">cache_key</span> <span class="o">=</span> <span class="s1">&#39;ionosphere.</span><span class="si">%s</span><span class="s1">.alert.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">added_by</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
             <span class="n">last_alert</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="k">try</span><span class="p">:</span>
@@ -1203,18 +1408,45 @@
                 <span class="bp">self</span><span class="o">.</span><span class="n">remove_metric_check_file</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
                 <span class="k">return</span>
 
-            <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
-            <span class="n">anomaly_age</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">now</span><span class="p">)</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">anomaly_age</span> <span class="o">&gt;</span> <span class="n">max_age_seconds</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                    <span class="s1">&#39;Ionosphere check max age exceeded - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1"> seconds old, older than </span><span class="si">%s</span><span class="s1"> seconds discarding&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                        <span class="n">metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_age</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">max_age_seconds</span><span class="p">)))</span>
-                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">,</span> <span class="s1">&#39;rt&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fr</span><span class="p">:</span>
-                    <span class="n">metric_check_file_contents</span> <span class="o">=</span> <span class="n">fr</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+            <span class="c1"># @added 20200413 - Feature #3486: analyzer_batch</span>
+            <span class="c1">#                   Feature #3480: batch_processing</span>
+            <span class="c1"># Do not evaluate batch metrics against max_age_seconds</span>
+            <span class="n">analyzer_batch_anomaly</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">BATCH_PROCESSING</span><span class="p">:</span>
+                <span class="c1"># Is this a analyzer_batch related anomaly?</span>
+                <span class="n">analyzer_batch_anomaly</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">analyzer_batch_metric_anomaly_key</span> <span class="o">=</span> <span class="s1">&#39;analyzer_batch.anomaly.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">),</span> <span class="n">metric</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">analyzer_batch_anomaly</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">analyzer_batch_metric_anomaly_key</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                        <span class="s1">&#39;error :: could not query cache_key - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">analyzer_batch_metric_anomaly_key</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                    <span class="n">analyzer_batch_anomaly</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="n">analyzer_batch_anomaly</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;batch processing - identified as an analyzer_batch triggered anomaly from the presence of the Redis key </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">analyzer_batch_metric_anomaly_key</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;batch processing - not identified as an analyzer_batch triggered anomaly as no Redis key found - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">analyzer_batch_metric_anomaly_key</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">analyzer_batch_anomaly</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;batch anomaly not checking max_age_seconds for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">analyzer_batch_metric_anomaly_key</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># @modified 20200413 - Feature #3486: analyzer_batch</span>
+                <span class="c1">#                      Feature #3480: batch_processing</span>
+                <span class="c1"># Wrapped in if analyzer_batch_anomaly</span>
+                <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+                <span class="n">anomaly_age</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">now</span><span class="p">)</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">anomaly_age</span> <span class="o">&gt;</span> <span class="n">max_age_seconds</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                        <span class="s1">&#39;debug :: metric check file contents</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file_contents</span><span class="p">)))</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">remove_metric_check_file</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
-                    <span class="k">return</span>
+                        <span class="s1">&#39;Ionosphere check max age exceeded - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1"> seconds old, older than </span><span class="si">%s</span><span class="s1"> seconds discarding&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_age</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">max_age_seconds</span><span class="p">)))</span>
+                    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">,</span> <span class="s1">&#39;rt&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fr</span><span class="p">:</span>
+                        <span class="n">metric_check_file_contents</span> <span class="o">=</span> <span class="n">fr</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                            <span class="s1">&#39;debug :: metric check file contents</span><span class="se">\n</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file_contents</span><span class="p">)))</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">remove_metric_check_file</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
+                        <span class="k">return</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;processing check_file for ionosphere_learn - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
 
@@ -1337,7 +1569,10 @@
         <span class="c1"># section</span>
         <span class="n">ionosphere_non_smtp_alerter_metrics</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">ionosphere_non_smtp_alerter_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;ionosphere.ionosphere_non_smtp_alerter_metrics&#39;</span><span class="p">))</span>
+            <span class="c1"># @modified 20191030 - Bug #3266: py3 Redis binary objects not strings</span>
+            <span class="c1">#                      Branch #3262: py3</span>
+            <span class="c1"># ionosphere_non_smtp_alerter_metrics = list(self.redis_conn.smembers(&#39;ionosphere.ionosphere_non_smtp_alerter_metrics&#39;))</span>
+            <span class="n">ionosphere_non_smtp_alerter_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;ionosphere.ionosphere_non_smtp_alerter_metrics&#39;</span><span class="p">))</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to generate a list from the ionosphere.ionosphere_non_smtp_alerter_metrics Redis set&#39;</span><span class="p">)</span>
@@ -1349,7 +1584,13 @@
             <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
             <span class="c1"># if base_name in self.ionosphere_non_smtp_alerter_metrics:</span>
             <span class="k">if</span> <span class="n">base_name</span> <span class="ow">in</span> <span class="n">ionosphere_non_smtp_alerter_metrics</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: Ionosphere does not handle metrics that do not have a smtp alert context removing check for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">))</span>
+
+                <span class="c1"># @modified 20191114 - Feature #: forward_alert</span>
+                <span class="c1"># Allow ionosphere to check any metrics that have an alerter other than smtp set, apart from syslog</span>
+
+                <span class="c1"># logger.error(&#39;error :: Ionosphere does not handle metrics that do not have a smtp alert context removing check for %s&#39; % (base_name))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Ionosphere does not handle metrics that do not have a smtp alert context removing check for </span><span class="si">%s</span><span class="s1"> which is a training_metric&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">))</span>
+
                 <span class="bp">self</span><span class="o">.</span><span class="n">remove_metric_check_file</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
                 <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
                     <span class="n">engine_disposal</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span>
@@ -1655,6 +1896,47 @@
                 <span class="c1"># fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">all_fp_ids</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: Ionosphere is enabled on </span><span class="si">%s</span><span class="s1"> but has no feature_profiles&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">))</span>
+                    <span class="c1"># @added 20200516 - Bug #3546: Change ionosphere_enabled if all features profiles are disabled</span>
+                    <span class="c1"># If there are no features profiles enabled for the metric</span>
+                    <span class="c1"># send it back to the source to alert and update the DB with</span>
+                    <span class="c1"># ionosphere_enabled=0, it has been willy nillied, all its</span>
+                    <span class="c1"># fps have been disabled.  This has the ramification that</span>
+                    <span class="c1"># any layers the metric has will be disabled as well</span>
+                    <span class="k">if</span> <span class="n">added_by</span> <span class="o">!=</span> <span class="s1">&#39;ionosphere_learn&#39;</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> has been willy nillied, all its features profiles have been disabled, but it is still flagged as ionosphere_enabled&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">))</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;sending </span><span class="si">%s</span><span class="s1"> back to </span><span class="si">%s</span><span class="s1"> to alert&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">))</span>
+                        <span class="n">cache_key</span> <span class="o">=</span> <span class="s1">&#39;ionosphere.</span><span class="si">%s</span><span class="s1">.alert.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">added_by</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
+                        <span class="n">cache_key_value</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">anomalous_value</span><span class="p">),</span> <span class="n">base_name</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">),</span> <span class="n">triggered_algorithms</span><span class="p">,</span> <span class="n">full_duration</span><span class="p">]</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">cache_key_value</span><span class="p">))</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;added Redis alert key - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="n">cache_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">cache_key_value</span><span class="p">)))</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                                <span class="s1">&#39;error :: failed to add Redis key - </span><span class="si">%s</span><span class="s1"> - [</span><span class="si">%s</span><span class="s1">, </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">]&#39;</span> <span class="o">%</span>
+                                <span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomalous_value</span><span class="p">),</span> <span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">)),</span>
+                                    <span class="nb">str</span><span class="p">(</span><span class="n">triggered_algorithms</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">full_duration</span><span class="p">)))</span>
+                        <span class="c1"># Update DB as to the fact that the metric is an ionosphere</span>
+                        <span class="c1"># metric, all its fps have been disabled, it has been willy</span>
+                        <span class="c1"># nillied</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">metrics_table</span><span class="p">,</span> <span class="n">log_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">metrics_table_meta</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">log_msg</span><span class="p">)</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ionosphere_table OK&#39;</span><span class="p">)</span>
+                            <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+                            <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                                <span class="n">metrics_table</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
+                                    <span class="n">metrics_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="n">metrics_id</span><span class="p">)</span><span class="o">.</span>
+                                <span class="n">values</span><span class="p">(</span><span class="n">ionosphere_enabled</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span>
+                            <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;updated </span><span class="si">%s</span><span class="s1"> to ionosphere_enabled=0&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="n">base_name</span><span class="p">))</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> has been unwilly nillied&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">))</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not update matched_count and last_matched for </span><span class="si">%s</span><span class="s1"> &#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">))</span>
+
                     <span class="n">fail_check</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">metric_failed_check_dir</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">remove_metric_check_file</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">metric_check_file</span><span class="p">))</span>
@@ -1983,11 +2265,21 @@
                 <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHE_ENABLED</span><span class="p">:</span>
                     <span class="n">fp_id_feature_values_key</span> <span class="o">=</span> <span class="s1">&#39;fp.id.</span><span class="si">%s</span><span class="s1">.feature.values&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">)</span>
                     <span class="k">try</span><span class="p">:</span>
-                        <span class="n">fp_id_feature_values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">memcache_client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">fp_id_feature_values_key</span><span class="p">)</span>
+                        <span class="c1"># @modified 20191029 - Task #3304: py3 - handle pymemcache bytes not str</span>
+                        <span class="c1"># fp_id_feature_values = self.memcache_client.get(fp_id_feature_values_key)</span>
+                        <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                            <span class="n">fp_id_feature_values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">memcache_client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">fp_id_feature_values_key</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">fp_id_feature_values</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">memcache_client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">fp_id_feature_values_key</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
                         <span class="c1"># if memcache does not have the key the response to the</span>
                         <span class="c1"># client is None, it does not except</span>
                     <span class="k">except</span><span class="p">:</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get </span><span class="si">%s</span><span class="s1"> from memcache&#39;</span> <span class="o">%</span> <span class="n">fp_id_feature_values_key</span><span class="p">)</span>
+                        <span class="c1"># @modified 20200501 - Branch #3262: py3</span>
+                        <span class="c1"># This is not an error if the data does not exist in</span>
+                        <span class="c1"># memcache, it can be expected not to exists in</span>
+                        <span class="c1"># memcache if it has not be used in a while.</span>
+                        <span class="c1"># logger.error(&#39;error :: failed to get %s from memcache&#39; % fp_id_feature_values_key)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;did not get </span><span class="si">%s</span><span class="s1"> from memcache, will query DB&#39;</span> <span class="o">%</span> <span class="n">fp_id_feature_values_key</span><span class="p">)</span>
                     <span class="k">try</span><span class="p">:</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">memcache_client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
                     <span class="k">except</span><span class="p">:</span>
@@ -2223,20 +2515,42 @@
                     <span class="n">metric_fp_ts_table</span> <span class="o">=</span> <span class="s1">&#39;z_ts_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metrics_id</span><span class="p">)</span>
                     <span class="n">fp_id_metric_ts</span> <span class="o">=</span> <span class="p">[]</span>
                     <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHE_ENABLED</span><span class="p">:</span>
+                        <span class="c1"># @added 20200421 - Task #3304: py3 - handle pymemcache bytes not str</span>
+                        <span class="c1"># Explicitly set the fp_id_metric_ts_object so it</span>
+                        <span class="c1"># always exists to be evaluated</span>
+                        <span class="n">fp_id_metric_ts_object</span> <span class="o">=</span> <span class="kc">None</span>
+
                         <span class="n">fp_id_metric_ts_key</span> <span class="o">=</span> <span class="s1">&#39;fp.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.ts&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metrics_id</span><span class="p">))</span>
                         <span class="k">try</span><span class="p">:</span>
-                            <span class="n">fp_id_metric_ts_object</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">memcache_client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">fp_id_metric_ts_key</span><span class="p">)</span>
+                            <span class="c1"># @modified 20191029 - Task #3304: py3 - handle pymemcache bytes not str</span>
+                            <span class="c1"># fp_id_metric_ts_object = self.memcache_client.get(fp_id_metric_ts_key)</span>
+                            <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                                <span class="n">fp_id_metric_ts_object</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">memcache_client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">fp_id_metric_ts_key</span><span class="p">)</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="n">fp_id_metric_ts_object</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">memcache_client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">fp_id_metric_ts_key</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
                             <span class="c1"># if memcache does not have the key the response to the</span>
                             <span class="c1"># client is None, it does not except</span>
                         <span class="k">except</span><span class="p">:</span>
-                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get </span><span class="si">%s</span><span class="s1"> from memcache&#39;</span> <span class="o">%</span> <span class="n">fp_id_metric_ts_key</span><span class="p">)</span>
+                            <span class="c1"># @modified 20200501 - Branch #3262: py3</span>
+                            <span class="c1"># This is not an error if the data does not exist in</span>
+                            <span class="c1"># memcache, it can be expected not to exists in</span>
+                            <span class="c1"># memcache if it has not be used in a while.</span>
+                            <span class="c1"># logger.error(&#39;error :: failed to get %s from memcache&#39; % fp_id_metric_ts_key)</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;did not get </span><span class="si">%s</span><span class="s1"> from memcache, will query DB&#39;</span> <span class="o">%</span> <span class="n">fp_id_metric_ts_key</span><span class="p">)</span>
                         <span class="k">try</span><span class="p">:</span>
                             <span class="bp">self</span><span class="o">.</span><span class="n">memcache_client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
                         <span class="k">except</span><span class="p">:</span>
                             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to close memcache_client&#39;</span><span class="p">)</span>
                         <span class="k">if</span> <span class="n">fp_id_metric_ts_object</span><span class="p">:</span>
-                            <span class="n">fp_id_metric_ts</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">fp_id_metric_ts_object</span><span class="p">)</span>
-                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;used memcache </span><span class="si">%s</span><span class="s1"> key data to populate fp_id_metric_ts with </span><span class="si">%s</span><span class="s1"> data points&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fp_id_metric_ts_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fp_id_metric_ts</span><span class="p">))))</span>
+                            <span class="c1"># @modified 20200421 - Task #3304: py3 - handle pymemcache bytes not str</span>
+                            <span class="c1"># Wrapped in try and except</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="n">fp_id_metric_ts</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">fp_id_metric_ts_object</span><span class="p">)</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;used memcache </span><span class="si">%s</span><span class="s1"> key data to populate fp_id_metric_ts with </span><span class="si">%s</span><span class="s1"> data points&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fp_id_metric_ts_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">fp_id_metric_ts</span><span class="p">))))</span>
+                            <span class="k">except</span><span class="p">:</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to literal_eval the fp_id_metric_ts_object in minmax_check&#39;</span><span class="p">)</span>
+                                <span class="n">fp_id_metric_ts</span> <span class="o">=</span> <span class="p">[]</span>
                         <span class="k">else</span><span class="p">:</span>
                             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;no memcache </span><span class="si">%s</span><span class="s1"> key data, will use database&#39;</span> <span class="o">%</span> <span class="n">fp_id_metric_ts_key</span><span class="p">)</span>
                     <span class="k">if</span> <span class="ow">not</span> <span class="n">fp_id_metric_ts</span><span class="p">:</span>
@@ -3121,7 +3435,7 @@
                     <span class="c1"># 2016-03-02 13:16:17 :: 1515 :: metric variable - value - 5622.0</span>
                     <span class="n">added_at</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">()))</span>
                     <span class="n">source</span> <span class="o">=</span> <span class="s1">&#39;graphite&#39;</span>
-                    <span class="n">panaroma_anomaly_data</span> <span class="o">=</span> <span class="s1">&#39;metric = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                    <span class="n">panorama_anomaly_data</span> <span class="o">=</span> <span class="s1">&#39;metric = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
                                             <span class="s1">&#39;value = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
                                             <span class="s1">&#39;from_timestamp = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
                                             <span class="s1">&#39;metric_timestamp = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
@@ -3137,19 +3451,19 @@
                            <span class="n">this_host</span><span class="p">,</span> <span class="n">added_at</span><span class="p">)</span>
 
                     <span class="c1"># Create an anomaly file with details about the anomaly</span>
-                    <span class="n">panaroma_anomaly_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.txt&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">panorama_anomaly_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.txt&#39;</span> <span class="o">%</span> <span class="p">(</span>
                         <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_CHECK_PATH</span><span class="p">,</span> <span class="n">added_at</span><span class="p">,</span>
                         <span class="n">base_name</span><span class="p">)</span>
                     <span class="k">try</span><span class="p">:</span>
                         <span class="n">write_data_to_file</span><span class="p">(</span>
-                            <span class="n">skyline_app</span><span class="p">,</span> <span class="n">panaroma_anomaly_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span>
-                            <span class="n">panaroma_anomaly_data</span><span class="p">)</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;added panorama anomaly file :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">panaroma_anomaly_file</span><span class="p">))</span>
+                            <span class="n">skyline_app</span><span class="p">,</span> <span class="n">panorama_anomaly_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span>
+                            <span class="n">panorama_anomaly_data</span><span class="p">)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;added panorama anomaly file :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">panorama_anomaly_file</span><span class="p">))</span>
                         <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
                         <span class="c1"># Moved to the Redis set function below</span>
                         <span class="c1"># self.sent_to_panorama.append(base_name)</span>
                     <span class="k">except</span><span class="p">:</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add panorama anomaly file :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">panaroma_anomaly_file</span><span class="p">))</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add panorama anomaly file :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">panorama_anomaly_file</span><span class="p">))</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                     <span class="c1"># @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
                     <span class="n">redis_set</span> <span class="o">=</span> <span class="s1">&#39;ionosphere.sent_to_panorama&#39;</span>
@@ -3264,7 +3578,7 @@
         <span class="c1"># @added 20190524 - Bug #3050: Ionosphere - Skyline and Graphite feedback</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;SKYLINE_FEEDBACK_NAMESPACES is set to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">SKYLINE_FEEDBACK_NAMESPACES</span><span class="p">))</span>
 
-        <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
             <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
 
             <span class="c1"># Make sure Redis is up</span>
@@ -3277,10 +3591,15 @@
                     <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">))</span>
                 <span class="n">sleep</span><span class="p">(</span><span class="mi">30</span><span class="p">)</span>
                 <span class="c1"># @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow</span>
-                <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">password</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">,</span> <span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+                <span class="c1"># @added 20191115 - Bug #3266: py3 Redis binary objects not strings</span>
+                <span class="c1">#                   Branch #3262: py3</span>
+                <span class="c1"># if settings.REDIS_PASSWORD:</span>
+                <span class="c1">#     self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)</span>
+                <span class="c1"># else:</span>
+                <span class="c1">#     self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">get_redis_conn</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span> <span class="o">=</span> <span class="n">get_redis_conn_decoded</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+
                 <span class="k">continue</span>
 
             <span class="c1"># Report app up</span>
@@ -3290,37 +3609,42 @@
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to update Redis key for </span><span class="si">%s</span><span class="s1"> up&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
 
-            <span class="c1"># purge_old_data_dirs after every check file run, this takes less</span>
-            <span class="c1"># than a second and keeps the purging somewhat consistent with</span>
-            <span class="c1"># input rate.</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;purging any old training data&#39;</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">purge_old_data_dirs</span><span class="p">(</span>
-                    <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_DATA_FOLDER</span><span class="p">,</span>
-                    <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR</span><span class="p">)</span>
-            <span class="k">except</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: purge_old_data_dirs - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">())</span>
-                <span class="k">if</span> <span class="n">ENABLE_IONOSPHERE_DEBUG</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                        <span class="s1">&#39;debug :: self.purge_old_data_dirs(</span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span>
+            <span class="c1"># @modified 20200330 - Feature #3462: Add IONOSPHERE_MANAGE_PURGE</span>
+            <span class="c1"># Wrapped purging up in a conditional to allow the user to offload</span>
+            <span class="c1"># purging to a script and cron if they so desire for any reason.</span>
+            <span class="k">if</span> <span class="n">IONOSPHERE_MANAGE_PURGE</span><span class="p">:</span>
+                <span class="c1"># purge_old_data_dirs after every check file run, this takes less</span>
+                <span class="c1"># than a second and keeps the purging somewhat consistent with</span>
+                <span class="c1"># input rate.</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;purging any old training data&#39;</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">purge_old_data_dirs</span><span class="p">(</span>
                         <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_DATA_FOLDER</span><span class="p">,</span>
                         <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR</span><span class="p">)</span>
-
-            <span class="c1"># @added 20170110 - Feature #1854: Ionosphere learn</span>
-            <span class="c1"># purge_old_data_dirs learn data</span>
-            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_LEARN</span><span class="p">:</span>
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;purging any old learning data&#39;</span><span class="p">)</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">purge_old_data_dirs</span><span class="p">(</span>
-                        <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_LEARN_FOLDER</span><span class="p">,</span>
-                        <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR</span><span class="p">)</span>
                 <span class="k">except</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: purge_old_data_dirs learn - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: purge_old_data_dirs - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">())</span>
                     <span class="k">if</span> <span class="n">ENABLE_IONOSPHERE_DEBUG</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
                             <span class="s1">&#39;debug :: self.purge_old_data_dirs(</span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span>
+                            <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_DATA_FOLDER</span><span class="p">,</span>
+                            <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR</span><span class="p">)</span>
+                <span class="c1"># @added 20170110 - Feature #1854: Ionosphere learn</span>
+                <span class="c1"># purge_old_data_dirs learn data</span>
+                <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_LEARN</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;purging any old learning data&#39;</span><span class="p">)</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">purge_old_data_dirs</span><span class="p">(</span>
                             <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_LEARN_FOLDER</span><span class="p">,</span>
                             <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: purge_old_data_dirs learn - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">traceback</span><span class="o">.</span><span class="n">print_exc</span><span class="p">())</span>
+                        <span class="k">if</span> <span class="n">ENABLE_IONOSPHERE_DEBUG</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                                <span class="s1">&#39;debug :: self.purge_old_data_dirs(</span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span>
+                                <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_LEARN_FOLDER</span><span class="p">,</span>
+                                <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;purge is not managed by Ionosphere - IONOSPHERE_MANAGE_PURGE = </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">IONOSPHERE_MANAGE_PURGE</span><span class="p">))</span>
 
             <span class="c1"># @added 20170916 - Feature #1996: Ionosphere - matches page</span>
             <span class="c1"># Create the ionosphere_summary_memcache_object</span>
@@ -3344,7 +3668,12 @@
             <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHE_ENABLED</span><span class="p">:</span>
                 <span class="n">hosts_id_key</span> <span class="o">=</span> <span class="s1">&#39;hosts.id.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">this_host</span>
                 <span class="k">try</span><span class="p">:</span>
-                    <span class="n">host_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">memcache_client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">hosts_id_key</span><span class="p">)</span>
+                    <span class="c1"># @modified 20191029 - Task #3304: py3 - handle pymemcache bytes not str</span>
+                    <span class="c1"># host_id = self.memcache_client.get(hosts_id_key)</span>
+                    <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                        <span class="n">host_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">memcache_client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">hosts_id_key</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">host_id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">memcache_client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">hosts_id_key</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
                     <span class="c1"># if memcache does not have the key the response to the</span>
                     <span class="c1"># client is None, it does not except</span>
                 <span class="k">except</span><span class="p">:</span>
@@ -3402,13 +3731,168 @@
             <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">            Determine if any metric has been added to add</span>
 <span class="sd">            &quot;&quot;&quot;</span>
-            <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="c1"># while True:</span>
+            <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">metric_var_files</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">metric_var_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">listdir</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_CHECK_PATH</span><span class="p">)</span> <span class="k">if</span> <span class="n">isfile</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_CHECK_PATH</span><span class="p">,</span> <span class="n">f</span><span class="p">))]</span>
                 <span class="k">except</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to list files in check dir&#39;</span><span class="p">)</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+
+                <span class="c1"># @added 20200109 - Feature #3380: Create echo features profile when a Mirage features profile is created</span>
+                <span class="c1"># Process the ionosphere.echo.work queue as echo features</span>
+                <span class="c1"># profiles cannot be easily shoehorned into the</span>
+                <span class="c1"># ionosphere.learn.work pipeline</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">ionosphere_echo_enabled</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_ECHO_ENABLED</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">ionosphere_echo_enabled</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">echo_job</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">metric_var_files</span> <span class="ow">and</span> <span class="n">ionosphere_echo_enabled</span><span class="p">:</span>
+                    <span class="n">ionosphere_echo_work</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="n">echo_job</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">ionosphere_echo_work</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;ionosphere.echo.work&#39;</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not query Redis for ionosphere.echo.work - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">ionosphere_echo_work</span><span class="p">:</span>
+                        <span class="n">echo_work_queue_items</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ionosphere_echo_work</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">echo_work_queue_items</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="n">echo_job</span> <span class="o">=</span> <span class="kc">True</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;processing a ionosphere.echo.work item&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">echo_job</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">ionosphere_echo_work</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ionosphere_echo_work</span><span class="p">):</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">echo_metric_list</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">ionosphere_echo_work</span><span class="p">)</span>
+                            <span class="n">echo_metric_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">echo_metric_list</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+                            <span class="n">echo_base_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">echo_metric_list</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+                            <span class="n">echo_full_duration</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">echo_metric_list</span><span class="p">[</span><span class="mi">6</span><span class="p">])</span>
+                            <span class="k">break</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not determine details from ionosphere_echo_work item&#39;</span><span class="p">)</span>
+                            <span class="k">continue</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">echo_base_name</span><span class="p">:</span>
+                        <span class="n">echo_job</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">if</span> <span class="n">echo_job</span><span class="p">:</span>
+                    <span class="c1"># When an item is in the ionosphere.echo.work set it needs</span>
+                    <span class="c1"># metric_echo_check_file created to pass to process_ionosphere_echo</span>
+                    <span class="n">echo_metric_check_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.echo.txt&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_TMP_DIR</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">echo_metric_timestamp</span><span class="p">),</span>
+                        <span class="n">echo_base_name</span><span class="p">)</span>
+                    <span class="n">echo_create_fp_metric_key</span> <span class="o">=</span> <span class="s1">&#39;ionosphere.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.echo_create_check&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">echo_metric_timestamp</span><span class="p">),</span> <span class="n">echo_base_name</span><span class="p">)</span>
+                    <span class="n">echo_create_fp_metric_count</span> <span class="o">=</span> <span class="mi">1</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">echo_create_fp_metric_count</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">echo_create_fp_metric_key</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not query Redis for ionosphere.manage_ionosphere_unique_metrics: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">echo_create_fp_metric_count</span><span class="p">:</span>
+                        <span class="n">echo_create_fp_metric_count</span> <span class="o">=</span> <span class="mi">1</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">echo_create_fp_metric_count</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">echo_metric_check_file</span><span class="p">)):</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: echo_metric_check_file - </span><span class="si">%s</span><span class="s1"> already exists, removing&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">echo_metric_check_file</span><span class="p">))</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">remove_metric_check_file</span><span class="p">(</span><span class="n">echo_metric_check_file</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">echo_create_fp_metric_count</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: echo_create_fp_metric_count is </span><span class="si">%s</span><span class="s1">, no further attempts will be made to create an echo fp for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">echo_create_fp_metric_count</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">echo_metric_list</span><span class="p">)))</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;removing ionosphere.echo.work item </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">echo_metric_list</span><span class="p">)))</span>
+                        <span class="n">work_set</span> <span class="o">=</span> <span class="s1">&#39;ionosphere.echo.work&#39;</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">srem</span><span class="p">(</span><span class="n">work_set</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">echo_metric_list</span><span class="p">))</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;removed work item - </span><span class="si">%s</span><span class="s1"> - from Redis set - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">echo_metric_list</span><span class="p">),</span> <span class="n">work_set</span><span class="p">))</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to remove work item list from Redis set - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">work_set</span><span class="p">)</span>
+                        <span class="n">echo_job</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">if</span> <span class="n">echo_job</span><span class="p">:</span>
+                    <span class="n">check_data</span> <span class="o">=</span> <span class="s1">&#39;metric = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                                 <span class="s1">&#39;metric_timestamp = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                                 <span class="s1">&#39;added_by = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                                 <span class="s1">&#39;full_duration = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
+                        <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">echo_base_name</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">echo_metric_timestamp</span><span class="p">),</span>
+                            <span class="s1">&#39;webapp&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">echo_full_duration</span><span class="p">))</span>
+                    <span class="n">echo_metric_check_file_created</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">write_data_to_file</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">echo_metric_check_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">check_data</span><span class="p">)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;added ionosphere.echo.work item check file for process_ionosphere_echo - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">echo_metric_check_file</span><span class="p">))</span>
+                        <span class="n">echo_metric_check_file_created</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add ionosphere.echo.work item check file for process_ionosphere_echo - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">echo_metric_check_file</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="n">echo_metric_check_file_created</span><span class="p">:</span>
+                        <span class="c1"># Set a Redis key so that if the echo fp creation fails</span>
+                        <span class="c1"># a continous loop to try to create it does not occur</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="n">echo_create_fp_metric_key</span><span class="p">,</span> <span class="mi">3600</span><span class="p">,</span> <span class="n">echo_create_fp_metric_count</span><span class="p">)</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;updated Redis key for </span><span class="si">%s</span><span class="s1"> up&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to update Redis key for </span><span class="si">%s</span><span class="s1"> up&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
+                        <span class="c1"># Spawn a single process_ionosphere_echo process</span>
+                        <span class="n">function_name</span> <span class="o">=</span> <span class="s1">&#39;process_ionosphere_echo&#39;</span>
+                        <span class="n">pids</span> <span class="o">=</span> <span class="p">[]</span>
+                        <span class="n">spawned_pids</span> <span class="o">=</span> <span class="p">[]</span>
+                        <span class="n">pid_count</span> <span class="o">=</span> <span class="mi">0</span>
+                        <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+                        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">IONOSPHERE_PROCESSES</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="n">p</span> <span class="o">=</span> <span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">process_ionosphere_echo</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">echo_metric_check_file</span><span class="p">))</span>
+                                <span class="n">pids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+                                <span class="n">pid_count</span> <span class="o">+=</span> <span class="mi">1</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                                    <span class="s1">&#39;starting </span><span class="si">%s</span><span class="s1"> of </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> for ionosphere.echo.work item&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                        <span class="nb">str</span><span class="p">(</span><span class="n">pid_count</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">IONOSPHERE_PROCESSES</span><span class="p">),</span>
+                                        <span class="n">function_name</span><span class="p">))</span>
+                                <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+                                <span class="n">spawned_pids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+                            <span class="k">except</span><span class="p">:</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to start </span><span class="si">%s</span><span class="s1"> for ionosphere.echo.work item&#39;</span> <span class="o">%</span> <span class="n">function_name</span><span class="p">)</span>
+                                <span class="k">continue</span>
+                        <span class="c1"># Self monitor the process and terminate if the</span>
+                        <span class="c1"># process_ionosphere_echo has run for too long</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">ionosphere_echo_max_fp_create_time</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_ECHO_MAX_FP_CREATE_TIME</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">ionosphere_echo_max_fp_create_time</span> <span class="o">=</span> <span class="mi">55</span>
+                        <span class="n">p_starts</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+                        <span class="k">while</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">p_starts</span> <span class="o">&lt;=</span> <span class="n">ionosphere_echo_max_fp_create_time</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">):</span>
+                                <span class="c1"># Just to avoid hogging the CPU</span>
+                                <span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="c1"># All the processes are done, break now.</span>
+                                <span class="n">time_to_run</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">p_starts</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                                    <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1"> completed in </span><span class="si">%.2f</span><span class="s1"> seconds for ionosphere.echo.work item&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                        <span class="nb">str</span><span class="p">(</span><span class="n">IONOSPHERE_PROCESSES</span><span class="p">),</span>
+                                        <span class="n">function_name</span><span class="p">,</span> <span class="n">time_to_run</span><span class="p">))</span>
+                                <span class="n">work_set</span> <span class="o">=</span> <span class="s1">&#39;ionosphere.echo.work&#39;</span>
+                                <span class="k">try</span><span class="p">:</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">srem</span><span class="p">(</span><span class="n">work_set</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">echo_metric_list</span><span class="p">))</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;removed work item - </span><span class="si">%s</span><span class="s1"> - from Redis set - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">echo_metric_list</span><span class="p">),</span> <span class="n">work_set</span><span class="p">))</span>
+                                <span class="k">except</span><span class="p">:</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to remove work item list from Redis set - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">work_set</span><span class="p">)</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">remove_metric_check_file</span><span class="p">(</span><span class="n">echo_metric_check_file</span><span class="p">)</span>
+                                <span class="k">break</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="c1"># We only enter this if we didn&#39;t &#39;break&#39; above.</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;timed out, killing all </span><span class="si">%s</span><span class="s1"> processes for ionosphere.echo.work item&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">function_name</span><span class="p">))</span>
+                            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">:</span>
+                                <span class="k">try</span><span class="p">:</span>
+                                    <span class="n">p</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+                                    <span class="c1"># p.join()</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;killed </span><span class="si">%s</span><span class="s1"> process for ionosphere.echo.work item&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">function_name</span><span class="p">))</span>
+                                <span class="k">except</span><span class="p">:</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: killing all </span><span class="si">%s</span><span class="s1"> processes for ionosphere.echo.work item&#39;</span> <span class="o">%</span> <span class="n">function_name</span><span class="p">)</span>
 
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">metric_var_files</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;sleeping 20 no metric check files&#39;</span><span class="p">)</span>
@@ -3446,7 +3930,9 @@
 
                         <span class="c1"># Self monitor process and terminate if run for too long</span>
                         <span class="n">p_starts</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
-                        <span class="k">while</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">p_starts</span> <span class="o">&lt;=</span> <span class="mi">5</span><span class="p">:</span>
+                        <span class="c1"># @modified 20200507 - increase the allowed time</span>
+                        <span class="c1"># while time() - p_starts &lt;= 5:</span>
+                        <span class="k">while</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">p_starts</span> <span class="o">&lt;=</span> <span class="mi">20</span><span class="p">:</span>
                             <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">):</span>
                                 <span class="c1"># Just to avoid hogging the CPU</span>
                                 <span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
@@ -3473,6 +3959,7 @@
                 <span class="n">metric_var_files</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">metric_var_files</span> <span class="o">=</span> <span class="p">[</span><span class="n">f</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">listdir</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_CHECK_PATH</span><span class="p">)</span> <span class="k">if</span> <span class="n">isfile</span><span class="p">(</span><span class="n">join</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_CHECK_PATH</span><span class="p">,</span> <span class="n">f</span><span class="p">))]</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metric check files found - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">metric_var_files</span><span class="p">)))</span>
                 <span class="k">except</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to list files in check dir&#39;</span><span class="p">)</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
@@ -3493,7 +3980,10 @@
                     <span class="k">try</span><span class="p">:</span>
                         <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
                         <span class="c1"># not_anomalous = str(len(self.not_anomalous))</span>
-                        <span class="n">not_anomalous</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;ionosphere.not_anomalous&#39;</span><span class="p">))))</span>
+                        <span class="c1"># @modified 20191030 - Bug #3266: py3 Redis binary objects not strings</span>
+                        <span class="c1">#                      Branch #3262: py3</span>
+                        <span class="c1"># not_anomalous = str(len(list(self.redis_conn.smembers(&#39;ionosphere.not_anomalous&#39;))))</span>
+                        <span class="n">not_anomalous</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;ionosphere.not_anomalous&#39;</span><span class="p">))))</span>
                     <span class="k">except</span><span class="p">:</span>
                         <span class="n">not_anomalous</span> <span class="o">=</span> <span class="s1">&#39;0&#39;</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;not_anomalous      :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">not_anomalous</span><span class="p">)</span>
@@ -3504,7 +3994,10 @@
                         <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
                         <span class="c1"># Use Redis set instead of Manager() list</span>
                         <span class="c1"># total_anomalies = str(len(self.anomalous_metrics))</span>
-                        <span class="n">total_anomalies</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;ionosphere.anomalous_metrics&#39;</span><span class="p">))))</span>
+                        <span class="c1"># @modified 20191030 - Bug #3266: py3 Redis binary objects not strings</span>
+                        <span class="c1">#                      Branch #3262: py3</span>
+                        <span class="c1"># total_anomalies = str(len(list(self.redis_conn.smembers(&#39;ionosphere.anomalous_metrics&#39;))))</span>
+                        <span class="n">total_anomalies</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;ionosphere.anomalous_metrics&#39;</span><span class="p">))))</span>
                     <span class="k">except</span><span class="p">:</span>
                         <span class="n">total_anomalies</span> <span class="o">=</span> <span class="s1">&#39;0&#39;</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;total_anomalies    :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">total_anomalies</span><span class="p">)</span>
@@ -3514,7 +4007,10 @@
                     <span class="k">try</span><span class="p">:</span>
                         <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
                         <span class="c1"># training_metrics = str(len(self.training_metrics))</span>
-                        <span class="n">training_metrics</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;ionosphere.training_metrics&#39;</span><span class="p">))))</span>
+                        <span class="c1"># @modified 20191030 - Bug #3266: py3 Redis binary objects not strings</span>
+                        <span class="c1">#                      Branch #3262: py3</span>
+                        <span class="c1"># training_metrics = str(len(list(self.redis_conn.smembers(&#39;ionosphere.training_metrics&#39;))))</span>
+                        <span class="n">training_metrics</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;ionosphere.training_metrics&#39;</span><span class="p">))))</span>
                     <span class="k">except</span><span class="p">:</span>
                         <span class="n">training_metrics</span> <span class="o">=</span> <span class="s1">&#39;0&#39;</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;training metrics   :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">training_metrics</span><span class="p">)</span>
@@ -3524,7 +4020,10 @@
                     <span class="k">try</span><span class="p">:</span>
                         <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
                         <span class="c1"># features_profiles_checked = str(len(self.features_profiles_checked))</span>
-                        <span class="n">features_profiles_checked</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;ionosphere.features_profiles_checked&#39;</span><span class="p">))))</span>
+                        <span class="c1"># @modified 20191030 - Bug #3266: py3 Redis binary objects not strings</span>
+                        <span class="c1">#                      Branch #3262: py3</span>
+                        <span class="c1"># features_profiles_checked = str(len(list(self.redis_conn.smembers(&#39;ionosphere.features_profiles_checked&#39;))))</span>
+                        <span class="n">features_profiles_checked</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;ionosphere.features_profiles_checked&#39;</span><span class="p">))))</span>
                     <span class="k">except</span><span class="p">:</span>
                         <span class="n">features_profiles_checked</span> <span class="o">=</span> <span class="s1">&#39;0&#39;</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fps checked count  :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">features_profiles_checked</span><span class="p">)</span>
@@ -3551,7 +4050,10 @@
                         <span class="k">try</span><span class="p">:</span>
                             <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
                             <span class="c1"># sent_to_panorama = str(len(self.sent_to_panorama))</span>
-                            <span class="n">sent_to_panorama</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;ionosphere.sent_to_panorama&#39;</span><span class="p">))))</span>
+                            <span class="c1"># @modified 20191030 - Bug #3266: py3 Redis binary objects not strings</span>
+                            <span class="c1">#                      Branch #3262: py3</span>
+                            <span class="c1"># sent_to_panorama = str(len(list(self.redis_conn.smembers(&#39;ionosphere.sent_to_panorama&#39;))))</span>
+                            <span class="n">sent_to_panorama</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;ionosphere.sent_to_panorama&#39;</span><span class="p">))))</span>
                         <span class="k">except</span><span class="p">:</span>
                             <span class="n">sent_to_panorama</span> <span class="o">=</span> <span class="s1">&#39;0&#39;</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;sent_to_panorama   :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">sent_to_panorama</span><span class="p">)</span>
@@ -3612,6 +4114,7 @@
                     <span class="n">metric_var_files_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">metric_var_files_sorted</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">metric_var_files_count</span> <span class="o">&gt;</span> <span class="mi">2</span><span class="p">:</span>
                         <span class="n">rate_limit_feedback_metrics</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;rate_limit_feedback_metrics set to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">rate_limit_feedback_metrics</span><span class="p">)))</span>
                 <span class="k">if</span> <span class="n">rate_limit_feedback_metrics</span><span class="p">:</span>
                     <span class="k">for</span> <span class="n">i_metric_check_file</span> <span class="ow">in</span> <span class="n">metric_var_files_sorted</span><span class="p">:</span>
                         <span class="n">feedback_metric</span> <span class="o">=</span> <span class="kc">False</span>
@@ -3659,8 +4162,88 @@
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to list files in check dir&#39;</span><span class="p">)</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
 
+                <span class="c1"># @added 20200414 - Feature #3486: analyzer_batch</span>
+                <span class="c1">#                   Feature #3480: batch_processing</span>
+                <span class="c1"># Prioritise realtime metric checks over analyzer_batch checks</span>
+                <span class="c1"># as if a lot of anomalies are submitted from analyzer_batch</span>
+                <span class="c1"># and they are processed first then real time metrics waiting to</span>
+                <span class="c1"># be processed could the max_age_seconds time limit. Batch</span>
+                <span class="c1"># anomalies are not submitted to max_age_seconds check,</span>
+                <span class="c1"># therefore they will get done in due course.</span>
+                <span class="n">prioritise_realtime_checks</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">remove_batch_anomalies_check_files</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">realtime_metric_var_files_count</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="n">batch_metric_var_files_count</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="c1"># If there are realtime metric anomalies and batch metric</span>
+                <span class="c1"># anomalies prioritise the realtime checks by removing the</span>
+                <span class="c1"># batch anomaly checks from the metric_var_files</span>
+                <span class="k">if</span> <span class="n">metric_var_files</span> <span class="ow">and</span> <span class="n">prioritise_realtime_checks</span> <span class="ow">and</span> <span class="n">BATCH_PROCESSING</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">rate_limit_feedback_metrics</span><span class="p">:</span>
+                        <span class="n">prioritise_realtime_checks</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;prioritise_realtime_checks set to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">prioritise_realtime_checks</span><span class="p">)))</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">metric_var_files_sorted</span> <span class="o">=</span> <span class="p">[]</span>
+                        <span class="k">if</span> <span class="n">metric_var_files</span><span class="p">:</span>
+                            <span class="n">metric_var_files_sorted</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">metric_var_files</span><span class="p">)</span>
+                            <span class="c1"># logger.info(&#39;prioritise_realtime_checks checking %s metrics for batch anomalies&#39; % (str(len(metric_var_files_sorted))))</span>
+                            <span class="k">for</span> <span class="n">i_metric_check_file</span> <span class="ow">in</span> <span class="n">metric_var_files_sorted</span><span class="p">:</span>
+                                <span class="n">analyzer_batch_anomaly</span> <span class="o">=</span> <span class="kc">None</span>
+                                <span class="n">check_file_anomaly_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+                                <span class="k">try</span><span class="p">:</span>
+                                    <span class="n">check_metric_file_list</span> <span class="o">=</span> <span class="n">i_metric_check_file</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]</span>
+                                    <span class="n">last_name_element</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">check_metric_file_list</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+                                    <span class="n">base_name</span> <span class="o">=</span> <span class="s1">&#39;.&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">check_metric_file_list</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">last_name_element</span><span class="p">])</span>
+                                    <span class="n">i_metric_check_filename</span> <span class="o">=</span> <span class="n">i_metric_check_file</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_CHECK_PATH</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+                                    <span class="n">check_file_anomaly_timestamp</span> <span class="o">=</span> <span class="n">i_metric_check_filename</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not determine anomaly_timestamp from filename </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                        <span class="n">i_metric_check_file</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
+                                    <span class="n">check_file_anomaly_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+                                <span class="c1"># Is this a analyzer_batch related anomaly</span>
+                                <span class="k">if</span> <span class="n">check_file_anomaly_timestamp</span><span class="p">:</span>
+                                    <span class="n">analyzer_batch_metric_anomaly_key</span> <span class="o">=</span> <span class="s1">&#39;analyzer_batch.anomaly.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                        <span class="nb">str</span><span class="p">(</span><span class="n">check_file_anomaly_timestamp</span><span class="p">),</span> <span class="n">base_name</span><span class="p">)</span>
+                                    <span class="k">try</span><span class="p">:</span>
+                                        <span class="n">analyzer_batch_anomaly</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">analyzer_batch_metric_anomaly_key</span><span class="p">)</span>
+                                    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                                            <span class="s1">&#39;error :: could not query cache_key - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                                <span class="n">analyzer_batch_metric_anomaly_key</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                                        <span class="n">analyzer_batch_anomaly</span> <span class="o">=</span> <span class="kc">None</span>
+                                <span class="k">if</span> <span class="n">analyzer_batch_anomaly</span><span class="p">:</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;batch processing - identified as an analyzer_batch triggered anomaly from the presence of the Redis key </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">analyzer_batch_metric_anomaly_key</span><span class="p">)</span>
+                                    <span class="n">remove_batch_anomalies_check_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i_metric_check_file</span><span class="p">)</span>
+                                    <span class="n">batch_metric_var_files_count</span> <span class="o">+=</span> <span class="mi">1</span>
+                                <span class="k">else</span><span class="p">:</span>
+                                    <span class="n">realtime_metric_var_files_count</span> <span class="o">+=</span> <span class="mi">1</span>
+                                    <span class="c1"># logger.info(&#39;batch processing - no batch anomaly Redis key found - %s&#39; % analyzer_batch_metric_anomaly_key)</span>
+
+                        <span class="c1"># @added 20200414 - Feature #3486: analyzer_batch</span>
+                        <span class="c1">#                   Feature #3480: batch_processing</span>
+                        <span class="c1"># If there are realtime metric anomalies and batch metric</span>
+                        <span class="c1"># anomalies prioritise the realtime checks by removing the</span>
+                        <span class="c1"># batch anomaly checks from the metric_var_files</span>
+                        <span class="n">realtime_metric_var_files</span> <span class="o">=</span> <span class="p">[]</span>
+                        <span class="k">if</span> <span class="n">realtime_metric_var_files_count</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">remove_batch_anomalies_check_files</span><span class="p">:</span>
+                                <span class="k">for</span> <span class="n">metric_var_file</span> <span class="ow">in</span> <span class="n">metric_var_files_sorted</span><span class="p">:</span>
+                                    <span class="k">if</span> <span class="n">metric_var_file</span> <span class="ow">in</span> <span class="n">remove_batch_anomalies_check_files</span><span class="p">:</span>
+                                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;removing batch anomaly check file to prioritise realtime metric checks - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_var_file</span><span class="p">))</span>
+                                <span class="k">else</span><span class="p">:</span>
+                                    <span class="n">realtime_metric_var_files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric_var_file</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">realtime_metric_var_files</span><span class="p">:</span>
+                                <span class="n">realtime_metric_var_files_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">realtime_metric_var_files</span><span class="p">)</span>
+                                <span class="n">metric_var_files</span> <span class="o">=</span> <span class="n">realtime_metric_var_files</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;removed </span><span class="si">%s</span><span class="s1"> batch anomaly check files from metric_var_files list to prioritise the </span><span class="si">%s</span><span class="s1"> realtime metric checks&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                    <span class="nb">str</span><span class="p">(</span><span class="n">batch_metric_var_files_count</span><span class="p">),</span>
+                                    <span class="nb">str</span><span class="p">(</span><span class="n">realtime_metric_var_files_count</span><span class="p">)))</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to determine batch anomalies&#39;</span><span class="p">)</span>
+
                 <span class="k">if</span> <span class="n">metric_var_files</span><span class="p">:</span>
                     <span class="n">ionosphere_job</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> metric check files, so set to ionosphere_job = True&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">metric_var_files</span><span class="p">))))</span>
                     <span class="k">break</span>
 
                 <span class="c1"># @added 20170113 - Feature #1854: Ionosphere learn</span>
@@ -3670,7 +4253,10 @@
                 <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_LEARN</span><span class="p">:</span>
                     <span class="n">learn_work</span> <span class="o">=</span> <span class="kc">None</span>
                     <span class="k">try</span><span class="p">:</span>
-                        <span class="n">learn_work</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;ionosphere.learn.work&#39;</span><span class="p">)</span>
+                        <span class="c1"># @modified 20191030 - Bug #3266: py3 Redis binary objects not strings</span>
+                        <span class="c1">#                      Branch #3262: py3</span>
+                        <span class="c1"># learn_work = self.redis_conn.smembers(&#39;ionosphere.learn.work&#39;)</span>
+                        <span class="n">learn_work</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;ionosphere.learn.work&#39;</span><span class="p">)</span>
                     <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not query Redis for ionosphere.learn.work - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">learn_work</span><span class="p">:</span>
@@ -3712,7 +4298,10 @@
             <span class="c1"># Timed this takes 0.013319 seconds on 689 unique_metrics</span>
             <span class="n">unique_metrics</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">unique_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span> <span class="o">+</span> <span class="s1">&#39;unique_metrics&#39;</span><span class="p">))</span>
+                <span class="c1"># @modified 20191030 - Bug #3266: py3 Redis binary objects not strings</span>
+                <span class="c1">#                      Branch #3262: py3</span>
+                <span class="c1"># unique_metrics = list(self.redis_conn.smembers(settings.FULL_NAMESPACE + &#39;unique_metrics&#39;))</span>
+                <span class="n">unique_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span> <span class="o">+</span> <span class="s1">&#39;unique_metrics&#39;</span><span class="p">))</span>
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not get the unique_metrics list from Redis&#39;</span><span class="p">)</span>
@@ -3724,7 +4313,10 @@
             <span class="c1"># section</span>
             <span class="n">ionosphere_smtp_alerter_metrics</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">ionosphere_smtp_alerter_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;ionosphere.ionosphere_smtp_alerter_metrics&#39;</span><span class="p">))</span>
+                <span class="c1"># @modified 20191030 - Bug #3266: py3 Redis binary objects not strings</span>
+                <span class="c1">#                      Branch #3262: py3</span>
+                <span class="c1"># ionosphere_smtp_alerter_metrics = list(self.redis_conn.smembers(&#39;ionosphere.ionosphere_smtp_alerter_metrics&#39;))</span>
+                <span class="n">ionosphere_smtp_alerter_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;ionosphere.ionosphere_smtp_alerter_metrics&#39;</span><span class="p">))</span>
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to generate a list from the ionosphere_smtp_alerter_metrics Redis set&#39;</span><span class="p">)</span>
@@ -3809,14 +4401,20 @@
             <span class="c1"># Manager().list()</span>
             <span class="n">ionosphere_smtp_alerter_metrics</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">ionosphere_smtp_alerter_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;ionosphere.ionosphere_smtp_alerter_metrics&#39;</span><span class="p">))</span>
+                <span class="c1"># @modified 20191030 - Bug #3266: py3 Redis binary objects not strings</span>
+                <span class="c1">#                      Branch #3262: py3</span>
+                <span class="c1"># ionosphere_smtp_alerter_metrics = list(self.redis_conn.smembers(&#39;ionosphere.ionosphere_smtp_alerter_metrics&#39;))</span>
+                <span class="n">ionosphere_smtp_alerter_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;ionosphere.ionosphere_smtp_alerter_metrics&#39;</span><span class="p">))</span>
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to generate a list from the ionosphere_smtp_alerter_metrics Redis set&#39;</span><span class="p">)</span>
                 <span class="n">ionosphere_smtp_alerter_metrics</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="n">ionosphere_non_smtp_alerter_metrics</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">ionosphere_non_smtp_alerter_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;ionosphere.ionosphere_non_smtp_alerter_metrics&#39;</span><span class="p">))</span>
+                <span class="c1"># @modified 20191030 - Bug #3266: py3 Redis binary objects not strings</span>
+                <span class="c1">#                      Branch #3262: py3</span>
+                <span class="c1"># ionosphere_non_smtp_alerter_metrics = list(self.redis_conn.smembers(&#39;ionosphere.ionosphere_non_smtp_alerter_metrics&#39;))</span>
+                <span class="n">ionosphere_non_smtp_alerter_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;ionosphere.ionosphere_non_smtp_alerter_metrics&#39;</span><span class="p">))</span>
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to generate a list from the ionosphere_non_smtp_alerter_metrics Redis set&#39;</span><span class="p">)</span>
@@ -3854,7 +4452,10 @@
                 <span class="k">if</span> <span class="n">run_process_ionosphere_echo</span><span class="p">:</span>
                     <span class="n">ionosphere_unique_metrics</span> <span class="o">=</span> <span class="p">[]</span>
                     <span class="k">try</span><span class="p">:</span>
-                        <span class="n">ionosphere_unique_metrics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;ionosphere.unique_metrics&#39;</span><span class="p">)</span>
+                        <span class="c1"># @modified 20191030 - Bug #3266: py3 Redis binary objects not strings</span>
+                        <span class="c1">#                      Branch #3262: py3</span>
+                        <span class="c1"># ionosphere_unique_metrics = self.redis_conn.smembers(&#39;ionosphere.unique_metrics&#39;)</span>
+                        <span class="n">ionosphere_unique_metrics</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;ionosphere.unique_metrics&#39;</span><span class="p">)</span>
                     <span class="k">except</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get Redis smembers ionosphere.unique_metrics&#39;</span><span class="p">)</span>
@@ -4059,8 +4660,13 @@
 
             <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">():</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;stopping </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">function_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">())))</span>
-                    <span class="n">p</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+                    <span class="c1"># @modified 20191031 - Bug #3296: Ionosphere spawn_learn_process hanging on docker</span>
+                    <span class="c1">#                      Branch #3002 - docker</span>
+                    <span class="c1"># Use terminate not join for docker</span>
+                    <span class="c1"># logger.info(&#39;stopping %s - %s&#39; % (function_name, str(p.is_alive())))</span>
+                    <span class="c1"># p.join()</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;killing </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">function_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">())))</span>
+                    <span class="n">p</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
 
             <span class="c1"># @added 20170108 - Feature #1830: Ionosphere alerts</span>
             <span class="c1"># Reset added lists of ionospehere_smtp_alerter_metrics and</span>
@@ -4098,7 +4704,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2019, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
 
     </p>
   </div>
@@ -4120,7 +4726,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.3.0',
+            VERSION:'2.0.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

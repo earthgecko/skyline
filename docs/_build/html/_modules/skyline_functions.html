@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>skyline_functions &mdash; Skyline 1.3.0 documentation</title>
+  <title>skyline_functions &mdash; Skyline 2.0.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Skyline 1.3.0 documentation" href="../index.html"/>
+    <link rel="top" title="Skyline 2.0.0 documentation" href="../index.html"/>
         <link rel="up" title="Module code" href="index.html"/> 
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                1.3
+                2.0
               </div>
             
           
@@ -90,10 +90,12 @@
 <li class="toctree-l1"><a class="reference internal" href="../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
@@ -177,25 +179,29 @@
 <span class="sd">These are shared functions that are required in multiple modules.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">logging</span>
-<span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">dirname</span><span class="p">,</span> <span class="n">join</span><span class="p">,</span> <span class="n">abspath</span><span class="p">,</span> <span class="n">isfile</span>
 <span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">path</span>
 <span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">time</span>
 <span class="kn">import</span> <span class="nn">socket</span>
 <span class="kn">import</span> <span class="nn">datetime</span>
 <span class="kn">import</span> <span class="nn">errno</span>
+<span class="kn">import</span> <span class="nn">os</span>
 
 <span class="kn">import</span> <span class="nn">traceback</span>
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">requests</span>
-<span class="k">try</span><span class="p">:</span>
-    <span class="kn">import</span> <span class="nn">urlparse</span>
-<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-    <span class="kn">import</span> <span class="nn">urllib.parse</span>
-<span class="k">try</span><span class="p">:</span>
-    <span class="kn">import</span> <span class="nn">urllib2</span>
-<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-    <span class="kn">import</span> <span class="nn">urllib.request</span>
-    <span class="kn">import</span> <span class="nn">urllib.error</span>
+<span class="c1"># @modified 20191025 - Task #3290: Handle urllib2 in py3</span>
+<span class="c1">#                      Branch #3262: py3</span>
+<span class="c1"># try:</span>
+<span class="c1">#     import urllib2</span>
+<span class="c1"># except ImportError:</span>
+<span class="c1">#     import urllib.request</span>
+<span class="c1">#     import urllib.error</span>
+
+<span class="c1"># @added 20191114 - Bug #3266: py3 Redis binary objects not strings</span>
+<span class="c1">#                   Branch #3262: py3</span>
+<span class="c1"># Added a single functions to deal with Redis connection and the</span>
+<span class="c1"># charset=&#39;utf-8&#39;, decode_responses=True arguments required in py3</span>
+<span class="kn">from</span> <span class="nn">redis</span> <span class="k">import</span> <span class="n">StrictRedis</span>
 
 <span class="kn">import</span> <span class="nn">settings</span>
 
@@ -212,12 +218,132 @@
 <span class="k">except</span><span class="p">:</span>
     <span class="n">CARBON_PORT</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
 
+<span class="c1"># @added 20191007 - Feature #3250: Allow Skyline to send metrics to another Carbon host</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">settings</span> <span class="k">import</span> <span class="n">SKYLINE_METRICS_CARBON_HOST</span>
+    <span class="n">skyline_metrics_carbon_host</span> <span class="o">=</span> <span class="n">SKYLINE_METRICS_CARBON_HOST</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">skyline_metrics_carbon_host</span> <span class="o">=</span> <span class="n">CARBON_HOST</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">settings</span> <span class="k">import</span> <span class="n">SKYLINE_METRICS_CARBON_PORT</span>
+    <span class="n">skyline_metrics_carbon_port</span> <span class="o">=</span> <span class="n">SKYLINE_METRICS_CARBON_PORT</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">skyline_metrics_carbon_port</span> <span class="o">=</span> <span class="n">CARBON_PORT</span>
+
 <span class="n">config</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;user&#39;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_DBUSER</span><span class="p">,</span>
           <span class="s1">&#39;password&#39;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_DBUSERPASS</span><span class="p">,</span>
           <span class="s1">&#39;host&#39;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_DBHOST</span><span class="p">,</span>
           <span class="s1">&#39;port&#39;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_DBPORT</span><span class="p">,</span>
           <span class="s1">&#39;database&#39;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_DATABASE</span><span class="p">,</span>
           <span class="s1">&#39;raise_on_warnings&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">}</span>
+
+
+<span class="c1"># @added 20191025 - Bug #3266: py3 Redis binary objects not strings</span>
+<span class="c1">#                   Branch #3262: py3</span>
+<span class="c1"># Added a single functions to deal with Redis connection and the</span>
+<span class="c1"># charset=&#39;utf-8&#39;, decode_responses=True arguments required in py3</span>
+<div class="viewcode-block" id="get_redis_conn"><a class="viewcode-back" href="../skyline.html#skyline_functions.get_redis_conn">[docs]</a><span class="k">def</span> <span class="nf">get_redis_conn</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get a Redis connection</span>
+
+<span class="sd">    :param current_skyline_app: the skyline app using this function</span>
+<span class="sd">    :type current_skyline_app: str</span>
+<span class="sd">    :return: REDIS_CONN</span>
+<span class="sd">    :rtype: object</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
+    <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
+
+    <span class="n">REDIS_CONN</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">:</span>
+            <span class="n">REDIS_CONN</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span>
+                <span class="n">password</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">,</span>
+                <span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">REDIS_CONN</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">redis</span> <span class="k">import</span> <span class="n">StrictRedis</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">REDIS_CONN</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">:</span>
+                <span class="n">REDIS_CONN</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span>
+                    <span class="n">password</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">,</span>
+                    <span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">REDIS_CONN</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> - redis connection failed&#39;</span> <span class="o">%</span> <span class="n">current_skyline_app</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="n">REDIS_CONN</span></div>
+
+
+<div class="viewcode-block" id="get_redis_conn_decoded"><a class="viewcode-back" href="../skyline.html#skyline_functions.get_redis_conn_decoded">[docs]</a><span class="k">def</span> <span class="nf">get_redis_conn_decoded</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get a Redis connection with decoded responses, to read sets</span>
+
+<span class="sd">    :param current_skyline_app: the skyline app using this function</span>
+<span class="sd">    :type current_skyline_app: str</span>
+<span class="sd">    :return: REDIS_CONN_DECODED</span>
+<span class="sd">    :rtype: object</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">python_version</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">sys</span> <span class="k">import</span> <span class="n">version_info</span>
+        <span class="n">python_version</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
+    <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
+
+    <span class="n">REDIS_CONN_DECODED</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">REDIS_CONN_DECODED</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span>
+                    <span class="n">password</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">,</span>
+                    <span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">REDIS_CONN_DECODED</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span>
+                    <span class="n">password</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">,</span>
+                    <span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">,</span>
+                    <span class="n">charset</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">,</span> <span class="n">decode_responses</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">REDIS_CONN_DECODED</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">REDIS_CONN_DECODED</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span>
+                    <span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">,</span>
+                    <span class="n">charset</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">,</span> <span class="n">decode_responses</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">redis</span> <span class="k">import</span> <span class="n">StrictRedis</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">REDIS_CONN_DECODED</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="n">REDIS_CONN_DECODED</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span>
+                        <span class="n">password</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">,</span>
+                        <span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">REDIS_CONN_DECODED</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span>
+                        <span class="n">password</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">,</span>
+                        <span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">,</span>
+                        <span class="n">charset</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">,</span> <span class="n">decode_responses</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="n">REDIS_CONN_DECODED</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">REDIS_CONN_DECODED</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span>
+                        <span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">,</span>
+                        <span class="n">charset</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">,</span> <span class="n">decode_responses</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> - redis decoded connection failed&#39;</span> <span class="o">%</span> <span class="n">current_skyline_app</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="n">REDIS_CONN_DECODED</span></div>
 
 
 <div class="viewcode-block" id="send_graphite_metric"><a class="viewcode-back" href="../skyline.html#skyline_functions.send_graphite_metric">[docs]</a><span class="k">def</span> <span class="nf">send_graphite_metric</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
@@ -243,9 +369,11 @@
         <span class="kn">from</span> <span class="nn">sys</span> <span class="k">import</span> <span class="n">version_info</span>
         <span class="n">python_version</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
-<span class="c1"># @added 20190518 - Branch #3002: docker</span>
-<span class="c1"># If the CARBON_HOST is set to the default do not send_graphite_metric</span>
-    <span class="k">if</span> <span class="n">CARBON_HOST</span> <span class="o">==</span> <span class="s1">&#39;YOUR_GRAPHITE_HOST.example.com&#39;</span><span class="p">:</span>
+    <span class="c1"># @added 20190518 - Branch #3002: docker</span>
+    <span class="c1"># If the CARBON_HOST is set to the default do not send_graphite_metric</span>
+    <span class="c1"># @modified 20191007 - Feature #3250: Allow Skyline to send metrics to another Carbon host</span>
+    <span class="c1"># if CARBON_HOST == &#39;YOUR_GRAPHITE_HOST.example.com&#39;:</span>
+    <span class="k">if</span> <span class="n">skyline_metrics_carbon_host</span> <span class="o">==</span> <span class="s1">&#39;YOUR_GRAPHITE_HOST.example.com&#39;</span><span class="p">:</span>
         <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
         <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
         <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;CARBON_HOST is not configured in settings.py no CARBON_HOST to send metrics to&#39;</span><span class="p">)</span>
@@ -255,7 +383,9 @@
     <span class="c1"># Use the CARBON_HOST rather than GRAPHITE_HOST to allow for the 2 to be</span>
     <span class="c1"># on different hosts</span>
     <span class="c1"># if GRAPHITE_HOST != &#39;&#39;:</span>
-    <span class="k">if</span> <span class="n">CARBON_HOST</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+    <span class="c1"># @modified 20191007 - Feature #3250: Allow Skyline to send metrics to another Carbon host</span>
+    <span class="c1"># if CARBON_HOST != &#39;&#39;:</span>
+    <span class="k">if</span> <span class="n">skyline_metrics_carbon_host</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
         <span class="n">sock</span> <span class="o">=</span> <span class="n">socket</span><span class="o">.</span><span class="n">socket</span><span class="p">()</span>
         <span class="n">sock</span><span class="o">.</span><span class="n">settimeout</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
 
@@ -268,13 +398,17 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="c1"># @modified 20190518 - Branch #3002: docker</span>
             <span class="c1"># sock.connect((GRAPHITE_HOST, CARBON_PORT))</span>
-            <span class="n">sock</span><span class="o">.</span><span class="n">connect</span><span class="p">((</span><span class="n">CARBON_HOST</span><span class="p">,</span> <span class="n">CARBON_PORT</span><span class="p">))</span>
+            <span class="c1"># @modified 20191007 - Feature #3250: Allow Skyline to send metrics to another Carbon host</span>
+            <span class="c1"># sock.connect((CARBON_HOST, CARBON_PORT))</span>
+            <span class="n">sock</span><span class="o">.</span><span class="n">connect</span><span class="p">((</span><span class="n">skyline_metrics_carbon_host</span><span class="p">,</span> <span class="n">skyline_metrics_carbon_port</span><span class="p">))</span>
             <span class="n">sock</span><span class="o">.</span><span class="n">settimeout</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
         <span class="k">except</span> <span class="n">socket</span><span class="o">.</span><span class="n">error</span><span class="p">:</span>
             <span class="n">sock</span><span class="o">.</span><span class="n">settimeout</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
             <span class="c1"># @modified 20190518 - Branch #3002: docker</span>
             <span class="c1"># endpoint = &#39;%s:%d&#39; % (GRAPHITE_HOST, CARBON_PORT)</span>
-            <span class="n">endpoint</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">:</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">CARBON_HOST</span><span class="p">,</span> <span class="n">CARBON_PORT</span><span class="p">)</span>
+            <span class="c1"># @modified 20191007 - Feature #3250: Allow Skyline to send metrics to another Carbon host</span>
+            <span class="c1"># endpoint = &#39;%s:%d&#39; % (CARBON_HOST, CARBON_PORT)</span>
+            <span class="n">endpoint</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">:</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_metrics_carbon_host</span><span class="p">,</span> <span class="n">skyline_metrics_carbon_port</span><span class="p">)</span>
             <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
             <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
             <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
@@ -295,7 +429,9 @@
         <span class="k">except</span><span class="p">:</span>
             <span class="c1"># @modified 20190518 - Branch #3002: docker</span>
             <span class="c1"># endpoint = &#39;%s:%d&#39; % (GRAPHITE_HOST, CARBON_PORT)</span>
-            <span class="n">endpoint</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">:</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">CARBON_HOST</span><span class="p">,</span> <span class="n">CARBON_PORT</span><span class="p">)</span>
+            <span class="c1"># @modified 20191007 - Feature #3250: Allow Skyline to send metrics to another Carbon host</span>
+            <span class="c1"># endpoint = &#39;%s:%d&#39; % (CARBON_HOST, CARBON_PORT)</span>
+            <span class="n">endpoint</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">:</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_metrics_carbon_host</span><span class="p">,</span> <span class="n">skyline_metrics_carbon_port</span><span class="p">)</span>
             <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
             <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
             <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
@@ -327,6 +463,96 @@
             <span class="k">pass</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span></div>
+
+
+<span class="c1"># @added 20191023 - Task #3290: Handle urllib2 in py3</span>
+<span class="c1">#                   Branch #3262: py3</span>
+<span class="c1"># Use urlretrieve</span>
+<div class="viewcode-block" id="get_graphite_graph_image"><a class="viewcode-back" href="../skyline.html#skyline_functions.get_graphite_graph_image">[docs]</a><span class="k">def</span> <span class="nf">get_graphite_graph_image</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">url</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">image_file</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Fetches a Graphite graph image of a metric and saves the image to the</span>
+<span class="sd">    specified file.</span>
+
+<span class="sd">    :param current_skyline_app: the app calling the function so the function</span>
+<span class="sd">        knows which log to write too.</span>
+<span class="sd">    :param url: the graph URL</span>
+<span class="sd">    :param image_file: the absolute path and file name to save the graph png image</span>
+<span class="sd">        as.</span>
+<span class="sd">    :type current_skyline_app: str</span>
+<span class="sd">    :type url: str</span>
+<span class="sd">    :type image_file: str</span>
+<span class="sd">    :return: True</span>
+<span class="sd">    :rtype:  boolean</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">python_version</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">sys</span> <span class="k">import</span> <span class="n">version_info</span>
+        <span class="n">python_version</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">urllib</span><span class="o">.</span><span class="n">urlretrieve</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">urllib</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="c1"># For backwards compatibility with py2 load urlib.request as urllib so</span>
+            <span class="c1"># that urllib.urlretrieve is available to both as the same module.</span>
+            <span class="c1"># from urllib import request as urllib</span>
+            <span class="kn">import</span> <span class="nn">urllib.request</span>
+            <span class="kn">import</span> <span class="nn">urllib.error</span>
+
+    <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
+    <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">url</span><span class="p">:</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: get_graphite_graph_image :: URL - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">url</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">image_file</span><span class="p">))</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">image_file</span><span class="p">:</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: get_graphite_graph_image :: image_file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">image_file</span><span class="p">))</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="n">file_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">image_file</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">file_dir</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">file_dir</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o755</span><span class="p">)</span>
+        <span class="c1"># Python &gt;2.5</span>
+        <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">exc</span><span class="o">.</span><span class="n">errno</span> <span class="o">==</span> <span class="n">errno</span><span class="o">.</span><span class="n">EEXIST</span> <span class="ow">and</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+                <span class="k">pass</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">file_dir</span><span class="p">):</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+            <span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: get_graphite_graph_image - could not create directory - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">file_dir</span><span class="p">)))</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: get_graphite_graph_image :: saving </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">url</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">image_file</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">urllib</span><span class="o">.</span><span class="n">urlretrieve</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">image_file</span><span class="p">)</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">image_file</span><span class="p">,</span> <span class="mo">0o644</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="o">.</span><span class="n">urlretrieve</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">image_file</span><span class="p">)</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">image_file</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o644</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: get_graphite_graph_image :: saved </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">url</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">image_file</span><span class="p">)))</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: get_graphite_graph_image :: failed to save </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">url</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">image_file</span><span class="p">))</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">current_skyline_app</span> <span class="o">==</span> <span class="s1">&#39;webapp&#39;</span><span class="p">:</span>
+            <span class="c1"># Raise to webbapp</span>
+            <span class="k">raise</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="kc">True</span></div>
 
 
 <div class="viewcode-block" id="load_metric_vars"><a class="viewcode-back" href="../skyline.html#skyline_functions.load_metric_vars">[docs]</a><span class="k">def</span> <span class="nf">load_metric_vars</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">metric_vars_file</span><span class="p">):</span>
@@ -499,7 +725,7 @@
         <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;moved check file to - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">failed_check_file</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">True</span>
     <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
-        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
         <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;failed to move check file to -</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">failed_check_file</span>
         <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">msg</span><span class="p">)</span>
         <span class="k">pass</span>
@@ -556,6 +782,17 @@
     <span class="k">except</span><span class="p">:</span>
         <span class="kn">import</span> <span class="nn">re</span>
 
+    <span class="c1"># @added 20191025 - Task #3290: Handle urllib2 in py3</span>
+    <span class="c1">#                   Branch #3262: py3</span>
+<span class="c1">#    try:</span>
+<span class="c1">#        urllib.urlretrieve</span>
+<span class="c1">#    except:</span>
+<span class="c1">#        try:</span>
+<span class="c1">#            import urllib as urllib</span>
+<span class="c1">#        except:</span>
+<span class="c1">#            import urllib.request</span>
+<span class="c1">#            import urllib.error</span>
+
     <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
     <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
 
@@ -564,8 +801,11 @@
 
     <span class="c1"># @added 20160803 - Unescaped Graphite target - https://github.com/earthgecko/skyline/issues/20</span>
     <span class="c1">#                   bug1546: Unescaped Graphite target</span>
-    <span class="n">new_metric_namespace</span> <span class="o">=</span> <span class="n">metric</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">,</span> <span class="s1">&#39;\:&#39;</span><span class="p">)</span>
-    <span class="n">metric_namespace</span> <span class="o">=</span> <span class="n">new_metric_namespace</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">,</span> <span class="s1">&#39;\(&#39;</span><span class="p">)</span>
+    <span class="c1"># @modified 20191029 - Branch #3263: py3</span>
+    <span class="c1"># Commented out colon</span>
+    <span class="c1"># new_metric_namespace = metric.replace(&#39;:&#39;, &#39;\:&#39;)</span>
+    <span class="c1"># metric_namespace = new_metric_namespace.replace(&#39;(&#39;, &#39;\(&#39;)</span>
+    <span class="n">metric_namespace</span> <span class="o">=</span> <span class="n">metric</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;(&#39;</span><span class="p">,</span> <span class="s1">&#39;\(&#39;</span><span class="p">)</span>
     <span class="n">metric</span> <span class="o">=</span> <span class="n">metric_namespace</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;)&#39;</span><span class="p">,</span> <span class="s1">&#39;\)&#39;</span><span class="p">)</span>
 
     <span class="c1"># Graphite timeouts</span>
@@ -594,26 +834,33 @@
     <span class="c1"># increasing monotonically to their deriative products in Graphite now</span>
     <span class="c1"># graphs</span>
     <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="n">REDIS_CONN</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">REDIS_CONN_DECODED</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="c1"># @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow</span>
-        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">:</span>
-            <span class="n">REDIS_CONN</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">password</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">,</span> <span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">REDIS_CONN</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+        <span class="n">REDIS_CONN_DECODED</span> <span class="o">=</span> <span class="n">get_redis_conn_decoded</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span>
     <span class="k">except</span><span class="p">:</span>
-        <span class="kn">from</span> <span class="nn">redis</span> <span class="k">import</span> <span class="n">StrictRedis</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">REDIS_CONN</span><span class="p">:</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="c1"># @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow</span>
-            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">:</span>
-                <span class="n">REDIS_CONN</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">password</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">,</span> <span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">REDIS_CONN</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
-        <span class="k">except</span><span class="p">:</span>
-            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_smtp - redis connection failed&#39;</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: get_graphite_metric - failed to get_redis_conn&#39;</span><span class="p">)</span>
+
+<span class="c1">#    try:</span>
+<span class="c1">#        # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow</span>
+<span class="c1">#        if settings.REDIS_PASSWORD:</span>
+<span class="c1">#            REDIS_CONN = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)</span>
+<span class="c1">#        else:</span>
+<span class="c1">#            REDIS_CONN = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)</span>
+<span class="c1">#    except:</span>
+<span class="c1">#        from redis import StrictRedis</span>
+<span class="c1">#    if not REDIS_CONN:</span>
+<span class="c1">#        try:</span>
+<span class="c1">#            # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow</span>
+<span class="c1">#            if settings.REDIS_PASSWORD:</span>
+<span class="c1">#                REDIS_CONN = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)</span>
+<span class="c1">#            else:</span>
+<span class="c1">#                REDIS_CONN = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)</span>
+<span class="c1">#        except:</span>
+<span class="c1">#            current_logger.error(&#39;error :: %s - redis connection failed&#39; % current_skyline_app)</span>
+
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">derivative_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">REDIS_CONN</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;derivative_metrics&#39;</span><span class="p">))</span>
+        <span class="n">derivative_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">REDIS_CONN_DECODED</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;derivative_metrics&#39;</span><span class="p">))</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">derivative_metrics</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">redis_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">))</span>
@@ -627,7 +874,7 @@
         <span class="n">metric_found_in_redis</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">if</span> <span class="n">known_derivative_metric</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">non_derivative_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">REDIS_CONN</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;non_derivative_metrics&#39;</span><span class="p">))</span>
+            <span class="n">non_derivative_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">REDIS_CONN_DECODED</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;non_derivative_metrics&#39;</span><span class="p">))</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">non_derivative_metrics</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="n">redis_metric_name</span> <span class="ow">in</span> <span class="n">non_derivative_metrics</span><span class="p">:</span>
@@ -663,14 +910,16 @@
     <span class="n">graphite_port</span> <span class="o">=</span> <span class="s1">&#39;80&#39;</span>
     <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PORT</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
         <span class="n">graphite_port</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PORT</span><span class="p">)</span>
+    <span class="c1"># @added 20191002 - Branch #3002: docker</span>
+    <span class="c1"># Unset the graphite_port if normal https</span>
+    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PORT</span> <span class="o">==</span> <span class="s1">&#39;443&#39;</span> <span class="ow">and</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PROTOCOL</span> <span class="o">==</span> <span class="s1">&#39;https&#39;</span><span class="p">:</span>
+        <span class="n">graphite_port</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+
     <span class="c1"># @modified 20190520 - Branch #3002: docker</span>
     <span class="c1"># image_url = settings.GRAPHITE_PROTOCOL + &#39;://&#39; + settings.GRAPHITE_HOST + &#39;:&#39; + graphite_port + &#39;/render?from=&#39; + graphite_from + &#39;&amp;until=&#39; + graphite_until + &#39;&amp;target=&#39; + target_metric</span>
     <span class="c1"># image_url = settings.GRAPHITE_PROTOCOL + &#39;://&#39; + settings.GRAPHITE_HOST + &#39;:&#39; + graphite_port + &#39;/api/datasources/proxy/1/render/?from=&#39; + graphite_from + &#39;&amp;until=&#39; + graphite_until + &#39;&amp;target=&#39; + target_metric</span>
     <span class="n">image_url</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PROTOCOL</span> <span class="o">+</span> <span class="s1">&#39;://&#39;</span> <span class="o">+</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span> <span class="o">+</span> <span class="s1">&#39;:&#39;</span> <span class="o">+</span> <span class="n">graphite_port</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_RENDER_URI</span> <span class="o">+</span> <span class="s1">&#39;?from=&#39;</span> <span class="o">+</span> <span class="n">graphite_from</span> <span class="o">+</span> <span class="s1">&#39;&amp;until=&#39;</span> <span class="o">+</span> <span class="n">graphite_until</span> <span class="o">+</span> <span class="s1">&#39;&amp;target=&#39;</span> <span class="o">+</span> <span class="n">target_metric</span>
     <span class="n">url</span> <span class="o">=</span> <span class="n">image_url</span> <span class="o">+</span> <span class="s1">&#39;&amp;format=&#39;</span> <span class="o">+</span> <span class="n">output_format</span>
-
-    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span><span class="p">:</span>
-        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;graphite url - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">url</span><span class="p">))</span>
 
     <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;graphite url - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">url</span><span class="p">))</span>
 
@@ -754,20 +1003,36 @@
 
         <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_DEBUG</span><span class="p">:</span>
             <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;graphite image url - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">image_url</span><span class="p">)))</span>
-        <span class="n">image_url_timeout</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">connect_timeout</span><span class="p">)</span>
+        <span class="c1"># image_url_timeout = int(connect_timeout)</span>
 
         <span class="n">image_data</span> <span class="o">=</span> <span class="kc">None</span>
 
-        <span class="k">try</span><span class="p">:</span>
-            <span class="c1"># @modified 20170913 - Task #2160: Test skyline with bandit</span>
-            <span class="c1"># Added nosec to exclude from bandit tests</span>
-            <span class="n">image_data</span> <span class="o">=</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">urlopen</span><span class="p">(</span><span class="n">image_url</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">image_url_timeout</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>  <span class="c1"># nosec</span>
-            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;url OK - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">image_url</span><span class="p">))</span>
-        <span class="k">except</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">URLError</span><span class="p">:</span>
-            <span class="n">image_data</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: url bad - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">image_url</span><span class="p">))</span>
+        <span class="c1"># @modified 20191025 - Task #3290: Handle urllib2 in py3</span>
+        <span class="c1">#                      Branch #3262: py3</span>
+        <span class="c1"># Use urlretrieve</span>
+        <span class="c1"># try:</span>
+        <span class="c1">#     # @modified 20170913 - Task #2160: Test skyline with bandit</span>
+        <span class="c1">#     # Added nosec to exclude from bandit tests</span>
+        <span class="c1">#     image_data = urllib2.urlopen(image_url, timeout=image_url_timeout).read()  # nosec</span>
+        <span class="c1">#     current_logger.info(&#39;url OK - %s&#39; % (image_url))</span>
+        <span class="c1"># except urllib2.URLError:</span>
+        <span class="c1">#     image_data = None</span>
+        <span class="c1">#     current_logger.error(&#39;error :: url bad - %s&#39; % (image_url))</span>
 
-        <span class="k">if</span> <span class="n">image_data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># @added 20191025 - Task #3290: Handle urllib2 in py3</span>
+        <span class="c1">#                   Branch #3262: py3</span>
+        <span class="c1"># Use urlretrieve</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">image_data</span> <span class="o">=</span> <span class="n">get_graphite_graph_image</span><span class="p">(</span>
+                <span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">image_url</span><span class="p">,</span> <span class="n">graphite_image_file</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: get_graphite_graph_image :: failed to get_graphite_graph_image(</span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">url</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">graphite_image_file</span><span class="p">))</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
+
+        <span class="c1"># if image_data is not None:</span>
+        <span class="k">if</span> <span class="n">image_data</span> <span class="o">==</span> <span class="s1">&#39;disabled_for_testing&#39;</span><span class="p">:</span>
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">graphite_image_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                 <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">image_data</span><span class="p">)</span>
             <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;retrieved - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">graphite_image_file</span><span class="p">))</span>
@@ -775,9 +1040,9 @@
                 <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">graphite_image_file</span><span class="p">,</span> <span class="mo">0o644</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
                 <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">graphite_image_file</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o644</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
-                <span class="s1">&#39;error :: failed to retrieved - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">graphite_image_file</span><span class="p">))</span>
+        <span class="c1"># else:</span>
+        <span class="c1">#    current_logger.error(</span>
+        <span class="c1">#         &#39;error :: failed to retrieve - %s&#39; % (graphite_image_file))</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">graphite_image_file</span><span class="p">):</span>
             <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;retrieve failed to surface </span><span class="si">%s</span><span class="s1"> graph from Graphite&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">)</span>
@@ -894,11 +1159,12 @@
     <span class="k">except</span><span class="p">:</span>
         <span class="kn">import</span> <span class="nn">os</span>
 
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">python_version</span>
-    <span class="k">except</span><span class="p">:</span>
-        <span class="kn">from</span> <span class="nn">sys</span> <span class="k">import</span> <span class="n">version_info</span>
-        <span class="n">python_version</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="c1"># @modified 20191115 - Branch #3262: py3</span>
+    <span class="c1"># try:</span>
+    <span class="c1">#     python_version</span>
+    <span class="c1"># except:</span>
+    <span class="c1">#     from sys import version_info</span>
+    <span class="c1">#     python_version = int(version_info[0])</span>
 
     <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
     <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
@@ -1079,17 +1345,17 @@
         <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_PANORAMA_DEBUG</span><span class="p">:</span>
             <span class="n">ENABLE_DEBUG</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">except</span><span class="p">:</span>
-        <span class="n">nothing_to_do</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">ENABLE_DEBUG</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_WEBAPP_DEBUG</span><span class="p">:</span>
             <span class="n">ENABLE_DEBUG</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">except</span><span class="p">:</span>
-        <span class="n">nothing_to_do</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">ENABLE_DEBUG</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_IONOSPHERE_DEBUG</span><span class="p">:</span>
             <span class="n">ENABLE_DEBUG</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">except</span><span class="p">:</span>
-        <span class="n">nothing_to_do</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">ENABLE_DEBUG</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
     <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
@@ -1292,6 +1558,22 @@
     <span class="k">except</span><span class="p">:</span>
         <span class="kn">from</span> <span class="nn">ast</span> <span class="k">import</span> <span class="n">literal_eval</span>
 
+    <span class="c1"># @added 20191029 - Task #3304: py3 - handle pymemcache bytes not str</span>
+    <span class="c1">#                   Branch #3262: py3</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">python_version</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">sys</span> <span class="k">import</span> <span class="n">version_info</span>
+        <span class="n">python_version</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="c1"># @added 20191030 - Task #3304: py3 - handle pymemcache bytes not str</span>
+    <span class="c1">#                   Branch #3262: py3</span>
+    <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">codecs</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">codecs</span>
+
     <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
     <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
 
@@ -1305,9 +1587,22 @@
     <span class="n">memcache_result</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHE_ENABLED</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">memcache_result</span> <span class="o">=</span> <span class="n">memcache_client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">metrics_db_object_key</span><span class="p">)</span>
+            <span class="c1"># @modified 20191029 - Task #3304: py3 - handle pymemcache bytes not str</span>
+            <span class="c1"># memcache_result = memcache_client.get(metrics_db_object_key)</span>
+            <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">memcache_result</span> <span class="o">=</span> <span class="n">memcache_client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">metrics_db_object_key</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># memcache_result = memcache_client.get(metrics_db_object_key)</span>
+                <span class="c1"># @modified 20200109 - Task #3304: py3 - handle pymemcache bytes not str</span>
+                <span class="c1"># Handle when memcache returns None as the new decode errors with</span>
+                <span class="c1"># AttributeError: &#39;NoneType&#39; object has no attribute &#39;decode&#39;</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">memcache_result</span> <span class="o">=</span> <span class="n">memcache_client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">metrics_db_object_key</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+                <span class="k">except</span> <span class="p">(</span><span class="ne">TypeError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">):</span>
+                    <span class="n">memcache_result</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get </span><span class="si">%s</span><span class="s1"> from memcache&#39;</span> <span class="o">%</span> <span class="n">metrics_db_object_key</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: skyline_functions :: get_memcache_metric_object :: failed to get </span><span class="si">%s</span><span class="s1"> from memcache&#39;</span> <span class="o">%</span> <span class="n">metrics_db_object_key</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">memcache_client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="c1"># @modified 20170913 - Task #2160: Test skyline with bandit</span>
@@ -1321,12 +1616,21 @@
             <span class="n">memcache_metrics_db_object</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">memcache_result</span><span class="p">)</span>
             <span class="n">memcache_metric_dict</span> <span class="o">=</span> <span class="p">{}</span>
             <span class="c1"># for k, v in memcache_result_list:</span>
-            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">memcache_metrics_db_object</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
-                <span class="n">key_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
-                <span class="n">key_value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
-                <span class="n">memcache_metric_dict</span><span class="p">[</span><span class="n">key_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">key_value</span>
+            <span class="c1"># @modified 20191030 - Branch #3262: py3</span>
+            <span class="c1"># for k, v in memcache_metrics_db_object.iteritems():</span>
+            <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">memcache_metrics_db_object</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+                    <span class="n">key_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+                    <span class="n">key_value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+                    <span class="n">memcache_metric_dict</span><span class="p">[</span><span class="n">key_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">key_value</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">memcache_metrics_db_object</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                    <span class="n">key_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">)</span>
+                    <span class="n">key_value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+                    <span class="n">memcache_metric_dict</span><span class="p">[</span><span class="n">key_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">key_value</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to process data from memcache key </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metrics_db_object_key</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: skyline_functions :: get_memcache_metric_object :: failed to process data with iter of memcache memcache_metrics_db_object key dict </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metrics_db_object_key</span><span class="p">)</span>
             <span class="n">memcache_metric_dict</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">memcache_client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
@@ -1336,8 +1640,8 @@
             <span class="k">pass</span>
 
     <span class="k">if</span> <span class="n">memcache_metric_dict</span><span class="p">:</span>
-        <span class="n">metrics_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">memcache_metric_dict</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">])</span>
-        <span class="n">metric_ionosphere_enabled</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">memcache_metric_dict</span><span class="p">[</span><span class="s1">&#39;ionosphere_enabled&#39;</span><span class="p">])</span>
+        <span class="c1"># metrics_id = int(memcache_metric_dict[&#39;id&#39;])</span>
+        <span class="c1"># metric_ionosphere_enabled = int(memcache_metric_dict[&#39;ionosphere_enabled&#39;])</span>
         <span class="n">metrics_db_object</span> <span class="o">=</span> <span class="n">memcache_metric_dict</span>
         <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;get_memcache_metric_object :: returned memcache data for key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metrics_db_object_key</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">metrics_db_object</span>
@@ -1366,6 +1670,14 @@
     <span class="k">except</span><span class="p">:</span>
         <span class="kn">from</span> <span class="nn">ast</span> <span class="k">import</span> <span class="n">literal_eval</span>
 
+    <span class="c1"># @added 20191029 - Task #3304: py3 - handle pymemcache bytes not str</span>
+    <span class="c1">#                   Branch #3262: py3</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">python_version</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">sys</span> <span class="k">import</span> <span class="n">version_info</span>
+        <span class="n">python_version</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
     <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
     <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
 
@@ -1379,9 +1691,15 @@
     <span class="n">memcache_result</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">MEMCACHE_ENABLED</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">memcache_result</span> <span class="o">=</span> <span class="n">memcache_client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">fp_ids_list_object_key</span><span class="p">)</span>
+            <span class="c1"># @modified 20191029 - Task #3304: py3 - handle pymemcache bytes not str</span>
+            <span class="c1"># memcache_result = memcache_client.get(fp_ids_list_object_key)</span>
+            <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">memcache_result</span> <span class="o">=</span> <span class="n">memcache_client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">fp_ids_list_object_key</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">memcache_result</span> <span class="o">=</span> <span class="n">memcache_client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">fp_ids_list_object_key</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get </span><span class="si">%s</span><span class="s1"> from memcache&#39;</span> <span class="o">%</span> <span class="n">fp_ids_list_object_key</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: skyline_functions :: get_memcache_fp_ids_object :: failed to get </span><span class="si">%s</span><span class="s1"> from memcache&#39;</span> <span class="o">%</span> <span class="n">fp_ids_list_object_key</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">memcache_client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="c1"># @modified 20170913 - Task #2160: Test skyline with bandit</span>
@@ -1394,7 +1712,7 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="n">result</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">memcache_result</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
-            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to process data from memcache key </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fp_ids_list_object_key</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: skyline_functions :: get_memcache_fp_ids_object :: failed to process data from memcache key with literal_eval </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fp_ids_list_object_key</span><span class="p">)</span>
             <span class="n">result</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">memcache_client</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
@@ -1492,30 +1810,35 @@
 
     <span class="c1"># Feature #2034: analyse_derivatives</span>
     <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="n">REDIS_CONN</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">REDIS_CONN_DECODED</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="c1">#    try:</span>
+<span class="c1">#        # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow</span>
+<span class="c1">#        if settings.REDIS_PASSWORD:</span>
+<span class="c1">#            REDIS_CONN = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)</span>
+<span class="c1">#        else:</span>
+<span class="c1">#            REDIS_CONN = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)</span>
+<span class="c1">#    except:</span>
+<span class="c1">#        from redis import StrictRedis</span>
+<span class="c1">#    if not REDIS_CONN:</span>
+<span class="c1">#        try:</span>
+<span class="c1">#            # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow</span>
+<span class="c1">#            if settings.REDIS_PASSWORD:</span>
+<span class="c1">#                REDIS_CONN = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)</span>
+<span class="c1">#            else:</span>
+<span class="c1">#                REDIS_CONN = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)</span>
+<span class="c1">#        except:</span>
+<span class="c1">#            current_logger.error(&#39;error :: known_derivative_metric - Redis connection failed&#39;)</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="c1"># @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow</span>
-        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">:</span>
-            <span class="n">REDIS_CONN</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">password</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">,</span> <span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">REDIS_CONN</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+        <span class="n">REDIS_CONN_DECODED</span> <span class="o">=</span> <span class="n">get_redis_conn_decoded</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span>
     <span class="k">except</span><span class="p">:</span>
-        <span class="kn">from</span> <span class="nn">redis</span> <span class="k">import</span> <span class="n">StrictRedis</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">REDIS_CONN</span><span class="p">:</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="c1"># @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow</span>
-            <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">:</span>
-                <span class="n">REDIS_CONN</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">password</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">,</span> <span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">REDIS_CONN</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
-        <span class="k">except</span><span class="p">:</span>
-            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: known_derivative_metric - Redis connection failed&#39;</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: known_derivative_metric - get_redis_conn failed&#39;</span><span class="p">)</span>
+
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">derivative_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">REDIS_CONN</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;derivative_metrics&#39;</span><span class="p">))</span>
+        <span class="n">derivative_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">REDIS_CONN_DECODED</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;derivative_metrics&#39;</span><span class="p">))</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">derivative_metrics</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">non_derivative_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">REDIS_CONN</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;non_derivative_metrics&#39;</span><span class="p">))</span>
+        <span class="n">non_derivative_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">REDIS_CONN_DECODED</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;non_derivative_metrics&#39;</span><span class="p">))</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">non_derivative_metrics</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">try</span><span class="p">:</span>
@@ -1533,6 +1856,11 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="n">known_derivative_metric</span><span class="p">:</span>
         <span class="n">last_derivative_metric_key</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">try</span><span class="p">:</span>
+            <span class="n">REDIS_CONN</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">REDIS_CONN</span> <span class="o">=</span> <span class="n">get_redis_conn</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: is_derivative_metric :: last_derivative_metric_key - get_redis_conn failed&#39;</span><span class="p">)</span>
             <span class="n">last_derivative_metric_key</span> <span class="o">=</span> <span class="n">REDIS_CONN</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">derivative_metric_key</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not query Redis for last_derivative_metric_key: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
@@ -1578,19 +1906,22 @@
     <span class="n">return_boolean</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">REDIS_CONN</span> <span class="o">=</span> <span class="kc">None</span>
 
+    <span class="c1"># @modified 20191025 - Bug #3266: py3 Redis binary objects not strings</span>
+    <span class="c1">#                      Branch #3262: py3</span>
+    <span class="c1"># Added, charset=&#39;utf-8&#39;, decode_responses=True to REDIS_CONN</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">:</span>
-            <span class="n">REDIS_CONN</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">password</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">,</span> <span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+            <span class="n">REDIS_CONN</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">password</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">,</span> <span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">,</span> <span class="n">charset</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">,</span> <span class="n">decode_responses</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">REDIS_CONN</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+            <span class="n">REDIS_CONN</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">,</span> <span class="n">charset</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">,</span> <span class="n">decode_responses</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="kn">from</span> <span class="nn">redis</span> <span class="k">import</span> <span class="n">StrictRedis</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">REDIS_CONN</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">:</span>
-                <span class="n">REDIS_CONN</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">password</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">,</span> <span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+                <span class="n">REDIS_CONN</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">password</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">,</span> <span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">,</span> <span class="n">charset</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">,</span> <span class="n">decode_responses</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">REDIS_CONN</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+                <span class="n">REDIS_CONN</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">,</span> <span class="n">charset</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">,</span> <span class="n">decode_responses</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: set_metric_as_derivative - Redis connection failed&#39;</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">REDIS_CONN</span><span class="p">:</span>
@@ -1737,6 +2068,225 @@
     <span class="k">if</span> <span class="n">select_field</span> <span class="o">==</span> <span class="s1">&#39;id&#39;</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
     <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">result</span><span class="p">)</span></div>
+
+
+<span class="c1"># @added 20191106 - Branch #3002: docker</span>
+<span class="c1">#                   Branch #3262: py3</span>
+<div class="viewcode-block" id="get_graphite_port"><a class="viewcode-back" href="../skyline.html#skyline_functions.get_graphite_port">[docs]</a><span class="k">def</span> <span class="nf">get_graphite_port</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns graphite port based on configuration in settings.py</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PROTOCOL</span> <span class="o">==</span> <span class="s1">&#39;http&#39;</span><span class="p">:</span>
+        <span class="n">graphite_port</span> <span class="o">=</span> <span class="s1">&#39;80&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">graphite_port</span> <span class="o">=</span> <span class="s1">&#39;443&#39;</span>
+    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PORT</span> <span class="o">!=</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+        <span class="n">graphite_port</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_PORT</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">graphite_port</span></div>
+
+
+<div class="viewcode-block" id="get_graphite_render_uri"><a class="viewcode-back" href="../skyline.html#skyline_functions.get_graphite_render_uri">[docs]</a><span class="k">def</span> <span class="nf">get_graphite_render_uri</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns graphite render uri based on configuration in settings.py</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
+    <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">graphite_render_uri</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_RENDER_URI</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;get_graphite_render_uri :: GRAPHITE_RENDER_URI is not declared in settings.py, using default of </span><span class="se">\&#39;</span><span class="s1">render</span><span class="se">\&#39;</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">graphite_render_uri</span> <span class="o">=</span> <span class="s1">&#39;render&#39;</span>
+    <span class="k">return</span> <span class="n">graphite_render_uri</span></div>
+
+
+<div class="viewcode-block" id="get_graphite_custom_headers"><a class="viewcode-back" href="../skyline.html#skyline_functions.get_graphite_custom_headers">[docs]</a><span class="k">def</span> <span class="nf">get_graphite_custom_headers</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Returns custom http headers</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
+    <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
+    <span class="n">headers</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">headers</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_CUSTOM_HEADERS</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;get_graphite_custom_headers :: GRAPHITE_CUSTOM_HEADERS is not declared in settings.py, using default of \{\}&#39;</span><span class="p">)</span>
+        <span class="n">headers</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">headers</span></div>
+
+
+<span class="c1"># @added 20191113 - Feature #: forward_alert</span>
+<div class="viewcode-block" id="forward_alert"><a class="viewcode-back" href="../skyline.html#skyline_functions.forward_alert">[docs]</a><span class="k">def</span> <span class="nf">forward_alert</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">alert_data</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Sends alert data to a HTTP endpoint</span>
+
+<span class="sd">    :param current_skyline_app: the app calling the function so the function</span>
+<span class="sd">        knows which log to write too.</span>
+<span class="sd">    :param alert_data: a list containing the alert data</span>
+<span class="sd">    :type current_skyline_app: str</span>
+<span class="sd">    :type alert_data: list</span>
+<span class="sd">    :type key: str</span>
+<span class="sd">    :type value: str or int</span>
+<span class="sd">    :return: tuple</span>
+<span class="sd">    :rtype:  (boolean, str)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
+    <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
+    <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> - never to be implemented.  Implemented as http_alerter&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="n">current_skyline_app</span><span class="p">))</span></div>
+
+
+<span class="c1"># @added 20200413 - Feature #3486: analyzer_batch</span>
+<span class="c1">#                   Feature #3480: batch_processing</span>
+<div class="viewcode-block" id="is_batch_metric"><a class="viewcode-back" href="../skyline.html#skyline_functions.is_batch_metric">[docs]</a><span class="k">def</span> <span class="nf">is_batch_metric</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">base_name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Determine if the metric is designated as an analyzer batch processing metric</span>
+
+<span class="sd">    :param current_skyline_app: the app calling the function so the function</span>
+<span class="sd">        knows which log to write too.</span>
+<span class="sd">    :param metric_name: the metric name</span>
+<span class="sd">    :type current_skyline_app: str</span>
+<span class="sd">    :type metric_name: str</span>
+<span class="sd">    :return: False</span>
+<span class="sd">    :rtype:  boolean</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">debug_is_batch_metric</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="n">debug_is_batch_metric</span><span class="p">:</span>
+        <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
+        <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">current_logger</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">settings</span> <span class="k">import</span> <span class="n">BATCH_PROCESSING</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">BATCH_PROCESSING</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">settings</span> <span class="k">import</span> <span class="n">BATCH_PROCESSING_NAMESPACES</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">BATCH_PROCESSING_NAMESPACES</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">debug_is_batch_metric</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="n">batch_metric</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">BATCH_PROCESSING</span><span class="p">:</span>
+        <span class="n">batch_metric</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">BATCH_PROCESSING_NAMESPACES</span><span class="p">:</span>
+            <span class="n">batch_metric</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">base_name_namespace_elements</span> <span class="o">=</span> <span class="n">base_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">batch_processing_namespace</span> <span class="ow">in</span> <span class="n">BATCH_PROCESSING_NAMESPACES</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">batch_processing_namespace</span> <span class="ow">in</span> <span class="n">base_name</span><span class="p">:</span>
+                    <span class="n">batch_metric</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">if</span> <span class="n">debug_is_batch_metric</span><span class="p">:</span>
+                        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> - is_batch_metric - namespace - </span><span class="si">%s</span><span class="s1"> matched by being in </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">batch_processing_namespace</span><span class="p">))</span>
+                    <span class="k">break</span>
+                <span class="n">batch_processing_namespace_namespace_elements</span> <span class="o">=</span> <span class="n">batch_processing_namespace</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+                <span class="n">elements_matched</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">base_name_namespace_elements</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">batch_processing_namespace_namespace_elements</span><span class="p">)</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">elements_matched</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">batch_processing_namespace_namespace_elements</span><span class="p">):</span>
+                    <span class="n">batch_metric</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="k">if</span> <span class="n">debug_is_batch_metric</span><span class="p">:</span>
+                        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> - is_batch_metric - namespace - </span><span class="si">%s</span><span class="s1"> matched by elements of </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">batch_processing_namespace</span><span class="p">))</span>
+                    <span class="k">break</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">del</span> <span class="n">base_name_namespace_elements</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">del</span> <span class="n">batch_processing_namespace_namespace_elements</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">del</span> <span class="n">elements_matched</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="k">return</span> <span class="n">batch_metric</span></div>
+
+
+<span class="c1"># @added 20200424 - Feature #3504: Handle airgaps in batch metrics</span>
+<span class="c1">#                   Feature #3480: batch_processing</span>
+<span class="c1">#                   Feature #3486: analyzer_batch</span>
+<span class="c1">#                   Feature #3400: Identify air gaps in the metric data</span>
+<span class="c1"># Moved to skyline_functions from its original definition analyzer/algorithms.py</span>
+<span class="c1"># as is required in analyzer/analyzer.py now as well to identify which batch</span>
+<span class="c1"># metrics should also be checked for airgaps.</span>
+<div class="viewcode-block" id="is_check_airgap_metric"><a class="viewcode-back" href="../skyline.html#skyline_functions.is_check_airgap_metric">[docs]</a><span class="k">def</span> <span class="nf">is_check_airgap_metric</span><span class="p">(</span><span class="n">base_name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Check if a metric matches a metric namespace in CHECK_AIRGAPS or one in</span>
+<span class="sd">    SKIP_AIRGAPS.</span>
+
+<span class="sd">    :param base_name: the metric base_name</span>
+<span class="sd">    :type base_name: str</span>
+<span class="sd">    :return: False</span>
+<span class="sd">    :rtype:  boolean</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">IDENTIFY_AIRGAPS</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">IDENTIFY_AIRGAPS</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">IDENTIFY_AIRGAPS</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">CHECK_AIRGAPS</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">CHECK_AIRGAPS</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">CHECK_AIRGAPS</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">SKIP_AIRGAPS</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SKIP_AIRGAPS</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">SKIP_AIRGAPS</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">check_metric_for_airgaps</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">IDENTIFY_AIRGAPS</span><span class="p">:</span>
+        <span class="n">check_metric_for_airgaps</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">CHECK_AIRGAPS</span><span class="p">:</span>
+            <span class="n">check_metric_for_airgaps</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">metric_namespace_elements</span> <span class="o">=</span> <span class="n">base_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">to_check</span> <span class="ow">in</span> <span class="n">CHECK_AIRGAPS</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">to_check</span> <span class="ow">in</span> <span class="n">base_name</span><span class="p">:</span>
+                        <span class="n">check_metric_for_airgaps</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="k">break</span>
+                    <span class="n">to_check_namespace_elements</span> <span class="o">=</span> <span class="n">to_check</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+                    <span class="n">elements_matched</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">metric_namespace_elements</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">to_check_namespace_elements</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">elements_matched</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">to_check_namespace_elements</span><span class="p">):</span>
+                        <span class="n">check_metric_for_airgaps</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="k">break</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+        <span class="c1"># Allow to skip identifying airgaps on certain metrics and namespaces</span>
+        <span class="k">if</span> <span class="n">check_metric_for_airgaps</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">metric_namespace_elements</span> <span class="o">=</span> <span class="n">base_name</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">to_skip</span> <span class="ow">in</span> <span class="n">SKIP_AIRGAPS</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">to_skip</span> <span class="ow">in</span> <span class="n">base_name</span><span class="p">:</span>
+                        <span class="n">check_metric_for_airgaps</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="k">break</span>
+                    <span class="n">to_skip_namespace_elements</span> <span class="o">=</span> <span class="n">to_skip</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+                    <span class="n">elements_matched</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">metric_namespace_elements</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">to_skip_namespace_elements</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">elements_matched</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">to_skip_namespace_elements</span><span class="p">):</span>
+                        <span class="n">check_metric_for_airgaps</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="k">break</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+    <span class="k">return</span> <span class="n">check_metric_for_airgaps</span></div>
+
+
+<span class="c1"># @added 20200506 - Feature #3532: Sort all time series</span>
+<div class="viewcode-block" id="sort_timeseries"><a class="viewcode-back" href="../skyline.html#skyline_functions.sort_timeseries">[docs]</a><span class="k">def</span> <span class="nf">sort_timeseries</span><span class="p">(</span><span class="n">timeseries</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This function is used to sort a time series by timestamp to ensure that</span>
+<span class="sd">    there are no unordered timestamps in the time series which are artefacts of</span>
+<span class="sd">    the collector or carbon-relay. So all Redis time series are sorted by</span>
+<span class="sd">    timestamp before analysis.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sorted_timeseries</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="n">timeseries</span><span class="p">:</span>
+        <span class="n">sorted_timeseries</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">del</span> <span class="n">timeseries</span>
+
+    <span class="k">return</span> <span class="n">sorted_timeseries</span></div>
 </pre></div>
 
            </div>
@@ -1748,7 +2298,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2019, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
 
     </p>
   </div>
@@ -1770,7 +2320,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.3.0',
+            VERSION:'2.0.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

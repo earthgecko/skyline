@@ -270,6 +270,8 @@ By default Mirage is disabled, various Mirage options can be configured in the
 ``settings.py`` file and Analyzer and Mirage can be configured as appropriate
 for your environment.
 
+For all the specific alert configurations see the `Alerts <alerts.html>`__ page.
+
 Mirage requires some directories as per ``settings.py`` defines (these require
 absolute path):
 

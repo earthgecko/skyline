@@ -33,6 +33,10 @@ In `settings.py` set
   SLACK_ENABLED = True
 
 And update the the `SLACK_OPTS` as appropriate for your metrics.
+Note that even if you map multiple channels to a metric namespace, only ONE, the
+first channel, will get slack updates to the thread.
+Also note the channels are parsed in order and the first match will be the
+channel/s were alerts are sent.
 
 .. code-block:: python
 
@@ -46,7 +50,7 @@ And update the the `SLACK_OPTS` as appropriate for your metrics.
       'channels': {
           'skyline': ('#skyline',),
           'skyline_test.alerters.test': ('#skyline',),
-          'horizon.udp.test': ('#skyline',),
+          'horizon.udp.test': ('#skyline'),
       },
       'icon_emoji': ':chart_with_upwards_trend:',
       # Your default slack Skyline channel name e.g. '#skyline'

@@ -98,7 +98,8 @@ Example usage:
   MYSQL_ROOT_PASSWORD="SET_THE_ROOT_MYSQL_USER_PASSWORD"        # The MySQL root user password
   MYSQL_SKYLINE_PASSWORD="SET_THE_SKYLINE_MYSQL_USER_PASSWORD"  # The Skyline DB user password
   REDIS_PASSWORD="SET_A_REALLY_REALLY_LONG_Redis_PASSWORD"      # The Redis password
-  SKYLINE_RELEASE="master"                                      # The Skyline release/branch/commit to deploy' > /etc/skyline/skyline.dawn.conf
+  SKYLINE_RELEASE="master"                                      # The Skyline release/branch/commit to deploy
+  INSTALL_GRAPHITE=0                                            # Install Graphite 0 = no, 1 = yes (CentOS 6 only)' > /etc/skyline/skyline.dawn.conf
   # Check that the configurations are as desired, specifically check that
   # the IP address declared in YOUR_SERVER_IP_ADDRESS from the USE_IP variable
   # is correct

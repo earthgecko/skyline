@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>slack &mdash; Skyline 1.3.0 documentation</title>
+  <title>slack &mdash; Skyline 2.0.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="genindex.html"/>
         <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 1.3.0 documentation" href="index.html"/>
+    <link rel="top" title="Skyline 2.0.0 documentation" href="index.html"/>
         <link rel="next" title="Strictly increasing monotonicity" href="monotonic-metrics.html"/>
         <link rel="prev" title="docker - EXPERIMENTAL" href="docker.html"/> 
 
@@ -65,7 +65,7 @@
             
             
               <div class="version">
-                1.3
+                2.0
               </div>
             
           
@@ -91,10 +91,12 @@
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">slack</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#skyline-slack-settings">Skyline slack settings</a></li>
@@ -202,7 +204,11 @@ Under Display Information &gt; App icon &amp; Preview and click and add:
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">SLACK_ENABLED</span> <span class="o">=</span> <span class="bp">True</span>
 </pre></div>
 </div>
-<p>And update the the <cite>SLACK_OPTS</cite> as appropriate for your metrics.</p>
+<p>And update the the <cite>SLACK_OPTS</cite> as appropriate for your metrics.
+Note that even if you map multiple channels to a metric namespace, only ONE, the
+first channel, will get slack updates to the thread.
+Also note the channels are parsed in order and the first match will be the
+channel/s were alerts are sent.</p>
 <div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">SLACK_OPTS</span> <span class="o">=</span> <span class="p">{</span>
     <span class="c1"># Bot User OAuth Access Token</span>
     <span class="s1">&#39;bot_user_oauth_access_token&#39;</span><span class="p">:</span> <span class="s1">&#39;YOUR_slack_bot_user_oauth_access_token&#39;</span><span class="p">,</span>
@@ -213,7 +219,7 @@ Under Display Information &gt; App icon &amp; Preview and click and add:
     <span class="s1">&#39;channels&#39;</span><span class="p">:</span> <span class="p">{</span>
         <span class="s1">&#39;skyline&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;#skyline&#39;</span><span class="p">,),</span>
         <span class="s1">&#39;skyline_test.alerters.test&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;#skyline&#39;</span><span class="p">,),</span>
-        <span class="s1">&#39;horizon.udp.test&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;#skyline&#39;</span><span class="p">,),</span>
+        <span class="s1">&#39;horizon.udp.test&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s1">&#39;#skyline&#39;</span><span class="p">),</span>
     <span class="p">},</span>
     <span class="s1">&#39;icon_emoji&#39;</span><span class="p">:</span> <span class="s1">&#39;:chart_with_upwards_trend:&#39;</span><span class="p">,</span>
     <span class="c1"># Your default slack Skyline channel name e.g. &#39;#skyline&#39;</span>
@@ -256,7 +262,7 @@ Under Display Information &gt; App icon &amp; Preview and click and add:
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2019, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
 
     </p>
   </div>
@@ -278,7 +284,7 @@ Under Display Information &gt; App icon &amp; Preview and click and add:
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'./',
-            VERSION:'1.3.0',
+            VERSION:'2.0.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

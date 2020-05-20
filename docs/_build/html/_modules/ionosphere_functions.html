@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>ionosphere_functions &mdash; Skyline 1.3.0 documentation</title>
+  <title>ionosphere_functions &mdash; Skyline 2.0.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../genindex.html"/>
         <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Skyline 1.3.0 documentation" href="../index.html"/>
+    <link rel="top" title="Skyline 2.0.0 documentation" href="../index.html"/>
         <link rel="up" title="Module code" href="index.html"/> 
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                1.3
+                2.0
               </div>
             
           
@@ -90,10 +90,12 @@
 <li class="toctree-l1"><a class="reference internal" href="../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
@@ -204,7 +206,7 @@
 <span class="kn">import</span> <span class="nn">settings</span>
 <span class="kn">import</span> <span class="nn">skyline_version</span>
 
-<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="p">(</span><span class="n">RepresentsInt</span><span class="p">,</span> <span class="n">mkdir_p</span><span class="p">,</span> <span class="n">write_data_to_file</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="n">RepresentsInt</span><span class="p">,</span> <span class="n">mkdir_p</span><span class="p">,</span> <span class="n">write_data_to_file</span>
 <span class="kn">from</span> <span class="nn">tsfresh_feature_names</span> <span class="k">import</span> <span class="n">TSFRESH_FEATURES</span>
 
 <span class="kn">from</span> <span class="nn">database</span> <span class="k">import</span> <span class="p">(</span>
@@ -217,6 +219,11 @@
 <span class="c1"># @added 20190502 - Branch #2646: slack</span>
 <span class="kn">from</span> <span class="nn">slack_functions</span> <span class="k">import</span> <span class="n">slack_post_message</span><span class="p">,</span> <span class="n">slack_post_reaction</span>
 
+<span class="c1"># @added 20200512 - Bug #2534: Ionosphere - fluid approximation - IONOSPHERE_MINMAX_SCALING_RANGE_TOLERANCE on low ranges</span>
+<span class="c1">#                   Feature #2404: Ionosphere - fluid approximation</span>
+<span class="kn">from</span> <span class="nn">create_matplotlib_graph</span> <span class="k">import</span> <span class="n">create_matplotlib_graph</span>
+
+<span class="n">LOCAL_DEBUG</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="n">skyline_version</span> <span class="o">=</span> <span class="n">skyline_version</span><span class="o">.</span><span class="n">__absolute_version__</span>
 
 <span class="k">try</span><span class="p">:</span>
@@ -361,6 +368,121 @@
     <span class="k">return</span> <span class="n">use_full_duration</span><span class="p">,</span> <span class="n">valid_learning_duration</span><span class="p">,</span> <span class="n">use_full_duration_days</span><span class="p">,</span> <span class="n">max_generations</span><span class="p">,</span> <span class="n">max_percent_diff_from_origin</span></div>
 
 
+<span class="c1"># @added 20200512 - Bug #2534: Ionosphere - fluid approximation - IONOSPHERE_MINMAX_SCALING_RANGE_TOLERANCE on low ranges</span>
+<span class="c1">#                   Feature #2404: Ionosphere - fluid approximation</span>
+<span class="c1"># Due to the loss of resolution in the Grpahite graph images due</span>
+<span class="c1"># to their size, create a matplotlib graph for the DB fp time</span>
+<span class="c1"># series data for more accurate validation</span>
+<div class="viewcode-block" id="create_fp_ts_graph"><a class="viewcode-back" href="../skyline.html#ionosphere_functions.create_fp_ts_graph">[docs]</a><span class="k">def</span> <span class="nf">create_fp_ts_graph</span><span class="p">(</span>
+    <span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">metric_data_dir</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">fp_id</span><span class="p">,</span> <span class="n">anomaly_timestamp</span><span class="p">,</span>
+        <span class="n">timeseries</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Creates a png graph image using the features profile time series data</span>
+<span class="sd">    provided or from the features profile time seires data in the DB if an empty</span>
+<span class="sd">    list is provided.</span>
+
+<span class="sd">    :param current_skyline_app: the Skyline app name calling the function</span>
+<span class="sd">    :param metric_data_dir: the training_data or features profile directory were</span>
+<span class="sd">        the png image is to be saved to</span>
+<span class="sd">    :param base_name: the base_name of the metric</span>
+<span class="sd">    :param fp_ip: the feature profile id</span>
+<span class="sd">    :param anomaly_timestamp: the anomaly timestamp</span>
+<span class="sd">    :param timeseries: the time series</span>
+<span class="sd">    :type current_skyline_app: str</span>
+<span class="sd">    :type metric_data_dir: str</span>
+<span class="sd">    :type base_name: str</span>
+<span class="sd">    :type fp_id: int</span>
+<span class="sd">    :type anomaly_timestamp: int</span>
+<span class="sd">    :type timeseries: list</span>
+<span class="sd">    :return: boolean</span>
+<span class="sd">    :rtype: boolean</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
+    <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
+
+    <span class="n">fp_ts_graph_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.fp_id_ts.</span><span class="si">%s</span><span class="s1">.matplotlib.png&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="n">metric_data_dir</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">fp_ts_graph_file</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="n">fp_id_metric_ts</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">timeseries</span><span class="p">:</span>
+        <span class="c1"># Get timeseries data from the z_fp_ts table</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;create_fp_ts_graph :: getting MySQL engine&#39;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">engine</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">fp_create_get_an_engine</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+            <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: create_fp_ts_graph :: could not get a MySQL engine&#39;</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="c1"># First check to determine if the z_ts_&lt;mertic_id&gt; for the fp</span>
+        <span class="c1"># has data in memcache before querying the database</span>
+        <span class="n">ionosphere_table</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">ionosphere_table</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">ionosphere_table_meta</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
+            <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: create_fp_ts_graph :: failed to get ionosphere_table meta for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+            <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">ionosphere_table</span><span class="p">])</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">ionosphere_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">id</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">fp_id</span><span class="p">))</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">result</span><span class="p">:</span>
+                <span class="n">metric_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;metric_id&#39;</span><span class="p">])</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;found metric_id from the DB - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">metric_id</span><span class="p">)))</span>
+            <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not determine full_duration from ionosphere for fp_id </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+                <span class="n">fp_create_engine_disposal</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="n">metric_fp_ts_table</span> <span class="o">=</span> <span class="s1">&#39;z_ts_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_id</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">stmt</span> <span class="o">=</span> <span class="s1">&#39;SELECT timestamp, value FROM </span><span class="si">%s</span><span class="s1"> WHERE fp_id=</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_fp_ts_table</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">))</span>  <span class="c1"># nosec</span>
+            <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">engine</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">):</span>
+                <span class="n">fp_id_ts_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;timestamp&#39;</span><span class="p">])</span>
+                <span class="n">fp_id_ts_value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">])</span>
+                <span class="n">fp_id_metric_ts</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">fp_id_ts_timestamp</span><span class="p">,</span> <span class="n">fp_id_ts_value</span><span class="p">])</span>
+            <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="n">values_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">fp_id_metric_ts</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;determined </span><span class="si">%s</span><span class="s1"> values for the fp_id time series </span><span class="si">%s</span><span class="s1"> for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">values_count</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">)))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not determine timestamps and values from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric_fp_ts_table</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+                <span class="n">fp_create_engine_disposal</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">fp_id_metric_ts</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+            <span class="n">fp_create_engine_disposal</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
+        <span class="n">timeseries</span> <span class="o">=</span> <span class="n">fp_id_metric_ts</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">timeseries</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not determine timestamps and values for fp_id </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">))</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="n">created_fp_ts_graph</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">graph_title</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="se">\n</span><span class="s1">Features profile id </span><span class="si">%s</span><span class="s1"> - database time series data plot&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">))</span>
+        <span class="n">created_fp_ts_graph</span><span class="p">,</span> <span class="n">fp_ts_graph_file</span> <span class="o">=</span> <span class="n">create_matplotlib_graph</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">fp_ts_graph_file</span><span class="p">,</span> <span class="n">graph_title</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to create matplotlib graph for </span><span class="si">%s</span><span class="s1"> fp id %&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="o">.</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">)))</span>
+    <span class="k">return</span> <span class="n">created_fp_ts_graph</span></div>
+
+
 <span class="c1"># @modified 20190503 - Branch #2646: slack</span>
 <span class="c1"># Added slack_ionosphere_job</span>
 <span class="c1"># def create_features_profile(current_skyline_app, requested_timestamp, data_for_metric, context, ionosphere_job, fp_parent_id, fp_generation, fp_learn):</span>
@@ -405,11 +527,75 @@
 <span class="sd">    :rtype: str, boolean, boolean, str, str</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">python_version</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">sys</span> <span class="k">import</span> <span class="n">version_info</span>
+        <span class="n">python_version</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
     <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
     <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
 
     <span class="n">base_name</span> <span class="o">=</span> <span class="n">data_for_metric</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># @added 20200216 - Feature #3450: Handle multiple requests to create a features profile</span>
+    <span class="c1"># Ensure that one features profile can only be created if</span>
+    <span class="c1"># multiple requests are received to create a features profile</span>
+    <span class="n">fp_pending</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">fp_pending_cache_key</span> <span class="o">=</span> <span class="s1">&#39;fp_pending.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">requested_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">))</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># TODO - make this use get_redis_conn, but needs testing</span>
+        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">:</span>
+            <span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">password</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">,</span> <span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: create_features_profile :: failed to establish redis_conn to determine if a features profile is pending - </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">requested_timestamp</span><span class="p">),</span> <span class="n">base_name</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;training&#39;</span> <span class="ow">or</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;features_profile&#39;</span><span class="p">:</span>
+            <span class="c1"># Raise to webbapp I believe to provide traceback to user in UI</span>
+            <span class="k">raise</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">fp_pending</span> <span class="o">=</span> <span class="n">redis_conn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">fp_pending_cache_key</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: create_features_profile :: failed to determine if a features profile is pending - </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">requested_timestamp</span><span class="p">),</span> <span class="n">base_name</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;training&#39;</span> <span class="ow">or</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;features_profile&#39;</span><span class="p">:</span>
+            <span class="c1"># Raise to webbapp I believe to provide traceback to user in UI</span>
+            <span class="k">raise</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span>
+    <span class="k">if</span> <span class="n">fp_pending</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="s1">&#39;None&#39;</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;create_features_profile :: a features profile is pending - </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">requested_timestamp</span><span class="p">),</span> <span class="n">base_name</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;training&#39;</span> <span class="ow">or</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;features_profile&#39;</span><span class="p">:</span>
+            <span class="c1"># Raise to webbapp I believe to provide traceback to user in UI</span>
+            <span class="k">raise</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="n">fp_pending_cache_key</span><span class="p">,</span> <span class="mi">60</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">))</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;create_features_profile :: created </span><span class="si">%s</span><span class="s1"> Redis key with expiry of 60 seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">fp_pending_cache_key</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+            <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: create_features_profile :: failed to determine create </span><span class="si">%s</span><span class="s1"> Redis key&#39;</span> <span class="o">%</span> <span class="n">fp_pending_cache_key</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;training&#39;</span> <span class="ow">or</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;features_profile&#39;</span><span class="p">:</span>
+                <span class="c1"># Raise to webbapp I believe to provide traceback to user in UI</span>
+                <span class="k">raise</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span>
 
     <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;training_data&#39;</span><span class="p">:</span>
         <span class="n">ionosphere_job</span> <span class="o">=</span> <span class="s1">&#39;learn_fp_human&#39;</span>
@@ -528,22 +714,80 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span>
 
+    <span class="c1"># @added 20191029 - Task #3302: Handle csv.reader in py3</span>
+    <span class="c1">#                      Branch #3262: py3</span>
+    <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">codecs</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">codecs</span>
+
     <span class="n">features_data</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">features_file</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fr</span><span class="p">:</span>
-        <span class="n">reader</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">reader</span><span class="p">(</span><span class="n">fr</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">reader</span><span class="p">):</span>
-            <span class="n">feature_name_item</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="n">fname_id</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="n">f_value</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="n">feature_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-            <span class="n">feature_name_item</span> <span class="o">=</span> <span class="nb">filter</span><span class="p">(</span>
-                <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">feature_name</span><span class="p">,</span> <span class="n">TSFRESH_FEATURES</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">feature_name_item</span><span class="p">:</span>
-                <span class="n">feature_name_list</span> <span class="o">=</span> <span class="n">feature_name_item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                <span class="n">fname_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">feature_name_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-            <span class="n">f_value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-            <span class="k">if</span> <span class="n">fname_id</span> <span class="ow">and</span> <span class="n">f_value</span><span class="p">:</span>
-                <span class="n">features_data</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">fname_id</span><span class="p">,</span> <span class="n">f_value</span><span class="p">])</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># @modified 20191029 - Task #3302: Handle csv.reader in py3</span>
+        <span class="c1">#                      Branch #3262: py3</span>
+        <span class="c1"># with open(features_file, &#39;rb&#39;) as fr:</span>
+        <span class="c1">#     reader = csv.reader(fr, delimiter=&#39;,&#39;)</span>
+        <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">with_open</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">features_file</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">with_open</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">features_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="n">with_open</span> <span class="k">as</span> <span class="n">fr</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="n">reader</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">reader</span><span class="p">(</span><span class="n">fr</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># reader = csv.reader(codecs.iterdecode(fr, &#39;utf-8&#39;), delimiter=&#39;,&#39;)</span>
+                <span class="n">reader</span> <span class="o">=</span> <span class="n">csv</span><span class="o">.</span><span class="n">reader</span><span class="p">(</span><span class="n">fr</span><span class="p">,</span> <span class="n">delimiter</span><span class="o">=</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+            <span class="c1"># current_logger.debug(&#39;debug :: accquired reader&#39;)</span>
+            <span class="c1"># for i, line in enumerate(reader):</span>
+            <span class="c1">#     current_logger.debug(&#39;debug :: %s, %s&#39; % (str(i), str(line[0])))</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">reader</span><span class="p">):</span>
+                <span class="n">feature_name_item</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">fname_id</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">f_value</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                    <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: line - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">line</span><span class="p">))</span>
+                <span class="n">feature_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                    <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: feature_name - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">feature_name</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">feature_name</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">feature_name_item</span> <span class="o">=</span> <span class="nb">filter</span><span class="p">(</span>
+                            <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="n">feature_name</span><span class="p">,</span> <span class="n">TSFRESH_FEATURES</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="k">continue</span>
+                    <span class="k">if</span> <span class="n">feature_name_item</span><span class="p">:</span>
+                        <span class="n">feature_name_list</span> <span class="o">=</span> <span class="n">feature_name_item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="n">fname_id</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">feature_name_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="n">f_value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">tsfresh_id</span><span class="p">,</span> <span class="n">tsfresh_feature_name</span> <span class="ow">in</span> <span class="n">TSFRESH_FEATURES</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">feature_name</span> <span class="o">==</span> <span class="n">tsfresh_feature_name</span><span class="p">:</span>
+                                <span class="n">feature_name_item</span> <span class="o">=</span> <span class="p">[</span><span class="n">tsfresh_id</span><span class="p">,</span> <span class="n">tsfresh_feature_name</span><span class="p">]</span>
+                                <span class="k">break</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="k">continue</span>
+                    <span class="k">if</span> <span class="n">feature_name_item</span><span class="p">:</span>
+                        <span class="n">fname_id</span> <span class="o">=</span> <span class="n">feature_name_item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                            <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: fname_id - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">fname_id</span><span class="p">))</span>
+                    <span class="n">f_value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">line</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="k">if</span> <span class="n">fname_id</span> <span class="ow">and</span> <span class="n">f_value</span><span class="p">:</span>
+                    <span class="n">features_data</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">fname_id</span><span class="p">,</span> <span class="n">f_value</span><span class="p">])</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: failed iterate csv data from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">features_file</span><span class="p">))</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;training&#39;</span> <span class="ow">or</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;features_profile&#39;</span><span class="p">:</span>
+            <span class="c1"># Raise to webbapp to provide traceback to user in UI</span>
+            <span class="k">raise</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span>
 
     <span class="c1"># @added 20170113 - Feature #1854: Ionosphere learn - generations</span>
     <span class="c1"># Set the learn generations variables with the IONOSPHERE_LEARN_DEFAULT_ and any</span>
@@ -1023,6 +1267,21 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;create_features_profile :: </span><span class="si">%s</span><span class="s1"> - automated so the table should exist continuing&#39;</span> <span class="o">%</span> <span class="n">context</span><span class="p">)</span>
 
+    <span class="c1"># @added 20200512 - Bug #2534: Ionosphere - fluid approximation - IONOSPHERE_MINMAX_SCALING_RANGE_TOLERANCE on low ranges</span>
+    <span class="c1">#                   Feature #2404: Ionosphere - fluid approximation</span>
+    <span class="c1"># Due to the loss of resolution in the Grpahite graph images due</span>
+    <span class="c1"># to their size, create a matplotlib graph for the DB fp time</span>
+    <span class="c1"># series data for more accurate validation</span>
+    <span class="n">fp_ts_graph_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.fp_id_ts.</span><span class="si">%s</span><span class="s1">.matplotlib.png&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="n">metric_training_data_dir</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">new_fp_id</span><span class="p">))</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">fp_ts_graph_file</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">created_fp_ts_graph</span><span class="p">,</span> <span class="n">fp_ts_graph_file</span> <span class="o">=</span> <span class="n">create_fp_ts_graph</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">metric_training_data_dir</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">new_fp_id</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">use_anomaly_timestamp</span><span class="p">),</span> <span class="n">validated_timeseries</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: create_features_profile :: failed to created_fp_ts_graph for </span><span class="si">%s</span><span class="s1"> fp id </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">new_fp_id</span><span class="p">)))</span>
+
     <span class="k">del</span> <span class="n">validated_timeseries</span>
     <span class="k">del</span> <span class="n">insert_statement</span>
 
@@ -1241,11 +1500,20 @@
                 <span class="n">slack_response</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;ok&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">slack_response</span> <span class="o">=</span> <span class="n">slack_post_reaction</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">channel_id</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">slack_thread_ts</span><span class="p">),</span> <span class="n">reaction_emoji</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;create_features_profile :: slack_response - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">slack_response</span><span class="p">)))</span>
                 <span class="k">except</span><span class="p">:</span>
                     <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
                     <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
                     <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: create_features_profile :: failed to slack_post_reaction&#39;</span>
                     <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">slack_response</span><span class="p">:</span>
+                        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;create_features_profile :: slack_response - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">slack_response</span><span class="p">)))</span>
+
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">slack_response</span><span class="p">[</span><span class="s1">&#39;ok&#39;</span><span class="p">]:</span>
                     <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">slack_response</span><span class="p">[</span><span class="s1">&#39;error&#39;</span><span class="p">])</span> <span class="o">==</span> <span class="s1">&#39;already_reacted&#39;</span><span class="p">:</span>
                         <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
@@ -1356,10 +1624,12 @@
                         <span class="nb">str</span><span class="p">(</span><span class="n">ionosphere_job</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">requested_timestamp</span><span class="p">),</span> <span class="n">base_name</span><span class="p">,</span>
                         <span class="nb">str</span><span class="p">(</span><span class="n">new_fp_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_generation</span><span class="p">)))</span>
                 <span class="c1"># @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow</span>
-                <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">:</span>
-                    <span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">password</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">,</span> <span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+                <span class="c1"># @modified 20200216 - Feature #3450: Handle multiple requests to create a features profile</span>
+                <span class="c1"># redis_conn now provided at the start of this function</span>
+                <span class="c1"># if settings.REDIS_PASSWORD:</span>
+                <span class="c1">#     redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)</span>
+                <span class="c1"># else:</span>
+                <span class="c1">#     redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)</span>
                 <span class="c1"># @modified 20190414 - Task #2824: Test redis-py upgrade</span>
                 <span class="c1">#                      Task #2926: Update dependencies</span>
                 <span class="c1"># redis_conn.sadd(&#39;ionosphere.learn.work&#39;, [&#39;Soft&#39;, str(ionosphere_job), int(requested_timestamp), base_name, int(new_fp_id), int(fp_generation)])</span>
@@ -1376,6 +1646,29 @@
         <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
             <span class="n">fp_create_engine_disposal</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
 
+    <span class="c1"># @added 20200108 - Feature #3380: Create echo features profile when a Mirage features profile is created</span>
+    <span class="c1"># If a Mirage features profile was created by a user add a record to the</span>
+    <span class="c1"># ionosphere.echo.work Redis so that Ionosphere can run process_ionosphere_echo</span>
+    <span class="c1"># on the data and create a echo features profile asap</span>
+    <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_ECHO_ENABLED</span> <span class="ow">and</span> <span class="n">new_fp_id</span> <span class="ow">and</span> <span class="n">context</span> <span class="o">==</span> <span class="s1">&#39;training_data&#39;</span> <span class="ow">and</span> <span class="n">ionosphere_job</span> <span class="o">==</span> <span class="s1">&#39;learn_fp_human&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">ts_full_duration</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">int</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span><span class="p">):</span>
+            <span class="c1"># @modified 20200216 - Feature #3450: Handle multiple requests to create a features profile</span>
+            <span class="c1"># redis_conn now provided at the start of this function</span>
+            <span class="c1"># if settings.REDIS_PASSWORD:</span>
+            <span class="c1">#     redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)</span>
+            <span class="c1"># else:</span>
+            <span class="c1">#     redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)</span>
+            <span class="n">ionosphere_job</span> <span class="o">=</span> <span class="s1">&#39;echo_fp_human&#39;</span>
+            <span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="s1">&#39;ionosphere.echo.work&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">([</span><span class="s1">&#39;Soft&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">ionosphere_job</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">requested_timestamp</span><span class="p">),</span> <span class="n">base_name</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">new_fp_id</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">fp_generation</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">ts_full_duration</span><span class="p">)]))</span>
+
+    <span class="c1"># @added 20200216 - Feature #3450: Handle multiple requests to create a features profile</span>
+    <span class="c1"># Ensure that one features profile can only be created if</span>
+    <span class="c1"># multiple requests are received to create a features profile</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">redis_conn</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">fp_pending_cache_key</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">pass</span>
+
     <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">new_fp_id</span><span class="p">),</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span></div>
 
 
@@ -1385,7 +1678,7 @@
 <span class="sd">    Get all the correlations for an anomaly from the database</span>
 
 <span class="sd">    :param current_skyline_app: the Skyline app name calling the function</span>
-<span class="sd">    :param anomaly_id: thee base_name of the metric</span>
+<span class="sd">    :param anomaly_id: the panorama anomaly id</span>
 <span class="sd">    :type current_skyline_app: str</span>
 <span class="sd">    :type anomaly_id: int</span>
 <span class="sd">    :return: list</span>
@@ -1474,6 +1767,7 @@
         <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not determine correlations for anomaly id -  </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
             <span class="n">fp_create_engine_disposal</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
+        <span class="k">del</span> <span class="n">metrics_list</span>
         <span class="k">raise</span>
 
     <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
@@ -1483,7 +1777,123 @@
         <span class="n">sorted_correlations</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">correlations</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">correlations</span> <span class="o">=</span> <span class="n">sorted_correlations</span>
 
+    <span class="k">del</span> <span class="n">metrics_list</span>
     <span class="k">return</span> <span class="n">correlations</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span></div>
+
+
+<span class="c1"># @added 20200113 - Feature #3390: luminosity related anomalies</span>
+<span class="c1">#                   Branch #2270: luminosity</span>
+<div class="viewcode-block" id="get_related"><a class="viewcode-back" href="../skyline.html#ionosphere_functions.get_related">[docs]</a><span class="k">def</span> <span class="nf">get_related</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">anomaly_id</span><span class="p">,</span> <span class="n">anomaly_timestamp</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Get all the related anomalies from the database</span>
+
+<span class="sd">    :param current_skyline_app: the Skyline app name calling the function</span>
+<span class="sd">    :param anomaly_id: the panorama anomaly id</span>
+<span class="sd">    :param anomaly_timestamp: the anomaly timestamp</span>
+<span class="sd">    :type current_skyline_app: str</span>
+<span class="sd">    :type anomaly_id: int</span>
+<span class="sd">    :type anomaly_timestamp: int</span>
+<span class="sd">    :return: list</span>
+<span class="sd">    :return: [[metric_name, related_timestamp],[metric_name, related_timestamp],...]</span>
+<span class="sd">    :rtype: [[str, int]]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
+    <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
+    <span class="n">func_name</span> <span class="o">=</span> <span class="s1">&#39;get_related&#39;</span>
+
+    <span class="n">related</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># @added 20200419 - Feature #3390: luminosity related anomalies</span>
+    <span class="c1">#                   Branch #2270: luminosity</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">related_time_period</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LUMINOSITY_RELATED_TIME_PERIOD</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">related_time_period</span> <span class="o">=</span> <span class="mi">120</span>
+
+    <span class="c1"># @modified 20200419 - Feature #3390: luminosity related anomalies</span>
+    <span class="c1">#                      Branch #2270: luminosity</span>
+    <span class="c1"># Use settings.LUMINOSITY_RELATED_TIME_PERIOD</span>
+    <span class="c1"># minus_two_minutes = int(anomaly_timestamp) - 120</span>
+    <span class="c1"># plus_two_minutes = int(anomaly_timestamp) + 120</span>
+    <span class="n">minus_two_minutes</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">anomaly_timestamp</span><span class="p">)</span> <span class="o">-</span> <span class="n">related_time_period</span>
+    <span class="n">plus_two_minutes</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">anomaly_timestamp</span><span class="p">)</span> <span class="o">+</span> <span class="n">related_time_period</span>
+
+    <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;get_related :: getting MySQL engine for </span><span class="si">%s</span><span class="s1"> and timestamp </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_timestamp</span><span class="p">)))</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">engine</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">fp_create_get_an_engine</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">trace</span><span class="p">)</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: could not get a MySQL engine&#39;</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+        <span class="c1"># return False, False, fail_msg, trace, False</span>
+        <span class="k">raise</span>  <span class="c1"># to webapp to return in the UI</span>
+
+    <span class="n">metrics_table</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">metrics_table</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">metrics_table_meta</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: failed to get metrics_table_meta&#39;</span> <span class="o">%</span> <span class="n">func_name</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+
+    <span class="n">anomalies_table</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">anomalies_table</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">anomalies_table_meta</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">fail_msg</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">trace</span><span class="p">)</span>
+        <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: failed to get anomalies_table_meta&#39;</span> <span class="o">%</span> <span class="n">func_name</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">fail_msg</span><span class="p">)</span>
+
+    <span class="n">metrics_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+        <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">metrics_table</span><span class="p">])</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">metrics_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">id</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+            <span class="n">metric_id</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span>
+            <span class="n">metric_name</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;metric&#39;</span><span class="p">]</span>
+            <span class="n">metrics_list</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">metric_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_name</span><span class="p">)])</span>
+        <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not determine metrics from MySQL&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+            <span class="n">fp_create_engine_disposal</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
+        <span class="k">raise</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">connection</span> <span class="o">=</span> <span class="n">engine</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span>
+        <span class="n">stmt</span> <span class="o">=</span> <span class="n">select</span><span class="p">([</span><span class="n">anomalies_table</span><span class="p">])</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">anomaly_timestamp</span> <span class="o">&gt;</span> <span class="n">minus_two_minutes</span><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">anomaly_timestamp</span> <span class="o">&lt;=</span> <span class="n">plus_two_minutes</span><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">anomalies_table</span><span class="o">.</span><span class="n">c</span><span class="o">.</span><span class="n">id</span> <span class="o">!=</span> <span class="n">anomaly_id</span><span class="p">)</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span><span class="n">stmt</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+            <span class="n">related_anomaly_id</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;id&#39;</span><span class="p">]</span>
+            <span class="n">metric_id</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;metric_id&#39;</span><span class="p">]</span>
+            <span class="n">metric_name</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">metric_id</span><span class="p">:</span>
+                <span class="n">metric_name_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">metrics_list_name</span> <span class="k">for</span> <span class="n">metrics_list_id</span><span class="p">,</span> <span class="n">metrics_list_name</span> <span class="ow">in</span> <span class="n">metrics_list</span> <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_id</span><span class="p">)</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">metrics_list_id</span><span class="p">)]</span>
+                <span class="n">metric_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_name_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">related_anomaly_timestamp</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;anomaly_timestamp&#39;</span><span class="p">]</span>
+            <span class="n">related_full_duration</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;full_duration&#39;</span><span class="p">]</span>
+            <span class="n">related</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="nb">int</span><span class="p">(</span><span class="n">related_anomaly_id</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_name</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">related_anomaly_timestamp</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">related_full_duration</span><span class="p">)])</span>
+        <span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not determine related anomalies from DB for anomaly id -  </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_id</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">engine</span><span class="p">:</span>
+            <span class="n">fp_create_engine_disposal</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span>
+        <span class="k">del</span> <span class="n">metrics_list</span>
+        <span class="k">raise</span>
+
+    <span class="k">del</span> <span class="n">metrics_list</span>
+    <span class="k">return</span> <span class="n">related</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span></div>
 </pre></div>
 
            </div>
@@ -1495,7 +1905,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2019, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
 
     </p>
   </div>
@@ -1517,7 +1927,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../',
-            VERSION:'1.3.0',
+            VERSION:'2.0.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

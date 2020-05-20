@@ -63,8 +63,8 @@ The crucible check file has the following lines, each line being a variable:
 - graphite_metric [optional] - True or False
 - run_crucible_tests [optional] - True or False
 - added_by [optional] - string
-- graphite_override_uri_parameters [optional] - True or False, default is False
-  if set to True graphite_metric must be set to True too.
+- graphite_override_uri_parameters [optional] - str or False, default is False
+  if set to a str the graphite_metric must be set to True too.
 
 If the graphite_override_uri_parameters variable is set in the check file the
 graphite_metric variable must be set to True for it be take effect.  If the
@@ -79,7 +79,56 @@ graphite_override_uri_parameters would be:
 The full graphite URL and render URI parameter must not be declared as Crucible
 will construct the full URL using normal settings.py GRAPHITE variables.
 
-Here are some examples of check files:
+Here are some examples of check files, the format has change between the Python
+2 and 3 versions.
+
+Example of current Python 3 format:
+
+.. code-block:: python
+
+    metric = 'telegraf.skyline-1.cpu-total.cpu.usage_user'
+    value = '0'
+    from_timestamp = '1577504411'
+    metric_timestamp = '1585394411'
+    triggered_algorithms = ['histogram_bins', 'first_hour_average', 'stddev_from_average', 'grubbs', 'ks_test', 'mean_subtraction_cumulation', 'median_absolute_deviation', 'stddev_from_moving_average', 'least_squares']
+    algorithms = ['histogram_bins', 'first_hour_average', 'stddev_from_average', 'grubbs', 'ks_test', 'mean_subtraction_cumulation', 'median_absolute_deviation', 'stddev_from_moving_average', 'least_squares', 'detect_drop_off_cliff']
+    anomaly_dir = '/tmp/crucible_testing/crucible'
+    graphite_metric = True
+    run_crucible_tests = True
+    added_by = 'earthgecko'
+    graphite_override_uri_parameters = 'from=-3months&target=telegraf.skyline-1.cpu-total.cpu.usage_user'
+
+The creation of the above can be automated fairly easily assuming you are
+running Skyline as the skyline user, to analyze the last 3 months of data in
+Graphite for a metric:
+
+.. code-block:: bash
+
+    METRIC="telegraf.skyline-1.cpu-total.cpu.usage_user"
+    WDIR="/tmp/crucible_testing/crucible/$METRIC"
+    mkdir -p $WDIR
+    UNTIL=$(date +%s)
+    FROM=$(echo "$UNTIL - 7890000" | bc)
+    echo "metric = '$METRIC'
+    value = '0'
+    from_timestamp = '$FROM'
+    metric_timestamp = '$UNTIL'
+    triggered_algorithms = ['histogram_bins', 'first_hour_average', 'stddev_from_average', 'grubbs', 'ks_test', 'mean_subtraction_cumulation', 'median_absolute_deviation', 'stddev_from_moving_average', 'least_squares']
+    algorithms = ['histogram_bins', 'first_hour_average', 'stddev_from_average', 'grubbs', 'ks_test', 'mean_subtraction_cumulation', 'median_absolute_deviation', 'stddev_from_moving_average', 'least_squares', 'detect_drop_off_cliff']
+    anomaly_dir = '$WDIR'
+    graphite_metric = True
+    run_crucible_tests = True
+    added_by = 'earthgecko'
+    graphite_override_uri_parameters = 'from=-3months&target=${METRIC}'" > $WDIR/$METRIC.txt
+
+    chown -R skyline:skyline $WDIR
+    cat $WDIR/$METRIC.txt > /opt/skyline/crucible/check/$METRIC.txt
+    chown skyline:skyline /opt/skyline/crucible/check/$METRIC
+
+    systemctl start crucible
+
+
+Example of the old Python 2 format:
 
 .. code-block:: python
 
@@ -93,7 +142,6 @@ Here are some examples of check files:
     run_crucible_tests = True
     added_by = "earthgecko"
     graphite_override_uri_parameters = "from=00%3A00_20190527&until=23%3A59_20190612&target=movingMedian(nonNegativeDerivative(stats.zpf-watcher-prod-1-30g-doa2.vda.readTime)%2C24)"
-
 
 
 Why use `.txt` check files

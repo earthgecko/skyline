@@ -7,14 +7,15 @@ a very simple divide-and-conquer strategy. It first checks Redis to get
 the total number of metrics stored, and then it fires up a number of
 processes equal to :mod:`settings.ANALYZER_PROCESSES`, assigning each
 processes a number of metrics. Analyzing a metric is a very
-CPU-intensive process, because each timeseries must be decoded from
-Messagepack and then run through the algorithms.  Analyzer is also routes
+CPU-intensive process, because each time series must be decoded from
+Messagepack and then run through the algorithms.  Analyzer also routes
 metric checks to other services (Mirage, Panorama and Ionosphere) for
-further analysis or recording an anomaly event, as appropriately.
+further analysis or recording an anomaly event, as appropriately, more on that
+later.
 
-Due to Analyzer being the most CPU-intensive Skyline process, it is advisable to
-set :mod:`settings.ANALYZER_PROCESSES` to about the number of cores you have -
-leaving a few for the Skyline services and Redis.
+Due to Analyzer being one of the most CPU-intensive Skyline process, it is
+advisable to set :mod:`settings.ANALYZER_PROCESSES` to about the number of cores
+you have - leaving a few for the Skyline services and Redis.
 
 The original documentation and settings for skyline were based on:
 
@@ -36,7 +37,7 @@ then the optimum settings will most likely be something similar to:
     ANALYZER_PROCESSES = 1
     ANALYZER_OPTIMUM_RUN_DURATION = 60
 
-Python multiprocessing is not very efficient if it is not need, in fact
+Python multiprocessing is not very efficient if it is not needed, in fact
 the overall overhead of the spawned processes ends up greater than the
 overhead of processing with a single process.
 
@@ -72,26 +73,26 @@ sure to update the :mod:`settings.CONSENSUS` setting appropriately.
 Algorithm philosophy
 ====================
 
-The basic algorithm is based on 3-sigma, derived from Shewhart's
+The basic algorithms are based on 3-sigma, derived from Shewhart's
 `statistical process
 control <http://en.wikipedia.org/wiki/Statistical_process_control>`__.
 However, you are not limited to 3-sigma based algorithms if you do not
 want to use them - as long as you return a boolean, you can add any sort
-of algorithm you like to run on timeseries and vote.
+of algorithm you like to run on time series and vote.
 
 Explanation of Exceptions
 =========================
 
-**TooShort**: The timeseries was too short, as defined in
+**TooShort**: The time series was too short, as defined in
 :mod:`settings.MIN_TOLERABLE_LENGTH`
 
-**Incomplete**: The timeseries was less than :mod:`settings.FULL_DURATION`
+**Incomplete**: The time series was less than :mod:`settings.FULL_DURATION`
 seconds long
 
-**Stale**: The timeseries has not received a new metric in more than
+**Stale**: The time series has not received a new metric in more than
 :mod:`settings.STALE_PERIOD` seconds
 
-**Boring**: The timeseries has been the same value for the past
+**Boring**: The time series has been the same value for the past
 :mod:`settings.MAX_TOLERABLE_BOREDOM` seconds
 
 **Other**: There's probably an error in the code, if you've been making
@@ -117,11 +118,39 @@ Push to Ionosphere
 
 Analyzer pushes anomalous metrics that are ionosphere_enabled to Ionosphere
 to check if the anomalous time series is known to be NOT ANOMALOUS due to it's
-features profile matching a known NOT ANOMALOUS features profile see
-`Ionosphere <ionosphere.html>`__.
+features profile matching a known NOT ANOMALOUS trained or learnt features
+profile see `Ionosphere <ionosphere.html>`__.
+
+analyzer_batch
+==============
+
+analyzer_batch is a submodule of Analyzer that runs as an independent service
+with the sole purpose of handling and analysing metrics that are not streamed in
+real time but are updated in batches, every x minutes or hour/s.
+It is a "lite" and slightly modified version of analyzer that works in
+conjunction with analyzer to handle batch metrics.
+By default analyzer_batch and :mod:`settings.BATCH_PROCESSING` related settings
+are disabled.
+
+It should only be enabled if you have metrics that are received in infrequent
+batches, metrics feed per minute do not require batch processing.  For example
+if a metric/s are sent to Skyline every 15 minutes with a data point for each
+minute in the period, Analyzer's default analysis would only analyse the latest
+data point against the metric time series data and not all the 14 data points
+since the last analysis, analyzer_batch does.
+
+It is not default Analyzer behaviour as it adds unnecessary computational
+overhead on analysing real time metrics, therefore it is only implemented if
+required.
+
+analyzer_batch and :mod:`settings.BATCH_PROCESSING` needs to be enabled if you
+wish to use Flux to process uploaded data files, see
+`Flux <flux.html>`__.
 
 Analyzer :mod:`settings.ALERTS`
 ===============================
+
+For all the specific alert configurations see the `Alerts <alerts.html>`__ page.
 
 Order Matters
 -------------
@@ -173,27 +202,28 @@ evaluated and the bigcheese metrics would be alerted on every 60 mins instead of
 the desired every 10 minutes.
 
 Please refer to `Mirage - Order Matters <mirage.html#order-matters>`__ section
-for a similar example of how order matters in the Mirage context.
+for a similar example of how order matters in the Mirage context and how to
+define a metric namespace as a Mirage metric.
 
 Analyzer SMTP alert graphs
 ==========================
 
 Analyzer by default now sends 2 graphs in any SMTP alert.  The original Graphite
 graph is sent and an additional graph image is sent that is plotted using the
-actual Redis timeseries data for the metric.
+actual Redis time series data for the metric.
 
 The Redis data graph has been added to make it specifically clear as to the data
 that Analyzer is alerting on.  Often your metrics are aggregated in Graphite and
-a Graphite graph is not the exact representation of the timeseries data that
+a Graphite graph is not the exact representation of the time series data that
 triggered the alert, so having both is clearer.
 
 The Redis data graph also adds the mean and the 3-sigma boundaries to the plot,
 which is useful for brain training.  This goes against the "less is more
 (effective)" data visualization philosophy, however if the human neocortex is
 presented with 3-sigma boundaries enough times, it will probably eventually be
-able to calculate 3-sigma boundaries in any timeseries, reasonably well.
+able to calculate 3-sigma boundaries in any time series, reasonably well.
 
-Bearing in mind that when we view anomalous timeseries in the UI we are
+Bearing in mind that when we view anomalous time series in the UI we are
 presented with a red line depicting the anomalous range, this graph just does
 the similar in the alert context.
 
@@ -217,9 +247,9 @@ What **Analyzer** does
 - Analyzer determines all unique metrics in Redis and divides them
   between :mod:`settings.ANALYZER_PROCESSES` to be analysed between
   ``spin_process`` processes.
-- The spawned ``spin_process`` processes pull the all timeseries for
+- The spawned ``spin_process`` processes pull the all time series for
   their ``assigned_metrics`` they have been assigned from Redis and
-  iterate through each metric and analyze the timeseries against the
+  iterate through each metric and analyse the time series against the
   :mod:`settings.ALGORITHMS` declared in the settings.py
 - The ``spin_process`` will add any metric that it finds anomalous
   (triggers :mod:`settings.CONSENSUS` number of algorithms) to a list of
@@ -228,16 +258,16 @@ What **Analyzer** does
   anomalous\_metrics list to see if:
 
   - If the metric matches an :mod:`settings.ALERTS` tuple in settings.py
-  - If a Mirage parameter is set in the tuple, then Analyzer does not
-    alert, but hands the metric off to Mirage by adding a Mirage check
-    file.
-  - If a metric is an Ionosphere enabled metric, then Analyzer does not alert,
-    but hands the metric off to Ionosphere by adding an Ionosphere check
-    file.
-  - If ``ENABLE_CRUCIBLE`` is True, Analyzer adds timeseries as a json
+  - If a Mirage SECOND_ORDER_RESOLUTION_HOURS parameter is set in the tuple,
+    then Analyzer does not alert, but hands the metric off to Mirage by adding
+    a Mirage check file.
+  - If a metric is an Ionosphere enabled metric (and not a Mirage metric), then
+    Analyzer does not alert, but sends the metric to Ionosphere by adding an
+    Ionosphere check file.
+  - If ``ENABLE_CRUCIBLE`` is True, Analyzer adds the time series as a json
     file and a Crucible check file.
-  - If no Mirage parameter, but the metric matches an :mod:`settings.ALERTS` tuple
-    namespace, Analyzer then checks if an Analyzer alert key exists for
+  - If no Mirage parameter, but the metric matches an :mod:`settings.ALERTS`
+    tuple namespace, Analyzer then checks if an Analyzer alert key exists for
     the metric by querying the metric's Analyzer alert key in Redis.
   - If no alert key, Analyzer sends alert/s to the configured alerters
     and sets the metric's Analyzer alert key for :mod:`settings.EXPIRATION_TIME`

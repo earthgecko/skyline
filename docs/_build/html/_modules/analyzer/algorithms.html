@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>analyzer.algorithms &mdash; Skyline 1.3.0 documentation</title>
+  <title>analyzer.algorithms &mdash; Skyline 2.0.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.3.0 documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 2.0.0 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                1.3
+                2.0
               </div>
             
           
@@ -90,10 +90,12 @@
 <li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
@@ -177,6 +179,10 @@
 <span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">getpid</span>
 <span class="kn">from</span> <span class="nn">timeit</span> <span class="k">import</span> <span class="n">default_timer</span> <span class="k">as</span> <span class="n">timer</span>
 
+<span class="c1"># @added 20200117 - Feature #3400: Identify air gaps in the metric data</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">Counter</span>
+<span class="kn">from</span> <span class="nn">ast</span> <span class="k">import</span> <span class="n">literal_eval</span>
+
 <span class="kn">import</span> <span class="nn">pandas</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">scipy</span>
@@ -199,6 +205,8 @@
     <span class="n">ENABLE_ALGORITHM_RUN_METRICS</span><span class="p">,</span>
     <span class="n">ENABLE_ALL_ALGORITHMS_RUN_METRICS</span><span class="p">,</span>
     <span class="n">REDIS_PASSWORD</span><span class="p">,</span>
+    <span class="c1"># @added 20200117 - Feature #3400: Identify air gaps in the metric data</span>
+    <span class="n">FULL_NAMESPACE</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="kn">from</span> <span class="nn">algorithm_exceptions</span> <span class="k">import</span> <span class="n">TooShort</span><span class="p">,</span> <span class="n">Stale</span><span class="p">,</span> <span class="n">Boring</span>
@@ -232,6 +240,51 @@
 <span class="c1">#    ALERT_ON_STALE_PERIOD = settings.ALERT_ON_STALE_PERIOD</span>
 <span class="k">except</span><span class="p">:</span>
     <span class="n">ALERT_ON_STALE_PERIOD</span> <span class="o">=</span> <span class="mi">300</span>
+<span class="c1"># @added 20200117 - Feature #3400: Identify air gaps in the metric data</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">settings</span> <span class="k">import</span> <span class="n">IDENTIFY_AIRGAPS</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">IDENTIFY_AIRGAPS</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">settings</span> <span class="k">import</span> <span class="n">MAX_AIRGAP_PERIOD</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">MAX_AIRGAP_PERIOD</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="mi">3600</span> <span class="o">*</span> <span class="mi">6</span><span class="p">)</span>
+<span class="c1"># @added 20200214 - Bug #3448: Repeated airgapped_metrics</span>
+<span class="c1">#                   Feature #3400: Identify air gaps in the metric data</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">settings</span> <span class="k">import</span> <span class="n">IDENTIFY_UNORDERED_TIMESERIES</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">IDENTIFY_UNORDERED_TIMESERIES</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">settings</span> <span class="k">import</span> <span class="n">CHECK_AIRGAPS</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">CHECK_AIRGAPS</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">settings</span> <span class="k">import</span> <span class="n">SKIP_AIRGAPS</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">SKIP_AIRGAPS</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="c1"># @added 20200423 - Feature #3504: Handle airgaps in batch metrics</span>
+<span class="c1">#                   Feature #3480: batch_processing</span>
+<span class="c1">#                   Feature #3486: analyzer_batch</span>
+<span class="c1">#                   Feature #3400: Identify air gaps in the metric data</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">settings</span> <span class="k">import</span> <span class="n">BATCH_PROCESSING</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">BATCH_PROCESSING</span> <span class="o">=</span> <span class="kc">False</span>
+
+<span class="c1"># @added 20200430 - Feature #3480: batch_processing</span>
+<span class="c1"># Tidy up and reduce logging</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">settings</span> <span class="k">import</span> <span class="n">BATCH_PROCESSING_DEBUG</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">BATCH_PROCESSING_DEBUG</span> <span class="o">=</span> <span class="kc">None</span>
+
+<span class="c1"># @added 20200423 - Feature #3504: Handle airgaps in batch metrics</span>
+<span class="c1">#                   Feature #3400: Identify air gaps in the metric data</span>
+<span class="k">if</span> <span class="n">IDENTIFY_AIRGAPS</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">CHECK_AIRGAPS</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="n">is_check_airgap_metric</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">This is no man&#39;s land. Do anything you want in here,</span>
@@ -318,8 +371,15 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">series</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">])</span>
-        <span class="n">stdDev</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">series</span><span class="p">)</span>
+        <span class="c1"># @modified 20191011 - Update least_squares &amp; grubbs algorithms by using sample standard deviation PR #124</span>
+        <span class="c1">#                      Task #3256: Review and test PR 124</span>
+        <span class="c1"># Change from using scipy/numpy std which calculates the population</span>
+        <span class="c1"># standard deviation to using pandas.std which calculates the sample</span>
+        <span class="c1"># standard deviation which is more appropriate for time series data</span>
+        <span class="c1"># series = scipy.array([x[1] for x in timeseries])</span>
+        <span class="c1"># stdDev = scipy.std(series)</span>
+        <span class="n">series</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">)</span>
+        <span class="n">stdDev</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
 
         <span class="c1"># Issue #27 - Handle z_score agent.py RuntimeWarning - https://github.com/earthgecko/skyline/issues/27</span>
         <span class="c1"># This change avoids spewing warnings on agent.py tests:</span>
@@ -496,7 +556,15 @@
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">False</span>
 
-        <span class="n">std_dev</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">errors</span><span class="p">)</span>
+        <span class="c1"># @modified 20191011 - Update least_squares &amp; grubbs algorithms by using sample standard deviation PR #124</span>
+        <span class="c1">#                      Task #3256: Review and test PR 124</span>
+        <span class="c1"># Change from using scipy/numpy std which calculates the population</span>
+        <span class="c1"># standard deviation to using pandas.std which calculates the sample</span>
+        <span class="c1"># standard deviation which is more appropriate for time series data</span>
+        <span class="c1"># std_dev = scipy.std(errors)</span>
+        <span class="n">series</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">errors</span><span class="p">)</span>
+        <span class="n">std_dev</span> <span class="o">=</span> <span class="n">series</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+
         <span class="n">t</span> <span class="o">=</span> <span class="p">(</span><span class="n">errors</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">errors</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="n">errors</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">])</span> <span class="o">/</span> <span class="mi">3</span>
 
         <span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">std_dev</span> <span class="o">*</span> <span class="mi">3</span> <span class="ow">and</span> <span class="nb">round</span><span class="p">(</span><span class="n">std_dev</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">round</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span>
@@ -667,6 +735,256 @@
     <span class="k">return</span> <span class="kc">False</span></div>
 
 
+<span class="c1"># @added 20200117 - Feature #3400: Identify air gaps in the metric data</span>
+<span class="c1"># The implementation of this feature bumped up analyzer.run_time from:</span>
+<span class="c1"># from ~2.5 to 3 seconds up to between 3.0 and 4.0 seconds on 608 metrics</span>
+<span class="c1"># from ~5.5 to 10 seconds up to between 7.5 and 11.5 seconds on 1441 metrics</span>
+<span class="c1"># from ~1.20 to 1.38 seconds up to between 1.42 and 1.5 seocnds on 191 metrics</span>
+<span class="c1"># @modified 20200501 - Feature #3400: Identify air gaps in the metric data</span>
+<span class="c1"># Added airgapped_metrics_filled</span>
+<span class="c1"># def identify_airgaps(metric_name, timeseries, airgapped_metrics):</span>
+<div class="viewcode-block" id="identify_airgaps"><a class="viewcode-back" href="../../skyline.analyzer.html#analyzer.algorithms.identify_airgaps">[docs]</a><span class="k">def</span> <span class="nf">identify_airgaps</span><span class="p">(</span><span class="n">metric_name</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">,</span> <span class="n">airgapped_metrics</span><span class="p">,</span> <span class="n">airgapped_metrics_filled</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Identify air gaps in metrics to populate the analyzer.airgapped_metrics</span>
+<span class="sd">    Redis set with the air gaps if the specific air gap it is not present in the</span>
+<span class="sd">    set. If there is a start_airgap timestamp and no end_airgap is set then the</span>
+<span class="sd">    metric will be in a current air gap state and/or it will become stale.  If</span>
+<span class="sd">    the netric starts sending data again, it will have the end_airgap set and be</span>
+<span class="sd">    added to the analyzer.airgapped_metrics Redis set.  Also Identify if a time</span>
+<span class="sd">    series is unordered.</span>
+
+<span class="sd">    :param metric_name: the FULL_NAMESPACE metric name</span>
+<span class="sd">    :type metric_name: str</span>
+<span class="sd">    :param timeseries: the metric time series</span>
+<span class="sd">    :type timeseries: list</span>
+<span class="sd">    :param airgapped_metrics: the air gapped metrics list generated from the</span>
+<span class="sd">        analyzer.airgapped_metrics Redis set</span>
+<span class="sd">    :type airgapped_metrics: list</span>
+<span class="sd">    :return: list of air gapped metrics and a boolean as to whether the time</span>
+<span class="sd">        series is unordered</span>
+<span class="sd">    :rtype: list, boolean</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">30</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[],</span> <span class="kc">None</span>
+
+    <span class="n">airgaps</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1"># To ensure that nothing in this function affects existing analysis, them</span>
+    <span class="c1"># entire block is wrapped in try except pass so that analyzer is affected</span>
+    <span class="c1"># as little as possible should something here fail.</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">current_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
+        <span class="n">max_airgap_timestamp</span> <span class="o">=</span> <span class="n">current_timestamp</span> <span class="o">-</span> <span class="n">MAX_AIRGAP_PERIOD</span>
+        <span class="c1"># Determine resolution from the data within the MAX_AIRGAP_PERIOD</span>
+        <span class="n">resolution_timestamps</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">metric_resolution_determined</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">metric_datapoint</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">:</span>
+            <span class="n">timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_datapoint</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">timestamp</span> <span class="o">&lt;</span> <span class="n">max_airgap_timestamp</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">resolution_timestamps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span>
+        <span class="n">timestamp_resolutions</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="n">resolution_timestamps</span><span class="p">:</span>
+            <span class="n">last_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">for</span> <span class="n">timestamp</span> <span class="ow">in</span> <span class="n">resolution_timestamps</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">last_timestamp</span><span class="p">:</span>
+                    <span class="n">resolution</span> <span class="o">=</span> <span class="n">timestamp</span> <span class="o">-</span> <span class="n">last_timestamp</span>
+                    <span class="n">timestamp_resolutions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">resolution</span><span class="p">)</span>
+                    <span class="n">last_timestamp</span> <span class="o">=</span> <span class="n">timestamp</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">last_timestamp</span> <span class="o">=</span> <span class="n">timestamp</span>
+        <span class="k">if</span> <span class="n">resolution_timestamps</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">resolution_timestamps</span>
+        <span class="n">timestamp_resolutions_count</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">ordered_timestamp_resolutions_count</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">metric_resolution</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">timestamp_resolutions</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">timestamp_resolutions_count</span> <span class="o">=</span> <span class="n">Counter</span><span class="p">(</span><span class="n">timestamp_resolutions</span><span class="p">)</span>
+                <span class="n">ordered_timestamp_resolutions_count</span> <span class="o">=</span> <span class="n">timestamp_resolutions_count</span><span class="o">.</span><span class="n">most_common</span><span class="p">()</span>
+                <span class="n">metric_resolution</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ordered_timestamp_resolutions_count</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                <span class="k">if</span> <span class="n">metric_resolution</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">metric_resolution_determined</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">traceback_format_exc_string</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+                <span class="n">algorithm_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">get_function_name</span><span class="p">())</span>
+                <span class="n">record_algorithm_error</span><span class="p">(</span><span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback_format_exc_string</span><span class="p">)</span>
+                <span class="k">del</span> <span class="n">timestamp_resolutions</span>
+                <span class="c1"># return None</span>
+                <span class="k">return</span> <span class="p">[],</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">timestamp_resolutions</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">timestamp_resolutions</span>
+        <span class="n">airgaps_present</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">metric_resolution_determined</span> <span class="ow">and</span> <span class="n">metric_resolution</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">metric_resolution</span> <span class="o">&lt;</span> <span class="mi">600</span><span class="p">:</span>
+                <span class="n">airgap_duration</span> <span class="o">=</span> <span class="p">((</span><span class="nb">int</span><span class="p">(</span><span class="n">metric_resolution</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="nb">int</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">metric_resolution</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">airgap_duration</span> <span class="o">=</span> <span class="p">((</span><span class="nb">int</span><span class="p">(</span><span class="n">metric_resolution</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="mi">60</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ordered_timestamp_resolutions_count</span><span class="p">:</span>
+                <span class="n">resolution</span> <span class="o">=</span> <span class="n">i</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">resolution</span> <span class="o">==</span> <span class="n">metric_resolution</span><span class="p">:</span>
+                    <span class="k">continue</span>
+                <span class="k">if</span> <span class="n">resolution</span> <span class="o">&gt;</span> <span class="n">airgap_duration</span><span class="p">:</span>
+                    <span class="n">airgaps_present</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">timestamp_resolutions_count</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">timestamp_resolutions_count</span>
+
+        <span class="c1"># @added 20200214 - Bug #3448: Repeated airgapped_metrics</span>
+        <span class="c1">#                   Feature #3400: Identify air gaps in the metric data</span>
+        <span class="c1"># Identify metrics that have time series that are not ordered, for</span>
+        <span class="c1"># Analyser to order and replace the existing Redis metric key time</span>
+        <span class="c1"># data. If backfilling is being done via Flux then unordered time series</span>
+        <span class="c1"># data can be expected from time to time.  Although these metrics are</span>
+        <span class="c1"># identified via their flux.filled Redis key, this is an additional test</span>
+        <span class="c1"># just to catch any that slip through the gaps.  This operation fairly</span>
+        <span class="c1"># fast, testing on 657 metrics with loading all the time series data and</span>
+        <span class="c1"># running the below function took 0.43558645248413086 seconds.</span>
+        <span class="n">unordered_timeseries</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">for</span> <span class="n">resolution</span> <span class="ow">in</span> <span class="n">ordered_timestamp_resolutions_count</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">resolution</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">unordered_timeseries</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">break</span>
+
+        <span class="k">if</span> <span class="n">ordered_timestamp_resolutions_count</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">ordered_timestamp_resolutions_count</span>
+
+        <span class="c1"># @added 20200214 - Bug #3448: Repeated airgapped_metrics</span>
+        <span class="c1">#                      Feature #3400: Identify air gaps in the metric data</span>
+        <span class="c1"># Here if airgaps are not being identifying, return whether the time</span>
+        <span class="c1"># series is unordered</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">IDENTIFY_AIRGAPS</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">airgaps_present</span>
+            <span class="k">return</span> <span class="p">[],</span> <span class="n">unordered_timeseries</span>
+        <span class="k">if</span> <span class="n">airgaps_present</span><span class="p">:</span>
+            <span class="n">base_name</span> <span class="o">=</span> <span class="n">metric_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="c1"># logger.info(&#39;airgaps present in %s - %s&#39; % (base_name, str(ordered_timestamp_resolutions_count)))</span>
+            <span class="n">airgaps</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">last_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">start_airgap</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">for</span> <span class="n">metric_datapoint</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">:</span>
+                <span class="n">timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_datapoint</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="c1"># Handle the first timestamp</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">last_timestamp</span><span class="p">:</span>
+                    <span class="n">last_timestamp</span> <span class="o">=</span> <span class="n">timestamp</span>
+                    <span class="k">continue</span>
+                <span class="c1"># Discard any period less than MAX_AIRGAP_PERIOD</span>
+                <span class="k">if</span> <span class="n">timestamp</span> <span class="o">&lt;</span> <span class="n">max_airgap_timestamp</span><span class="p">:</span>
+                    <span class="n">last_timestamp</span> <span class="o">=</span> <span class="n">timestamp</span>
+                    <span class="k">continue</span>
+                <span class="n">original_last_timestamp</span> <span class="o">=</span> <span class="n">last_timestamp</span>
+                <span class="n">difference</span> <span class="o">=</span> <span class="n">timestamp</span> <span class="o">-</span> <span class="n">last_timestamp</span>
+                <span class="n">last_timestamp</span> <span class="o">=</span> <span class="n">timestamp</span>
+                <span class="k">if</span> <span class="n">difference</span> <span class="o">&lt;</span> <span class="n">airgap_duration</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">start_airgap</span><span class="p">:</span>
+                        <span class="n">end_airgap</span> <span class="o">=</span> <span class="n">original_last_timestamp</span> <span class="o">-</span> <span class="mi">1</span>
+                        <span class="n">airgap_known</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="k">if</span> <span class="n">airgapped_metrics</span><span class="p">:</span>
+                            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">airgapped_metrics</span><span class="p">:</span>
+                                <span class="c1"># @modified 20200213 - Bug #3448: Repeated airgapped_metrics</span>
+                                <span class="c1"># Only literal_eval if required</span>
+                                <span class="c1"># airgap = literal_eval(i)</span>
+                                <span class="c1"># airgap_metric = str(airgap[0])</span>
+                                <span class="c1"># if base_name != airgap_metric:</span>
+                                <span class="k">if</span> <span class="n">base_name</span> <span class="ow">in</span> <span class="n">i</span><span class="p">:</span>
+                                    <span class="n">airgap</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                                <span class="k">else</span><span class="p">:</span>
+                                    <span class="k">continue</span>
+                                <span class="n">airgap_metric_resolution</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">airgap</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                                <span class="k">if</span> <span class="n">metric_resolution</span> <span class="o">!=</span> <span class="n">airgap_metric_resolution</span><span class="p">:</span>
+                                    <span class="k">continue</span>
+                                <span class="n">start_timestamp_present</span> <span class="o">=</span> <span class="kc">False</span>
+                                <span class="n">airgap_metric_start_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">airgap</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+                                <span class="k">if</span> <span class="n">start_airgap</span> <span class="o">==</span> <span class="n">airgap_metric_start_timestamp</span><span class="p">:</span>
+                                    <span class="n">start_timestamp_present</span> <span class="o">=</span> <span class="kc">True</span>
+                                <span class="n">end_timestamp_present</span> <span class="o">=</span> <span class="kc">False</span>
+                                <span class="n">airgap_metric_end_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">airgap</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+                                <span class="k">if</span> <span class="n">end_airgap</span> <span class="o">==</span> <span class="n">airgap_metric_end_timestamp</span><span class="p">:</span>
+                                    <span class="n">end_timestamp_present</span> <span class="o">=</span> <span class="kc">True</span>
+                                <span class="k">if</span> <span class="n">start_timestamp_present</span> <span class="ow">and</span> <span class="n">end_timestamp_present</span><span class="p">:</span>
+                                    <span class="n">airgap_known</span> <span class="o">=</span> <span class="kc">True</span>
+                                    <span class="n">start_airgap</span> <span class="o">=</span> <span class="kc">None</span>
+                                    <span class="n">end_airgap</span> <span class="o">=</span> <span class="kc">None</span>
+                                    <span class="k">break</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">airgap_known</span><span class="p">:</span>
+                            <span class="c1"># @modified 20200213 - Bug #3448: Repeated airgapped_metrics</span>
+                            <span class="n">add_airgap</span> <span class="o">=</span> <span class="kc">True</span>
+                            <span class="k">if</span> <span class="n">start_airgap</span> <span class="o">&lt;</span> <span class="n">max_airgap_timestamp</span><span class="p">:</span>
+                                <span class="n">add_airgap</span> <span class="o">=</span> <span class="kc">False</span>
+                            <span class="k">if</span> <span class="n">end_airgap</span> <span class="o">&lt;</span> <span class="n">max_airgap_timestamp</span><span class="p">:</span>
+                                <span class="n">add_airgap</span> <span class="o">=</span> <span class="kc">False</span>
+                            <span class="c1"># @added 20200501 - Feature #3400: Identify air gaps in the metric data</span>
+                            <span class="c1"># Check airgapped_metrics_filled and if present do</span>
+                            <span class="c1"># do not add even if there is an airgap as the</span>
+                            <span class="c1"># airgap filler has reported it has filled all it</span>
+                            <span class="c1"># can</span>
+                            <span class="k">if</span> <span class="n">airgapped_metrics_filled</span><span class="p">:</span>
+                                <span class="n">current_airgap</span> <span class="o">=</span> <span class="nb">str</span><span class="p">([</span><span class="n">base_name</span><span class="p">,</span> <span class="n">metric_resolution</span><span class="p">,</span> <span class="n">start_airgap</span><span class="p">,</span> <span class="n">end_airgap</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+                                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">airgapped_metrics_filled</span><span class="p">:</span>
+                                    <span class="n">filled_airgap</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                                    <span class="k">if</span> <span class="n">filled_airgap</span> <span class="o">==</span> <span class="n">current_airgap</span><span class="p">:</span>
+                                        <span class="n">airgap_known</span> <span class="o">=</span> <span class="kc">True</span>
+                                        <span class="n">start_airgap</span> <span class="o">=</span> <span class="kc">None</span>
+                                        <span class="n">end_airgap</span> <span class="o">=</span> <span class="kc">None</span>
+                                        <span class="n">add_airgap</span> <span class="o">=</span> <span class="kc">False</span>
+                                        <span class="k">break</span>
+
+                            <span class="k">if</span> <span class="n">add_airgap</span><span class="p">:</span>
+                                <span class="n">airgaps</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">base_name</span><span class="p">,</span> <span class="n">metric_resolution</span><span class="p">,</span> <span class="n">start_airgap</span><span class="p">,</span> <span class="n">end_airgap</span><span class="p">,</span> <span class="mi">0</span><span class="p">])</span>
+                            <span class="n">start_airgap</span> <span class="o">=</span> <span class="kc">None</span>
+                            <span class="n">end_airgap</span> <span class="o">=</span> <span class="kc">None</span>
+                        <span class="k">continue</span>
+                <span class="k">if</span> <span class="n">difference</span> <span class="o">&gt;</span> <span class="n">airgap_duration</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">start_airgap</span><span class="p">:</span>
+                        <span class="c1"># If there is a start_airgap timestamp and no end_airgap</span>
+                        <span class="c1"># is set then the metric will be in a current air gap</span>
+                        <span class="c1"># state and/or it will become stale.  If the netric</span>
+                        <span class="c1"># starts sending data again, it will have the end_airgap</span>
+                        <span class="c1"># set and be added to airgapped_metrics</span>
+                        <span class="n">start_airgap</span> <span class="o">=</span> <span class="n">original_last_timestamp</span> <span class="o">+</span> <span class="mi">1</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">traceback_format_exc_string</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="n">algorithm_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">get_function_name</span><span class="p">())</span>
+        <span class="n">record_algorithm_error</span><span class="p">(</span><span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback_format_exc_string</span><span class="p">)</span>
+        <span class="c1"># return None</span>
+        <span class="k">return</span> <span class="p">[],</span> <span class="kc">False</span>
+
+    <span class="c1"># @modified 20200214 - Bug #3448: Repeated airgapped_metrics</span>
+    <span class="c1">#                      Feature #3400: Identify air gaps in the metric data</span>
+    <span class="c1"># Also return with the time series is unordered</span>
+    <span class="c1"># return airgaps</span>
+    <span class="k">return</span> <span class="n">airgaps</span><span class="p">,</span> <span class="n">unordered_timeseries</span></div>
+
+
+<span class="c1"># @added 20200423 - Feature #3508: ionosphere.untrainable_metrics</span>
+<div class="viewcode-block" id="negatives_present"><a class="viewcode-back" href="../../skyline.analyzer.html#analyzer.algorithms.negatives_present">[docs]</a><span class="k">def</span> <span class="nf">negatives_present</span><span class="p">(</span><span class="n">timeseries</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Determine if there are negative number present in a time series</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">np_array</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">])</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">lowest_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">np_array</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">lowest_value</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">negatives</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">ts</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">v</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">negatives</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">ts</span><span class="p">,</span> <span class="n">v</span><span class="p">))</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="k">pass</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">return</span> <span class="n">negatives</span>
+    <span class="k">return</span> <span class="kc">False</span></div>
+
+
 <div class="viewcode-block" id="is_anomalously_anomalous"><a class="viewcode-back" href="../../skyline.analyzer.html#analyzer.algorithms.is_anomalously_anomalous">[docs]</a><span class="k">def</span> <span class="nf">is_anomalously_anomalous</span><span class="p">(</span><span class="n">metric_name</span><span class="p">,</span> <span class="n">ensemble</span><span class="p">,</span> <span class="n">datapoint</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This method runs a meta-analysis on the metric to determine whether the</span>
@@ -676,6 +994,11 @@
     <span class="n">new_trigger</span> <span class="o">=</span> <span class="p">[</span><span class="n">time</span><span class="p">(),</span> <span class="n">datapoint</span><span class="p">]</span>
 
     <span class="c1"># Get the old history</span>
+    <span class="c1"># @added 20200505 - Feature #3504: Handle airgaps in batch metrics</span>
+    <span class="c1"># Use get_redis_conn</span>
+    <span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="n">get_redis_conn</span>
+    <span class="n">redis_conn</span> <span class="o">=</span> <span class="n">get_redis_conn</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+
     <span class="n">raw_trigger_history</span> <span class="o">=</span> <span class="n">redis_conn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;trigger_history.&#39;</span> <span class="o">+</span> <span class="n">metric_name</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">raw_trigger_history</span><span class="p">:</span>
         <span class="n">redis_conn</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="s1">&#39;trigger_history.&#39;</span> <span class="o">+</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">packb</span><span class="p">([(</span><span class="n">time</span><span class="p">(),</span> <span class="n">datapoint</span><span class="p">)]))</span>
@@ -707,7 +1030,16 @@
     <span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="n">intervals</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">mean</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">3</span> <span class="o">*</span> <span class="n">stdDev</span></div>
 
 
-<div class="viewcode-block" id="run_selected_algorithm"><a class="viewcode-back" href="../../skyline.analyzer.html#analyzer.algorithms.run_selected_algorithm">[docs]</a><span class="k">def</span> <span class="nf">run_selected_algorithm</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">):</span>
+<span class="c1"># @modified 20200117 - Feature #3400: Identify air gaps in the metric data</span>
+<span class="c1"># Added the airgapped_metrics list</span>
+<span class="c1"># def run_selected_algorithm(timeseries, metric_name):</span>
+<span class="c1"># @modified 20200423 - Feature #3508: ionosphere.untrainable_metrics</span>
+<span class="c1"># Added run_negatives_present</span>
+<span class="c1"># def run_selected_algorithm(timeseries, metric_name, airgapped_metrics):</span>
+<span class="c1"># @modified 20200501 - Feature #3400: Identify air gaps in the metric data</span>
+<span class="c1"># Added airgapped_metrics_filled and check_for_airgaps_only</span>
+<span class="c1"># def run_selected_algorithm(timeseries, metric_name, airgapped_metrics, run_negatives_present):</span>
+<div class="viewcode-block" id="run_selected_algorithm"><a class="viewcode-back" href="../../skyline.analyzer.html#analyzer.algorithms.run_selected_algorithm">[docs]</a><span class="k">def</span> <span class="nf">run_selected_algorithm</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">airgapped_metrics</span><span class="p">,</span> <span class="n">airgapped_metrics_filled</span><span class="p">,</span> <span class="n">run_negatives_present</span><span class="p">,</span> <span class="n">check_for_airgaps_only</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Filter timeseries and run selected algorithm.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -715,8 +1047,8 @@
     <span class="c1"># @added 20180807 - Feature #2492: alert on stale metrics</span>
     <span class="c1"># Determine if a metric has stopped sending data and if so add to the</span>
     <span class="c1"># analyzer.alert_on_stale_metrics Redis set</span>
+    <span class="n">add_to_alert_on_stale_metrics</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">if</span> <span class="n">ALERT_ON_STALE_METRICS</span><span class="p">:</span>
-        <span class="n">add_to_alert_on_stale_metrics</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="c1"># @modified 20180816 - Feature #2492: alert on stale metrics</span>
         <span class="c1"># Added try and except to prevent some errors that are encounter between</span>
         <span class="c1"># 00:14 and 00:17 on some days</span>
@@ -741,29 +1073,154 @@
 
         <span class="k">if</span> <span class="n">add_to_alert_on_stale_metrics</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">redis_conn</span><span class="o">.</span><span class="n">ping</span><span class="p">()</span>
-            <span class="k">except</span><span class="p">:</span>
-                <span class="kn">from</span> <span class="nn">redis</span> <span class="k">import</span> <span class="n">StrictRedis</span>
-                <span class="k">if</span> <span class="n">REDIS_PASSWORD</span><span class="p">:</span>
-                    <span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">password</span><span class="o">=</span><span class="n">REDIS_PASSWORD</span><span class="p">,</span> <span class="n">unix_socket_path</span><span class="o">=</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
-            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># @added 20200505 - Feature #3504: Handle airgaps in batch metrics</span>
+                <span class="c1"># Use get_redis_conn</span>
+                <span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="n">get_redis_conn</span>
+                <span class="n">redis_conn</span> <span class="o">=</span> <span class="n">get_redis_conn</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
                 <span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="s1">&#39;analyzer.alert_on_stale_metrics&#39;</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">)</span>
             <span class="k">except</span><span class="p">:</span>
                 <span class="k">pass</span>
 
-    <span class="c1"># Get rid of short series</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">MIN_TOLERABLE_LENGTH</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">TooShort</span><span class="p">()</span>
+    <span class="c1"># @added 20200505 - Feature #3504: Handle airgaps in batch metrics</span>
+    <span class="c1"># Check to see if this is a batch processing metric that has been sent</span>
+    <span class="c1"># through Analyzer to check for airgaps only and if so do not check the</span>
+    <span class="c1"># timeseries for exceptions</span>
+    <span class="n">check_for_timeseries_exceptions</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">check_airgap_only</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">BATCH_PROCESSING</span> <span class="ow">and</span> <span class="n">check_for_airgaps_only</span><span class="p">:</span>
+        <span class="n">check_airgap_only_key</span> <span class="o">=</span> <span class="s1">&#39;analyzer.check_airgap_only.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric_name</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">add_to_alert_on_stale_metrics</span><span class="p">:</span>
+                <span class="c1"># @added 20200505 - Feature #3504: Handle airgaps in batch metrics</span>
+                <span class="c1"># Use get_redis_conn</span>
+                <span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="n">get_redis_conn</span>
+                <span class="n">redis_conn</span> <span class="o">=</span> <span class="n">get_redis_conn</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+            <span class="n">check_airgap_only</span> <span class="o">=</span> <span class="n">redis_conn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">check_airgap_only_key</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">check_airgap_only</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">check_airgap_only</span><span class="p">:</span>
+            <span class="n">check_for_timeseries_exceptions</span> <span class="o">=</span> <span class="kc">False</span>
 
-    <span class="c1"># Get rid of stale series</span>
-    <span class="k">if</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">STALE_PERIOD</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">Stale</span><span class="p">()</span>
+    <span class="c1"># @modified 20200505 - Feature #3504: Handle airgaps in batch metrics</span>
+    <span class="c1"># Wrapped in check_for_timeseries_exceptions as if it is a check_airgap_only</span>
+    <span class="c1"># metric then the time series should not be checked for exceptions</span>
+    <span class="k">if</span> <span class="n">check_for_timeseries_exceptions</span><span class="p">:</span>
+        <span class="c1"># Get rid of short series</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">MIN_TOLERABLE_LENGTH</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">TooShort</span><span class="p">()</span>
 
-    <span class="c1"># Get rid of boring series</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="n">MAX_TOLERABLE_BOREDOM</span><span class="p">:]))</span> <span class="o">==</span> <span class="n">BOREDOM_SET_SIZE</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="n">Boring</span><span class="p">()</span>
+        <span class="c1"># Get rid of stale series</span>
+        <span class="k">if</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">STALE_PERIOD</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">Stale</span><span class="p">()</span>
+
+        <span class="c1"># Get rid of boring series</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="n">MAX_TOLERABLE_BOREDOM</span><span class="p">:]))</span> <span class="o">==</span> <span class="n">BOREDOM_SET_SIZE</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">Boring</span><span class="p">()</span>
+
+    <span class="c1"># @added 20200423 - Feature #3508: ionosphere.untrainable_metrics</span>
+    <span class="c1"># Added run_negatives_present</span>
+    <span class="n">negatives_found</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="c1"># @added 20200117 - Feature #3400: Identify air gaps in the metric data</span>
+    <span class="c1"># @modified 20200214 - Bug #3448: Repeated airgapped_metrics</span>
+    <span class="c1">#                      Feature #3400: Identify air gaps in the metric data</span>
+    <span class="c1"># if IDENTIFY_AIRGAPS:</span>
+    <span class="k">if</span> <span class="n">IDENTIFY_AIRGAPS</span> <span class="ow">or</span> <span class="n">IDENTIFY_UNORDERED_TIMESERIES</span><span class="p">:</span>
+        <span class="c1"># airgaps = identify_airgaps(metric_name, timeseries, airgapped_metrics)</span>
+        <span class="c1"># if airgaps:</span>
+        <span class="n">process_metric</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">IDENTIFY_AIRGAPS</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">CHECK_AIRGAPS</span><span class="p">:</span>
+                <span class="n">process_metric</span> <span class="o">=</span> <span class="kc">False</span>
+
+                <span class="c1"># @added 20200423 - Feature #3504: Handle airgaps in batch metrics</span>
+                <span class="c1">#                   Feature #3400: Identify air gaps in the metric data</span>
+                <span class="c1"># Replaced code block below to determine if a metric is a check</span>
+                <span class="c1"># with a skyline_functions definition of that block as</span>
+                <span class="c1"># the check_metric_for_airgaps function</span>
+                <span class="n">check_metric_for_airgaps</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">check_metric_for_airgaps</span> <span class="o">=</span> <span class="n">is_check_airgap_metric</span><span class="p">(</span><span class="n">metric_name</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">check_metric_for_airgaps</span> <span class="o">=</span> <span class="kc">False</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;failed to determine if </span><span class="si">%s</span><span class="s1"> is an airgap metric: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">metric_name</span><span class="p">),</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()))</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;failed to determine if the metric is an airgap metric&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">check_metric_for_airgaps</span><span class="p">:</span>
+                    <span class="n">process_metric</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># If IDENTIFY_AIRGAPS is not enabled and</span>
+            <span class="c1"># IDENTIFY_UNORDERED_TIMESERIES is enabled process the metric</span>
+            <span class="k">if</span> <span class="n">IDENTIFY_UNORDERED_TIMESERIES</span><span class="p">:</span>
+                <span class="n">process_metric</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">airgaps</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">unordered_timeseries</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">process_metric</span><span class="p">:</span>
+            <span class="c1"># @modified 20200501 - Feature #3400: Identify air gaps in the metric data</span>
+            <span class="c1"># Added airgapped_metrics_filled</span>
+            <span class="c1"># airgaps, unordered_timeseries = identify_airgaps(metric_name, timeseries, airgapped_metrics)</span>
+            <span class="n">airgaps</span><span class="p">,</span> <span class="n">unordered_timeseries</span> <span class="o">=</span> <span class="n">identify_airgaps</span><span class="p">(</span><span class="n">metric_name</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">,</span> <span class="n">airgapped_metrics</span><span class="p">,</span> <span class="n">airgapped_metrics_filled</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">airgaps</span> <span class="ow">or</span> <span class="n">unordered_timeseries</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">redis_conn</span><span class="o">.</span><span class="n">ping</span><span class="p">()</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="c1"># @added 20200505 - Feature #3504: Handle airgaps in batch metrics</span>
+                <span class="c1"># Use get_redis_conn</span>
+                <span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="n">get_redis_conn</span>
+                <span class="n">redis_conn</span> <span class="o">=</span> <span class="n">get_redis_conn</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">airgaps</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">airgaps</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="s1">&#39;analyzer.airgapped_metrics&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;adding airgap </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+                    <span class="c1"># TODO: learn_airgapped_metrics</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="k">pass</span>
+            <span class="k">del</span> <span class="n">airgaps</span>
+
+        <span class="c1"># @added 20200214 - Bug #3448: Repeated airgapped_metrics</span>
+        <span class="c1">#                   Feature #3400: Identify air gaps in the metric data</span>
+        <span class="c1"># Also add unordered time series to the analyzer.unordered_timeseries</span>
+        <span class="c1"># Redis set</span>
+        <span class="k">if</span> <span class="n">unordered_timeseries</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="s1">&#39;analyzer.unordered_timeseries&#39;</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">)</span>
+                <span class="k">del</span> <span class="n">unorder_timeseries</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+
+    <span class="c1"># @added 20200423 - Feature #3504: Handle airgaps in batch metrics</span>
+    <span class="c1">#                   Feature #3480: batch_processing</span>
+    <span class="c1">#                   Feature #3486: analyzer_batch</span>
+    <span class="c1">#                   Feature #3400: Identify air gaps in the metric data</span>
+    <span class="c1"># Check to see if this is a batch processing metric that has been sent to</span>
+    <span class="c1"># analyzer_batch for processing but sent through Analyzer to check for</span>
+    <span class="c1"># airgaps only and if so return as it should not be run through algorithms</span>
+    <span class="k">if</span> <span class="n">BATCH_PROCESSING</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">check_airgap_only</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">redis_conn</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">check_airgap_only_key</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;failed to delete Redis key </span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">check_airgap_only_key</span><span class="p">),</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()))</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;failed to failure regarding deleting the check_airgap_only_key Redis key&#39;</span><span class="p">)</span>
+            <span class="c1"># @modified 20200430 - Feature #3480: batch_processing</span>
+            <span class="c1"># Tidy up and reduce logging, only log if debug enabled</span>
+            <span class="k">if</span> <span class="n">BATCH_PROCESSING_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;algorithms :: batch processing - batch metric </span><span class="si">%s</span><span class="s1"> checked for airgaps only, not analysing&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">metric_name</span><span class="p">)))</span>
+
+            <span class="c1"># TODO: the only worry here is that this metric then gets added to</span>
+            <span class="c1"># the not_anomalous Redis set?  Not sure if that is a problem, I do</span>
+            <span class="c1"># not think it is.  Unless it is in the end of anomaly_end_timestamp</span>
+            <span class="c1"># context?</span>
+            <span class="c1"># @modified 20200424 - Feature #3508: ionosphere.untrainable_metrics</span>
+            <span class="c1"># Added negatives_found</span>
+            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="p">[],</span> <span class="mi">1</span><span class="p">,</span> <span class="n">negatives_found</span>
 
     <span class="c1"># RUN_OPTIMIZED_WORKFLOW - replaces the original ensemble method:</span>
     <span class="c1"># ensemble = [globals()[algorithm](timeseries) for algorithm in ALGORITHMS]</span>
@@ -851,16 +1308,33 @@
 
         <span class="n">threshold</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ensemble</span><span class="p">)</span> <span class="o">-</span> <span class="n">CONSENSUS</span>
         <span class="k">if</span> <span class="n">ensemble</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">threshold</span><span class="p">:</span>
+
+            <span class="c1"># @added 20200425 - Feature #3508: ionosphere.untrainable_metrics</span>
+            <span class="c1"># Only run a negatives_present check if it is anomalous, there</span>
+            <span class="c1"># is no need to check unless it is related to an anomaly</span>
+            <span class="k">if</span> <span class="n">run_negatives_present</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">negatives_found</span> <span class="o">=</span> <span class="n">negatives_present</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Algorithm error: negatives_present :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">negatives_found</span> <span class="o">=</span> <span class="kc">False</span>
+
             <span class="k">if</span> <span class="n">ENABLE_SECOND_ORDER</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">is_anomalously_anomalous</span><span class="p">(</span><span class="n">metric_name</span><span class="p">,</span> <span class="n">ensemble</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]):</span>
-                    <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="n">ensemble</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="c1"># @modified 20200423 - Feature #3508: ionosphere.untrainable_metrics</span>
+                    <span class="c1"># Added negatives_found</span>
+                    <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="n">ensemble</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">negatives_found</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="n">ensemble</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="n">ensemble</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">negatives_found</span>
 
-        <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">ensemble</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+        <span class="c1"># @modified 20200423 - Feature #3508: ionosphere.untrainable_metrics</span>
+        <span class="c1"># Added negatives_found</span>
+        <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">ensemble</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">negatives_found</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Algorithm error: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-        <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="p">[],</span> <span class="mi">1</span></div>
+        <span class="c1"># @modified 20200423 - Feature #3508: ionosphere.untrainable_metrics</span>
+        <span class="c1"># Added negatives_found</span>
+        <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="p">[],</span> <span class="mi">1</span><span class="p">,</span> <span class="n">negatives_found</span></div>
 </pre></div>
 
            </div>
@@ -872,7 +1346,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2019, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
 
     </p>
   </div>
@@ -894,7 +1368,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.3.0',
+            VERSION:'2.0.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true

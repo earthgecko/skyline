@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>boundary.boundary &mdash; Skyline 1.3.0 documentation</title>
+  <title>boundary.boundary &mdash; Skyline 2.0.0 documentation</title>
   
 
   
@@ -35,7 +35,7 @@
         <link rel="index" title="Index"
               href="../../genindex.html"/>
         <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 1.3.0 documentation" href="../../index.html"/>
+    <link rel="top" title="Skyline 2.0.0 documentation" href="../../index.html"/>
         <link rel="up" title="Module code" href="../index.html"/> 
 
   
@@ -64,7 +64,7 @@
             
             
               <div class="version">
-                1.3
+                2.0
               </div>
             
           
@@ -90,10 +90,12 @@
 <li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
@@ -177,7 +179,7 @@
     <span class="kn">from</span> <span class="nn">Queue</span> <span class="k">import</span> <span class="n">Empty</span>
 <span class="k">except</span><span class="p">:</span>
     <span class="kn">from</span> <span class="nn">queue</span> <span class="k">import</span> <span class="n">Empty</span>
-<span class="kn">from</span> <span class="nn">redis</span> <span class="k">import</span> <span class="n">StrictRedis</span>
+<span class="c1"># from redis import StrictRedis</span>
 <span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">time</span><span class="p">,</span> <span class="n">sleep</span>
 <span class="kn">from</span> <span class="nn">threading</span> <span class="k">import</span> <span class="n">Thread</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">defaultdict</span>
@@ -207,7 +209,14 @@
     <span class="n">send_graphite_metric</span><span class="p">,</span> <span class="n">write_data_to_file</span><span class="p">,</span> <span class="n">move_file</span><span class="p">,</span>
     <span class="c1"># @added 20181126 - Task #2742: Update Boundary</span>
     <span class="c1">#                   Feature #2034: analyse_derivatives</span>
-    <span class="n">nonNegativeDerivative</span><span class="p">,</span> <span class="n">in_list</span><span class="p">)</span>
+    <span class="n">nonNegativeDerivative</span><span class="p">,</span> <span class="n">in_list</span><span class="p">,</span>
+    <span class="c1"># @added 20191025 - Bug #3266: py3 Redis binary objects not strings</span>
+    <span class="c1">#                   Branch #3262: py3</span>
+    <span class="c1"># Added a single functions to deal with Redis connection and the</span>
+    <span class="c1"># charset=&#39;utf-8&#39;, decode_responses=True arguments required in py3</span>
+    <span class="n">get_redis_conn</span><span class="p">,</span> <span class="n">get_redis_conn_decoded</span><span class="p">,</span>
+    <span class="c1"># @added 20200506 - Feature #3532: Sort all time series</span>
+    <span class="n">sort_timeseries</span><span class="p">)</span>
 
 <span class="kn">from</span> <span class="nn">boundary_alerters</span> <span class="k">import</span> <span class="n">trigger_alert</span>
 <span class="kn">from</span> <span class="nn">boundary_algorithms</span> <span class="k">import</span> <span class="n">run_selected_algorithm</span>
@@ -246,6 +255,8 @@
     <span class="n">BOUNDARY_AUTOAGGRERATION_METRICS</span> <span class="o">=</span> <span class="p">(</span>
         <span class="p">(</span><span class="s2">&quot;auotaggeration_metrics_not_declared&quot;</span><span class="p">,</span> <span class="mi">60</span><span class="p">)</span>
     <span class="p">)</span>
+<span class="c1"># @added 20191107 - Branch #3262: py3</span>
+<span class="n">alert_test_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">_alert_test.txt&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_TMP_DIR</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="Boundary"><a class="viewcode-back" href="../../skyline.boundary.html#boundary.boundary.Boundary">[docs]</a><span class="k">class</span> <span class="nc">Boundary</span><span class="p">(</span><span class="n">Thread</span><span class="p">):</span>
@@ -255,11 +266,24 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">super</span><span class="p">(</span><span class="n">Boundary</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="c1"># @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow</span>
-        <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">password</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">,</span> <span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+<span class="c1">#        if settings.REDIS_PASSWORD:</span>
+<span class="c1">#            self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)</span>
+<span class="c1">#        else:</span>
+<span class="c1">#            self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">get_redis_conn</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">daemon</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="c1"># @added 20191022 - Bug #3266: py3 Redis binary objects not strings</span>
+        <span class="c1">#                   Branch #3262: py3</span>
+<span class="c1">#        if settings.REDIS_PASSWORD:</span>
+<span class="c1">#            self.redis_conn_decoded = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH, charset=&#39;utf-8&#39;, decode_responses=True)</span>
+<span class="c1">#        else:</span>
+<span class="c1">#            self.redis_conn_decoded = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH, charset=&#39;utf-8&#39;, decode_responses=True)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span> <span class="o">=</span> <span class="n">get_redis_conn_decoded</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">parent_pid</span> <span class="o">=</span> <span class="n">parent_pid</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">current_pid</span> <span class="o">=</span> <span class="n">getpid</span><span class="p">()</span>
         <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
@@ -397,6 +421,15 @@
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: redis data error: &#39;</span> <span class="o">+</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: </span><span class="si">%e</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
 
+            <span class="c1"># @added 20200506 - Feature #3532: Sort all time series</span>
+            <span class="c1"># To ensure that there are no unordered timestamps in the time</span>
+            <span class="c1"># series which are artefacts of the collector or carbon-relay, sort</span>
+            <span class="c1"># all time series by timestamp before analysis.</span>
+            <span class="n">original_timeseries</span> <span class="o">=</span> <span class="n">timeseries</span>
+            <span class="k">if</span> <span class="n">original_timeseries</span><span class="p">:</span>
+                <span class="n">timeseries</span> <span class="o">=</span> <span class="n">sort_timeseries</span><span class="p">(</span><span class="n">original_timeseries</span><span class="p">)</span>
+                <span class="k">del</span> <span class="n">original_timeseries</span>
+
             <span class="n">base_name</span> <span class="o">=</span> <span class="n">metric_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
             <span class="c1"># Determine the metrics BOUNDARY_METRICS metric tuple settings</span>
@@ -496,6 +529,15 @@
                 <span class="n">unpacker</span><span class="o">.</span><span class="n">feed</span><span class="p">(</span><span class="n">raw_series</span><span class="p">)</span>
                 <span class="n">timeseries</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">unpacker</span><span class="p">)</span>
 
+                <span class="c1"># @added 20200507 - Feature #3532: Sort all time series</span>
+                <span class="c1"># To ensure that there are no unordered timestamps in the time</span>
+                <span class="c1"># series which are artefacts of the collector or carbon-relay, sort</span>
+                <span class="c1"># all time series by timestamp before analysis.</span>
+                <span class="n">original_timeseries</span> <span class="o">=</span> <span class="n">timeseries</span>
+                <span class="k">if</span> <span class="n">original_timeseries</span><span class="p">:</span>
+                    <span class="n">timeseries</span> <span class="o">=</span> <span class="n">sort_timeseries</span><span class="p">(</span><span class="n">original_timeseries</span><span class="p">)</span>
+                    <span class="k">del</span> <span class="n">original_timeseries</span>
+
                 <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: unpacked OK - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">raw_assigned_id</span><span class="p">)))</span>
 
@@ -584,7 +626,10 @@
                     <span class="c1"># to their deriative products</span>
                     <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">False</span>
                     <span class="k">try</span><span class="p">:</span>
-                        <span class="n">derivative_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;derivative_metrics&#39;</span><span class="p">))</span>
+                        <span class="c1"># @modified 20191022 - Bug #3266: py3 Redis binary objects not strings</span>
+                        <span class="c1">#                      Branch #3262: py3</span>
+                        <span class="c1"># derivative_metrics = list(self.redis_conn.smembers(&#39;derivative_metrics&#39;))</span>
+                        <span class="n">derivative_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;derivative_metrics&#39;</span><span class="p">))</span>
                     <span class="k">except</span><span class="p">:</span>
                         <span class="n">derivative_metrics</span> <span class="o">=</span> <span class="p">[]</span>
                     <span class="n">redis_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">))</span>
@@ -638,7 +683,14 @@
 
                 <span class="c1"># If it&#39;s anomalous, add it to list</span>
                 <span class="k">if</span> <span class="n">anomalous</span><span class="p">:</span>
-                    <span class="n">anomalous_metric</span> <span class="o">=</span> <span class="p">[</span><span class="n">datapoint</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">metric_expiration_time</span><span class="p">,</span> <span class="n">metric_min_average</span><span class="p">,</span> <span class="n">metric_min_average_seconds</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">,</span> <span class="n">alert_threshold</span><span class="p">,</span> <span class="n">metric_alerters</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">]</span>
+                    <span class="c1"># @added 20200122 - Feature #3396: http_alerter</span>
+                    <span class="c1"># Add the metric timestamp for the http_alerter resend queue</span>
+                    <span class="n">metric_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+
+                    <span class="c1"># @added 20200122 - Feature #3396: http_alerter</span>
+                    <span class="c1"># Add the metric timestamp for the http_alerter resend queue</span>
+                    <span class="c1"># anomalous_metric = [datapoint, metric_name, metric_expiration_time, metric_min_average, metric_min_average_seconds, metric_trigger, alert_threshold, metric_alerters, algorithm]</span>
+                    <span class="n">anomalous_metric</span> <span class="o">=</span> <span class="p">[</span><span class="n">datapoint</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">metric_expiration_time</span><span class="p">,</span> <span class="n">metric_min_average</span><span class="p">,</span> <span class="n">metric_min_average_seconds</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">,</span> <span class="n">alert_threshold</span><span class="p">,</span> <span class="n">metric_alerters</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">]</span>
                     <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
                     <span class="c1"># self.anomalous_metrics.append(anomalous_metric)</span>
                     <span class="k">try</span><span class="p">:</span>
@@ -663,7 +715,9 @@
 
                     <span class="k">if</span> <span class="n">determine_anomaly_details</span><span class="p">:</span>
                         <span class="n">metric_timestamp</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]))</span>
-                        <span class="n">from_timestamp</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]))</span>
+                        <span class="c1"># Handle single data point time series</span>
+                        <span class="c1"># from_timestamp = str(int(timeseries[1][0]))</span>
+                        <span class="n">from_timestamp</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]))</span>
                         <span class="n">timeseries_dir</span> <span class="o">=</span> <span class="n">base_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">)</span>
 
                     <span class="c1"># If Panorama is enabled - create a Panorama check</span>
@@ -724,8 +778,11 @@
                         <span class="n">crucible_anomaly_dir</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">CRUCIBLE_DATA_FOLDER</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">timeseries_dir</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">metric_timestamp</span>
                         <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">crucible_anomaly_dir</span><span class="p">):</span>
                             <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                                <span class="n">mode_arg</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="s1">&#39;0755&#39;</span><span class="p">)</span>
-                                <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">crucible_anomaly_dir</span><span class="p">,</span> <span class="n">mode_arg</span><span class="p">)</span>
+                                <span class="c1"># @modified 20191022 - Task #2828: Skyline - Python 3.7</span>
+                                <span class="c1">#                      Branch #3262: py3</span>
+                                <span class="c1"># mode_arg = int(&#39;0755&#39;)</span>
+                                <span class="c1"># os.makedirs(crucible_anomaly_dir, mode_arg)</span>
+                                <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">crucible_anomaly_dir</span><span class="p">,</span> <span class="mo">0o755</span><span class="p">)</span>
                             <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
                                 <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">crucible_anomaly_dir</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o755</span><span class="p">)</span>
 
@@ -764,7 +821,9 @@
                         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">crucible_anomaly_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
                             <span class="n">fh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">crucible_anomaly_data</span><span class="p">)</span>
                         <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                            <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">crucible_anomaly_file</span><span class="p">,</span> <span class="mi">0644</span><span class="p">)</span>
+                            <span class="c1"># @modified 20191021 - Branch #3262: py3</span>
+                            <span class="c1"># os.chmod(crucible_anomaly_file, 0644)</span>
+                            <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">crucible_anomaly_file</span><span class="p">,</span> <span class="mo">0o644</span><span class="p">)</span>
                         <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
                             <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">crucible_anomaly_file</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o644</span><span class="p">)</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;added crucible anomaly file :: </span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.txt&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">crucible_anomaly_dir</span><span class="p">,</span> <span class="n">base_name</span><span class="p">))</span>
@@ -776,7 +835,9 @@
                             <span class="c1"># timeseries</span>
                             <span class="n">fh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">timeseries_json</span><span class="p">)</span>
                         <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                            <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">json_file</span><span class="p">,</span> <span class="mi">0644</span><span class="p">)</span>
+                            <span class="c1"># @modified 20191021 - Branch #3262: py3</span>
+                            <span class="c1"># os.chmod(json_file, 0644)</span>
+                            <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">json_file</span><span class="p">,</span> <span class="mo">0o644</span><span class="p">)</span>
                         <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
                             <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">json_file</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o644</span><span class="p">)</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;added crucible timeseries file :: </span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.json&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">crucible_anomaly_dir</span><span class="p">,</span> <span class="n">base_name</span><span class="p">))</span>
@@ -786,7 +847,9 @@
                         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">crucible_check_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
                             <span class="n">fh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">crucible_anomaly_data</span><span class="p">)</span>
                         <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                            <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">crucible_check_file</span><span class="p">,</span> <span class="mi">0644</span><span class="p">)</span>
+                            <span class="c1"># @modified 20191021 - Branch #3262: py3</span>
+                            <span class="c1"># os.chmod(crucible_check_file, 0644)</span>
+                            <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">crucible_check_file</span><span class="p">,</span> <span class="mo">0o644</span><span class="p">)</span>
                         <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
                             <span class="n">os</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="n">crucible_check_file</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o644</span><span class="p">)</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;added crucible check :: </span><span class="si">%s</span><span class="s1">,</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">))</span>
@@ -801,16 +864,19 @@
             <span class="k">except</span> <span class="n">Boring</span><span class="p">:</span>
                 <span class="n">exceptions</span><span class="p">[</span><span class="s1">&#39;Boring&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                 <span class="n">exceptions</span><span class="p">[</span><span class="s1">&#39;Other&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;exceptions[&#39;Other&#39;] traceback follows:&quot;</span><span class="p">)</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: exceptions[</span><span class="se">\&#39;</span><span class="s1">Other</span><span class="se">\&#39;</span><span class="s1">]&#39;</span><span class="p">)</span>
 
         <span class="c1"># Add values to the queue so the parent process can collate</span>
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">anomaly_breakdown</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">anomaly_breakdown_q</span><span class="o">.</span><span class="n">put</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
-
+            <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: anomaly_breakdown.item - </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)))</span>
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">exceptions_q</span><span class="o">.</span><span class="n">put</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">exceptions_q</span><span class="o">.</span><span class="n">put</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: exceptions.item - </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)))</span></div>
 
 <div class="viewcode-block" id="Boundary.run"><a class="viewcode-back" href="../../skyline.boundary.html#boundary.boundary.Boundary.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -860,18 +926,20 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;warning :: SERVER_METRIC_PATH is not declared in settings.py, defaults to </span><span class="se">\&#39;\&#39;</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;skyline_app_graphite_namespace is set to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">skyline_app_graphite_namespace</span><span class="p">))</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">BOUNDARY_METRICS</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">BOUNDARY_METRICS</span>
-            <span class="n">boundary_metrics_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">BOUNDARY_METRICS</span><span class="p">)</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;BOUNDARY_METRICS is set from settings.py with </span><span class="si">%s</span><span class="s1"> Boundry metrics&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">boundary_metrics_count</span><span class="p">))</span>
-        <span class="k">except</span><span class="p">:</span>
-            <span class="n">BOUNDARY_METRICS</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;warning :: BOUNDARY_METRICS is not declared in settings.py, defaults to []&#39;</span><span class="p">)</span>
-        <span class="k">try</span><span class="p">:</span>
             <span class="n">ENABLE_BOUNDARY_DEBUG</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_BOUNDARY_DEBUG</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;ENABLE_BOUNDARY_DEBUG is set from settings.py to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">))</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;warning :: ENABLE_BOUNDARY_DEBUG is not declared in settings.py, defaults to False&#39;</span><span class="p">)</span>
             <span class="n">ENABLE_BOUNDARY_DEBUG</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">BOUNDARY_METRICS</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">BOUNDARY_METRICS</span>
+            <span class="n">boundary_metrics_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">BOUNDARY_METRICS</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;BOUNDARY_METRICS is set from settings.py with </span><span class="si">%s</span><span class="s1"> Boundry metrics&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">boundary_metrics_count</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: BOUNDARY_METRICS - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">BOUNDARY_METRICS</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">BOUNDARY_METRICS</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;warning :: BOUNDARY_METRICS is not declared in settings.py, defaults to []&#39;</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">BOUNDARY_AUTOAGGRERATION</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">BOUNDARY_AUTOAGGRERATION</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;BOUNDARY_AUTOAGGRERATION is set from settings.py to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">BOUNDARY_AUTOAGGRERATION</span><span class="p">))</span>
@@ -883,37 +951,56 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;BOUNDARY_AUTOAGGRERATION_METRICS is set from settings.py&#39;</span><span class="p">)</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">BOUNDARY_AUTOAGGRERATION_METRICS</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="p">(</span><span class="s2">&quot;auotaggeration_metrics_not_declared&quot;</span><span class="p">,</span> <span class="mi">60</span><span class="p">)</span>
+                <span class="p">(</span><span class="s1">&#39;autoaggeration_metrics_not_declared&#39;</span><span class="p">,</span> <span class="mi">60</span><span class="p">)</span>
             <span class="p">)</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;warning :: BOUNDARY_AUTOAGGRERATION_METRICS is not declared in settings.py, defaults to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                 <span class="nb">str</span><span class="p">(</span><span class="n">BOUNDARY_AUTOAGGRERATION_METRICS</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span>
 
-        <span class="k">while</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="c1"># @modified 20191022 - Branch #3262: py3</span>
+        <span class="c1"># python-2.x and python3.x handle while 1 and while True differently</span>
+        <span class="c1"># while 1:</span>
+        <span class="n">running</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">while</span> <span class="n">running</span><span class="p">:</span>
             <span class="n">now</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
 
             <span class="c1"># Make sure Redis is up</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">ping</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: Redis is up&#39;</span><span class="p">)</span>
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: skyline cannot connect to redis at socket path </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
                 <span class="n">sleep</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
                 <span class="c1"># @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow</span>
-                <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">password</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_PASSWORD</span><span class="p">,</span> <span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">settings</span><span class="o">.</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+<span class="c1">#                if settings.REDIS_PASSWORD:</span>
+<span class="c1">#                    self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)</span>
+<span class="c1">#                else:</span>
+<span class="c1">#                    self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span> <span class="o">=</span> <span class="n">get_redis_conn</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
                 <span class="k">continue</span>
 
             <span class="c1"># Report app up</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="mi">120</span><span class="p">,</span> <span class="n">now</span><span class="p">)</span>
 
             <span class="c1"># Discover unique metrics</span>
-            <span class="n">unique_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span> <span class="o">+</span> <span class="s1">&#39;unique_metrics&#39;</span><span class="p">))</span>
+            <span class="c1"># @modified 20191022 - Bug #3266: py3 Redis binary objects not strings</span>
+            <span class="c1">#                      Branch #3262: py3</span>
+            <span class="c1"># unique_metrics = list(self.redis_conn.smembers(settings.FULL_NAMESPACE + &#39;unique_metrics&#39;))</span>
+            <span class="n">redis_set</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span> <span class="o">+</span> <span class="s1">&#39;unique_metrics&#39;</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">unique_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="n">redis_set</span><span class="p">))</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to generate list from Redis set </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">redis_set</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">unique_metrics</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;no metrics in redis. try adding some - see README&#39;</span><span class="p">)</span>
                 <span class="n">sleep</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
                 <span class="k">continue</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> metrics in Redis set </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">unique_metrics</span><span class="p">)),</span> <span class="n">redis_set</span><span class="p">))</span>
 
             <span class="c1"># Reset boundary_metrics</span>
             <span class="n">boundary_metrics</span> <span class="o">=</span> <span class="p">[]</span>
@@ -921,17 +1008,59 @@
             <span class="c1"># Build boundary metrics</span>
             <span class="k">for</span> <span class="n">metric_name</span> <span class="ow">in</span> <span class="n">unique_metrics</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">BOUNDARY_METRICS</span><span class="p">:</span>
-                    <span class="n">CHECK_MATCH_PATTERN</span> <span class="o">=</span> <span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                    <span class="n">check_match_pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">CHECK_MATCH_PATTERN</span><span class="p">)</span>
-                    <span class="n">base_name</span> <span class="o">=</span> <span class="n">metric_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-                    <span class="n">pattern_match</span> <span class="o">=</span> <span class="n">check_match_pattern</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: pattern matching </span><span class="si">%s</span><span class="s1"> against BOUNDARY_METRICS </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">metric_name</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">)))</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">CHECK_MATCH_PATTERN</span> <span class="o">=</span> <span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="n">check_match_pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">CHECK_MATCH_PATTERN</span><span class="p">)</span>
+
+                        <span class="c1"># @added 20191021 - Branch #3262: py3</span>
+                        <span class="n">metric_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_name</span><span class="p">)</span>
+
+                        <span class="n">base_name</span> <span class="o">=</span> <span class="n">metric_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                        <span class="n">pattern_match</span> <span class="o">=</span> <span class="n">check_match_pattern</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: pattern matching - </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">metric_name</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">)))</span>
+
                     <span class="k">if</span> <span class="n">pattern_match</span><span class="p">:</span>
                         <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
-                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: boundary metric - pattern MATCHED - &#39;</span> <span class="o">+</span> <span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot; | &quot;</span> <span class="o">+</span> <span class="n">base_name</span><span class="p">)</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: boundary metric - pattern MATCHED - &#39;</span> <span class="o">+</span> <span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot; | &quot;</span> <span class="o">+</span> <span class="n">base_name</span><span class="p">)</span>
                         <span class="n">boundary_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">metric_name</span><span class="p">,</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span>
 
             <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: boundary metrics - &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">boundary_metrics</span><span class="p">))</span>
+
+            <span class="c1"># @added 20191106 - Branch #3262: py3</span>
+            <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">alert_test_file</span><span class="p">):</span>
+                <span class="n">test_alert</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">with</span> <span class="nb">open</span><span class="p">((</span><span class="n">alert_test_file</span><span class="p">),</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+                        <span class="n">raw_test_alert</span> <span class="o">=</span> <span class="n">fh</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+                    <span class="n">test_alert</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">raw_test_alert</span><span class="p">)</span>
+                    <span class="c1"># [metric, alerter]</span>
+                    <span class="c1"># e.g. [&#39;server-1.cpu.user&#39;, &#39;smtp&#39;]</span>
+                    <span class="c1"># e.g. [&#39;server-1.cpu.user&#39;, &#39;slack&#39;]</span>
+                    <span class="c1"># e.g. [&#39;skyline_test.alerters.test&#39;, &#39;smtp&#39;]</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not evaluate test_alert from </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">alert_test_file</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">test_alert</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;test alert metric found - alerting on </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">((</span><span class="n">test_alert</span><span class="p">)))</span>
+                        <span class="n">metric_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">test_alert</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                        <span class="n">test_alerter</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">test_alert</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;test alert to </span><span class="si">%s</span><span class="s1"> for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">test_alerter</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">))</span>
+                        <span class="n">trigger_alert</span><span class="p">(</span><span class="n">test_alerter</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;testing&#39;</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">()))</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: test trigger_alert - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to test trigger_alert :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric_name</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">alert_test_file</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error - failed to remove </span><span class="si">%s</span><span class="s1">, continuing&#39;</span> <span class="o">%</span> <span class="n">alert_test_file</span><span class="p">)</span>
+                    <span class="k">pass</span>
 
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">boundary_metrics</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;no Boundary metrics in redis. try adding some - see README&#39;</span><span class="p">)</span>
@@ -989,7 +1118,10 @@
             <span class="c1"># Use Redis set instead of Manager() list</span>
             <span class="n">boundary_not_anomalous_metrics</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">literal_boundary_not_anomalous_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;boundary.not_anomalous_metrics&#39;</span><span class="p">))</span>
+                <span class="c1"># @modified 20191022 - Bug #3266: py3 Redis binary objects not strings</span>
+                <span class="c1">#                      Branch #3262: py3</span>
+                <span class="c1"># literal_boundary_not_anomalous_metrics = list(self.redis_conn.smembers(&#39;boundary.not_anomalous_metrics&#39;))</span>
+                <span class="n">literal_boundary_not_anomalous_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;boundary.not_anomalous_metrics&#39;</span><span class="p">))</span>
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to generate list from Redis set boundary.not_anomalous_metrics&#39;</span><span class="p">)</span>
@@ -1052,14 +1184,21 @@
             <span class="c1"># Use Redis set instead of Manager() list</span>
             <span class="n">boundary_anomalous_metrics</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">literal_boundary_anomalous_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;boundary.anomalous_metrics&#39;</span><span class="p">))</span>
+                <span class="c1"># @modified 20191022 - Bug #3266: py3 Redis binary objects not strings</span>
+                <span class="c1">#                      Branch #3262: py3</span>
+                <span class="c1"># literal_boundary_anomalous_metrics = list(self.redis_conn.smembers(&#39;boundary.anomalous_metrics&#39;))</span>
+                <span class="n">literal_boundary_anomalous_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;boundary.anomalous_metrics&#39;</span><span class="p">))</span>
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to generate list from Redis set boundary.anomalous_metrics&#39;</span><span class="p">)</span>
                 <span class="n">literal_boundary_anomalous_metrics</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">metric_list_string</span> <span class="ow">in</span> <span class="n">literal_boundary_anomalous_metrics</span><span class="p">:</span>
-                <span class="n">metric</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">metric_list_string</span><span class="p">)</span>
-                <span class="n">boundary_anomalous_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">metric</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">metric_list_string</span><span class="p">)</span>
+                    <span class="n">boundary_anomalous_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">metric</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to literal_eval metric_list_string - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_list_string</span><span class="p">))</span>
 
             <span class="c1"># Send alerts</span>
             <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">BOUNDARY_ENABLE_ALERTS</span><span class="p">:</span>
@@ -1074,6 +1213,10 @@
                     <span class="n">alert_threshold</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">anomalous_metric</span><span class="p">[</span><span class="mi">6</span><span class="p">])</span>
                     <span class="n">metric_alerters</span> <span class="o">=</span> <span class="n">anomalous_metric</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span>
                     <span class="n">algorithm</span> <span class="o">=</span> <span class="n">anomalous_metric</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span>
+                    <span class="c1"># @added 20200122 - Feature #3396: http_alerter</span>
+                    <span class="c1"># Add the metric timestamp for the http_alerter resend queue</span>
+                    <span class="n">metric_timestamp</span> <span class="o">=</span> <span class="n">anomalous_metric</span><span class="p">[</span><span class="mi">9</span><span class="p">]</span>
+
                     <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;debug :: anomalous_metric - &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomalous_metric</span><span class="p">))</span>
 
@@ -1220,7 +1363,7 @@
                                             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;debug :: send_alert set to </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">send_alert</span><span class="p">))</span>
                                     <span class="k">else</span><span class="p">:</span>
                                         <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
-                                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;debug :: redis alerter key retrieved, unpacking&quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">alerter_sent_count_key</span><span class="p">))</span>
+                                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: redis alerter key retrieved, unpacking </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">alerter_sent_count_key</span><span class="p">))</span>
                                         <span class="n">unpacker</span> <span class="o">=</span> <span class="n">Unpacker</span><span class="p">(</span><span class="n">use_list</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
                                         <span class="n">unpacker</span><span class="o">.</span><span class="n">feed</span><span class="p">(</span><span class="n">alerter_sent_count_key_data</span><span class="p">)</span>
                                         <span class="n">raw_alerts_sent</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">unpacker</span><span class="p">)</span>
@@ -1254,25 +1397,28 @@
                                             <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">anomalous_metric</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span> <span class="n">packb</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">anomalous_metric</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span>
                                             <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
                                                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: key setex OK - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">cache_key</span><span class="p">))</span>
-                                            <span class="n">trigger_alert</span><span class="p">(</span><span class="n">alerter</span><span class="p">,</span> <span class="n">datapoint</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">expiration_time</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">)</span>
+                                            <span class="c1"># @modified 20200122 - Feature #3396: http_alerter</span>
+                                            <span class="c1"># Add the metric timestamp for the http_alerter resend queue</span>
+                                            <span class="c1"># trigger_alert(alerter, datapoint, base_name, expiration_time, metric_trigger, algorithm)</span>
+                                            <span class="n">trigger_alert</span><span class="p">(</span><span class="n">alerter</span><span class="p">,</span> <span class="n">datapoint</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">expiration_time</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">)</span>
                                             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alert sent :: </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1"> - via </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="n">datapoint</span><span class="p">,</span> <span class="n">alerter</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">))</span>
-                                            <span class="n">trigger_alert</span><span class="p">(</span><span class="s2">&quot;syslog&quot;</span><span class="p">,</span> <span class="n">datapoint</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">expiration_time</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">)</span>
+                                            <span class="n">trigger_alert</span><span class="p">(</span><span class="s2">&quot;syslog&quot;</span><span class="p">,</span> <span class="n">datapoint</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">expiration_time</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">)</span>
                                             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alert sent :: </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1"> - via syslog - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="n">datapoint</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">))</span>
                                             <span class="n">alerter_alert_sent</span> <span class="o">=</span> <span class="kc">True</span>
                                         <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                                             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert failed :: </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1"> - via </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="n">datapoint</span><span class="p">,</span> <span class="n">alerter</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">))</span>
                                             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not send alert: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
-                                            <span class="n">trigger_alert</span><span class="p">(</span><span class="s1">&#39;syslog&#39;</span><span class="p">,</span> <span class="n">datapoint</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">expiration_time</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">)</span>
+                                            <span class="n">trigger_alert</span><span class="p">(</span><span class="s1">&#39;syslog&#39;</span><span class="p">,</span> <span class="n">datapoint</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">expiration_time</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">)</span>
                                     <span class="k">else</span><span class="p">:</span>
                                         <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
                                             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;debug :: cache_key exists not alerting via </span><span class="si">%s</span><span class="s2"> for </span><span class="si">%s</span><span class="s2"> is less than alerter_limit </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span><span class="n">alerter</span><span class="p">,</span> <span class="n">cache_key</span><span class="p">))</span>
-                                        <span class="n">trigger_alert</span><span class="p">(</span><span class="s2">&quot;syslog&quot;</span><span class="p">,</span> <span class="n">datapoint</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">expiration_time</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">)</span>
+                                        <span class="n">trigger_alert</span><span class="p">(</span><span class="s2">&quot;syslog&quot;</span><span class="p">,</span> <span class="n">datapoint</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">expiration_time</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">)</span>
                                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alert sent :: </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1"> - via syslog - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="n">datapoint</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">))</span>
                                 <span class="k">except</span><span class="p">:</span>
-                                    <span class="n">trigger_alert</span><span class="p">(</span><span class="s2">&quot;syslog&quot;</span><span class="p">,</span> <span class="n">datapoint</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">expiration_time</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">)</span>
+                                    <span class="n">trigger_alert</span><span class="p">(</span><span class="s2">&quot;syslog&quot;</span><span class="p">,</span> <span class="n">datapoint</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">expiration_time</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">)</span>
                                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alert sent :: </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1"> - via syslog - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="n">datapoint</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">))</span>
                             <span class="k">else</span><span class="p">:</span>
-                                <span class="n">trigger_alert</span><span class="p">(</span><span class="s2">&quot;syslog&quot;</span><span class="p">,</span> <span class="n">datapoint</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">expiration_time</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">)</span>
+                                <span class="n">trigger_alert</span><span class="p">(</span><span class="s2">&quot;syslog&quot;</span><span class="p">,</span> <span class="n">datapoint</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">expiration_time</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">)</span>
                                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alert sent :: </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1"> - via syslog - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="n">datapoint</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">))</span>
 
                             <span class="c1"># Update the alerts sent for the alerter cache key,</span>
@@ -1288,7 +1434,7 @@
                     <span class="k">else</span><span class="p">:</span>
                         <span class="c1"># Always alert to syslog, even if alert_threshold is not</span>
                         <span class="c1"># breached or if send_alert is not True</span>
-                        <span class="n">trigger_alert</span><span class="p">(</span><span class="s2">&quot;syslog&quot;</span><span class="p">,</span> <span class="n">datapoint</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">expiration_time</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">)</span>
+                        <span class="n">trigger_alert</span><span class="p">(</span><span class="s2">&quot;syslog&quot;</span><span class="p">,</span> <span class="n">datapoint</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">expiration_time</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">)</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alert sent :: </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1"> - via syslog - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="n">datapoint</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">))</span>
 
                     <span class="c1"># @added 20171216 - Task #2236: Change Boundary to only send to Panorama on alert</span>
@@ -1316,6 +1462,70 @@
                     <span class="n">anomalous_metrics</span> <span class="o">=</span> <span class="n">boundary_anomalous_metrics</span>
                     <span class="n">anomalous_metrics</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="n">operator</span><span class="o">.</span><span class="n">itemgetter</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
                     <span class="n">fh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;handle_data(</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="n">anomalous_metrics</span><span class="p">)</span>
+
+            <span class="c1"># @added 20200121 - Feature #3396: http_alerter</span>
+            <span class="n">full_resend_queue</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">resend_queue</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">redis_set</span> <span class="o">=</span> <span class="s1">&#39;boundary.http_alerter.queue&#39;</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">resend_queue</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="n">redis_set</span><span class="p">))</span>
+                    <span class="k">if</span> <span class="n">resend_queue</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> items in the </span><span class="si">%s</span><span class="s1"> Redis set&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">resend_queue</span><span class="p">)),</span> <span class="n">redis_set</span><span class="p">))</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;0 items in the </span><span class="si">%s</span><span class="s1"> Redis set&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">redis_set</span><span class="p">))</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not determine http_alerter item from Redis set </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">redis_set</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                    <span class="n">resend_queue</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get </span><span class="si">%s</span><span class="s1">.http_alerter.queue from Redis&#39;</span> <span class="o">%</span> <span class="n">skyline_app</span><span class="p">)</span>
+                <span class="n">resend_queue</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">if</span> <span class="n">resend_queue</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">http_alerters_down</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">resend_item</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">full_resend_queue</span><span class="p">):</span>
+                        <span class="n">resend_item_list</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">resend_item</span><span class="p">)</span>
+                        <span class="c1"># data = [alerter, datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp, str(metric_alert_dict)]</span>
+                        <span class="n">alerter</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">resend_item_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                        <span class="n">datapoint</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">resend_item_list</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                        <span class="n">metric_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">resend_item_list</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+                        <span class="n">expiration_time</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">resend_item_list</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+                        <span class="n">metric_trigger</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">resend_item_list</span><span class="p">[</span><span class="mi">4</span><span class="p">])</span>
+                        <span class="n">algorithm</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">resend_item_list</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span>
+                        <span class="n">metric_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">resend_item_list</span><span class="p">[</span><span class="mi">6</span><span class="p">])</span>
+                        <span class="n">metric_alert_dict</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">resend_item_list</span><span class="p">[</span><span class="mi">7</span><span class="p">])</span>
+
+                        <span class="c1"># To ensure that Boundary does not loop through every alert in the queue</span>
+                        <span class="c1"># for an alerter_endpoint, if the alerter_endpoint is down and wait for</span>
+                        <span class="c1"># the connect timeout on each one, if an alerter_endpoint fails a Redis</span>
+                        <span class="c1"># key is created to check against to see if the alerter_endpoint is down</span>
+                        <span class="n">alerter_name</span> <span class="o">=</span> <span class="n">alerter</span>
+                        <span class="n">alerter_endpoint_cache_key</span> <span class="o">=</span> <span class="s1">&#39;http_alerter.down.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">alerter_name</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">alerter_endpoint_cache_key</span> <span class="ow">in</span> <span class="n">http_alerters_down</span><span class="p">:</span>
+                            <span class="k">continue</span>
+                        <span class="n">alerter_endpoint_failed</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">alerter_endpoint_failed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">alerter_endpoint_cache_key</span><span class="p">)</span>
+                        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_http could not query Redis for cache_key </span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">alerter_endpoint_cache_key</span><span class="p">),</span> <span class="n">e</span><span class="p">))</span>
+                        <span class="k">if</span> <span class="n">alerter_endpoint_failed</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">alerter_endpoint_cache_key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">http_alerters_down</span><span class="p">:</span>
+                                <span class="n">http_alerters_down</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">alerter_endpoint_cache_key</span><span class="p">)</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> Redis exists not alerting for any alerts for this endpoint&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">alerter_endpoint_cache_key</span><span class="p">))</span>
+                            <span class="k">continue</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;resend_queue item :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">resend_item_list</span><span class="p">)))</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">trigger_alert</span><span class="p">(</span><span class="n">alerter</span><span class="p">,</span> <span class="n">datapoint</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">expiration_time</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">)</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;trigger_alert :: </span><span class="si">%s</span><span class="s1"> resend </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">resend_item_list</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_alert_dict</span><span class="p">)))</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to trigger_alert for resend queue item&#39;</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to parse resend_queue&#39;</span><span class="p">)</span>
 
             <span class="n">run_time</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">now</span>
             <span class="n">total_metrics</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">boundary_metrics</span><span class="p">))</span>
@@ -1358,6 +1568,16 @@
                 <span class="n">unpacker</span> <span class="o">=</span> <span class="n">Unpacker</span><span class="p">(</span><span class="n">use_list</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
                 <span class="n">unpacker</span><span class="o">.</span><span class="n">feed</span><span class="p">(</span><span class="n">raw_series</span><span class="p">)</span>
                 <span class="n">timeseries</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">unpacker</span><span class="p">)</span>
+
+                <span class="c1"># @added 20200507 - Feature #3532: Sort all time series</span>
+                <span class="c1"># To ensure that there are no unordered timestamps in the time</span>
+                <span class="c1"># series which are artefacts of the collector or carbon-relay, sort</span>
+                <span class="c1"># all time series by timestamp before analysis.</span>
+                <span class="n">original_timeseries</span> <span class="o">=</span> <span class="n">timeseries</span>
+                <span class="k">if</span> <span class="n">original_timeseries</span><span class="p">:</span>
+                    <span class="n">timeseries</span> <span class="o">=</span> <span class="n">sort_timeseries</span><span class="p">(</span><span class="n">original_timeseries</span><span class="p">)</span>
+                    <span class="k">del</span> <span class="n">original_timeseries</span>
+
                 <span class="n">time_human</span> <span class="o">=</span> <span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">timeseries</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span> <span class="o">/</span> <span class="mi">3600</span>
                 <span class="n">projected</span> <span class="o">=</span> <span class="mi">24</span> <span class="o">*</span> <span class="p">(</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">now</span><span class="p">)</span> <span class="o">/</span> <span class="n">time_human</span>
 
@@ -1408,7 +1628,7 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2019, Gary Wilson.
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
 
     </p>
   </div>
@@ -1430,7 +1650,7 @@
     <script type="text/javascript">
         var DOCUMENTATION_OPTIONS = {
             URL_ROOT:'../../',
-            VERSION:'1.3.0',
+            VERSION:'2.0.0',
             COLLAPSE_INDEX:false,
             FILE_SUFFIX:'.html',
             HAS_SOURCE:  true
