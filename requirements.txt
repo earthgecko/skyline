@@ -32,6 +32,7 @@ patsy==0.5.1
 statsmodels==0.10.1
 msgpack-python==0.5.6
 requests==2.22.0
+python-simple-hipchat==0.4.0
 pygerduty==0.38.2
 mysql-connector-python==8.0.16
 gunicorn==19.9.0

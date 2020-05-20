@@ -320,7 +320,7 @@ msgpack-python==0.5.6
 requests==2.22.0
 
 # ALERTERS - uncomment any alerters you want to enable
-#python-simple-hipchat==0.4.0
+python-simple-hipchat==0.4.0
 
 # @modified 20161119 - Branch #922: ionosphere
 #                      Task #1758: Update deps in Ionosphere
