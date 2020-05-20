@@ -52,6 +52,14 @@ skyline.flux.populate_metric_worker module
     :undoc-members:
     :show-inheritance:
 
+skyline.flux.uploaded_data_worker module
+----------------------------------------
+
+.. automodule:: flux.uploaded_data_worker
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 skyline.flux.worker module
 --------------------------
 

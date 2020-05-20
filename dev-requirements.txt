@@ -523,4 +523,7 @@ falcon==2.0.0
 # @added 20200517 - Feature #3550: flux.uploaded_data_worker
 #                   Feature #3538: webapp - upload_data endpoint
 xlrd==1.2.0
-pandas_log==0.1.7; python_version >= '3.2'
+# @added 20200520 - Feature #3550: flux.uploaded_data_worker
+# pin to 0.1.6 until pandas-1.0.3 has been thoroughly tested
+#pandas_log==0.1.7; python_version >= '3.2'
+pandas_log==0.1.6; python_version >= '3.2'

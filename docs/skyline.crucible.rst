@@ -28,6 +28,14 @@ skyline.crucible.crucible_algorithms module
     :undoc-members:
     :show-inheritance:
 
+skyline.crucible.crucible_firings module
+----------------------------------------
+
+.. automodule:: crucible.crucible_firings
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 
 Module contents
 ---------------

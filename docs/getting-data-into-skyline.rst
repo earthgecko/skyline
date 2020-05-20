@@ -118,7 +118,7 @@ Skyline, see the `Flux <flux.html>`__ page.
 upload_data to Flux
 ~~~~~~~~~~~~~~~~~~~
 
-See the `upload_data to Flux <uploa-data-to-flux.html>`__ page.
+See the `upload_data to Flux <upload-data-to-flux.html>`__ page.
 
 Vista
 ~~~~~

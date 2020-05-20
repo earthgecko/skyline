@@ -12,6 +12,14 @@ skyline.webapp.backend module
     :undoc-members:
     :show-inheritance:
 
+skyline.webapp.crucible_backend module
+--------------------------------------
+
+.. automodule:: webapp.crucible_backend
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 skyline.webapp.gunicorn module
 ------------------------------
 
