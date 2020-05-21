@@ -70,7 +70,7 @@ utc_timezones = [
     'UTC', 'Universal', 'Zulu'
 ]
 
-ALLOWED_EXTENSIONS = {'json', 'csv', 'xlsx'}
+ALLOWED_EXTENSIONS = {'json', 'csv', 'xlsx', 'xls'}
 
 
 class UploadedDataWorker(Process):
@@ -275,6 +275,15 @@ class UploadedDataWorker(Process):
                     except:
                         resample_method = 'mean'
                     upload_status.append(['resample_method', resample_method])
+                    # @added 20200521 - Feature #3538: webapp - upload_data endpoint
+                    #                   Feature #3550: flux.uploaded_data_worker
+                    # Added the ability to ignore_submitted_timestamps and not
+                    # check flux.last metric timestamp
+                    try:
+                        ignore_submitted_timestamps = upload_dict['ignore_submitted_timestamps']
+                    except:
+                        ignore_submitted_timestamps = False
+                    upload_status.append(['ignore_submitted_timestamps', ignore_submitted_timestamps])
                 except:
                     logger.error(traceback.format_exc())
                     logger.error('error :: uploaded_data_worker :: failed to determine required variables for the upload_dict - %s ' % str(upload_dict))
@@ -576,6 +585,13 @@ class UploadedDataWorker(Process):
                         dryrun = True
                 except:
                     dryrun = False
+                try:
+                    ignore_submitted_timestamps_str = upload_info['ignore_submitted_timestamps']
+                    if ignore_submitted_timestamps_str == 'true':
+                        ignore_submitted_timestamps = True
+                        logger.info('uploaded_data_worker :: determined ignore_submitted_timestamps from the upload_info dict - %s' % str(ignore_submitted_timestamps))
+                except:
+                    logger.info('uploaded_data_worker :: ignore_submitted_timestamps was not passed in the upload info')
 
             if upload_dict and processing_upload_failed:
                 logger.info('uploaded_data_worker :: failed to process upload - %s' % str(upload_dict))
@@ -643,7 +659,7 @@ class UploadedDataWorker(Process):
                         upload_status = new_upload_status(upload_status, processing_filename, failure_reason)
 
                 if successful:
-                    if data_format == 'xlsx':
+                    if data_format == 'xlsx' or data_format == 'xls':
                         try:
                             if LOCAL_DEBUG or debug_enabled_in_info:
                                 logger.info('running - pd.read_excel(' + file_to_process + ', skiprows=' + str(skip_rows) + ', header=' + str(header_row) + ', usecols=' + str(columns_to_process) + ')')
@@ -661,18 +677,20 @@ class UploadedDataWorker(Process):
                                 logger.debug(df.info())
                             else:
                                 df = pd.read_excel(file_to_process, skiprows=skip_rows, header=header_row, usecols=columns_to_process)
-                            logger.info('uploaded_data_worker :: pandas dataframe created from xlsx - %s' % str(file_to_process))
+                            logger.info('uploaded_data_worker :: pandas dataframe created from %s - %s' % (
+                                data_format, str(file_to_process)))
                             # Unfortunately this if df is not a reliable test
                             # if df.info() is None:
                             #     logger.error('error :: uploaded_data_worker :: df.info() returns None')
                             #     df = None
                         except:
                             logger.error(traceback.format_exc())
-                            failure_reason = 'pandas failed to parse the xlsx data file - %s' % str(file_to_process)
+                            failure_reason = 'failed - pandas failed to parse the %s data file - %s' % (
+                                data_format, str(file_to_process))
                             logger.error('error :: uploaded_data_worker :: %s' % failure_reason)
                             successful = False
                             if upload_status:
-                                upload_status = new_upload_status(upload_status, processing_filename, 'failed to read xlsx data')
+                                upload_status = new_upload_status(upload_status, processing_filename, failure_reason)
                     if data_format == 'csv':
                         try:
                             if LOCAL_DEBUG or debug_enabled_in_info:
@@ -926,12 +944,17 @@ class UploadedDataWorker(Process):
                         if data_df_successful and timeseries and metric:
                             cache_key = 'flux.last.%s' % metric
                             redis_last_metric_data = None
-                            try:
-                                redis_last_metric_data = self.redis_conn_decoded.get(cache_key)
-                            except:
-                                logger.error(traceback.format_exc())
-                                logger.error('error :: uploaded_data_worker :: failed to determine last_flux_timestamp from Redis key %s' % cache_key)
-                                last_flux_timestamp = None
+                            # @added 20200521 - Feature #3538: webapp - upload_data endpoint
+                            #                   Feature #3550: flux.uploaded_data_worker
+                            # Added the ability to ignore_submitted_timestamps and not
+                            # check flux.last metric timestamp
+                            if not ignore_submitted_timestamps:
+                                try:
+                                    redis_last_metric_data = self.redis_conn_decoded.get(cache_key)
+                                except:
+                                    logger.error(traceback.format_exc())
+                                    logger.error('error :: uploaded_data_worker :: failed to determine last_flux_timestamp from Redis key %s' % cache_key)
+                                    last_flux_timestamp = None
                             if redis_last_metric_data:
                                 try:
                                     last_metric_data = literal_eval(redis_last_metric_data)
@@ -1227,6 +1250,13 @@ class UploadedDataWorker(Process):
                                     metric_data = [int(last_timestamp_sent), float(last_value_sent)]
                                     if dryrun:
                                         logger.info('uploaded_data_worker :: DRYRUN :: faking updating %s with %s' % (
+                                            cache_key, str(metric_data)))
+                                    # @added 20200521 - Feature #3538: webapp - upload_data endpoint
+                                    #                   Feature #3550: flux.uploaded_data_worker
+                                    # Added the ability to ignore_submitted_timestamps and not
+                                    # check flux.last metric timestamp
+                                    elif ignore_submitted_timestamps:
+                                        logger.info('uploaded_data_worker :: ignore_submitted_timestamps :: not updating %s with %s' % (
                                             cache_key, str(metric_data)))
                                     else:
                                         self.redis_conn.set(cache_key, str(metric_data))
