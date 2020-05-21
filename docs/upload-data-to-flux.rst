@@ -34,8 +34,12 @@ So you could upload `data.csv`, `data.csv.gz` or `data.zip` with the `data.csv`
 file inside the zip archive.
 
 Any files in an archive that are not of an allowed format are not extracted or
-they are deleted.  Try and submit one data file per upload as ordering has not
-been tested.
+they are deleted.
+
+Files names **must only have** alphanumeric, `-`, `_` and `.` characters in them.
+File names like `'2020-05-13-05_devices_99_1(2).xlsx'` are not acceptable (
+no matter what your OS lets you do).  Handling `'`, `(`, etc in the file names
+is not something that will be done.
 
 Multiple data files should be uploaded and processed sequentially.  At the
 moment upload the oldest data file first and then after validating the status of
