@@ -2,6 +2,8 @@
 upload_data to Flux - EXPERIMENTAL
 ==================================
 
+**POST variables may change as this is a experimental feature**
+
 **SIMPLE** data files can be uploaded via the /upload_data HTTP/S endpoint for
 Flux to process and fed to Graphite.  A number of things need to be enabled and
 running to allow for processing data file uploads, which are not enabled by
@@ -15,15 +17,18 @@ Skyline currently allows for the uploading of the following format data files:
 
 - csv (tested)
 - xlsx (tested)
+- xls (not tested)
 
 Seeing as data files can be large, the following archive formats are accepted:
 
 - gz (tested)
-- zip (tested)
+- zip (partly tested, multiple data files per archive have not been thoroughly tested)
 
 A single file or archive can be uploaded or many data files can be uploaded in
 a single archive.  A `info.csv` must also be included in the archive, more
-on that below.
+on that below.  **HOWEVER** if you wish to determine the status of the upload
+programmatically you will want to upload one data file per upload, otherwise
+making sense of the upload_status will be very difficult.
 
 So you could upload `data.csv`, `data.csv.gz` or `data.zip` with the `data.csv`
 file inside the zip archive.
@@ -94,12 +99,19 @@ info.json
 
 Your date time column MUST be named date in the columns_to_metrics mapping.
 
-For convenience sake you can also add two additional elements to the info.json:
+For convenience sake you can also add additional elements to the info.json:
 
 - `"debug": "true"` which outputs additional information regarding the imported
   dataframe in the flux.log to aid with debugging.
 - `"dryrun": "true"` which runs through the processing but does not submit data
   to Graphite.
+- `"ignore_submitted_timestamps": "true"`, a check is normally done of the last
+  timestamp submitted to flux for the metric to ensure that data is not
+  submitted multiple times. If you wish to override this check to resubmit data,
+  update or override already submitted data pass this in the info.json. However
+  do **note**,  if you wish to resubmit data that is **NOT IN THE** latest
+  Graphite retention (old data) this will not have the desired affect as
+  Graphite down sampling (aggregation) will already have occurred.
 
 This tells Skyline what the parent metric namespace should be which would
 result in metrics:

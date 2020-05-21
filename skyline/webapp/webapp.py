@@ -189,8 +189,8 @@ if file_uploads_enabled:
         DATA_UPLOADS_PATH = settings.DATA_UPLOADS_PATH
     except:
         DATA_UPLOADS_PATH = '/tmp/skyline/data_uploads'
-    ALLOWED_EXTENSIONS = {'json', 'csv', 'xlsx', 'zip', 'gz'}
-    ALLOWED_FORMATS = {'csv', 'xlsx'}
+    ALLOWED_EXTENSIONS = {'json', 'csv', 'xlsx', 'xls', 'zip', 'gz'}
+    ALLOWED_FORMATS = {'csv', 'xlsx', 'xls'}
     # @modified 20200520 - Bug #3552: flux.uploaded_data_worker - tar.gz
     # tar.gz needs more work
     # ALLOWED_ARCHIVES = {'none', 'zip', 'gz', 'tar_gz'}
@@ -4685,6 +4685,11 @@ def upload_data():
     resample_method = 'mean'
     json_response = False
     flux_identifier = None
+    # @added 20200521 - Feature #3538: webapp - upload_data endpoint
+    #                   Feature #3550: flux.uploaded_data_worker
+    # Added the ability to ignore_submitted_timestamps and not
+    # check flux.last metric timestamp
+    ignore_submitted_timestamps = False
 
     upload_id = None
     data_dict = {}
@@ -4879,6 +4884,15 @@ def upload_data():
             if resample_method_str == 'sum':
                 resample_method = 'sum'
                 logger.info('handling upload_data POST with variable columns_to_process - %s' % str(columns_to_process))
+        # @added 20200521 - Feature #3538: webapp - upload_data endpoint
+        #                   Feature #3550: flux.uploaded_data_worker
+        # Added the ability to ignore_submitted_timestamps and not
+        # check flux.last metric timestamp
+        if 'ignore_submitted_timestamps' in request.form:
+            ignore_submitted_timestamps_str = request.form['ignore_submitted_timestamps']
+            if ignore_submitted_timestamps_str == 'true':
+                ignore_submitted_timestamps = True
+                logger.info('handling upload_data POST with variable json_response - %s' % str(json_response))
 
         if 'info_file' not in request.files:
             create_info_file = True
@@ -4903,7 +4917,8 @@ def upload_data():
                 "columns_to_ignore": columns_to_ignore,
                 "columns_to_process": columns_to_process,
                 "info_file_in_archive": info_file_in_archive,
-                "resample_method": resample_method
+                "resample_method": resample_method,
+                "ignore_submitted_timestamps": ignore_submitted_timestamps,
             }
 
         info_file_saved = False
@@ -4989,7 +5004,8 @@ def upload_data():
             "info_file_in_archive": info_file_in_archive,
             "skip_rows": skip_rows,
             "header_row": header_row,
-            "resample_method": resample_method
+            "resample_method": resample_method,
+            "ignore_submitted_timestamps": ignore_submitted_timestamps,
         }
         try:
             REDIS_CONN.sadd('flux.uploaded_data', str(upload_data_dict))

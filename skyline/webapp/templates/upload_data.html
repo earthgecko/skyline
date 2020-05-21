@@ -105,6 +105,7 @@
   		        <td><select name="format">
                 <option value="csv">csv</option>
                 <option value="xlsx">xlsx</option>
+                <option value="xls">xls</option>
               </select><br>
   		      </tr>
   		      <tr>
@@ -172,6 +173,17 @@
               </select><br>
               If you data file has a sample rate of more than 1 data point per metric per 60 seconds, a pandas resample at <code>1Min</code> is appied to the data.<br>
               If the data needs to be resampled, you can select to resample it by the mean (default) or the sum.<br>
+  		      </tr>
+  		      <tr>
+              <td>ignore_submitted_timestamps [optional]</td>
+  		        <td><select name="ignore_submitted_timestamps">
+                <option value="false">false</option>
+                <option value="true">true</option>
+              </select><br>
+              A check is normally done of the last timestamp submitted to flux for the metric to ensure that data is not submitted multiple times<br>
+              If you wish to override this check to resubmit data, update or override already submitted data set this to <code>true</code><br>
+              <strong>Note</strong>: If you wish to resubmit data that is <code>NOT IN THE</code> latest Graphite retention (old data) this will not have the desired affect.<br>
+              If you are submit data for the first time probably set this to true.
   		      </tr>
   		    </tbody>
   		  </table>
