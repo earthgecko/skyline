@@ -301,7 +301,7 @@ def create_fp_ts_graph(
     created_fp_ts_graph = False
     try:
         graph_title = '%s\nFeatures profile id %s - database time series data plot' % (base_name, str(fp_id))
-        created_fp_ts_graph, fp_ts_graph_file = create_matplotlib_graph(current_skyline_app, fp_ts_graph_file, graph_title, timeseries)
+        created_fp_ts_graph = create_matplotlib_graph(current_skyline_app, fp_ts_graph_file, graph_title, timeseries)
     except:
         current_logger.error(traceback.format_exc())
         current_logger.error('error :: failed to create matplotlib graph for %s fp id %' % (base_name. str(fp_id)))
