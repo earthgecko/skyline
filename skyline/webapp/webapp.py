@@ -4680,8 +4680,8 @@ def upload_data():
     date_orientation = 'rows'
     skip_rows = None
     header_row = None
-    columns_to_ignore = 0
-    columns_to_process = 0
+    columns_to_ignore = None
+    columns_to_process = None
     resample_method = 'mean'
     json_response = False
     flux_identifier = None

@@ -1258,6 +1258,14 @@ class UploadedDataWorker(Process):
                                     elif ignore_submitted_timestamps:
                                         logger.info('uploaded_data_worker :: ignore_submitted_timestamps :: not updating %s with %s' % (
                                             cache_key, str(metric_data)))
+                                        # @added 20200527 - Feature #3550: flux.uploaded_data_worker
+                                        # If submitted timestamps are ignored
+                                        # add the the Redis set for analyzer to
+                                        # sorted and deduplicated the time
+                                        # series data in Redis
+                                        self.redis_conn.sadd('flux.sort_and_dedup.metrics', metric)
+                                        logger.info('uploaded_data_worker :: added %s to flux.sort_and_dedup.metrics Redis set' % (
+                                            metric))
                                     else:
                                         self.redis_conn.set(cache_key, str(metric_data))
                                         logger.info('uploaded_data_worker :: set the metric Redis key - %s - %s' % (
