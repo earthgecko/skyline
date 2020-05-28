@@ -602,6 +602,17 @@ class Analyzer(Thread):
             logger.error('error :: failed to generate a list from analyzer.non_smtp_alerter_metrics Redis set')
             non_smtp_alerter_metrics = []
 
+        # @added 20200527 - Feature #3550: flux.uploaded_data_worker
+        # If data has been uploaded ignoring submitted timestamps then the Redis
+        # time series data needs to be sorted and deduplicated
+        flux_upload_metrics_to_sort_and_deduplicate = []
+        try:
+            flux_upload_metrics_to_sort_and_deduplicate = list(self.redis_conn_decoded.smembers('flux.sort_and_dedup.metrics'))
+        except:
+            logger.info(traceback.format_exc())
+            logger.error('error :: failed to generate a list from flux.sort_and_dedup.metrics Redis set')
+            flux_upload_metrics_to_sort_and_deduplicate = []
+
         # @added 20200213 - Bug #3448: Repeated airgapped_metrics
         #                   Feature #3400: Identify air gaps in the metric data
         # Backfill airgaps in Redis time series with flux back filled data
@@ -810,6 +821,18 @@ class Analyzer(Thread):
                     sort_data = True
                     logger.info('sorting and deduplicating data because %s is in the analyzer.unordered_timeseries' % str(metric_name))
             sorted_and_deduplicated_timeseries = None
+
+            # @added 20200527 - Feature #3550: flux.uploaded_data_worker
+            # If data has been uploaded ignoring submitted timestamps then the
+            # Redis time series data needs to be sorted and deduplicated
+            if base_name in flux_upload_metrics_to_sort_and_deduplicate:
+                sort_data = True
+                try:
+                    self.redis_conn.srem('flux.sort_and_dedup.metrics', base_name)
+                except:
+                    logger.info(traceback.format_exc())
+                    logger.error('error :: failed to remove %s from flux.sort_and_dedup.metrics Redis set')
+
             if sort_data:
                 try:
                     unsorted_length = len(timeseries)
@@ -4230,10 +4253,10 @@ class Analyzer(Thread):
                     # expected and not an error
                     # logger.error('error :: could not rename Redis set new_derivative_metrics: %s' % str(e))
                     if ANALYZER_ENABLED:
-                        logger.error('error :: could not rename Redis set new_derivative_metrics: %s' % str(e))
+                        logger.error('error :: could not get Redis set derivative_metrics: %s' % str(e))
                     else:
                         logger.info(
-                            'there is no Redis set new_derivative_metrics to rename, expected as ANALYZER_ENABLED is set to %s - %s' % (
+                            'there is no Redis set derivative_metrics, expected as ANALYZER_ENABLED is set to %s - %s' % (
                                 str(ANALYZER_ENABLED), str(e)))
 
                 # @added 20190922 - Branch #3002: docker
