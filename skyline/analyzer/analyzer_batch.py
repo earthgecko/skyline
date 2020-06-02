@@ -348,36 +348,79 @@ class AnalyzerBatch(Thread):
         # metric
         known_derivative_metric = False
         unknown_deriv_status = True
-        if metric_name in non_derivative_metrics:
+
+        # @modified 20200601 - Feature #3480: batch_processing
+        #                      Bug #2050: analyse_derivatives - change in monotonicity
+        # Switch the order in which they are checked and do not check if
+        # not manage_derivative_metrics as will only be set to True anyway
+        # if metric_name in non_derivative_metrics:
+        #     unknown_deriv_status = False
+        # if unknown_deriv_status:
+        #     if metric_name in derivative_metrics:
+        #         known_derivative_metric = True
+        #         unknown_deriv_status = False
+        if metric_name in derivative_metrics:
+            known_derivative_metric = True
             unknown_deriv_status = False
         if unknown_deriv_status:
-            if metric_name in derivative_metrics:
-                known_derivative_metric = True
+            if metric_name in non_derivative_metrics:
                 unknown_deriv_status = False
 
         # First check if it has its own Redis z.derivative_metric key
         # that has not expired
         derivative_metric_key = 'z.derivative_metric.%s' % str(base_name)
 
+        # @added 20200601 - Feature #3480: batch_processing
+        #                   Bug #2050: analyse_derivatives - change in monotonicity
+        # When a monotonic metric changes in the last run before a
+        # manage_derivative_metrics run, when manage_derivative_metrics runs
+        # it classifies it and adds it to non_derivative_metrics the only
+        # way to stop this is check the key for each metric
+        last_derivative_metric_key = None
+        try:
+            last_derivative_metric_key = self.redis_conn_decoded.get(derivative_metric_key)
+        except Exception as e:
+            logger.error('error :: could not query Redis for last_derivative_metric_key: %s' % e)
+        if last_derivative_metric_key:
+            known_derivative_metric = True
+
         if unknown_deriv_status:
             # @added 20170617 - Bug #2050: analyse_derivatives - change in monotonicity
-            last_derivative_metric_key = False
-            try:
-                last_derivative_metric_key = self.redis_conn.get(derivative_metric_key)
-            except Exception as e:
-                logger.error('error :: could not query Redis for last_derivative_metric_key: %s' % e)
+            # @modified 20200601 - Feature #3480: batch_processing
+            #                      Bug #2050: analyse_derivatives - change in monotonicity
+            # Always check moved to above
+            # last_derivative_metric_key = False
+            # try:
+            #     last_derivative_metric_key = self.redis_conn.get(derivative_metric_key)
+            # except Exception as e:
+            #     logger.error('error :: could not query Redis for last_derivative_metric_key: %s' % e)
+
+            # @modified 20200601 - Feature #3480: batch_processing
+            #                      Bug #2050: analyse_derivatives - change in monotonicity
+            # Apply skip_derivative
+            skip_derivative = in_list(base_name, non_derivative_monotonic_metrics)
+            is_strictly_increasing_monotonically = False
+
+            if not skip_derivative:
+                is_strictly_increasing_monotonically = strictly_increasing_monotonicity(timeseries)
+                if is_strictly_increasing_monotonically:
+                    try:
+                        last_expire_set = int(time())
+                        self.redis_conn.setex(
+                            derivative_metric_key, settings.FULL_DURATION, last_expire_set)
+                    except Exception as e:
+                        logger.error('error :: could not set Redis derivative_metric key: %s' % e)
+            else:
+                is_strictly_increasing_monotonically = False
 
             # Determine if it is a strictly increasing monotonically metric
             # or has been in last FULL_DURATION via its z.derivative_metric
             # key
-            if not last_derivative_metric_key:
-                is_strictly_increasing_monotonically = strictly_increasing_monotonicity(timeseries)
-            else:
+            if last_derivative_metric_key:
                 # Until the z.derivative_metric key expires, it is classed
                 # as such
                 is_strictly_increasing_monotonically = True
 
-            skip_derivative = in_list(base_name, non_derivative_monotonic_metrics)
             if skip_derivative:
                 is_strictly_increasing_monotonically = False
             if is_strictly_increasing_monotonically:
@@ -387,12 +430,28 @@ class AnalyzerBatch(Thread):
                 except:
                     logger.info(traceback.format_exc())
                     logger.error('error :: failed to add metric to Redis derivative_metrics set')
+                try:
+                    self.redis_conn.sadd('new_derivative_metrics', metric_name)
+                except:
+                    logger.info(traceback.format_exc())
+                    logger.error('error :: failed to add metric to Redis new_derivative_metrics set')
+                try:
+                    last_expire_set = int(time())
+                    self.redis_conn.setex(
+                        derivative_metric_key, settings.FULL_DURATION, last_expire_set)
+                except Exception as e:
+                    logger.error('error :: could not set Redis derivative_metric key: %s' % e)
             else:
                 try:
                     self.redis_conn.sadd('non_derivative_metrics', metric_name)
                 except:
                     logger.info(traceback.format_exc())
                     logger.error('error :: failed to add metric to Redis non_derivative_metrics set')
+                try:
+                    self.redis_conn.sadd('new_non_derivative_metrics', metric_name)
+                except:
+                    logger.info(traceback.format_exc())
+                    logger.error('error :: failed to add metric to Redis new_non_derivative_metrics set')
 
         # Distill timeseries strings into lists
         for i, batch_timestamp in enumerate(timestamps_to_analyse):

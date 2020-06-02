@@ -1314,6 +1314,13 @@ def strictly_increasing_monotonicity(timeseries):
     monotonically, it will only return True if the values are strictly
     increasing, an incrementing count.
     """
+
+    # @added 20200529 - Bug #2050: analyse_derivatives - change in monotonicity
+    # Only apply to time series that have sufficient data to make this
+    # determination
+    if len(timeseries) < 90:
+        return False
+
     import numpy as np
 
     test_ts = []
