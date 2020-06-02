@@ -666,10 +666,22 @@ def identify_airgaps(metric_name, timeseries, airgapped_metrics, airgapped_metri
         # fast, testing on 657 metrics with loading all the time series data and
         # running the below function took 0.43558645248413086 seconds.
         unordered_timeseries = False
-        for resolution in ordered_timestamp_resolutions_count:
-            if resolution[0] < 0:
-                unordered_timeseries = True
-                break
+
+        # @added 20200601 - Feature #3400: Identify air gaps in the metric data
+        # Wrap in try and except
+        if ordered_timestamp_resolutions_count:
+            try:
+                for resolution in ordered_timestamp_resolutions_count:
+                    if resolution[0] < 0:
+                        unordered_timeseries = True
+                        break
+            except:
+                traceback_format_exc_string = traceback.format_exc()
+                algorithm_name = str(get_function_name())
+                record_algorithm_error(algorithm_name, traceback_format_exc_string)
+                del timestamp_resolutions
+                # return None
+                return [], None
 
         if ordered_timestamp_resolutions_count:
             del ordered_timestamp_resolutions_count
