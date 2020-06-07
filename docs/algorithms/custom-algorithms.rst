@@ -154,7 +154,7 @@ Below the requirements are outlined, please read them and you can refer to a
 couple of example custom algorithm files in the skyline/custom_algorithms
 directory of the repo.  https://github.com/earthgecko/skyline/tree/master/skyline/custom_algorithms
 
-.. warn:: Do remember if the algorithm has requirements that are not declared
+.. warning:: Do remember if the algorithm has requirements that are not declared
   in Skyline's requirements.txt file, ensure that you install the algorithm's
   requirements in the Skyline virtualenv.
 

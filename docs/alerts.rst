@@ -194,3 +194,28 @@ Boundary handles the boundary resend queue and resends for boundary alerts.
 Boundary uses the same checks to determine whether the endpoint is healthy to
 prevent Boundary from attempting to repeatedly resend all alerts to a
 http_alerter endpoint that is down.
+
+External alert configs
+======================
+
+Skyline can fetch alert configs from external sources
+
+- **Example**::
+
+    EXTERNAL_ALERTS = {
+        'test_alert_config': {
+            'url': 'http://127.0.0.1:1500/mock_api?test_alert_config',
+            'method': 'GET',
+        },
+        'metric_collector_1': {
+            'url': 'https://example.org/alert_config',
+            'method': 'POST',
+            'data': {
+                'token': '1234567890123456'
+            },
+        },
+        'client_app': {
+            'url': 'https://username:password@app.example.org/alerts?token=3456abcde&metrics=all',
+            'method': 'GET',
+        },
+    }
