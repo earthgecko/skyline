@@ -48,7 +48,8 @@ LOCAL_DEBUG = False
 
 # @added 20170319 - Feature #1978: worker - DO_NOT_SKIP_LIST
 try:
-    DO_NOT_SKIP_LIST = settings.DO_NOT_SKIP_LIST
+    # @modified 20200606 - Bug #3572: Apply list to settings import
+    DO_NOT_SKIP_LIST = list(settings.DO_NOT_SKIP_LIST)
 except:
     DO_NOT_SKIP_LIST = []
 

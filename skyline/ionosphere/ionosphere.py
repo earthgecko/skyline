@@ -152,11 +152,12 @@ except:
 # and if busy do not analyse the Skyline host namespace while
 # ionosphere is busy.
 try:
-    SKYLINE_FEEDBACK_NAMESPACES = settings.SKYLINE_FEEDBACK_NAMESPACES
+    # @modified 20200606 - Bug #3572: Apply list to settings import
+    SKYLINE_FEEDBACK_NAMESPACES = list(settings.SKYLINE_FEEDBACK_NAMESPACES)
 except:
     # Let us take a guess
     try:
-        graphite_host = settings.GRAPHITE_HOST
+        graphite_host = str(settings.GRAPHITE_HOST)
         graphite_hostname = graphite_host.split('.', -1)[0]
         SKYLINE_FEEDBACK_NAMESPACES = [settings.SERVER_METRICS_NAME, graphite_hostname]
     except:
@@ -175,7 +176,9 @@ try:
 except:
     BATCH_PROCESSING = None
 try:
-    from settings import BATCH_PROCESSING_NAMESPACES
+    # @modified 20200606 - Bug #3572: Apply list to settings import
+    # from settings import BATCH_PROCESSING_NAMESPACES
+    BATCH_PROCESSING_NAMESPACES = list(settings.BATCH_PROCESSING_NAMESPACES)
 except:
     BATCH_PROCESSING_NAMESPACES = []
 
@@ -358,58 +361,70 @@ class Ionosphere(Thread):
             logger.info(traceback.format_exc())
             logger.error('error :: purge_old_data_dirs - os.walk')
 
+        # @added 20200529 - Feature #3472: ionosphere.training_data Redis set
+        #                   Feature #3474: webapp api - training_data
+        logger.info('cleaned old training data')
+
         # @added 20200409 - Feature #3472: ionosphere.training_data Redis set
         #                   Feature #3474: webapp api - training_data
         if training_data_list:
             training_data_instances = []
             for training_data_dir in training_data_list:
                 for path, folders, files in os.walk(training_data_dir):
-                    add_folder = False
-                    metric = None
-                    timestamp = None
-                    if files:
+
+                    # @modified 20200529 - Feature #3472: ionosphere.training_data Redis set
+                    #                      Feature #3474: webapp api - training_data
+                    # Wrapped in try and except
+                    try:
                         add_folder = False
                         metric = None
                         timestamp = None
-                        if '/learn/' in path:
-                            metric_file = None
-                            metric_file_path = None
-                            continue
-                        for ifile in files:
-                            if ifile.endswith('.png'):
-                                add_folder = True
-                            if ifile.endswith('.txt'):
-                                if ifile.endswith('.fp.details.txt'):
-                                    continue
-                                if ifile.endswith('.fp.created.txt'):
-                                    continue
-                                else:
-                                    metric_file = ifile
-                                    metric_file_path = path
-                        if add_folder:
-                            if metric_file and metric_file_path:
-                                metric = metric_file.replace('.txt', '', 1)
-                                path_elements = metric_file_path.split(os.sep)
-                                for element in path_elements:
-                                    if re.match('\d{10}', element):
-                                        timestamp = int(element)
-                            if metric and timestamp:
-                                # @added 20200425 - Feature #3508: ionosphere.untrainable_metrics
-                                # Determine and add resolution
-                                resolution_seconds = settings.FULL_DURATION
-                                for ifile in files:
-                                    if ifile.endswith('.png') and 'mirage' in ifile and 'graphite' in ifile:
-                                        try:
-                                            ifile_resolution_elements = ifile.replace('.png', '', 1).split('.')
-                                            ifile_resolution_str = ifile_resolution_elements[-1]
-                                            ifile_resolution = int(ifile_resolution_str.replace('h', '', 1))
-                                            resolution_seconds = ifile_resolution * 3600
-                                        except:
-                                            pass
-                                # @modified 20200425 - Feature #3508: ionosphere.untrainable_metrics
-                                # Added resolution_seconds
-                                # training_data_instances.append([metric, timestamp])
-                                training_data_instances.append([metric, timestamp, resolution_seconds])
+                        if files:
+                            add_folder = False
+                            metric = None
+                            timestamp = None
+                            if '/learn/' in path:
+                                metric_file = None
+                                metric_file_path = None
+                                continue
+                            for ifile in files:
+                                if ifile.endswith('.png'):
+                                    add_folder = True
+                                if ifile.endswith('.txt'):
+                                    if ifile.endswith('.fp.details.txt'):
+                                        continue
+                                    if ifile.endswith('.fp.created.txt'):
+                                        continue
+                                    else:
+                                        metric_file = ifile
+                                        metric_file_path = path
+                            if add_folder:
+                                if metric_file and metric_file_path:
+                                    metric = metric_file.replace('.txt', '', 1)
+                                    path_elements = metric_file_path.split(os.sep)
+                                    for element in path_elements:
+                                        if re.match('\d{10}', element):
+                                            timestamp = int(element)
+                                if metric and timestamp:
+                                    # @added 20200425 - Feature #3508: ionosphere.untrainable_metrics
+                                    # Determine and add resolution
+                                    resolution_seconds = settings.FULL_DURATION
+                                    for ifile in files:
+                                        if ifile.endswith('.png') and 'mirage' in ifile and 'graphite' in ifile:
+                                            try:
+                                                ifile_resolution_elements = ifile.replace('.png', '', 1).split('.')
+                                                ifile_resolution_str = ifile_resolution_elements[-1]
+                                                ifile_resolution = int(ifile_resolution_str.replace('h', '', 1))
+                                                resolution_seconds = ifile_resolution * 3600
+                                            except:
+                                                pass
+                                    # @modified 20200425 - Feature #3508: ionosphere.untrainable_metrics
+                                    # Added resolution_seconds
+                                    # training_data_instances.append([metric, timestamp])
+                                    training_data_instances.append([metric, timestamp, resolution_seconds])
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to evaluate training_dir - %s' % str(training_data_dir))
 
             if training_data_instances:
                 training_data_count = len(training_data_instances)
@@ -1318,7 +1333,7 @@ class Ionosphere(Thread):
                 # metric_ionosphere_enabled = int(metrics_db_object['ionosphere_enabled'])
                 metric_ionosphere_enabled = None
                 try:
-                    metric_ionosphere_enabled = int(metrics_db_object['ionosphere_enabled'])
+                    metric_ionosphere_enabled = metrics_db_object['ionosphere_enabled']
                 except:
                     logger.error(traceback.format_exc())
                     logger.error('error :: could not determine ionosphere_enabled from metrics_db_object for %s' % base_name)
