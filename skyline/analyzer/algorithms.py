@@ -45,6 +45,31 @@ if ENABLE_SECOND_ORDER:
     else:
         redis_conn = StrictRedis(unix_socket_path=REDIS_SOCKET_PATH)
 
+# @added 20200603 - Feature #3566: custom_algorithms
+try:
+    from settings import CUSTOM_ALGORITHMS
+except:
+    CUSTOM_ALGORITHMS = None
+try:
+    from settings import DEBUG_CUSTOM_ALGORITHMS
+except:
+    DEBUG_CUSTOM_ALGORITHMS = False
+if CUSTOM_ALGORITHMS:
+    try:
+        from custom_algorithms_to_run import get_custom_algorithms_to_run
+    except:
+        get_custom_algorithms_to_run = None
+    try:
+        from custom_algorithms import run_custom_algorithm_on_timeseries
+    except:
+        run_custom_algorithm_on_timeseries = None
+
+# @added 20200604 - Mirage - populate_redis
+try:
+    from settings import MIRAGE_AUTOFILL_TOOSHORT
+except:
+    MIRAGE_AUTOFILL_TOOSHORT = None
+
 skyline_app = 'analyzer'
 skyline_app_logger = '%sLog' % skyline_app
 logger = logging.getLogger(skyline_app_logger)
@@ -56,8 +81,8 @@ except:
 
 # @added 20180807 - Feature #2492: alert on stale metrics
 try:
-    from settings import ALERT_ON_STALE_METRICS
-#    ALERT_ON_STALE_METRICS = settings.ALERT_ON_STALE_METRICS
+    from settings import ALERT_ON_STALE_METRICS as S_ALERT_ON_STALE_METRICS
+    ALERT_ON_STALE_METRICS = list(S_ALERT_ON_STALE_METRICS)
 except:
     ALERT_ON_STALE_METRICS = False
 try:
@@ -81,11 +106,15 @@ try:
 except:
     IDENTIFY_UNORDERED_TIMESERIES = False
 try:
-    from settings import CHECK_AIRGAPS
+    # @modified 20200606 - Bug #3572: Apply list to settings import
+    from settings import CHECK_AIRGAPS as S_CHECK_AIRGAPS
+    CHECK_AIRGAPS = list(S_CHECK_AIRGAPS)
 except:
     CHECK_AIRGAPS = []
 try:
-    from settings import SKIP_AIRGAPS
+    # @modified 20200606 - Bug #3572: Apply list to settings import
+    from settings import SKIP_AIRGAPS as S_SKIP_AIRGAPS
+    SKIP_AIRGAPS = list(S_SKIP_AIRGAPS)
 except:
     SKIP_AIRGAPS = []
 
@@ -944,6 +973,27 @@ def run_selected_algorithm(timeseries, metric_name, airgapped_metrics, airgapped
     if check_for_timeseries_exceptions:
         # Get rid of short series
         if len(timeseries) < MIN_TOLERABLE_LENGTH:
+            # @added 20200604 - Mirage - populate_redis
+            if MIRAGE_AUTOFILL_TOOSHORT:
+                base_name = metric_name.replace(FULL_NAMESPACE, '', 1)
+                redis_populated = False
+                redis_populated_key = 'mirage.redis_populated.%s' % base_name
+                try:
+                    from skyline_functions import get_redis_conn
+                    redis_conn = get_redis_conn(skyline_app)
+                except:
+                    redis_conn = None
+                if redis_conn:
+                    try:
+                        redis_populated = redis_conn.get(redis_populated_key)
+                    except:
+                        redis_conn = None
+                if not redis_populated:
+                    try:
+                        redis_conn.sadd('mirage.populate_redis', str(base_name))
+                    except:
+                        redis_conn = None
+
             raise TooShort()
 
         # Get rid of stale series
@@ -1057,7 +1107,10 @@ def run_selected_algorithm(timeseries, metric_name, airgapped_metrics, airgapped
             # context?
             # @modified 20200424 - Feature #3508: ionosphere.untrainable_metrics
             # Added negatives_found
-            return False, [], 1, negatives_found
+            # @modified 20200603 - Feature #3566: custom_algorithms
+            # Added algorithms_run
+            algorithms_run = []
+            return False, [], 1, negatives_found, algorithms_run
 
     # RUN_OPTIMIZED_WORKFLOW - replaces the original ensemble method:
     # ensemble = [globals()[algorithm](timeseries) for algorithm in ALGORITHMS]
@@ -1077,9 +1130,151 @@ def run_selected_algorithm(timeseries, metric_name, airgapped_metrics, airgapped
 
     algorithm_tmp_file_prefix = '%s/%s.' % (SKYLINE_TMP_DIR, skyline_app)
 
-    for algorithm in ALGORITHMS:
-        if consensus_possible:
+    # @added 20200603 - Feature #3566: custom_algorithms
+    algorithms_run = []
+    custom_consensus_override = False
+    custom_consensus_values = []
+    run_3sigma_algorithms = True
+    run_3sigma_algorithms_overridden_by = []
+    custom_algorithm = None
+    if CUSTOM_ALGORITHMS:
+        base_name = metric_name.replace(FULL_NAMESPACE, '', 1)
+        custom_algorithms_to_run = {}
+        try:
+            custom_algorithms_to_run = get_custom_algorithms_to_run(skyline_app, base_name, CUSTOM_ALGORITHMS, DEBUG_CUSTOM_ALGORITHMS)
+            if DEBUG_CUSTOM_ALGORITHMS:
+                if custom_algorithms_to_run:
+                    logger.debug('algorithms :: debug :: custom algorithms ARE RUN on %s' % (str(base_name)))
+        except:
+            logger.error('error :: get_custom_algorithms_to_run :: %s' % traceback.format_exc())
+            custom_algorithms_to_run = {}
+        for custom_algorithm in custom_algorithms_to_run:
+            if consensus_possible:
+                algorithm = custom_algorithm
+                debug_logging = False
+                try:
+                    debug_logging = custom_algorithms_to_run[custom_algorithm]['debug_logging']
+                except:
+                    debug_logging = False
+                if DEBUG_CUSTOM_ALGORITHMS:
+                    debug_logging = True
+                if send_algorithm_run_metrics:
+                    algorithm_count_file = '%s%s.count' % (algorithm_tmp_file_prefix, algorithm)
+                    algorithm_timings_file = '%s%s.timings' % (algorithm_tmp_file_prefix, algorithm)
+                run_algorithm = []
+                run_algorithm.append(algorithm)
+                number_of_algorithms += 1
+                number_of_algorithms_run += 1
+                if send_algorithm_run_metrics:
+                    start = timer()
+                if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
+                    logger.debug('debug :: algorithms :: running custom algorithm %s on %s' % (
+                        str(algorithm), str(base_name)))
+                    start_debug_timer = timer()
+                run_custom_algorithm_on_timeseries = None
+                try:
+                    from custom_algorithms import run_custom_algorithm_on_timeseries
+                    if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
+                        logger.debug('debug :: algorithms :: loaded run_custom_algorithm_on_timeseries')
+                except:
+                    if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: algorithms :: failed to load run_custom_algorithm_on_timeseries')
+                result = None
+                anomalyScore = None
+                if run_custom_algorithm_on_timeseries:
+                    try:
+                        result, anomalyScore = run_custom_algorithm_on_timeseries(skyline_app, getpid(), base_name, timeseries, custom_algorithm, custom_algorithms_to_run[custom_algorithm], DEBUG_CUSTOM_ALGORITHMS)
+                        algorithm_result = [result]
+                        if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
+                            logger.debug('debug :: algorithms :: run_custom_algorithm_on_timeseries run with result - %s, anomalyScore - %s' % (
+                                str(result), str(anomalyScore)))
+                    except:
+                        if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: algorithms :: failed to run custom_algorithm %s on %s' % (
+                                custom_algorithm, base_name))
+                        result = None
+                        algorithm_result = [None]
+                else:
+                    if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
+                        logger.error('error :: debug :: algorithms :: run_custom_algorithm_on_timeseries was not loaded so was not run')
+                if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
+                    end_debug_timer = timer()
+                    logger.debug('debug :: algorithms :: ran custom algorithm %s on %s with result of (%s, %s) in %.6f seconds' % (
+                        str(algorithm), str(base_name),
+                        str(result), str(anomalyScore),
+                        (end_debug_timer - start_debug_timer)))
+                algorithms_run.append(algorithm)
+                if send_algorithm_run_metrics:
+                    end = timer()
+                    with open(algorithm_count_file, 'a') as f:
+                        f.write('1\n')
+                    with open(algorithm_timings_file, 'a') as f:
+                        f.write('%.6f\n' % (end - start))
+            else:
+                algorithm_result = [False]
 
+            if algorithm_result.count(True) == 1:
+                result = True
+                number_of_algorithms_triggered += 1
+            elif algorithm_result.count(False) == 1:
+                result = False
+            elif algorithm_result.count(None) == 1:
+                result = None
+            else:
+                result = False
+            final_ensemble.append(result)
+            custom_consensus = None
+            algorithms_allowed_in_consensus = []
+            # @added 20200605 - Feature #3566: custom_algorithms
+            # Allow only single or multiple custom algorithms to run and allow
+            # the a custom algorithm to specify not to run 3sigma aglorithms
+            custom_run_3sigma_algorithms = True
+            try:
+                custom_run_3sigma_algorithms = custom_algorithms_to_run[custom_algorithm]['run_3sigma_algorithms']
+            except:
+                custom_run_3sigma_algorithms = True
+            if not custom_run_3sigma_algorithms and result:
+                run_3sigma_algorithms = False
+                run_3sigma_algorithms_overridden_by.append(custom_algorithm)
+                if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
+                    logger.debug('debug :: algorithms :: run_3sigma_algorithms is False on %s for %s' % (
+                        custom_algorithm, base_name))
+            if result:
+                try:
+                    custom_consensus = custom_algorithms_to_run[custom_algorithm]['consensus']
+                    if custom_consensus == 0:
+                        custom_consensus = int(CONSENSUS)
+                    else:
+                        custom_consensus_values.append(custom_consensus)
+                except:
+                    custom_consensus = int(CONSENSUS)
+                try:
+                    algorithms_allowed_in_consensus = custom_algorithms_to_run[custom_algorithm]['algorithms_allowed_in_consensus']
+                except:
+                    algorithms_allowed_in_consensus = []
+                if custom_consensus == 1:
+                    consensus_possible = False
+                    custom_consensus_override = True
+                    logger.info('algorithms :: overidding the CONSENSUS as custom algorithm %s overides on %s' % (
+                        str(algorithm), str(base_name)))
+                # TODO - figure out how to handle consensus overrides if
+                #        multiple custom algorithms are used
+    if DEBUG_CUSTOM_ALGORITHMS:
+        if not run_3sigma_algorithms:
+            logger.debug('algorithms :: not running 3 sigma algorithms')
+        if len(run_3sigma_algorithms_overridden_by) > 0:
+            logger.debug('algorithms :: run_3sigma_algorithms overridden by %s' % (
+                str(run_3sigma_algorithms_overridden_by)))
+
+    for algorithm in ALGORITHMS:
+        # @modified 20200605 - Feature #3566: custom_algorithms
+        # Added run_3sigma_algorithms to allow only single or multiple custom
+        # algorithms to run and allow the a custom algorithm to specify not to
+        # run 3sigma aglorithms.
+        # if consensus_possible:
+        if consensus_possible and run_3sigma_algorithms:
             if send_algorithm_run_metrics:
                 algorithm_count_file = '%s%s.count' % (algorithm_tmp_file_prefix, algorithm)
                 algorithm_timings_file = '%s%s.timings' % (algorithm_tmp_file_prefix, algorithm)
@@ -1095,6 +1290,9 @@ def run_selected_algorithm(timeseries, metric_name, airgapped_metrics, airgapped
                 # logger.error('%s failed' % (algorithm))
                 algorithm_result = [None]
 
+            # @added 20200603 - Feature #3566: custom_algorithms
+            algorithms_run.append(algorithm)
+
             if send_algorithm_run_metrics:
                 end = timer()
                 with open(algorithm_count_file, 'a') as f:
@@ -1102,8 +1300,9 @@ def run_selected_algorithm(timeseries, metric_name, airgapped_metrics, airgapped
                 with open(algorithm_timings_file, 'a') as f:
                     f.write('%.6f\n' % (end - start))
         else:
-            algorithm_result = [False]
+            algorithm_result = [None]
             # logger.info('CONSENSUS NOT ACHIEVABLE - skipping %s' % (str(algorithm)))
+            algorithms_run.append(algorithm)
 
         if algorithm_result.count(True) == 1:
             result = True
@@ -1137,13 +1336,21 @@ def run_selected_algorithm(timeseries, metric_name, airgapped_metrics, airgapped
             # skip_algorithms_count = number_of_algorithms - number_of_algorithms_run
             # logger.info('skipping %s algorithms' % (str(skip_algorithms_count)))
 
+    # MOVED custom algorithms from HERE
+
     # logger.info('final_ensemble: %s' % (str(final_ensemble)))
 
     try:
         # ensemble = [globals()[algorithm](timeseries) for algorithm in ALGORITHMS]
         ensemble = final_ensemble
 
-        threshold = len(ensemble) - CONSENSUS
+        # @modified 20200603 - Feature #3566: custom_algorithms
+        # threshold = len(ensemble) - CONSENSUS
+        if custom_consensus_override:
+            threshold = len(ensemble) - 1
+        else:
+            threshold = len(ensemble) - CONSENSUS
+
         if ensemble.count(False) <= threshold:
 
             # @added 20200425 - Feature #3508: ionosphere.untrainable_metrics
@@ -1160,15 +1367,21 @@ def run_selected_algorithm(timeseries, metric_name, airgapped_metrics, airgapped
                 if is_anomalously_anomalous(metric_name, ensemble, timeseries[-1][1]):
                     # @modified 20200423 - Feature #3508: ionosphere.untrainable_metrics
                     # Added negatives_found
-                    return True, ensemble, timeseries[-1][1], negatives_found
+                    # @modified 20200603 - Feature #3566: custom_algorithms
+                    # Added algorithms_run
+                    return True, ensemble, timeseries[-1][1], negatives_found, algorithms_run
             else:
-                return True, ensemble, timeseries[-1][1], negatives_found
+                return True, ensemble, timeseries[-1][1], negatives_found, algorithms_run
 
         # @modified 20200423 - Feature #3508: ionosphere.untrainable_metrics
         # Added negatives_found
-        return False, ensemble, timeseries[-1][1], negatives_found
+        # @modified 20200603 - Feature #3566: custom_algorithms
+        # Added algorithms_run
+        return False, ensemble, timeseries[-1][1], negatives_found, algorithms_run
     except:
         logger.error('Algorithm error: %s' % traceback.format_exc())
         # @modified 20200423 - Feature #3508: ionosphere.untrainable_metrics
         # Added negatives_found
-        return False, [], 1, negatives_found
+        # @modified 20200603 - Feature #3566: custom_algorithms
+        # Added algorithms_run
+        return False, [], 1, negatives_found, algorithms_run

@@ -84,7 +84,9 @@ class TestAlgorithms(unittest.TestCase):
         airgapped_metrics_filled = []
         run_negatives_present = False
         check_for_airgaps_only = False
-        result, ensemble, datapoint, negatives_found = algorithms.run_selected_algorithm(timeseries, 'test.metric', airgapped_metrics, airgapped_metrics_filled, run_negatives_present, check_for_airgaps_only)
+        # @modified 20200604 - Feature #3566: custom_algorithms
+        # Added algorithms_run
+        result, ensemble, datapoint, negatives_found, algorithms_run = algorithms.run_selected_algorithm(timeseries, 'test.metric', airgapped_metrics, airgapped_metrics_filled, run_negatives_present, check_for_airgaps_only)
 
         self.assertTrue(result)
         self.assertTrue(len(filter(None, ensemble)) >= settings.CONSENSUS)

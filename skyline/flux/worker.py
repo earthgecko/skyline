@@ -252,7 +252,7 @@ class Worker(Process):
                                         int(time()))
                                     logger.info('worker :: set Redis key %s' % (str(flux_filled_key)))
                                 except Exception as e:
-                                    logger.error('error :: failed to could not set Redis derivative_metric key: %s' % e)
+                                    logger.error('error :: failed to could not set Redis flux.filled key: %s' % e)
                     else:
                         logger.info('worker :: discarded %s, %s, %s as a data point for %s has already been submitted to Graphite' % (
                             str(metric), str(value), str(timestamp), str(timestamp)))

@@ -119,7 +119,8 @@ try:
 except:
     BATCH_PROCESSING = None
 try:
-    from settings import BATCH_PROCESSING_NAMESPACES
+    # @modified 20200606 - Bug #3572: Apply list to settings import
+    BATCH_PROCESSING_NAMESPACES = list(settings.BATCH_PROCESSING_NAMESPACES)
 except:
     BATCH_PROCESSING_NAMESPACES = []
 
@@ -127,9 +128,27 @@ except:
 # Determine if any metrcs have negatives values some they can be
 # added to the ionosphere.untrainable_metrics Redis set
 try:
-    from settings import KNOWN_NEGATIVE_METRICS
+    # @modified 20200606 - Bug #3572: Apply list to settings import
+    # from settings import KNOWN_NEGATIVE_METRICS
+    KNOWN_NEGATIVE_METRICS = list(settings.KNOWN_NEGATIVE_METRICS)
 except:
     KNOWN_NEGATIVE_METRICS = []
+
+# @added 20200604 - Mirage - populate_redis
+try:
+    from settings import MIRAGE_AUTOFILL_TOOSHORT
+except:
+    MIRAGE_AUTOFILL_TOOSHORT = False
+
+# @added 20200607 - Feature #3566: custom_algorithms
+try:
+    CUSTOM_ALGORITHMS = settings.CUSTOM_ALGORITHMS
+except:
+    CUSTOM_ALGORITHMS = None
+try:
+    DEBUG_CUSTOM_ALGORITHMS = settings.DEBUG_CUSTOM_ALGORITHMS
+except:
+    DEBUG_CUSTOM_ALGORITHMS = False
 
 skyline_app_graphite_namespace = 'skyline.%s%s' % (skyline_app, SERVER_METRIC_PATH)
 failed_checks_dir = '%s_failed' % settings.MIRAGE_CHECK_PATH
@@ -266,7 +285,7 @@ class Mirage(Thread):
         parsed = urlparse.urlparse(url)
         target = urlparse.parse_qs(parsed.query)['target'][0]
 
-        metric_data_folder = settings.MIRAGE_DATA_FOLDER + "/" + target
+        metric_data_folder = str(settings.MIRAGE_DATA_FOLDER) + "/" + target
         mkdir_p(metric_data_folder)
         with open(metric_data_folder + "/" + target + '.json', 'w') as f:
             f.write(json.dumps(converted))
@@ -427,6 +446,169 @@ class Mirage(Thread):
                         logger.info(log_string)
         else:
             return None
+
+# @added 20200604 - Mirage - populate_redis
+    def populate_redis(self, i, metric):
+        """
+        Get FULL_DURATION data from Graphite for a metric and populate Redis
+        """
+        # Check if it has been done via the mirage.redis_populate key
+        redis_populated = False
+        redis_populated_key = 'mirage.redis_populated.%s' % metric
+        try:
+            redis_populated = self.redis_conn_decoded.get(redis_populated_key)
+        except Exception as e:
+            logger.error(
+                'error :: populate_redis :: could not query cache_key - %s - %s' % (
+                    redis_populated_key, e))
+            redis_populated = False
+        # Do not handle batch processing metrics
+        batch_processing_metrics = []
+        try:
+            batch_processing_metrics = list(self.redis_conn_decoded.smembers('analyzer.batch_processing_metrics'))
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: populate_redis :: failed to get analyzer.batch_processing_metrics from Redis')
+            batch_processing_metrics = None
+        if batch_processing_metrics:
+            if metric in batch_processing_metrics:
+                redis_populated = True
+                logger.info('populate_redis :: %s is a batch processing metric, not handling, creating Redis key %s' % (
+                    metric, redis_populated_key))
+                try:
+                    self.redis_conn.setex(redis_populated_key, settings.FULL_DURATION, int(time()))
+                    logger.info('populate_redis :: created Redis key %s' % (redis_populated_key))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: populate_redis :: failed to create Redis key %s' % redis_populated_key)
+
+        if redis_populated:
+            logger.info('populate_redis :: the Redis key %s already exists, it has been done' % (redis_populated_key))
+            try:
+                self.redis_conn.srem('mirage.populate_redis', metric)
+                logger.info('populate_redis :: removed item - %s - from Redis set mirage.populate_redis' % (metric))
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: populate_redis :: failed to remove item %s from Redis set mirage.populate_redis' % metric)
+            return
+        time_now = int(time())
+        time_from = int(time_now - settings.FULL_DURATION)
+        # Calculate graphite from and until parameters from the metric timestamp
+        graphite_until = datetime.datetime.fromtimestamp(int(float(time_now))).strftime('%H:%M_%Y%m%d')
+        graphite_from = datetime.datetime.fromtimestamp(int(time_from)).strftime('%H:%M_%Y%m%d')
+        # Remove any old json file related to the metric
+        metric_data_folder = '%s/%s' % (settings.MIRAGE_DATA_FOLDER, metric)
+        metric_json_file = '%s/%s.json' % (metric_data_folder, str(metric))
+        try:
+            os.remove(metric_json_file)
+        except OSError:
+            pass
+        # Get data from graphite
+        logger.info('populate_redis :: surfacing %s time series from Graphite' % (metric))
+        try:
+            self.surface_graphite_metric_data(metric, graphite_from, graphite_until)
+        except:
+            logger.info(traceback.format_exc())
+            logger.error('error :: populate_redis :: failed to surface_graphite_metric_data to populate %s' % (
+                str(metric_json_file)))
+        # Check there is a json timeseries file to use
+        if not os.path.isfile(metric_json_file):
+            logger.error(
+                'error :: populate_redis :: retrieve failed - failed to surface %s time series from graphite' % (
+                    metric))
+            try:
+                self.redis_conn.setex(redis_populated_key, settings.FULL_DURATION, time_now)
+                logger.info('populate_redis :: created Redis key %s' % (redis_populated_key))
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: populate_redis :: failed to create Redis key %s' % redis_populated_key)
+            try:
+                self.redis_conn.srem('mirage.populate_redis', metric)
+                logger.info('populate_redis :: removed item - %s - from Redis set mirage.populate_redis' % (metric))
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: populate_redis :: failed to remove item %s from Redis set mirage.populate_redis' % metric)
+            return
+        else:
+            logger.info('populate_redis :: retrieved data :: for %s' % (
+                metric))
+        self.check_if_parent_is_alive()
+        timeseries = []
+        try:
+            with open((metric_json_file), 'r') as f:
+                timeseries = json.loads(f.read())
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: populate_redis :: failed to get timeseries from json - %s' % metric_json_file)
+            timeseries = []
+        if not timeseries:
+            logger.info('populate_redis :: no timeseries data for %s, setting redis_populated_key and removing from mirage.populate_redis' % metric)
+            try:
+                self.redis_conn.setex(redis_populated_key, settings.FULL_DURATION, time_now)
+                logger.info('populate_redis :: created Redis key %s' % (redis_populated_key))
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: populate_redis :: failed to create Redis key %s' % redis_populated_key)
+            try:
+                self.redis_conn.srem('mirage.populate_redis', metric)
+                logger.info('populate_redis :: removed item - %s - from Redis set mirage.populate_redis' % (metric))
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: populate_redis :: failed to remove item %s from Redis set mirage.populate_redis' % metric)
+            return
+        try:
+            os.remove(metric_json_file)
+        except OSError:
+            pass
+        FULL_NAMESPACE = settings.FULL_NAMESPACE
+        pipe = None
+        logger.info('populate_redis :: time series data for %s, populating Redis with %s data points' % (
+            metric, str(len(timeseries))))
+        try:
+            pipe = self.redis_conn.pipeline()
+        except Exception as e:
+            logger.error('error :: populate_redis :: error on Redis pipe: %s' % (str(e)))
+            pipe = None
+        redis_populated = False
+        try:
+            for metric_data in timeseries:
+                key = ''.join((FULL_NAMESPACE, metric))
+                try:
+                    pipe.append(str(key), packb(metric_data))
+                except Exception as e:
+                    logger.error('error :: populate_redis :: error on pipe.append: %s' % (str(e)))
+            pipe.execute()
+            redis_populated = True
+        except Exception as e:
+            logger.error('error :: populate_redis :: error on pipe.execute: %s' % (str(e)))
+        if redis_populated:
+            del timeseries
+            try:
+                self.redis_conn.setex(redis_populated_key, settings.FULL_DURATION, time_now)
+                logger.info('populate_redis :: created Redis key %s' % (redis_populated_key))
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: populate_redis :: failed to create Redis key %s' % redis_populated_key)
+            # Add to Redis set so that Analyzer sorts and deduplicates the data
+            # on the next run
+            try:
+                self.redis_conn.sadd('mirage.filled', metric)
+                logger.info('populate_redis :: add %s to Redis set mirage.filled for Analyzer to sort and deduplicate the Redis data' % metric)
+            except Exception as e:
+                logger.error('error :: populate_redis :: failed add metric to Redis set mirage.filled: %s' % e)
+            try:
+                self.redis_conn.setex(redis_populated_key, settings.FULL_DURATION, time_now)
+                logger.info('populate_redis :: created Redis key %s' % (redis_populated_key))
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: populate_redis :: failed to create Redis key %s' % redis_populated_key)
+            try:
+                self.redis_conn.srem('mirage.populate_redis', metric)
+                logger.info('populate_redis :: removed item - %s - from Redis set mirage.populate_redis' % (metric))
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: populate_redis :: failed to remove item %s from Redis set mirage.populate_redis' % metric)
+            return
 
     def spin_process(self, i, run_timestamp):
         """
@@ -764,7 +946,8 @@ class Mirage(Thread):
             known_derivative_metric = True
         if known_derivative_metric:
             try:
-                non_derivative_monotonic_metrics = settings.NON_DERIVATIVE_MONOTONIC_METRICS
+                # @modified 20200606 - Bug #3572: Apply list to settings import
+                non_derivative_monotonic_metrics = list(settings.NON_DERIVATIVE_MONOTONIC_METRICS)
             except:
                 non_derivative_monotonic_metrics = []
             skip_derivative = in_list(redis_metric_name, non_derivative_monotonic_metrics)
@@ -791,13 +974,18 @@ class Mirage(Thread):
             else:
                 logger.info('will check %s for negative values' % (metric))
 
+        # @added 20200607 - Feature #3566: custom_algorithms
+        algorithms_run = list(settings.MIRAGE_ALGORITHMS)
+
         try:
             if valid_mirage_timeseries:
                 logger.info('analyzing :: %s at %s seconds' % (metric, second_order_resolution_seconds))
                 # @modified 20200425 - Feature #3508: ionosphere.untrainable_metrics
                 # Added run_negatives_present and negatives_found
                 # anomalous, ensemble, datapoint = run_selected_algorithm(timeseries, metric, second_order_resolution_seconds)
-                anomalous, ensemble, datapoint, negatives_found = run_selected_algorithm(timeseries, metric, second_order_resolution_seconds, run_negatives_present)
+                # @modified 20200607 - Feature #3566: custom_algorithms
+                # Added algorithms_run
+                anomalous, ensemble, datapoint, negatives_found, algorithms_run = run_selected_algorithm(timeseries, metric, second_order_resolution_seconds, run_negatives_present)
             else:
                 logger.info('not analyzing :: %s at %s seconds as there is not sufficiently older datapoints in the timeseries - not valid_mirage_timeseries' % (metric, second_order_resolution_seconds))
                 anomalous = False
@@ -870,7 +1058,10 @@ class Mirage(Thread):
             triggered_algorithms = []
             for index, value in enumerate(ensemble):
                 if value:
-                    algorithm = settings.MIRAGE_ALGORITHMS[index]
+                    # @modified 20200607 - Feature #3566: custom_algorithms
+                    # algorithm = settings.MIRAGE_ALGORITHMS[index]
+                    algorithm = algorithms_run[index]
+
                     anomaly_breakdown[algorithm] += 1
                     triggered_algorithms.append(algorithm)
 
@@ -965,7 +1156,9 @@ class Mirage(Thread):
                                         'added_by = \'%s\'\n' \
                                         'added_at = \'%s\'\n' \
                     % (base_name, str(datapoint), from_timestamp,
-                       str(int_metric_timestamp), str(settings.MIRAGE_ALGORITHMS),
+                       # @modified 20200607 - Feature #3566: custom_algorithms
+                       # str(int_metric_timestamp), str(settings.MIRAGE_ALGORITHMS),
+                       str(int_metric_timestamp), str(algorithms_run),
                        triggered_algorithms, skyline_app, source,
                        this_host, added_at)
 
@@ -999,7 +1192,7 @@ class Mirage(Thread):
             if settings.ENABLE_CRUCIBLE and settings.MIRAGE_CRUCIBLE_ENABLED:
                 from_timestamp = str(int(timeseries[1][0]))
                 timeseries_dir = base_name.replace('.', '/')
-                crucible_anomaly_dir = settings.CRUCIBLE_DATA_FOLDER + '/' + timeseries_dir + '/' + metric_timestamp
+                crucible_anomaly_dir = str(settings.CRUCIBLE_DATA_FOLDER) + '/' + timeseries_dir + '/' + metric_timestamp
                 if not os.path.exists(crucible_anomaly_dir):
                     mkdir_p(crucible_anomaly_dir)
 
@@ -1024,7 +1217,9 @@ class Mirage(Thread):
                                         'added_by = \'%s\'\n' \
                                         'added_at = \'%s\'\n' \
                     % (base_name, str(datapoint), from_timestamp,
-                       str(int_metric_timestamp), str(settings.MIRAGE_ALGORITHMS),
+                       # @modified 20200607 - Feature #3566: custom_algorithms
+                       # str(int_metric_timestamp), str(settings.MIRAGE_ALGORITHMS),
+                       str(int_metric_timestamp), str(algorithms_run),
                        triggered_algorithms, crucible_anomaly_dir,
                        skyline_app, added_at)
 
@@ -1295,6 +1490,73 @@ class Mirage(Thread):
                 # Report app up
                 self.redis_conn.setex(skyline_app, 120, now)
 
+                # @added 20200604 - Mirage - populate_redis
+                # This functionality enables Mirage to populate the Skyline
+                # Redis instance with FULL_DURATION data from Graphite if
+                # Analyzer flags the time series as TooShort and adds it too the
+                # mirage.populate_redis Redis set. Or possibly if there are
+                # airgaps in the Redis data due to a network partition.  It will
+                # fill a metric about every 10 seconds or so, unless there are
+                # Mirage checks or ionosphere_alerts to send
+                populate_redis_with_metrics = []
+                if MIRAGE_AUTOFILL_TOOSHORT:
+                    try:
+                        populate_redis_with_metrics = list(self.redis_conn_decoded.smembers('mirage.populate_redis'))
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to get Redis set mirage.populate_redis')
+                        populate_redis_with_metrics = []
+                metric_to_populate_redis = None
+                populate_redis_with_metrics_count = 0
+                if populate_redis_with_metrics:
+                    populate_redis_with_metrics_count = len(populate_redis_with_metrics)
+                    logger.info('%s metrics found in mirage.populate_redis Redis set' % str(populate_redis_with_metrics_count))
+                    try:
+                        metric_to_populate_redis = str(populate_redis_with_metrics[0])
+                        try:
+                            del populate_redis_with_metrics
+                        except:
+                            pass
+                        logger.info('processing %s from mirage.populate_redis Redis set' % metric_to_populate_redis)
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to determine metric to populate_redis')
+                        metric_to_populate_redis = None
+                if metric_to_populate_redis:
+                    try:
+                        # Spawn a populate_redis processes
+                        pids = []
+                        spawned_pids = []
+                        p = Process(target=self.populate_redis, args=(1, metric_to_populate_redis))
+                        pids.append(p)
+                        logger.info('starting populate_redis process')
+                        p.start()
+                        spawned_pids.append(p.pid)
+                        p_starts = time()
+                        while time() - p_starts <= 10:
+                            if any(p.is_alive() for p in pids):
+                                # Just to avoid hogging the CPU
+                                sleep(.1)
+                            else:
+                                # All the processes are done, break now.
+                                time_to_run = time() - p_starts
+                                logger.info('populate_redis process completed in %.2f seconds' % (
+                                    time_to_run))
+                                break
+                        else:
+                            # We only enter this if we didn't 'break' above.
+                            logger.info('timed out, killing populate_redis process')
+                            for p in pids:
+                                p.terminate()
+                                # p.join()
+                        for p in pids:
+                            if p.is_alive():
+                                logger.info('stopping populate_redis process - %s' % (str(p.is_alive())))
+                                p.join()
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to spawn populate_redis process')
+
                 # @added 20161228 - Feature #1828: ionosphere - mirage Redis data features
                 # If Ionosphere is going to pass alerts back to the app
                 # here we are going to have break out and force a alerting
@@ -1374,8 +1636,13 @@ class Mirage(Thread):
                 # appropriatte sleep
                 if len(metric_var_files) == 0:
                     if not ionosphere_alerts_returned:
-                        logger.info('sleeping no metrics...')
-                        sleep(10)
+                        # @modified 20200604 - Mirage - populate_redis
+                        # Do not sleep if there are metrics to populate in Redis
+                        if populate_redis_with_metrics_count == 0:
+                            logger.info('sleeping no metrics...')
+                            sleep(10)
+                        else:
+                            logger.info('no checks or alerts, continuing to process populate_redis metrics')
                 else:
                     sleep(1)
 
@@ -1469,28 +1736,55 @@ class Mirage(Thread):
                         logger.info('%s :: stopping spin_process - %s' % (skyline_app, str(p.is_alive())))
                         p.join()
 
-                # Log the last reported error by any algorithms that errored in the
-                # spawned processes from algorithms.py
-                for completed_pid in spawned_pids:
-                    logger.info('spin_process with pid %s completed' % (str(completed_pid)))
-                    for algorithm in settings.MIRAGE_ALGORITHMS:
+            # @added 20200607 - Feature #3508: ionosphere.untrainable_metrics
+            # Check to non 3sigma algorithm errors too
+            if LOCAL_DEBUG:
+                logger.debug('debug :: adding negatives_present to check_algorithm_errors')
+            check_algorithm_errors = ['negatives_present']
+            for algorithm in list(settings.MIRAGE_ALGORITHMS):
+                if LOCAL_DEBUG or DEBUG_CUSTOM_ALGORITHMS:
+                    logger.debug('debug :: adding %s to check_algorithm_errors' % (algorithm))
+                check_algorithm_errors.append(algorithm)
+            # @added 20200607 - Feature #3566: custom_algorithms
+            if CUSTOM_ALGORITHMS:
+                for custom_algorithm in settings.CUSTOM_ALGORITHMS:
+                    if LOCAL_DEBUG or DEBUG_CUSTOM_ALGORITHMS:
+                        logger.debug('debug :: adding custom_algorithm %s to check_algorithm_errors' % (custom_algorithm))
+                    check_algorithm_errors.append(custom_algorithm)
+
+            if LOCAL_DEBUG or DEBUG_CUSTOM_ALGORITHMS:
+                logger.debug('debug :: checking for algorithm error files')
+
+            for completed_pid in spawned_pids:
+                logger.info('spin_process with pid %s completed' % (str(completed_pid)))
+                # @modified 20200607 - Feature #3566: custom_algorithms
+                #                      Feature #3508: ionosphere.untrainable_metrics
+                # Check to non 3sigma algorithm errors too and wrapped in try
+                try:
+                    # for algorithm in settings.MIRAGE_ALGORITHMS:
+                    for algorithm in check_algorithm_errors:
                         algorithm_error_file = '%s/%s.%s.%s.algorithm.error' % (
                             settings.SKYLINE_TMP_DIR, skyline_app,
                             str(completed_pid), algorithm)
                         if os.path.isfile(algorithm_error_file):
                             logger.info(
-                                'error - spin_process with pid %s has reported an error with the %s algorithm' % (
+                                'error :: spin_process with pid %s has reported an error with the %s algorithm' % (
                                     str(completed_pid), algorithm))
                             try:
                                 with open(algorithm_error_file, 'r') as f:
                                     error_string = f.read()
                                 logger.error('%s' % str(error_string))
                             except:
-                                logger.error('failed to read %s error file' % algorithm)
+                                logger.error('error :: failed to read %s error file' % algorithm)
                             try:
                                 os.remove(algorithm_error_file)
                             except OSError:
                                 pass
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to check algorithm errors')
+                if LOCAL_DEBUG or DEBUG_CUSTOM_ALGORITHMS:
+                    logger.debug('debug :: checked for algorithm error files')
 
                 # Grab data from the queue and populate dictionaries
                 exceptions = dict()
@@ -1527,7 +1821,9 @@ class Mirage(Thread):
                 for i_exception in exceptions_metrics:
                     if i_exception not in exceptions.keys():
                         exceptions[i_exception] = 0
-                for i_anomaly_breakdown in settings.MIRAGE_ALGORITHMS:
+                # @modified 20200607 - Feature #3566: custom_algorithms
+                # for i_anomaly_breakdown in settings.MIRAGE_ALGORITHMS:
+                for i_anomaly_breakdown in check_algorithm_errors:
                     if i_anomaly_breakdown not in anomaly_breakdown.keys():
                         anomaly_breakdown[i_anomaly_breakdown] = 0
 
@@ -1821,7 +2117,7 @@ class Mirage(Thread):
                                             logger.error(traceback.format_exc())
                                             logger.error('error :: failed to determine full_duration from the Ionosphere alert for %s' % (metric[1]))
                                             logger.info('using settings.FULL_DURATION - %s' % (str(settings.FULL_DURATION)))
-                                            second_order_resolution_seconds = settings.FULL_DURATION
+                                            second_order_resolution_seconds = int(settings.FULL_DURATION)
                                 # @modified 20190524 - Branch #3002
                                 # Wrapped in try except
                                 try:

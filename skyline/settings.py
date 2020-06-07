@@ -673,6 +673,107 @@ CONSENSUS = 6
 :vartype CONSENSUS: int
 """
 
+CUSTOM_ALGORITHMS = {}
+"""
+:var CUSTOM_ALGORITHMS: Custom algorithms to run.  An empty dict {} disables
+    this feature.
+:vartype CUSTOM_ALGORITHMS: dict
+
+- For full documentation see https://earthgecko-skyline.readthedocs.io/en/latest/algorithms/custom-algorithms.html
+- **CUSTOM_ALGORITHMS example**::
+
+    CUSTOM_ALGORITHMS = {
+        'abs_stddev_from_median': {
+            'namespaces': ['telegraf.cpu-total.cpu.usage_system'],
+            'algorithm_source': '/opt/skyline/github/skyline/skyline/custom_algorithms/abs_stddev_from_median.py',
+            'algorithm_parameters': {},
+            'max_execution_time': 0.09,
+            'consensus': 6,
+            'algorithms_allowed_in_consensus': [],
+            'run_3sigma_algorithms': True,
+            'use_with': ['analyzer', 'analyzer_batch', 'mirage', 'crucible'],
+            'debug_logging': False,
+        },
+        'last_same_hours': {
+            'namespaces': ['telegraf.cpu-total.cpu.usage_user'],
+            'algorithm_source': '/opt/skyline/github/skyline/skyline/custom_algorithms/last_same_hours.py',
+            # Pass the argument 1209600 for the sample_period parameter and
+            # enable debug_logging in the algorithm itself
+            'algorithm_parameters': {
+              'sample_period': 604800,
+              'debug_logging': True
+            },
+            'max_execution_time': 0.3,
+            'consensus': 6,
+            'algorithms_allowed_in_consensus': [],
+            'run_3sigma_algorithms': True,
+            # This does not run on analyzer as it is weekly data
+            'use_with': ['mirage', 'crucible'],
+            'debug_logging': False,
+        },
+        'detect_significant_change': {
+            'namespaces': ['swell.buoy.*.Hm0'],
+            # Algorithm source not in the Skyline code directory
+            'algorithm_source': '/opt/skyline_custom_algorithms/detect_significant_change/detect_significant_change.py',
+            'algorithm_parameters': {},
+            'max_execution_time': 0.002,
+            'consensus': 1,
+            'algorithms_allowed_in_consensus': ['detect_significant_change'],
+            'run_3sigma_algorithms': False,
+            'use_with': ['analyzer', 'crucible'],
+            'debug_logging': True,
+        },
+    }
+
+- Each dictionary item needs to be named the same as the algorithm to be run
+- CUSTOM_ALGORITHMS dictionary keys and values are:
+
+:param namespaces: a list of absolute metric names, substrings (dotted elements)
+    of a namespace or a regex of a namespace
+:param algorithm_source: the full path to the custom algorithm Python file
+:param algorithm_parameters: a dictionary of any parameters to pass to the
+    custom algorithm
+:param max_execution_time: the maximum time the algorithm should run, any longer
+    than this value and the algorithm process will be timed out and terminated.
+    Bear in mind that algorithms have to run FAST, otherwise analysis stops
+    being real time and the Skyline apps will terminate their own spawned
+    processes.  Consider that Skyline's 3 sigma algorithms take on average
+    0.0023 seconds to run and all 9 are run on a metric in about 0.0207 seconds.
+:param consensus: The number of algorithms that need to trigger, including this
+    one for a data point to be classed as anomalous, you can declare the same as
+    the :mod:`settings.CONSENSUS` value or that +1 or simply 1 if you want as
+    anomaly triggered because the custom algorithm triggered.
+:param algorithms_allowed_in_consensus: this is not implemented yet and is
+    optional
+:param run_3sigma_algorithms: a boolean stating whether to run normal 3 sigma
+    algorithms, this is optional and defaults to ``True`` if it is not passed
+    in the dictionary.  Read the full documentation referred to above to
+    determine the affects of passing this as ``False``.
+:param use_with: a list of Skyline apps which should apply the algorithm if
+    they handle the metric, it is only applied if the app handles the metric,
+    generally set this to ``['analyzer', 'analyzer_batch', 'mirage', 'crucible']``
+:param debug_logging: whether to run debug logging on the custom algorithm,
+    normally set this to ``False`` but for development and testing ``True`` is
+    useful.
+:type namespaces: list
+:type algorithm_source: str
+:type algorithm_parameters: dict
+:type consensus: int
+:type algorithms_allowed_in_consensus: list
+:type run_3sigma_algorithms: boolean
+:type use_with: list
+:type debug_logging: boolean
+
+"""
+
+DEBUG_CUSTOM_ALGORITHMS = {}
+"""
+:var DEBUG_CUSTOM_ALGORITHMS: This is the number of algorithms that must return True before a
+    metric is classified as anomalous by Analyzer.  An empty dict {} disables
+    this feature.
+:vartype CUSTOM_ALGORITHMS: dict
+"""
+
 RUN_OPTIMIZED_WORKFLOW = True
 """
 :var RUN_OPTIMIZED_WORKFLOW: This sets Analyzer to run in an optimized manner.
@@ -816,6 +917,25 @@ trigger again.
 
 .. note:: All slack alerts must be declared AFTER smtp alerts as slack alerts
     use the smtp resources to send to slack.
+
+"""
+
+EXTERNAL_ALERTS = {}
+"""
+:var EXTERNAL_ALERTS: Skyline can get json alert configs from external sources.
+:vartype EXTERNAL_ALERTS: dict
+
+See the External alerts documentation for the elements the are required in a
+json alert config and how external alerts are applied.
+
+- **Example**::
+
+    EXTERNAL_ALERTS = {
+        'test_alert_config': {
+            'url': 'http://127.0.0.1:1500/mock_api?test_alert_config',
+            'method': 'GET',
+        },
+    }
 
 """
 
@@ -1426,6 +1546,21 @@ MIRAGE_PERIODIC_CHECK_NAMESPACES = [
     same way that :mod:`settings.SKIP_LIST` does, it matches in the string or
     the dotted namespace elements.
 :vartype MIRAGE_PERIODIC_CHECK_NAMESPACES: list
+"""
+
+MIRAGE_AUTOFILL_TOOSHORT = False
+"""
+:var MIRAGE_AUTOFILL_TOOSHORT: This is a convenience feature that allows
+    Analyzer to send metrics that are classed TooShort to Mirage and have Mirage
+    attempt to fetch the data from Graphite and populate Redis with the time
+    series data.  This is useful if for some reason Graphite stopped pickling
+    data to Horizon or when Skyline is first run against a populated Graphite
+    that already has metric data.  Mirage will only try to fetch data from
+    Graphite and populate Redis with data for a metric once in FULL_DURATION,
+    so that any remote metrics from Vista are not attempt to be fetched over and
+    over as this feature only works with the GRAPHITE_HOST, not remote data
+    sources.
+:vartype MIRAGE_AUTOFILL_TOOSHORT: boolean
 """
 
 """

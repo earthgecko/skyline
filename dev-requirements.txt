@@ -527,3 +527,6 @@ xlrd==1.2.0
 # pin to 0.1.6 until pandas-1.0.3 has been thoroughly tested
 #pandas_log==0.1.7; python_version >= '3.2'
 pandas_log==0.1.6; python_version >= '3.2'
+
+# @added 20200604 - Feature #3566: custom_algorithms
+timeout-decorator==0.4.1

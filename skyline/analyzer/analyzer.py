@@ -80,7 +80,8 @@ except:
     SERVER_METRIC_PATH = ''
 
 try:
-    DO_NOT_ALERT_ON_STALE_METRICS = settings.DO_NOT_ALERT_ON_STALE_METRICS
+    # @modified 20200606 - Bug #3572: Apply list to settings imports
+    DO_NOT_ALERT_ON_STALE_METRICS = list(settings.DO_NOT_ALERT_ON_STALE_METRICS)
 except:
     DO_NOT_ALERT_ON_STALE_METRICS = []
 
@@ -92,7 +93,8 @@ except:
 # Add Mirage periodic checks so that Mirage is analysing each metric at
 # least once per hour.
 try:
-    MIRAGE_PERIODIC_CHECK = settings.MIRAGE_PERIODIC_CHECK
+    # @modified 20200606 - Bug #3572: Apply list to settings imports
+    MIRAGE_PERIODIC_CHECK = list(settings.MIRAGE_PERIODIC_CHECK)
 except:
     MIRAGE_PERIODIC_CHECK = False
 try:
@@ -102,7 +104,8 @@ except:
 # @added 20200505 - Feature #2882: Mirage - periodic_check
 # Surface this once
 try:
-    mirage_periodic_check_namespaces = settings.MIRAGE_PERIODIC_CHECK_NAMESPACES
+    # @modified 20200606 - Bug #3572: Apply list to settings imports
+    mirage_periodic_check_namespaces = list(settings.MIRAGE_PERIODIC_CHECK_NAMESPACES)
 except:
     mirage_periodic_check_namespaces = []
 
@@ -116,7 +119,8 @@ except:
     logger.info('warning :: ANALYZER_ENABLED is not declared in settings.py, defaults to True')
 
 try:
-    ALERT_ON_STALE_METRICS = settings.ALERT_ON_STALE_METRICS
+    # @modified 20200606 - Bug #3572: Apply list to settings imports
+    ALERT_ON_STALE_METRICS = list(settings.ALERT_ON_STALE_METRICS)
 except:
     ALERT_ON_STALE_METRICS = False
 
@@ -143,7 +147,9 @@ try:
 except:
     BATCH_PROCESSING = None
 try:
-    from settings import BATCH_PROCESSING_NAMESPACES
+    # @modified 20200606 - Bug #3572: Apply list to settings imports
+    # from settings import BATCH_PROCESSING_NAMESPACES
+    BATCH_PROCESSING_NAMESPACES = list(settings.BATCH_PROCESSING_NAMESPACES)
 except:
     BATCH_PROCESSING_NAMESPACES = []
 # @added 20200414 - Feature #3486: analyzer_batch
@@ -158,7 +164,9 @@ except:
 CHECK_AIRGAPS = []
 if IDENTIFY_AIRGAPS:
     try:
-        from settings import CHECK_AIRGAPS
+        # @modified 20200606 - Bug #3572: Apply list to settings imports
+        # from settings import CHECK_AIRGAPS
+        CHECK_AIRGAPS = list(settings.CHECK_AIRGAPS)
     except:
         CHECK_AIRGAPS = []
     if CHECK_AIRGAPS:
@@ -168,7 +176,9 @@ if IDENTIFY_AIRGAPS:
 # Determine if any metrcs have negatives values some they can be
 # added to the ionosphere.untrainable_metrics Redis set
 try:
-    from settings import KNOWN_NEGATIVE_METRICS
+    # @modified 20200606 - Bug #3572: Apply list to settings imports
+    # from settings import KNOWN_NEGATIVE_METRICS
+    KNOWN_NEGATIVE_METRICS = list(settings.KNOWN_NEGATIVE_METRICS)
 except:
     KNOWN_NEGATIVE_METRICS = []
 
@@ -179,6 +189,25 @@ try:
     inactive_after = settings.FULL_DURATION - settings.METRICS_INACTIVE_AFTER
 except:
     inactive_after = settings.FULL_DURATION - 3600
+
+# @added 20200528 - Feature #3560: External alert config
+try:
+    EXTERNAL_ALERTS = settings.EXTERNAL_ALERTS
+except:
+    EXTERNAL_ALERTS = {}
+# @added 20200602 - Feature #3560: External alert config
+if EXTERNAL_ALERTS:
+    from external_alert_configs import get_external_alert_configs
+
+# @added 20200603 - Feature #3566: custom_algorithms
+try:
+    CUSTOM_ALGORITHMS = settings.CUSTOM_ALGORITHMS
+except:
+    CUSTOM_ALGORITHMS = None
+try:
+    DEBUG_CUSTOM_ALGORITHMS = settings.DEBUG_CUSTOM_ALGORITHMS
+except:
+    DEBUG_CUSTOM_ALGORITHMS = False
 
 # @added 20190522 - Feature #2580: illuminance
 # Disabled for now as in concept phase.  This would work better if
@@ -373,9 +402,9 @@ class Analyzer(Thread):
 
         # @added 20190410 - Feature #2916: ANALYZER_ENABLED setting
         if not ANALYZER_ENABLED:
-            len_assigned_metrics = len(assigned_metrics)
+            # len_assigned_metrics = len(assigned_metrics)
             logger.info('ANALYZER_ENABLED is set to %s removing the %s assigned_metrics' % (
-                str(ANALYZER_ENABLED), str(len_assigned_metrics)))
+                str(ANALYZER_ENABLED), str(len(assigned_metrics))))
             assigned_metrics = []
             del unique_metrics
 
@@ -581,7 +610,9 @@ class Analyzer(Thread):
                         logger.error('error :: failed to delete Redis key :: analyzer.derivative_metrics_expiry')
 
         try:
-            non_derivative_monotonic_metrics = settings.NON_DERIVATIVE_MONOTONIC_METRICS
+            # @modified 20200606 - Bug #3572: Apply list to settings import
+            # non_derivative_monotonic_metrics = settings.NON_DERIVATIVE_MONOTONIC_METRICS
+            non_derivative_monotonic_metrics = list(settings.NON_DERIVATIVE_MONOTONIC_METRICS)
         except:
             non_derivative_monotonic_metrics = []
 
@@ -612,6 +643,17 @@ class Analyzer(Thread):
             logger.info(traceback.format_exc())
             logger.error('error :: failed to generate a list from flux.sort_and_dedup.metrics Redis set')
             flux_upload_metrics_to_sort_and_deduplicate = []
+
+        # @added 20200604 - Mirage - populate_redis
+        mirage_filled_metrics_to_sort_and_deduplicate = []
+        try:
+            mirage_filled_metrics_to_sort_and_deduplicate = list(self.redis_conn_decoded.smembers('mirage.filled'))
+            if mirage_filled_metrics_to_sort_and_deduplicate:
+                logger.info('determined %s metrics from mirage.filled Redis set' % str(len(mirage_filled_metrics_to_sort_and_deduplicate)))
+        except:
+            logger.info(traceback.format_exc())
+            logger.error('error :: failed to generate a list from mirage.filled Redis set')
+            mirage_filled_metrics_to_sort_and_deduplicate = []
 
         # @added 20200213 - Bug #3448: Repeated airgapped_metrics
         #                   Feature #3400: Identify air gaps in the metric data
@@ -842,7 +884,19 @@ class Analyzer(Thread):
                     self.redis_conn.srem('flux.sort_and_dedup.metrics', base_name)
                 except:
                     logger.info(traceback.format_exc())
-                    logger.error('error :: failed to remove %s from flux.sort_and_dedup.metrics Redis set')
+                    logger.error('error :: failed to remove %s from flux.sort_and_dedup.metrics Redis set' % base_name)
+
+            # @added 20200604 - Mirage - populate_redis
+            mirage_filled = False
+            if base_name in mirage_filled_metrics_to_sort_and_deduplicate:
+                sort_data = True
+                mirage_filled = True
+                try:
+                    self.redis_conn.srem('mirage.filled', base_name)
+                    logger.info('removed %s from mirage.filled Redis set' % base_name)
+                except:
+                    logger.info(traceback.format_exc())
+                    logger.error('error :: failed to remove %s from mirage.filled Redis set' % base_name)
 
             if sort_data:
                 try:
@@ -855,15 +909,15 @@ class Analyzer(Thread):
                     timeseries = sorted_and_deduplicated_timeseries
                 except:
                     logger.info(traceback.format_exc())
-                    logger.error('error :: failed to sort and deduplicate flux filled timeseries for %s' % str(metric_name))
+                    logger.error('error :: failed to sort and deduplicate flux/mirage filled timeseries for %s' % str(metric_name))
                 if not sorted_and_deduplicated_timeseries:
-                    logger.error('error :: failed to sort and deduplicate flux filled timeseries for %s' % str(metric_name))
+                    logger.error('error :: failed to sort and deduplicate flux/mirage filled timeseries for %s' % str(metric_name))
             # Recreate the Redis key sorted and deduplicated and feed to
             # Redis ala Horizon worker method more or less
             if sorted_and_deduplicated_timeseries:
+                new_metric_name_key = 'analyzer.sorted.deduped.%s' % str(metric_name)
                 logger.info('populating Redis key %s with sorted and deduplicated data' % str(new_metric_name_key))
                 try:
-                    new_metric_name_key = 'analyzer.sorted.deduped.%s' % str(metric_name)
                     for datapoint in sorted_and_deduplicated_timeseries:
                         metric = (new_metric_name_key, (datapoint[0], datapoint[1]))
                         self.redis_conn.append(str(new_metric_name_key), packb(metric[1]))
@@ -1040,17 +1094,20 @@ class Analyzer(Thread):
                         logger.info('deleting key %s' % (metric_key_to_delete))
                         self.redis_conn.delete(metric_key_to_delete)
                     except:
-                        logger.info(traceback.format_exc())
+                        logger.error(traceback.format_exc())
                         logger.error('error :: failed to delete Redis key %s' % (
                             metric_key_to_delete))
-                    try:
-                        logger.info('Redis time series key data sorted and ordered with Flux additions, deleting key %s' % (metric_flux_filled_key))
-                        self.redis_conn.delete(metric_flux_filled_key)
-                        get_updated_redis_timeseries = True
-                    except:
-                        logger.info(traceback.format_exc())
-                        logger.error('error :: failed to delete Redis key %s' % (
-                            metric_key_to_delete))
+
+                    # @modified 20200604 - Mirage - populate_redis
+                    if not mirage_filled:
+                        try:
+                            logger.info('Redis time series key data sorted and ordered with Flux additions, deleting key %s' % (metric_flux_filled_key))
+                            self.redis_conn.delete(metric_flux_filled_key)
+                            get_updated_redis_timeseries = True
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: failed to delete Redis key %s' % (
+                                metric_key_to_delete))
 
             if get_updated_redis_timeseries:
                 updated_timeseries = []
@@ -1475,7 +1532,9 @@ class Analyzer(Thread):
                 # @modified 20200501 - Feature #3400: Identify air gaps in the metric data
                 # Added metric_airgaps_filled and check_for_airgaps_only
                 # anomalous, ensemble, datapoint, negatives_found = run_selected_algorithm(timeseries, metric_name, metric_airgaps, run_negatives_present)
-                anomalous, ensemble, datapoint, negatives_found = run_selected_algorithm(timeseries, metric_name, metric_airgaps, metric_airgaps_filled, run_negatives_present, check_for_airgaps_only)
+                # @modified 20200603 - Feature #3566: custom_algorithms
+                # Added algorithms_run
+                anomalous, ensemble, datapoint, negatives_found, algorithms_run = run_selected_algorithm(timeseries, metric_name, metric_airgaps, metric_airgaps_filled, run_negatives_present, check_for_airgaps_only)
                 del metric_airgaps
                 del metric_airgaps_filled
 
@@ -1607,7 +1666,10 @@ class Analyzer(Thread):
                     triggered_algorithms = []
                     for index, value in enumerate(ensemble):
                         if value:
-                            algorithm = settings.ALGORITHMS[index]
+                            # @modified 20200603 - Feature #3566: custom_algorithms
+                            # algorithm = list(settings.ALGORITHMS)[index]
+                            algorithm = algorithms_run[index]
+
                             anomaly_breakdown[algorithm] += 1
                             triggered_algorithms.append(algorithm)
 
@@ -1845,7 +1907,9 @@ class Analyzer(Thread):
                                                 'added_by = \'%s\'\n' \
                                                 'added_at = \'%s\'\n' \
                             % (base_name, str(datapoint), from_timestamp,
-                               metric_timestamp, str(settings.ALGORITHMS),
+                               # @modified 20200603 - Feature #3566: custom_algorithms
+                               # metric_timestamp, str(settings.ALGORITHMS),
+                               metric_timestamp, str(algorithms_run),
                                triggered_algorithms, skyline_app, source,
                                this_host, added_at)
 
@@ -1887,7 +1951,7 @@ class Analyzer(Thread):
                     # If Crucible is enabled - save timeseries and create a
                     # Crucible check
                     if settings.ENABLE_CRUCIBLE and settings.ANALYZER_CRUCIBLE_ENABLED:
-                        crucible_anomaly_dir = settings.CRUCIBLE_DATA_FOLDER + '/' + timeseries_dir + '/' + metric_timestamp
+                        crucible_anomaly_dir = str(settings.CRUCIBLE_DATA_FOLDER) + '/' + timeseries_dir + '/' + metric_timestamp
                         if not os.path.exists(crucible_anomaly_dir):
                             mkdir_p(crucible_anomaly_dir)
 
@@ -1912,7 +1976,9 @@ class Analyzer(Thread):
                                                 'added_by = \'%s\'\n' \
                                                 'added_at = \'%s\'\n' \
                             % (base_name, str(datapoint), from_timestamp,
-                               metric_timestamp, str(settings.ALGORITHMS),
+                               # @modified 20200603 - Feature #3566: custom_algorithms
+                               # metric_timestamp, str(settings.ALGORITHMS),
+                               metric_timestamp, str(algorithms_run),
                                triggered_algorithms, crucible_anomaly_dir,
                                skyline_app, metric_timestamp)
 
@@ -2184,14 +2250,16 @@ class Analyzer(Thread):
             ANALYZER_ENABLED = True
             logger.info('warning :: ANALYZER_ENABLED is not declared in settings.py, defaults to True')
         try:
-            DO_NOT_ALERT_ON_STALE_METRICS = settings.DO_NOT_ALERT_ON_STALE_METRICS
+            # @modified 20200606 - Bug #3572: Apply list to settings import
+            DO_NOT_ALERT_ON_STALE_METRICS = list(settings.DO_NOT_ALERT_ON_STALE_METRICS)
             do_not_alert_count = len(DO_NOT_ALERT_ON_STALE_METRICS)
             logger.info('DO_NOT_ALERT_ON_STALE_METRICS is set from settings.py to not alert on %s namespaces' % str(do_not_alert_count))
         except:
             DO_NOT_ALERT_ON_STALE_METRICS = []
             logger.info('warning :: DO_NOT_ALERT_ON_STALE_METRICS is not declared in settings.py, defaults to []')
         try:
-            ALERT_ON_STALE_METRICS = settings.ALERT_ON_STALE_METRICS
+            # @modified 20200606 - Bug #3572: Apply list to settings import
+            ALERT_ON_STALE_METRICS = list(settings.ALERT_ON_STALE_METRICS)
             logger.info('ALERT_ON_STALE_METRICS is set from settings.py to %s' % str(ALERT_ON_STALE_METRICS))
         except:
             ALERT_ON_STALE_METRICS = False
@@ -2241,10 +2309,16 @@ class Analyzer(Thread):
 
         # Initiate the algorithm timings if Analyzer is configured to send the
         # algorithm_breakdown metrics with ENABLE_ALGORITHM_RUN_METRICS
-        algorithm_tmp_file_prefix = settings.SKYLINE_TMP_DIR + '/' + skyline_app + '.'
+        # @modified 20200606 - Bug #3572: Apply list to settings import
+        algorithm_tmp_file_prefix = str(settings.SKYLINE_TMP_DIR) + '/' + skyline_app + '.'
         algorithms_to_time = []
         if send_algorithm_run_metrics:
-            algorithms_to_time = settings.ALGORITHMS
+            algorithms_to_time = list(settings.ALGORITHMS)
+            # @added 20200603 - Feature #3566: custom_algorithms
+            if CUSTOM_ALGORITHMS:
+                for custom_algorithm in settings.CUSTOM_ALGORITHMS:
+                    algorithms_to_time.append(custom_algorithm)
+            logger.info('%s :: algorithms_to_time - %s' % (skyline_app, str(algorithms_to_time)))
 
         if LOCAL_DEBUG:
             logger.info('debug :: Memory usage in run after algorithms_to_time: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
@@ -2302,6 +2376,18 @@ class Analyzer(Thread):
                 logger.info('no metrics in redis. try adding some - see README')
                 sleep(10)
                 continue
+
+            # @added 20200528 - Feature #3560: External alert config
+            ALERTS = settings.ALERTS
+            alert_configs = None
+            if EXTERNAL_ALERTS:
+                try:
+                    alert_configs = get_external_alert_configs(skyline_app)
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: could not determine external alert configs')
+            if alert_configs:
+                logger.info('retrieved alert_configs')
 
             # @modified 20190518 - Bug #3020: Newly installed analyzer on docker not flushing and recreating analyzer algorithm exception Redis sets
             # The management of the analyzer Redis algorithm exception sets
@@ -2741,11 +2827,24 @@ class Analyzer(Thread):
             # @added 20200601 - Feature #3508: ionosphere.untrainable_metrics
             #                   Feature #3400: Identify air gaps in the metric data
             # Check to non 3sigma algorithm errors too
+            if LOCAL_DEBUG:
+                logger.debug('debug :: adding negatives_present to check_algorithm_errors')
             check_algorithm_errors = ['negatives_present']
             if IDENTIFY_AIRGAPS:
+                if LOCAL_DEBUG:
+                    logger.debug('debug :: adding identify_airgaps to check_algorithm_errors')
                 check_algorithm_errors.append('identify_airgaps')
             for algorithm in settings.ALGORITHMS:
+                if LOCAL_DEBUG or DEBUG_CUSTOM_ALGORITHMS:
+                    logger.debug('debug :: adding %s to check_algorithm_errors' % (algorithm))
                 check_algorithm_errors.append(algorithm)
+
+            # @added 20200603 - Feature #3566: custom_algorithms
+            if CUSTOM_ALGORITHMS:
+                for custom_algorithm in settings.CUSTOM_ALGORITHMS:
+                    if LOCAL_DEBUG or DEBUG_CUSTOM_ALGORITHMS:
+                        logger.debug('debug :: adding custom_algorithm %s to check_algorithm_errors' % (custom_algorithm))
+                    check_algorithm_errors.append(custom_algorithm)
 
             # Log the last reported error by any algorithms that errored in the
             # spawned processes from algorithms.py
@@ -2810,7 +2909,16 @@ class Analyzer(Thread):
             for i_exception in exceptions_metrics:
                 if i_exception not in exceptions.keys():
                     exceptions[i_exception] = 0
-            for i_anomaly_breakdown in settings.ALGORITHMS:
+
+            # @added 20200603 - Feature #3566: custom_algorithms
+            anomaly_breakdown_algorithms = list(settings.ALGORITHMS)
+            if CUSTOM_ALGORITHMS:
+                for custom_algorithm in settings.CUSTOM_ALGORITHMS:
+                    anomaly_breakdown_algorithms.append(custom_algorithm)
+
+            # @modified 20200603 - Feature #3566: custom_algorithms
+            # for i_anomaly_breakdown in settings.ALGORITHMS:
+            for i_anomaly_breakdown in anomaly_breakdown_algorithms:
                 if i_anomaly_breakdown not in anomaly_breakdown.keys():
                     anomaly_breakdown[i_anomaly_breakdown] = 0
 
@@ -2988,377 +3096,214 @@ class Analyzer(Thread):
 
             # Send alerts
             if settings.ENABLE_ALERTS:
-                for alert in settings.ALERTS:
-                    # @modified 20161229 - Feature #1830: Ionosphere alerts
-                    # Handle alerting for Ionosphere
-                    # for metric in self.anomalous_metrics:
-                    # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
-                    # for metric in self.all_anomalous_metrics:
-                    # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
-                    #                   Branch #3262: py3
-                    # all_anomalous_metrics = list(self.redis_conn.smembers('analyzer.all_anomalous_metrics'))
-                    all_anomalous_metrics = list(self.redis_conn_decoded.smembers('analyzer.all_anomalous_metrics'))
-                    if LOCAL_DEBUG:
-                        logger.info('debug :: for alert in settings.ALERTS analyzer.all_anomalous_metrics - %s' % (
-                            str(all_anomalous_metrics)))
-
-                    for metric_list_string in all_anomalous_metrics:
-                        metric = literal_eval(metric_list_string)
+                try:
+                    for alert in settings.ALERTS:
+                        # @modified 20161229 - Feature #1830: Ionosphere alerts
+                        # Handle alerting for Ionosphere
+                        # for metric in self.anomalous_metrics:
+                        # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                        # for metric in self.all_anomalous_metrics:
+                        # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
+                        #                   Branch #3262: py3
+                        # all_anomalous_metrics = list(self.redis_conn.smembers('analyzer.all_anomalous_metrics'))
+                        all_anomalous_metrics = list(self.redis_conn_decoded.smembers('analyzer.all_anomalous_metrics'))
                         if LOCAL_DEBUG:
-                            logger.info('debug :: metric in all_anomalous_metrics - %s' % (
-                                str(metric)))
+                            logger.info('debug :: for alert in settings.ALERTS analyzer.all_anomalous_metrics - %s' % (
+                                str(all_anomalous_metrics)))
 
-                        # @added 20180914 - Bug #2594: Analyzer Ionosphere alert on Analyzer data point
-                        # Set each metric to the default Analyzer context
-                        context = 'Analyzer'
-
-                        pattern_match = False
-                        # Absolute match
-                        if str(metric[1]) == str(alert[0]):
-                            pattern_match = True
+                        for metric_list_string in all_anomalous_metrics:
+                            metric = literal_eval(metric_list_string)
                             if LOCAL_DEBUG:
-                                logger.debug('debug :: metric absolutely pattern matched - %s %s' % (
-                                    str(metric[1]), str(alert[0])))
-                            # @added 20191021 - Bug #3266: py3 Redis binary objects not strings
-                            #                   Branch #3262: py3
-                            matched_by = 'absolutely'
-
-                        if not pattern_match:
-                            if LOCAL_DEBUG:
-                                logger.debug('debug :: metric not absolutely pattern matched - %s' % (
-                                    str(metric[1])))
-
-                            ALERT_MATCH_PATTERN = alert[0]
-                            METRIC_PATTERN = metric[1]
-                            matched_by = 'not matched'
-                            try:
-                                alert_match_pattern = re.compile(ALERT_MATCH_PATTERN)
-                                pattern_match = alert_match_pattern.match(METRIC_PATTERN)
-                                # if LOCAL_DEBUG:
-                                #     logger.info(
-                                #         'debug :: regex alert pattern matched :: %s %s' %
-                                #         (alert[0], metric[1]))
-                                matched_by = 'regex'
-                            except:
-                                pattern_match = False
-                        # @modified 20160806 - Reintroduced the original
-                        # substring matching after wildcard matching, to allow
-                        # more flexibility
-                        if not pattern_match:
-                            if alert[0] in metric[1]:
-                                pattern_match = True
-                                # if LOCAL_DEBUG:
-                                #     logger.info(
-                                #         'debug :: substring alert pattern matched :: %s %s' %
-                                #         (alert[0], metric[1]))
-                                matched_by = 'substring'
-
-                        if not pattern_match:
-                            if LOCAL_DEBUG:
-                                logger.debug('debug :: metric not pattern matched, continuing - %s' % (
-                                    str(metric[1])))
-                            continue
-
-                        mirage_metric = False
-                        analyzer_metric = True
-                        cache_key = 'last_alert.%s.%s' % (alert[1], metric[1])
-                        if LOCAL_DEBUG:
-                            logger.debug('debug :: last_alert cache key %s' % (
-                                str(cache_key)))
-
-                        if settings.ENABLE_MIRAGE:
-                            try:
-                                # @modified 20181023 - Feature #2618: alert_slack
-                                # SECOND_ORDER_RESOLUTION_FULL_DURATION = alert[3]
-                                SECOND_ORDER_RESOLUTION_FULL_DURATION = int(alert[3])
-                                mirage_metric = True
-                                analyzer_metric = False
-                                logger.info(
-                                    'mirage check :: %s at %s hours - matched by %s' %
-                                    (metric[1],
-                                        str(SECOND_ORDER_RESOLUTION_FULL_DURATION),
-                                        matched_by))
-                                context = 'Mirage'
-                            except:
-                                mirage_metric = False
-                                if LOCAL_DEBUG:
-                                    logger.debug('debug :: not Mirage metric - %s' % metric[1])
-
-                        if mirage_metric:
-                            # Write anomalous metric to test at second
-                            # order resolution by Mirage to the check
-                            # file
-                            if LOCAL_DEBUG:
-                                logger.info(
-                                    'debug :: Memory usage in run before writing mirage check file: %s (kb)' %
-                                    resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
-                            # @added 20160815 - Analyzer also alerting on Mirage metrics now #22
-                            # With the reintroduction of the original substring
-                            # matching it become evident that Analyzer could
-                            # alert on a Mirage metric via a match on a parent
-                            # namespace pattern later in the ALERTS tuples.
-                            # If it is a Mirage metric, we add a mirage.metrics
-                            # key for Analyzer to check in the analyzer_metric
-                            # step below.  This allows us to wildcard and
-                            # substring match, but the mirage.metrics keys act
-                            # as a dynamic SKIP_LIST for Analyzer
-                            mirage_metric_cache_key = 'mirage.metrics.%s' % metric[1]
-                            try:
-                                self.redis_conn.setex(mirage_metric_cache_key, alert[2], packb(metric[0]))
-                            except:
-                                logger.info(traceback.format_exc())
-                                logger.error('error :: failed to add mirage.metrics Redis key - %s' % str(mirage_metric_cache_key))
-
-                            # metric_timestamp = int(time())
-                            # anomaly_check_file = '%s/%s.%s.txt' % (settings.MIRAGE_CHECK_PATH, metric_timestamp, metric[1])
-                            # @added 20170206 - Bug #1904: Handle non filesystem friendly metric names in check files
-                            anomaly_check_file = None
-                            try:
-                                sane_metricname = filesafe_metricname(str(metric[1]))
-                                anomaly_check_file = '%s/%s.%s.txt' % (settings.MIRAGE_CHECK_PATH, str(int(metric[2])), sane_metricname)
-                            except:
-                                logger.error(traceback.format_exc())
-                                logger.error('error :: failed to determine anomaly_check_file')
-
-                            if anomaly_check_file:
-                                anomaly_check_file_created = False
-                                try:
-                                    # @added 20190410 - Feature #2882: Mirage - periodic_check
-                                    # Allow for even non Mirage metrics to have
-                                    # periodic checks done.  If the Mirage
-                                    # SECOND_ORDER_RESOLUTION_HOURS are not set
-                                    # in the alert tuple default to 7 days, 168
-                                    # hours
-                                    try:
-                                        use_hours_to_resolve = int(alert[3])
-                                    except:
-                                        use_hours_to_resolve = 168
-
-                                    with open(anomaly_check_file, 'w') as fh:
-                                        # metric_name, anomalous datapoint, hours to resolve, timestamp
-                                        # @modified 20190410 - Feature #2882: Mirage - periodic_check
-                                        # fh.write('metric = "%s"\nvalue = "%s"\nhours_to_resolve = "%s"\nmetric_timestamp = "%s"\n' % (metric[1], metric[0], alert[3], str(metric[2])))
-                                        fh.write('metric = "%s"\nvalue = "%s"\nhours_to_resolve = "%s"\nmetric_timestamp = "%s"\n' % (metric[1], metric[0], str(use_hours_to_resolve), str(metric[2])))
-                                    anomaly_check_file_created = True
-                                except:
-                                    logger.error(traceback.format_exc())
-                                    logger.error('error :: failed to write anomaly_check_file')
-                                if LOCAL_DEBUG:
-                                    logger.info(
-                                        'debug :: Memory usage in run after writing mirage check file: %s (kb)' %
-                                        resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
-
-                                if anomaly_check_file_created:
-                                    if python_version == 2:
-                                        # @modified 20190130 - Task #2690: Test Skyline on Python-3.6.7
-                                        #                      Task #2828: Skyline - Python 3.7
-                                        #                      Branch #3262: py3
-                                        # os.chmod(anomaly_check_file, 0644)
-                                        os.chmod(anomaly_check_file, 0o644)
-                                    if python_version == 3:
-                                        os.chmod(anomaly_check_file, mode=0o644)
-                                    if LOCAL_DEBUG:
-                                        logger.info(
-                                            'debug :: Memory usage in run after chmod mirage check file: %s (kb)' %
-                                            resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
-
-                            logger.info('added mirage check :: %s,%s,%s' % (metric[1], metric[0], alert[3]))
-                            try:
-                                # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
-                                #                      Task #3032: Debug number of Python processes and memory use
-                                #                      Branch #3002: docker
-                                # Replace Manager.list instances with Redis sets
-                                # self.sent_to_mirage.append(metric[1])
-                                redis_set = 'analyzer.sent_to_mirage'
-                                data = str(metric[1])
-                                try:
-                                    self.redis_conn.sadd(redis_set, data)
-                                except:
-                                    logger.info(traceback.format_exc())
-                                    logger.error('error :: failed to add %s to Redis set %s' % (
-                                        str(data), str(redis_set)))
-                            except:
-                                logger.info(traceback.format_exc())
-                                # logger.error(
-                                #     'error :: failed add to self.sent_to_mirage.append with %s' %
-                                #     metric[1])
-                                logger.error(
-                                    'error :: failed add %s to analyzer.sent_to_mirage Redis set' %
-                                    metric[1])
-
-                            # Alert for analyzer if enabled
-                            # This sends an Analyzer ALERT for every check that
-                            # is sent to Mirage.
-                            if settings.ENABLE_FULL_DURATION_ALERTS:
-
-                                # @modified 20200413 - Feature #3486: analyzer_batch
-                                #                      Feature #3480: batch_processing
-                                # Change the last_alert cache key to hold the
-                                # the anomaly timestamp which which the alert
-                                # was sent, not the packb anomaly value, which
-                                # having reviewed the code is not used or called
-                                # anywhere.  The packb of the last_alert cache
-                                # key is from the original Etsy code, using the
-                                # timestamp of the anomaly allows it to be used
-                                # to determine if a batch anomaly should be
-                                # alerted on based on the comparison of the
-                                # timestamps rather than just the last_alert
-                                # key as analyzer_batch could send multiple
-                                # anomalies in one batch that might be
-                                # EXPIRATION_TIME apart.
-                                # self.redis_conn.setex(cache_key, alert[2], packb(metric[0]))
-                                self.redis_conn.setex(cache_key, alert[2], int(metric[2]))
-                                logger.info('triggering alert ENABLE_FULL_DURATION_ALERTS :: %s %s via %s' % (metric[1], metric[0], alert[1]))
-                                try:
-                                    if alert[1] != 'smtp':
-                                        trigger_alert(alert, metric, context)
-                                    else:
-                                        smtp_trigger_alert(alert, metric, context)
-                                except:
-                                    logger.error(
-                                        'error :: failed to trigger_alert ENABLE_FULL_DURATION_ALERTS :: %s %s via %s' %
-                                        (metric[1], metric[0], alert[1]))
-                            else:
-                                if LOCAL_DEBUG:
-                                    logger.info('debug :: ENABLE_FULL_DURATION_ALERTS not enabled')
-                            continue
-
-                        # @added 20161228 - Feature #1830: Ionosphere alerts
-                        #                   Branch #922: Ionosphere
-                        # Bringing Ionosphere online - do alert on Ionosphere
-                        # metrics if Ionosphere is up
-                        metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(metric[1]))
-                        if LOCAL_DEBUG:
-                            logger.debug('debug :: metric_name - %s' % str(metric_name))
-
-                        if metric_name in ionosphere_unique_metrics:
-                            ionosphere_up = False
-                            try:
-                                ionosphere_up = self.redis_conn.get('ionosphere')
-                            except Exception as e:
-                                logger.error('error :: could not query Redis for ionosphere key: %s' % str(e))
-                            if ionosphere_up:
-                                # @modified 20161229 - Feature #1830: Ionosphere alerts
-                                # Do alert if Ionosphere created a Redis
-                                # ionosphere.analyzer.alert key
-                                if str(metric[1]) in ionosphere_metric_alerts:
-                                    logger.info('alerting as in ionosphere_alerts - Ionosphere metric - %s' % str(metric[1]))
-                                    context = 'Ionosphere'
-                                else:
-                                    logger.info('not alerting - Ionosphere metric - %s' % str(metric[1]))
-                                    continue
-                            else:
-                                logger.error('error :: Ionosphere not report up')
-                                logger.info('taking over alerting from Ionosphere if alert is matched on - %s' % str(metric[1]))
-                        else:
-                            if LOCAL_DEBUG:
-                                logger.debug('debug :: metric_name not in ionosphere_unique_metrics - %s' % str(metric_name))
-
-                        # @added 20161231 - Feature #1830: Ionosphere alerts
-                        #                   Analyzer also alerting on Mirage metrics now #22
-                        # Do not alert on Mirage metrics
-                        if metric_name in mirage_unique_metrics:
-                            logger.info('not alerting - skipping Mirage metric - %s' % str(metric[1]))
-                            continue
-
-                        if analyzer_metric:
-                            if LOCAL_DEBUG:
-                                logger.debug('debug :: metric_name is analyzer_metric - %s' % str(analyzer_metric))
-                            # @added 20160815 - Analyzer also alerting on Mirage metrics now #22
-                            # If the metric has a dynamic mirage.metrics key,
-                            # skip it
-                            mirage_metric_cache_key = 'mirage.metrics.%s' % metric[1]
-                            mirage_metric_key = False
-                            if settings.ENABLE_MIRAGE:
-                                try:
-                                    mirage_metric_key = self.redis_conn.get(mirage_metric_cache_key)
-                                    if LOCAL_DEBUG:
-                                        logger.debug('debug :: metric_name analyzer_metric mirage_metric_key - %s' % str(mirage_metric_key))
-
-                                except Exception as e:
-                                    logger.error('error :: could not query Redis for mirage_metric_cache_key: %s' % e)
-
-                            if mirage_metric_key:
-                                if LOCAL_DEBUG:
-                                    logger.info('debug :: mirage metric key exists, skipping %s' % metric[1])
-                                continue
-
-                            try:
-                                last_alert = self.redis_conn.get(cache_key)
-                                if LOCAL_DEBUG:
-                                    logger.debug('debug :: metric_name analyzer_metric last_alert - %s' % str(last_alert))
-                            except Exception as e:
-                                logger.error('error :: could not query Redis for cache_key: %s' % e)
-                                continue
-
-                            # @added 20200413 - Feature #3486: analyzer_batch
-                            #                   Feature #3480: batch_processing
-                            # Do not evaluate batch metrics against the presence
-                            # of the last_alert cache key, but against the
-                            # timestamp of the anomaly as reported by the key
-                            if BATCH_PROCESSING and last_alert:
-                                # Is this a analyzer_batch related anomaly
-                                analyzer_batch_anomaly = None
-                                analyzer_batch_metric_anomaly_key = 'analyzer_batch.anomaly.%s.%s' % (
-                                    str(int(metric[2])), metric)
-                                try:
-                                    analyzer_batch_anomaly = self.redis_conn.get(analyzer_batch_metric_anomaly_key)
-                                except Exception as e:
-                                    logger.error(
-                                        'error :: could not query cache_key - %s - %s' % (
-                                            analyzer_batch_metric_anomaly_key, e))
-                                    analyzer_batch_anomaly = None
-                                if analyzer_batch_anomaly:
-                                    logger.info('batch processing - identified as an analyzer_batch triggered anomaly from the presence of the Redis key %s' % analyzer_batch_metric_anomaly_key)
-                                else:
-                                    logger.info('batch processing - not identified as an analyzer_batch triggered anomaly as no Redis key found - %s' % analyzer_batch_metric_anomaly_key)
-                                if analyzer_batch_anomaly:
-                                    seconds_between_batch_anomalies = None
-                                    try:
-                                        seconds_between_batch_anomalies = int(metric[2]) - int(last_alert)
-                                    except:
-                                        logger.info(traceback.format_exc())
-                                        logger.error('error :: failed to calculate number of seconds between last_alert anomalyy timestamp and current batch anomaly timestamp')
-                                    if seconds_between_batch_anomalies == 0:
-                                        seconds_between_batch_anomalies = 1
-                                    if seconds_between_batch_anomalies > int(alert[2]):
-                                        logger.info('batch processing - setting last_alert to None for %s, so Analyzer will alert on this anomaly which occurred %s seconds after the last anomaly alerted on' % (
-                                            metric, str(seconds_between_batch_anomalies)))
-                                        last_alert = None
-
-                            if last_alert:
-                                if str(metric[1]) in ionosphere_metric_alerts:
-                                    logger.info('not alerting on ionosphere_alerts Ionosphere metric - last_alert key exists - %s' % str(metric[1]))
-                                    logger.info('so alert resources will not be created for this ionosphere_alerts Ionosphere metric - %s' % str(metric[1]))
-                                continue
+                                logger.info('debug :: metric in all_anomalous_metrics - %s' % (
+                                    str(metric)))
 
                             # @added 20180914 - Bug #2594: Analyzer Ionosphere alert on Analyzer data point
-                            # Due to ionosphere_alerts being added to the
-                            # self.all_anomalous_metrics after Analyzer metrics
-                            # here we need to ensure that we only alert on the
-                            # last item for the metric in the list so that the
-                            # alert is not sent out with any current
-                            # anomaly data from the current Analyzer run, but
-                            # with the data from the ionosphere_alerts item.
-                            if context == 'Ionosphere':
-                                for check_metric in ionosphere_anomalous_metrics:
-                                    if metric[1] == check_metric[1]:
-                                        if metric[2] != check_metric[2]:
-                                            # If the timestamps do not match
-                                            # then it is the list item from
-                                            # the Analyzer anomaly, not the
-                                            # Ionosphere list item
-                                            continue
+                            # Set each metric to the default Analyzer context
+                            context = 'Analyzer'
 
-                            try:
-                                # @modified 20191021 - Bug #3266: py3 Redis binary objects not strings
-                                #                      Branch #3262: py3
-                                # self.redis_conn.setex(cache_key, alert[2], packb(metric[0]))
-                                if python_version == 2:
+                            pattern_match = False
+                            # Absolute match
+                            if str(metric[1]) == str(alert[0]):
+                                pattern_match = True
+                                if LOCAL_DEBUG:
+                                    logger.debug('debug :: metric absolutely pattern matched - %s %s' % (
+                                        str(metric[1]), str(alert[0])))
+                                # @added 20191021 - Bug #3266: py3 Redis binary objects not strings
+                                #                   Branch #3262: py3
+                                matched_by = 'absolutely'
+
+                            if not pattern_match:
+                                if LOCAL_DEBUG:
+                                    logger.debug('debug :: metric not absolutely pattern matched - %s' % (
+                                        str(metric[1])))
+
+                                ALERT_MATCH_PATTERN = alert[0]
+                                METRIC_PATTERN = metric[1]
+                                matched_by = 'not matched'
+                                try:
+                                    alert_match_pattern = re.compile(ALERT_MATCH_PATTERN)
+                                    pattern_match = alert_match_pattern.match(METRIC_PATTERN)
+                                    # if LOCAL_DEBUG:
+                                    #     logger.info(
+                                    #         'debug :: regex alert pattern matched :: %s %s' %
+                                    #         (alert[0], metric[1]))
+                                    matched_by = 'regex'
+                                except:
+                                    pattern_match = False
+                            # @modified 20160806 - Reintroduced the original
+                            # substring matching after wildcard matching, to allow
+                            # more flexibility
+                            if not pattern_match:
+                                if alert[0] in metric[1]:
+                                    pattern_match = True
+                                    # if LOCAL_DEBUG:
+                                    #     logger.info(
+                                    #         'debug :: substring alert pattern matched :: %s %s' %
+                                    #         (alert[0], metric[1]))
+                                    matched_by = 'substring'
+
+                            if not pattern_match:
+                                if LOCAL_DEBUG:
+                                    logger.debug('debug :: metric not pattern matched, continuing - %s' % (
+                                        str(metric[1])))
+                                continue
+
+                            mirage_metric = False
+                            analyzer_metric = True
+                            cache_key = 'last_alert.%s.%s' % (alert[1], metric[1])
+                            if LOCAL_DEBUG:
+                                logger.debug('debug :: last_alert cache key %s' % (
+                                    str(cache_key)))
+
+                            if settings.ENABLE_MIRAGE:
+                                try:
+                                    # @modified 20181023 - Feature #2618: alert_slack
+                                    # SECOND_ORDER_RESOLUTION_FULL_DURATION = alert[3]
+                                    SECOND_ORDER_RESOLUTION_FULL_DURATION = int(alert[3])
+                                    mirage_metric = True
+                                    analyzer_metric = False
+                                    logger.info(
+                                        'mirage check :: %s at %s hours - matched by %s' %
+                                        (metric[1],
+                                            str(SECOND_ORDER_RESOLUTION_FULL_DURATION),
+                                            matched_by))
+                                    context = 'Mirage'
+                                except:
+                                    mirage_metric = False
+                                    if LOCAL_DEBUG:
+                                        logger.debug('debug :: not Mirage metric - %s' % metric[1])
+
+                            if mirage_metric:
+                                # Write anomalous metric to test at second
+                                # order resolution by Mirage to the check
+                                # file
+                                if LOCAL_DEBUG:
+                                    logger.info(
+                                        'debug :: Memory usage in run before writing mirage check file: %s (kb)' %
+                                        resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+                                # @added 20160815 - Analyzer also alerting on Mirage metrics now #22
+                                # With the reintroduction of the original substring
+                                # matching it become evident that Analyzer could
+                                # alert on a Mirage metric via a match on a parent
+                                # namespace pattern later in the ALERTS tuples.
+                                # If it is a Mirage metric, we add a mirage.metrics
+                                # key for Analyzer to check in the analyzer_metric
+                                # step below.  This allows us to wildcard and
+                                # substring match, but the mirage.metrics keys act
+                                # as a dynamic SKIP_LIST for Analyzer
+                                mirage_metric_cache_key = 'mirage.metrics.%s' % metric[1]
+                                try:
+                                    self.redis_conn.setex(mirage_metric_cache_key, alert[2], packb(metric[0]))
+                                except:
+                                    logger.info(traceback.format_exc())
+                                    logger.error('error :: failed to add mirage.metrics Redis key - %s' % str(mirage_metric_cache_key))
+
+                                # metric_timestamp = int(time())
+                                # anomaly_check_file = '%s/%s.%s.txt' % (settings.MIRAGE_CHECK_PATH, metric_timestamp, metric[1])
+                                # @added 20170206 - Bug #1904: Handle non filesystem friendly metric names in check files
+                                anomaly_check_file = None
+                                try:
+                                    sane_metricname = filesafe_metricname(str(metric[1]))
+                                    anomaly_check_file = '%s/%s.%s.txt' % (settings.MIRAGE_CHECK_PATH, str(int(metric[2])), sane_metricname)
+                                except:
+                                    logger.error(traceback.format_exc())
+                                    logger.error('error :: failed to determine anomaly_check_file')
+
+                                if anomaly_check_file:
+                                    anomaly_check_file_created = False
+                                    try:
+                                        # @added 20190410 - Feature #2882: Mirage - periodic_check
+                                        # Allow for even non Mirage metrics to have
+                                        # periodic checks done.  If the Mirage
+                                        # SECOND_ORDER_RESOLUTION_HOURS are not set
+                                        # in the alert tuple default to 7 days, 168
+                                        # hours
+                                        try:
+                                            use_hours_to_resolve = int(alert[3])
+                                        except:
+                                            use_hours_to_resolve = 168
+
+                                        with open(anomaly_check_file, 'w') as fh:
+                                            # metric_name, anomalous datapoint, hours to resolve, timestamp
+                                            # @modified 20190410 - Feature #2882: Mirage - periodic_check
+                                            # fh.write('metric = "%s"\nvalue = "%s"\nhours_to_resolve = "%s"\nmetric_timestamp = "%s"\n' % (metric[1], metric[0], alert[3], str(metric[2])))
+                                            fh.write('metric = "%s"\nvalue = "%s"\nhours_to_resolve = "%s"\nmetric_timestamp = "%s"\n' % (metric[1], metric[0], str(use_hours_to_resolve), str(metric[2])))
+                                        anomaly_check_file_created = True
+                                    except:
+                                        logger.error(traceback.format_exc())
+                                        logger.error('error :: failed to write anomaly_check_file')
+                                    if LOCAL_DEBUG:
+                                        logger.info(
+                                            'debug :: Memory usage in run after writing mirage check file: %s (kb)' %
+                                            resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+
+                                    if anomaly_check_file_created:
+                                        if python_version == 2:
+                                            # @modified 20190130 - Task #2690: Test Skyline on Python-3.6.7
+                                            #                      Task #2828: Skyline - Python 3.7
+                                            #                      Branch #3262: py3
+                                            # os.chmod(anomaly_check_file, 0644)
+                                            os.chmod(anomaly_check_file, 0o644)
+                                        if python_version == 3:
+                                            os.chmod(anomaly_check_file, mode=0o644)
+                                        if LOCAL_DEBUG:
+                                            logger.info(
+                                                'debug :: Memory usage in run after chmod mirage check file: %s (kb)' %
+                                                resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+
+                                logger.info('added mirage check :: %s,%s,%s' % (metric[1], metric[0], alert[3]))
+                                try:
+                                    # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                                    #                      Task #3032: Debug number of Python processes and memory use
+                                    #                      Branch #3002: docker
+                                    # Replace Manager.list instances with Redis sets
+                                    # self.sent_to_mirage.append(metric[1])
+                                    redis_set = 'analyzer.sent_to_mirage'
+                                    data = str(metric[1])
+                                    try:
+                                        self.redis_conn.sadd(redis_set, data)
+                                    except:
+                                        logger.info(traceback.format_exc())
+                                        logger.error('error :: failed to add %s to Redis set %s' % (
+                                            str(data), str(redis_set)))
+                                except:
+                                    logger.info(traceback.format_exc())
+                                    # logger.error(
+                                    #     'error :: failed add to self.sent_to_mirage.append with %s' %
+                                    #     metric[1])
+                                    logger.error(
+                                        'error :: failed add %s to analyzer.sent_to_mirage Redis set' %
+                                        metric[1])
+
+                                # Alert for analyzer if enabled
+                                # This sends an Analyzer ALERT for every check that
+                                # is sent to Mirage.
+                                if settings.ENABLE_FULL_DURATION_ALERTS:
+
                                     # @modified 20200413 - Feature #3486: analyzer_batch
                                     #                      Feature #3480: batch_processing
                                     # Change the last_alert cache key to hold the
-                                    # the anomaly timestamp for which the alert
+                                    # the anomaly timestamp which which the alert
                                     # was sent, not the packb anomaly value, which
                                     # having reviewed the code is not used or called
                                     # anywhere.  The packb of the last_alert cache
@@ -3370,56 +3315,225 @@ class Analyzer(Thread):
                                     # key as analyzer_batch could send multiple
                                     # anomalies in one batch that might be
                                     # EXPIRATION_TIME apart.
-                                    # key_set = self.redis_conn.setex(cache_key, alert[2], packb(metric[0]))
-                                    key_set = self.redis_conn.setex(cache_key, alert[2], int(metric[2]))
-                                if python_version == 3:
-                                    # key_set = self.redis_conn.setex(cache_key, str(alert[2]), packb(str(metric[0])))
-                                    key_set = self.redis_conn.setex(cache_key, str(alert[2]), int(metric[2]))
+                                    # self.redis_conn.setex(cache_key, alert[2], packb(metric[0]))
+                                    self.redis_conn.setex(cache_key, alert[2], int(metric[2]))
+                                    logger.info('triggering alert ENABLE_FULL_DURATION_ALERTS :: %s %s via %s' % (metric[1], metric[0], alert[1]))
+                                    try:
+                                        if alert[1] != 'smtp':
+                                            trigger_alert(alert, metric, context)
+                                        else:
+                                            smtp_trigger_alert(alert, metric, context)
+                                    except:
+                                        logger.error(
+                                            'error :: failed to trigger_alert ENABLE_FULL_DURATION_ALERTS :: %s %s via %s' %
+                                            (metric[1], metric[0], alert[1]))
+                                else:
+                                    if LOCAL_DEBUG:
+                                        logger.info('debug :: ENABLE_FULL_DURATION_ALERTS not enabled')
+                                continue
+
+                            # @added 20161228 - Feature #1830: Ionosphere alerts
+                            #                   Branch #922: Ionosphere
+                            # Bringing Ionosphere online - do alert on Ionosphere
+                            # metrics if Ionosphere is up
+                            metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(metric[1]))
+                            if LOCAL_DEBUG:
+                                logger.debug('debug :: metric_name - %s' % str(metric_name))
+
+                            if metric_name in ionosphere_unique_metrics:
+                                ionosphere_up = False
+                                try:
+                                    ionosphere_up = self.redis_conn.get('ionosphere')
+                                except Exception as e:
+                                    logger.error('error :: could not query Redis for ionosphere key: %s' % str(e))
+                                if ionosphere_up:
+                                    # @modified 20161229 - Feature #1830: Ionosphere alerts
+                                    # Do alert if Ionosphere created a Redis
+                                    # ionosphere.analyzer.alert key
+                                    if str(metric[1]) in ionosphere_metric_alerts:
+                                        logger.info('alerting as in ionosphere_alerts - Ionosphere metric - %s' % str(metric[1]))
+                                        context = 'Ionosphere'
+                                    else:
+                                        logger.info('not alerting - Ionosphere metric - %s' % str(metric[1]))
+                                        continue
+                                else:
+                                    logger.error('error :: Ionosphere not report up')
+                                    logger.info('taking over alerting from Ionosphere if alert is matched on - %s' % str(metric[1]))
+                            else:
                                 if LOCAL_DEBUG:
-                                    logger.debug('debug :: metric_name analyzer_metric cache_key setex - %s, %s, %s, %s' % (
-                                        str(cache_key), str(alert[2]),
-                                        str(metric[0]), str(key_set)))
-                            except:
-                                # logger.error('error :: failed to set alert cache key :: %s' % (cache_key))
-                                logger.error(traceback.format_exc())
-                                logger.error('error :: metric_name analyzer_metric cache_key setex - %s, %s, %s, %s' % (
-                                    str(cache_key), str(alert[2]),
-                                    str(metric[0]), str(key_set)))
-                            try:
-                                logger.info(
-                                    'triggering alert :: %s %s via %s - matched by %s' %
+                                    logger.debug('debug :: metric_name not in ionosphere_unique_metrics - %s' % str(metric_name))
+
+                            # @added 20161231 - Feature #1830: Ionosphere alerts
+                            #                   Analyzer also alerting on Mirage metrics now #22
+                            # Do not alert on Mirage metrics
+                            if metric_name in mirage_unique_metrics:
+                                logger.info('not alerting - skipping Mirage metric - %s' % str(metric[1]))
+                                continue
+
+                            if analyzer_metric:
+                                if LOCAL_DEBUG:
+                                    logger.debug('debug :: metric_name is analyzer_metric - %s' % str(analyzer_metric))
+                                # @added 20160815 - Analyzer also alerting on Mirage metrics now #22
+                                # If the metric has a dynamic mirage.metrics key,
+                                # skip it
+                                mirage_metric_cache_key = 'mirage.metrics.%s' % metric[1]
+                                mirage_metric_key = False
+                                if settings.ENABLE_MIRAGE:
+                                    try:
+                                        mirage_metric_key = self.redis_conn.get(mirage_metric_cache_key)
+                                        if LOCAL_DEBUG:
+                                            logger.debug('debug :: metric_name analyzer_metric mirage_metric_key - %s' % str(mirage_metric_key))
+
+                                    except Exception as e:
+                                        logger.error('error :: could not query Redis for mirage_metric_cache_key: %s' % e)
+
+                                if mirage_metric_key:
+                                    if LOCAL_DEBUG:
+                                        logger.info('debug :: mirage metric key exists, skipping %s' % metric[1])
+                                    continue
+
+                                try:
+                                    last_alert = self.redis_conn.get(cache_key)
+                                    if LOCAL_DEBUG:
+                                        logger.debug('debug :: metric_name analyzer_metric last_alert - %s' % str(last_alert))
+                                except Exception as e:
+                                    logger.error('error :: could not query Redis for cache_key: %s' % e)
+                                    continue
+
+                                # @added 20200413 - Feature #3486: analyzer_batch
+                                #                   Feature #3480: batch_processing
+                                # Do not evaluate batch metrics against the presence
+                                # of the last_alert cache key, but against the
+                                # timestamp of the anomaly as reported by the key
+                                if BATCH_PROCESSING and last_alert:
+                                    # Is this a analyzer_batch related anomaly
+                                    analyzer_batch_anomaly = None
+                                    analyzer_batch_metric_anomaly_key = 'analyzer_batch.anomaly.%s.%s' % (
+                                        # str(metric_timestamp), metric)
+                                        str(int(metric[2])), metric)
+                                    try:
+                                        analyzer_batch_anomaly = self.redis_conn.get(analyzer_batch_metric_anomaly_key)
+                                    except Exception as e:
+                                        logger.error(
+                                            'error :: could not query cache_key - %s - %s' % (
+                                                analyzer_batch_metric_anomaly_key, e))
+                                        analyzer_batch_anomaly = None
+                                    if analyzer_batch_anomaly:
+                                        logger.info('batch processing - identified as an analyzer_batch triggered anomaly from the presence of the Redis key %s' % analyzer_batch_metric_anomaly_key)
+                                    else:
+                                        logger.info('batch processing - not identified as an analyzer_batch triggered anomaly as no Redis key found - %s' % analyzer_batch_metric_anomaly_key)
+                                    if analyzer_batch_anomaly:
+                                        seconds_between_batch_anomalies = None
+                                        try:
+                                            seconds_between_batch_anomalies = int(metric[2]) - int(last_alert)
+                                        except:
+                                            logger.info(traceback.format_exc())
+                                            logger.error('error :: failed to calculate number of seconds between last_alert anomalyy timestamp and current batch anomaly timestamp')
+                                        if seconds_between_batch_anomalies == 0:
+                                            seconds_between_batch_anomalies = 1
+                                        if seconds_between_batch_anomalies > int(alert[2]):
+                                            logger.info('batch processing - setting last_alert to None for %s, so Analyzer will alert on this anomaly which occurred %s seconds after the last anomaly alerted on' % (
+                                                metric, str(seconds_between_batch_anomalies)))
+                                            last_alert = None
+
+                                if last_alert:
+                                    if str(metric[1]) in ionosphere_metric_alerts:
+                                        logger.info('not alerting on ionosphere_alerts Ionosphere metric - last_alert key exists - %s' % str(metric[1]))
+                                        logger.info('so alert resources will not be created for this ionosphere_alerts Ionosphere metric - %s' % str(metric[1]))
+                                    continue
+
+                                # @added 20180914 - Bug #2594: Analyzer Ionosphere alert on Analyzer data point
+                                # Due to ionosphere_alerts being added to the
+                                # self.all_anomalous_metrics after Analyzer metrics
+                                # here we need to ensure that we only alert on the
+                                # last item for the metric in the list so that the
+                                # alert is not sent out with any current
+                                # anomaly data from the current Analyzer run, but
+                                # with the data from the ionosphere_alerts item.
+                                if context == 'Ionosphere':
+                                    for check_metric in ionosphere_anomalous_metrics:
+                                        if metric[1] == check_metric[1]:
+                                            if metric[2] != check_metric[2]:
+                                                # If the timestamps do not match
+                                                # then it is the list item from
+                                                # the Analyzer anomaly, not the
+                                                # Ionosphere list item
+                                                continue
+
+                                try:
                                     # @modified 20191021 - Bug #3266: py3 Redis binary objects not strings
                                     #                      Branch #3262: py3
-                                    # (metric[1], metric[0], alert[1], matched_by))
-                                    (str(metric[1]), str(metric[0]), str(alert[1]),
-                                        str(matched_by)))
-                            except:
-                                logger.error(traceback.format_exc())
-                                logger.error('error :: metric_name analyzer_metric triggering alert')
-                            if LOCAL_DEBUG:
-                                logger.info(
-                                    'debug :: Memory usage in run before triggering alert: %s (kb)' %
-                                    resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
-                            try:
-                                if alert[1] != 'smtp':
-                                    trigger_alert(alert, metric, context)
-                                    logger.info('trigger_alert :: alert: %s, metric: %s, context: %s' % (
-                                        str(alert), str(metric), str(context)))
-                                else:
-                                    smtp_trigger_alert(alert, metric, context)
-                                    logger.info('smtp_trigger_alert :: alert: %s, metric: %s, context: %s' % (
-                                        str(alert), str(metric), str(context)))
+                                    # self.redis_conn.setex(cache_key, alert[2], packb(metric[0]))
+                                    if python_version == 2:
+                                        # @modified 20200413 - Feature #3486: analyzer_batch
+                                        #                      Feature #3480: batch_processing
+                                        # Change the last_alert cache key to hold the
+                                        # the anomaly timestamp for which the alert
+                                        # was sent, not the packb anomaly value, which
+                                        # having reviewed the code is not used or called
+                                        # anywhere.  The packb of the last_alert cache
+                                        # key is from the original Etsy code, using the
+                                        # timestamp of the anomaly allows it to be used
+                                        # to determine if a batch anomaly should be
+                                        # alerted on based on the comparison of the
+                                        # timestamps rather than just the last_alert
+                                        # key as analyzer_batch could send multiple
+                                        # anomalies in one batch that might be
+                                        # EXPIRATION_TIME apart.
+                                        # key_set = self.redis_conn.setex(cache_key, alert[2], packb(metric[0]))
+                                        key_set = self.redis_conn.setex(cache_key, alert[2], int(metric[2]))
+                                    if python_version == 3:
+                                        # key_set = self.redis_conn.setex(cache_key, str(alert[2]), packb(str(metric[0])))
+                                        key_set = self.redis_conn.setex(cache_key, str(alert[2]), int(metric[2]))
                                     if LOCAL_DEBUG:
-                                        logger.info('debug :: smtp_trigger_alert spawned')
+                                        logger.debug('debug :: metric_name analyzer_metric cache_key setex - %s, %s, %s, %s' % (
+                                            str(cache_key), str(alert[2]),
+                                            str(metric[0]), str(key_set)))
+                                except:
+                                    # logger.error('error :: failed to set alert cache key :: %s' % (cache_key))
+                                    logger.error(traceback.format_exc())
+                                    logger.error('error :: metric_name analyzer_metric cache_key setex - %s, %s, %s, %s' % (
+                                        str(cache_key), str(alert[2]),
+                                        str(metric[0]), str(key_set)))
+                                try:
+                                    logger.info(
+                                        'triggering alert :: %s %s via %s - matched by %s' %
+                                        # @modified 20191021 - Bug #3266: py3 Redis binary objects not strings
+                                        #                      Branch #3262: py3
+                                        # (metric[1], metric[0], alert[1], matched_by))
+                                        (str(metric[1]), str(metric[0]), str(alert[1]),
+                                            str(matched_by)))
+                                except:
+                                    logger.error(traceback.format_exc())
+                                    logger.error('error :: metric_name analyzer_metric triggering alert')
                                 if LOCAL_DEBUG:
                                     logger.info(
-                                        'debug :: Memory usage in run after triggering alert: %s (kb)' %
+                                        'debug :: Memory usage in run before triggering alert: %s (kb)' %
                                         resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
-                            except:
-                                logger.error('error :: trigger_alert - %s' % traceback.format_exc())
-                                logger.error(
-                                    'error :: failed to trigger_alert :: %s %s via %s' %
-                                    (metric[1], metric[0], alert[1]))
+                                try:
+                                    if alert[1] != 'smtp':
+                                        trigger_alert(alert, metric, context)
+                                        logger.info('trigger_alert :: alert: %s, metric: %s, context: %s' % (
+                                            str(alert), str(metric), str(context)))
+                                    else:
+                                        smtp_trigger_alert(alert, metric, context)
+                                        logger.info('smtp_trigger_alert :: alert: %s, metric: %s, context: %s' % (
+                                            str(alert), str(metric), str(context)))
+                                        if LOCAL_DEBUG:
+                                            logger.info('debug :: smtp_trigger_alert spawned')
+                                    if LOCAL_DEBUG:
+                                        logger.info(
+                                            'debug :: Memory usage in run after triggering alert: %s (kb)' %
+                                            resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+                                except:
+                                    logger.error('error :: trigger_alert - %s' % traceback.format_exc())
+                                    logger.error(
+                                        'error :: failed to trigger_alert :: %s %s via %s' %
+                                        (metric[1], metric[0], alert[1]))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed in check to alert step')
+
             # @modified 20160207 - Branch #922: Ionosphere
             # Handle if alerts are not enabled
             else:
@@ -3521,7 +3635,26 @@ class Analyzer(Thread):
             if LOCAL_DEBUG:
                 logger.info('debug :: Memory usage in run before algorithm test run times: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 
+            algorithms_to_time = []
+            if LOCAL_DEBUG or DEBUG_CUSTOM_ALGORITHMS:
+                logger.debug('debug :: algorithms_to_time reset to - %s' % (str(algorithms_to_time)))
+            algorithms_to_time = list(settings.ALGORITHMS)
+            if LOCAL_DEBUG or DEBUG_CUSTOM_ALGORITHMS:
+                logger.debug('debug :: algorithms_to_time from settings.ALGORITHMS - %s' % (str(algorithms_to_time)))
+            if CUSTOM_ALGORITHMS:
+                for custom_algorithm in settings.CUSTOM_ALGORITHMS:
+                    algorithms_to_time.append(custom_algorithm)
+                    if LOCAL_DEBUG or DEBUG_CUSTOM_ALGORITHMS:
+                        logger.debug('debug :: algorithms_to_time added %s from settings.CUSTOM_ALGORITHMS - %s' % (str(custom_algorithm), str(algorithms_to_time)))
+
+            if LOCAL_DEBUG or DEBUG_CUSTOM_ALGORITHMS:
+                logger.debug('debug :: algorithms_to_time - %s' % (str(algorithms_to_time)))
+                logger.debug('debug :: processing algorithms_to_time - %s' % (str(algorithms_to_time)))
+
             for algorithm in algorithms_to_time:
+                if LOCAL_DEBUG or DEBUG_CUSTOM_ALGORITHMS:
+                    logger.debug('debug :: processing algorithm count and timings - %s' % (str(algorithm)))
+
                 algorithm_count_file = algorithm_tmp_file_prefix + algorithm + '.count'
                 algorithm_timings_file = algorithm_tmp_file_prefix + algorithm + '.timings'
 
@@ -3787,11 +3920,12 @@ class Analyzer(Thread):
                 #                      Branch #3262: py3
                 # literal_real_anomalous_metrics = list(self.redis_conn.smembers('analyzer.real_anomalous_metrics'))
                 literal_real_anomalous_metrics = list(self.redis_conn_decoded.smembers('analyzer.real_anomalous_metrics'))
+                logger.debug('debug :: literal_real_anomalous_metrics - %s' % str(literal_real_anomalous_metrics))
                 for metric_list_string in literal_real_anomalous_metrics:
                     metric = literal_eval(metric_list_string)
                     real_anomalous_metrics.append(metric)
             except:
-                logger.info(traceback.format_exc())
+                logger.error(traceback.format_exc())
                 logger.error('error :: failed to generate list from Redis set analyzer.real_anomalous_metrics to calculate total_anomalies')
             total_anomalies = str(len(real_anomalous_metrics))
 
@@ -4399,7 +4533,8 @@ class Analyzer(Thread):
                 except Exception as e:
                     logger.error('error :: could not add live_at to Redis set derivative_metrics: %s' % str(e))
                 try:
-                    non_derivative_monotonic_metrics = settings.NON_DERIVATIVE_MONOTONIC_METRICS
+                    # @modified 20200606 - Bug #3572: Apply list to settings imports
+                    non_derivative_monotonic_metrics = list(settings.NON_DERIVATIVE_MONOTONIC_METRICS)
                 except:
                     non_derivative_monotonic_metrics = []
                 try:
