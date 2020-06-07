@@ -182,7 +182,7 @@ def alert_smtp(alert, metric, context):
 
     # For backwards compatibility
     if '@' in alert[1]:
-        sender = settings.ALERT_SENDER
+        sender = str(settings.ALERT_SENDER)
         recipients = alert[1]
     else:
         sender = settings.SMTP_OPTS['sender']

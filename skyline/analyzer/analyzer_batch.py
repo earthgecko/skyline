@@ -88,10 +88,20 @@ except:
 # Determine if any metrcs have negatives values some they can be
 # added to the ionosphere.untrainable_metrics Redis set
 try:
-    from settings import KNOWN_NEGATIVE_METRICS
+    # @modified 20200606 - Bug #3572: Apply list to settings import
+    KNOWN_NEGATIVE_METRICS = list(settings.KNOWN_NEGATIVE_METRICS)
 except:
     KNOWN_NEGATIVE_METRICS = []
 
+# @added 20200607 - Feature #3566: custom_algorithms
+try:
+    CUSTOM_ALGORITHMS = settings.CUSTOM_ALGORITHMS
+except:
+    CUSTOM_ALGORITHMS = None
+try:
+    DEBUG_CUSTOM_ALGORITHMS = settings.DEBUG_CUSTOM_ALGORITHMS
+except:
+    DEBUG_CUSTOM_ALGORITHMS = False
 
 skyline_app_graphite_namespace = 'skyline.%s%s' % (skyline_app, SERVER_METRIC_PATH)
 
@@ -209,7 +219,8 @@ class AnalyzerBatch(Thread):
         except:
             non_derivative_metrics = []
         try:
-            non_derivative_monotonic_metrics = settings.NON_DERIVATIVE_MONOTONIC_METRICS
+            # @modified 20200606 - Bug #3572: Apply list to settings import
+            non_derivative_monotonic_metrics = list(settings.NON_DERIVATIVE_MONOTONIC_METRICS)
         except:
             non_derivative_monotonic_metrics = []
         non_smtp_alerter_metrics = []
@@ -524,7 +535,10 @@ class AnalyzerBatch(Thread):
                 # @modified 20200425 - Feature #3508: ionosphere.untrainable_metrics
                 # Added run_negatives_present and added negatives_found
                 # anomalous, ensemble, datapoint = run_selected_batch_algorithm(batch_timeseries, metric_name)
-                anomalous, ensemble, datapoint, negatives_found = run_selected_batch_algorithm(batch_timeseries, metric_name, run_negatives_present)
+                # @modified 20200607 - Feature #3566: custom_algorithms
+                # Added algorithms_run
+
+                anomalous, ensemble, datapoint, negatives_found, algorithms_run = run_selected_batch_algorithm(batch_timeseries, metric_name, run_negatives_present)
 
                 if test_anomaly_batch_timeseries:
                     logger.info('test_anomaly - analyzed %s data with anomaly value in it and anomalous = %s' % (
@@ -613,7 +627,10 @@ class AnalyzerBatch(Thread):
                     triggered_algorithms = []
                     for index, value in enumerate(ensemble):
                         if value:
-                            algorithm = settings.ALGORITHMS[index]
+                            # @modified 20200607 - Feature #3566: custom_algorithms
+                            # algorithm = settings.ALGORITHMS[index]
+                            algorithm = algorithms_run[index]
+
                             anomaly_breakdown[algorithm] += 1
                             triggered_algorithms.append(algorithm)
 
@@ -830,7 +847,9 @@ class AnalyzerBatch(Thread):
                                                 'added_by = \'%s\'\n' \
                                                 'added_at = \'%s\'\n' \
                             % (base_name, str(datapoint), from_timestamp,
-                               metric_timestamp, str(settings.ALGORITHMS),
+                               # @modified 20200603 - Feature #3566: custom_algorithms
+                               # metric_timestamp, str(settings.ALGORITHMS),
+                               metric_timestamp, str(algorithms_run),
                                triggered_algorithms, skyline_app, source,
                                this_host, added_at)
 
@@ -1270,7 +1289,16 @@ class AnalyzerBatch(Thread):
                 for i_exception in exceptions_metrics:
                     if i_exception not in exceptions.keys():
                         exceptions[i_exception] = 0
-                for i_anomaly_breakdown in settings.ALGORITHMS:
+
+                # @added 20200607 - Feature #3566: custom_algorithms
+                anomaly_breakdown_algorithms = list(settings.ALGORITHMS)
+                if CUSTOM_ALGORITHMS:
+                    for custom_algorithm in settings.CUSTOM_ALGORITHMS:
+                        anomaly_breakdown_algorithms.append(custom_algorithm)
+
+                # @modified 20200607 - Feature #3566: custom_algorithms
+                # for i_anomaly_breakdown in settings.ALGORITHMS:
+                for i_anomaly_breakdown in anomaly_breakdown_algorithms:
                     if i_anomaly_breakdown not in anomaly_breakdown.keys():
                         anomaly_breakdown[i_anomaly_breakdown] = 0
 
