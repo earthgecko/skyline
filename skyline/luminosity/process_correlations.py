@@ -33,7 +33,8 @@ from skyline_functions import (
 #                   Feature #3512: matched_or_regexed_in_list function
 from matched_or_regexed_in_list import matched_or_regexed_in_list
 try:
-    correlate_namespaces_only = settings.LUMINOSITY_CORRELATE_NAMESPACES_ONLY
+    # @modified 20200606 - Bug #3572: Apply list to settings import
+    correlate_namespaces_only = list(settings.LUMINOSITY_CORRELATE_NAMESPACES_ONLY)
 except:
     correlate_namespaces_only = []
 

@@ -1315,7 +1315,8 @@ def strictly_increasing_monotonicity(timeseries):
     increasing, an incrementing count.
     """
 
-    # @added 20200529 - Bug #2050: analyse_derivatives - change in monotonicity
+    # @added 20200529 - Feature #3480: batch_processing
+    #                   Bug #2050: analyse_derivatives - change in monotonicity
     # Only apply to time series that have sufficient data to make this
     # determination
     if len(timeseries) < 90:
@@ -1674,7 +1675,8 @@ def is_derivative_metric(current_skyline_app, base_name):
     except:
         non_derivative_metrics = []
     try:
-        non_derivative_monotonic_metrics = settings.NON_DERIVATIVE_MONOTONIC_METRICS
+        # @modified 20200606 - Bug #3572: Apply list to settings import
+        non_derivative_monotonic_metrics = list(settings.NON_DERIVATIVE_MONOTONIC_METRICS)
     except:
         non_derivative_monotonic_metrics = []
 
@@ -1994,7 +1996,9 @@ def is_batch_metric(current_skyline_app, base_name):
     except:
         BATCH_PROCESSING = None
     try:
-        from settings import BATCH_PROCESSING_NAMESPACES
+        # @modified 20200606 - Bug #3572: Apply list to settings import
+        # from settings import BATCH_PROCESSING_NAMESPACES
+        BATCH_PROCESSING_NAMESPACES = list(settings.BATCH_PROCESSING_NAMESPACES)
     except:
         BATCH_PROCESSING_NAMESPACES = []
 
@@ -2061,11 +2065,13 @@ def is_check_airgap_metric(base_name):
     except:
         IDENTIFY_AIRGAPS = False
     try:
-        CHECK_AIRGAPS = settings.CHECK_AIRGAPS
+        # @modified 20200606 - Bug #3572: Apply list to settings import
+        CHECK_AIRGAPS = list(settings.CHECK_AIRGAPS)
     except:
         CHECK_AIRGAPS = []
     try:
-        SKIP_AIRGAPS = settings.SKIP_AIRGAPS
+        # @modified 20200606 - Bug #3572: Apply list to settings import
+        SKIP_AIRGAPS = list(settings.SKIP_AIRGAPS)
     except:
         SKIP_AIRGAPS = []
     check_metric_for_airgaps = False

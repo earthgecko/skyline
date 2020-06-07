@@ -1113,7 +1113,8 @@ def ionosphere_learn(timestamp):
                     known_derivative_metric = True
                 if known_derivative_metric:
                     try:
-                        non_derivative_monotonic_metrics = settings.NON_DERIVATIVE_MONOTONIC_METRICS
+                        # @modified 20200606 - Bug #3572: Apply list to settings import
+                        non_derivative_monotonic_metrics = list(settings.NON_DERIVATIVE_MONOTONIC_METRICS)
                     except:
                         non_derivative_monotonic_metrics = []
                     skip_derivative = in_list(metric, non_derivative_monotonic_metrics)
