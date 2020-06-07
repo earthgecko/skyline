@@ -119,7 +119,9 @@ try:
 except:
     BATCH_PROCESSING = None
 try:
-    from settings import BATCH_PROCESSING_NAMESPACES
+    # @modified 20200606 - Bug #3572: Apply list to settings import
+    # from settings import BATCH_PROCESSING_NAMESPACES
+    BATCH_PROCESSING_NAMESPACES = list(settings.BATCH_PROCESSING_NAMESPACES)
 except:
     BATCH_PROCESSING_NAMESPACES = []
 
@@ -981,7 +983,13 @@ class Panorama(Thread):
             logger.info('debug :: cache_key - %s.last_check.%s.%s' % (
                 skyline_app, app, metric))
         try:
-            last_check = self.redis_conn.get(cache_key)
+            # @modified 20200603 - Task #3562; Change panorama.last_check keys to timestamp value
+            #                      Feature #3486: analyzer_batch
+            #                      Feature #3480: batch_processing
+            # As a int is now used and not a msgpack value, decoded the key
+            # value
+            # last_check = self.redis_conn.get(cache_key)
+            last_check = self.redis_conn_decoded.get(cache_key)
         except Exception as e:
             logger.error(
                 'error :: could not query cache_key - %s.last_check.%s.%s - %s' % (
@@ -1014,7 +1022,7 @@ class Panorama(Thread):
             analyzer_batch_metric_anomaly_key = 'analyzer_batch.anomaly.%s.%s' % (
                 str(metric_timestamp), metric)
             try:
-                analyzer_batch_anomaly = self.redis_conn.get(analyzer_batch_metric_anomaly_key)
+                analyzer_batch_anomaly = self.redis_conn_decoded.get(analyzer_batch_metric_anomaly_key)
             except Exception as e:
                 logger.error(
                     'error :: could not query cache_key - %s - %s' % (
@@ -1047,6 +1055,21 @@ class Panorama(Thread):
                             str(settings.PANORAMA_EXPIRY_TIME)))
                         logger.info('recording anomaly for batch metric %s, so setting last_check to None' % (
                             metric))
+                        last_check = None
+                    else:
+                        logger.info('the difference between the last anomaly timestamp (%s) and the current anomaly timestamp (%s) for batch metric %s is less than %s, not recording the anomaly' % (
+                            str(last_timestamp), str(metric_timestamp), metric,
+                            str(settings.PANORAMA_EXPIRY_TIME)))
+
+                    # @added 20200603 - Task #3562; Change panorama.last_check keys to timestamp value
+                    #                   Feature #3486: analyzer_batch
+                    #                   Feature #3480: batch_processing
+                    # If the metric is a batch processing metric and the anomaly
+                    # timestamp is less than the last_check timestamp, insert
+                    # the anomaly
+                    if int(metric_timestamp) < last_timestamp:
+                        logger.info('batch anomaly timestamp (%s) less than the last_check timestamp (%s), recording anomaly for batch metric %s, so setting last_check to None' % (
+                            str(metric_timestamp), str(last_timestamp), metric))
                         last_check = None
 
         if last_check:
@@ -1395,12 +1418,17 @@ class Panorama(Thread):
                         int(metric_timestamp))
                 else:
                     self.redis_conn.setex(
-                        cache_key, settings.PANORAMA_EXPIRY_TIME, packb(value))
+                        # @modified 20200603 - Feature #3486: analyzer_batch
+                        #                      Feature #3480: batch_processing
+                        # As per above do not use msgpack with the value, set the
+                        # value to the timestamp
+                        # cache_key, settings.PANORAMA_EXPIRY_TIME, packb(value))
+                        cache_key, settings.PANORAMA_EXPIRY_TIME, int(metric_timestamp))
                 logger.info('set cache_key - %s.last_check.%s.%s - %s' % (
                     skyline_app, app, metric, str(settings.PANORAMA_EXPIRY_TIME)))
             except Exception as e:
                 logger.error(
-                    'error :: could not query cache_key - %s.last_check.%s.%s - %s' % (
+                    'error :: could not set cache_key - %s.last_check.%s.%s - %s' % (
                         skyline_app, app, metric, e))
 
         # @added 20191031 - Feature #3306: Record anomaly_end_timestamp
