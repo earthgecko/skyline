@@ -80,6 +80,31 @@ However, you are not limited to 3-sigma based algorithms if you do not
 want to use them - as long as you return a boolean, you can add any sort
 of algorithm you like to run on time series and vote.
 
+Using custom algorithms
+=======================
+
+Originally the intent in Skyline was allow users to add any algorithms they
+wanted directly into algorithms.py:
+
+.. code-block:: python
+
+  """
+  This is no man's land. Do anything you want in here,
+  as long as you return a boolean that determines whether the input
+  timeseries is anomalous or not.
+
+  To add an algorithm, define it here, and add its name to settings.ALGORITHMS.
+  """
+
+This is still of course possible, however it is not greatly useful if you do
+not want your algorithm to be tied into the Skyline `CONSENSUS` methodology or
+maintain the core algorithms files yourself.  Therefore the easier and preferred
+method is to use the :mod:`settings.CUSTOM_ALGORITHMS` functionality, which
+always you to load any Python source algorithm file you want and define the
+algorithm in terms of `CONSENSUS` and what namespaces to run it against.
+
+See `Custom algorithms <algorithms/custom-algorithms.html>`__
+
 Explanation of Exceptions
 =========================
 

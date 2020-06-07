@@ -39,10 +39,34 @@ skyline.create_matplotlib_graph module
     :undoc-members:
     :show-inheritance:
 
+skyline.custom_algorithms module
+--------------------------------
+
+.. automodule:: custom_algorithms
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+skyline.custom_algorithms_to_run module
+---------------------------------------
+
+.. automodule:: custom_algorithms_to_run
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 skyline.database module
 -----------------------
 
 .. automodule:: database
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+skyline.external_alert_configs module
+-------------------------------------
+
+.. automodule:: external_alert_configs
     :members:
     :undoc-members:
     :show-inheritance:
