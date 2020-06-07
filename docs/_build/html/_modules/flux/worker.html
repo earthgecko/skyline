@@ -102,6 +102,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../analyzer.html">Analyzer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../algorithms/index.html">Algorithms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../mirage.html">Mirage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../boundary.html">Boundary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../crucible.html">Crucible</a></li>
@@ -427,7 +428,7 @@
                                         <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">()))</span>
                                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;worker :: set Redis key </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">flux_filled_key</span><span class="p">)))</span>
                                 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to could not set Redis derivative_metric key: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to could not set Redis flux.filled key: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;worker :: discarded </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1"> as a data point for </span><span class="si">%s</span><span class="s1"> has already been submitted to Graphite&#39;</span> <span class="o">%</span> <span class="p">(</span>
                             <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)))</span>

@@ -102,6 +102,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../analyzer.html">Analyzer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../algorithms/index.html">Algorithms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../mirage.html">Mirage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../boundary.html">Boundary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../crucible.html">Crucible</a></li>
@@ -203,6 +204,8 @@
         <span class="n">SKYLINE_TMP_DIR</span><span class="p">,</span>
         <span class="n">REDIS_SOCKET_PATH</span><span class="p">,</span>
         <span class="n">REDIS_PASSWORD</span><span class="p">,</span>
+        <span class="c1"># @added 20200607 - Feature #3566: custom_algorithms</span>
+        <span class="n">FULL_NAMESPACE</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="c1"># from algorithm_exceptions import *</span>
 
@@ -218,6 +221,26 @@
         <span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">password</span><span class="o">=</span><span class="n">REDIS_PASSWORD</span><span class="p">,</span> <span class="n">unix_socket_path</span><span class="o">=</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">redis_conn</span> <span class="o">=</span> <span class="n">StrictRedis</span><span class="p">(</span><span class="n">unix_socket_path</span><span class="o">=</span><span class="n">REDIS_SOCKET_PATH</span><span class="p">)</span>
+
+<span class="c1"># @added 20200607 - Feature #3566: custom_algorithms</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">settings</span> <span class="k">import</span> <span class="n">CUSTOM_ALGORITHMS</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">CUSTOM_ALGORITHMS</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">settings</span> <span class="k">import</span> <span class="n">DEBUG_CUSTOM_ALGORITHMS</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">DEBUG_CUSTOM_ALGORITHMS</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="k">if</span> <span class="n">CUSTOM_ALGORITHMS</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">timeit</span> <span class="k">import</span> <span class="n">default_timer</span> <span class="k">as</span> <span class="n">timer</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">custom_algorithms_to_run</span> <span class="k">import</span> <span class="n">get_custom_algorithms_to_run</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">get_custom_algorithms_to_run</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">custom_algorithms</span> <span class="k">import</span> <span class="n">run_custom_algorithm_on_timeseries</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">run_custom_algorithm_on_timeseries</span> <span class="o">=</span> <span class="kc">None</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">This is no man&#39;s land. Do anything you want in here,</span>
@@ -644,6 +667,9 @@
 
     <span class="k">try</span><span class="p">:</span>
         <span class="n">np_array</span> <span class="o">=</span> <span class="n">pandas</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">])</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">try</span><span class="p">:</span>
         <span class="n">lowest_value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">np_array</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">lowest_value</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">negatives</span> <span class="o">=</span> <span class="p">[]</span>
@@ -711,9 +737,151 @@
     <span class="c1"># Added negatives_found for run_negatives_present</span>
     <span class="n">negatives_found</span> <span class="o">=</span> <span class="kc">False</span>
 
+    <span class="c1"># @added 20200607 - Feature #3566: custom_algorithms</span>
+    <span class="n">final_custom_ensemble</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">algorithms_run</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">custom_consensus_override</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">custom_consensus_values</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">run_3sigma_algorithms</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="n">run_3sigma_algorithms_overridden_by</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">custom_algorithm</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">CUSTOM_ALGORITHMS</span><span class="p">:</span>
+        <span class="n">base_name</span> <span class="o">=</span> <span class="n">metric_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">custom_algorithms_to_run</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">custom_algorithms_to_run</span> <span class="o">=</span> <span class="n">get_custom_algorithms_to_run</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">CUSTOM_ALGORITHMS</span><span class="p">,</span> <span class="n">DEBUG_CUSTOM_ALGORITHMS</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">DEBUG_CUSTOM_ALGORITHMS</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">custom_algorithms_to_run</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;algorithms :: debug :: custom algorithms ARE RUN on </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">)))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: get_custom_algorithms_to_run :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">custom_algorithms_to_run</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">custom_algorithm</span> <span class="ow">in</span> <span class="n">custom_algorithms_to_run</span><span class="p">:</span>
+            <span class="n">debug_logging</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">debug_logging</span> <span class="o">=</span> <span class="n">custom_algorithms_to_run</span><span class="p">[</span><span class="n">custom_algorithm</span><span class="p">][</span><span class="s1">&#39;debug_logging&#39;</span><span class="p">]</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">debug_logging</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">DEBUG_CUSTOM_ALGORITHMS</span><span class="p">:</span>
+                <span class="n">debug_logging</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">run_algorithm</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">run_algorithm</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">custom_algorithm</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">DEBUG_CUSTOM_ALGORITHMS</span> <span class="ow">or</span> <span class="n">debug_logging</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: algorithms :: running custom algorithm </span><span class="si">%s</span><span class="s1"> on </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">custom_algorithm</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">)))</span>
+                <span class="n">start_debug_timer</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+            <span class="n">run_custom_algorithm_on_timeseries</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="kn">from</span> <span class="nn">custom_algorithms</span> <span class="k">import</span> <span class="n">run_custom_algorithm_on_timeseries</span>
+                <span class="k">if</span> <span class="n">DEBUG_CUSTOM_ALGORITHMS</span> <span class="ow">or</span> <span class="n">debug_logging</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: algorithms :: loaded run_custom_algorithm_on_timeseries&#39;</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">DEBUG_CUSTOM_ALGORITHMS</span> <span class="ow">or</span> <span class="n">debug_logging</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: algorithms :: failed to load run_custom_algorithm_on_timeseries&#39;</span><span class="p">)</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">anomalyScore</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">run_custom_algorithm_on_timeseries</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">result</span><span class="p">,</span> <span class="n">anomalyScore</span> <span class="o">=</span> <span class="n">run_custom_algorithm_on_timeseries</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">getpid</span><span class="p">(),</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">,</span> <span class="n">custom_algorithm</span><span class="p">,</span> <span class="n">custom_algorithms_to_run</span><span class="p">[</span><span class="n">custom_algorithm</span><span class="p">],</span> <span class="n">DEBUG_CUSTOM_ALGORITHMS</span><span class="p">)</span>
+                    <span class="n">algorithm_result</span> <span class="o">=</span> <span class="p">[</span><span class="n">result</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">DEBUG_CUSTOM_ALGORITHMS</span> <span class="ow">or</span> <span class="n">debug_logging</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: algorithms :: run_custom_algorithm_on_timeseries run with result - </span><span class="si">%s</span><span class="s1">, anomalyScore - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="nb">str</span><span class="p">(</span><span class="n">result</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomalyScore</span><span class="p">)))</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">DEBUG_CUSTOM_ALGORITHMS</span> <span class="ow">or</span> <span class="n">debug_logging</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: algorithms :: failed to run custom_algorithm </span><span class="si">%s</span><span class="s1"> on </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">custom_algorithm</span><span class="p">,</span> <span class="n">base_name</span><span class="p">))</span>
+                    <span class="n">result</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="n">algorithm_result</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">DEBUG_CUSTOM_ALGORITHMS</span> <span class="ow">or</span> <span class="n">debug_logging</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: debug :: algorithms :: run_custom_algorithm_on_timeseries was not loaded so was not run&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">DEBUG_CUSTOM_ALGORITHMS</span> <span class="ow">or</span> <span class="n">debug_logging</span><span class="p">:</span>
+                <span class="n">end_debug_timer</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: algorithms :: ran custom algorithm </span><span class="si">%s</span><span class="s1"> on </span><span class="si">%s</span><span class="s1"> with result of (</span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">) in </span><span class="si">%.6f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">custom_algorithm</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">),</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">result</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomalyScore</span><span class="p">),</span>
+                    <span class="p">(</span><span class="n">end_debug_timer</span> <span class="o">-</span> <span class="n">start_debug_timer</span><span class="p">)))</span>
+            <span class="n">algorithms_run</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">custom_algorithm</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">algorithm_result</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">elif</span> <span class="n">algorithm_result</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">elif</span> <span class="n">algorithm_result</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">final_custom_ensemble</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+            <span class="n">custom_consensus</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">algorithms_allowed_in_consensus</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="c1"># @added 20200605 - Feature #3566: custom_algorithms</span>
+            <span class="c1"># Allow only single or multiple custom algorithms to run and allow</span>
+            <span class="c1"># the a custom algorithm to specify not to run 3sigma aglorithms</span>
+            <span class="n">custom_run_3sigma_algorithms</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">custom_run_3sigma_algorithms</span> <span class="o">=</span> <span class="n">custom_algorithms_to_run</span><span class="p">[</span><span class="n">custom_algorithm</span><span class="p">][</span><span class="s1">&#39;run_3sigma_algorithms&#39;</span><span class="p">]</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">custom_run_3sigma_algorithms</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">custom_run_3sigma_algorithms</span> <span class="ow">and</span> <span class="n">result</span><span class="p">:</span>
+                <span class="n">run_3sigma_algorithms</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">run_3sigma_algorithms_overridden_by</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">custom_algorithm</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">DEBUG_CUSTOM_ALGORITHMS</span> <span class="ow">or</span> <span class="n">debug_logging</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: algorithms :: run_3sigma_algorithms is False on </span><span class="si">%s</span><span class="s1"> for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">custom_algorithm</span><span class="p">,</span> <span class="n">base_name</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">result</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">custom_consensus</span> <span class="o">=</span> <span class="n">custom_algorithms_to_run</span><span class="p">[</span><span class="n">custom_algorithm</span><span class="p">][</span><span class="s1">&#39;consensus&#39;</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">custom_consensus</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">custom_consensus</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">MIRAGE_CONSENSUS</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">custom_consensus_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">custom_consensus</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">custom_consensus</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">MIRAGE_CONSENSUS</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">algorithms_allowed_in_consensus</span> <span class="o">=</span> <span class="n">custom_algorithms_to_run</span><span class="p">[</span><span class="n">custom_algorithm</span><span class="p">][</span><span class="s1">&#39;algorithms_allowed_in_consensus&#39;</span><span class="p">]</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">algorithms_allowed_in_consensus</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">if</span> <span class="n">custom_consensus</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">custom_consensus_override</span> <span class="o">=</span> <span class="kc">True</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;algorithms :: overidding the CONSENSUS as custom algorithm </span><span class="si">%s</span><span class="s1"> overides on </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">custom_algorithm</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">)))</span>
+                <span class="c1"># TODO - figure out how to handle consensus overrides if</span>
+                <span class="c1">#        multiple custom algorithms are used</span>
+    <span class="k">if</span> <span class="n">DEBUG_CUSTOM_ALGORITHMS</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">run_3sigma_algorithms</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;algorithms :: not running 3 sigma algorithms&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">run_3sigma_algorithms_overridden_by</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;algorithms :: run_3sigma_algorithms overridden by </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">run_3sigma_algorithms_overridden_by</span><span class="p">)))</span>
+
+    <span class="c1"># @added 20200607 - Feature #3566: custom_algorithms</span>
+    <span class="n">ensemble</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">custom_consensus_override</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">ensemble</span> <span class="o">=</span> <span class="p">[</span><span class="nb">globals</span><span class="p">()[</span><span class="n">algorithm</span><span class="p">](</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">)</span> <span class="k">for</span> <span class="n">algorithm</span> <span class="ow">in</span> <span class="n">MIRAGE_ALGORITHMS</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">algorithm</span> <span class="ow">in</span> <span class="n">MIRAGE_ALGORITHMS</span><span class="p">:</span>
+                <span class="n">algorithms_run</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">algorithm</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Algorithm error: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="c1"># @modified 20200425 - Feature #3508: ionosphere.untrainable_metrics</span>
+            <span class="c1"># Added negatives_found</span>
+            <span class="c1"># return False, [], 1</span>
+            <span class="c1"># @modified 20200607 - Feature #3566: custom_algorithms</span>
+            <span class="c1"># Added algorithms_run</span>
+            <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="p">[],</span> <span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">algorithms_run</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">algorithm</span> <span class="ow">in</span> <span class="n">MIRAGE_ALGORITHMS</span><span class="p">:</span>
+            <span class="n">ensemble</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+
+    <span class="c1"># @modified 20200607 - Feature #3566: custom_algorithms</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">ensemble</span> <span class="o">=</span> <span class="p">[</span><span class="nb">globals</span><span class="p">()[</span><span class="n">algorithm</span><span class="p">](</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">)</span> <span class="k">for</span> <span class="n">algorithm</span> <span class="ow">in</span> <span class="n">MIRAGE_ALGORITHMS</span><span class="p">]</span>
-        <span class="n">threshold</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ensemble</span><span class="p">)</span> <span class="o">-</span> <span class="n">MIRAGE_CONSENSUS</span>
+        <span class="c1"># threshold = len(ensemble) - MIRAGE_CONSENSUS</span>
+        <span class="k">if</span> <span class="n">custom_consensus_override</span><span class="p">:</span>
+            <span class="n">threshold</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ensemble</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">threshold</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ensemble</span><span class="p">)</span> <span class="o">-</span> <span class="n">MIRAGE_CONSENSUS</span>
         <span class="k">if</span> <span class="n">ensemble</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">threshold</span><span class="p">:</span>
 
             <span class="c1"># @added 20200425 - Feature #3508: ionosphere.untrainable_metrics</span>
@@ -737,23 +905,31 @@
                     <span class="c1"># @modified 20200425 - Feature #3508: ionosphere.untrainable_metrics</span>
                     <span class="c1"># Added negatives_found</span>
                     <span class="c1"># return True, ensemble, timeseries[-1][1]</span>
-                    <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="n">ensemble</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">negatives_found</span>
+                    <span class="c1"># @modified 20200607 - Feature #3566: custom_algorithms</span>
+                    <span class="c1"># Added algorithms_run</span>
+                    <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="n">ensemble</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">negatives_found</span><span class="p">,</span> <span class="n">algorithms_run</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="c1"># @modified 20200425 - Feature #3508: ionosphere.untrainable_metrics</span>
                 <span class="c1"># Added negatives_found</span>
                 <span class="c1"># return True, ensemble, timeseries[-1][1]</span>
-                <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="n">ensemble</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">negatives_found</span>
+                <span class="c1"># @modified 20200607 - Feature #3566: custom_algorithms</span>
+                <span class="c1"># Added algorithms_run</span>
+                <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="n">ensemble</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">negatives_found</span><span class="p">,</span> <span class="n">algorithms_run</span>
 
         <span class="c1"># @modified 20200425 - Feature #3508: ionosphere.untrainable_metrics</span>
         <span class="c1"># Added negatives_found</span>
         <span class="c1"># return False, ensemble, timeseries[-1][1]</span>
-        <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">ensemble</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">negatives_found</span>
+        <span class="c1"># @modified 20200607 - Feature #3566: custom_algorithms</span>
+        <span class="c1"># Added algorithms_run</span>
+        <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="n">ensemble</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">negatives_found</span><span class="p">,</span> <span class="n">algorithms_run</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;Algorithm error: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
         <span class="c1"># @modified 20200425 - Feature #3508: ionosphere.untrainable_metrics</span>
         <span class="c1"># Added negatives_found</span>
         <span class="c1"># return False, [], 1</span>
-        <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="p">[],</span> <span class="mi">1</span><span class="p">,</span> <span class="kc">False</span></div>
+        <span class="c1"># @modified 20200607 - Feature #3566: custom_algorithms</span>
+        <span class="c1"># Added algorithms_run</span>
+        <span class="k">return</span> <span class="kc">False</span><span class="p">,</span> <span class="p">[],</span> <span class="mi">1</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="n">algorithms_run</span></div>
 </pre></div>
 
            </div>

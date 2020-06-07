@@ -102,6 +102,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../horizon.html">Horizon</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../analyzer.html">Analyzer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../algorithms/index.html">Algorithms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mirage.html">Mirage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../boundary.html">Boundary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../crucible.html">Crucible</a></li>
@@ -1489,6 +1490,14 @@
 <span class="sd">    monotonically, it will only return True if the values are strictly</span>
 <span class="sd">    increasing, an incrementing count.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># @added 20200529 - Feature #3480: batch_processing</span>
+    <span class="c1">#                   Bug #2050: analyse_derivatives - change in monotonicity</span>
+    <span class="c1"># Only apply to time series that have sufficient data to make this</span>
+    <span class="c1"># determination</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">90</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
     <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
     <span class="n">test_ts</span> <span class="o">=</span> <span class="p">[]</span>
@@ -1842,7 +1851,8 @@
     <span class="k">except</span><span class="p">:</span>
         <span class="n">non_derivative_metrics</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">non_derivative_monotonic_metrics</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">NON_DERIVATIVE_MONOTONIC_METRICS</span>
+        <span class="c1"># @modified 20200606 - Bug #3572: Apply list to settings import</span>
+        <span class="n">non_derivative_monotonic_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">NON_DERIVATIVE_MONOTONIC_METRICS</span><span class="p">)</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">non_derivative_monotonic_metrics</span> <span class="o">=</span> <span class="p">[]</span>
 
@@ -2162,7 +2172,9 @@
     <span class="k">except</span><span class="p">:</span>
         <span class="n">BATCH_PROCESSING</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="kn">from</span> <span class="nn">settings</span> <span class="k">import</span> <span class="n">BATCH_PROCESSING_NAMESPACES</span>
+        <span class="c1"># @modified 20200606 - Bug #3572: Apply list to settings import</span>
+        <span class="c1"># from settings import BATCH_PROCESSING_NAMESPACES</span>
+        <span class="n">BATCH_PROCESSING_NAMESPACES</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">BATCH_PROCESSING_NAMESPACES</span><span class="p">)</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">BATCH_PROCESSING_NAMESPACES</span> <span class="o">=</span> <span class="p">[]</span>
 
@@ -2229,11 +2241,13 @@
     <span class="k">except</span><span class="p">:</span>
         <span class="n">IDENTIFY_AIRGAPS</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">CHECK_AIRGAPS</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">CHECK_AIRGAPS</span>
+        <span class="c1"># @modified 20200606 - Bug #3572: Apply list to settings import</span>
+        <span class="n">CHECK_AIRGAPS</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">CHECK_AIRGAPS</span><span class="p">)</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">CHECK_AIRGAPS</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">SKIP_AIRGAPS</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SKIP_AIRGAPS</span>
+        <span class="c1"># @modified 20200606 - Bug #3572: Apply list to settings import</span>
+        <span class="n">SKIP_AIRGAPS</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">SKIP_AIRGAPS</span><span class="p">)</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">SKIP_AIRGAPS</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">check_metric_for_airgaps</span> <span class="o">=</span> <span class="kc">False</span>

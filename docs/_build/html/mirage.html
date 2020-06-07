@@ -37,7 +37,7 @@
         <link rel="search" title="Search" href="search.html"/>
     <link rel="top" title="Skyline 2.0.0 documentation" href="index.html"/>
         <link rel="next" title="Boundary" href="boundary.html"/>
-        <link rel="prev" title="Analyzer Optimizations" href="analyzer-optimizations.html"/> 
+        <link rel="prev" title="Custom algorithms" href="algorithms/custom-algorithms.html"/> 
 
   
   <script src="_static/js/modernizr.min.js"></script>
@@ -103,6 +103,7 @@
 <li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
 <li class="toctree-l1"><a class="reference internal" href="analyzer.html">Analyzer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="algorithms/index.html">Algorithms</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Mirage</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#an-overview-of-mirage">An overview of Mirage</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#why-mirage">Why Mirage?</a></li>
@@ -424,7 +425,21 @@ that suit Mirage periodic checks are metrics like % disk space used on fairly
 consistent servers that are not expected to fluctuate too drastically over a
 period of days, like a DB server volume.</p>
 <p>You definitely do not what to run all your server or app metrics through Mirage
-periodic checks.</p>
+periodic checks, unless you used some sane configuration in terms of setting a
+reasonable <a class="reference internal" href="skyline.html#settings.MIRAGE_PERIODIC_CHECK_INTERVAL" title="settings.MIRAGE_PERIODIC_CHECK_INTERVAL"><code class="xref py py-mod docutils literal"><span class="pre">settings.MIRAGE_PERIODIC_CHECK_INTERVAL</span></code></a>, you could send all
+your metrics through Mirage over say a 4 hour period.</p>
+<p>Say you have 10000 metrics and you want to periodically analyse them all with
+Mirage you could set them all to be analysed over a 6 hour period.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">MIRAGE_PERIODIC_CHECK</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="n">MIRAGE_PERIODIC_CHECK_NAMESPACES</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;*&#39;</span><span class="p">]</span>
+<span class="n">MIRAGE_PERIODIC_CHECK_INTERVAL</span> <span class="o">=</span> <span class="mi">21600</span>
+</pre></div>
+</div>
+<p>This would result in Mirage surfacing and analysing 27 metrics per minute, so
+you need to consider the impact on your Graphite, bandwidth and CPU usage.
+However Mirage will prioritise real time checks received from Analyzer over
+periodic checks and periodic checks will be queued to ensure real time analysis
+is not affected by periodic checks.</p>
 </div>
 <div class="section" id="what-mirage-does">
 <h2>What Mirage does<a class="headerlink" href="#what-mirage-does" title="Permalink to this headline">¶</a></h2>
@@ -463,7 +478,7 @@ as anomalous having not matched any known features profile or layers.</li>
         <a href="boundary.html" class="btn btn-neutral float-right" title="Boundary" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="analyzer-optimizations.html" class="btn btn-neutral" title="Analyzer Optimizations" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="algorithms/custom-algorithms.html" class="btn btn-neutral" title="Custom algorithms" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   

@@ -28,6 +28,7 @@ Contents:
   horizon
   analyzer
   analyzer-optimizations
+  algorithms/index.rst
   mirage
   boundary
   crucible

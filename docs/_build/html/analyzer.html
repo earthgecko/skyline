@@ -104,6 +104,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Analyzer</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#algorithms">Algorithms</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#algorithm-philosophy">Algorithm philosophy</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#using-custom-algorithms">Using custom algorithms</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#explanation-of-exceptions">Explanation of Exceptions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#metrics-monotonicity">Metrics monotonicity</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#push-to-mirage">Push to Mirage</a></li>
@@ -121,6 +122,7 @@
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="algorithms/index.html">Algorithms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mirage.html">Mirage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="boundary.html">Boundary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="crucible.html">Crucible</a></li>
@@ -258,6 +260,27 @@ control</a>.
 However, you are not limited to 3-sigma based algorithms if you do not
 want to use them - as long as you return a boolean, you can add any sort
 of algorithm you like to run on time series and vote.</p>
+</div>
+<div class="section" id="using-custom-algorithms">
+<h2>Using custom algorithms<a class="headerlink" href="#using-custom-algorithms" title="Permalink to this headline">¶</a></h2>
+<p>Originally the intent in Skyline was allow users to add any algorithms they
+wanted directly into algorithms.py:</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This is no man&#39;s land. Do anything you want in here,</span>
+<span class="sd">as long as you return a boolean that determines whether the input</span>
+<span class="sd">timeseries is anomalous or not.</span>
+
+<span class="sd">To add an algorithm, define it here, and add its name to settings.ALGORITHMS.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+</pre></div>
+</div>
+<p>This is still of course possible, however it is not greatly useful if you do
+not want your algorithm to be tied into the Skyline <cite>CONSENSUS</cite> methodology or
+maintain the core algorithms files yourself.  Therefore the easier and preferred
+method is to use the <a class="reference internal" href="skyline.html#settings.CUSTOM_ALGORITHMS" title="settings.CUSTOM_ALGORITHMS"><code class="xref py py-mod docutils literal"><span class="pre">settings.CUSTOM_ALGORITHMS</span></code></a> functionality, which
+always you to load any Python source algorithm file you want and define the
+algorithm in terms of <cite>CONSENSUS</cite> and what namespaces to run it against.</p>
+<p>See <a class="reference external" href="algorithms/custom-algorithms.html">Custom algorithms</a></p>
 </div>
 <div class="section" id="explanation-of-exceptions">
 <h2>Explanation of Exceptions<a class="headerlink" href="#explanation-of-exceptions" title="Permalink to this headline">¶</a></h2>

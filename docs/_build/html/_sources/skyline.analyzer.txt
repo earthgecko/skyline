@@ -44,14 +44,6 @@ skyline.analyzer.algorithms_batch module
     :undoc-members:
     :show-inheritance:
 
-skyline.analyzer.analyzer.debug.nonNegativeDerivative module
-------------------------------------------------------------
-
-.. automodule:: analyzer.analyzer.debug.nonNegativeDerivative
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 skyline.analyzer.analyzer module
 --------------------------------
 

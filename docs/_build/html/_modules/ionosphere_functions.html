@@ -102,6 +102,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../horizon.html">Horizon</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../analyzer.html">Analyzer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../algorithms/index.html">Algorithms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../mirage.html">Mirage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../boundary.html">Boundary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../crucible.html">Crucible</a></li>
@@ -476,7 +477,7 @@
     <span class="n">created_fp_ts_graph</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">graph_title</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="se">\n</span><span class="s1">Features profile id </span><span class="si">%s</span><span class="s1"> - database time series data plot&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">))</span>
-        <span class="n">created_fp_ts_graph</span><span class="p">,</span> <span class="n">fp_ts_graph_file</span> <span class="o">=</span> <span class="n">create_matplotlib_graph</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">fp_ts_graph_file</span><span class="p">,</span> <span class="n">graph_title</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">)</span>
+        <span class="n">created_fp_ts_graph</span> <span class="o">=</span> <span class="n">create_matplotlib_graph</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">fp_ts_graph_file</span><span class="p">,</span> <span class="n">graph_title</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">)</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
         <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to create matplotlib graph for </span><span class="si">%s</span><span class="s1"> fp id %&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="o">.</span> <span class="nb">str</span><span class="p">(</span><span class="n">fp_id</span><span class="p">)))</span>
