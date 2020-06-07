@@ -1208,12 +1208,99 @@ def mock_api():
             redis_set = 'mock_api.alert_reciever.alerts'
             try:
                 REDIS_CONN_UNDECODE.sadd(redis_set, str(data_dict))
+                # @added 20200528 - Feature #3560: External alert config
+                # Expire this set
+                REDIS_CONN_UNDECODE.expire(redis_set, 3600)
                 logger.info('added alert to %s' % redis_set)
             except:
-                logger.info(traceback.format_exc())
+                logger.error(traceback.format_exc())
                 logger.error('error :: mock_api :: could not add data_dict to Redis set - %s' % redis_set)
             logger.info('mock_api :: responding with 200 and %s' % str(data_dict))
             return jsonify(data_dict), 200
+
+    # @added 20200528 - Feature #3560: External alert config
+    if 'alert_config' in request.args:
+        token = None
+        if request.method == 'GET':
+            # return 'Method Not Allowed', 405
+            try:
+                token = request.args.get('token', None)
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: Webapp could not get token from the alert_config request, returning 400')
+        if request.method == 'POST':
+            try:
+                post_data = request.get_json()
+                logger.info('mock_api :: /alert_config recieved %s' % str(post_data))
+                token = str(post_data['data']['token'])
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: Webapp could not get token from the alert_config POST request, returning 400 - %s' % str(request.form))
+        if not token:
+            error_msg = 'no token found'
+            logger.error('error :: %s, returning 400' % error_msg)
+            data_dict = {"status": {"error"}, "data": {"error": error_msg}}
+            return jsonify(data_dict), 400
+        if token != settings.FLUX_SELF_API_KEY:
+            error_msg = 'no token found'
+            logger.error('error :: the token %s does not match settings.FLUX_SELF_API_KEY, returning 401' % str(token))
+            return 'Unauthorized', 401
+        count = 1
+        alerts_dict = {}
+        for alert in settings.ALERTS:
+            try:
+                namespace = alert[0]
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: mock_api :: alert_config :: could not determine namespace from alert_tuple - %s' % str(alert))
+                continue
+            try:
+                alerter = alert[1]
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: mock_api :: alert_config :: could not determine alerter from alert_tuple - %s' % str(alert))
+                continue
+            try:
+                expiration = alert[2]
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: mock_api :: alert_config :: could not determine expiration from alert_tuple - %s' % str(alert))
+                continue
+            try:
+                second_order_resolution_hours = int(alert[3])
+                second_order_resolution = int(second_order_resolution_hours * 3600)
+            except:
+                second_order_resolution = settings.FULL_DURATION
+            namespace_prefix_1 = namespace.replace('^', '')
+            namespace_prefix_2 = namespace_prefix_1.replace('\\', '')
+            namespace_prefix = namespace_prefix_2.split('.')[0]
+            learn_days = 30
+            count_id = str(count)
+            alerts_dict[count_id] = {
+                'alerter': str(alerter),
+                'expiration': str(expiration),
+                'namespace': str(namespace),
+                'namespace_prefix': str(namespace_prefix),
+                'second_order_resolution': str(second_order_resolution),
+                'learn_days': str(learn_days)
+            }
+            count += 1
+        data_dict = {"status": {}, "data": alerts_dict}
+        return jsonify(data_dict), 200
+
+    # @added 20200528 - Feature #3560: External alert config
+    if 'test_alert_config' in request.args:
+        alerts_dict = {}
+        alerts_dict['test_external_alert_config'] = {
+            'alerter': 'http_alerter-mock_api',
+            'expiration': '60',
+            'namespace': 'analyzer.runtime',
+            'namespace_prefix': 'skyline',
+            'second_order_resolution': '604800',
+            'learn_days': '30'
+        }
+        data_dict = {"status": {}, "data": alerts_dict}
+        return jsonify(data_dict), 200
 
 
 # @added 20180721 - Feature #2464: luminosity_remote_data
@@ -5607,8 +5694,10 @@ def rebrow_keys(host, port, db):
                     return internal_error(message, trace)
                 if result == 1:
                     flash('Key %s has been deleted.' % request.form['key'], category='info')
+                    logger.info('rebrow :: deleted Redis key - %s' % str(request.form['key']))
                 else:
                     flash('Key %s could not be deleted.' % request.form['key'], category='error')
+                    logger.info('rebrow :: could not deleted Redis key - %s' % str(request.form['key']))
         return redirect(request.url)
     else:
         offset = int(request.args.get('offset', '0'))
@@ -5629,6 +5718,8 @@ def rebrow_keys(host, port, db):
         types = {}
         for key in limited_keys:
             types[key] = r.type(key)
+        logger.info('rebrow :: returned keys list')
+
         return render_template(
             'rebrow_keys.html',
             host=host,
@@ -5688,6 +5779,11 @@ def rebrow_key(host, port, db, key):
     except:
         logger.error(traceback.format_exc())
         logger.error('error :: rebrow access :: failed to login to Redis with token')
+    try:
+        r_d = get_redis(host, port, db, redis_password, True)
+    except:
+        logger.error(traceback.format_exc())
+        logger.error('error :: rebrow access :: failed to login to Redis with token')
 
     try:
         # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
@@ -5698,6 +5794,7 @@ def rebrow_key(host, port, db, key):
         dump_key = key.decode('utf-8')
         if python_version == 3:
             dump = r.dump(dump_key)
+        logger.info('rebrow :: got key - %s' % str(dump_key))
     except:
         message = 'Failed to dump Redis key - %s, decoded key - %s' % (str(key), str(dump_key))
         trace = traceback.format_exc()
@@ -5724,6 +5821,7 @@ def rebrow_key(host, port, db, key):
     if python_version == 3:
         key = dump_key
         t = r.type(key).decode('utf-8')
+    logger.info('rebrow :: got key - %s, of type %s' % (str(dump_key), str(t)))
 
     ttl = r.pttl(key)
     if t == 'string':
@@ -5732,6 +5830,7 @@ def rebrow_key(host, port, db, key):
         # val = r.get(key)
         try:
             val = r.get(key)
+            # val = r_d.get(key)
         except:
             abort(404)
 
@@ -5755,12 +5854,14 @@ def rebrow_key(host, port, db, key):
             unpacker.feed(raw_result)
             val = list(unpacker)
             msg_pack_key = True
+            logger.info('rebrow :: msgpack key unpacked - %s' % str(dump_key))
     elif t == 'list':
         val = r.lrange(key, 0, -1)
     elif t == 'hash':
         val = r.hgetall(key)
     elif t == 'set':
         val = r.smembers(key)
+        logger.info('rebrow :: set key - %s' % str(key))
     elif t == 'zset':
         val = r.zrange(key, 0, -1, withscores=True)
     return render_template(
