@@ -102,6 +102,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../analyzer.html">Analyzer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../algorithms/index.html">Algorithms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../mirage.html">Mirage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../boundary.html">Boundary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../crucible.html">Crucible</a></li>
@@ -294,7 +295,8 @@
 <span class="k">except</span><span class="p">:</span>
     <span class="n">BATCH_PROCESSING</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="k">try</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">settings</span> <span class="k">import</span> <span class="n">BATCH_PROCESSING_NAMESPACES</span>
+    <span class="c1"># @modified 20200606 - Bug #3572: Apply list to settings import</span>
+    <span class="n">BATCH_PROCESSING_NAMESPACES</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">BATCH_PROCESSING_NAMESPACES</span><span class="p">)</span>
 <span class="k">except</span><span class="p">:</span>
     <span class="n">BATCH_PROCESSING_NAMESPACES</span> <span class="o">=</span> <span class="p">[]</span>
 
@@ -302,9 +304,27 @@
 <span class="c1"># Determine if any metrcs have negatives values some they can be</span>
 <span class="c1"># added to the ionosphere.untrainable_metrics Redis set</span>
 <span class="k">try</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">settings</span> <span class="k">import</span> <span class="n">KNOWN_NEGATIVE_METRICS</span>
+    <span class="c1"># @modified 20200606 - Bug #3572: Apply list to settings import</span>
+    <span class="c1"># from settings import KNOWN_NEGATIVE_METRICS</span>
+    <span class="n">KNOWN_NEGATIVE_METRICS</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">KNOWN_NEGATIVE_METRICS</span><span class="p">)</span>
 <span class="k">except</span><span class="p">:</span>
     <span class="n">KNOWN_NEGATIVE_METRICS</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="c1"># @added 20200604 - Mirage - populate_redis</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">settings</span> <span class="k">import</span> <span class="n">MIRAGE_AUTOFILL_TOOSHORT</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">MIRAGE_AUTOFILL_TOOSHORT</span> <span class="o">=</span> <span class="kc">False</span>
+
+<span class="c1"># @added 20200607 - Feature #3566: custom_algorithms</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">CUSTOM_ALGORITHMS</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">CUSTOM_ALGORITHMS</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">CUSTOM_ALGORITHMS</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">DEBUG_CUSTOM_ALGORITHMS</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">DEBUG_CUSTOM_ALGORITHMS</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">DEBUG_CUSTOM_ALGORITHMS</span> <span class="o">=</span> <span class="kc">False</span>
 
 <span class="n">skyline_app_graphite_namespace</span> <span class="o">=</span> <span class="s1">&#39;skyline.</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">SERVER_METRIC_PATH</span><span class="p">)</span>
 <span class="n">failed_checks_dir</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">_failed&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">MIRAGE_CHECK_PATH</span>
@@ -441,7 +461,7 @@
         <span class="n">parsed</span> <span class="o">=</span> <span class="n">urlparse</span><span class="o">.</span><span class="n">urlparse</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
         <span class="n">target</span> <span class="o">=</span> <span class="n">urlparse</span><span class="o">.</span><span class="n">parse_qs</span><span class="p">(</span><span class="n">parsed</span><span class="o">.</span><span class="n">query</span><span class="p">)[</span><span class="s1">&#39;target&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
 
-        <span class="n">metric_data_folder</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">MIRAGE_DATA_FOLDER</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">target</span>
+        <span class="n">metric_data_folder</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">MIRAGE_DATA_FOLDER</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">target</span>
         <span class="n">mkdir_p</span><span class="p">(</span><span class="n">metric_data_folder</span><span class="p">)</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">metric_data_folder</span> <span class="o">+</span> <span class="s2">&quot;/&quot;</span> <span class="o">+</span> <span class="n">target</span> <span class="o">+</span> <span class="s1">&#39;.json&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">converted</span><span class="p">))</span>
@@ -602,6 +622,169 @@
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">log_string</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span></div>
+
+<span class="c1"># @added 20200604 - Mirage - populate_redis</span>
+<div class="viewcode-block" id="Mirage.populate_redis"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage.Mirage.populate_redis">[docs]</a>    <span class="k">def</span> <span class="nf">populate_redis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">metric</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get FULL_DURATION data from Graphite for a metric and populate Redis</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Check if it has been done via the mirage.redis_populate key</span>
+        <span class="n">redis_populated</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">redis_populated_key</span> <span class="o">=</span> <span class="s1">&#39;mirage.redis_populated.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">redis_populated</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">redis_populated_key</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s1">&#39;error :: populate_redis :: could not query cache_key - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">redis_populated_key</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+            <span class="n">redis_populated</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="c1"># Do not handle batch processing metrics</span>
+        <span class="n">batch_processing_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">batch_processing_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;analyzer.batch_processing_metrics&#39;</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: populate_redis :: failed to get analyzer.batch_processing_metrics from Redis&#39;</span><span class="p">)</span>
+            <span class="n">batch_processing_metrics</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">batch_processing_metrics</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">batch_processing_metrics</span><span class="p">:</span>
+                <span class="n">redis_populated</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;populate_redis :: </span><span class="si">%s</span><span class="s1"> is a batch processing metric, not handling, creating Redis key </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">metric</span><span class="p">,</span> <span class="n">redis_populated_key</span><span class="p">))</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="n">redis_populated_key</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">()))</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;populate_redis :: created Redis key </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">redis_populated_key</span><span class="p">))</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: populate_redis :: failed to create Redis key </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">redis_populated_key</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">redis_populated</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;populate_redis :: the Redis key </span><span class="si">%s</span><span class="s1"> already exists, it has been done&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">redis_populated_key</span><span class="p">))</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">srem</span><span class="p">(</span><span class="s1">&#39;mirage.populate_redis&#39;</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;populate_redis :: removed item - </span><span class="si">%s</span><span class="s1"> - from Redis set mirage.populate_redis&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">))</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: populate_redis :: failed to remove item </span><span class="si">%s</span><span class="s1"> from Redis set mirage.populate_redis&#39;</span> <span class="o">%</span> <span class="n">metric</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="n">time_now</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
+        <span class="n">time_from</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time_now</span> <span class="o">-</span> <span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span><span class="p">)</span>
+        <span class="c1"># Calculate graphite from and until parameters from the metric timestamp</span>
+        <span class="n">graphite_until</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">time_now</span><span class="p">)))</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%H:%M_%Y%m</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">graphite_from</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">time_from</span><span class="p">))</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%H:%M_%Y%m</span><span class="si">%d</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="c1"># Remove any old json file related to the metric</span>
+        <span class="n">metric_data_folder</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">MIRAGE_DATA_FOLDER</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span>
+        <span class="n">metric_json_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.json&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_data_folder</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">metric_json_file</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="c1"># Get data from graphite</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;populate_redis :: surfacing </span><span class="si">%s</span><span class="s1"> time series from Graphite&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">surface_graphite_metric_data</span><span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="n">graphite_from</span><span class="p">,</span> <span class="n">graphite_until</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: populate_redis :: failed to surface_graphite_metric_data to populate </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">metric_json_file</span><span class="p">)))</span>
+        <span class="c1"># Check there is a json timeseries file to use</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">metric_json_file</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s1">&#39;error :: populate_redis :: retrieve failed - failed to surface </span><span class="si">%s</span><span class="s1"> time series from graphite&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">metric</span><span class="p">))</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="n">redis_populated_key</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span><span class="p">,</span> <span class="n">time_now</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;populate_redis :: created Redis key </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">redis_populated_key</span><span class="p">))</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: populate_redis :: failed to create Redis key </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">redis_populated_key</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">srem</span><span class="p">(</span><span class="s1">&#39;mirage.populate_redis&#39;</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;populate_redis :: removed item - </span><span class="si">%s</span><span class="s1"> - from Redis set mirage.populate_redis&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">))</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: populate_redis :: failed to remove item </span><span class="si">%s</span><span class="s1"> from Redis set mirage.populate_redis&#39;</span> <span class="o">%</span> <span class="n">metric</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;populate_redis :: retrieved data :: for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">metric</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">check_if_parent_is_alive</span><span class="p">()</span>
+        <span class="n">timeseries</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">((</span><span class="n">metric_json_file</span><span class="p">),</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                <span class="n">timeseries</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: populate_redis :: failed to get timeseries from json - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric_json_file</span><span class="p">)</span>
+            <span class="n">timeseries</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">timeseries</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;populate_redis :: no timeseries data for </span><span class="si">%s</span><span class="s1">, setting redis_populated_key and removing from mirage.populate_redis&#39;</span> <span class="o">%</span> <span class="n">metric</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="n">redis_populated_key</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span><span class="p">,</span> <span class="n">time_now</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;populate_redis :: created Redis key </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">redis_populated_key</span><span class="p">))</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: populate_redis :: failed to create Redis key </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">redis_populated_key</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">srem</span><span class="p">(</span><span class="s1">&#39;mirage.populate_redis&#39;</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;populate_redis :: removed item - </span><span class="si">%s</span><span class="s1"> - from Redis set mirage.populate_redis&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">))</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: populate_redis :: failed to remove item </span><span class="si">%s</span><span class="s1"> from Redis set mirage.populate_redis&#39;</span> <span class="o">%</span> <span class="n">metric</span><span class="p">)</span>
+            <span class="k">return</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">metric_json_file</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="n">FULL_NAMESPACE</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span>
+        <span class="n">pipe</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;populate_redis :: time series data for </span><span class="si">%s</span><span class="s1">, populating Redis with </span><span class="si">%s</span><span class="s1"> data points&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">metric</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">))))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">pipe</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">pipeline</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: populate_redis :: error on Redis pipe: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
+            <span class="n">pipe</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">redis_populated</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">metric_data</span> <span class="ow">in</span> <span class="n">timeseries</span><span class="p">:</span>
+                <span class="n">key</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">((</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="n">metric</span><span class="p">))</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">pipe</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="n">packb</span><span class="p">(</span><span class="n">metric_data</span><span class="p">))</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: populate_redis :: error on pipe.append: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
+            <span class="n">pipe</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
+            <span class="n">redis_populated</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: populate_redis :: error on pipe.execute: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="n">redis_populated</span><span class="p">:</span>
+            <span class="k">del</span> <span class="n">timeseries</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="n">redis_populated_key</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span><span class="p">,</span> <span class="n">time_now</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;populate_redis :: created Redis key </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">redis_populated_key</span><span class="p">))</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: populate_redis :: failed to create Redis key </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">redis_populated_key</span><span class="p">)</span>
+            <span class="c1"># Add to Redis set so that Analyzer sorts and deduplicates the data</span>
+            <span class="c1"># on the next run</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="s1">&#39;mirage.filled&#39;</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;populate_redis :: add </span><span class="si">%s</span><span class="s1"> to Redis set mirage.filled for Analyzer to sort and deduplicate the Redis data&#39;</span> <span class="o">%</span> <span class="n">metric</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: populate_redis :: failed add metric to Redis set mirage.filled: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="n">redis_populated_key</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span><span class="p">,</span> <span class="n">time_now</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;populate_redis :: created Redis key </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">redis_populated_key</span><span class="p">))</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: populate_redis :: failed to create Redis key </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">redis_populated_key</span><span class="p">)</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">srem</span><span class="p">(</span><span class="s1">&#39;mirage.populate_redis&#39;</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;populate_redis :: removed item - </span><span class="si">%s</span><span class="s1"> - from Redis set mirage.populate_redis&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">))</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: populate_redis :: failed to remove item </span><span class="si">%s</span><span class="s1"> from Redis set mirage.populate_redis&#39;</span> <span class="o">%</span> <span class="n">metric</span><span class="p">)</span>
+            <span class="k">return</span></div>
 
 <div class="viewcode-block" id="Mirage.spin_process"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage.Mirage.spin_process">[docs]</a>    <span class="k">def</span> <span class="nf">spin_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">run_timestamp</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -939,7 +1122,8 @@
             <span class="n">known_derivative_metric</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">if</span> <span class="n">known_derivative_metric</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">non_derivative_monotonic_metrics</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">NON_DERIVATIVE_MONOTONIC_METRICS</span>
+                <span class="c1"># @modified 20200606 - Bug #3572: Apply list to settings import</span>
+                <span class="n">non_derivative_monotonic_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">NON_DERIVATIVE_MONOTONIC_METRICS</span><span class="p">)</span>
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">non_derivative_monotonic_metrics</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="n">skip_derivative</span> <span class="o">=</span> <span class="n">in_list</span><span class="p">(</span><span class="n">redis_metric_name</span><span class="p">,</span> <span class="n">non_derivative_monotonic_metrics</span><span class="p">)</span>
@@ -966,13 +1150,18 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;will check </span><span class="si">%s</span><span class="s1"> for negative values&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">))</span>
 
+        <span class="c1"># @added 20200607 - Feature #3566: custom_algorithms</span>
+        <span class="n">algorithms_run</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">MIRAGE_ALGORITHMS</span><span class="p">)</span>
+
         <span class="k">try</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">valid_mirage_timeseries</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;analyzing :: </span><span class="si">%s</span><span class="s1"> at </span><span class="si">%s</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">))</span>
                 <span class="c1"># @modified 20200425 - Feature #3508: ionosphere.untrainable_metrics</span>
                 <span class="c1"># Added run_negatives_present and negatives_found</span>
                 <span class="c1"># anomalous, ensemble, datapoint = run_selected_algorithm(timeseries, metric, second_order_resolution_seconds)</span>
-                <span class="n">anomalous</span><span class="p">,</span> <span class="n">ensemble</span><span class="p">,</span> <span class="n">datapoint</span><span class="p">,</span> <span class="n">negatives_found</span> <span class="o">=</span> <span class="n">run_selected_algorithm</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">,</span> <span class="n">run_negatives_present</span><span class="p">)</span>
+                <span class="c1"># @modified 20200607 - Feature #3566: custom_algorithms</span>
+                <span class="c1"># Added algorithms_run</span>
+                <span class="n">anomalous</span><span class="p">,</span> <span class="n">ensemble</span><span class="p">,</span> <span class="n">datapoint</span><span class="p">,</span> <span class="n">negatives_found</span><span class="p">,</span> <span class="n">algorithms_run</span> <span class="o">=</span> <span class="n">run_selected_algorithm</span><span class="p">(</span><span class="n">timeseries</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">,</span> <span class="n">run_negatives_present</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;not analyzing :: </span><span class="si">%s</span><span class="s1"> at </span><span class="si">%s</span><span class="s1"> seconds as there is not sufficiently older datapoints in the timeseries - not valid_mirage_timeseries&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">,</span> <span class="n">second_order_resolution_seconds</span><span class="p">))</span>
                 <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">False</span>
@@ -1045,7 +1234,10 @@
             <span class="n">triggered_algorithms</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">ensemble</span><span class="p">):</span>
                 <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
-                    <span class="n">algorithm</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">MIRAGE_ALGORITHMS</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+                    <span class="c1"># @modified 20200607 - Feature #3566: custom_algorithms</span>
+                    <span class="c1"># algorithm = settings.MIRAGE_ALGORITHMS[index]</span>
+                    <span class="n">algorithm</span> <span class="o">=</span> <span class="n">algorithms_run</span><span class="p">[</span><span class="n">index</span><span class="p">]</span>
+
                     <span class="n">anomaly_breakdown</span><span class="p">[</span><span class="n">algorithm</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
                     <span class="n">triggered_algorithms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">algorithm</span><span class="p">)</span>
 
@@ -1140,7 +1332,9 @@
                                         <span class="s1">&#39;added_by = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
                                         <span class="s1">&#39;added_at = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
                     <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">datapoint</span><span class="p">),</span> <span class="n">from_timestamp</span><span class="p">,</span>
-                       <span class="nb">str</span><span class="p">(</span><span class="n">int_metric_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">MIRAGE_ALGORITHMS</span><span class="p">),</span>
+                       <span class="c1"># @modified 20200607 - Feature #3566: custom_algorithms</span>
+                       <span class="c1"># str(int_metric_timestamp), str(settings.MIRAGE_ALGORITHMS),</span>
+                       <span class="nb">str</span><span class="p">(</span><span class="n">int_metric_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">algorithms_run</span><span class="p">),</span>
                        <span class="n">triggered_algorithms</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span>
                        <span class="n">this_host</span><span class="p">,</span> <span class="n">added_at</span><span class="p">)</span>
 
@@ -1174,7 +1368,7 @@
             <span class="k">if</span> <span class="n">settings</span><span class="o">.</span><span class="n">ENABLE_CRUCIBLE</span> <span class="ow">and</span> <span class="n">settings</span><span class="o">.</span><span class="n">MIRAGE_CRUCIBLE_ENABLED</span><span class="p">:</span>
                 <span class="n">from_timestamp</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]))</span>
                 <span class="n">timeseries_dir</span> <span class="o">=</span> <span class="n">base_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">)</span>
-                <span class="n">crucible_anomaly_dir</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">CRUCIBLE_DATA_FOLDER</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">timeseries_dir</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">metric_timestamp</span>
+                <span class="n">crucible_anomaly_dir</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">CRUCIBLE_DATA_FOLDER</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">timeseries_dir</span> <span class="o">+</span> <span class="s1">&#39;/&#39;</span> <span class="o">+</span> <span class="n">metric_timestamp</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">crucible_anomaly_dir</span><span class="p">):</span>
                     <span class="n">mkdir_p</span><span class="p">(</span><span class="n">crucible_anomaly_dir</span><span class="p">)</span>
 
@@ -1199,7 +1393,9 @@
                                         <span class="s1">&#39;added_by = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
                                         <span class="s1">&#39;added_at = </span><span class="se">\&#39;</span><span class="si">%s</span><span class="se">\&#39;\n</span><span class="s1">&#39;</span> \
                     <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">datapoint</span><span class="p">),</span> <span class="n">from_timestamp</span><span class="p">,</span>
-                       <span class="nb">str</span><span class="p">(</span><span class="n">int_metric_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">MIRAGE_ALGORITHMS</span><span class="p">),</span>
+                       <span class="c1"># @modified 20200607 - Feature #3566: custom_algorithms</span>
+                       <span class="c1"># str(int_metric_timestamp), str(settings.MIRAGE_ALGORITHMS),</span>
+                       <span class="nb">str</span><span class="p">(</span><span class="n">int_metric_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">algorithms_run</span><span class="p">),</span>
                        <span class="n">triggered_algorithms</span><span class="p">,</span> <span class="n">crucible_anomaly_dir</span><span class="p">,</span>
                        <span class="n">skyline_app</span><span class="p">,</span> <span class="n">added_at</span><span class="p">)</span>
 
@@ -1470,6 +1666,73 @@
                 <span class="c1"># Report app up</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="mi">120</span><span class="p">,</span> <span class="n">now</span><span class="p">)</span>
 
+                <span class="c1"># @added 20200604 - Mirage - populate_redis</span>
+                <span class="c1"># This functionality enables Mirage to populate the Skyline</span>
+                <span class="c1"># Redis instance with FULL_DURATION data from Graphite if</span>
+                <span class="c1"># Analyzer flags the time series as TooShort and adds it too the</span>
+                <span class="c1"># mirage.populate_redis Redis set. Or possibly if there are</span>
+                <span class="c1"># airgaps in the Redis data due to a network partition.  It will</span>
+                <span class="c1"># fill a metric about every 10 seconds or so, unless there are</span>
+                <span class="c1"># Mirage checks or ionosphere_alerts to send</span>
+                <span class="n">populate_redis_with_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">if</span> <span class="n">MIRAGE_AUTOFILL_TOOSHORT</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">populate_redis_with_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;mirage.populate_redis&#39;</span><span class="p">))</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get Redis set mirage.populate_redis&#39;</span><span class="p">)</span>
+                        <span class="n">populate_redis_with_metrics</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">metric_to_populate_redis</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">populate_redis_with_metrics_count</span> <span class="o">=</span> <span class="mi">0</span>
+                <span class="k">if</span> <span class="n">populate_redis_with_metrics</span><span class="p">:</span>
+                    <span class="n">populate_redis_with_metrics_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">populate_redis_with_metrics</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> metrics found in mirage.populate_redis Redis set&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">populate_redis_with_metrics_count</span><span class="p">))</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">metric_to_populate_redis</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">populate_redis_with_metrics</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="k">del</span> <span class="n">populate_redis_with_metrics</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="k">pass</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;processing </span><span class="si">%s</span><span class="s1"> from mirage.populate_redis Redis set&#39;</span> <span class="o">%</span> <span class="n">metric_to_populate_redis</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to determine metric to populate_redis&#39;</span><span class="p">)</span>
+                        <span class="n">metric_to_populate_redis</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="n">metric_to_populate_redis</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="c1"># Spawn a populate_redis processes</span>
+                        <span class="n">pids</span> <span class="o">=</span> <span class="p">[]</span>
+                        <span class="n">spawned_pids</span> <span class="o">=</span> <span class="p">[]</span>
+                        <span class="n">p</span> <span class="o">=</span> <span class="n">Process</span><span class="p">(</span><span class="n">target</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">populate_redis</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">metric_to_populate_redis</span><span class="p">))</span>
+                        <span class="n">pids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;starting populate_redis process&#39;</span><span class="p">)</span>
+                        <span class="n">p</span><span class="o">.</span><span class="n">start</span><span class="p">()</span>
+                        <span class="n">spawned_pids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">pid</span><span class="p">)</span>
+                        <span class="n">p_starts</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span>
+                        <span class="k">while</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">p_starts</span> <span class="o">&lt;=</span> <span class="mi">10</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">):</span>
+                                <span class="c1"># Just to avoid hogging the CPU</span>
+                                <span class="n">sleep</span><span class="p">(</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
+                            <span class="k">else</span><span class="p">:</span>
+                                <span class="c1"># All the processes are done, break now.</span>
+                                <span class="n">time_to_run</span> <span class="o">=</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">p_starts</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;populate_redis process completed in </span><span class="si">%.2f</span><span class="s1"> seconds&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                    <span class="n">time_to_run</span><span class="p">))</span>
+                                <span class="k">break</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="c1"># We only enter this if we didn&#39;t &#39;break&#39; above.</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;timed out, killing populate_redis process&#39;</span><span class="p">)</span>
+                            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">:</span>
+                                <span class="n">p</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+                                <span class="c1"># p.join()</span>
+                        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pids</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">():</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;stopping populate_redis process - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">())))</span>
+                                <span class="n">p</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to spawn populate_redis process&#39;</span><span class="p">)</span>
+
                 <span class="c1"># @added 20161228 - Feature #1828: ionosphere - mirage Redis data features</span>
                 <span class="c1"># If Ionosphere is going to pass alerts back to the app</span>
                 <span class="c1"># here we are going to have break out and force a alerting</span>
@@ -1549,8 +1812,13 @@
                 <span class="c1"># appropriatte sleep</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">metric_var_files</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="k">if</span> <span class="ow">not</span> <span class="n">ionosphere_alerts_returned</span><span class="p">:</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;sleeping no metrics...&#39;</span><span class="p">)</span>
-                        <span class="n">sleep</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+                        <span class="c1"># @modified 20200604 - Mirage - populate_redis</span>
+                        <span class="c1"># Do not sleep if there are metrics to populate in Redis</span>
+                        <span class="k">if</span> <span class="n">populate_redis_with_metrics_count</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;sleeping no metrics...&#39;</span><span class="p">)</span>
+                            <span class="n">sleep</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;no checks or alerts, continuing to process populate_redis metrics&#39;</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 
@@ -1644,28 +1912,55 @@
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> :: stopping spin_process - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">is_alive</span><span class="p">())))</span>
                         <span class="n">p</span><span class="o">.</span><span class="n">join</span><span class="p">()</span>
 
-                <span class="c1"># Log the last reported error by any algorithms that errored in the</span>
-                <span class="c1"># spawned processes from algorithms.py</span>
-                <span class="k">for</span> <span class="n">completed_pid</span> <span class="ow">in</span> <span class="n">spawned_pids</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;spin_process with pid </span><span class="si">%s</span><span class="s1"> completed&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">completed_pid</span><span class="p">)))</span>
-                    <span class="k">for</span> <span class="n">algorithm</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">MIRAGE_ALGORITHMS</span><span class="p">:</span>
+            <span class="c1"># @added 20200607 - Feature #3508: ionosphere.untrainable_metrics</span>
+            <span class="c1"># Check to non 3sigma algorithm errors too</span>
+            <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: adding negatives_present to check_algorithm_errors&#39;</span><span class="p">)</span>
+            <span class="n">check_algorithm_errors</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;negatives_present&#39;</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">algorithm</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">MIRAGE_ALGORITHMS</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">LOCAL_DEBUG</span> <span class="ow">or</span> <span class="n">DEBUG_CUSTOM_ALGORITHMS</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: adding </span><span class="si">%s</span><span class="s1"> to check_algorithm_errors&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">algorithm</span><span class="p">))</span>
+                <span class="n">check_algorithm_errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">algorithm</span><span class="p">)</span>
+            <span class="c1"># @added 20200607 - Feature #3566: custom_algorithms</span>
+            <span class="k">if</span> <span class="n">CUSTOM_ALGORITHMS</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">custom_algorithm</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">CUSTOM_ALGORITHMS</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">LOCAL_DEBUG</span> <span class="ow">or</span> <span class="n">DEBUG_CUSTOM_ALGORITHMS</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: adding custom_algorithm </span><span class="si">%s</span><span class="s1"> to check_algorithm_errors&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">custom_algorithm</span><span class="p">))</span>
+                    <span class="n">check_algorithm_errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">custom_algorithm</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">LOCAL_DEBUG</span> <span class="ow">or</span> <span class="n">DEBUG_CUSTOM_ALGORITHMS</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: checking for algorithm error files&#39;</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">completed_pid</span> <span class="ow">in</span> <span class="n">spawned_pids</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;spin_process with pid </span><span class="si">%s</span><span class="s1"> completed&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">completed_pid</span><span class="p">)))</span>
+                <span class="c1"># @modified 20200607 - Feature #3566: custom_algorithms</span>
+                <span class="c1">#                      Feature #3508: ionosphere.untrainable_metrics</span>
+                <span class="c1"># Check to non 3sigma algorithm errors too and wrapped in try</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="c1"># for algorithm in settings.MIRAGE_ALGORITHMS:</span>
+                    <span class="k">for</span> <span class="n">algorithm</span> <span class="ow">in</span> <span class="n">check_algorithm_errors</span><span class="p">:</span>
                         <span class="n">algorithm_error_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.algorithm.error&#39;</span> <span class="o">%</span> <span class="p">(</span>
                             <span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_TMP_DIR</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">,</span>
                             <span class="nb">str</span><span class="p">(</span><span class="n">completed_pid</span><span class="p">),</span> <span class="n">algorithm</span><span class="p">)</span>
                         <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">algorithm_error_file</span><span class="p">):</span>
                             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
-                                <span class="s1">&#39;error - spin_process with pid </span><span class="si">%s</span><span class="s1"> has reported an error with the </span><span class="si">%s</span><span class="s1"> algorithm&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="s1">&#39;error :: spin_process with pid </span><span class="si">%s</span><span class="s1"> has reported an error with the </span><span class="si">%s</span><span class="s1"> algorithm&#39;</span> <span class="o">%</span> <span class="p">(</span>
                                     <span class="nb">str</span><span class="p">(</span><span class="n">completed_pid</span><span class="p">),</span> <span class="n">algorithm</span><span class="p">))</span>
                             <span class="k">try</span><span class="p">:</span>
                                 <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">algorithm_error_file</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
                                     <span class="n">error_string</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
                                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">error_string</span><span class="p">))</span>
                             <span class="k">except</span><span class="p">:</span>
-                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;failed to read </span><span class="si">%s</span><span class="s1"> error file&#39;</span> <span class="o">%</span> <span class="n">algorithm</span><span class="p">)</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to read </span><span class="si">%s</span><span class="s1"> error file&#39;</span> <span class="o">%</span> <span class="n">algorithm</span><span class="p">)</span>
                             <span class="k">try</span><span class="p">:</span>
                                 <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">algorithm_error_file</span><span class="p">)</span>
                             <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
                                 <span class="k">pass</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to check algorithm errors&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">LOCAL_DEBUG</span> <span class="ow">or</span> <span class="n">DEBUG_CUSTOM_ALGORITHMS</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: checked for algorithm error files&#39;</span><span class="p">)</span>
 
                 <span class="c1"># Grab data from the queue and populate dictionaries</span>
                 <span class="n">exceptions</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
@@ -1702,7 +1997,9 @@
                 <span class="k">for</span> <span class="n">i_exception</span> <span class="ow">in</span> <span class="n">exceptions_metrics</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">i_exception</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                         <span class="n">exceptions</span><span class="p">[</span><span class="n">i_exception</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
-                <span class="k">for</span> <span class="n">i_anomaly_breakdown</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">MIRAGE_ALGORITHMS</span><span class="p">:</span>
+                <span class="c1"># @modified 20200607 - Feature #3566: custom_algorithms</span>
+                <span class="c1"># for i_anomaly_breakdown in settings.MIRAGE_ALGORITHMS:</span>
+                <span class="k">for</span> <span class="n">i_anomaly_breakdown</span> <span class="ow">in</span> <span class="n">check_algorithm_errors</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">i_anomaly_breakdown</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">anomaly_breakdown</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                         <span class="n">anomaly_breakdown</span><span class="p">[</span><span class="n">i_anomaly_breakdown</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
 
@@ -1996,7 +2293,7 @@
                                             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                                             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to determine full_duration from the Ionosphere alert for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
                                             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;using settings.FULL_DURATION - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span><span class="p">)))</span>
-                                            <span class="n">second_order_resolution_seconds</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span>
+                                            <span class="n">second_order_resolution_seconds</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span><span class="p">)</span>
                                 <span class="c1"># @modified 20190524 - Branch #3002</span>
                                 <span class="c1"># Wrapped in try except</span>
                                 <span class="k">try</span><span class="p">:</span>

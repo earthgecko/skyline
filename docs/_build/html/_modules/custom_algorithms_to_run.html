@@ -1,0 +1,337 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>custom_algorithms_to_run &mdash; Skyline 2.0.0 documentation</title>
+  
+
+  
+  
+
+  
+
+  
+  
+    
+
+  
+
+  
+  
+    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  
+
+  
+    <link rel="stylesheet" href="../_static/skyline.styles.css" type="text/css" />
+  
+
+  
+        <link rel="index" title="Index"
+              href="../genindex.html"/>
+        <link rel="search" title="Search" href="../search.html"/>
+    <link rel="top" title="Skyline 2.0.0 documentation" href="../index.html"/>
+        <link rel="up" title="Module code" href="index.html"/> 
+
+  
+  <script src="../_static/js/modernizr.min.js"></script>
+
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search">
+          
+
+          
+            <a href="../index.html" class="icon icon-home"> Skyline
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+                <ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../alerts.html">Alerts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../docker.html">docker - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../slack.html">slack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../algorithms/index.html">Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html#reliability">Reliability</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../skyline.html">skyline package</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="../index.html">Skyline</a>
+      </nav>
+
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../index.html">Docs</a> &raquo;</li>
+      
+          <li><a href="index.html">Module code</a> &raquo;</li>
+      
+    <li>custom_algorithms_to_run</li>
+      <li class="wy-breadcrumbs-aside">
+        
+          
+        
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for custom_algorithms_to_run</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">from</span> <span class="nn">matched_or_regexed_in_list</span> <span class="k">import</span> <span class="n">matched_or_regexed_in_list</span>
+
+
+<span class="c1"># @added 20200603 - Feature #3566: custom_algorithms</span>
+<div class="viewcode-block" id="get_custom_algorithms_to_run"><a class="viewcode-back" href="../skyline.html#custom_algorithms_to_run.get_custom_algorithms_to_run">[docs]</a><span class="k">def</span> <span class="nf">get_custom_algorithms_to_run</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">custom_algorithms</span><span class="p">,</span> <span class="n">debug</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return a dictionary of custom algoritms to run on a metric determined from</span>
+<span class="sd">    the :mod:`settings.CUSTOM_ALGORITHMS` dictionary.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
+        <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
+        <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">current_logger</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="n">custom_algorithms_to_run</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">custom_algorithm</span> <span class="ow">in</span> <span class="n">custom_algorithms</span><span class="p">:</span>
+        <span class="n">use_with_current_skyline_app</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">use_with</span> <span class="o">=</span> <span class="n">custom_algorithms</span><span class="p">[</span><span class="n">custom_algorithm</span><span class="p">][</span><span class="s1">&#39;use_with&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">current_skyline_app</span> <span class="ow">in</span> <span class="n">use_with</span><span class="p">:</span>
+                <span class="n">use_with_current_skyline_app</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">use_with_current_skyline_app</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">use_with_current_skyline_app</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">namespaces</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">namespaces</span> <span class="o">=</span> <span class="n">custom_algorithms</span><span class="p">[</span><span class="n">custom_algorithm</span><span class="p">][</span><span class="s1">&#39;namespaces&#39;</span><span class="p">]</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">namespaces</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">algorithm_source</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">consensus</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">algorithms_allowed_in_consensus</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">run_custom_algorithm</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">max_execution_time</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="n">namespaces</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">namespace</span> <span class="ow">in</span> <span class="n">namespaces</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">run_custom_algorithm</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">run_custom_algorithm</span><span class="p">,</span> <span class="n">run_custom_algorithm_matched_by</span> <span class="o">=</span> <span class="n">matched_or_regexed_in_list</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="p">[</span><span class="n">namespace</span><span class="p">])</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="k">pass</span>
+                    <span class="k">if</span> <span class="n">run_custom_algorithm</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
+                            <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: get_custom_algorithms_to_run :: </span><span class="si">%s</span><span class="s1"> - namespace - </span><span class="si">%s</span><span class="s1">, run_custom_algorithm_matched_by </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">namespace</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">run_custom_algorithm_matched_by</span><span class="p">)))</span>
+                        <span class="k">break</span>
+        <span class="k">if</span> <span class="n">run_custom_algorithm</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">algorithm_source</span> <span class="o">=</span> <span class="n">custom_algorithms</span><span class="p">[</span><span class="n">custom_algorithm</span><span class="p">][</span><span class="s1">&#39;algorithm_source&#39;</span><span class="p">]</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">algorithm_source</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">algorithm_parameters</span> <span class="o">=</span> <span class="n">custom_algorithms</span><span class="p">[</span><span class="n">custom_algorithm</span><span class="p">][</span><span class="s1">&#39;algorithm_parameters&#39;</span><span class="p">]</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">algorithm_parameters</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">max_execution_time</span> <span class="o">=</span> <span class="n">custom_algorithms</span><span class="p">[</span><span class="n">custom_algorithm</span><span class="p">][</span><span class="s1">&#39;max_execution_time&#39;</span><span class="p">]</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">max_execution_time</span> <span class="o">=</span> <span class="mf">0.05</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">consensus</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">custom_algorithms</span><span class="p">[</span><span class="n">custom_algorithm</span><span class="p">][</span><span class="s1">&#39;consensus&#39;</span><span class="p">])</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">consensus</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">algorithms_allowed_in_consensus</span> <span class="o">=</span> <span class="n">custom_algorithms</span><span class="p">[</span><span class="n">custom_algorithm</span><span class="p">][</span><span class="s1">&#39;algorithms_allowed_in_consensus&#39;</span><span class="p">]</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">algorithms_allowed_in_consensus</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">debug_logging</span> <span class="o">=</span> <span class="n">custom_algorithms</span><span class="p">[</span><span class="n">custom_algorithm</span><span class="p">][</span><span class="s1">&#39;debug_logging&#39;</span><span class="p">]</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">debug_logging</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: get_custom_algorithms_to_run :: </span><span class="si">%s</span><span class="s1"> - custom_algorithm - </span><span class="si">%s</span><span class="s1">, max_execution_time - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">custom_algorithm</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">max_execution_time</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="n">run_custom_algorithm</span> <span class="ow">and</span> <span class="n">algorithm_source</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">custom_algorithms_to_run</span><span class="p">[</span><span class="n">custom_algorithm</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s1">&#39;namespaces&#39;</span><span class="p">:</span> <span class="n">namespaces</span><span class="p">,</span>
+                    <span class="s1">&#39;algorithm_source&#39;</span><span class="p">:</span> <span class="n">algorithm_source</span><span class="p">,</span>
+                    <span class="s1">&#39;algorithm_parameters&#39;</span><span class="p">:</span> <span class="n">algorithm_parameters</span><span class="p">,</span>
+                    <span class="s1">&#39;max_execution_time&#39;</span><span class="p">:</span> <span class="n">max_execution_time</span><span class="p">,</span>
+                    <span class="s1">&#39;consensus&#39;</span><span class="p">:</span> <span class="n">consensus</span><span class="p">,</span>
+                    <span class="s1">&#39;algorithms_allowed_in_consensus&#39;</span><span class="p">:</span> <span class="n">algorithms_allowed_in_consensus</span><span class="p">,</span>
+                    <span class="s1">&#39;debug_logging&#39;</span><span class="p">:</span> <span class="n">debug_logging</span>
+                <span class="p">}</span>
+                <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
+                    <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: get_custom_algorithms_to_run :: </span><span class="si">%s</span><span class="s1"> - custom_algorithms_to_run - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">custom_algorithms_to_run</span><span class="p">)))</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
+                    <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: get_custom_algorithms_to_run :: failed to create dict for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">base_name</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">pass</span>
+    <span class="k">return</span> <span class="n">custom_algorithms_to_run</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  
+
+    <script type="text/javascript">
+        var DOCUMENTATION_OPTIONS = {
+            URL_ROOT:'../',
+            VERSION:'2.0.0',
+            COLLAPSE_INDEX:false,
+            FILE_SUFFIX:'.html',
+            HAS_SOURCE:  true
+        };
+    </script>
+      <script type="text/javascript" src="../_static/jquery.js"></script>
+      <script type="text/javascript" src="../_static/underscore.js"></script>
+      <script type="text/javascript" src="../_static/doctools.js"></script>
+
+  
+
+  
+  
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+  
+
+  
+  
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.StickyNav.enable();
+      });
+  </script>
+   
+
+</body>
+</html>

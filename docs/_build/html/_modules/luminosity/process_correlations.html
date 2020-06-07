@@ -102,6 +102,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../analyzer.html">Analyzer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../algorithms/index.html">Algorithms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../mirage.html">Mirage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../boundary.html">Boundary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../crucible.html">Crucible</a></li>
@@ -208,7 +209,8 @@
 <span class="c1">#                   Feature #3512: matched_or_regexed_in_list function</span>
 <span class="kn">from</span> <span class="nn">matched_or_regexed_in_list</span> <span class="k">import</span> <span class="n">matched_or_regexed_in_list</span>
 <span class="k">try</span><span class="p">:</span>
-    <span class="n">correlate_namespaces_only</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">LUMINOSITY_CORRELATE_NAMESPACES_ONLY</span>
+    <span class="c1"># @modified 20200606 - Bug #3572: Apply list to settings import</span>
+    <span class="n">correlate_namespaces_only</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LUMINOSITY_CORRELATE_NAMESPACES_ONLY</span><span class="p">)</span>
 <span class="k">except</span><span class="p">:</span>
     <span class="n">correlate_namespaces_only</span> <span class="o">=</span> <span class="p">[]</span>
 

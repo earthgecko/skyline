@@ -102,6 +102,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../analyzer.html">Analyzer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../algorithms/index.html">Algorithms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../mirage.html">Mirage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../boundary.html">Boundary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../crucible.html">Crucible</a></li>
@@ -327,11 +328,12 @@
 <span class="c1"># and if busy do not analyse the Skyline host namespace while</span>
 <span class="c1"># ionosphere is busy.</span>
 <span class="k">try</span><span class="p">:</span>
-    <span class="n">SKYLINE_FEEDBACK_NAMESPACES</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_FEEDBACK_NAMESPACES</span>
+    <span class="c1"># @modified 20200606 - Bug #3572: Apply list to settings import</span>
+    <span class="n">SKYLINE_FEEDBACK_NAMESPACES</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_FEEDBACK_NAMESPACES</span><span class="p">)</span>
 <span class="k">except</span><span class="p">:</span>
     <span class="c1"># Let us take a guess</span>
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">graphite_host</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span>
+        <span class="n">graphite_host</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_HOST</span><span class="p">)</span>
         <span class="n">graphite_hostname</span> <span class="o">=</span> <span class="n">graphite_host</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">SKYLINE_FEEDBACK_NAMESPACES</span> <span class="o">=</span> <span class="p">[</span><span class="n">settings</span><span class="o">.</span><span class="n">SERVER_METRICS_NAME</span><span class="p">,</span> <span class="n">graphite_hostname</span><span class="p">]</span>
     <span class="k">except</span><span class="p">:</span>
@@ -350,7 +352,9 @@
 <span class="k">except</span><span class="p">:</span>
     <span class="n">BATCH_PROCESSING</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="k">try</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">settings</span> <span class="k">import</span> <span class="n">BATCH_PROCESSING_NAMESPACES</span>
+    <span class="c1"># @modified 20200606 - Bug #3572: Apply list to settings import</span>
+    <span class="c1"># from settings import BATCH_PROCESSING_NAMESPACES</span>
+    <span class="n">BATCH_PROCESSING_NAMESPACES</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">BATCH_PROCESSING_NAMESPACES</span><span class="p">)</span>
 <span class="k">except</span><span class="p">:</span>
     <span class="n">BATCH_PROCESSING_NAMESPACES</span> <span class="o">=</span> <span class="p">[]</span>
 
@@ -533,58 +537,70 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: purge_old_data_dirs - os.walk&#39;</span><span class="p">)</span>
 
+        <span class="c1"># @added 20200529 - Feature #3472: ionosphere.training_data Redis set</span>
+        <span class="c1">#                   Feature #3474: webapp api - training_data</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;cleaned old training data&#39;</span><span class="p">)</span>
+
         <span class="c1"># @added 20200409 - Feature #3472: ionosphere.training_data Redis set</span>
         <span class="c1">#                   Feature #3474: webapp api - training_data</span>
         <span class="k">if</span> <span class="n">training_data_list</span><span class="p">:</span>
             <span class="n">training_data_instances</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">for</span> <span class="n">training_data_dir</span> <span class="ow">in</span> <span class="n">training_data_list</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">path</span><span class="p">,</span> <span class="n">folders</span><span class="p">,</span> <span class="n">files</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">walk</span><span class="p">(</span><span class="n">training_data_dir</span><span class="p">):</span>
-                    <span class="n">add_folder</span> <span class="o">=</span> <span class="kc">False</span>
-                    <span class="n">metric</span> <span class="o">=</span> <span class="kc">None</span>
-                    <span class="n">timestamp</span> <span class="o">=</span> <span class="kc">None</span>
-                    <span class="k">if</span> <span class="n">files</span><span class="p">:</span>
+
+                    <span class="c1"># @modified 20200529 - Feature #3472: ionosphere.training_data Redis set</span>
+                    <span class="c1">#                      Feature #3474: webapp api - training_data</span>
+                    <span class="c1"># Wrapped in try and except</span>
+                    <span class="k">try</span><span class="p">:</span>
                         <span class="n">add_folder</span> <span class="o">=</span> <span class="kc">False</span>
                         <span class="n">metric</span> <span class="o">=</span> <span class="kc">None</span>
                         <span class="n">timestamp</span> <span class="o">=</span> <span class="kc">None</span>
-                        <span class="k">if</span> <span class="s1">&#39;/learn/&#39;</span> <span class="ow">in</span> <span class="n">path</span><span class="p">:</span>
-                            <span class="n">metric_file</span> <span class="o">=</span> <span class="kc">None</span>
-                            <span class="n">metric_file_path</span> <span class="o">=</span> <span class="kc">None</span>
-                            <span class="k">continue</span>
-                        <span class="k">for</span> <span class="n">ifile</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
-                            <span class="k">if</span> <span class="n">ifile</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.png&#39;</span><span class="p">):</span>
-                                <span class="n">add_folder</span> <span class="o">=</span> <span class="kc">True</span>
-                            <span class="k">if</span> <span class="n">ifile</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.txt&#39;</span><span class="p">):</span>
-                                <span class="k">if</span> <span class="n">ifile</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.fp.details.txt&#39;</span><span class="p">):</span>
-                                    <span class="k">continue</span>
-                                <span class="k">if</span> <span class="n">ifile</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.fp.created.txt&#39;</span><span class="p">):</span>
-                                    <span class="k">continue</span>
-                                <span class="k">else</span><span class="p">:</span>
-                                    <span class="n">metric_file</span> <span class="o">=</span> <span class="n">ifile</span>
-                                    <span class="n">metric_file_path</span> <span class="o">=</span> <span class="n">path</span>
-                        <span class="k">if</span> <span class="n">add_folder</span><span class="p">:</span>
-                            <span class="k">if</span> <span class="n">metric_file</span> <span class="ow">and</span> <span class="n">metric_file_path</span><span class="p">:</span>
-                                <span class="n">metric</span> <span class="o">=</span> <span class="n">metric_file</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-                                <span class="n">path_elements</span> <span class="o">=</span> <span class="n">metric_file_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="p">)</span>
-                                <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">path_elements</span><span class="p">:</span>
-                                    <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s1">&#39;\d</span><span class="si">{10}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">element</span><span class="p">):</span>
-                                        <span class="n">timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
-                            <span class="k">if</span> <span class="n">metric</span> <span class="ow">and</span> <span class="n">timestamp</span><span class="p">:</span>
-                                <span class="c1"># @added 20200425 - Feature #3508: ionosphere.untrainable_metrics</span>
-                                <span class="c1"># Determine and add resolution</span>
-                                <span class="n">resolution_seconds</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span>
-                                <span class="k">for</span> <span class="n">ifile</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
-                                    <span class="k">if</span> <span class="n">ifile</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.png&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="s1">&#39;mirage&#39;</span> <span class="ow">in</span> <span class="n">ifile</span> <span class="ow">and</span> <span class="s1">&#39;graphite&#39;</span> <span class="ow">in</span> <span class="n">ifile</span><span class="p">:</span>
-                                        <span class="k">try</span><span class="p">:</span>
-                                            <span class="n">ifile_resolution_elements</span> <span class="o">=</span> <span class="n">ifile</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.png&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
-                                            <span class="n">ifile_resolution_str</span> <span class="o">=</span> <span class="n">ifile_resolution_elements</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-                                            <span class="n">ifile_resolution</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ifile_resolution_str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;h&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
-                                            <span class="n">resolution_seconds</span> <span class="o">=</span> <span class="n">ifile_resolution</span> <span class="o">*</span> <span class="mi">3600</span>
-                                        <span class="k">except</span><span class="p">:</span>
-                                            <span class="k">pass</span>
-                                <span class="c1"># @modified 20200425 - Feature #3508: ionosphere.untrainable_metrics</span>
-                                <span class="c1"># Added resolution_seconds</span>
-                                <span class="c1"># training_data_instances.append([metric, timestamp])</span>
-                                <span class="n">training_data_instances</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">metric</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">resolution_seconds</span><span class="p">])</span>
+                        <span class="k">if</span> <span class="n">files</span><span class="p">:</span>
+                            <span class="n">add_folder</span> <span class="o">=</span> <span class="kc">False</span>
+                            <span class="n">metric</span> <span class="o">=</span> <span class="kc">None</span>
+                            <span class="n">timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+                            <span class="k">if</span> <span class="s1">&#39;/learn/&#39;</span> <span class="ow">in</span> <span class="n">path</span><span class="p">:</span>
+                                <span class="n">metric_file</span> <span class="o">=</span> <span class="kc">None</span>
+                                <span class="n">metric_file_path</span> <span class="o">=</span> <span class="kc">None</span>
+                                <span class="k">continue</span>
+                            <span class="k">for</span> <span class="n">ifile</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="n">ifile</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.png&#39;</span><span class="p">):</span>
+                                    <span class="n">add_folder</span> <span class="o">=</span> <span class="kc">True</span>
+                                <span class="k">if</span> <span class="n">ifile</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.txt&#39;</span><span class="p">):</span>
+                                    <span class="k">if</span> <span class="n">ifile</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.fp.details.txt&#39;</span><span class="p">):</span>
+                                        <span class="k">continue</span>
+                                    <span class="k">if</span> <span class="n">ifile</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.fp.created.txt&#39;</span><span class="p">):</span>
+                                        <span class="k">continue</span>
+                                    <span class="k">else</span><span class="p">:</span>
+                                        <span class="n">metric_file</span> <span class="o">=</span> <span class="n">ifile</span>
+                                        <span class="n">metric_file_path</span> <span class="o">=</span> <span class="n">path</span>
+                            <span class="k">if</span> <span class="n">add_folder</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="n">metric_file</span> <span class="ow">and</span> <span class="n">metric_file_path</span><span class="p">:</span>
+                                    <span class="n">metric</span> <span class="o">=</span> <span class="n">metric_file</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                                    <span class="n">path_elements</span> <span class="o">=</span> <span class="n">metric_file_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">sep</span><span class="p">)</span>
+                                    <span class="k">for</span> <span class="n">element</span> <span class="ow">in</span> <span class="n">path_elements</span><span class="p">:</span>
+                                        <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="s1">&#39;\d</span><span class="si">{10}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">element</span><span class="p">):</span>
+                                            <span class="n">timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">element</span><span class="p">)</span>
+                                <span class="k">if</span> <span class="n">metric</span> <span class="ow">and</span> <span class="n">timestamp</span><span class="p">:</span>
+                                    <span class="c1"># @added 20200425 - Feature #3508: ionosphere.untrainable_metrics</span>
+                                    <span class="c1"># Determine and add resolution</span>
+                                    <span class="n">resolution_seconds</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span>
+                                    <span class="k">for</span> <span class="n">ifile</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+                                        <span class="k">if</span> <span class="n">ifile</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.png&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="s1">&#39;mirage&#39;</span> <span class="ow">in</span> <span class="n">ifile</span> <span class="ow">and</span> <span class="s1">&#39;graphite&#39;</span> <span class="ow">in</span> <span class="n">ifile</span><span class="p">:</span>
+                                            <span class="k">try</span><span class="p">:</span>
+                                                <span class="n">ifile_resolution_elements</span> <span class="o">=</span> <span class="n">ifile</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.png&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)</span>
+                                                <span class="n">ifile_resolution_str</span> <span class="o">=</span> <span class="n">ifile_resolution_elements</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                                                <span class="n">ifile_resolution</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ifile_resolution_str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;h&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+                                                <span class="n">resolution_seconds</span> <span class="o">=</span> <span class="n">ifile_resolution</span> <span class="o">*</span> <span class="mi">3600</span>
+                                            <span class="k">except</span><span class="p">:</span>
+                                                <span class="k">pass</span>
+                                    <span class="c1"># @modified 20200425 - Feature #3508: ionosphere.untrainable_metrics</span>
+                                    <span class="c1"># Added resolution_seconds</span>
+                                    <span class="c1"># training_data_instances.append([metric, timestamp])</span>
+                                    <span class="n">training_data_instances</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">metric</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">resolution_seconds</span><span class="p">])</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to evaluate training_dir - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">training_data_dir</span><span class="p">))</span>
 
             <span class="k">if</span> <span class="n">training_data_instances</span><span class="p">:</span>
                 <span class="n">training_data_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">training_data_instances</span><span class="p">)</span>
@@ -1493,7 +1509,7 @@
                 <span class="c1"># metric_ionosphere_enabled = int(metrics_db_object[&#39;ionosphere_enabled&#39;])</span>
                 <span class="n">metric_ionosphere_enabled</span> <span class="o">=</span> <span class="kc">None</span>
                 <span class="k">try</span><span class="p">:</span>
-                    <span class="n">metric_ionosphere_enabled</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">metrics_db_object</span><span class="p">[</span><span class="s1">&#39;ionosphere_enabled&#39;</span><span class="p">])</span>
+                    <span class="n">metric_ionosphere_enabled</span> <span class="o">=</span> <span class="n">metrics_db_object</span><span class="p">[</span><span class="s1">&#39;ionosphere_enabled&#39;</span><span class="p">]</span>
                 <span class="k">except</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not determine ionosphere_enabled from metrics_db_object for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>

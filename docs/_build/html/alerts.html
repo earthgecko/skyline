@@ -103,6 +103,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#failures">Failures</a></li>
 </ul>
 </li>
+<li class="toctree-l2"><a class="reference internal" href="#external-alert-configs">External alert configs</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="docker.html">docker - EXPERIMENTAL</a></li>
@@ -111,6 +112,7 @@
 <li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
 <li class="toctree-l1"><a class="reference internal" href="analyzer.html">Analyzer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="algorithms/index.html">Algorithms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mirage.html">Mirage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="boundary.html">Boundary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="crucible.html">Crucible</a></li>
@@ -358,6 +360,33 @@ Boundary uses the same checks to determine whether the endpoint is healthy to
 prevent Boundary from attempting to repeatedly resend all alerts to a
 http_alerter endpoint that is down.</p>
 </div>
+</div>
+<div class="section" id="external-alert-configs">
+<h2>External alert configs<a class="headerlink" href="#external-alert-configs" title="Permalink to this headline">¶</a></h2>
+<p>Skyline can fetch alert configs from external sources</p>
+<ul>
+<li><p class="first"><strong>Example</strong>:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">EXTERNAL_ALERTS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;test_alert_config&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;url&#39;</span><span class="p">:</span> <span class="s1">&#39;http://127.0.0.1:1500/mock_api?test_alert_config&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;method&#39;</span><span class="p">:</span> <span class="s1">&#39;GET&#39;</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;metric_collector_1&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;url&#39;</span><span class="p">:</span> <span class="s1">&#39;https://example.org/alert_config&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;method&#39;</span><span class="p">:</span> <span class="s1">&#39;POST&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;data&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;token&#39;</span><span class="p">:</span> <span class="s1">&#39;1234567890123456&#39;</span>
+        <span class="p">},</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;client_app&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;url&#39;</span><span class="p">:</span> <span class="s1">&#39;https://username:password@app.example.org/alerts?token=3456abcde&amp;metrics=all&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;method&#39;</span><span class="p">:</span> <span class="s1">&#39;GET&#39;</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</li>
+</ul>
 </div>
 </div>
 

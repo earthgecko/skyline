@@ -104,6 +104,7 @@
 <li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
 <li class="toctree-l1"><a class="reference internal" href="analyzer.html">Analyzer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="algorithms/index.html">Algorithms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mirage.html">Mirage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="boundary.html">Boundary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="crucible.html">Crucible</a></li>
@@ -158,7 +159,10 @@
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-algorithm_exceptions">skyline.algorithm_exceptions module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-create_matplotlib_graph">skyline.create_matplotlib_graph module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#skyline-custom-algorithms-module">skyline.custom_algorithms module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-custom_algorithms_to_run">skyline.custom_algorithms_to_run module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-database">skyline.database module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-external_alert_configs">skyline.external_alert_configs module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-features_profile">skyline.features_profile module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-ionosphere_functions">skyline.ionosphere_functions module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-matched_or_regexed_in_list">skyline.matched_or_regexed_in_list module</a></li>
@@ -297,6 +301,12 @@ and handling prevents any memory leaks in the parent.
 <p># &#64;added 20160806 - Bug #1558: Memory leak in Analyzer
 # Debug with garbage collection - <a class="reference external" href="http://code.activestate.com/recipes/65333/">http://code.activestate.com/recipes/65333/</a></p>
 <p>show us what&#8217;s the garbage about</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="mirage.mirage.Mirage.populate_redis">
+<code class="descname">populate_redis</code><span class="sig-paren">(</span><em>i</em>, <em>metric</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/mirage/mirage.html#Mirage.populate_redis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#mirage.mirage.Mirage.populate_redis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get FULL_DURATION data from Graphite for a metric and populate Redis</p>
 </dd></dl>
 
 <dl class="method">

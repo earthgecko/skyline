@@ -101,6 +101,7 @@
 <li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
 <li class="toctree-l1"><a class="reference internal" href="analyzer.html">Analyzer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="algorithms/index.html">Algorithms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mirage.html">Mirage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="boundary.html">Boundary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="crucible.html">Crucible</a></li>
@@ -173,6 +174,7 @@
             
   <div class="section" id="upload-data-to-flux-experimental">
 <h1>upload_data to Flux - EXPERIMENTAL<a class="headerlink" href="#upload-data-to-flux-experimental" title="Permalink to this headline">¶</a></h1>
+<p><strong>POST variables may change as this is a experimental feature</strong></p>
 <p><strong>SIMPLE</strong> data files can be uploaded via the /upload_data HTTP/S endpoint for
 Flux to process and fed to Graphite.  A number of things need to be enabled and
 running to allow for processing data file uploads, which are not enabled by
@@ -184,20 +186,26 @@ section on the Flux page.</p>
 <ul class="simple">
 <li>csv (tested)</li>
 <li>xlsx (tested)</li>
+<li>xls (not tested)</li>
 </ul>
 <p>Seeing as data files can be large, the following archive formats are accepted:</p>
 <ul class="simple">
 <li>gz (tested)</li>
-<li>zip (tested)</li>
+<li>zip (partly tested, multiple data files per archive have not been thoroughly tested)</li>
 </ul>
 <p>A single file or archive can be uploaded or many data files can be uploaded in
 a single archive.  A <cite>info.csv</cite> must also be included in the archive, more
-on that below.</p>
+on that below.  <strong>HOWEVER</strong> if you wish to determine the status of the upload
+programmatically you will want to upload one data file per upload, otherwise
+making sense of the upload_status will be very difficult.</p>
 <p>So you could upload <cite>data.csv</cite>, <cite>data.csv.gz</cite> or <cite>data.zip</cite> with the <cite>data.csv</cite>
 file inside the zip archive.</p>
 <p>Any files in an archive that are not of an allowed format are not extracted or
-they are deleted.  Try and submit one data file per upload as ordering has not
-been tested.</p>
+they are deleted.</p>
+<p>Files names <strong>must only have</strong> alphanumeric, <cite>-</cite>, <cite>_</cite> and <cite>.</cite> characters in them.
+File names like <cite>&#8216;2020-05-13-05_devices_99_1(2).xlsx&#8217;</cite> are not acceptable (
+no matter what your OS lets you do).  Handling <cite>&#8216;</cite>, <cite>(</cite>, etc in the file names
+is not something that will be done.</p>
 <p>Multiple data files should be uploaded and processed sequentially.  At the
 moment upload the oldest data file first and then after validating the status of
 the upload (the /api?upload_status link is return on the Flux_frontend page or
@@ -251,12 +259,19 @@ Note, in processing rows are 0-indexed</p>
 </pre></div>
 </div>
 <p>Your date time column MUST be named date in the columns_to_metrics mapping.</p>
-<p>For convenience sake you can also add two additional elements to the info.json:</p>
+<p>For convenience sake you can also add additional elements to the info.json:</p>
 <ul class="simple">
 <li><cite>&#8220;debug&#8221;: &#8220;true&#8221;</cite> which outputs additional information regarding the imported
 dataframe in the flux.log to aid with debugging.</li>
 <li><cite>&#8220;dryrun&#8221;: &#8220;true&#8221;</cite> which runs through the processing but does not submit data
 to Graphite.</li>
+<li><cite>&#8220;ignore_submitted_timestamps&#8221;: &#8220;true&#8221;</cite>, a check is normally done of the last
+timestamp submitted to flux for the metric to ensure that data is not
+submitted multiple times. If you wish to override this check to resubmit data,
+update or override already submitted data pass this in the info.json. However
+do <strong>note</strong>,  if you wish to resubmit data that is <strong>NOT IN THE</strong> latest
+Graphite retention (old data) this will not have the desired affect as
+Graphite down sampling (aggregation) will already have occurred.</li>
 </ul>
 <p>This tells Skyline what the parent metric namespace should be which would
 result in metrics:</p>

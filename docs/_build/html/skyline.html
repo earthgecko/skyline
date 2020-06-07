@@ -103,6 +103,7 @@
 <li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
 <li class="toctree-l1"><a class="reference internal" href="analyzer.html">Analyzer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="algorithms/index.html">Algorithms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mirage.html">Mirage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="boundary.html">Boundary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="crucible.html">Crucible</a></li>
@@ -148,7 +149,10 @@
 <li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-algorithm_exceptions">skyline.algorithm_exceptions module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-create_matplotlib_graph">skyline.create_matplotlib_graph module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#skyline-custom-algorithms-module">skyline.custom_algorithms module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-custom_algorithms_to_run">skyline.custom_algorithms_to_run module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-database">skyline.database module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#module-external_alert_configs">skyline.external_alert_configs module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-features_profile">skyline.features_profile module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-ionosphere_functions">skyline.ionosphere_functions module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#module-matched_or_regexed_in_list">skyline.matched_or_regexed_in_list module</a></li>
@@ -218,7 +222,6 @@
 <li class="toctree-l2"><a class="reference internal" href="skyline.analyzer.html#module-analyzer.alerters">skyline.analyzer.alerters module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.analyzer.html#module-analyzer.algorithms">skyline.analyzer.algorithms module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.analyzer.html#module-analyzer.algorithms_batch">skyline.analyzer.algorithms_batch module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="skyline.analyzer.html#skyline-analyzer-analyzer-debug-nonnegativederivative-module">skyline.analyzer.analyzer.debug.nonNegativeDerivative module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.analyzer.html#module-analyzer.analyzer">skyline.analyzer.analyzer module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.analyzer.html#module-analyzer.analyzer_batch">skyline.analyzer.analyzer_batch module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.analyzer.html#module-analyzer">Module contents</a></li>
@@ -247,7 +250,6 @@
 <li class="toctree-l2"><a class="reference internal" href="skyline.crucible.html#module-crucible.agent">skyline.crucible.agent module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.crucible.html#module-crucible.crucible">skyline.crucible.crucible module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.crucible.html#module-crucible.crucible_algorithms">skyline.crucible.crucible_algorithms module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="skyline.crucible.html#module-crucible.crucible_firings">skyline.crucible.crucible_firings module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.crucible.html#module-crucible">Module contents</a></li>
 </ul>
 </li>
@@ -395,6 +397,19 @@ to be saved to</li>
 </dd></dl>
 
 </div>
+<div class="section" id="skyline-custom-algorithms-module">
+<h2>skyline.custom_algorithms module<a class="headerlink" href="#skyline-custom-algorithms-module" title="Permalink to this headline">¶</a></h2>
+</div>
+<div class="section" id="module-custom_algorithms_to_run">
+<span id="skyline-custom-algorithms-to-run-module"></span><h2>skyline.custom_algorithms_to_run module<a class="headerlink" href="#module-custom_algorithms_to_run" title="Permalink to this headline">¶</a></h2>
+<dl class="function">
+<dt id="custom_algorithms_to_run.get_custom_algorithms_to_run">
+<code class="descname">get_custom_algorithms_to_run</code><span class="sig-paren">(</span><em>current_skyline_app</em>, <em>base_name</em>, <em>custom_algorithms</em>, <em>debug</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/custom_algorithms_to_run.html#get_custom_algorithms_to_run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#custom_algorithms_to_run.get_custom_algorithms_to_run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return a dictionary of custom algoritms to run on a metric determined from
+the <a class="reference internal" href="#settings.CUSTOM_ALGORITHMS" title="settings.CUSTOM_ALGORITHMS"><code class="xref py py-mod docutils literal"><span class="pre">settings.CUSTOM_ALGORITHMS</span></code></a> dictionary.</p>
+</dd></dl>
+
+</div>
 <div class="section" id="module-database">
 <span id="skyline-database-module"></span><h2>skyline.database module<a class="headerlink" href="#module-database" title="Permalink to this headline">¶</a></h2>
 <dl class="function">
@@ -446,6 +461,30 @@ to be saved to</li>
 <dt id="database.luminosity_table_meta">
 <code class="descname">luminosity_table_meta</code><span class="sig-paren">(</span><em>current_skyline_app</em>, <em>engine</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/database.html#luminosity_table_meta"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#database.luminosity_table_meta" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
+
+</div>
+<div class="section" id="module-external_alert_configs">
+<span id="skyline-external-alert-configs-module"></span><h2>skyline.external_alert_configs module<a class="headerlink" href="#module-external_alert_configs" title="Permalink to this headline">¶</a></h2>
+<p>external_alert_configs</p>
+<dl class="function">
+<dt id="external_alert_configs.get_external_alert_configs">
+<code class="descname">get_external_alert_configs</code><span class="sig-paren">(</span><em>current_skyline_app</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/external_alert_configs.html#get_external_alert_configs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#external_alert_configs.get_external_alert_configs" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return concatenated alerts configs based on <a class="reference internal" href="#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALERTS</span></code></a> and any
+fetched external alert configs declared in <a class="reference internal" href="#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALERTS</span></code></a></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>current_skyline_app</strong> (<em>str</em>) &#8211; the app calling the function so the function
+knows which log to write too.</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">[[alerter, namespace, ]]</td>
+</tr>
+<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
 
 </div>
 <div class="section" id="module-features_profile">
@@ -1827,6 +1866,126 @@ metric is classified as anomalous by Analyzer.</td>
 </dd></dl>
 
 <dl class="data">
+<dt id="settings.CUSTOM_ALGORITHMS">
+<code class="descname">CUSTOM_ALGORITHMS</code><em class="property"> = {}</em><a class="headerlink" href="#settings.CUSTOM_ALGORITHMS" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.CUSTOM_ALGORITHMS" title="settings.CUSTOM_ALGORITHMS"><strong>CUSTOM_ALGORITHMS</strong></a> (<em>dict</em>) &#8211; Custom algorithms to run.  An empty dict {} disables
+this feature.</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><p class="first">For full documentation see <a class="reference external" href="https://earthgecko-skyline.readthedocs.io/en/latest/algorithms/custom-algorithms.html">https://earthgecko-skyline.readthedocs.io/en/latest/algorithms/custom-algorithms.html</a></p>
+</li>
+<li><p class="first"><strong>CUSTOM_ALGORITHMS example</strong>:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">CUSTOM_ALGORITHMS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;abs_stddev_from_median&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;namespaces&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;telegraf.cpu-total.cpu.usage_system&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;algorithm_source&#39;</span><span class="p">:</span> <span class="s1">&#39;/opt/skyline/github/skyline/skyline/custom_algorithms/abs_stddev_from_median.py&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;algorithm_parameters&#39;</span><span class="p">:</span> <span class="p">{},</span>
+        <span class="s1">&#39;max_execution_time&#39;</span><span class="p">:</span> <span class="mf">0.09</span><span class="p">,</span>
+        <span class="s1">&#39;consensus&#39;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span>
+        <span class="s1">&#39;algorithms_allowed_in_consensus&#39;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="s1">&#39;run_3sigma_algorithms&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="s1">&#39;use_with&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;analyzer&#39;</span><span class="p">,</span> <span class="s1">&#39;analyzer_batch&#39;</span><span class="p">,</span> <span class="s1">&#39;mirage&#39;</span><span class="p">,</span> <span class="s1">&#39;crucible&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;debug_logging&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;last_same_hours&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;namespaces&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;telegraf.cpu-total.cpu.usage_user&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;algorithm_source&#39;</span><span class="p">:</span> <span class="s1">&#39;/opt/skyline/github/skyline/skyline/custom_algorithms/last_same_hours.py&#39;</span><span class="p">,</span>
+        <span class="c1"># Pass the argument 1209600 for the sample_period parameter and</span>
+        <span class="c1"># enable debug_logging in the algorithm itself</span>
+        <span class="s1">&#39;algorithm_parameters&#39;</span><span class="p">:</span> <span class="p">{</span>
+          <span class="s1">&#39;sample_period&#39;</span><span class="p">:</span> <span class="mi">604800</span><span class="p">,</span>
+          <span class="s1">&#39;debug_logging&#39;</span><span class="p">:</span> <span class="kc">True</span>
+        <span class="p">},</span>
+        <span class="s1">&#39;max_execution_time&#39;</span><span class="p">:</span> <span class="mf">0.3</span><span class="p">,</span>
+        <span class="s1">&#39;consensus&#39;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span>
+        <span class="s1">&#39;algorithms_allowed_in_consensus&#39;</span><span class="p">:</span> <span class="p">[],</span>
+        <span class="s1">&#39;run_3sigma_algorithms&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="c1"># This does not run on analyzer as it is weekly data</span>
+        <span class="s1">&#39;use_with&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;mirage&#39;</span><span class="p">,</span> <span class="s1">&#39;crucible&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;debug_logging&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="p">},</span>
+    <span class="s1">&#39;detect_significant_change&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;namespaces&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;swell.buoy.*.Hm0&#39;</span><span class="p">],</span>
+        <span class="c1"># Algorithm source not in the Skyline code directory</span>
+        <span class="s1">&#39;algorithm_source&#39;</span><span class="p">:</span> <span class="s1">&#39;/opt/skyline_custom_algorithms/detect_significant_change/detect_significant_change.py&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;algorithm_parameters&#39;</span><span class="p">:</span> <span class="p">{},</span>
+        <span class="s1">&#39;max_execution_time&#39;</span><span class="p">:</span> <span class="mf">0.002</span><span class="p">,</span>
+        <span class="s1">&#39;consensus&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="s1">&#39;algorithms_allowed_in_consensus&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;detect_significant_change&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;run_3sigma_algorithms&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="s1">&#39;use_with&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;analyzer&#39;</span><span class="p">,</span> <span class="s1">&#39;crucible&#39;</span><span class="p">],</span>
+        <span class="s1">&#39;debug_logging&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</li>
+<li><p class="first">Each dictionary item needs to be named the same as the algorithm to be run</p>
+</li>
+<li><p class="first">CUSTOM_ALGORITHMS dictionary keys and values are:</p>
+</li>
+</ul>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>namespaces</strong> (<em>list</em>) &#8211; a list of absolute metric names, substrings (dotted elements)
+of a namespace or a regex of a namespace</li>
+<li><strong>algorithm_source</strong> (<em>str</em>) &#8211; the full path to the custom algorithm Python file</li>
+<li><strong>algorithm_parameters</strong> (<em>dict</em>) &#8211; a dictionary of any parameters to pass to the
+custom algorithm</li>
+<li><strong>max_execution_time</strong> &#8211; the maximum time the algorithm should run, any longer
+than this value and the algorithm process will be timed out and terminated.
+Bear in mind that algorithms have to run FAST, otherwise analysis stops
+being real time and the Skyline apps will terminate their own spawned
+processes.  Consider that Skyline&#8217;s 3 sigma algorithms take on average
+0.0023 seconds to run and all 9 are run on a metric in about 0.0207 seconds.</li>
+<li><strong>consensus</strong> (<em>int</em>) &#8211; The number of algorithms that need to trigger, including this
+one for a data point to be classed as anomalous, you can declare the same as
+the <a class="reference internal" href="#settings.CONSENSUS" title="settings.CONSENSUS"><code class="xref py py-mod docutils literal"><span class="pre">settings.CONSENSUS</span></code></a> value or that +1 or simply 1 if you want as
+anomaly triggered because the custom algorithm triggered.</li>
+<li><strong>algorithms_allowed_in_consensus</strong> (<em>list</em>) &#8211; this is not implemented yet and is
+optional</li>
+<li><strong>run_3sigma_algorithms</strong> (<em>boolean</em>) &#8211; a boolean stating whether to run normal 3 sigma
+algorithms, this is optional and defaults to <code class="docutils literal"><span class="pre">True</span></code> if it is not passed
+in the dictionary.  Read the full documentation referred to above to
+determine the affects of passing this as <code class="docutils literal"><span class="pre">False</span></code>.</li>
+<li><strong>use_with</strong> (<em>list</em>) &#8211; a list of Skyline apps which should apply the algorithm if
+they handle the metric, it is only applied if the app handles the metric,
+generally set this to <code class="docutils literal"><span class="pre">['analyzer',</span> <span class="pre">'analyzer_batch',</span> <span class="pre">'mirage',</span> <span class="pre">'crucible']</span></code></li>
+<li><strong>debug_logging</strong> (<em>boolean</em>) &#8211; whether to run debug logging on the custom algorithm,
+normally set this to <code class="docutils literal"><span class="pre">False</span></code> but for development and testing <code class="docutils literal"><span class="pre">True</span></code> is
+useful.</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.DEBUG_CUSTOM_ALGORITHMS">
+<code class="descname">DEBUG_CUSTOM_ALGORITHMS</code><em class="property"> = {}</em><a class="headerlink" href="#settings.DEBUG_CUSTOM_ALGORITHMS" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.DEBUG_CUSTOM_ALGORITHMS" title="settings.DEBUG_CUSTOM_ALGORITHMS"><strong>DEBUG_CUSTOM_ALGORITHMS</strong></a> &#8211; This is the number of algorithms that must return True before a
+metric is classified as anomalous by Analyzer.  An empty dict {} disables
+this feature.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
 <dt id="settings.RUN_OPTIMIZED_WORKFLOW">
 <code class="descname">RUN_OPTIMIZED_WORKFLOW</code><em class="property"> = True</em><a class="headerlink" href="#settings.RUN_OPTIMIZED_WORKFLOW" title="Permalink to this definition">¶</a></dt>
 <dd><table class="docutils field-list" frame="void" rules="none">
@@ -2046,6 +2205,33 @@ alerts with.</p>
 <p class="last">All slack alerts must be declared AFTER smtp alerts as slack alerts
 use the smtp resources to send to slack.</p>
 </div>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.EXTERNAL_ALERTS">
+<code class="descname">EXTERNAL_ALERTS</code><em class="property"> = {}</em><a class="headerlink" href="#settings.EXTERNAL_ALERTS" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.EXTERNAL_ALERTS" title="settings.EXTERNAL_ALERTS"><strong>EXTERNAL_ALERTS</strong></a> (<em>dict</em>) &#8211; Skyline can get json alert configs from external sources.</td>
+</tr>
+</tbody>
+</table>
+<p>See the External alerts documentation for the elements the are required in a
+json alert config and how external alerts are applied.</p>
+<ul>
+<li><p class="first"><strong>Example</strong>:</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">EXTERNAL_ALERTS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;test_alert_config&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="s1">&#39;url&#39;</span><span class="p">:</span> <span class="s1">&#39;http://127.0.0.1:1500/mock_api?test_alert_config&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;method&#39;</span><span class="p">:</span> <span class="s1">&#39;GET&#39;</span><span class="p">,</span>
+    <span class="p">},</span>
+<span class="p">}</span>
+</pre></div>
+</div>
+</li>
+</ul>
 </dd></dl>
 
 <dl class="data">
@@ -2819,6 +3005,28 @@ will ensure that these Mirage metric namespaces are analyzed by Mirage every
 <a class="reference internal" href="#settings.MIRAGE_PERIODIC_CHECK_INTERVAL" title="settings.MIRAGE_PERIODIC_CHECK_INTERVAL"><code class="xref py py-mod docutils literal"><span class="pre">settings.MIRAGE_PERIODIC_CHECK_INTERVAL</span></code></a> seconds.  This works in the
 same way that <a class="reference internal" href="#settings.SKIP_LIST" title="settings.SKIP_LIST"><code class="xref py py-mod docutils literal"><span class="pre">settings.SKIP_LIST</span></code></a> does, it matches in the string or
 the dotted namespace elements.</td>
+</tr>
+</tbody>
+</table>
+</dd></dl>
+
+<dl class="data">
+<dt id="settings.MIRAGE_AUTOFILL_TOOSHORT">
+<code class="descname">MIRAGE_AUTOFILL_TOOSHORT</code><em class="property"> = False</em><a class="headerlink" href="#settings.MIRAGE_AUTOFILL_TOOSHORT" title="Permalink to this definition">¶</a></dt>
+<dd><table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Variables:</th><td class="field-body"><a class="reference internal" href="#settings.MIRAGE_AUTOFILL_TOOSHORT" title="settings.MIRAGE_AUTOFILL_TOOSHORT"><strong>MIRAGE_AUTOFILL_TOOSHORT</strong></a> (<em>boolean</em>) &#8211; This is a convenience feature that allows
+Analyzer to send metrics that are classed TooShort to Mirage and have Mirage
+attempt to fetch the data from Graphite and populate Redis with the time
+series data.  This is useful if for some reason Graphite stopped pickling
+data to Horizon or when Skyline is first run against a populated Graphite
+that already has metric data.  Mirage will only try to fetch data from
+Graphite and populate Redis with data for a metric once in FULL_DURATION,
+so that any remote metrics from Vista are not attempt to be fetched over and
+over as this feature only works with the GRAPHITE_HOST, not remote data
+sources.</td>
 </tr>
 </tbody>
 </table>

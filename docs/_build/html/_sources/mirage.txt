@@ -404,7 +404,24 @@ consistent servers that are not expected to fluctuate too drastically over a
 period of days, like a DB server volume.
 
 You definitely do not what to run all your server or app metrics through Mirage
-periodic checks.
+periodic checks, unless you used some sane configuration in terms of setting a
+reasonable :mod:`settings.MIRAGE_PERIODIC_CHECK_INTERVAL`, you could send all
+your metrics through Mirage over say a 4 hour period.
+
+Say you have 10000 metrics and you want to periodically analyse them all with
+Mirage you could set them all to be analysed over a 6 hour period.
+
+.. code-block:: python
+
+  MIRAGE_PERIODIC_CHECK = True
+  MIRAGE_PERIODIC_CHECK_NAMESPACES = ['*']
+  MIRAGE_PERIODIC_CHECK_INTERVAL = 21600
+
+This would result in Mirage surfacing and analysing 27 metrics per minute, so
+you need to consider the impact on your Graphite, bandwidth and CPU usage.
+However Mirage will prioritise real time checks received from Analyzer over
+periodic checks and periodic checks will be queued to ensure real time analysis
+is not affected by periodic checks.
 
 What Mirage does
 ================

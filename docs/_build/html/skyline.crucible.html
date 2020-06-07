@@ -104,6 +104,7 @@
 <li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
 <li class="toctree-l1"><a class="reference internal" href="analyzer.html">Analyzer</a></li>
 <li class="toctree-l1"><a class="reference internal" href="analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="algorithms/index.html">Algorithms</a></li>
 <li class="toctree-l1"><a class="reference internal" href="mirage.html">Mirage</a></li>
 <li class="toctree-l1"><a class="reference internal" href="boundary.html">Boundary</a></li>
 <li class="toctree-l1"><a class="reference internal" href="crucible.html">Crucible</a></li>
@@ -139,7 +140,6 @@
 <li class="toctree-l4"><a class="reference internal" href="#module-crucible.agent">skyline.crucible.agent module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-crucible.crucible">skyline.crucible.crucible module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-crucible.crucible_algorithms">skyline.crucible.crucible_algorithms module</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-crucible.crucible_firings">skyline.crucible.crucible_firings module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-crucible">Module contents</a></li>
 </ul>
 </li>
@@ -157,7 +157,10 @@
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-algorithm_exceptions">skyline.algorithm_exceptions module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-create_matplotlib_graph">skyline.create_matplotlib_graph module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#skyline-custom-algorithms-module">skyline.custom_algorithms module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-custom_algorithms_to_run">skyline.custom_algorithms_to_run module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-database">skyline.database module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-external_alert_configs">skyline.external_alert_configs module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-features_profile">skyline.features_profile module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-ionosphere_functions">skyline.ionosphere_functions module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-matched_or_regexed_in_list">skyline.matched_or_regexed_in_list module</a></li>
@@ -415,52 +418,6 @@ matches drops off cliffs.</p>
 <dt id="crucible.crucible_algorithms.run_algorithms">
 <code class="descname">run_algorithms</code><span class="sig-paren">(</span><em>timeseries</em>, <em>timeseries_name</em>, <em>end_timestamp</em>, <em>full_duration</em>, <em>timeseries_file</em>, <em>skyline_app</em>, <em>algorithms</em>, <em>alert_interval</em>, <em>add_to_panorama</em>, <em>padded_timeseries</em>, <em>from_timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crucible/crucible_algorithms.html#run_algorithms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crucible.crucible_algorithms.run_algorithms" title="Permalink to this definition">¶</a></dt>
 <dd><p>Iteratively run algorithms.</p>
-</dd></dl>
-
-</div>
-<div class="section" id="module-crucible.crucible_firings">
-<span id="skyline-crucible-crucible-firings-module"></span><h2>skyline.crucible.crucible_firings module<a class="headerlink" href="#module-crucible.crucible_firings" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="crucible.crucible_firings.Crucible_firings">
-<em class="property">class </em><code class="descname">Crucible_firings</code><span class="sig-paren">(</span><em>parent_pid</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crucible/crucible_firings.html#Crucible_firings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crucible.crucible_firings.Crucible_firings" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">threading.Thread</span></code></p>
-<dl class="method">
-<dt id="crucible.crucible_firings.Crucible_firings.batch_check_if_parent_is_alive">
-<code class="descname">batch_check_if_parent_is_alive</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crucible/crucible_firings.html#Crucible_firings.batch_check_if_parent_is_alive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crucible.crucible_firings.Crucible_firings.batch_check_if_parent_is_alive" title="Permalink to this definition">¶</a></dt>
-<dd><p>Check if the parent process is alive</p>
-</dd></dl>
-
-<dl class="method">
-<dt id="crucible.crucible_firings.Crucible_firings.spin_batch_process">
-<code class="descname">spin_batch_process</code><span class="sig-paren">(</span><em>i</em>, <em>run_timestamp</em>, <em>metric_name</em>, <em>last_analyzed_timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/crucible/crucible_firings.html#Crucible_firings.spin_batch_process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crucible.crucible_firings.Crucible_firings.spin_batch_process" title="Permalink to this definition">¶</a></dt>
-<dd><p>Assign a metric and penultimate_timeseries_timestamp for a process to
-analyze.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>i</strong> &#8211; python process id</li>
-<li><strong>run_timestamp</strong> &#8211; the epoch timestamp at which this process was called</li>
-<li><strong>metric_name</strong> &#8211; the FULL_NAMESPACE metric name as keyed in Redis</li>
-<li><strong>last_analyzed_timestamp</strong> &#8211; the last analysed timestamp as recorded
-in the Redis key last_timestamp.basename key.</li>
-</ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last">returns True</p>
-</td>
-</tr>
-</tbody>
-</table>
-</dd></dl>
-
-<dl class="method">
-<dt id="crucible.crucible_firings.Crucible_firings.run">
-<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/crucible/crucible_firings.html#Crucible_firings.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#crucible.crucible_firings.Crucible_firings.run" title="Permalink to this definition">¶</a></dt>
-<dd><p>Called when the process intializes.</p>
-</dd></dl>
-
 </dd></dl>
 
 </div>
