@@ -276,6 +276,20 @@ This is an example of a more complex custom algorithm structure, that uses
 
 https://github.com/earthgecko/skyline/tree/master/skyline/custom_algorithms/last_same_hours.py
 
+Running a Mirage only custom algorithm on a metric all the time
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Normally for Analyzer to push a metric to Mirage, Analyzer would have to trigger
+on it as anomalous.  However if you wish to run a custom algorithm on a metric
+that requires ``SECOND_ORDER_RESOLUTION_HOURS`` of data to run against as the
+:mod:`settings.FULL_DURATION` data is not sufficient for the custom algorithm,
+perhaps due to seasonality, then you need to declare the metric in
+:mod:`settings.MIRAGE_ALWAYS_METRICS`.  This will cause Analyzer to add the
+metric to Mirage on every run.  Note that the metric needs to be defined as a
+mirage enabled metric in the normal way, ensuring it matches a smtp alert
+defined in :mod:`settings.ALERTS` with a ``SECOND_ORDER_RESOLUTION_HOURS``
+declared.
+
 Some things to consider
 ~~~~~~~~~~~~~~~~~~~~~~~
 

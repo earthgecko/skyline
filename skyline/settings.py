@@ -1519,11 +1519,12 @@ MIRAGE_PERIODIC_CHECK = True
 """
 :var MIRAGE_PERIODIC_CHECK: This enables Mirage to periodically check metrics
     matching the namespaces in :mod:`settings.MIRAGE_PERIODIC_CHECK_NAMESPACES`
-    every :mod:`settings.MIRAGE_PERIODIC_CHECK_INTERVAL`.  Mirage should only
+    at every :mod:`settings.MIRAGE_PERIODIC_CHECK_INTERVAL`.  Mirage should only
     be configured to periodically analyse key metrics.  For further in depth
     details regarding Mirage periodic check and their impact, please see the
     Mirage Periodic Checks documentation at:
     https://earthgecko-skyline.readthedocs.io/en/latest/mirage.html#periodic-checks
+    Further :mod:`settings.MIRAGE_ONLY_METRICS` are handled by
 :vartype MIRAGE_PERIODIC_CHECK: boolean
 """
 
@@ -1546,6 +1547,18 @@ MIRAGE_PERIODIC_CHECK_NAMESPACES = [
     same way that :mod:`settings.SKIP_LIST` does, it matches in the string or
     the dotted namespace elements.
 :vartype MIRAGE_PERIODIC_CHECK_NAMESPACES: list
+"""
+
+MIRAGE_ALWAYS_METRICS = []
+"""
+:var MIRAGE_ALWAYS_METRICS: These are metrics you want to always be checked by
+    Mirage, every minute and not just by Analyzer.  For this to be in effect,
+    you must ensure that MIRAGE_PERIODIC_CHECK is set to ``True``.  This allows
+    for a use case where you want to apply a specific
+    :mod:`settings.CUSTOM_ALGORITHMS` algorithm on a metric, all the time.  The
+    metrics declared here must be absolute metric names, no element matching or
+    regex is applied.
+:vartype MIRAGE_ALWAYS_METRICS: list
 """
 
 MIRAGE_AUTOFILL_TOOSHORT = False
