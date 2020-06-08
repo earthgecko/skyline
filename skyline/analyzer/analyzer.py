@@ -208,6 +208,11 @@ try:
     DEBUG_CUSTOM_ALGORITHMS = settings.DEBUG_CUSTOM_ALGORITHMS
 except:
     DEBUG_CUSTOM_ALGORITHMS = False
+# @added 20200607 - Feature #3566: custom_algorithms
+try:
+    MIRAGE_ALWAYS_METRICS = list(settings.MIRAGE_ALWAYS_METRICS)
+except:
+    MIRAGE_ALWAYS_METRICS = []
 
 # @added 20190522 - Feature #2580: illuminance
 # Disabled for now as in concept phase.  This would work better if
@@ -1619,8 +1624,27 @@ class Analyzer(Thread):
                         logger.info(traceback.format_exc())
                         logger.error('error :: failed to add %s to Redis set %s' % (
                             str(data), str(redis_set)))
-
                     anomalous = True
+
+                # @added 20200607 - Feature #3566: custom_algorithms
+                # If a metric is specified in MIRAGE_ALWAYS_METRICS add it to the
+                # analyzer.mirage_always_metrics Redis set and set it to
+                # anomalous so it gets pushed to Mirage on every run.
+                if not anomalous:
+                    if MIRAGE_ALWAYS_METRICS and base_name in MIRAGE_ALWAYS_METRICS:
+                        redis_set = 'analyzer.new.mirage_always_metrics'
+                        data = str(base_name)
+                        try:
+                            self.redis_conn.sadd(redis_set, data)
+                            logger.info('added %s to the analyzer.new.mirage_always_metrics Redis set because it is a MIRAGE_ALWAYS_METRICS metric' % (
+                                str(base_name)))
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: failed to add %s to Redis set %s' % (
+                                str(data), str(redis_set)))
+                        anomalous = True
+                        logger.info('set %s set anomalous to True so it can be pushed to Mirage for analysis because it is a MIRAGE_ALWAYS_METRICS metric' % (
+                            str(base_name)))
 
                 # @added 20200411 - Feature #3480: batch_processing
                 if BATCH_PROCESSING:
@@ -2773,6 +2797,12 @@ class Analyzer(Thread):
             except:
                 pass
 
+            # @added 20200607 - Feature #3566: custom_algorithms
+            try:
+                self.redis_conn.rename('analyzer.new.mirage_always_metrics', 'analyzer.mirage_always_metrics')
+            except:
+                pass
+
             # Spawn processes
             pids = []
             spawned_pids = []
@@ -3383,7 +3413,6 @@ class Analyzer(Thread):
                                         mirage_metric_key = self.redis_conn.get(mirage_metric_cache_key)
                                         if LOCAL_DEBUG:
                                             logger.debug('debug :: metric_name analyzer_metric mirage_metric_key - %s' % str(mirage_metric_key))
-
                                     except Exception as e:
                                         logger.error('error :: could not query Redis for mirage_metric_cache_key: %s' % e)
 

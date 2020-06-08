@@ -654,6 +654,10 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
                 if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
                     logger.debug('debug :: algorithms :: run_3sigma_algorithms is False on %s for %s' % (
                         custom_algorithm, base_name))
+            else:
+                if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
+                    logger.debug('debug :: algorithms :: run_3sigma_algorithms will now be run on %s' % (
+                        base_name))
             if result:
                 try:
                     custom_consensus = custom_algorithms_to_run[custom_algorithm]['consensus']
