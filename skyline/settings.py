@@ -766,12 +766,10 @@ CUSTOM_ALGORITHMS = {}
 
 """
 
-DEBUG_CUSTOM_ALGORITHMS = {}
+DEBUG_CUSTOM_ALGORITHMS = False
 """
-:var DEBUG_CUSTOM_ALGORITHMS: This is the number of algorithms that must return True before a
-    metric is classified as anomalous by Analyzer.  An empty dict {} disables
-    this feature.
-:vartype CUSTOM_ALGORITHMS: dict
+:var DEBUG_CUSTOM_ALGORITHMS: a boolean to enable debugging.
+:vartype DEBUG_CUSTOM_ALGORITHMS: boolean
 """
 
 RUN_OPTIMIZED_WORKFLOW = True
