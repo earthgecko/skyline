@@ -649,7 +649,7 @@ class Analyzer(Thread):
             logger.error('error :: failed to generate a list from flux.sort_and_dedup.metrics Redis set')
             flux_upload_metrics_to_sort_and_deduplicate = []
 
-        # @added 20200604 - Mirage - populate_redis
+        # @added 20200604 - Feature #3570: Mirage - populate_redis
         mirage_filled_metrics_to_sort_and_deduplicate = []
         try:
             mirage_filled_metrics_to_sort_and_deduplicate = list(self.redis_conn_decoded.smembers('mirage.filled'))
@@ -851,6 +851,19 @@ class Analyzer(Thread):
             if not manage_derivative_metrics:
                 unknown_deriv_status = True
 
+            # @added 20200609 - Feature #3570: Mirage - populate_redis
+            #                   Bug #3448: Repeated airgapped_metrics
+            #                   Feature #3400: Identify air gaps in the metric data
+            # Defined this outside the if IDENTIFY_AIRGAPS and flux_filled_keys
+            # scope below as is checked it the
+            # if IDENTIFY_UNORDERED_TIMESERIES and analyzer_unordered_timeseries
+            # block too which can also set sort = True, but now so can the
+            # mirage_filled variable and the
+            # mirage_filled_metrics_to_sort_and_deduplicate, so there is 3
+            # conditions now and in the if not mirage_filled check, it fails to
+            # interpolate this variable.
+            metric_flux_filled_key = 'flux.filled.%s' % str(base_name)
+
             # @added 20200213 - Bug #3448: Repeated airgapped_metrics
             #                   Feature #3400: Identify air gaps in the metric data
             # When flux backfills a metric airgap and sends it to Graphite,
@@ -866,7 +879,9 @@ class Analyzer(Thread):
             # Added get_updated_redis_timeseries
             get_updated_redis_timeseries = False
             if IDENTIFY_AIRGAPS and flux_filled_keys:
-                metric_flux_filled_key = 'flux.filled.%s' % str(base_name)
+                # @modified 20200609 - Feature #3570: Mirage - populate_redis
+                # Define outside this conditional scope above.
+                # metric_flux_filled_key = 'flux.filled.%s' % str(base_name)
                 sorted_and_deduplicated_timeseries = None
                 populated_redis_key = False
                 new_metric_name_key = 'analyzer.sorted.deduped.%s' % str(metric_name)
@@ -891,7 +906,7 @@ class Analyzer(Thread):
                     logger.info(traceback.format_exc())
                     logger.error('error :: failed to remove %s from flux.sort_and_dedup.metrics Redis set' % base_name)
 
-            # @added 20200604 - Mirage - populate_redis
+            # @added 20200604 - Feature #3570: Mirage - populate_redis
             mirage_filled = False
             if base_name in mirage_filled_metrics_to_sort_and_deduplicate:
                 sort_data = True
@@ -1103,7 +1118,7 @@ class Analyzer(Thread):
                         logger.error('error :: failed to delete Redis key %s' % (
                             metric_key_to_delete))
 
-                    # @modified 20200604 - Mirage - populate_redis
+                    # @modified 20200604 - Feature #3570: Mirage - populate_redis
                     if not mirage_filled:
                         try:
                             logger.info('Redis time series key data sorted and ordered with Flux additions, deleting key %s' % (metric_flux_filled_key))
@@ -1545,7 +1560,13 @@ class Analyzer(Thread):
 
                 # @added 20191016 - Branch #3262: py3
                 if LOCAL_DEBUG:
-                    logger.info('debug :: metric %s - anomalous - %s' % (str(metric_name), str(anomalous)))
+                    logger.debug('debug :: metric %s - anomalous - %s' % (str(metric_name), str(anomalous)))
+
+                # @added 20200608 - Feature #3566: custom_algorithms
+                if DEBUG_CUSTOM_ALGORITHMS:
+                    logger.debug('debug :: metric %s - anomalous - %s, ensemble - %s, algorithms_run - %s' % (
+                        str(metric_name), str(anomalous), str(ensemble),
+                        str(algorithms_run)))
 
                 # @added 20200214 - Bug #3448: Repeated airgapped_metrics
                 #                   Feature #3400: Identify air gaps in the metric data
@@ -4150,8 +4171,11 @@ class Analyzer(Thread):
             # Set the anomaly_end_timestamp for any metrics no longer anomalous
             not_anomalous_metrics = []
             not_anomalous_metrics_data = []
+            # @modified 20200608 - Feature #3306: Record anomaly_end_timestamp
+            # Declare outside try
             redis_set = 'current.anomalies'
             try:
+                # redis_set = 'current.anomalies'
                 current_anomalies = self.redis_conn_decoded.smembers(redis_set)
             except:
                 logger.info(traceback.format_exc())
@@ -4175,6 +4199,20 @@ class Analyzer(Thread):
                         list_data = literal_eval(item)
                         anomalous_metric = str(list_data[0])
                         anomaly_timestamp = int(list_data[1])
+                        # @added 20200608 - Feature #3306: Record anomaly_end_timestamp
+                        # Remove entries from the current.anomalies set if the
+                        # timestamp is older than FULL_DURATION
+                        if anomaly_timestamp < (now - settings.FULL_DURATION):
+                            redis_set = 'current.anomalies'
+                            try:
+                                self.redis_conn.srem(redis_set, str(list_data))
+                                logger.info('removed %s from Redis set %s as the anomaly_timestamp is older than FULL_DURATION - %s' % (
+                                    metric, redis_set, str(list_data)))
+                                continue
+                            except:
+                                logger.error(traceback.format_exc())
+                                logger.error('error :: failed to remove %s for Redis set %s' % (str(list_data), redis_set))
+
                         try:
                             anomaly_id = int(list_data[2])
                         except:
@@ -4194,8 +4232,8 @@ class Analyzer(Thread):
                         for metric, anomaly_end_timestamp in not_anomalous_metrics_data:
                             if anomalous_metric == metric:
                                 update_item = False
+                                redis_set = 'current.anomalies'
                                 try:
-                                    redis_set = 'current.anomalies'
                                     self.redis_conn.srem(redis_set, str(list_data))
                                     update_item = True
                                 except:
