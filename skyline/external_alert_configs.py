@@ -63,7 +63,7 @@ def get_external_alert_configs(current_skyline_app):
         if debug_get_external_alert_configs:
             current_logger.debug('debug :: get_external_alert_configs settings.EXTERNAL_ALERTS is defined')
     except:
-        return (external_alert_configs, external_from_cache, internal_alert_configs, internal_from_cache, all_alerts, all_from_cache)
+        return (external_alert_configs, external_from_cache, internal_alert_configs, internal_from_cache, tuple(all_alerts), all_from_cache)
 
     redis_conn_decoded = None
     try:
