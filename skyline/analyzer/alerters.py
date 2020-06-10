@@ -192,6 +192,17 @@ def alert_smtp(alert, metric, context):
             use_default_recipient = False
         except:
             use_default_recipient = True
+
+        # @added 20200610 - Feature #3560: External alert config
+        # If the alert is for an external alerter set to no_email
+        if use_default_recipient:
+            try:
+                if alert[4]['type'] == 'external':
+                    recipients = 'no_email'
+                    use_default_recipient = False
+            except:
+                pass
+
         if use_default_recipient:
             try:
                 recipients = settings.SMTP_OPTS['default_recipient']
@@ -1047,6 +1058,19 @@ def alert_smtp(alert, metric, context):
         if DOCKER_FAKE_EMAIL_ALERTS:
             logger.info('alert_smtp - DOCKER_FAKE_EMAIL_ALERTS is set to %s, not executing SMTP command' % str(DOCKER_FAKE_EMAIL_ALERTS))
             send_email_alert = False
+
+        # @added 20200610 - Feature #3560: External alert config
+        #                   Feature #3406: Allow for no_email SMTP_OPTS
+        # If the alert is for an external alerter set to no_email
+        no_email = False
+        if str(sender) == 'no_email':
+            send_email_alert = False
+            no_email = True
+        if str(primary_recipient) == 'no_email':
+            send_email_alert = False
+            no_email = True
+        if no_email:
+            logger.info('alert_smtp - no_email is set, not executing SMTP command')
 
         # @modified 20190517 - Branch #3002: docker
         # Wrap the smtp block based on whether to actually send mail or not.
@@ -1948,6 +1972,11 @@ def alert_http(alert, metric, context):
         # Test for mirage second_order_resolution_hours tuple
         try:
             full_duration = int(alert[3]) * 3600
+            # @modified 20200610 - Feature #3560: External alert config
+            # Wrapped in if so that if alert[3] 0 is
+            # also handled in the all_alerts list
+            if full_duration == 0:
+                full_duration = settings.FULL_DURATION
         except:
             full_duration = settings.FULL_DURATION
 

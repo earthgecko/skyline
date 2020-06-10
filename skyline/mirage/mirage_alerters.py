@@ -210,6 +210,16 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
                 logger.error('alert_smtp :: error :: could not iterate recipients list')
         except:
             use_default_recipient = True
+        # @added 20200610 - Feature #3560: External alert config
+        # If the alert is for an external alerter set to no_email
+        if use_default_recipient:
+            try:
+                if alert[4]['type'] == 'external':
+                    recipients = 'no_email'
+                    use_default_recipient = False
+            except:
+                pass
+
         if use_default_recipient:
             try:
                 recipients = settings.SMTP_OPTS['default_recipient']

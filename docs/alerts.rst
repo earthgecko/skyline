@@ -200,7 +200,9 @@ External alert configs
 
 Skyline can fetch alert configs from external sources
 
-- **Example**::
+- **Example**
+
+.. code-block:: python
 
     EXTERNAL_ALERTS = {
         'test_alert_config': {
@@ -218,4 +220,27 @@ Skyline can fetch alert configs from external sources
             'url': 'https://username:password@app.example.org/alerts?token=3456abcde&metrics=all',
             'method': 'GET',
         },
+    }
+
+- The external source endpoint must return a json response with a ``data`` item
+  which contains named alert items with the following keys and values:
+
+.. code-block:: json
+
+    {"data": {
+      "1": {"alerter": "http_alerter-example.org",
+       "namespace_prefix": "vista.remote_hosts.example.org",
+       "namespace": "nginx.GET",
+       "expiration": "3600",
+       "second_order_resolution": "604800",
+       "learn_days": "30",
+       "inactive_after": "1800"},
+      "nginx_errors": {"alerter": "http_alerter-example.org",
+       "namespace_prefix": "vista.remote_hosts.example.org",
+       "namespace": "nginx.errors",
+       "expiration": "900",
+       "second_order_resolution": "86400",
+       "learn_days": "30",
+       "inactive_after": "1800"}
+      }
     }

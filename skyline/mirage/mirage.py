@@ -150,6 +150,14 @@ try:
 except:
     DEBUG_CUSTOM_ALGORITHMS = False
 
+# @added 20200610 - Feature #3560: External alert config
+try:
+    EXTERNAL_ALERTS = settings.EXTERNAL_ALERTS
+except:
+    EXTERNAL_ALERTS = {}
+if EXTERNAL_ALERTS:
+    from external_alert_configs import get_external_alert_configs
+
 skyline_app_graphite_namespace = 'skyline.%s%s' % (skyline_app, SERVER_METRIC_PATH)
 failed_checks_dir = '%s_failed' % settings.MIRAGE_CHECK_PATH
 # @added 20191107 - Branch #3262: py3
@@ -2023,7 +2031,33 @@ class Mirage(Thread):
                 logger.error('error :: failed to determine list from mirage.anomalous_metrics Redis set')
                 mirage_anomalous_metrics = []
 
-            for alert in settings.ALERTS:
+            # @added 20200610 - Feature #3560: External alert config
+            external_alerts = {}
+            external_from_cache = None
+            internal_alerts = {}
+            internal_from_cache = None
+            all_alerts = list(settings.ALERTS)
+            all_from_cache = None
+            if EXTERNAL_ALERTS:
+                try:
+                    external_alerts, external_from_cache, internal_alerts, internal_from_cache, all_alerts, all_from_cache = get_external_alert_configs(skyline_app)
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: could not determine external alert configs')
+                logger.info('retrieved %s external_alerts configurations from_cache %s, %s internal_alerts from_cache %s and %s all_alerts from_cache %s' % (
+                    str(len(external_alerts)), str(external_from_cache),
+                    str(len(internal_alerts)), str(internal_from_cache),
+                    str(len(all_alerts)), str(all_from_cache)))
+                if LOCAL_DEBUG:
+                    logger.debug('debug :: all_alerts :: %s' % str(all_alerts))
+            if not all_alerts:
+                logger.error('error :: all_alerts is not set, so creating from settings.ALERTS')
+                all_alerts = list(settings.ALERTS)
+
+            # @modified 20200610 - Feature #3560: External alert config
+            # for alert in settings.ALERTS:
+            for alert in all_alerts:
+
                 # @added 20181114 - Bug #2682: Reduce mirage ionosphere alert loop
                 not_an_ionosphere_metric_check_done = 'none'
 
@@ -2098,7 +2132,23 @@ class Mirage(Thread):
                         if alert[0] in metric[1]:
                             pattern_match = True
                     if pattern_match:
-                        cache_key = 'mirage.last_alert.%s.%s' % (alert[1], metric[1])
+
+                        # @added 20200610 - Feature #3560: External alert config
+                        external_alerter_alerter = None
+                        try:
+                            if alert[4]['type'] == 'external':
+                                external_alerter_alerter = alert[4]['alerter']
+                        except:
+                            pass
+
+                        # @modified 20200610 - Feature #3560: External alert config
+                        # Use the all_alerts list which includes external alert configs
+                        # cache_key = 'mirage.last_alert.%s.%s' % (alert[1], metric[1])
+                        if external_alerter_alerter:
+                            cache_key = 'mirage.last_alert.%s.%s.%s' % (str(external_alerter_alerter), alert[1], metric[1])
+                        else:
+                            cache_key = 'mirage.last_alert.%s.%s' % (alert[1], metric[1])
+
                         try:
                             last_alert = self.redis_conn.get(cache_key)
                             if not last_alert:
@@ -2169,7 +2219,9 @@ class Mirage(Thread):
                 # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
                 # if len(self.anomalous_metrics) == 0:
                 if len(mirage_anomalous_metrics) == 0:
-                    for negate_alert in settings.ALERTS:
+                    # @modified 20200610 - Feature #3560: External alert config
+                    # for negate_alert in settings.ALERTS:
+                    for negate_alert in all_alerts:
                         # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
                         # for not_anomalous_metric in self.not_anomalous_metrics:
                         for not_anomalous_metric in mirage_not_anomalous_metrics:

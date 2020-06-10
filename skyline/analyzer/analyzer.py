@@ -2423,16 +2423,27 @@ class Analyzer(Thread):
                 continue
 
             # @added 20200528 - Feature #3560: External alert config
-            ALERTS = settings.ALERTS
-            alert_configs = None
+            external_alerts = {}
+            external_from_cache = None
+            internal_alerts = {}
+            internal_from_cache = None
+            all_alerts = list(settings.ALERTS)
+            all_from_cache = None
             if EXTERNAL_ALERTS:
                 try:
-                    alert_configs = get_external_alert_configs(skyline_app)
+                    external_alerts, external_from_cache, internal_alerts, internal_from_cache, all_alerts, all_from_cache = get_external_alert_configs(skyline_app)
                 except:
                     logger.error(traceback.format_exc())
                     logger.error('error :: could not determine external alert configs')
-            if alert_configs:
-                logger.info('retrieved alert_configs')
+                logger.info('retrieved %s external_alerts configurations from_cache %s, %s internal_alerts from_cache %s and %s all_alerts from_cache %s' % (
+                    str(len(external_alerts)), str(external_from_cache),
+                    str(len(internal_alerts)), str(internal_from_cache),
+                    str(len(all_alerts)), str(all_from_cache)))
+                if LOCAL_DEBUG:
+                    logger.debug('debug :: all_alerts :: %s' % str(all_alerts))
+            if not all_alerts:
+                logger.error('error :: all_alerts is not set, so creating from settings.ALERTS')
+                all_alerts = list(settings.ALERTS)
 
             # @modified 20190518 - Bug #3020: Newly installed analyzer on docker not flushing and recreating analyzer algorithm exception Redis sets
             # The management of the analyzer Redis algorithm exception sets
@@ -2528,7 +2539,10 @@ class Analyzer(Thread):
                     except:
                         logger.error('error :: could not query Redis to delete mirage.unique_metric set')
 
-                for alert in settings.ALERTS:
+                # @modified 20200610 - Feature #3560: External alert config
+                # Use the all_alerts list which includes external alert configs
+                # for alert in settings.ALERTS:
+                for alert in all_alerts:
                     for metric in unique_metrics:
                         ALERT_MATCH_PATTERN = alert[0]
                         base_name = metric.replace(settings.FULL_NAMESPACE, '', 1)
@@ -2554,8 +2568,11 @@ class Analyzer(Thread):
 
                         mirage_metric = False
                         try:
-                            SECOND_ORDER_RESOLUTION_FULL_DURATION = alert[3]
-                            mirage_metric = True
+                            # @modified 20200610 - Feature #3560: External alert config
+                            # SECOND_ORDER_RESOLUTION_FULL_DURATION = alert[3]
+                            SECOND_ORDER_RESOLUTION_FULL_DURATION = int(alert[3])
+                            if SECOND_ORDER_RESOLUTION_FULL_DURATION > 24:
+                                mirage_metric = True
                         except:
                             mirage_metric = False
 
@@ -2646,7 +2663,11 @@ class Analyzer(Thread):
                     metric_name = str(metric_name)
 
                 base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
-                for alert in settings.ALERTS:
+
+                # @modified 20200610 - Feature #3560: External alert config
+                # Use the all_alerts list which includes external alert configs
+                # for alert in settings.ALERTS:
+                for alert in all_alerts:
                     pattern_match = False
                     if str(alert[1]) == 'smtp':
                         ALERT_MATCH_PATTERN = alert[0]
@@ -3145,23 +3166,38 @@ class Analyzer(Thread):
                             logger.error(traceback.format_exc())
                             logger.error('error :: failed to add an analyzer_batch anomalous_metric for %s' % str(cache_key))
 
+            # @modified 20161229 - Feature #1830: Ionosphere alerts
+            # Handle alerting for Ionosphere
+            # for metric in self.anomalous_metrics:
+            # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+            # for metric in self.all_anomalous_metrics:
+            # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
+            #                   Branch #3262: py3
+            # all_anomalous_metrics = list(self.redis_conn.smembers('analyzer.all_anomalous_metrics'))
+            # @modified 20200608 - Feature #3560: External alert config
+            # Moved from inside for alert in settings.ALERTS so it is only
+            # queried once
+            all_anomalous_metrics = []
+            try:
+                all_anomalous_metrics = list(self.redis_conn_decoded.smembers('analyzer.all_anomalous_metrics'))
+                if LOCAL_DEBUG:
+                    logger.info('debug :: for alert in settings.ALERTS analyzer.all_anomalous_metrics - %s' % (
+                        str(all_anomalous_metrics)))
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to query Redis set analyzer.all_anomalous_metrics')
+
             # Send alerts
             if settings.ENABLE_ALERTS:
                 try:
-                    for alert in settings.ALERTS:
-                        # @modified 20161229 - Feature #1830: Ionosphere alerts
-                        # Handle alerting for Ionosphere
-                        # for metric in self.anomalous_metrics:
-                        # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
-                        # for metric in self.all_anomalous_metrics:
-                        # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
-                        #                   Branch #3262: py3
-                        # all_anomalous_metrics = list(self.redis_conn.smembers('analyzer.all_anomalous_metrics'))
-                        all_anomalous_metrics = list(self.redis_conn_decoded.smembers('analyzer.all_anomalous_metrics'))
-                        if LOCAL_DEBUG:
-                            logger.info('debug :: for alert in settings.ALERTS analyzer.all_anomalous_metrics - %s' % (
-                                str(all_anomalous_metrics)))
 
+                    # @modified 20200610 - Feature #3560: External alert config
+                    # Use the all_alerts list which includes external alert configs
+                    # for alert in settings.ALERTS:
+                    for alert in all_alerts:
+                        # @modified 20200608 - Feature #3560: External alert config
+                        # Moved to above so only called once
+                        # all_anomalous_metrics = list(self.redis_conn_decoded.smembers('analyzer.all_anomalous_metrics'))
                         for metric_list_string in all_anomalous_metrics:
                             metric = literal_eval(metric_list_string)
                             if LOCAL_DEBUG:
@@ -3221,7 +3257,21 @@ class Analyzer(Thread):
 
                             mirage_metric = False
                             analyzer_metric = True
-                            cache_key = 'last_alert.%s.%s' % (alert[1], metric[1])
+
+                            # @added 20200610 - Feature #3560: External alert config
+                            external_alerter_alerter = None
+                            try:
+                                if alert[4]['type'] == 'external':
+                                    external_alerter_alerter = alert[4]['alerter']
+                            except:
+                                pass
+
+                            # @modified 20200610 - Feature #3560: External alert config
+                            # Use the all_alerts list which includes external alert configs
+                            if external_alerter_alerter:
+                                cache_key = 'last_alert.%s.%s.%s' % (str(external_alerter_alerter), alert[1], metric[1])
+                            else:
+                                cache_key = 'last_alert.%s.%s' % (alert[1], metric[1])
                             if LOCAL_DEBUG:
                                 logger.debug('debug :: last_alert cache key %s' % (
                                     str(cache_key)))
@@ -3231,14 +3281,18 @@ class Analyzer(Thread):
                                     # @modified 20181023 - Feature #2618: alert_slack
                                     # SECOND_ORDER_RESOLUTION_FULL_DURATION = alert[3]
                                     SECOND_ORDER_RESOLUTION_FULL_DURATION = int(alert[3])
-                                    mirage_metric = True
-                                    analyzer_metric = False
-                                    logger.info(
-                                        'mirage check :: %s at %s hours - matched by %s' %
-                                        (metric[1],
-                                            str(SECOND_ORDER_RESOLUTION_FULL_DURATION),
-                                            matched_by))
-                                    context = 'Mirage'
+                                    # @modified 20200610 - Feature #3560: External alert config
+                                    # Wrapped in if so that if alert[3] 0 is
+                                    # also handled in the all_alerts list
+                                    if SECOND_ORDER_RESOLUTION_FULL_DURATION > 24:
+                                        mirage_metric = True
+                                        analyzer_metric = False
+                                        logger.info(
+                                            'mirage check :: %s at %s hours - matched by %s' %
+                                            (metric[1],
+                                                str(SECOND_ORDER_RESOLUTION_FULL_DURATION),
+                                                matched_by))
+                                        context = 'Mirage'
                                 except:
                                     mirage_metric = False
                                     if LOCAL_DEBUG:
