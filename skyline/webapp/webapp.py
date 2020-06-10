@@ -5830,9 +5830,17 @@ def rebrow_key(host, port, db, key):
         # val = r.get(key)
         try:
             val = r.get(key)
-            # val = r_d.get(key)
         except:
             abort(404)
+
+        # @modified 20200610 - Bug #3266: py3 Redis binary objects not strings
+        #                      Branch #3262: py3
+        # Try decode val so that bytes-like objects are decoded, this will fail
+        # sliently and if it is a msg_packed_key
+        try:
+            val = val.decode('utf-8')
+        except (UnicodeDecodeError, AttributeError):
+            pass
 
         # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
         #                      Branch #3262: py3
@@ -5861,6 +5869,13 @@ def rebrow_key(host, port, db, key):
         val = r.hgetall(key)
     elif t == 'set':
         val = r.smembers(key)
+        # @modified 20200610 - Bug #3266: py3 Redis binary objects not strings
+        #                      Branch #3262: py3
+        # Try decode val so that bytes-like objects are decoded, this will fail
+        try:
+            val = val.decode('utf-8')
+        except (UnicodeDecodeError, AttributeError):
+            pass
         logger.info('rebrow :: set key - %s' % str(key))
     elif t == 'zset':
         val = r.zrange(key, 0, -1, withscores=True)
