@@ -1192,6 +1192,11 @@ class UploadedDataWorker(Process):
                                 data_points_sent = 0
                                 smallListOfMetricTuples = []
                                 tuples_added = 0
+                                # @added 20200617 - Feature #3550: flux.uploaded_data_worker
+                                # Reduce the speed of submissions to Graphite
+                                # if there are lots of data points
+                                number_of_datapoints = len(listOfMetricTuples)
+
                                 for data in listOfMetricTuples:
                                     smallListOfMetricTuples.append(data)
                                     tuples_added += 1
@@ -1201,6 +1206,11 @@ class UploadedDataWorker(Process):
                                             logger.info('uploaded_data_worker :: DRYRUN :: faking sending data')
                                         else:
                                             pickle_data_sent = pickle_data_to_graphite(smallListOfMetricTuples)
+                                            # @added 20200617 - Feature #3550: flux.uploaded_data_worker
+                                            # Reduce the speed of submissions to Graphite
+                                            # if there are lots of data points
+                                            if number_of_datapoints > 4000:
+                                                sleep(0.3)
                                         if pickle_data_sent:
                                             data_points_sent += tuples_added
                                             logger.info('uploaded_data_worker :: sent %s/%s of %s data points to Graphite via pickle for %s' % (
