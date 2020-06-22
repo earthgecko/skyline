@@ -609,6 +609,39 @@ def version():
 # def data():
 def api():
 
+    # @added 20200611 - Feature #3578: Test alerts
+    if 'test_alert' in request.args:
+        logger.info('/api?test_alert request')
+        if 'skyline_app' in request.args:
+            test_skyline_app = request.args.get('skyline_app', None)
+        if not test_skyline_app:
+            logger.error('error :: /api?test_alert request no skyline_app parameter sent')
+            return 'Bad Request', 400
+        if 'metric' in request.args:
+            metric = request.args.get('metric', None)
+        if not metric:
+            logger.error('error :: /api?test_alert request no metric parameter sent')
+            return 'Bad Request', 400
+
+        logger.info('/api?test_alert request with skyline_app - %s and metric - %s' % (
+            test_skyline_app, metric))
+        test_alert_redis_key = '%s.test_alerts' % test_skyline_app
+        try:
+            REDIS_CONN.sadd(test_alert_redis_key, metric)
+        except Exception as e:
+            logger.error(traceback.format_exc())
+            logger.error('error :: could not add %s to %s Redis set' % (
+                test_skyline_app, metric))
+            return 'Internal Server Error', 500
+        test_alert_dict = {
+            'skyline_app': test_skyline_app,
+            'metric': metric
+        }
+        data_dict = {"status": {}, "data": {"test_alert": test_alert_dict}}
+        logger.info('/api?test_alert request returning data - %s' % (
+            str(data_dict)))
+        return jsonify(data_dict), 200
+
     # @added 20200517 - Feature #3538: webapp - upload_data endpoint
     #                   Feature #3550: flux.uploaded_data_worker
     if 'upload_status' in request.args:
@@ -5871,7 +5904,7 @@ def rebrow_key(host, port, db, key):
         val = r.smembers(key)
         # @modified 20200610 - Bug #3266: py3 Redis binary objects not strings
         #                      Branch #3262: py3
-        # Try decode val so that bytes-like objects are decoded, this will fail
+        # Try decode val so that bytes-like objects are decoded
         try:
             val = val.decode('utf-8')
         except (UnicodeDecodeError, AttributeError):
