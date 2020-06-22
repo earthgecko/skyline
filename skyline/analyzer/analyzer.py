@@ -660,6 +660,19 @@ class Analyzer(Thread):
             logger.error('error :: failed to generate a list from mirage.filled Redis set')
             mirage_filled_metrics_to_sort_and_deduplicate = []
 
+        # @added 20200611 - Feature #3578: Test alerts
+        test_alerts = []
+        test_alerts_redis_set = '%s.test_alerts' % skyline_app
+        try:
+            test_alerts = list(self.redis_conn_decoded.smembers(test_alerts_redis_set))
+            if test_alerts:
+                logger.info('determined %s test alerts to send from %s Redis set - %s' % (
+                    str(len(test_alerts)), test_alerts_redis_set, str(test_alerts)))
+        except:
+            logger.info(traceback.format_exc())
+            logger.error('error :: failed to generate a list from %s Redis set' % test_alerts_redis_set)
+            test_alerts = []
+
         # @added 20200213 - Bug #3448: Repeated airgapped_metrics
         #                   Feature #3400: Identify air gaps in the metric data
         # Backfill airgaps in Redis time series with flux back filled data
@@ -1667,6 +1680,22 @@ class Analyzer(Thread):
                         logger.info('set %s set anomalous to True so it can be pushed to Mirage for analysis because it is a MIRAGE_ALWAYS_METRICS metric' % (
                             str(base_name)))
 
+                # @added 20200611 - Feature #3578: Test alerts
+                if not anomalous:
+                    if base_name in test_alerts:
+                        metric_timestamp = timeseries[-1][0]
+                        metric = [datapoint, base_name, metric_timestamp]
+                        redis_set = '%s.test_alerts_data' % skyline_app
+                        data = str(metric)
+                        try:
+                            self.redis_conn.sadd(redis_set, data)
+                        except:
+                            logger.info(traceback.format_exc())
+                            logger.error('error :: failed to add %s to Redis set %s' % (
+                                str(data), str(redis_set)))
+                        logger.info('test_alerts includes %s, added to %s Redis set' % (
+                            str(base_name), redis_set))
+
                 # @added 20200411 - Feature #3480: batch_processing
                 if BATCH_PROCESSING:
                     if batch_metric:
@@ -2544,25 +2573,20 @@ class Analyzer(Thread):
                 # for alert in settings.ALERTS:
                 for alert in all_alerts:
                     for metric in unique_metrics:
-                        ALERT_MATCH_PATTERN = alert[0]
+                        # ALERT_MATCH_PATTERN = alert[0]
                         base_name = metric.replace(settings.FULL_NAMESPACE, '', 1)
-                        METRIC_PATTERN = base_name
-                        pattern_match = False
-                        matched_by = 'not matched'
+
+                        # @modified 20200622 - Task #3586: Change all alert pattern checks to matched_or_regexed_in_list
+                        #                      Feature #3512: matched_or_regexed_in_list function
+                        # Changed original alert matching pattern to use new
+                        # method
+                        pattern_match, metric_matched_by = matched_or_regexed_in_list(skyline_app, base_name, [alert[0]])
+                        if LOCAL_DEBUG and pattern_match:
+                            logger.debug('debug :: %s matched alert - %s' % (base_name, alert[0]))
                         try:
-                            alert_match_pattern = re.compile(ALERT_MATCH_PATTERN)
-                            pattern_match = alert_match_pattern.match(METRIC_PATTERN)
-                            if pattern_match:
-                                matched_by = 'regex'
-                                pattern_match = True
+                            del metric_matched_by
                         except:
-                            pattern_match = False
-
-                        if not pattern_match:
-                            if alert[0] in base_name:
-                                pattern_match = True
-                                matched_by = 'substring'
-
+                            pass
                         if not pattern_match:
                             continue
 
@@ -2670,15 +2694,22 @@ class Analyzer(Thread):
                 for alert in all_alerts:
                     pattern_match = False
                     if str(alert[1]) == 'smtp':
-                        ALERT_MATCH_PATTERN = alert[0]
-                        METRIC_PATTERN = base_name
-                        pattern_match = False
+
+                        # @modified 20200622 - Task #3586: Change all alert pattern checks to matched_or_regexed_in_list
+                        #                      Feature #3512: matched_or_regexed_in_list function
+                        # Changed original alert matching pattern to use new
+                        # method
+                        # ALERT_MATCH_PATTERN = alert[0]
+                        # METRIC_PATTERN = base_name
                         try:
-                            # Match by regex
-                            alert_match_pattern = re.compile(ALERT_MATCH_PATTERN)
-                            pattern_match = alert_match_pattern.match(METRIC_PATTERN)
+                            pattern_match, metric_matched_by = matched_or_regexed_in_list(skyline_app, base_name, [alert[0]])
+                            if LOCAL_DEBUG and pattern_match:
+                                logger.debug('debug :: %s matched alert - %s' % (base_name, alert[0]))
+                            try:
+                                del metric_matched_by
+                            except:
+                                pass
                             if pattern_match:
-                                pattern_match = True
                                 # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
                                 # if base_name not in self.smtp_alerter_metrics:
                                 #     self.smtp_alerter_metrics.append(base_name)
@@ -2693,22 +2724,6 @@ class Analyzer(Thread):
                                             str(data), str(redis_set)))
                         except:
                             pattern_match = False
-
-                        if not pattern_match:
-                            # Match by substring
-                            if alert[0] in base_name:
-                                # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
-                                # if base_name not in self.smtp_alerter_metrics:
-                                #     self.smtp_alerter_metrics.append(base_name)
-                                if base_name not in smtp_alerter_metrics:
-                                    redis_set = 'analyzer.smtp_alerter_metrics'
-                                    data = str(base_name)
-                                    try:
-                                        self.redis_conn.sadd(redis_set, data)
-                                    except:
-                                        logger.info(traceback.format_exc())
-                                        logger.error('error :: failed to add %s to Redis set %s' % (
-                                            str(data), str(redis_set)))
 
                 # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
                 # Use Redis set analyzer.smtp_alerter_metrics in place of
@@ -3209,45 +3224,21 @@ class Analyzer(Thread):
                             context = 'Analyzer'
 
                             pattern_match = False
-                            # Absolute match
-                            if str(metric[1]) == str(alert[0]):
-                                pattern_match = True
-                                if LOCAL_DEBUG:
-                                    logger.debug('debug :: metric absolutely pattern matched - %s %s' % (
-                                        str(metric[1]), str(alert[0])))
-                                # @added 20191021 - Bug #3266: py3 Redis binary objects not strings
-                                #                   Branch #3262: py3
-                                matched_by = 'absolutely'
 
-                            if not pattern_match:
-                                if LOCAL_DEBUG:
-                                    logger.debug('debug :: metric not absolutely pattern matched - %s' % (
-                                        str(metric[1])))
-
-                                ALERT_MATCH_PATTERN = alert[0]
-                                METRIC_PATTERN = metric[1]
-                                matched_by = 'not matched'
+                            # @modified 20200622 - Task #3586: Change all alert pattern checks to matched_or_regexed_in_list
+                            #                      Feature #3512: matched_or_regexed_in_list function
+                            # Changed original alert matching pattern to use new
+                            # method
+                            try:
+                                pattern_match, metric_matched_by = matched_or_regexed_in_list(skyline_app, base_name, [alert[0]])
+                                if LOCAL_DEBUG and pattern_match:
+                                    logger.debug('debug :: %s matched alert - %s' % (base_name, alert[0]))
                                 try:
-                                    alert_match_pattern = re.compile(ALERT_MATCH_PATTERN)
-                                    pattern_match = alert_match_pattern.match(METRIC_PATTERN)
-                                    # if LOCAL_DEBUG:
-                                    #     logger.info(
-                                    #         'debug :: regex alert pattern matched :: %s %s' %
-                                    #         (alert[0], metric[1]))
-                                    matched_by = 'regex'
+                                    del metric_matched_by
                                 except:
-                                    pattern_match = False
-                            # @modified 20160806 - Reintroduced the original
-                            # substring matching after wildcard matching, to allow
-                            # more flexibility
-                            if not pattern_match:
-                                if alert[0] in metric[1]:
-                                    pattern_match = True
-                                    # if LOCAL_DEBUG:
-                                    #     logger.info(
-                                    #         'debug :: substring alert pattern matched :: %s %s' %
-                                    #         (alert[0], metric[1]))
-                                    matched_by = 'substring'
+                                    pass
+                            except:
+                                pattern_match = False
 
                             if not pattern_match:
                                 if LOCAL_DEBUG:
@@ -3637,6 +3628,73 @@ class Analyzer(Thread):
                 except:
                     logger.error(traceback.format_exc())
                     logger.error('error :: failed in check to alert step')
+
+            # @added 20200611 - Feature #3578: Test alerts
+            test_alerts_redis_set = '%s.test_alerts' % skyline_app
+            try:
+                self.redis_conn.delete(test_alerts_redis_set)
+            except:
+                pass
+            test_alerts_data = []
+            test_alerts_redis_set = '%s.test_alerts_data' % skyline_app
+            try:
+                test_alerts_data = list(self.redis_conn_decoded.smembers(test_alerts_redis_set))
+                if test_alerts_data:
+                    logger.info('determined %s test alerts to send from %s Redis set' % (
+                        str(len(test_alerts_data)), test_alerts_redis_set))
+                    try:
+                        self.redis_conn.delete(test_alerts_redis_set)
+                    except:
+                        pass
+            except:
+                logger.info(traceback.format_exc())
+                logger.error('error :: failed to generate a list from %s Redis set' % test_alerts_redis_set)
+                test_alerts_data = []
+            if test_alerts_data:
+                for alert in all_alerts:
+                    for metric_list_string in test_alerts_data:
+                        metric = literal_eval(metric_list_string)
+                        pattern_match = False
+
+                        # @modified 20200622 - Task #3586: Change all alert pattern checks to matched_or_regexed_in_list
+                        #                      Feature #3512: matched_or_regexed_in_list function
+                        # Changed original alert matching pattern to use new
+                        # method
+                        base_name = str(metric[1])
+                        try:
+                            pattern_match, metric_matched_by = matched_or_regexed_in_list(skyline_app, base_name, [alert[0]])
+                            if LOCAL_DEBUG and pattern_match:
+                                logger.debug('debug :: %s matched alert - %s' % (base_name, alert[0]))
+                            try:
+                                del metric_matched_by
+                            except:
+                                pass
+                        except:
+                            pattern_match = False
+
+                        if not pattern_match:
+                            continue
+                        try:
+                            test_value = 'TEST - %s' % str(metric[0])
+                            metric_test = (test_value, metric[1], metric[2])
+                            if alert[1] != 'smtp':
+                                if alert[1] == 'slack':
+                                    trigger_alert(alert, metric_test, context)
+                                    logger.info('trigger_alert :: test_alert - alert: %s, metric: %s, context: %s' % (
+                                        str(alert), str(metric_test), str(context)))
+                                else:
+                                    trigger_alert(alert, metric, context)
+                                    logger.info('trigger_alert :: test_alert - alert: %s, metric: %s, context: %s' % (
+                                        str(alert), str(metric), str(context)))
+                            else:
+                                smtp_trigger_alert(alert, metric_test, context)
+                                logger.info('smtp_trigger_alert :: tests_alert - alert: %s, metric: %s, context: %s' % (
+                                    str(alert), str(metric_test), str(context)))
+                        except:
+                            logger.error('error :: test_alert - trigger_alert - %s' % traceback.format_exc())
+                            logger.error(
+                                'error :: test_alert - failed to trigger_alert :: %s %s via %s' %
+                                (metric[1], metric[0], alert[1]))
 
             # @modified 20160207 - Branch #922: Ionosphere
             # Handle if alerts are not enabled

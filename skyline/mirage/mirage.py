@@ -2118,19 +2118,24 @@ class Mirage(Thread):
                                 logger.info('not an Ionosphere metric checking whether to alert - %s' % str(metric[1]))
                                 not_an_ionosphere_metric_check_done = metric_name
 
-                    ALERT_MATCH_PATTERN = alert[0]
-                    METRIC_PATTERN = metric[1]
+                    # ALERT_MATCH_PATTERN = alert[0]
+                    # METRIC_PATTERN = metric[1]
+                    # @modified 20200622 - Task #3586: Change all alert pattern checks to matched_or_regexed_in_list
+                    #                      Feature #3512: matched_or_regexed_in_list function
+                    # Changed original alert matching pattern to use new
+                    # method
+                    base_name = str(metric[1])
                     try:
-                        alert_match_pattern = re.compile(ALERT_MATCH_PATTERN)
-                        pattern_match = alert_match_pattern.match(METRIC_PATTERN)
+                        pattern_match, metric_matched_by = matched_or_regexed_in_list(skyline_app, base_name, [alert[0]])
+                        if LOCAL_DEBUG and pattern_match:
+                            logger.debug('debug :: %s matched alert - %s' % (base_name, alert[0]))
+                        try:
+                            del metric_matched_by
+                        except:
+                            pass
                     except:
                         pattern_match = False
-                    # @modified 20160806 - Reintroduced the original
-                    # substring matching after wildcard matching, to allow
-                    # more flexibility
-                    if not pattern_match:
-                        if alert[0] in metric[1]:
-                            pattern_match = True
+
                     if pattern_match:
 
                         # @added 20200610 - Feature #3560: External alert config
