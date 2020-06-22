@@ -3230,13 +3230,13 @@ class Analyzer(Thread):
                             # Changed original alert matching pattern to use new
                             # method
                             try:
-                                pattern_match, metric_matched_by = matched_or_regexed_in_list(skyline_app, base_name, [alert[0]])
+                                pattern_match, matched_by = matched_or_regexed_in_list(skyline_app, metric[1], [alert[0]])
                                 if LOCAL_DEBUG and pattern_match:
-                                    logger.debug('debug :: %s matched alert - %s' % (base_name, alert[0]))
-                                try:
-                                    del metric_matched_by
-                                except:
-                                    pass
+                                    logger.debug('debug :: %s matched alert - %s' % (metric[1], alert[0]))
+                                # try:
+                                #     del metric_matched_by
+                                # except:
+                                #     pass
                             except:
                                 pattern_match = False
 
@@ -3282,9 +3282,11 @@ class Analyzer(Thread):
                                             'mirage check :: %s at %s hours - matched by %s' %
                                             (metric[1],
                                                 str(SECOND_ORDER_RESOLUTION_FULL_DURATION),
-                                                matched_by))
+                                                str(matched_by)))
                                         context = 'Mirage'
                                 except:
+                                    logger.error(traceback.format_exc())
+                                    logger.error('error :: failed to determine if metric is a Mirage metric')
                                     mirage_metric = False
                                     if LOCAL_DEBUG:
                                         logger.debug('debug :: not Mirage metric - %s' % metric[1])
@@ -3311,7 +3313,7 @@ class Analyzer(Thread):
                                 try:
                                     self.redis_conn.setex(mirage_metric_cache_key, alert[2], packb(metric[0]))
                                 except:
-                                    logger.info(traceback.format_exc())
+                                    logger.error(traceback.format_exc())
                                     logger.error('error :: failed to add mirage.metrics Redis key - %s' % str(mirage_metric_cache_key))
 
                                 # metric_timestamp = int(time())
