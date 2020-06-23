@@ -214,6 +214,13 @@ try:
 except:
     MIRAGE_ALWAYS_METRICS = []
 
+# @added 20200623 - Feature #3588: Metric http_alerter queues
+#                   Feature #3396: http_alerter
+try:
+    HTTP_ALERTERS_ENABLED = settings.HTTP_ALERTERS_ENABLED
+except:
+    HTTP_ALERTERS_ENABLED = False
+
 # @added 20190522 - Feature #2580: illuminance
 # Disabled for now as in concept phase.  This would work better if
 # the illuminance_datapoint was determined from the time series
@@ -4233,6 +4240,26 @@ class Analyzer(Thread):
                 logger.info('Ionosphere metrics :: %s' % ionosphere_unique_metrics_count_str)
                 send_metric_name = '%s.ionosphere_metrics' % skyline_app_graphite_namespace
                 send_graphite_metric(skyline_app, send_metric_name, ionosphere_unique_metrics_count_str)
+
+            # @added 20200623 - Feature #3588: Metric http_alerter queues
+            #                   Feature #3396: http_alerter
+            # Send metrics of the http_alerter queue sizes so they can be
+            # monitored via Boundary checks
+            if HTTP_ALERTERS_ENABLED:
+                resend_queues = ['analyzer', 'mirage', 'ionosphere']
+                for source in resend_queues:
+                    http_alerter_queue_size = '0'
+                    try:
+                        redis_set = '%s.http_alerter.queue' % source
+                        http_alerter_queue_size = str(len(list(self.redis_conn_decoded.smembers(redis_set))))
+                        if resend_queue:
+                            logger.info('%s items in the %s Redis set' % (str(len(resend_queue)), redis_set))
+                            resend_items = []
+                    except Exception as e:
+                        logger.error('error :: could not determine http_alerter_queue_size from Redis set %s - %s' % (redis_set, e))
+                        http_alerter_queue_size = '0'
+                    send_metric_name = '%s.http_alerter.queue.%s' % (skyline_app_graphite_namespace, source)
+                    send_graphite_metric(skyline_app, send_metric_name, http_alerter_queue_size)
 
             # Check canary metric
             try:
