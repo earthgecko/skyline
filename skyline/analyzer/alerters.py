@@ -1987,7 +1987,12 @@ def alert_http(alert, metric, context):
             metric_name = str(metric[1])
             timestamp = int(metric[2])
             timestamp_str = str(timestamp)
-            value_str = str(float(metric[0]))
+            # @modified 20200611 - Feature #3578: Test alerts
+            # Allow a str as well to display TEST
+            try:
+                value_str = str(float(metric[0]))
+            except:
+                value_str = str(metric[0])
             full_duration_str = str(int(full_duration))
             expiry_str = str(int(alert[2]))
             metric_alert_dict = {
