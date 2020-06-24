@@ -2139,18 +2139,28 @@ class Mirage(Thread):
                     if pattern_match:
 
                         # @added 20200610 - Feature #3560: External alert config
-                        external_alerter_alerter = None
+                        # @modified 20200624 - Feature #3560: External alert config
+                        # Set the alert key to the external alerter id
+                        # external_alerter_alerter = None
+                        external_alerter_id = None
                         try:
                             if alert[4]['type'] == 'external':
-                                external_alerter_alerter = alert[4]['alerter']
+                                # @modified 20200624 - Feature #3560: External alert config
+                                # Set the alert key to the external alerter id
+                                # external_alerter_alerter = alert[4]['alerter']
+                                external_alerter_id = alert[4]['id'].replace('external-', '')
                         except:
                             pass
 
                         # @modified 20200610 - Feature #3560: External alert config
                         # Use the all_alerts list which includes external alert configs
                         # cache_key = 'mirage.last_alert.%s.%s' % (alert[1], metric[1])
-                        if external_alerter_alerter:
-                            cache_key = 'mirage.last_alert.%s.%s.%s' % (str(external_alerter_alerter), alert[1], metric[1])
+                        # @modified 20200624 - Feature #3560: External alert config
+                        # Set the alert key to the external alerter id
+                        # if external_alerter_alerter:
+                        #     cache_key = 'mirage.last_alert.%s.%s.%s' % (str(external_alerter_alerter), alert[1], metric[1])
+                        if external_alerter_id:
+                            cache_key = 'mirage.last_alert.%s.%s.%s' % (str(external_alerter_id), alert[1], metric[1])
                         else:
                             cache_key = 'mirage.last_alert.%s.%s' % (alert[1], metric[1])
 
