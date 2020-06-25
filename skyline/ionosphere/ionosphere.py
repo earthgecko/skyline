@@ -338,9 +338,23 @@ class Ionosphere(Thread):
         # files, add it to the list to be added to the Redis set
         training_data_list = []
 
+        # @added 20200625 - Feature #3472: ionosphere.training_data Redis set
+        #                   Feature #3474: webapp api - training_data
+        # Added occassional logging for monitoring
+        last_log_time = int(time_now)
+
         try:
             for path, folders, files in os.walk(dir_path):
                 for folder in folders[:]:
+                    # @added 20200625 - Feature #3472: ionosphere.training_data Redis set
+                    #                   Feature #3474: webapp api - training_data
+                    # Added occassional logging for monitoring
+                    current_time = int(time())
+                    last_logged = current_time - last_log_time
+                    if last_logged > 29:
+                        logger.info('still purging')
+                        last_log_time = current_time
+
                     folder_path = os.path.join(path, folder)
                     # Only timestamped directories are removed
                     if re.match('\d{10}', folder):
@@ -370,6 +384,16 @@ class Ionosphere(Thread):
         if training_data_list:
             training_data_instances = []
             for training_data_dir in training_data_list:
+
+                # @added 20200625 - Feature #3472: ionosphere.training_data Redis set
+                #                   Feature #3474: webapp api - training_data
+                # Added occassional logging for monitoring
+                current_time = int(time())
+                last_logged = current_time - last_log_time
+                if last_logged > 29:
+                    logger.info('still creating training_data Redis set')
+                    last_log_time = current_time
+
                 for path, folders, files in os.walk(training_data_dir):
 
                     # @modified 20200529 - Feature #3472: ionosphere.training_data Redis set
