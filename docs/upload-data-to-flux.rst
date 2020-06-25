@@ -88,7 +88,23 @@ header row and rows to ignore.  A info file is used to inform Skyline how to
 read and metric the data, take 2020-05-16-11.device_id.012383.info.json
 Note, in processing rows are 0-indexed
 
-info.json
+Your mileage may vary on different date formats, use as acceptable pandas date
+formats.  Tested date formats known to work:
+
+::
+
+    16-05-2020 11:00     # %d-%m-%Y %H:%M
+    16-05-2020 11:00:00  # %d-%m-%Y %H:%M:%S
+    2020/05/16 11:00:00  # %Y/%m/%d %H:%M:%S
+
+Known incapable date format, this date format has failed to be interpreted as a
+date column in the ``pandas.to_datetime`` conversion:
+
+::
+
+    2020-05-16 11:00:00  # %d-%m-%Y %H:%M:%S
+
+**info.json**
 
 ::
 

@@ -47,6 +47,12 @@ from boundary_alerters import trigger_alert
 from boundary_algorithms import run_selected_algorithm
 from algorithm_exceptions import (TooShort, Stale, Boring)
 
+# @added 20200622 - Task #3586: Change all alert pattern checks to matched_or_regexed_in_list
+#                   Feature #3512: matched_or_regexed_in_list function
+# Changed original alert matching pattern to use new
+# method
+from matched_or_regexed_in_list import matched_or_regexed_in_list
+
 skyline_app = 'boundary'
 skyline_app_logger = skyline_app + 'Log'
 logger = logging.getLogger(skyline_app_logger)
@@ -181,9 +187,9 @@ class Boundary(Thread):
         # Compile assigned metrics
         assigned_metrics_and_algos = [boundary_metrics[index] for index in assigned_keys]
         if ENABLE_BOUNDARY_DEBUG:
-            logger.info('debug :: printing assigned_metrics_and_algos')
+            logger.debug('debug :: printing assigned_metrics_and_algos')
             for assigned_metric_and_algo in assigned_metrics_and_algos:
-                logger.info('debug :: assigned_metric_and_algo - %s' % str(assigned_metric_and_algo))
+                logger.debug('debug :: assigned_metric_and_algo - %s' % str(assigned_metric_and_algo))
 
         # Compile assigned metrics
         assigned_metrics = []
@@ -198,10 +204,10 @@ class Boundary(Thread):
         unique_assigned_metrics = unique_noHash(assigned_metrics)
 
         if ENABLE_BOUNDARY_DEBUG:
-            logger.info('debug :: unique_assigned_metrics - %s' % str(unique_assigned_metrics))
-            logger.info('debug :: printing unique_assigned_metrics:')
+            logger.debug('debug :: unique_assigned_metrics - %s' % str(unique_assigned_metrics))
+            logger.debug('debug :: printing unique_assigned_metrics:')
             for unique_assigned_metric in unique_assigned_metrics:
-                logger.info('debug :: unique_assigned_metric - %s' % str(unique_assigned_metric))
+                logger.debug('debug :: unique_assigned_metric - %s' % str(unique_assigned_metric))
 
         # Check if this process is unnecessary
         if len(unique_assigned_metrics) == 0:
@@ -226,7 +232,7 @@ class Boundary(Thread):
         # The unique algorithms that are being used
         boundary_algorithms = unique_noHash(all_boundary_algorithms)
         if ENABLE_BOUNDARY_DEBUG:
-            logger.info('debug :: boundary_algorithms - %s' % str(boundary_algorithms))
+            logger.debug('debug :: boundary_algorithms - %s' % str(boundary_algorithms))
 
         discover_run_metrics = []
 
@@ -236,7 +242,7 @@ class Boundary(Thread):
 
             try:
                 if ENABLE_BOUNDARY_DEBUG:
-                    logger.info('debug :: unpacking timeseries for %s - %s' % (metric_name, str(i)))
+                    logger.debug('debug :: unpacking timeseries for %s - %s' % (metric_name, str(i)))
                 raw_series = raw_assigned[i]
                 unpacker = Unpacker(use_list=False)
                 unpacker.feed(raw_series)
@@ -258,19 +264,46 @@ class Boundary(Thread):
             base_name = metric_name.replace(FULL_NAMESPACE, '', 1)
 
             # Determine the metrics BOUNDARY_METRICS metric tuple settings
-            for metrick in BOUNDARY_METRICS:
-                CHECK_MATCH_PATTERN = metrick[0]
-                check_match_pattern = re.compile(CHECK_MATCH_PATTERN)
-                pattern_match = check_match_pattern.match(base_name)
+            # @modified 20200622 - Task #3586: Change all alert pattern checks to matched_or_regexed_in_list
+            #                      Feature #3512: matched_or_regexed_in_list function
+            # Changed original alert matching pattern to use new
+            # method
+            # for metrick in BOUNDARY_METRICS:
+            #    CHECK_MATCH_PATTERN = metrick[0]
+            # Determine the metrics BOUNDARY_METRICS metric tuple settings
+            for boundary_alerter in BOUNDARY_METRICS:
+                CHECK_MATCH_PATTERN = boundary_alerter[0]
+                try:
+                    pattern_match, metric_matched_by = matched_or_regexed_in_list(skyline_app, base_name, [boundary_alerter[0]])
+                    if ENABLE_BOUNDARY_DEBUG and pattern_match:
+                        logger.debug('debug :: %s matched alert - %s' % (base_name, boundary_alerter[0]))
+                    try:
+                        del metric_matched_by
+                    except:
+                        pass
+                except:
+                    pattern_match = False
+                # check_match_pattern = re.compile(CHECK_MATCH_PATTERN)
+                # pattern_match = check_match_pattern.match(base_name)
                 metric_pattern_matched = False
                 if pattern_match:
                     metric_pattern_matched = True
                     algo_pattern_matched = False
                     for algo in boundary_algorithms:
                         for metric in BOUNDARY_METRICS:
-                            CHECK_MATCH_PATTERN = metric[0]
-                            check_match_pattern = re.compile(CHECK_MATCH_PATTERN)
-                            pattern_match = check_match_pattern.match(base_name)
+                            # CHECK_MATCH_PATTERN = metric[0]
+                            try:
+                                pattern_match, metric_matched_by = matched_or_regexed_in_list(skyline_app, base_name, [metric[0]])
+                                if ENABLE_BOUNDARY_DEBUG and pattern_match:
+                                    logger.debug('debug :: %s and %s matched alert - %s' % (base_name, algo, metric[0]))
+                                try:
+                                    del metric_matched_by
+                                except:
+                                    pass
+                            except:
+                                pattern_match = False
+                            # check_match_pattern = re.compile(CHECK_MATCH_PATTERN)
+                            # pattern_match = check_match_pattern.match(base_name)
                             if pattern_match:
                                 if ENABLE_BOUNDARY_DEBUG:
                                     logger.info("debug :: metric and algo pattern MATCHED - " + metric[0] + " | " + base_name + " | " + str(metric[1]))
@@ -280,7 +313,8 @@ class Boundary(Thread):
                                 metric_trigger = False
                                 algorithm = False
                                 algo_pattern_matched = True
-                                algorithm = metric[1]
+                                # algorithm = metric[1]
+                                algorithm = boundary_alerter[1]
                                 try:
                                     if metric[2]:
                                         metric_expiration_time = metric[2]
@@ -313,22 +347,22 @@ class Boundary(Thread):
                                     metric_alerters = False
                             if metric_pattern_matched and algo_pattern_matched:
                                 if ENABLE_BOUNDARY_DEBUG:
-                                    logger.info('debug :: added metric - %s, %s, %s, %s, %s, %s, %s, %s, %s' % (str(i), metric_name, str(metric_expiration_time), str(metric_min_average), str(metric_min_average_seconds), str(metric_trigger), str(alert_threshold), metric_alerters, algorithm))
+                                    logger.debug('debug :: added metric - %s, %s, %s, %s, %s, %s, %s, %s, %s' % (str(i), metric_name, str(metric_expiration_time), str(metric_min_average), str(metric_min_average_seconds), str(metric_trigger), str(alert_threshold), metric_alerters, algorithm))
                                 discover_run_metrics.append([i, metric_name, metric_expiration_time, metric_min_average, metric_min_average_seconds, metric_trigger, alert_threshold, metric_alerters, algorithm])
 
         if ENABLE_BOUNDARY_DEBUG:
-            logger.info('debug :: printing discover_run_metrics')
+            logger.debug('debug :: printing discover_run_metrics')
             for discover_run_metric in discover_run_metrics:
-                logger.info('debug :: discover_run_metrics - %s' % str(discover_run_metric))
-            logger.info('debug :: build unique boundary metrics to analyze')
+                logger.debug('debug :: discover_run_metrics - %s' % str(discover_run_metric))
+            logger.debug('debug :: build unique boundary metrics to analyze')
 
         # Determine the unique set of metrics to run
         run_metrics = unique_noHash(discover_run_metrics)
 
         if ENABLE_BOUNDARY_DEBUG:
-            logger.info('debug :: printing run_metrics')
+            logger.debug('debug :: printing run_metrics')
             for run_metric in run_metrics:
-                logger.info('debug :: run_metrics - %s' % str(run_metric))
+                logger.debug('debug :: run_metrics - %s' % str(run_metric))
 
         # Distill timeseries strings and submit to run_selected_algorithm
         for metric_and_algo in run_metrics:
@@ -347,7 +381,7 @@ class Boundary(Thread):
                 algorithm = metric_and_algo[8]
 
                 if ENABLE_BOUNDARY_DEBUG:
-                    logger.info('debug :: unpacking timeseries for %s - %s' % (metric_name, str(raw_assigned_id)))
+                    logger.debug('debug :: unpacking timeseries for %s - %s' % (metric_name, str(raw_assigned_id)))
 
                 raw_series = raw_assigned[metric_and_algo[0]]
                 unpacker = Unpacker(use_list=False)
@@ -364,7 +398,7 @@ class Boundary(Thread):
                     del original_timeseries
 
                 if ENABLE_BOUNDARY_DEBUG:
-                    logger.info('debug :: unpacked OK - %s - %s' % (metric_name, str(raw_assigned_id)))
+                    logger.debug('debug :: unpacked OK - %s - %s' % (metric_name, str(raw_assigned_id)))
 
                 autoaggregate = False
                 autoaggregate_value = 0
@@ -376,14 +410,30 @@ class Boundary(Thread):
                         autoaggregate_value = 0
                         CHECK_MATCH_PATTERN = autoaggregate_metric[0]
                         base_name = metric_name.replace(FULL_NAMESPACE, '', 1)
-                        check_match_pattern = re.compile(CHECK_MATCH_PATTERN)
-                        pattern_match = check_match_pattern.match(base_name)
+
+                        # @modified 20200622 - Task #3586: Change all alert pattern checks to matched_or_regexed_in_list
+                        #                      Feature #3512: matched_or_regexed_in_list function
+                        # Changed original alert matching pattern to use new
+                        # method
+                        try:
+                            pattern_match, metric_matched_by = matched_or_regexed_in_list(skyline_app, base_name, [autoaggregate_metric[0]])
+                            if ENABLE_BOUNDARY_DEBUG and pattern_match:
+                                logger.debug('debug :: %s matched alert - %s' % (base_name, autoaggregate_metric[0]))
+                            try:
+                                del metric_matched_by
+                            except:
+                                pass
+                        except:
+                            pattern_match = False
+                        # check_match_pattern = re.compile(CHECK_MATCH_PATTERN)
+                        # pattern_match = check_match_pattern.match(base_name)
+
                         if pattern_match:
                             autoaggregate = True
                             autoaggregate_value = autoaggregate_metric[1]
 
                 if ENABLE_BOUNDARY_DEBUG:
-                    logger.info('debug :: BOUNDARY_AUTOAGGRERATION passed - %s - %s' % (metric_name, str(autoaggregate)))
+                    logger.debug('debug :: BOUNDARY_AUTOAGGRERATION passed - %s - %s' % (metric_name, str(autoaggregate)))
 
                 if ENABLE_BOUNDARY_DEBUG:
                     logger.info(
@@ -415,9 +465,23 @@ class Boundary(Thread):
                 wildcard_namespace = True
                 for metric_tuple in BOUNDARY_METRICS:
                     if not has_unique_tuple:
-                        CHECK_MATCH_PATTERN = metric_tuple[0]
-                        check_match_pattern = re.compile(CHECK_MATCH_PATTERN)
-                        pattern_match = check_match_pattern.match(base_name)
+                        # @modified 20200622 - Task #3586: Change all alert pattern checks to matched_or_regexed_in_list
+                        #                      Feature #3512: matched_or_regexed_in_list function
+                        # Changed original alert matching pattern to use new
+                        # method
+                        # CHECK_MATCH_PATTERN = metric_tuple[0]
+                        try:
+                            pattern_match, metric_matched_by = matched_or_regexed_in_list(skyline_app, base_name, [metric_tuple[0]])
+                            if ENABLE_BOUNDARY_DEBUG and pattern_match:
+                                logger.debug('debug :: %s matched alert - %s' % (base_name, str(metric_tuple[0])))
+                            try:
+                                del metric_matched_by
+                            except:
+                                pass
+                        except:
+                            pattern_match = False
+                        # check_match_pattern = re.compile(CHECK_MATCH_PATTERN)
+                        # pattern_match = check_match_pattern.match(base_name)
                         if pattern_match:
                             if metric_tuple[0] == base_name:
                                 wildcard_namespace = False
@@ -475,6 +539,13 @@ class Boundary(Thread):
                         except:
                             logger.error('error :: nonNegativeDerivative failed')
 
+                    # @added 20200624 - Task #3594: Add timestamp to ENABLE_BOUNDARY_DEBUG output
+                    #                   Feature #3532: Sort all time series
+                    try:
+                        metric_timestamp = int(timeseries[-1][0])
+                    except:
+                        metric_timestamp = None
+
                     # Submit the timeseries and settings to run_selected_algorithm
                     anomalous, ensemble, datapoint, metric_name, metric_expiration_time, metric_min_average, metric_min_average_seconds, metric_trigger, alert_threshold, metric_alerters, algorithm = run_selected_algorithm(
                         timeseries, metric_name,
@@ -489,7 +560,17 @@ class Boundary(Thread):
                         algorithm
                     )
                     if ENABLE_BOUNDARY_DEBUG:
-                        logger.info('debug :: analysed - %s' % (metric_name))
+                        # @modified 20200624 - Task #3594: Add timestamp to ENABLE_BOUNDARY_DEBUG output
+                        #                      Feature #3532: Sort all time series
+                        # logger.debug('debug :: analysed - %s' % (metric_name))
+                        try:
+                            logger.debug('debug :: analysed - %s, with datapoint %s at timestamp %s' % (
+                                metric_name, str(datapoint),
+                                str(metric_timestamp)))
+                        except:
+                            logger.error('error :: debug :: analysed - %s, but unknown datapoint or timestamp' % (
+                                metric_name))
+
                     # @added 20171214 - Bug #2232: Expiry boundary last_seen keys appropriately
                     # If it's not anomalous, add it to list
                     if not anomalous:
@@ -504,7 +585,7 @@ class Boundary(Thread):
                 else:
                     anomalous = False
                     if ENABLE_BOUNDARY_DEBUG:
-                        logger.info('debug :: more unique metric tuple not analysed - %s' % (metric_name))
+                        logger.debug('debug :: more unique metric tuple not analysed - %s' % (metric_name))
 
                 # If it's anomalous, add it to list
                 if anomalous:
@@ -697,11 +778,11 @@ class Boundary(Thread):
         for key, value in anomaly_breakdown.items():
             self.anomaly_breakdown_q.put((key, value))
             if ENABLE_BOUNDARY_DEBUG:
-                logger.info('debug :: anomaly_breakdown.item - %s, %s' % (str(key), str(value)))
+                logger.debug('debug :: anomaly_breakdown.item - %s, %s' % (str(key), str(value)))
         for key, value in exceptions.items():
             self.exceptions_q.put((key, value))
             if ENABLE_BOUNDARY_DEBUG:
-                logger.info('debug :: exceptions.item - %s, %s' % (str(key), str(value)))
+                logger.debug('debug :: exceptions.item - %s, %s' % (str(key), str(value)))
 
     def run(self):
         """
@@ -855,7 +936,7 @@ class Boundary(Thread):
                         boundary_metrics.append([metric_name, metric[1]])
 
             if ENABLE_BOUNDARY_DEBUG:
-                logger.info('debug :: boundary metrics - ' + str(boundary_metrics))
+                logger.debug('debug :: boundary metrics - ' + str(boundary_metrics))
 
             # @added 20191106 - Branch #3262: py3
             if os.path.isfile(alert_test_file):
@@ -973,7 +1054,7 @@ class Boundary(Thread):
                     try:
                         anomaly_cache_key = 'anomaly_seen.%s.%s' % (algorithm, base_name)
                         if ENABLE_BOUNDARY_DEBUG:
-                            logger.info('debug :: anomaly_cache_key - anomaly_seen.%s.%s' % (algorithm, base_name))
+                            logger.debug('debug :: anomaly_cache_key - anomaly_seen.%s.%s' % (algorithm, base_name))
                     except:
                         logger.info(traceback.format_exc())
                         logger.error('error :: failed to determine string for anomaly_cache_key')
@@ -982,10 +1063,10 @@ class Boundary(Thread):
                     try:
                         self.redis_conn.setex(anomaly_cache_key, anomaly_cache_key_expiration_time, packb(int(times_seen)))
                         if ENABLE_BOUNDARY_DEBUG:
-                            logger.info('debug :: redis - anomaly_cache_key set OK - %s' % str(anomaly_cache_key))
+                            logger.debug('debug :: redis - anomaly_cache_key set OK - %s' % str(anomaly_cache_key))
                     except:
                         if ENABLE_BOUNDARY_DEBUG:
-                            logger.info('debug :: redis failed - anomaly_cache_key set failed - %s' % str(anomaly_cache_key))
+                            logger.debug('debug :: redis failed - anomaly_cache_key set failed - %s' % str(anomaly_cache_key))
                     # @added 20171216 - Task #2236: Change Boundary to only send to Panorama on alert
                     # Remove tmp_panaroma_anomaly_file
                     # @modified 20171228 - Task #2236: Change Boundary to only send to Panorama on alert
@@ -994,15 +1075,15 @@ class Boundary(Thread):
                     tmp_panaroma_anomaly_file = '%s/%s.%s.%s.panorama_anomaly.txt' % (
                         settings.SKYLINE_TMP_DIR, added_at, algorithm, base_name)
                     if ENABLE_BOUNDARY_DEBUG:
-                        logger.info('debug :: set tmp_panaroma_anomaly_file to - %s' % (str(tmp_panaroma_anomaly_file)))
+                        logger.debug('debug :: set tmp_panaroma_anomaly_file to - %s' % (str(tmp_panaroma_anomaly_file)))
                     if os.path.isfile(tmp_panaroma_anomaly_file):
                         try:
                             if ENABLE_BOUNDARY_DEBUG:
-                                logger.info('debug :: removing tmp_panaroma_anomaly_file - %s' % (str(tmp_panaroma_anomaly_file)))
+                                logger.debug('debug :: removing tmp_panaroma_anomaly_file - %s' % (str(tmp_panaroma_anomaly_file)))
                             os.remove(str(tmp_panaroma_anomaly_file))
                         except OSError:
                             if ENABLE_BOUNDARY_DEBUG:
-                                logger.info('debug :: error removing tmp_panaroma_anomaly_file - %s' % (str(tmp_panaroma_anomaly_file)))
+                                logger.debug('debug :: error removing tmp_panaroma_anomaly_file - %s' % (str(tmp_panaroma_anomaly_file)))
                             pass
 
             # @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage
@@ -1060,7 +1141,7 @@ class Boundary(Thread):
 
                     if alert_threshold > 1:
                         if ENABLE_BOUNDARY_DEBUG:
-                            logger.info('debug :: alert_threshold - ' + str(alert_threshold))
+                            logger.debug('debug :: alert_threshold - ' + str(alert_threshold))
                         anomaly_cache_key_count_set = False
                         anomaly_cache_key_expiration_time = (int(alert_threshold) + 1) * 60
                         anomaly_cache_key = 'anomaly_seen.%s.%s' % (algorithm, base_name)
@@ -1069,10 +1150,10 @@ class Boundary(Thread):
                             if not anomaly_cache_key_count:
                                 try:
                                     if ENABLE_BOUNDARY_DEBUG:
-                                        logger.info('debug :: redis no anomaly_cache_key - ' + str(anomaly_cache_key))
+                                        logger.debug('debug :: redis no anomaly_cache_key - ' + str(anomaly_cache_key))
                                     times_seen = 1
                                     if ENABLE_BOUNDARY_DEBUG:
-                                        logger.info('debug :: redis setex anomaly_cache_key - ' + str(anomaly_cache_key))
+                                        logger.debug('debug :: redis setex anomaly_cache_key - ' + str(anomaly_cache_key))
                                     self.redis_conn.setex(anomaly_cache_key, anomaly_cache_key_expiration_time, packb(int(times_seen)))
                                     logger.info('set anomaly seen key :: %s seen %s' % (anomaly_cache_key, str(times_seen)))
                                 except Exception as e:
@@ -1080,11 +1161,11 @@ class Boundary(Thread):
                                     logger.error('error :: could not set key: %s' % e)
                             else:
                                 if ENABLE_BOUNDARY_DEBUG:
-                                    logger.info('debug :: redis anomaly_cache_key retrieved OK - ' + str(anomaly_cache_key))
+                                    logger.debug('debug :: redis anomaly_cache_key retrieved OK - ' + str(anomaly_cache_key))
                                 anomaly_cache_key_count_set = True
                         except:
                             if ENABLE_BOUNDARY_DEBUG:
-                                logger.info('debug :: redis failed - anomaly_cache_key retrieval failed - ' + str(anomaly_cache_key))
+                                logger.debug('debug :: redis failed - anomaly_cache_key retrieval failed - ' + str(anomaly_cache_key))
                             anomaly_cache_key_count_set = False
 
                         if anomaly_cache_key_count_set:
@@ -1102,7 +1183,7 @@ class Boundary(Thread):
                     # Alert the alerters if times_seen > alert_threshold
                     if times_seen >= alert_threshold:
                         if ENABLE_BOUNDARY_DEBUG:
-                            logger.info('debug :: times_seen %s is greater than or equal to alert_threshold %s' % (str(times_seen), str(alert_threshold)))
+                            logger.debug('debug :: times_seen %s is greater than or equal to alert_threshold %s' % (str(times_seen), str(alert_threshold)))
 
                         # @added 20171216 - Task #2236: Change Boundary to only send to Panorama on alert
                         tmp_panaroma_anomaly_file = '%s/%s.%s.%s.panorama_anomaly.txt' % (
@@ -1112,7 +1193,7 @@ class Boundary(Thread):
                             # multiple rules covering a number of algorithms
                             algorithm, base_name)
                         if ENABLE_BOUNDARY_DEBUG:
-                            logger.info('debug :: tmp_panaroma_anomaly_file - %s' % (str(tmp_panaroma_anomaly_file)))
+                            logger.debug('debug :: tmp_panaroma_anomaly_file - %s' % (str(tmp_panaroma_anomaly_file)))
                         if os.path.isfile(tmp_panaroma_anomaly_file):
                             panaroma_anomaly_file = '%s/%s.%s.txt' % (
                                 settings.PANORAMA_CHECK_PATH, added_at, base_name)
@@ -1145,14 +1226,14 @@ class Boundary(Thread):
                             send_alert = False
                             alerts_sent = 0
                             if ENABLE_BOUNDARY_DEBUG:
-                                logger.info('debug :: checking alerter - %s' % alerter)
+                                logger.debug('debug :: checking alerter - %s' % alerter)
                             try:
                                 if ENABLE_BOUNDARY_DEBUG:
-                                    logger.info('debug :: determining alerter_expiration_time for settings')
+                                    logger.debug('debug :: determining alerter_expiration_time for settings')
                                 alerter_expiration_time_setting = settings.BOUNDARY_ALERTER_OPTS['alerter_expiration_time'][alerter]
                                 alerter_expiration_time = int(alerter_expiration_time_setting)
                                 if ENABLE_BOUNDARY_DEBUG:
-                                    logger.info('debug :: determined alerter_expiration_time from settings - %s' % str(alerter_expiration_time))
+                                    logger.debug('debug :: determined alerter_expiration_time from settings - %s' % str(alerter_expiration_time))
                             except:
                                 # Set an arbitrary expiry time if not set
                                 alerter_expiration_time = 160
@@ -1188,7 +1269,7 @@ class Boundary(Thread):
                                             logger.info("debug :: send_alert set to %s" % str(send_alert))
                                     else:
                                         if ENABLE_BOUNDARY_DEBUG:
-                                            logger.info('debug :: redis alerter key retrieved, unpacking %s' % str(alerter_sent_count_key))
+                                            logger.debug('debug :: redis alerter key retrieved, unpacking %s' % str(alerter_sent_count_key))
                                         unpacker = Unpacker(use_list=False)
                                         unpacker.feed(alerter_sent_count_key_data)
                                         raw_alerts_sent = list(unpacker)
@@ -1221,7 +1302,7 @@ class Boundary(Thread):
                                         try:
                                             self.redis_conn.setex(cache_key, int(anomalous_metric[2]), packb(int(anomalous_metric[0])))
                                             if ENABLE_BOUNDARY_DEBUG:
-                                                logger.info('debug :: key setex OK - %s' % (cache_key))
+                                                logger.debug('debug :: key setex OK - %s' % (cache_key))
                                             # @modified 20200122 - Feature #3396: http_alerter
                                             # Add the metric timestamp for the http_alerter resend queue
                                             # trigger_alert(alerter, datapoint, base_name, expiration_time, metric_trigger, algorithm)
