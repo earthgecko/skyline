@@ -3649,11 +3649,16 @@ class Analyzer(Thread):
                     logger.error('error :: failed in check to alert step')
 
             # @added 20200611 - Feature #3578: Test alerts
-            test_alerts_redis_set = '%s.test_alerts' % skyline_app
-            try:
-                self.redis_conn.delete(test_alerts_redis_set)
-            except:
-                pass
+            # @modified 20200625 - Feature #3578: Test alerts
+            # Do not delete the set here as a test alert could be sent via
+            # webapp between Analyzer starting its run and reading the set and
+            # deleting here. Rather remove the entry in the test alert block
+            # below
+            # test_alerts_redis_set = '%s.test_alerts' % skyline_app
+            # try:
+            #     self.redis_conn.delete(test_alerts_redis_set)
+            # except:
+            #    pass
             test_alerts_data = []
             test_alerts_redis_set = '%s.test_alerts_data' % skyline_app
             try:
@@ -3714,6 +3719,14 @@ class Analyzer(Thread):
                             logger.error(
                                 'error :: test_alert - failed to trigger_alert :: %s %s via %s' %
                                 (metric[1], metric[0], alert[1]))
+
+                        # @added 20200625 - Feature #3578: Test alerts
+                        # Remove the metric from the test alert Redis set
+                        test_alerts_redis_set = '%s.test_alerts' % skyline_app
+                        try:
+                            self.redis_conn.srem(test_alerts_redis_set, base_name)
+                        except:
+                            pass
 
             # @modified 20160207 - Branch #922: Ionosphere
             # Handle if alerts are not enabled
