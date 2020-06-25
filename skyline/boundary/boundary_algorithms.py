@@ -53,13 +53,13 @@ def autoaggregate_ts(timeseries, autoaggregate_value):
     every minute then autoaggregate will aggregate every autoaggregate_value.
     """
     if ENABLE_BOUNDARY_DEBUG:
-        logger.info('debug :: autoaggregate_ts at %s seconds' % str(autoaggregate_value))
+        logger.debug('debug :: autoaggregate_ts at %s seconds' % str(autoaggregate_value))
 
     aggregated_timeseries = []
 
     if len(timeseries) < 60:
         if ENABLE_BOUNDARY_DEBUG:
-            logger.info('debug :: autoaggregate_ts - timeseries less than 60 datapoints, TooShort')
+            logger.debug('debug :: autoaggregate_ts - timeseries less than 60 datapoints, TooShort')
         raise TooShort()
 
     int_end_timestamp = int(timeseries[-1][0])
@@ -69,7 +69,7 @@ def autoaggregate_ts(timeseries, autoaggregate_value):
     start_timestamp = last_hour
 
     if ENABLE_BOUNDARY_DEBUG:
-        logger.info('debug :: autoaggregate_ts - aggregating from %s to %s' % (str(start_timestamp), str(int_end_timestamp)))
+        logger.debug('debug :: autoaggregate_ts - aggregating from %s to %s' % (str(start_timestamp), str(int_end_timestamp)))
 
     valid_timestamps = False
     try:
@@ -118,7 +118,7 @@ def less_than(timeseries, metric_name, metric_expiration_time, metric_min_averag
 
     if timeseries[-1][1] < metric_trigger:
         if ENABLE_BOUNDARY_DEBUG:
-            logger.info('debug :: less_than - %s less_than %s' % (
+            logger.debug('debug :: less_than - %s less_than %s' % (
                 str(timeseries[-1][1]), str(metric_trigger)))
         return True
 
@@ -137,7 +137,7 @@ def greater_than(timeseries, metric_name, metric_expiration_time, metric_min_ave
 
     if timeseries[-1][1] > metric_trigger:
         if ENABLE_BOUNDARY_DEBUG:
-            logger.info('debug :: grater_than - %s grater_than %s' % (
+            logger.debug('debug :: grater_than - %s grater_than %s' % (
                 str(timeseries[-1][1]), str(metric_trigger)))
         return True
 
@@ -306,43 +306,43 @@ def run_selected_algorithm(
     if algorithm == 'detect_drop_off_cliff':
         if len(timeseries) < MIN_TOLERABLE_LENGTH:
             if ENABLE_BOUNDARY_DEBUG:
-                logger.info('debug :: TooShort - %s, %s' % (metric_name, algorithm))
+                logger.debug('debug :: TooShort - %s, %s' % (metric_name, algorithm))
             raise TooShort()
 
     # Get rid of stale series
     if time() - timeseries[-1][0] > STALE_PERIOD:
         if ENABLE_BOUNDARY_DEBUG:
-            logger.info('debug :: Stale - %s, %s' % (metric_name, algorithm))
+            logger.debug('debug :: Stale - %s, %s' % (metric_name, algorithm))
         raise Stale()
 
     # Get rid of boring series
     if algorithm == 'detect_drop_off_cliff' or algorithm == 'less_than':
         if len(set(item[1] for item in timeseries[-MAX_TOLERABLE_BOREDOM:])) == BOREDOM_SET_SIZE:
             if ENABLE_BOUNDARY_DEBUG:
-                logger.info('debug :: Boring - %s, %s' % (metric_name, algorithm))
+                logger.debug('debug :: Boring - %s, %s' % (metric_name, algorithm))
             raise Boring()
 
     if autoaggregate:
         if ENABLE_BOUNDARY_DEBUG:
-            logger.info('debug :: auto aggregating %s for %s' % (metric_name, algorithm))
+            logger.debug('debug :: auto aggregating %s for %s' % (metric_name, algorithm))
         try:
             agg_timeseries = autoaggregate_ts(timeseries, autoaggregate_value)
             if ENABLE_BOUNDARY_DEBUG:
-                logger.info(
+                logger.debug(
                     'debug :: aggregated_timeseries returned %s for %s' % (
                         metric_name, algorithm))
         except Exception as e:
             agg_timeseries = []
             if ENABLE_BOUNDARY_DEBUG:
-                logger.info('debug error - autoaggregate excpection %s for %s' % (metric_name, algorithm))
                 logger.error('Algorithm error: %s' % traceback.format_exc())
                 logger.error('error: %e' % e)
+                logger.debug('debug error - autoaggregate excpection %s for %s' % (metric_name, algorithm))
 
         if len(agg_timeseries) > 10:
             timeseries = agg_timeseries
         else:
             if ENABLE_BOUNDARY_DEBUG:
-                logger.info('debug :: TooShort - %s, %s' % (metric_name, algorithm))
+                logger.debug('debug :: TooShort - %s, %s' % (metric_name, algorithm))
             raise TooShort()
 
     # @modified 20190312 - Task #2862: Allow Boundary to analyse short time series
@@ -350,7 +350,7 @@ def run_selected_algorithm(
     # if len(timeseries) < 10:
     if len(timeseries) < 1:
         if ENABLE_BOUNDARY_DEBUG:
-            logger.info(
+            logger.debug(
                 'debug :: timeseries too short - %s - timeseries length - %s' % (
                     metric_name, str(len(timeseries))))
         raise TooShort()
@@ -359,9 +359,14 @@ def run_selected_algorithm(
         ensemble = [globals()[algorithm](timeseries, metric_name, metric_expiration_time, metric_min_average, metric_min_average_seconds, metric_trigger)]
         if ensemble.count(True) == 1:
             if ENABLE_BOUNDARY_DEBUG:
-                logger.info(
-                    'debug :: anomalous datapoint = %s - %s, %s, %s, %s, %s, %s, %s, %s' % (
-                        str(timeseries[-1][1]),
+                logger.debug(
+                    # @modified 20200624 - Task #3594: Add timestamp to ENABLE_BOUNDARY_DEBUG output
+                    #                      Feature #3532: Sort all time series
+                    # Added timestamp to debug output
+                    # 'debug :: anomalous datapoint = %s - %s, %s, %s, %s, %s, %s, %s, %s' % (
+                    #     str(timeseries[-1][1]),
+                    'debug :: anomalous at %s with datapoint = %s - %s, %s, %s, %s, %s, %s, %s, %s' % (
+                        str(timeseries[-1][0]), str(timeseries[-1][1]),
                         str(metric_name), str(metric_expiration_time),
                         str(metric_min_average),
                         str(metric_min_average_seconds),
@@ -371,9 +376,14 @@ def run_selected_algorithm(
             return True, ensemble, timeseries[-1][1], metric_name, metric_expiration_time, metric_min_average, metric_min_average_seconds, metric_trigger, alert_threshold, metric_alerters, algorithm
         else:
             if ENABLE_BOUNDARY_DEBUG:
-                logger.info(
-                    'debug :: not anomalous datapoint = %s - %s, %s, %s, %s, %s, %s, %s, %s' % (
-                        str(timeseries[-1][1]),
+                logger.debug(
+                    # @modified 20200624 - Task #3594: Add timestamp to ENABLE_BOUNDARY_DEBUG output
+                    #                      Feature #3532: Sort all time series
+                    # Added timestamp to debug output
+                    # 'debug :: not anomalous datapoint = %s - %s, %s, %s, %s, %s, %s, %s, %s' % (
+                    #     str(timeseries[-1][1]),
+                    'debug :: not anomalous at %s with datapoint = %s - %s, %s, %s, %s, %s, %s, %s, %s' % (
+                        str(timeseries[-1][0]), str(timeseries[-1][1]),
                         str(metric_name), str(metric_expiration_time),
                         str(metric_min_average),
                         str(metric_min_average_seconds),

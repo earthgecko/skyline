@@ -132,5 +132,5 @@ and services running:
   uploaded data.
 
 For specific details about the data formats and methods for uploading and
-processing data files see the `upload_data to Flux <uploa-data-to-flux.html>`__
+processing data files see the `upload_data to Flux <upload-data-to-flux.html>`__
 page.
