@@ -3257,17 +3257,27 @@ class Analyzer(Thread):
                             analyzer_metric = True
 
                             # @added 20200610 - Feature #3560: External alert config
-                            external_alerter_alerter = None
+                            # @modified 20200624 - Feature #3560: External alert config
+                            # Set the alert key to the external alerter id
+                            # external_alerter_alerter = None
+                            external_alerter_id = None
                             try:
                                 if alert[4]['type'] == 'external':
-                                    external_alerter_alerter = alert[4]['alerter']
+                                    # @modified 20200624 - Feature #3560: External alert config
+                                    # Set the alert key to the external alerter id
+                                    # external_alerter_alerter = alert[4]['alerter']
+                                    external_alerter_id = alert[4]['id'].replace('external-', '')
                             except:
-                                pass
+                                external_alerter_id = None
 
                             # @modified 20200610 - Feature #3560: External alert config
                             # Use the all_alerts list which includes external alert configs
-                            if external_alerter_alerter:
-                                cache_key = 'last_alert.%s.%s.%s' % (str(external_alerter_alerter), alert[1], metric[1])
+                            # @modified 20200624 - Feature #3560: External alert config
+                            # Set the alert key to the external alerter id
+                            # if external_alerter_alerter:
+                            #     cache_key = 'last_alert.%s.%s.%s' % (str(external_alerter_alerter), alert[1], metric[1])
+                            if external_alerter_id:
+                                cache_key = 'last_alert.%s.%s.%s' % (str(external_alerter_id), alert[1], metric[1])
                             else:
                                 cache_key = 'last_alert.%s.%s' % (alert[1], metric[1])
                             if LOCAL_DEBUG:

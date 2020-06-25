@@ -1805,6 +1805,19 @@ def alert_http(alert, metric, second_order_resolution_seconds, context):
             value_str = str(float(metric[0]))
             full_duration_str = str(int(full_duration))
             expiry_str = str(int(alert[2]))
+
+            # @added 20200624 - Feature #3560: External alert config
+            # Add the external alerter id to the metric_alert_dict
+            external_alerter_id = None
+            try:
+                if alert[4]['type'] == 'external':
+                    # @modified 20200624 - Feature #3560: External alert config
+                    # Set the alert key to the external alerter id
+                    # external_alerter_alerter = alert[4]['alerter']
+                    external_alerter_id = alert[4]['id'].replace('external-', '')
+            except:
+                external_alerter_id = None
+
             metric_alert_dict = {
                 "metric": str(metric[1]),
                 "timestamp": timestamp_str,
@@ -1812,7 +1825,8 @@ def alert_http(alert, metric, second_order_resolution_seconds, context):
                 "full_duration": full_duration_str,
                 "expiry": expiry_str,
                 "source": str(source),
-                "token": str(alerter_token)
+                "token": str(alerter_token),
+                "id": str(external_alerter_id)
             }
             # @modified 20200302: Feature #3396: http_alerter
             # Add the token as an independent entity from the alert
