@@ -29,7 +29,7 @@ if True:
     import settings
     from skyline_functions import (
         get_redis_conn, get_redis_conn_decoded, mkdir_p, sort_timeseries,
-        filesafe_metricname)
+        filesafe_metricname, write_data_to_file)
 
 # Consolidate flux logging
 logger = set_up_logging(None)
@@ -751,6 +751,7 @@ class UploadedDataWorker(Process):
                                 logger.error(traceback.format_exc())
                                 logger.error('error :: uploaded_data_worker :: failed to convert date column to datetime64')
                             date_columns = [col for col in df.columns if 'datetime64[ns' in str(df[col].dtypes)]
+                            logger.info('uploaded_data_worker :: date_columns determined to be %s' % str(date_columns))
                     except:
                         logger.error(traceback.format_exc())
                         failure_reason = 'pandas failed to determined date columns'
@@ -850,7 +851,7 @@ class UploadedDataWorker(Process):
                     for data_col in data_columns:
                         data_df_successful = True
                         data_df = None
-                        data_col_key = '%s (%s)' % (data_col, processing_filename, )
+                        data_col_key = '%s (%s)' % (data_col, processing_filename)
                         upload_status.append([data_col_key, 'processing'])
                         try:
                             data_df = df[['pandas_utc_timestamp', data_col]].copy()
@@ -898,12 +899,15 @@ class UploadedDataWorker(Process):
                                 if sorted_timeseries:
                                     sorted_timeseries_length = len(sorted_timeseries)
                                     timeseries = sorted_timeseries
-                                    logger.info('uploaded_data_worker :: sorted timeseries for %s which now has %s timestamps and values' % (
+                                    logger.info('uploaded_data_worker :: sorted timeseries for %s which has %s timestamps and values' % (
                                         data_col, str(sorted_timeseries_length)))
                                     try:
                                         del sorted_timeseries
                                     except:
                                         pass
+                                else:
+                                    logger.error('error :: uploaded_data_worker :: sorted_timeseries does not exists - %s' % (
+                                        str(sorted_timeseries)))
                             except:
                                 logger.error(traceback.format_exc())
                                 failure_reason = 'failed to sort timeseries of pandas_utc_timestamp and %s' % data_col
@@ -1164,6 +1168,20 @@ class UploadedDataWorker(Process):
                             timeseries_length = len(timeseries)
                             logger.info('uploaded_data_worker :: after preprocessing there are %s data points to send to Graphite for %s' % (
                                 str(timeseries_length), metric))
+
+                            if LOCAL_DEBUG:
+                                timeseries_debug_file = '%s/%s.%s.txt' % (settings.SKYLINE_TMP_DIR, str(upload_id), metric)
+                                try:
+                                    write_data_to_file(
+                                        skyline_app, timeseries_debug_file, 'w',
+                                        str(timeseries))
+                                    logger.debug('debug :: added timeseries_debug_file :: %s' % (timeseries_debug_file))
+                                    # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                                    # Move to Redis set block below
+                                    # self.sent_to_panorama.append(base_name)
+                                except:
+                                    logger.error('error :: failed to add timeseries_debug_file :: %s' % (timeseries_debug_file))
+                                    logger.info(traceback.format_exc())
 
                             timestamp = None
                             value = None
