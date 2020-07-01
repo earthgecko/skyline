@@ -354,6 +354,14 @@ class Ionosphere(Thread):
                     if last_logged > 29:
                         logger.info('still purging')
                         last_log_time = current_time
+                        # @added 20200626 - Feature #3472: ionosphere.training_data Redis set
+                        # Report app up to stop other apps not finding the
+                        # ionosphere key in Redis
+                        try:
+                            self.redis_conn.setex(skyline_app, 120, current_time)
+                            logger.info('updated Redis key for %s up' % skyline_app)
+                        except:
+                            logger.error('error :: failed to update Redis key for %s up' % skyline_app)
 
                     folder_path = os.path.join(path, folder)
                     # Only timestamped directories are removed
@@ -393,6 +401,14 @@ class Ionosphere(Thread):
                 if last_logged > 29:
                     logger.info('still creating training_data Redis set')
                     last_log_time = current_time
+                    # @added 20200626 - Feature #3472: ionosphere.training_data Redis set
+                    # Report app up to stop other apps not finding the
+                    # ionosphere key in Redis
+                    try:
+                        self.redis_conn.setex(skyline_app, 120, current_time)
+                        logger.info('updated Redis key for %s up' % skyline_app)
+                    except:
+                        logger.error('error :: failed to update Redis key for %s up' % skyline_app)
 
                 for path, folders, files in os.walk(training_data_dir):
 
