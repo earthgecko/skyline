@@ -5,9 +5,23 @@ These are shared slack functions that are required in multiple modules.
 """
 import logging
 import traceback
-from slackclient import SlackClient
 
 import settings
+
+# @modified 20200701 - Task #3612: Upgrade to slack v2
+#                      Task #3608: Update Skyline to Python 3.8.3 and deps
+#                      Task #3556: Update deps
+# from slackclient import SlackClient
+# slackclient v2 has a version function, < v2 does not
+try:
+    from slack import version as slackVersion
+    slack_version = slackVersion.__version__
+except:
+    slack_version = '1.3'
+if slack_version == '1.3':
+    from slackclient import SlackClient
+else:
+    from slack import WebClient
 
 token = settings.SLACK_OPTS['bot_user_oauth_access_token']
 try:
@@ -37,7 +51,13 @@ def slack_post_message(current_skyline_app, channel, thread_ts, message):
     current_logger = logging.getLogger(current_skyline_app_logger)
 
     try:
-        sc = SlackClient(token)
+        # @modified 20200701 - Task #3612: Upgrade to slack v2
+        #                      Task #3608: Update Skyline to Python 3.8.3 and deps
+        #                      Task #3556: Update deps
+        if slack_version == '1.3':
+            sc = SlackClient(token)
+        else:
+            sc = WebClient(token, timeout=10)
     except:
         current_logger.error(traceback.format_exc())
         current_logger.error(
@@ -58,13 +78,22 @@ def slack_post_message(current_skyline_app, channel, thread_ts, message):
     # case '1543994173.000700'
     if thread_ts:
         try:
-            slack_post = sc.api_call(
-                'chat.postMessage',
-                channel=channel,
-                icon_emoji=icon_emoji,
-                text=message,
-                thread_ts=thread_ts
-            )
+            # @modified 20200701 - Task #3612: Upgrade to slack v2
+            if slack_version == '1.3':
+                slack_post = sc.api_call(
+                    'chat.postMessage',
+                    channel=channel,
+                    icon_emoji=icon_emoji,
+                    text=message,
+                    thread_ts=thread_ts
+                )
+            else:
+                slack_post = sc.chat_postMessage(
+                    channel=channel,
+                    icon_emoji=icon_emoji,
+                    text=message,
+                    thread_ts=thread_ts
+                )
         except:
             current_logger.error(traceback.format_exc())
             current_logger.error(
@@ -73,12 +102,20 @@ def slack_post_message(current_skyline_app, channel, thread_ts, message):
             return False
     else:
         try:
-            slack_post = sc.api_call(
-                'chat.postMessage',
-                channel=channel,
-                icon_emoji=icon_emoji,
-                text=message
-            )
+            # @modified 20200701 - Task #3612: Upgrade to slack v2
+            if slack_version == '1.3':
+                slack_post = sc.api_call(
+                    'chat.postMessage',
+                    channel=channel,
+                    icon_emoji=icon_emoji,
+                    text=message
+                )
+            else:
+                slack_post = sc.chat_postMessage(
+                    channel=channel,
+                    icon_emoji=icon_emoji,
+                    text=message
+                )
         except:
             current_logger.error(traceback.format_exc())
             current_logger.error(
@@ -126,7 +163,14 @@ def slack_post_reaction(current_skyline_app, channel, thread_ts, emoji):
     current_logger = logging.getLogger(current_skyline_app_logger)
 
     try:
-        sc = SlackClient(token)
+        # @modified 20200701 - Task #3612: Upgrade to slack v2
+        #                      Task #3608: Update Skyline to Python 3.8.3 and deps
+        #                      Task #3556: Update deps
+        # sc = SlackClient(token)
+        if slack_version == '1.3':
+            sc = SlackClient(token)
+        else:
+            sc = WebClient(token, timeout=10)
     except:
         current_logger.error(traceback.format_exc())
         current_logger.error(
@@ -135,12 +179,22 @@ def slack_post_reaction(current_skyline_app, channel, thread_ts, emoji):
 
     slack_response = None
     try:
-        slack_response = sc.api_call(
-            'reactions.add',
-            channel=channel,
-            name=emoji,
-            timestamp=thread_ts
-        )
+        # @modified 20200701 - Task #3612: Upgrade to slack v2
+        #                      Task #3608: Update Skyline to Python 3.8.3 and deps
+        #                      Task #3556: Update deps
+        if slack_version == '1.3':
+            slack_response = sc.api_call(
+                'reactions.add',
+                channel=channel,
+                name=emoji,
+                timestamp=thread_ts
+            )
+        else:
+            slack_response = sc.reactions_add(
+                channel=channel,
+                name=emoji,
+                timestamp=thread_ts
+            )
     except:
         current_logger.error(traceback.format_exc())
         current_logger.error(
