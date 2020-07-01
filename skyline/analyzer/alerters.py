@@ -1394,7 +1394,21 @@ def alert_slack(alert, metric, context):
         logger.info('alert_slack - bot_user_oauth_access_token is not configured, not sending alert')
         return False
 
-    from slackclient import SlackClient
+    # @modified 20200701 - Task #3612: Upgrade to slack v2
+    #                      Task #3608: Update Skyline to Python 3.8.3 and deps
+    #                      Task #3556: Update deps
+    # slackclient v2 has a version function, < v2 does not
+    # from slackclient import SlackClient
+    try:
+        from slack import version as slackVersion
+        slack_version = slackVersion.__version__
+    except:
+        slack_version = '1.3'
+    if slack_version == '1.3':
+        from slackclient import SlackClient
+    else:
+        from slack import WebClient
+
     import simplejson as json
 
     logger.info('alert_slack - anomalous metric :: alert: %s, metric: %s' % (str(alert), str(metric)))
@@ -1655,10 +1669,17 @@ def alert_slack(alert, metric, context):
         icon_emoji = ':chart_with_upwards_trend:'
 
     try:
-        sc = SlackClient(bot_user_oauth_access_token)
+        # @modified 20200701 - Task #3612: Upgrade to slack v2
+        #                      Task #3608: Update Skyline to Python 3.8.3 and deps
+        #                      Task #3556: Update deps
+        # sc = SlackClient(bot_user_oauth_access_token)
+        if slack_version == '1.3':
+            sc = SlackClient(bot_user_oauth_access_token)
+        else:
+            sc = WebClient(bot_user_oauth_access_token, timeout=10)
     except:
         logger.info(traceback.format_exc())
-        logger.error('error :: alert_slack - could not initiate SlackClient')
+        logger.error('error :: alert_slack - could not initiate slack.RTMClient')
         return False
 
     # @added 20191011 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
@@ -1734,9 +1755,17 @@ def alert_slack(alert, metric, context):
             # or color text, so we have jump through all the API hoops to end up
             # having to upload an image with a very basic message.
             if os.path.isfile(image_file):
-                slack_file_upload = sc.api_call(
-                    'files.upload', filename=filename, channels=channel,
-                    initial_comment=initial_comment, file=open(image_file, 'rb'))
+                # @modified 20200701 - Task #3612: Upgrade to slack v2
+                #                      Task #3608: Update Skyline to Python 3.8.3 and deps
+                #                      Task #3556: Update deps
+                if slack_version == '1.3':
+                    slack_file_upload = sc.api_call(
+                        'files.upload', filename=filename, channels=channel,
+                        initial_comment=initial_comment, file=open(image_file, 'rb'))
+                else:
+                    slack_file_upload = sc.files_upload(
+                        filename=filename, channels=channel,
+                        initial_comment=initial_comment, file=open(image_file, 'rb'))
                 if not slack_file_upload['ok']:
                     logger.error('error :: alert_slack - failed to send slack message')
                 # @added 20181205 - Branch #2646: slack
