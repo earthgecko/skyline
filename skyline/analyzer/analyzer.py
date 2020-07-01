@@ -3288,7 +3288,13 @@ class Analyzer(Thread):
                                 try:
                                     # @modified 20181023 - Feature #2618: alert_slack
                                     # SECOND_ORDER_RESOLUTION_FULL_DURATION = alert[3]
-                                    SECOND_ORDER_RESOLUTION_FULL_DURATION = int(alert[3])
+                                    # @modified 20200701 - Feature #3560: External alert config
+                                    #                      Task #3608: Update Skyline to Python 3.8.3 and deps
+                                    # SECOND_ORDER_RESOLUTION_FULL_DURATION = int(alert[3])
+                                    try:
+                                        SECOND_ORDER_RESOLUTION_FULL_DURATION = int(alert[3])
+                                    except:
+                                        SECOND_ORDER_RESOLUTION_FULL_DURATION = 0
                                     # @modified 20200610 - Feature #3560: External alert config
                                     # Wrapped in if so that if alert[3] 0 is
                                     # also handled in the all_alerts list
