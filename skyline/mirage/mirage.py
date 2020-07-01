@@ -2150,7 +2150,7 @@ class Mirage(Thread):
                                 # external_alerter_alerter = alert[4]['alerter']
                                 external_alerter_id = alert[4]['id'].replace('external-', '')
                         except:
-                            pass
+                            external_alerter_id = None
 
                         # @modified 20200610 - Feature #3560: External alert config
                         # Use the all_alerts list which includes external alert configs
