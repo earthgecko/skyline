@@ -475,7 +475,11 @@ class Panorama(Thread):
 
             if settings.ENABLE_DEBUG:
                 logger.info(
-                    'debug :: metric_vars determined - metric variable - metric - %s' % str(metric_vars.metric))
+                    # @modified 20200713 - AttributeError: 'list' object has no attribute 'metric' - Panorama not working #255
+                    #                      Bug #1460: panorama check file fails
+                    # Missed changing old method
+                    # 'debug :: metric_vars determined - metric variable - metric - %s' % str(metric_vars.metric))
+                    'debug :: metric_vars determined - metric variable - metric - %s' % str(metric))
 
         logger.info('debug :: metric_vars for %s' % str(metric))
         logger.info('debug :: %s' % str(metric_vars_array))
