@@ -64,7 +64,10 @@ from skyline_functions import (
     #                   Branch #3262: py3
     # Added a single functions to deal with Redis connection and the
     # charset='utf-8', decode_responses=True arguments required in py3
-    get_redis_conn, get_redis_conn_decoded)
+    get_redis_conn, get_redis_conn_decoded,
+    # @added 20200714 - Bug #3644: Do not apply ionosphere_busy to batch processing metrics
+    #                   Feature #3480: batch_processing
+    is_batch_metric)
 
 # @added 20161221 - calculate features for every anomaly, instead of making the
 # user do it in the frontend or calling the webapp constantly in a cron like
@@ -1952,6 +1955,26 @@ class Ionosphere(Thread):
             if echo_enabled:
                 echo_check = True
 
+        # @added 20200714 - Bug #3644: Do not apply ionosphere_busy to batch processing metrics
+        #                   Feature #3480: batch_processing
+        #                   Bug #2904: Initial Ionosphere echo load and Ionosphere feedback
+        #                   Feature #2484: FULL_DURATION feature profiles
+        # In the batch processing context do not apply the alternation between
+        # normal Ionosphere Mirage features profile checks and Ionosphere echo
+        # features profile checks when ionosphere_busy is set to True as it
+        # results in false positives on batch processing metrics where one check
+        # matches and the next does not, then the next does.
+        batch_metric = False
+        if echo_check and BATCH_PROCESSING:
+            # Batch processing metric
+            try:
+                batch_metric = is_batch_metric(skyline_app, base_name)
+            except:
+                batch_metric = False
+            if batch_metric and ionosphere_busy:
+                ionosphere_busy = False
+                logger.info('batch processing metric, ionosphere_busy has been changed from True to False to prevent switching between Mirage and echo fps')
+
         # @added 20190403 - Bug #2904: Initial Ionosphere echo load and Ionosphere feedback
         #                   Feature #2484: FULL_DURATION feature profiles
         # If there are more than 4 metric check files, alternate between normal
@@ -3667,7 +3690,7 @@ class Ionosphere(Thread):
                     try:
                         echo_create_fp_metric_count = self.redis_conn.get(echo_create_fp_metric_key)
                     except Exception as e:
-                        logger.error('error :: could not query Redis for ionosphere.manage_ionosphere_unique_metrics: %s' % e)
+                        logger.error('error :: could not query Redis for %s: %s' % (echo_metric_check_file, e))
                     if not echo_create_fp_metric_count:
                         echo_create_fp_metric_count = 1
                     else:
@@ -3711,9 +3734,9 @@ class Ionosphere(Thread):
                         # a continous loop to try to create it does not occur
                         try:
                             self.redis_conn.setex(echo_create_fp_metric_key, 3600, echo_create_fp_metric_count)
-                            logger.info('updated Redis key for %s up' % skyline_app)
+                            logger.info('updated Redis key %s' % echo_create_fp_metric_key)
                         except:
-                            logger.error('error :: failed to update Redis key for %s up' % skyline_app)
+                            logger.error('error :: failed to update Redis key %s' % echo_create_fp_metric_key)
                         # Spawn a single process_ionosphere_echo process
                         function_name = 'process_ionosphere_echo'
                         pids = []
