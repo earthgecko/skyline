@@ -43,6 +43,26 @@ skyline_app_logwait = '%s.wait' % skyline_app_logfile
 
 python_version = int(sys.version_info[0])
 
+# @added 20200727 - Feature #3650: ROOMBA_DO_NOT_PROCESS_BATCH_METRICS
+#                   Feature #3480: batch_processing
+#                   Feature #3486: analyzer_batch
+try:
+    from settings import ROOMBA_DO_NOT_PROCESS_BATCH_METRICS
+except:
+    ROOMBA_DO_NOT_PROCESS_BATCH_METRICS = Fale
+try:
+    from settings import BATCH_PROCESSING
+except:
+    BATCH_PROCESSING = None
+try:
+    BATCH_PROCESSING_NAMESPACES = list(settings.BATCH_PROCESSING_NAMESPACES)
+except:
+    BATCH_PROCESSING_NAMESPACES = []
+try:
+    from settings import BATCH_PROCESSING_DEBUG
+except:
+    BATCH_PROCESSING_DEBUG = None
+
 
 class Roomba(Thread):
     """
@@ -92,6 +112,31 @@ class Roomba(Thread):
         #                      Branch #3262: py3
         # unique_metrics = list(self.redis_conn.smembers(namespace_unique_metrics))
         unique_metrics = list(self.redis_conn_decoded.smembers(namespace_unique_metrics))
+
+        # @added 20200727 - Feature #3650: ROOMBA_DO_NOT_PROCESS_BATCH_METRICS
+        #                   Feature #3480: batch_processing
+        #                   Feature #3486: analyzer_batch
+        if ROOMBA_DO_NOT_PROCESS_BATCH_METRICS and BATCH_PROCESSING and BATCH_PROCESSING_NAMESPACES:
+            try:
+                batch_metrics = list(self.redis_conn_decoded.smembers('aet.analyzer.batch_processing_metrics'))
+            except:
+                logger.error('error - failed to get Redis set aet.analyzer.batch_processing_metrics')
+                batch_metrics = []
+            if batch_metrics:
+                full_namespace_batch_metrics = []
+                for base_name in batch_metrics:
+                    metric = ''.join((settings.FULL_NAMESPACE, base_name))
+                    full_namespace_batch_metrics.append(metric)
+                del batch_metrics
+                non_batch_unique_metrics = []
+                for metric in unique_metrics:
+                    if metric not in full_namespace_batch_metrics:
+                        non_batch_unique_metrics.append(metric)
+                del full_namespace_batch_metrics
+                if non_batch_unique_metrics:
+                    logger.info('roomba :: batch_processing :: removing %s batch metrics from unique_metrics' % str(len(full_namespace_batch_metrics)))
+                    unique_metrics = non_batch_unique_metrics
+                del non_batch_unique_metrics
 
         keys_per_processor = int(ceil(float(len(unique_metrics)) / float(settings.ROOMBA_PROCESSES)))
         if i == settings.ROOMBA_PROCESSES:
