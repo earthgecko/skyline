@@ -1249,6 +1249,17 @@ stall, I/O wait being one such edge case.  Although 99.999% of the time Roomba
 is fine, this ensures that no Roombas hang around longer than expected.
 """
 
+ROOMBA_DO_NOT_PROCESS_BATCH_METRICS = False
+"""
+:var ROOMBA_DO_NOT_PROCESS_BATCH_METRICS: Whether Horizon roomba should
+    euthanize batch processing metrics.
+:vartype ROOMBA_TIMEOUT: boolean
+
+This should be left as False unless you are backfilling batch metrics and do not
+want roomba removing data points before analyzer_batch has analyzed them.  If
+this is set to True, analyzer_batch euthanizes batch metrics.
+"""
+
 MAX_RESOLUTION = 1000
 """
 :var MAX_RESOLUTION: The Horizon agent will ignore incoming datapoints if their
@@ -2429,6 +2440,15 @@ IONOSPHERE_AUTOBUILD = True
     matched by age, etc or all and still be able to surface the available features
     profile page data on-demand.  NOT IMPLEMENTED YET
 
+"""
+
+IONOSPHERE_UNTRAINABLES = []
+"""
+:var IONOSPHERE_UNTRAINABLES: a list of metric names or namespaces that should
+    be deemed as untrainable.  For example you do not want to allow
+    http.status.500 to be trained that an occassional 1 or 2 errors is normal
+    and can be expected.
+:vartype IONOSPHERE_UNTRAINABLES: list
 """
 
 MEMCACHE_ENABLED = False

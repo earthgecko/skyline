@@ -103,6 +103,21 @@ try:
 except:
     DEBUG_CUSTOM_ALGORITHMS = False
 
+# @added 20200727 - Feature #3650: ROOMBA_DO_NOT_PROCESS_BATCH_METRICS
+#                   Feature #3480: batch_processing
+#                   Feature #3486: analyzer_batch
+try:
+    from settings import ROOMBA_DO_NOT_PROCESS_BATCH_METRICS
+except:
+    ROOMBA_DO_NOT_PROCESS_BATCH_METRICS = False
+if ROOMBA_DO_NOT_PROCESS_BATCH_METRICS:
+    try:
+        from types import TupleType
+    except ImportError:
+        eliminated_in_python3 = True
+    from redis import WatchError
+    from msgpack import packb
+
 skyline_app_graphite_namespace = 'skyline.%s%s' % (skyline_app, SERVER_METRIC_PATH)
 
 LOCAL_DEBUG = False
@@ -181,20 +196,62 @@ class AnalyzerBatch(Thread):
         # Handle EXPIRATION_TIME
         # Ship to Analyzer, Mirage or Ionosphere
 
-        raw_series = None
-        try:
-            raw_series = self.redis_conn.get(metric_name)
-        except:
-            logger.info(traceback.format_exc())
-            logger.error('error :: failed to get %s from Redis' % metric_name)
-            raw_series = None
-
         # Make process-specific dicts
         exceptions = defaultdict(int)
         anomaly_breakdown = defaultdict(int)
 
+        # @added 20200728 - Feature #3480: batch_processing
+        #                   Feature #3486: analyzer_batch
+        # If multiple work items exist and the timestamp in the work item is
+        # older than the last analyzed timestamp reported by Redis key, just
+        # skip and remove the work item
+        if metric_name.startswith(settings.FULL_NAMESPACE):
+            base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+        else:
+            base_name = metric_name
+        # Check the last_timestamp metric Redis key
+        last_metric_timestamp_key = 'last_timestamp.%s' % base_name
+        redis_key_set = None
+        last_redis_timestamp = 0
+        try:
+            last_redis_timestamp_data = self.redis_conn_decoded.get(last_metric_timestamp_key)
+            last_redis_timestamp = int(last_redis_timestamp_data)
+        except:
+            logger.error('error :: failed to get Redis key %s' % last_metric_timestamp_key)
+        get_raw_series = True
+        if last_redis_timestamp:
+            if last_redis_timestamp > last_analyzed_timestamp:
+                get_raw_series = False
+                logger.info('The %s is %s, the passed last_analyzed_timestamp is %s, not getting raw_series returning' % (
+                    last_metric_timestamp_key, str(last_redis_timestamp),
+                    str(last_analyzed_timestamp)))
+
+        raw_series = None
+        # @modified 20200728 - Feature #3480: batch_processing
+        #                      Feature #3486: analyzer_batch
+        # Only resurface the timeseries if the work item timestamp is greater
+        # than the last analyzed timestamp reported by Redis key
+        if get_raw_series:
+            try:
+                raw_series = self.redis_conn.get(metric_name)
+            except:
+                logger.info(traceback.format_exc())
+                logger.error('error :: failed to get %s from Redis' % metric_name)
+                raw_series = None
+
         if not raw_series:
             logger.info('No raw_series defined, returning')
+
+            # Remove for work list
+            redis_set = 'analyzer.batch'
+            data = [metric_name, int(last_analyzed_timestamp)]
+            try:
+                self.redis_conn.srem(redis_set, str(data))
+                logger.info('analyzer_batch :: removed batch metric item - %s - from Redis set - %s' % (str(data), redis_set))
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: analyzer_batch :: failed to remove batch metric item - %s - from Redis set - %s' % (str(data), redis_set))
+
             return
 
         # Determine the unique Mirage and Ionosphere metrics once, which are
@@ -249,6 +306,144 @@ class AnalyzerBatch(Thread):
             del raw_series
         except:
             pass
+
+        # @added 20200727 - Feature #3650: ROOMBA_DO_NOT_PROCESS_BATCH_METRICS
+        #                   Feature #3480: batch_processing
+        #                   Feature #3486: analyzer_batch
+        # euthanize keys if not done in roomba, allows for backfill processing
+        # via analyzer_batch
+        roombaed = False
+        if ROOMBA_DO_NOT_PROCESS_BATCH_METRICS:
+            now = int(time())
+            duration = settings.FULL_DURATION + settings.ROOMBA_GRACE_TIME
+            key = metric_name
+            namespace_unique_metrics = '%sunique_metrics' % str(settings.FULL_NAMESPACE)
+            euthanized = 0
+            trimmed_keys = 0
+            active_keys = 0
+            try:
+                # Put pipe back in multi mode
+                pipe = self.redis_conn.pipeline()
+                # WATCH the key
+                pipe.watch(key)
+                pipe.multi()
+                # There's one value. Purge if it's too old
+                last_timestamp = int(timeseries[-1][0])
+                # Do not purge if it has not been analyzed
+                if (last_timestamp - duration) > last_analyzed_timestamp:
+                    logger.info('batch_processing :: last_timestamp is %s, but for roomba setting to the last_analyzed_timestamp (%s) as it has not been analyzed' % (
+                        str(last_timestamp), str(last_analyzed_timestamp)))
+                    last_timestamp = last_analyzed_timestamp
+                now = int(last_analyzed_timestamp)
+                logger.info('batch_processing :: doing roomba on %s with %s data points' % (key, str(len(timeseries))))
+                roombaed = True
+                try:
+                    if python_version == 2:
+                        if not isinstance(timeseries[0], TupleType):
+                            if timeseries[0] < last_timestamp - duration:
+                                pipe.delete(key)
+                                pipe.srem(namespace_unique_metrics, key)
+                                pipe.execute()
+                                euthanized += 1
+                            timeseries = []
+                    if python_version == 3:
+                        if not isinstance(timeseries[0], tuple):
+                            if timeseries[0] < now - duration:
+                                pipe.delete(key)
+                                pipe.srem(namespace_unique_metrics, key)
+                                pipe.execute()
+                                euthanized += 1
+                            timeseries = []
+                except IndexError:
+                    timeseries = []
+                # Check if the last value is too old and purge
+                if timeseries[-1][0] < now - duration:
+                    pipe.delete(key)
+                    pipe.srem(namespace_unique_metrics, key)
+                    pipe.execute()
+                    euthanized += 1
+                    timeseries = []
+                # Remove old datapoints and duplicates from timeseries
+                temp = set()
+                temp_add = temp.add
+                delta = now - duration
+                trimmed = [
+                    tuple for tuple in timeseries
+                    if tuple[0] > delta and
+                    tuple[0] not in temp and not
+                    temp_add(tuple[0])
+                ]
+                # Purge if everything was deleted, set key otherwise
+                if len(trimmed) > 0:
+                    # Serialize and turn key back into not-an-array
+                    btrimmed = packb(trimmed)
+                    if len(trimmed) <= 15:
+                        value = btrimmed[1:]
+                    elif len(trimmed) <= 65535:
+                        value = btrimmed[3:]
+                        trimmed_keys += 1
+                    else:
+                        value = btrimmed[5:]
+                        trimmed_keys += 1
+                    pipe.set(key, value)
+                    active_keys += 1
+                else:
+                    pipe.delete(key)
+                    pipe.srem(namespace_unique_metrics, key)
+                    euthanized += 1
+                pipe.execute()
+            except WatchError:
+                logger.info('batch_processing :: blocked from euthanizing %s' % (key))
+            except Exception as e:
+                # If something bad happens, zap the key and hope it goes away
+                # pipe.delete(key)
+                # pipe.srem(namespace_unique_metrics, key)
+                # pipe.execute()
+                # euthanized += 1
+                logger.info(e)
+                logger.info('batch_processing :: something bad happened but not euthanizing %s' % (key))
+            finally:
+                pipe.reset()
+            raw_series = None
+            try:
+                raw_series = self.redis_conn.get(metric_name)
+            except:
+                logger.info(traceback.format_exc())
+                logger.error('error :: failed to get %s from Redis' % metric_name)
+                raw_series = None
+            if not raw_series:
+                logger.info('No raw_series defined after euthanizing %s, returning' % (key))
+                # Remove for work list
+                redis_set = 'analyzer.batch'
+                data = [metric_name, int(last_analyzed_timestamp)]
+                try:
+                    self.redis_conn.srem(redis_set, str(data))
+                    logger.info('analyzer_batch :: removed batch metric item - %s - from Redis set - %s' % (str(data), redis_set))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: analyzer_batch :: failed to remove batch metric item - %s - from Redis set - %s' % (str(data), redis_set))
+                return
+            try:
+                unpacker = Unpacker(use_list=False)
+                unpacker.feed(raw_series)
+                timeseries = list(unpacker)
+                if roombaed:
+                    logger.info('batch_processing :: after roomba %s has %s data points' % (key, str(len(timeseries))))
+            except:
+                timeseries = []
+
+            # @added 20200506 - Feature #3532: Sort all time series
+            # To ensure that there are no unordered timestamps in the time
+            # series which are artefacts of the collector or carbon-relay, sort
+            # all time series by timestamp before analysis.
+            original_timeseries = timeseries
+            if original_timeseries:
+                timeseries = sort_timeseries(original_timeseries)
+                del original_timeseries
+            try:
+                del raw_series
+            except:
+                pass
 
         timestamps_to_analyse = []
         # Reverse the time series so that only the first (last) items now to be
@@ -338,7 +533,12 @@ class AnalyzerBatch(Thread):
                 str(number_of_timestamps_to_analyze), metric_name,
                 str(last_analyzed_timestamp), str(last_redis_data_timestamp)))
 
-        base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+        # @modified 20200728 - Bug #3652: Handle multiple metrics in base_name conversion
+        # base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+        if metric_name.startswith(settings.FULL_NAMESPACE):
+            base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+        else:
+            base_name = metric_name
 
         # @added 20200425 - Feature #3508: ionosphere.untrainable_metrics
         # Determine if any metrcs have negatives values some they can be
@@ -463,6 +663,8 @@ class AnalyzerBatch(Thread):
                 except:
                     logger.info(traceback.format_exc())
                     logger.error('error :: failed to add metric to Redis new_non_derivative_metrics set')
+
+        not_anomalos_count = 0
 
         # Distill timeseries strings into lists
         for i, batch_timestamp in enumerate(timestamps_to_analyse):
@@ -607,9 +809,15 @@ class AnalyzerBatch(Thread):
                         logger.error('error :: failed to set Redis key %s' % analyzer_batch_metric_anomaly_key)
                 else:
                     if redis_key_set:
-                        logger.info('not anomalous :: %s at %s with %s, set Redis key %s to %s' % (
-                            base_name, str(int_metric_timestamp), str(datapoint),
-                            last_metric_timestamp_key, str(int_metric_timestamp)))
+                        not_anomalos_count += 1
+                        # @modified 20200728 - Feature #3480: batch_processing
+                        #                      Feature #3486: analyzer_batch
+                        # Only log on the last data point, not on all
+                        if int_metric_timestamp == int(last_redis_data_timestamp):
+                            logger.info('not anomalous :: %s at %s with %s (along with %s other not anomalous data points), set Redis key %s to %s' % (
+                                base_name, str(int_metric_timestamp), str(datapoint),
+                                str(not_anomalos_count),
+                                last_metric_timestamp_key, str(int_metric_timestamp)))
                     else:
                         logger.info('not anomalous :: %s at %s with %s' % (
                             base_name, str(int_metric_timestamp),
@@ -948,8 +1156,12 @@ class AnalyzerBatch(Thread):
                     self.redis_conn.setex(
                         last_metric_timestamp_key, 2592000,
                         int_metric_timestamp)
-                    logger.info('set Redis key %s to %s, even though it is too short' % (
-                        last_metric_timestamp_key, str(int_metric_timestamp)))
+                    # @modified 20200728 - Feature #3480: batch_processing
+                    #                      Feature #3486: analyzer_batch
+                    # Only log on the last data point, not on all
+                    if int_metric_timestamp == int(last_redis_data_timestamp):
+                        logger.info('set Redis key %s to %s, even though it is too short' % (
+                            last_metric_timestamp_key, str(int_metric_timestamp)))
                 except:
                     logger.error('error :: failed to set Redis key %s, even though it is too short' % last_metric_timestamp_key)
             except Stale:
@@ -963,8 +1175,12 @@ class AnalyzerBatch(Thread):
                     self.redis_conn.setex(
                         last_metric_timestamp_key, 2592000,
                         int_metric_timestamp)
-                    logger.info('set Redis key %s to %s, even though it is stale' % (
-                        last_metric_timestamp_key, str(int_metric_timestamp)))
+                    # @modified 20200728 - Feature #3480: batch_processing
+                    #                      Feature #3486: analyzer_batch
+                    # Only log on the last data point, not on all
+                    if int_metric_timestamp == int(last_redis_data_timestamp):
+                        logger.info('set Redis key %s to %s, even though it is stale' % (
+                            last_metric_timestamp_key, str(int_metric_timestamp)))
                 except:
                     logger.error('error :: failed to set Redis key %s, even though it is stale' % last_metric_timestamp_key)
             except Boring:
@@ -978,8 +1194,12 @@ class AnalyzerBatch(Thread):
                     self.redis_conn.setex(
                         last_metric_timestamp_key, 2592000,
                         int_metric_timestamp)
-                    logger.info('set Redis key %s to %s, even though it is boring' % (
-                        last_metric_timestamp_key, str(int_metric_timestamp)))
+                    # @modified 20200728 - Feature #3480: batch_processing
+                    #                      Feature #3486: analyzer_batch
+                    # Only log on the last data point, not on all
+                    if int_metric_timestamp == int(last_redis_data_timestamp):
+                        logger.info('set Redis key %s to %s, even though it is boring' % (
+                            last_metric_timestamp_key, str(int_metric_timestamp)))
                 except:
                     logger.error('error :: failed to set Redis key %s, even though it is boring' % last_metric_timestamp_key)
             except:
@@ -1200,6 +1420,7 @@ class AnalyzerBatch(Thread):
 
             metric_name = None
             last_analyzed_timestamp = None
+
             for index, analyzer_batch in enumerate(analyzer_batch_work):
                 try:
                     batch_processing_metric = literal_eval(analyzer_batch)
@@ -1213,6 +1434,26 @@ class AnalyzerBatch(Thread):
                     last_analyzed_timestamp = None
                     batch_processing_metric = None
                     sleep(1)
+
+            # @added 20200728 - Feature #3480: batch_processing
+            #                   Feature #3486: analyzer_batch
+            # If multiple work items exist sort them by oldest timestamp and
+            # process the item with the oldest timestamp first
+            if analyzer_batch_work:
+                unsorted_analyzer_batch_work = []
+                for index, analyzer_batch in enumerate(analyzer_batch_work):
+                    try:
+                        batch_processing_metric = literal_eval(analyzer_batch)
+                        metric_name = str(batch_processing_metric[0])
+                        last_analyzed_timestamp = int(batch_processing_metric[1])
+                        unsorted_analyzer_batch_work.append([metric_name, last_analyzed_timestamp])
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: could not determine details from analyzer_batch entry')
+                sorted_analyzer_batch_work = sorted(unsorted_analyzer_batch_work, key=lambda x: x[1])
+                metric_name = str(sorted_analyzer_batch_work[0][0])
+                last_analyzed_timestamp = int(sorted_analyzer_batch_work[0][1])
+                batch_processing_metric = [metric_name, last_analyzed_timestamp]
 
             if not metric_name:
                 break
