@@ -63,7 +63,13 @@ def engine_disposal(engine):
 # @modified 20200422 - Feature #3500: webapp - crucible_process_metrics
 #                      Feature #1448: Crucible web UI
 # Added pad_timeseries
-def submit_crucible_job(from_timestamp, until_timestamp, metrics_list, namespaces_list, source, alert_interval, user_id, user, add_to_panorama, pad_timeseries):
+# @added 20200607 - Feature #3630: webapp - crucible_process_training_data
+# Added training_data_json
+# def submit_crucible_job(from_timestamp, until_timestamp, metrics_list, namespaces_list, source, alert_interval, user_id, user, add_to_panorama, pad_timeseries, training_data_json):
+def submit_crucible_job(
+        from_timestamp, until_timestamp, metrics_list, namespaces_list, source,
+        alert_interval, user_id, user, add_to_panorama, pad_timeseries,
+        training_data_json):
     """
     Get a list of all the metrics passed and generate Crucible check files for
     each
@@ -80,6 +86,8 @@ def submit_crucible_job(from_timestamp, until_timestamp, metrics_list, namespace
     :param add_to_panorama: whether Crucible should add Skyline CONSENSUS
         anomalies to Panorama
     :param pad_timeseries: the amount of data to pad the time series with
+    :param training_data_json: the full path to the training_data json file if
+        source is training_data
     :type from_timestamp: int
     :type until_timestamp: int
     :type metrics_list: list
@@ -90,6 +98,7 @@ def submit_crucible_job(from_timestamp, until_timestamp, metrics_list, namespace
     :type user: str
     :type add_to_panorama: boolean
     :type pad_timeseries: str
+    :type training_data_json: str
     :return: tuple of lists
     :rtype:  (list, list, list, list)
 
@@ -254,6 +263,8 @@ def submit_crucible_job(from_timestamp, until_timestamp, metrics_list, namespace
         # @modified 20200421 - Feature #3500: webapp - crucible_process_metrics
         #                      Feature #1448: Crucible web UI
         # Added add_to_panorama
+        # @added 20200607 - Feature #3630: webapp - crucible_process_training_data
+        # Added training_data_json
         crucible_anomaly_data = 'metric = \'%s\'\n' \
                                 'value = \'%s\'\n' \
                                 'from_timestamp = \'%s\'\n' \
@@ -268,11 +279,12 @@ def submit_crucible_job(from_timestamp, until_timestamp, metrics_list, namespace
                                 'graphite_override_uri_parameters = \'%s\'\n' \
                                 'alert_interval = \'%s\'\n' \
                                 'add_to_panorama = %s\n' \
+                                'training_data_json = %s\n' \
             % (base_name, str(datapoint), str(from_timestamp),
                str(until_timestamp), str(settings.ALGORITHMS),
                triggered_algorithms, crucible_anomaly_dir, str(graphite_metric),
                skyline_app, str(added_at), str(graphite_override_uri_parameters),
-               str(alert_interval), str(add_to_panorama))
+               str(alert_interval), str(add_to_panorama), str(training_data_json))
 
         # Create an anomaly file with details about the anomaly
         crucible_anomaly_file = '%s/%s.txt' % (crucible_anomaly_dir, sane_metricname)

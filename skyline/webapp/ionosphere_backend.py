@@ -202,7 +202,13 @@ def ionosphere_data(requested_timestamp, data_for_metric, context):
     :rtype:  (list, list, list, list)
 
     """
-    base_name = data_for_metric.replace(settings.FULL_NAMESPACE, '', 1)
+    # @modified 20200728 - Bug #3652: Handle multiple metrics in base_name conversion
+    # base_name = data_for_metric.replace(settings.FULL_NAMESPACE, '', 1)
+    if data_for_metric.startswith(settings.FULL_NAMESPACE):
+        base_name = data_for_metric.replace(settings.FULL_NAMESPACE, '', 1)
+    else:
+        base_name = data_for_metric
+
     if context == 'training_data':
         log_context = 'training data'
     if context == 'features_profiles':
@@ -419,7 +425,13 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
 
         return metric_vars_array
 
-    base_name = data_for_metric.replace(settings.FULL_NAMESPACE, '', 1)
+    # @modified 20200728 - Bug #3652: Handle multiple metrics in base_name conversion
+    # base_name = data_for_metric.replace(settings.FULL_NAMESPACE, '', 1)
+    if data_for_metric.startswith(settings.FULL_NAMESPACE):
+        base_name = data_for_metric.replace(settings.FULL_NAMESPACE, '', 1)
+    else:
+        base_name = data_for_metric
+
     logger.info('%s requested for %s at %s' % (
         context, str(base_name), str(requested_timestamp)))
     metric_paths = []
@@ -1722,6 +1734,11 @@ def ionosphere_search(default_query, search_query):
                 logger.info('query_string now "%s"' % query_string)
             else:
                 new_query_string = '%s WHERE metric_id IN (%s)' % (query_string, str(metric_ids))
+                # @modified 20200708 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
+                # Correct query
+                if 'SELECT COUNT(*), metric_id FROM ionosphere GROUP BY metric_id' in query_string:
+                    new_select = query_string.replace('GROUP BY metric_id', '')
+                    new_query_string = '%s WHERE metric_id IN (%s) GROUP BY metric_id' % (new_select, str(metric_ids))
                 query_string = new_query_string
                 # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
                 logger.info('query_string now "%s"' % query_string)
@@ -1811,7 +1828,9 @@ def ionosphere_search(default_query, search_query):
                 metrics_id = str(metric_obj[0])
         new_query_string = query_string.replace('REPLACE_WITH_METRIC_ID', metrics_id)
         query_string = new_query_string
-        logger.debug('debug :: query_string - %s' % query_string)
+        # @modified 20200715 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
+        # logger.debug('debug :: query_string - %s' % query_string)
+        logger.info('get_metric_profiles - query_string now - %s' % query_string)
 
     ionosphere_table = None
     try:
@@ -1938,7 +1957,9 @@ def ionosphere_search(default_query, search_query):
     if not apply_metric_id:
         logger.info('selected all features profiles with id > 0')
     else:
-        logger.info('selected all features profiles with metric_id == %s' % str(apply_metric_id))
+        # @modified 20200715 - Task #3648: webapp - fp_search - do not use Redis metric check
+        # logger.info('selected all features profiles with metric_id == %s' % str(apply_metric_id))
+        logger.info('selected all %s features profiles with metric_id == %s' % (str(len(all_fps)), str(apply_metric_id)))
 
     if count_request and search_query:
         features_profiles = None
@@ -2274,6 +2295,7 @@ def ionosphere_search(default_query, search_query):
             if engine:
                 engine_disposal(engine)
             raise
+
     # Add the layers information to the features_profiles list
     features_profiles_and_layers = []
     if features_profiles:
@@ -5358,7 +5380,13 @@ def ionosphere_show_graphs(requested_timestamp, data_for_metric, fp_id):
     Get a list of all graphs
     """
 
-    base_name = data_for_metric.replace(settings.FULL_NAMESPACE, '', 1)
+    # @modified 20200728 - Bug #3652: Handle multiple metrics in base_name conversion
+    # base_name = data_for_metric.replace(settings.FULL_NAMESPACE, '', 1)
+    if data_for_metric.startswith(settings.FULL_NAMESPACE):
+        base_name = data_for_metric.replace(settings.FULL_NAMESPACE, '', 1)
+    else:
+        base_name = data_for_metric
+
     log_context = 'features profile data show graphs'
     logger.info('%s requested for %s at %s' % (
         log_context, str(base_name), str(requested_timestamp)))
