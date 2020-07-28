@@ -380,6 +380,10 @@ class Analyzer(Thread):
         if LOCAL_DEBUG:
             logger.info('debug :: Memory usage spin_process start: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 
+        # @added 20200724 - Feature #3532: Sort all time series
+        # Reduce the time use Redis pipe
+        pipe = None
+
         # TESTING removal of p.join() from p.terminate()
         # sleep(4)
 
@@ -445,6 +449,8 @@ class Analyzer(Thread):
             logger.info('No raw_assigned set, returning')
             return
 
+        logger.info('got raw_assigned metric data from Redis for %s assigned metrics' % str(len(assigned_metrics)))
+
         # @added 20161119 - Branch #922: ionosphere
         #                   Task #1718: review.tsfresh
         # Determine the unique Mirage and Ionosphere metrics once, which are
@@ -470,6 +476,8 @@ class Analyzer(Thread):
             # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
             # mirage_unique_metrics_count is unused so commented out
             # mirage_unique_metrics_count = len(mirage_unique_metrics)
+
+            logger.info('checking for mirage periodic metrics to add')
 
             # Mirage periodic checks are only done on declared namespaces as to
             # process all Mirage metrics periodically would probably create a
@@ -528,7 +536,14 @@ class Analyzer(Thread):
             for metric_name in periodic_check_mirage_metrics:
                 if len(mirage_periodic_check_metric_list) == int(mirage_periodic_checks_per_minute):
                     break
-                base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+
+                # @modified 20200728 - Bug #3652: Handle multiple metrics in base_name conversion
+                # base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+                if metric_name.startswith(settings.FULL_NAMESPACE):
+                    base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+                else:
+                    base_name = metric_name
+
                 mirage_periodic_check_cache_key = 'mirage.periodic_check.%s' % base_name
                 mirage_periodic_check_key = False
                 # @modified 20190524 - Feature #2882: Mirage - periodic_check
@@ -820,7 +835,14 @@ class Analyzer(Thread):
                 timeseries = sort_timeseries(original_timeseries)
                 del original_timeseries
 
-            base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+            # @modified 20200728 - Bug #3652: Handle multiple metrics in base_name conversion
+            # base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+            if metric_name.startswith(settings.FULL_NAMESPACE):
+                base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+            else:
+                base_name = metric_name
+
+            last_timeseries_timestamp = 0
 
             # @added 20200427 - Feature #3514: Identify inactive metrics
             # Added metrics that have become inactive to the Redis set to be flagged
@@ -952,19 +974,51 @@ class Analyzer(Thread):
                     logger.error('error :: failed to sort and deduplicate flux/mirage filled timeseries for %s' % str(metric_name))
                 if not sorted_and_deduplicated_timeseries:
                     logger.error('error :: failed to sort and deduplicate flux/mirage filled timeseries for %s' % str(metric_name))
+
+                # @added 20200723 - Feature #3532: Sort all time series
+                # Reduce the time. Check if the last timestamps are equal before
+                # submitting to Redis as if they are not at this point then they
+                # will not be after
+                try:
+                    last_new_sort_ts = int(sorted_and_deduplicated_timeseries[-1][0])
+                    if last_timeseries_timestamp != last_new_sort_ts:
+                        logger.info('the sorted and deduplicated last timestamp (%s) does not match the current data last timestamp (%s) before populating Redis, skipping %s' % (
+                            str(last_new_sort_ts), str(last_timeseries_timestamp), str(metric_name)))
+                        sorted_and_deduplicated_timeseries = []
+                    else:
+                        logger.info('the sorted and deduplicated last timestamp (%s) matches the current data last timestamp (%s) before populating Redis on %s' % (
+                            str(last_new_sort_ts), str(last_timeseries_timestamp), str(metric_name)))
+                except:
+                    logger.info(traceback.format_exc())
+                    logger.error('error :: failed to determine for timestamps match before populating Redis')
+
             # Recreate the Redis key sorted and deduplicated and feed to
             # Redis ala Horizon worker method more or less
             if sorted_and_deduplicated_timeseries:
                 new_metric_name_key = 'analyzer.sorted.deduped.%s' % str(metric_name)
                 logger.info('populating Redis key %s with sorted and deduplicated data' % str(new_metric_name_key))
                 try:
+                    # @modified 20200723 - Feature #3532: Sort all time series
+                    # Reduce the time.  Using pipe is 10x faster and keeps the
+                    # shape of the time series
+                    if not pipe:
+                        pipe = self.redis_conn.pipeline()
+                    # metric_ts_data = []
                     for datapoint in sorted_and_deduplicated_timeseries:
                         metric = (new_metric_name_key, (datapoint[0], datapoint[1]))
-                        self.redis_conn.append(str(new_metric_name_key), packb(metric[1]))
+                        # self.redis_conn.append(str(new_metric_name_key), packb(metric[1]))
+                        # metric_ts_data.append((datapoint[0], datapoint[1]))
+                        pipe.append(str(new_metric_name_key), packb(metric[1]))
+                    # self.redis_conn.set(str(new_metric_name_key), packb(metric_ts_data))
+                    pipe.execute()
+
+                    del metric_ts_data
+
                     populated_redis_key = True
                 except:
                     logger.info(traceback.format_exc())
                     logger.error('error :: failed to populate Redis key %s with sorted and deduplicated data' % str(metric_name))
+
                 if not populated_redis_key:
                     try:
                         self.redis_conn.delete(new_metric_name_key)
@@ -1089,7 +1143,7 @@ class Analyzer(Thread):
                             test_timeseries = sort_timeseries(original_test_timeseries)
                             del original_test_timeseries
 
-                        # @added 20200501 -
+                        # @added 20200501 - Feature #3532: Sort all time series
                         get_updated_redis_timeseries = True
 
                         logger.info('comparing most recent current timestamp from the renamed key with new sorted and deduplicated data')
@@ -1125,7 +1179,7 @@ class Analyzer(Thread):
                                 for datapoint in new_datapoints:
                                     metric = (metric_name, (datapoint[0], datapoint[1]))
                                     self.redis_conn.append(metric_name, packb(metric[1]))
-                                # @added 20200501 -
+                                # @added 20200501 - Feature #3532: Sort all time series
                                 get_updated_redis_timeseries = True
                             except:
                                 logger.info(traceback.format_exc())
@@ -1488,22 +1542,31 @@ class Analyzer(Thread):
                                     logger.info('batch processing - the penultimate_timeseries_timestamp is the same as second last timestamp from current Redis time series data for %s, not batch processing, continuing as normal' % (
                                         base_name))
 
-            if known_derivative_metric:
-                try:
-                    derivative_timeseries = nonNegativeDerivative(timeseries)
-                    timeseries = derivative_timeseries
-                except:
-                    logger.error('error :: nonNegativeDerivative failed')
-                # @added 20200529 - Feature #3480: batch_processing
-                #                   Bug #2050: analyse_derivatives - change in monotonicity
-                # Always set the derivative_metric_key if it is not set
-                if not last_derivative_metric_key:
+            # @modified 20200529 - Feature #3480: batch_processing
+            #                      Bug #2050: analyse_derivatives - change in monotonicity
+            # Only test nonNegativeDerivative if the timeseries has more than 3
+            # data points
+            # if known_derivative_metric:
+            if known_derivative_metric and timeseries:
+                if len(timeseries) > 3:
                     try:
-                        last_expire_set = int(time())
-                        self.redis_conn.setex(
-                            derivative_metric_key, settings.FULL_DURATION, last_expire_set)
-                    except Exception as e:
-                        logger.error('error :: could not set Redis derivative_metric key: %s' % e)
+                        derivative_timeseries = nonNegativeDerivative(timeseries)
+                        timeseries = derivative_timeseries
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: nonNegativeDerivative failed')
+                    # @added 20200529 - Feature #3480: batch_processing
+                    #                   Bug #2050: analyse_derivatives - change in monotonicity
+                    # Always set the derivative_metric_key if it is not set
+                    if not last_derivative_metric_key:
+                        try:
+                            last_expire_set = int(time())
+                            self.redis_conn.setex(
+                                derivative_metric_key, settings.FULL_DURATION, last_expire_set)
+                        except Exception as e:
+                            logger.error('error :: could not set Redis derivative_metric key: %s' % e)
+                else:
+                    logger.info('cannot run nonNegativeDerivative on %s timeseries as it has less than 4 data points' % base_name)
 
             # @added 20180903 - Feature #2580: illuminance
             #                   Feature #1986: flux
@@ -1618,7 +1681,13 @@ class Analyzer(Thread):
                         try:
                             redis_set = 'analyzer.not_anomalous_metrics'
                             try:
-                                base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+                                # @modified 20200728 - Bug #3652: Handle multiple metrics in base_name conversion
+                                # base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+                                if metric_name.startswith(settings.FULL_NAMESPACE):
+                                    base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+                                else:
+                                    base_name = metric_name
+
                                 data = [base_name, int(metric_timestamp)]
                                 self.redis_conn.sadd(redis_set, str(data))
                             except Exception as e:
@@ -1636,7 +1705,14 @@ class Analyzer(Thread):
                     # @modified 20190412 - Bug #2932: self.real_anomalous_metrics not being populated correctly
                     #                      Feature #2882: Mirage - periodic_check
                     # self.real_anomalous_metrics.append(base_name)
-                    base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+
+                    # @modified 20200728 - Bug #3652: Handle multiple metrics in base_name conversion
+                    # base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+                    if metric_name.startswith(settings.FULL_NAMESPACE):
+                        base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+                    else:
+                        base_name = metric_name
+
                     metric_timestamp = timeseries[-1][0]
                     metric = [datapoint, base_name, metric_timestamp]
                     # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
@@ -1729,7 +1805,13 @@ class Analyzer(Thread):
 
                 # If it's anomalous, add it to list
                 if anomalous:
-                    base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+                    # @modified 20200728 - Bug #3652: Handle multiple metrics in base_name conversion
+                    # base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+                    if metric_name.startswith(settings.FULL_NAMESPACE):
+                        base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+                    else:
+                        base_name = metric_name
+
                     metric_timestamp = timeseries[-1][0]
                     metric = [datapoint, base_name, metric_timestamp]
                     # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
@@ -2569,50 +2651,103 @@ class Analyzer(Thread):
 
                 if manage_mirage_unique_metrics:
                     try:
-                        logger.info('deleting Redis mirage.unique_metrics set to refresh')
-                        self.redis_conn.delete('mirage.unique_metrics')
-                        mirage_unique_metrics = []
+                        # @added 20200723 - Feature #3560: External alert config
+                        # Speed this up and optimizing the management of Redis
+                        # sets.  Do not delete but use the srem multiple members
+                        # method.
+                        # logger.info('deleting Redis mirage.unique_metrics set to refresh')
+                        # self.redis_conn.delete('mirage.unique_metrics')
+                        # mirage_unique_metrics = []
+                        logger.info('Redis mirage.unique_metrics set to refresh, checking for metrics to remove')
+                        mirage_metrics_to_remove = []
+                        for mirage_metric in mirage_unique_metrics:
+                            if mirage_metric not in unique_metrics:
+                                mirage_metrics_to_remove.append(mirage_metric)
+                        if mirage_metrics_to_remove:
+                            logger.info('removing %s metrics from mirage.unique_metrics' % str(len(mirage_metrics_to_remove)))
+                            self.redis_conn.srem('mirage.unique_metrics', *set(mirage_metrics_to_remove))
+                            # Reload the new set
+                            try:
+                                mirage_unique_metrics = list(self.redis_conn_decoded.smembers('mirage.unique_metrics'))
+                            except:
+                                logger.error(traceback.format_exc())
+                                logger.error('error :: failed to generate a list from the pruned mirage.unique_metrics')
                     except:
-                        logger.error('error :: could not query Redis to delete mirage.unique_metric set')
+                        # logger.error('error :: could not query Redis to delete mirage.unique_metric set')
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: could not remove multiple memeber from the mirage.unique_metric Redis set')
 
-                # @modified 20200610 - Feature #3560: External alert config
-                # Use the all_alerts list which includes external alert configs
-                # for alert in settings.ALERTS:
-                for alert in all_alerts:
+                    # @added 20200723 - Feature #3560: External alert config
+                    # Speed this up
+                    number_of_alerts_checked = 0
+                    mirage_metrics_added = []
+
+                    # @modified 20200610 - Feature #3560: External alert config
+                    # Use the all_alerts list which includes external alert configs
+                    # for alert in settings.ALERTS:
+                    # @modifed 20200723 - Feature #3560: External alert config
+                    # Speed this up, change to metric as main iter
+                    # for alert in all_alerts:
+                    #     for metric in unique_metrics:
                     for metric in unique_metrics:
-                        # ALERT_MATCH_PATTERN = alert[0]
-                        base_name = metric.replace(settings.FULL_NAMESPACE, '', 1)
-
-                        # @modified 20200622 - Task #3586: Change all alert pattern checks to matched_or_regexed_in_list
-                        #                      Feature #3512: matched_or_regexed_in_list function
-                        # Changed original alert matching pattern to use new
-                        # method
-                        pattern_match, metric_matched_by = matched_or_regexed_in_list(skyline_app, base_name, [alert[0]])
-                        if LOCAL_DEBUG and pattern_match:
-                            logger.debug('debug :: %s matched alert - %s' % (base_name, alert[0]))
-                        try:
-                            del metric_matched_by
-                        except:
-                            pass
-                        if not pattern_match:
-                            continue
-
                         mirage_metric = False
-                        try:
-                            # @modified 20200610 - Feature #3560: External alert config
-                            # SECOND_ORDER_RESOLUTION_FULL_DURATION = alert[3]
-                            SECOND_ORDER_RESOLUTION_FULL_DURATION = int(alert[3])
-                            if SECOND_ORDER_RESOLUTION_FULL_DURATION > 24:
-                                mirage_metric = True
-                        except:
-                            mirage_metric = False
+                        if metric in mirage_unique_metrics:
+                            continue
+                        for alert in all_alerts:
+                            # @added 20200723 - Feature #3560: External alert config
+                            # Speed this up
+                            if mirage_metric:
+                                continue
+                            try:
+                                if alert[4]['type'] == 'external':
+                                    continue
+                            except:
+                                pass
+                            if alert[1] != 'smtp':
+                                continue
+                            if not mirage_metric:
+                                number_of_alerts_checked += 1
+                                # ALERT_MATCH_PATTERN = alert[0]
+                                # @modified 20200728 - Bug #3652: Handle multiple metrics in base_name conversion
+                                # base_name = metric.replace(settings.FULL_NAMESPACE, '', 1)
+                                if metric.startswith(settings.FULL_NAMESPACE):
+                                    base_name = metric.replace(settings.FULL_NAMESPACE, '', 1)
+                                else:
+                                    base_name = metric
 
+                                # @modified 20200622 - Task #3586: Change all alert pattern checks to matched_or_regexed_in_list
+                                #                      Feature #3512: matched_or_regexed_in_list function
+                                # Changed original alert matching pattern to use new
+                                # method
+                                pattern_match, metric_matched_by = matched_or_regexed_in_list(skyline_app, base_name, [alert[0]])
+                                if LOCAL_DEBUG and pattern_match:
+                                    logger.debug('debug :: %s matched alert - %s' % (base_name, alert[0]))
+                                try:
+                                    del metric_matched_by
+                                except:
+                                    pass
+                                if not pattern_match:
+                                    continue
+                                # mirage_metric = False
+                                if not mirage_metric:
+                                    try:
+                                        # @modified 20200610 - Feature #3560: External alert config
+                                        # SECOND_ORDER_RESOLUTION_FULL_DURATION = alert[3]
+                                        SECOND_ORDER_RESOLUTION_FULL_DURATION = int(alert[3])
+                                        if SECOND_ORDER_RESOLUTION_FULL_DURATION > 24:
+                                            mirage_metric = True
+                                    except:
+                                        mirage_metric = False
                         if mirage_metric:
-                            if metric not in mirage_unique_metrics:
+                            # if metric not in mirage_unique_metrics:
+                            if metric not in mirage_metrics_added:
                                 try:
                                     self.redis_conn.sadd('mirage.unique_metrics', metric)
                                     if LOCAL_DEBUG:
                                         logger.info('debug :: added %s to mirage.unique_metrics' % metric)
+                                    # @added 20200723 - Feature #3560: External alert config
+                                    # Speed this up
+                                    mirage_metrics_added.append(metric)
                                 except:
                                     if LOCAL_DEBUG:
                                         logger.error('error :: failed to add %s to mirage.unique_metrics set' % metric)
@@ -2623,15 +2758,10 @@ class Analyzer(Thread):
                                 except:
                                     logger.error('error :: failed to set key :: analyzer.manage_mirage_unique_metrics')
 
-                        # Do we use list or dict, which is better performance?
-                        # With dict - Use EAFP (easier to ask forgiveness than
-                        # permission)
-                        try:
-                            blah = dict["mykey"]
-                            # key exists in dict
-                        except:
-                            # key doesn't exist in dict
-                            blah = False
+                    # @added 20200723 - Feature #3560: External alert config
+                    # Add debug count
+                    logger.info('number of alerts and metrics checked for mirage.unique_metrics - %s' % str(number_of_alerts_checked))
+                    del mirage_metrics_added
 
                 # If they were refresh set them again
                 if mirage_unique_metrics == []:
@@ -2656,6 +2786,9 @@ class Analyzer(Thread):
             # END Redis mirage.unique_metrics_set
 
             if LOCAL_DEBUG:
+                # Do we use list or dict, which is better performance?
+                # With dict - Use EAFP (easier to ask forgiveness than
+                # permission)
                 try:
                     blah = dict["mykey"]
                     # key exists in dict
@@ -2673,7 +2806,13 @@ class Analyzer(Thread):
                 # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
                 #                   Branch #3262: py3
                 # smtp_alerter_metrics = list(self.redis_conn.smembers('analyzer.smtp_alerter_metrics'))
-                smtp_alerter_metrics = list(self.redis_conn_decoded.smembers('analyzer.smtp_alerter_metrics'))
+                # @modified 20200723 - Feature #3560: External alert config
+                # Speed this up use the aet.analyzer.smtp_alerter_metrics and
+                # a method was added to remove non-existent metrics from it
+                # further on
+                # smtp_alerter_metrics = list(self.redis_conn_decoded.smembers('analyzer.smtp_alerter_metrics'))
+                smtp_alerter_metrics = list(self.redis_conn_decoded.smembers('aet.analyzer.smtp_alerter_metrics'))
+                logger.info('currently %s metrics in smtp_alerter_metrics' % (str(len(smtp_alerter_metrics))))
                 if LOCAL_DEBUG:
                     logger.info('debug :: smtp_alerter_metrics :: %s' % (str(smtp_alerter_metrics)))
             except:
@@ -2684,6 +2823,16 @@ class Analyzer(Thread):
             if LOCAL_DEBUG:
                 logger.info('debug :: unique_metrics :: %s' % (str(unique_metrics)))
 
+            # @added 20200723 - Feature #3560: External alert config
+            # Speed this up only check alerters if not already in the set
+            unique_base_names = []
+            if smtp_alerter_metrics:
+                try:
+                    self.redis_conn.sadd('analyzer.smtp_alerter_metrics', *set(smtp_alerter_metrics))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to add multiple members to the smtp_alerter_metrics Redis set')
+
             # @added 20170108 - Feature #1830: Ionosphere alerts
             # Adding lists of smtp_alerter_metrics and non_smtp_alerter_metrics
             # Timed this takes 0.013319 seconds on 689 unique_metrics
@@ -2693,45 +2842,66 @@ class Analyzer(Thread):
                 if python_version == 3:
                     metric_name = str(metric_name)
 
-                base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+                # @modified 20200728 - Bug #3652: Handle multiple metrics in base_name conversion
+                # base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+                if metric_name.startswith(settings.FULL_NAMESPACE):
+                    base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+                else:
+                    base_name = metric_name
 
-                # @modified 20200610 - Feature #3560: External alert config
-                # Use the all_alerts list which includes external alert configs
-                # for alert in settings.ALERTS:
-                for alert in all_alerts:
-                    pattern_match = False
-                    if str(alert[1]) == 'smtp':
+                # @added 20200723 - Feature #3560: External alert config
+                # Speed this up only check alerters if not already in the set
+                metric_in_smtp_alerters_set = False
+                unique_base_names.append(base_name)
+                if base_name not in smtp_alerter_metrics:
+                    # @modified 20200610 - Feature #3560: External alert config
+                    # Use the all_alerts list which includes external alert configs
+                    # for alert in settings.ALERTS:
+                    for alert in all_alerts:
+                        pattern_match = False
+                        if str(alert[1]) == 'smtp':
 
-                        # @modified 20200622 - Task #3586: Change all alert pattern checks to matched_or_regexed_in_list
-                        #                      Feature #3512: matched_or_regexed_in_list function
-                        # Changed original alert matching pattern to use new
-                        # method
-                        # ALERT_MATCH_PATTERN = alert[0]
-                        # METRIC_PATTERN = base_name
-                        try:
-                            pattern_match, metric_matched_by = matched_or_regexed_in_list(skyline_app, base_name, [alert[0]])
-                            if LOCAL_DEBUG and pattern_match:
-                                logger.debug('debug :: %s matched alert - %s' % (base_name, alert[0]))
+                            # @added 20200723 - Feature #3560: External alert config
+                            # Speed this up only check internal alerters
                             try:
-                                del metric_matched_by
+                                if alert[4]['type'] == 'external':
+                                    continue
                             except:
                                 pass
-                            if pattern_match:
-                                # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
-                                # if base_name not in self.smtp_alerter_metrics:
-                                #     self.smtp_alerter_metrics.append(base_name)
-                                if base_name not in smtp_alerter_metrics:
+
+                            # @modified 20200622 - Task #3586: Change all alert pattern checks to matched_or_regexed_in_list
+                            #                      Feature #3512: matched_or_regexed_in_list function
+                            # Changed original alert matching pattern to use new
+                            # method
+                            # ALERT_MATCH_PATTERN = alert[0]
+                            # METRIC_PATTERN = base_name
+                            try:
+                                pattern_match, metric_matched_by = matched_or_regexed_in_list(skyline_app, base_name, [alert[0]])
+                                if LOCAL_DEBUG and pattern_match:
+                                    logger.debug('debug :: %s matched alert - %s' % (base_name, alert[0]))
+                                try:
+                                    del metric_matched_by
+                                except:
+                                    pass
+                                if pattern_match:
+                                    # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                                    # if base_name not in self.smtp_alerter_metrics:
+                                    #     self.smtp_alerter_metrics.append(base_name)
+#                                    if base_name not in smtp_alerter_metrics:
                                     redis_set = 'analyzer.smtp_alerter_metrics'
                                     data = str(base_name)
                                     try:
                                         self.redis_conn.sadd(redis_set, data)
+                                        metric_in_smtp_alerters_set = True
+                                        break
                                     except:
                                         logger.info(traceback.format_exc())
                                         logger.error('error :: failed to add %s to Redis set %s' % (
                                             str(data), str(redis_set)))
-                        except:
-                            pattern_match = False
-
+                            except:
+                                pattern_match = False
+                else:
+                    metric_in_smtp_alerters_set = True
                 # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
                 # Use Redis set analyzer.smtp_alerter_metrics in place of
                 # self.smtp_alerter_metrics Manager.list
@@ -2739,12 +2909,17 @@ class Analyzer(Thread):
                 #     if base_name not in self.smtp_alerter_metrics:
                 #         self.non_smtp_alerter_metrics.append(base_name)
                 present_in_smtp_alerter_metrics = False
-                try:
-                    present_in_smtp_alerter_metrics = self.redis_conn.sismember('analyzer.smtp_alerter_metrics', base_name)
-                except:
-                    logger.error(traceback.format_exc())
-                    logger.error('error :: failed to determine if %s is in analyzer.smtp_alerter_metrics Redis set' % base_name)
-                    present_in_smtp_alerter_metrics = False
+                # @added 20200723 - Feature #3560: External alert config
+                # Speed this up only check alerters if not already in the set
+                if metric_in_smtp_alerters_set:
+                    present_in_smtp_alerter_metrics = True
+                if not present_in_smtp_alerter_metrics:
+                    try:
+                        present_in_smtp_alerter_metrics = self.redis_conn.sismember('analyzer.smtp_alerter_metrics', base_name)
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to determine if %s is in analyzer.smtp_alerter_metrics Redis set' % base_name)
+                        present_in_smtp_alerter_metrics = False
                 if not present_in_smtp_alerter_metrics:
                     redis_set = 'analyzer.non_smtp_alerter_metrics'
                     data = str(base_name)
@@ -2774,9 +2949,33 @@ class Analyzer(Thread):
                 # non_smtp_alerter_metrics = list(self.redis_conn.smembers('analyzer.non_smtp_alerter_metrics'))
                 non_smtp_alerter_metrics = list(self.redis_conn_decoded.smembers('analyzer.non_smtp_alerter_metrics'))
             except:
-                logger.info(traceback.format_exc())
+                logger.error(traceback.format_exc())
                 logger.error('error :: failed to generate a list from analyzer.non_smtp_alerter_metrics Redis set')
                 non_smtp_alerter_metrics = []
+
+            # @modified 20200723 - Feature #3560: External alert config
+            # Seeings as aet.analyzer.smtp_alerter_metrics is now being used to
+            # speed this up, entries need to be removed
+            logger.info('checking if any metrics need to be removed from smtp_alerter_metrics')
+            smtp_alerter_metrics_to_remove = []
+            for smtp_alerter_base_name in smtp_alerter_metrics:
+                if smtp_alerter_base_name not in unique_base_names:
+                    smtp_alerter_metrics_to_remove.append(smtp_alerter_base_name)
+            if smtp_alerter_metrics_to_remove:
+                try:
+                    logger.info('removing %s metrics from smtp_alerter_metrics' % str(len(smtp_alerter_metrics_to_remove)))
+                    self.redis_conn.srem('analyzer.smtp_alerter_metrics', *set(smtp_alerter_metrics_to_remove))
+                    # Reload the new set
+                    try:
+                        smtp_alerter_metrics = list(self.redis_conn_decoded.smembers('analyzer.smtp_alerter_metrics'))
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to generate a list from analyzer.smtp_alerter_metrics Redis set after removing entires')
+                except:
+                    logger.info(traceback.format_exc())
+                    logger.error('error :: failed to add multiple members to the new_analyzer.smtp_alerter_metrics Redis set')
+            else:
+                logger.info('no metrics need to remove from smtp_alerter_metrics')
 
             # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
             # logger.info('smtp_alerter_metrics     :: %s' % str(len(self.smtp_alerter_metrics)))
@@ -2791,8 +2990,17 @@ class Analyzer(Thread):
             # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
             # Use variable from the Redis set which replaced Manager.list
             # for metric in self.smtp_alerter_metrics:
-            for metric in smtp_alerter_metrics:
-                self.redis_conn.sadd('new_analyzer.smtp_alerter_metrics', metric)
+
+            # @modified 20200723 - Feature #3560: External alert config
+            # Speed this up with adding multiple members to the set
+            # for metric in smtp_alerter_metrics:
+            #    self.redis_conn.sadd('new_analyzer.smtp_alerter_metrics', metric)
+            try:
+                self.redis_conn.sadd('new_analyzer.smtp_alerter_metrics', *set(smtp_alerter_metrics))
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to add multiple members to the new_analyzer.smtp_alerter_metrics Redis set')
+
             try:
                 self.redis_conn.rename('analyzer.smtp_alerter_metrics', 'analyzer.smtp_alerter_metrics.old')
             except:
@@ -3212,7 +3420,7 @@ class Analyzer(Thread):
             # Send alerts
             if settings.ENABLE_ALERTS:
                 try:
-
+                    logger.info('checking for alerts')
                     # @modified 20200610 - Feature #3560: External alert config
                     # Use the all_alerts list which includes external alert configs
                     # for alert in settings.ALERTS:
@@ -3654,6 +3862,8 @@ class Analyzer(Thread):
                     logger.error(traceback.format_exc())
                     logger.error('error :: failed in check to alert step')
 
+            logger.info('alerts checked')
+
             # @added 20200611 - Feature #3578: Test alerts
             # @modified 20200625 - Feature #3578: Test alerts
             # Do not delete the set here as a test alert could be sent via
@@ -3737,7 +3947,7 @@ class Analyzer(Thread):
             # @modified 20160207 - Branch #922: Ionosphere
             # Handle if alerts are not enabled
             else:
-                logger.info('alerts not enabled')
+                logger.info('no test alerts were found')
 
             if LOCAL_DEBUG:
                 logger.info('debug :: Memory usage in run after alerts: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
@@ -3986,7 +4196,14 @@ class Analyzer(Thread):
 
                     if not process_metric:
                         continue
-                    base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+
+                    # @modified 20200728 - Bug #3652: Handle multiple metrics in base_name conversion
+                    # base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+                    if metric_name.startswith(settings.FULL_NAMESPACE):
+                        base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+                    else:
+                        base_name = metric_name
+
                     cache_key = 'last_alert.stale.%s' % (base_name)
                     last_alert = False
                     try:
@@ -4842,7 +5059,13 @@ class Analyzer(Thread):
 
             # @added 20200411 - Feature #3480: batch_processing
             try:
-                self.redis_conn.delete('analyzer.batch_processing_metrics')
+                # @modified 20200727 - Feature #3650: ROOMBA_DO_NOT_PROCESS_BATCH_METRICS
+                #                      Feature #3480: batch_processing
+                #                      Feature #3486: analyzer_batch
+                # Do not remove analyzer.batch_processing_metrics, but rename it
+                # to aet.analyzer.batch_processing_metrics for use in horizon/roomba.py
+                # self.redis_conn.delete('analyzer.batch_processing_metrics')
+                self.redis_conn.rename('analyzer.batch_processing_metrics', 'aet.analyzer.batch_processing_metrics')
             except:
                 pass
             try:
