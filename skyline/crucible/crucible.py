@@ -160,9 +160,12 @@ class Crucible(Thread):
                 add_line = literal_eval(array)
                 metric_vars.append(add_line)
 
+        # @added 20200607 - Feature #3630: webapp - crucible_process_training_data
+        # Added training_data_json
         string_keys = [
             'metric', 'anomaly_dir', 'added_by', 'app', 'run_script',
-            'graphite_override_uri_parameters']
+            'graphite_override_uri_parameters', 'training_data_json']
+
         float_keys = ['value']
         # @modified 20170127 - Feature #1886: Ionosphere learn - child like parent with evolutionary maturity
         # Added ionosphere_parent_id, always zero from Analyzer and Mirage
@@ -558,6 +561,17 @@ class Crucible(Thread):
         # be padded.  Added pad_timeseries in the webapp.
         padded_timeseries = False
 
+        # @added 20200607 - Feature #3630: webapp - crucible_process_training_data
+        # Added training_data_json
+        try:
+            key = 'training_data_json'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            training_data_json = str(value_list[0])
+        except:
+            training_data_json = None
+        if settings.ENABLE_CRUCIBLE_DEBUG:
+            logger.info('metric variable - training_data_json - %s' % str(training_data_json))
+
         # Only check if the metric does not a EXPIRATION_TIME key set, crucible
         # uses the alert EXPIRATION_TIME for the relevant alert setting contexts
         # whether that be analyzer, mirage, boundary, etc and sets its own
@@ -927,6 +941,23 @@ class Crucible(Thread):
                         logger.error('error :: failed to move check file to - %s' % failed_check_file)
                         pass
                     return
+
+        # @added 20200607 - Feature #3630: webapp - crucible_process_training_data
+        # Added training_data_json
+        if training_data_json:
+            if not os.path.isfile(training_data_json):
+                logger.error('error :: no training data json data found - %s' % training_data_json)
+                # Move metric check file
+                try:
+                    shutil.move(metric_check_file, failed_check_file)
+                    logger.info('moved check file to - %s' % failed_check_file)
+                except OSError:
+                    logger.error('error :: failed to move check file to - %s' % failed_check_file)
+                    pass
+                return
+            else:
+                logger.info('setting anomaly json to training_data_json - %s' % (training_data_json))
+                anomaly_json = training_data_json
 
         # Check timeseries json exists - raw or gz
         if not os.path.isfile(anomaly_json):
