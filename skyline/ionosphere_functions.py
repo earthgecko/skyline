@@ -361,7 +361,12 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
     current_skyline_app_logger = current_skyline_app + 'Log'
     current_logger = logging.getLogger(current_skyline_app_logger)
 
-    base_name = data_for_metric.replace(settings.FULL_NAMESPACE, '', 1)
+    # @modified 20200728 - Bug #3652: Handle multiple metrics in base_name conversion
+    # base_name = data_for_metric.replace(settings.FULL_NAMESPACE, '', 1)
+    if data_for_metric.startswith(settings.FULL_NAMESPACE):
+        base_name = data_for_metric.replace(settings.FULL_NAMESPACE, '', 1)
+    else:
+        base_name = data_for_metric
 
     # @added 20200216 - Feature #3450: Handle multiple requests to create a features profile
     # Ensure that one features profile can only be created if
