@@ -310,7 +310,13 @@ def get_assigned_metrics(i, base_name):
         if not correlate_namespace_to:
             correlate_with_metrics = []
             for metric_name in unique_metrics:
-                metric_base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+                # @modified 20200728 - Bug #3652: Handle multiple metrics in base_name conversion
+                # metric_base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+                if metric_name.startswith(settings.FULL_NAMESPACE):
+                    metric_base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+                else:
+                    metric_base_name = metric_name
+
                 add_metric, add_metric_matched_by = matched_or_regexed_in_list(skyline_app, metric_base_name, correlate_namespaces_only)
                 if not add_metric:
                     correlate_with_metrics.append(metric_name)
@@ -323,7 +329,13 @@ def get_assigned_metrics(i, base_name):
         correlate_with_namespace = correlate_namespace_matched_by['matched_namespace']
         if correlate_with_namespace:
             for metric_name in unique_metrics:
-                metric_base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+                # @modified 20200728 - Bug #3652: Handle multiple metrics in base_name conversion
+                # metric_base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+                if metric_name.startswith(settings.FULL_NAMESPACE):
+                    metric_base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+                else:
+                    metric_base_name = metric_name
+
                 add_metric, add_metric_matched_by = matched_or_regexed_in_list(skyline_app, metric_base_name, [correlate_with_namespace])
                 if add_metric:
                     correlate_with_metrics.append(metric_name)
@@ -500,7 +512,13 @@ def get_correlations(
         # if count > 1000:
         #     break
         correlated = None
-        metric_base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+        # @modified 20200728 - Bug #3652: Handle multiple metrics in base_name conversion
+        # metric_base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+        if metric_name.startswith(settings.FULL_NAMESPACE):
+            metric_base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+        else:
+            metric_base_name = metric_name
+
         if str(metric_base_name) == str(base_name):
             continue
         try:
@@ -607,7 +625,13 @@ def get_correlations(
         remote_metrics_count += 1
         correlated = None
         metric_name = str(ts_data[0])
-        metric_base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+        # @modified 20200728 - Bug #3652: Handle multiple metrics in base_name conversion
+        # metric_base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+        if metric_name.startswith(settings.FULL_NAMESPACE):
+            metric_base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+        else:
+            metric_base_name = metric_name
+
         if str(metric_base_name) == str(base_name):
             continue
         timeseries = []
