@@ -149,6 +149,12 @@ try:
     DEBUG_CUSTOM_ALGORITHMS = settings.DEBUG_CUSTOM_ALGORITHMS
 except:
     DEBUG_CUSTOM_ALGORITHMS = False
+# @added 20200723 - Feature #3472: ionosphere.training_data Redis set
+#                   Feature #3566: custom_algorithms
+try:
+    MIRAGE_ALWAYS_METRICS = list(settings.MIRAGE_ALWAYS_METRICS)
+except:
+    MIRAGE_ALWAYS_METRICS = []
 
 # @added 20200610 - Feature #3560: External alert config
 try:
@@ -1026,7 +1032,13 @@ class Mirage(Thread):
             logger.info(traceback.format_exc())
 
         if not anomalous:
-            base_name = metric.replace(settings.FULL_NAMESPACE, '', 1)
+            # @modified 20200728 - Bug #3652: Handle multiple metrics in base_name conversion
+            # base_name = metric.replace(settings.FULL_NAMESPACE, '', 1)
+            if metric.startswith(settings.FULL_NAMESPACE):
+                base_name = metric.replace(settings.FULL_NAMESPACE, '', 1)
+            else:
+                base_name = metric
+
             not_anomalous_metric = [datapoint, base_name]
             # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
             # self.not_anomalous_metrics.append(not_anomalous_metric)
@@ -1043,7 +1055,12 @@ class Mirage(Thread):
 
         # If it's anomalous, add it to list
         if anomalous:
-            base_name = metric.replace(settings.FULL_NAMESPACE, '', 1)
+            # @modified 20200728 - Bug #3652: Handle multiple metrics in base_name conversion
+            # base_name = metric.replace(settings.FULL_NAMESPACE, '', 1)
+            if metric.startswith(settings.FULL_NAMESPACE):
+                base_name = metric.replace(settings.FULL_NAMESPACE, '', 1)
+            else:
+                base_name = metric
             # metric_timestamp = int(timeseries[-1][0])
             metric_timestamp = int_metric_timestamp
             anomalous_metric = [datapoint, base_name, metric_timestamp]
@@ -1339,10 +1356,25 @@ class Mirage(Thread):
             except:
                 logger.error('error :: failed to rmtree %s' % metric_data_dir)
 
+        # @added 20200723 - Feature #3472: ionosphere.training_data Redis set
+        #                   Feature #3566: custom_algorithms
+        # Optimize for MIRAGE_ALWAYS_METRICS which can create a lot
+        # of training_data dirs a Analyzer always hands them off to
+        # mirage.
+        remove_ionosphere_data_dir = False
+        if not anomalous:
+            if base_name in MIRAGE_ALWAYS_METRICS:
+                remove_ionosphere_data_dir = True
+        if not anomalous and periodic_mirage_check:
+                remove_ionosphere_data_dir = True
+
         # @added 20190408 - Feature #2882: Mirage - periodic_check
         # Remove the training_dir for mirage_periodic_check_metrics if not
         # anomalous
-        if not anomalous and periodic_mirage_check:
+        # @modified 20200723 - Feature #3472: ionosphere.training_data Redis set
+        #                   Feature #3566: custom_algorithms
+        # if not anomalous and periodic_mirage_check:
+        if remove_ionosphere_data_dir:
             timeseries_dir = base_name.replace('.', '/')
             training_dir = '%s/%s/%s' % (
                 settings.IONOSPHERE_DATA_FOLDER, str(metric_timestamp),
@@ -1350,10 +1382,11 @@ class Mirage(Thread):
             if os.path.exists(training_dir):
                 try:
                     rmtree(training_dir)
-                    logger.info('removed Mirage periodic check training_data dir - %s' % training_dir)
+                    logger.info('removed Mirage always or periodic check training_data dir - %s' % training_dir)
                 except:
-                    logger.error('error :: failed to rmtree Mirage periodic check training_dir - %s' % training_dir)
-            del mirage_periodic_check_metrics
+                    logger.error('error :: failed to rmtree Mirage always or periodic check training_dir - %s' % training_dir)
+            if not anomalous and periodic_mirage_check:
+                del mirage_periodic_check_metrics
 
     def run(self):
         """
