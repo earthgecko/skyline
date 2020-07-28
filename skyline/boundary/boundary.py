@@ -924,7 +924,13 @@ class Boundary(Thread):
                         # @added 20191021 - Branch #3262: py3
                         metric_name = str(metric_name)
 
-                        base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+                        # @modified 20200728 - Bug #3652: Handle multiple metrics in base_name conversion
+                        # base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+                        if metric_name.startswith(settings.FULL_NAMESPACE):
+                            base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+                        else:
+                            base_name = metric_name
+
                         pattern_match = check_match_pattern.match(base_name)
                     except:
                         logger.error(traceback.format_exc())
