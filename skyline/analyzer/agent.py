@@ -92,7 +92,11 @@ def run():
         # from analyzer import algorithms
         import algorithms
         logger.info('Testing algorithms')
-        timeseries = map(list, zip(map(float, range(int(time()) - 86400, int(time()) + 1)), [1] * 86401))
+
+        # @modified 20200723 - Task #3608: Update Skyline to Python 3.8.3 and deps
+        # Use a shorter timeseries for quicker start up
+        # timeseries = map(list, zip(map(float, range(int(time()) - 86400, int(time()) + 1)), [1] * 86401))
+        timeseries = map(list, zip(map(float, range(int(time()) - 1440, int(time()) + 1)), [1] * 1440))
 
         # @added 20191024 - Branch #3262: py3
         # Convert map to list
