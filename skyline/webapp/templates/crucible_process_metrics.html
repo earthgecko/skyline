@@ -9,6 +9,26 @@
 <code> message </code>: {{ display_message }}<br>
 {% endif %}
 
+<script>
+function validate_to_process_submission()
+{
+    var source = document.forms["process_metrics"]["source"];
+    var training_data_json = document.forms["process_metrics"]["training_data_json"];
+    if (source.value == "training_data") and (training_data_json.value == "")
+    {
+        window.alert("Please enter the training_data json file");
+        training_data_json.focus();
+        return false;
+    }
+    if (source.value == "training_data") and (add_to_panaroma.value == "true")
+    {
+        window.alert("You cannot add anomalies from training data to Panorama");
+        add_to_panaroma.focus();
+        return false;
+    }
+    return true;
+}</script>
+
 <div class="navbar-header" role="navigation">
   <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
     <span class="sr-only">Toggle navigation</span>
@@ -54,7 +74,7 @@
         <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#process_options">Show process options</button>
         <div id="process_options" class="collapse">
   {% endif %}
-        <form action="crucible">
+        <form name="process_metrics" action="crucible" onsubmit="return validate_to_process_submission()">
   		  <table class="table table-hover">
   		    <thead>
   		      <tr>
@@ -114,7 +134,13 @@
 # Graphite is the only option currently
                 <option value="redis">redis</option>
 -->
+<!--          # @added 20200607 - Feature #3630: webapp - crucible_process_training_data -->
+                <option value="training_data">training_data</option>
               </select></td>
+  		      </tr>
+  		      <tr>
+  		        <td>training_data_json</td>
+  		        <td><input type="text" name="training_data_json" value="" /> the full path to training_data or saved trianing data json, if data_source is set to training_data</td>
   		      </tr>
   		      <tr>
                 <td>alert interval</td>

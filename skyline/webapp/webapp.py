@@ -1572,14 +1572,21 @@ def panorama():
                                     logger.info('%s found in derivative_metrics in Redis at %s on port %s' % (metric_name, str(redis_ip), str(redis_port)))
 
                     if metric_name not in unique_metrics and not metric_found_in_other_redis:
-                        error_string = 'error :: no metric - %s - exists in Redis' % metric_name
-                        logger.error(error_string)
-                        resp = json.dumps(
-                            {'404 Not Found': error_string})
-                        # @modified 20190116 - Cross-Site Scripting Security Vulnerability #85
-                        #                      Bug #2816: Cross-Site Scripting Security Vulnerability
-                        # return resp, 404
-                        return flask_escape(resp), 404
+                        # @added 20200715 - Task #3648: webapp - fp_search - do not use Redis metric check
+                        # Do not use the Redis metric check result in a webapp
+                        # fp_search request as this allows retried metric fps to
+                        # accessed
+                        if request.args.get(str('fp_search'), None):
+                            logger.info('check request.args -  %s not in Redis, but fp_search request so continuing' % metric_name)
+                        else:
+                            error_string = 'error :: no metric - %s - exists in Redis' % metric_name
+                            logger.error(error_string)
+                            resp = json.dumps(
+                                {'404 Not Found': error_string})
+                            # @modified 20190116 - Cross-Site Scripting Security Vulnerability #85
+                            #                      Bug #2816: Cross-Site Scripting Security Vulnerability
+                            # return resp, 404
+                            return flask_escape(resp), 404
 
             if key == 'count_by_metric':
                 count_by_metric_invalid = True
@@ -1882,6 +1889,8 @@ def crucible():
     total_crucible_jobs = 0
     pagination_start_request = False
     offset_request = False
+    # @added 20200607 - Feature #3630: webapp - crucible_process_training_data
+    training_data_json = None
 
     if request_args_len:
         if 'process_metrics' in request.args:
@@ -2030,6 +2039,10 @@ def crucible():
             if str_pad_timeseries:
                 pad_timeseries = str_pad_timeseries
 
+        # @added 20200607 - Feature #3630: webapp - crucible_process_training_data
+        if 'training_data_json' in request.args:
+            training_data_json = request.args.get(str('training_data_json'), None)
+
         do_process_metrics = False
         if from_timestamp and until_timestamp:
             if metrics:
@@ -2040,6 +2053,11 @@ def crucible():
                 do_process_metrics = True
                 namespaces_list = namespaces.split(',')
                 logger.info('crucible_process_metrics namespaces_list - %s' % str(namespaces_list))
+
+        # @added 20200607 - Feature #3630: webapp - crucible_process_training_data
+        if source == 'training_data' and training_data_json:
+            do_process_metrics = True
+
         crucible_job_id = None
         metrics_submitted_to_process = []
         if do_process_metrics:
@@ -2051,7 +2069,9 @@ def crucible():
                 # @modified 20200422 - Feature #3500: webapp - crucible_process_metrics
                 #                      Feature #1448: Crucible web UI
                 # Added pad_timeseries
-                crucible_job_id, metrics_submitted_to_process, message, trace = submit_crucible_job(from_timestamp, until_timestamp, metrics_list, namespaces_list, source, alert_interval, user_id, user, add_to_panorama, pad_timeseries)
+                # @added 20200607 - Feature #3630: webapp - crucible_process_training_data
+                # Added training_data_json
+                crucible_job_id, metrics_submitted_to_process, message, trace = submit_crucible_job(from_timestamp, until_timestamp, metrics_list, namespaces_list, source, alert_interval, user_id, user, add_to_panorama, pad_timeseries, training_data_json)
                 logger.info('crucible_process_metrics - submit_crucible_job returned (%s, %s, %s, %s)' % (
                     str(crucible_job_id), str(metrics_submitted_to_process),
                     str(message), str(trace)))
@@ -2508,6 +2528,12 @@ def ionosphere():
         limited_by = None
         get_metric_profiles = False
         not_metric_wildcard = True
+
+        # @added 20200710 - Feature #1996: Ionosphere - matches page
+        # Moved from within the loop below
+        matching = False
+        metric_like = False
+
         for i in request.args:
             key = str(i)
             if key not in REQUEST_ARGS:
@@ -2618,21 +2644,32 @@ def ionosphere():
                                 logger.info('%s found in derivative_metrics in Redis at %s on port %s' % (metric_name, str(redis_ip), str(redis_port)))
 
                 if metric_name not in unique_metrics and not metric_found_in_other_redis:
-                    error_string = 'error :: no metric - %s - exists in Redis' % metric_name
-                    logger.error(error_string)
-                    resp = json.dumps(
-                        {'results': error_string})
-                    # @modified 20190116 - Cross-Site Scripting Security Vulnerability #85
-                    #                      Bug #2816: Cross-Site Scripting Security Vulnerability
-                    # return resp, 404
-                    return flask_escape(resp), 404
+                    # @added 20200715 - Task #3648: webapp - fp_search - do not use Redis metric check
+                    # Do not use the Redis metric check result in a webapp
+                    # fp_search request as this allows retried metric fps to
+                    # accessed
+                    if fp_search_req:
+                        logger.info('fp_search_or_matches_req - %s not in Redis, but fp_search request so continuing' % metric_name)
+                        get_metric_profiles = True
+                        metric = str(value)
+                    else:
+                        error_string = 'error :: no metric - %s - exists in Redis' % metric_name
+                        logger.error(error_string)
+                        resp = json.dumps(
+                            {'results': error_string})
+                        # @modified 20190116 - Cross-Site Scripting Security Vulnerability #85
+                        #                      Bug #2816: Cross-Site Scripting Security Vulnerability
+                        # return resp, 404
+                        return flask_escape(resp), 404
                 else:
                     get_metric_profiles = True
                     metric = str(value)
 
             # @added 20170917 - Feature #1996: Ionosphere - matches page
-            matching = False
-            metric_like = False
+            # @modified 20170917 - Feature #1996: Ionosphere - matches page
+            # Move outside the loop
+            # matching = False
+            # metric_like = False
             if key == 'metric_like':
                 if value == 'all':
                     metric_namespace_pattern = value.replace('all', '')
@@ -2658,6 +2695,10 @@ def ionosphere():
                         #                      Bug #2816: Cross-Site Scripting Security Vulnerability
                         # return resp, 404
                         return flask_escape(resp), 404
+                    else:
+                        # @added 20200710 - Feature #1996: Ionosphere - matches page
+                        logger.info('metric_like %s was passed, %s metrics found matching' % (value, str(len(matching))))
+                        metric_like = str(value)
                 if matching:
                     metric_like = str(value)
 
@@ -2666,7 +2707,7 @@ def ionosphere():
             # @modified 20180717 - Task #2446: Optimize Ionosphere
             # Added missing search_success variable
             features_profiles, fps_count, mc, cc, gc, full_duration_list, enabled_list, tsfresh_version_list, generation_list, search_success, fail_msg, trace = ionosphere_search(False, True)
-
+            logger.info('fp_search_req returning response')
             return render_template(
                 'ionosphere.html', fp_search=fp_search_req,
                 fp_search_results=fp_search_req,
@@ -3466,6 +3507,12 @@ def ionosphere():
                         # but an fp exists so continue and do not 404
                         if fp_view:
                             logger.info('%s not in Redis, but fp passed so continuing' % metric_name)
+                        # @added 20200715 - Task #3648: webapp - fp_search - do not use Redis metric check
+                        # Do not use the Redis metric check result in a webapp
+                        # fp_search request as this allows retried metric fps to
+                        # accessed
+                        elif fp_search_req:
+                            logger.info('IONOSPHERE_REQUEST_ARGS check - %s not in Redis, but fp_search request so continuing' % metric_name)
                         else:
                             error_string = 'error :: no metric - %s - exists in Redis' % metric_name
                             logger.error(error_string)
@@ -3654,7 +3701,11 @@ def ionosphere():
         try:
             # @modified 20170221 - Feature #1862: Ionosphere features profiles search page
             # fd_list, en_list, tsfresh_list, gen_list, fail_msg, trace = ionosphere_search_defaults(get_options)
-            features_profiles, fp_count, mc, cc, gc, fd_list, en_list, tsfresh_list, gen_list, fail_msg, trace = ionosphere_search(True, False)
+            # @modified 20200715 - Task #3648: webapp - fp_search - do not use Redis metric check
+            #                      Task #2446: Optimize Ionosphere
+            # Added missing search_success variable
+            # features_profiles, fp_count, mc, cc, gc, fd_list, en_list, tsfresh_list, gen_list, fail_msg, trace = ionosphere_search(True, False)
+            features_profiles, fp_count, mc, cc, gc, fd_list, en_list, tsfresh_list, gen_list, search_success, fail_msg, trace = ionosphere_search(True, False)
             logger.debug('debug :: fd_list - %s' % str(fd_list))
         except:
             message = 'Uh oh ... a Skyline 500 :('
@@ -4029,11 +4080,17 @@ def ionosphere():
             # Added fp_anomaly_timestamp ionosphere_echo features profiles
             mpaths, images, hdate, m_vars, ts_json, data_to_process, p_id, gimages, gmimages, times_matched, glm_images, l_id_matched, ts_fd, i_ts_json, anomalous_timeseries, f_id_matched, fp_details_list, fp_anomaly_timestamp = ionosphere_metric_data(requested_timestamp, base_name, context, fp_id)
 
+            # @added 20200711 - Feature #3634: webapp - ionosphere - report number of data points
+            ts_json_length = 0
+            anomalous_timeseries_length = 0
+
             # @added 20170309  - Feature #1960: ionosphere_layers - i_ts_json
             # Show the last 30
             if ts_json:
                 try:
                     sample_ts_json = ts_json[-30:]
+                    # @added 20200711 - Feature #3634: webapp - ionosphere - report number of data points
+                    ts_json_length = len(ts_json)
                 except:
                     trace = traceback.format_exc()
                     message = 'Failed to sample ts_json'
@@ -4046,6 +4103,8 @@ def ionosphere():
             #     sample_i_ts_json = i_ts_json[-30:]
             if anomalous_timeseries:
                 sample_i_ts_json = anomalous_timeseries[-30:]
+                # @added 20200711 - Feature #3634: webapp - ionosphere - report number of data points
+                anomalous_timeseries_length = len(anomalous_timeseries)
 
             if fp_details_list:
                 f_id_created = fp_details_list[0]
@@ -4602,6 +4661,9 @@ def ionosphere():
                 #                   Branch #2270: luminosity
                 related=related, related_with_graph_links=related_with_graph_links,
                 related_matches=related_matches,
+                # @added 20200711 - Feature #3634: webapp - ionosphere - report number of data points
+                ts_json_length=ts_json_length,
+                anomalous_timeseries_length=anomalous_timeseries_length,
                 version=skyline_version, duration=(time.time() - start),
                 print_debug=debug_on), 200
         except:

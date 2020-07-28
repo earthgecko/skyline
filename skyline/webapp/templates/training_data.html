@@ -844,13 +844,17 @@ Image file: {{ image }}<br><br>
 <!-- # @modified 20170309 - Feature #1960: ionosphere_layers
     <h4><span class="logo"><span class="sky">Time series ::</span> <span class="re">not anomalous ::</span></span></span> <span class="sky">available</span></h4>
       {{ timeseries[-30:] }}-->
-    <h4><span class="logo"><span class="sky">Time series ::</span> <span class="re">anomalous ::</span></span></span> <span class="sky">json available [['app', '{{ app_context }}'], ['full_duration', {{ ts_full_duration }}]] - last 30 data points</span></h4>
+<!-- # @modified 20200711 - Feature #3634: webapp - ionosphere - report number of data points
+     # Added length -->
+    <h4><span class="logo"><span class="sky">Time series ::</span> <span class="re">anomalous ::</span></span></span> <span class="sky">json available [['app', '{{ app_context }}'], ['full_duration', {{ ts_full_duration }}]] - last 30 data points of {{ anomalous_timeseries_length }}</span></h4>
       {{ last_ts_json[-30:] }}
 <!-- # @added 20170309 - Feature #1960: ionosphere_layers
 Also return the Analyzer FULL_DURATION timeseries if available in a Mirage
 based features profile -->
     {% if ionosphere_json %}
-    <h4><span class="logo"><span class="sky">Time series ::</span> <span class="re">anomalous ::</span></span></span> <span class="sky">json available [['app', 'Analyzer'], ['full_duration', {{ baseline_fd }}]] - last 30 data points</span></h4>
+<!-- # @modified 20200711 - Feature #3634: webapp - ionosphere - report number of data points
+     # Added length -->
+    <h4><span class="logo"><span class="sky">Time series ::</span> <span class="re">anomalous ::</span></span></span> <span class="sky">json available [['app', 'Analyzer'], ['full_duration', {{ baseline_fd }}]] - last 30 data points of {{ ts_json_length }}</span></h4>
 <!--      {{ ionosphere_json[-30:] }} -->
       {{ last_i_ts_json[-30:] }}
     {% endif %}
