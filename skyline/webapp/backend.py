@@ -566,7 +566,13 @@ def luminosity_remote_data(anomaly_timestamp):
             del original_timeseries
 
         # Convert the time series if this is a known_derivative_metric
-        base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+        # @modified 20200728 - Bug #3652: Handle multiple metrics in base_name conversion
+        # base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+        if metric_name.startswith(settings.FULL_NAMESPACE):
+            base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+        else:
+            base_name = metric_name
+
         known_derivative_metric = is_derivative_metric('webapp', base_name)
         if known_derivative_metric:
             try:

@@ -1662,7 +1662,13 @@ class Panorama(Thread):
                                 for unique_metric in unique_metrics:
                                     if unique_metric not in db_fullnamespace_unique_metrics:
                                         try:
-                                            base_name = unique_metric.replace(settings.FULL_NAMESPACE, '', 1)
+                                            # @modified 20200728 - Bug #3652: Handle multiple metrics in base_name conversion
+                                            # base_name = unique_metric.replace(settings.FULL_NAMESPACE, '', 1)
+                                            if unique_metric.startswith(settings.FULL_NAMESPACE):
+                                                base_name = unique_metric.replace(settings.FULL_NAMESPACE, '', 1)
+                                            else:
+                                                base_name = unique_metric
+
                                             metric_id = self.insert_new_metric(base_name)
                                             logger.info('inserted %s into metrics table, assigned id %s' % (base_name, str(metric_id)))
                                         except:

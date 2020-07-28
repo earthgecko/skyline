@@ -163,7 +163,15 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
 
     # @added 20161229 - Feature #1830: Ionosphere alerts
     # Added Ionosphere variables
-    base_name = str(metric[1]).replace(settings.FULL_NAMESPACE, '', 1)
+
+    # @modified 20200728 - Bug #3652: Handle multiple metrics in base_name conversion
+    # base_name = str(metric[1]).replace(settings.FULL_NAMESPACE, '', 1)
+    metric_name = str(metric[1])
+    if metric_name.startswith(settings.FULL_NAMESPACE):
+        base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+    else:
+        base_name = metric_name
+
     # @modified 20191008 - Branch #3002: docker
     # wix-playground added a hashlib hexdigest method which has not been
     # verified so using the originaly method useless the base_name is longer
@@ -1252,7 +1260,15 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context):
     import simplejson as json
 
     logger.info('alert_slack - anomalous metric :: alert: %s, metric: %s' % (str(alert), str(metric)))
-    base_name = str(metric[1]).replace(settings.FULL_NAMESPACE, '', 1)
+
+    # @modified 20200728 - Bug #3652: Handle multiple metrics in base_name conversion
+    # base_name = str(metric[1]).replace(settings.FULL_NAMESPACE, '', 1)
+    metric_name = str(metric[1])
+    if metric_name.startswith(settings.FULL_NAMESPACE):
+        base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+    else:
+        base_name = metric_name
+
     # @modified 20191008 - Branch #3002: docker
     # wix-playground added a hashlib hexdigest method which has not been
     # verified so using the original method useless the base_name is longer
