@@ -480,6 +480,7 @@ class Ionosphere(Thread):
                         'deleted Redis set - %s' % (redis_set))
                 except:
                     pass
+
                 # @modified 20200425 - Feature #3508: ionosphere.untrainable_metrics
                 # Added resolution_seconds
                 # for metric, timestamp in training_data_instances:
@@ -1736,7 +1737,11 @@ class Ionosphere(Thread):
                                     'error :: ionosphere_learn check could not determine the fp generation of fp id %s from the row object for %s' % (
                                         str(fp_id), base_name))
                     else:
-                        logger.info('not using fp id %s not matched full_duration %s - %s' % (str(fp_id), str(full_duration), base_name))
+                        # @modified 20200717 - Bug #3382: Prevent ionosphere.learn loop edge cases
+                        # Added the fp full_duration for clarity sake
+                        # logger.info('not using fp id %s not matched full_duration %s - %s' % (str(fp_id), str(full_duration), base_name))
+                        logger.info('not using fp id %s of full_duration %s as does not match full_duration %s - %s' % (
+                            str(fp_id), str(row['full_duration']), str(full_duration), base_name))
 
                 # @added 20170115 - Feature #1854: Ionosphere learn - generations
                 # Create the fp_ids_db_object so it is available throughout
@@ -3519,33 +3524,42 @@ class Ionosphere(Thread):
                 # purge_old_data_dirs after every check file run, this takes less
                 # than a second and keeps the purging somewhat consistent with
                 # input rate.
+
+                # @added 20200723 - Feature #3462: Add IONOSPHERE_MANAGE_PURGE
+                # Do not purge every run
                 try:
-                    logger.info('purging any old training data')
-                    self.purge_old_data_dirs(
-                        settings.IONOSPHERE_DATA_FOLDER,
-                        settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR)
+                    last_purge_timestamp = self.redis_conn.get(last_purge_key)
                 except:
-                    logger.error('error :: purge_old_data_dirs - %s' % traceback.print_exc())
-                    if ENABLE_IONOSPHERE_DEBUG:
-                        logger.info(
-                            'debug :: self.purge_old_data_dirs(%s, %s)' %
+                    logger.error('error :: failed to get Redis key %s' % last_purge_key)
+                    last_purge_timestamp = 0
+                if not last_purge_timestamp:
+                    try:
+                        logger.info('purging any old training data')
+                        self.purge_old_data_dirs(
                             settings.IONOSPHERE_DATA_FOLDER,
                             settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR)
-                # @added 20170110 - Feature #1854: Ionosphere learn
-                # purge_old_data_dirs learn data
-                if settings.IONOSPHERE_LEARN:
-                    try:
-                        logger.info('purging any old learning data')
-                        self.purge_old_data_dirs(
-                            settings.IONOSPHERE_LEARN_FOLDER,
-                            settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR)
                     except:
-                        logger.error('error :: purge_old_data_dirs learn - %s' % traceback.print_exc())
+                        logger.error('error :: purge_old_data_dirs - %s' % traceback.print_exc())
                         if ENABLE_IONOSPHERE_DEBUG:
                             logger.info(
                                 'debug :: self.purge_old_data_dirs(%s, %s)' %
+                                settings.IONOSPHERE_DATA_FOLDER,
+                                settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR)
+                    # @added 20170110 - Feature #1854: Ionosphere learn
+                    # purge_old_data_dirs learn data
+                    if settings.IONOSPHERE_LEARN:
+                        try:
+                            logger.info('purging any old learning data')
+                            self.purge_old_data_dirs(
                                 settings.IONOSPHERE_LEARN_FOLDER,
                                 settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR)
+                        except:
+                            logger.error('error :: purge_old_data_dirs learn - %s' % traceback.print_exc())
+                            if ENABLE_IONOSPHERE_DEBUG:
+                                logger.info(
+                                    'debug :: self.purge_old_data_dirs(%s, %s)' %
+                                    settings.IONOSPHERE_LEARN_FOLDER,
+                                    settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR)
             else:
                 logger.info('purge is not managed by Ionosphere - IONOSPHERE_MANAGE_PURGE = %s' % str(IONOSPHERE_MANAGE_PURGE))
 
@@ -4241,7 +4255,13 @@ class Ionosphere(Thread):
                             current_redis_set, new_redis_set, str(e)))
 
             for metric_name in unique_metrics:
-                base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+                # @modified 20200728 - Bug #3652: Handle multiple metrics in base_name conversion
+                # base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+                if metric_name.startswith(settings.FULL_NAMESPACE):
+                    base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+                else:
+                    base_name = metric_name
+
                 for alert in settings.ALERTS:
                     pattern_match = False
                     if str(alert[1]) == 'smtp':
