@@ -1315,6 +1315,22 @@ class Mirage(Thread):
                     # Moved to the mirage.sent_to_ionosphere Redis set Redis set
                     # block below
                     # self.sent_to_ionosphere.append(base_name)
+
+                    # @added 20200804 - Feature #3462: Add IONOSPHERE_MANAGE_PURGE
+                    #                   Feature #3472: ionosphere.training_data Redis set
+                    #                   Feature #3474: webapp api - training_data
+                    # Add training data to the ionosphere.training_data so that
+                    # the ionosphere purge_old_data_dirs can happen less
+                    # frequently for reduced I/O
+                    redis_set = 'ionosphere.training_data'
+                    data = [base_name, int(int_metric_timestamp), second_order_resolution_seconds]
+                    try:
+                        logger.info('adding to Redis set %s - %s' % (
+                            redis_set, str(data)))
+                        self.redis_conn.sadd(redis_set, str(data))
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to add %s to %s Redis set' % (str(data), redis_set))
                 else:
                     logger.info('alert expiry key exists not sending to Ionosphere :: %s' % base_name)
                 # @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage
