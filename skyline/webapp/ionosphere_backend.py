@@ -113,6 +113,12 @@ except:
 if overall_verify_ssl:
     logging.captureWarnings(True)
 
+# @added 20200731 - Feature #3654: IONOSPHERE_GRAPHITE_NOW_GRAPHS_OVERRIDE
+try:
+    IONOSPHERE_GRAPHITE_NOW_GRAPHS_OVERRIDE = settings.IONOSPHERE_GRAPHITE_NOW_GRAPHS_OVERRIDE
+except:
+    IONOSPHERE_GRAPHITE_NOW_GRAPHS_OVERRIDE = False
+
 
 def ionosphere_get_metrics_dir(requested_timestamp, context):
     """
@@ -800,6 +806,12 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
     # operator about the metric.
     graphite_now_images = []
     graphite_now = int(time.time())
+
+    # @added 20200731 - Feature #3654: IONOSPHERE_GRAPHITE_NOW_GRAPHS_OVERRIDE
+    # Allow to override the Graphite NOW graphs with Graphite THEN graphs
+    if IONOSPHERE_GRAPHITE_NOW_GRAPHS_OVERRIDE:
+        graphite_now = int(requested_timestamp)
+
     graph_resolutions = []
     # @modified 20170116 - Feature #1854: Ionosphere learn - generations
     #                      Feature #1842: Ionosphere - Graphite now graphs

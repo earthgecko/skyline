@@ -55,6 +55,12 @@ try:
 except:
     skyline_metrics_carbon_port = CARBON_PORT
 
+# @added 20200731 - Feature #3654: IONOSPHERE_GRAPHITE_NOW_GRAPHS_OVERRIDE
+try:
+    IONOSPHERE_GRAPHITE_NOW_GRAPHS_OVERRIDE = settings.IONOSPHERE_GRAPHITE_NOW_GRAPHS_OVERRIDE
+except:
+    IONOSPHERE_GRAPHITE_NOW_GRAPHS_OVERRIDE = False
+
 config = {'user': settings.PANORAMA_DBUSER,
           'password': settings.PANORAMA_DBUSERPASS,
           'host': settings.PANORAMA_DBHOST,
@@ -794,7 +800,11 @@ def get_graphite_metric(
                     str_value = str(int(int_hours) / 24)
                     period = 'days'
                 if 'graphite_now' in output_object:
-                    unencoded_graph_title = 'Graphite NOW at %s %s' % (str_value, period)
+                    # @added 20200731 - Feature #3654: IONOSPHERE_GRAPHITE_NOW_GRAPHS_OVERRIDE
+                    if IONOSPHERE_GRAPHITE_NOW_GRAPHS_OVERRIDE:
+                        unencoded_graph_title = 'Graphite THEN at %s %s' % (str_value, period)
+                    else:
+                        unencoded_graph_title = 'Graphite NOW at %s %s' % (str_value, period)
                 # @added 20170308 - Feature #1960: ionosphere_layers
                 matched_graph = False
                 if 'matched.fp_id' in output_object:
