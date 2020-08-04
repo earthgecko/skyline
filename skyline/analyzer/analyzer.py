@@ -995,7 +995,6 @@ class Analyzer(Thread):
                 # metric will probably be reconciled in a subsequent run to fill
                 # any airgap created by possibly dropping any unordered data
                 # points/timestamps.
-                append_to_sorted_and_deduplicated_timeseries = False
 
                 # @added 20200723 - Feature #3532: Sort all time series
                 # Reduce the time. Check if the last timestamps are equal before
@@ -1016,6 +1015,24 @@ class Analyzer(Thread):
                         # @added 20200804 - Bug #3660: Handle flux and flux.filled lags
                         #                   Feature #3400: Identify air gaps in the metric data
                         # Just append
+                        # In cases where the Skyline instance is not processing all the
+                        # metrics within ANALYZER_OPTIMUM_RUN_DURATION and flux is
+                        # constantly filling or populating metrics and IDENTIFY_AIRGAPS
+                        # is enabled, analyzer can get into a state where:
+                        # - Sorting and de-duplicating flux metrics is never achieved on
+                        #   a number of metrics as there are new data points added during
+                        #   the processing period.
+                        # - Analyzer never gets through the processing in ANALYZER_OPTIMUM_RUN_DURATION
+                        #   as it is sorting and de-duplicating every flux metric. This
+                        #   results in all the sort and de-duplication processing being
+                        #   ineffective and unless.
+                        # Solution - Add any missing data points and timestamps to the
+                        # sorted and de-duplicated time series and use it, rather than
+                        # discarding it. This can result in dropped data points. However
+                        # if INDENTIFY_AIRGAPS is enabled, this will be mitigated as
+                        # metric will probably be reconciled in a subsequent run to fill
+                        # any airgap created by possibly dropping any unordered data
+                        # points/timestamps.
                         try:
                             last_ten_datapoints_in_current_redis_ts = timeseries[-60:]
                             last_ten_sorted_current_redis_ts = sorted(last_ten_datapoints_in_current_redis_ts, key=lambda x: x[0])
