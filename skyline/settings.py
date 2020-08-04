@@ -2152,6 +2152,20 @@ IONOSPHERE_MANAGE_PURGE = True
 :vartype IONOSPHERE_MANAGE_PURGE: boolean
 """
 
+IONOSPHERE_GRAPHITE_NOW_GRAPHS_OVERRIDE = False
+"""
+:var IONOSPHERE_GRAPHITE_NOW_GRAPHS_OVERRIDE: By defualt Graphite NOW graphs in
+    training_data are retrieved from Graphite when the training data is viewed.
+    Graphite NOW graphs are then generated using the current timestamp and
+    plotting graphs at now - 7h, now - 24h, now - 7days and now - 30days, this
+    can cause the actual anomalous period to not be shown in the Graphite NOW
+    graphs if the training data is only loaded days later.  This is especially
+    true if metrics are batch processed with historic data.  If this settings is
+    set to True, Graphite NOW graphs will be loaded as Graphite THEN graphs,
+    using the anomaly timestamp as now.
+:vartype IONOSPHERE_GRAPHITE_NOW_OVERRIDE: boolean
+"""
+
 SKYLINE_URL = 'https://skyline.example.com'
 """
 :var SKYLINE_URL: The http or https URL (and port if required) to access your

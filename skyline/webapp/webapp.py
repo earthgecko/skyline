@@ -301,6 +301,12 @@ try:
 except:
     GRAPHITE_RENDER_URI = 'render'
 
+# @added 20200731 - Feature #3654: IONOSPHERE_GRAPHITE_NOW_GRAPHS_OVERRIDE
+try:
+    IONOSPHERE_GRAPHITE_NOW_GRAPHS_OVERRIDE = settings.IONOSPHERE_GRAPHITE_NOW_GRAPHS_OVERRIDE
+except:
+    IONOSPHERE_GRAPHITE_NOW_GRAPHS_OVERRIDE = False
+
 
 @app.before_request
 # def setup_logging():
@@ -4582,6 +4588,11 @@ def ionosphere():
                             data_dict = {"status": {"created": "already exists"}, "data": {"fp_id": fp_id}}
                     return jsonify(data_dict), 200
 
+            # @added 20200731 - Feature #3654: IONOSPHERE_GRAPHITE_NOW_GRAPHS_OVERRIDE
+            graphite_now_graphs_title = 'NOW'
+            if IONOSPHERE_GRAPHITE_NOW_GRAPHS_OVERRIDE:
+                graphite_now_graphs_title = 'THEN'
+
             return render_template(
                 'ionosphere.html', timestamp=requested_timestamp,
                 for_metric=base_name, metric_vars=m_vars, metric_files=mpaths,
@@ -4664,6 +4675,8 @@ def ionosphere():
                 # @added 20200711 - Feature #3634: webapp - ionosphere - report number of data points
                 ts_json_length=ts_json_length,
                 anomalous_timeseries_length=anomalous_timeseries_length,
+                # @added 20200731 - Feature #3654: IONOSPHERE_GRAPHITE_NOW_GRAPHS_OVERRIDE
+                graphite_now_graphs_title=graphite_now_graphs_title,
                 version=skyline_version, duration=(time.time() - start),
                 print_debug=debug_on), 200
         except:

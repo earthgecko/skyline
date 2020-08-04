@@ -755,13 +755,13 @@ Image file: {{ image }}<br><br>
   {% endif %}
 
   {% if fp_id_matched %}
-      <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">graphs NOW ::</span></span></span> at <strong>7h, 24h, 7d and 30d</strong> for anomaly at <strong>{{ human_date }}</strong> when <strong><a href="?fp_view=true&fp_id={{ fp_id_matched }}&metric={{ for_metric }}">fp_id {{ fp_id_matched }}</a> <font color="green">MATCHED</font></strong></h4>
+      <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">graphs {{ graphite_now_graphs_title }} ::</span></span></span> at <strong>7h, 24h, 7d and 30d</strong> for anomaly at <strong>{{ human_date }}</strong> when <strong><a href="?fp_view=true&fp_id={{ fp_id_matched }}&metric={{ for_metric }}">fp_id {{ fp_id_matched }}</a> <font color="green">MATCHED</font></strong></h4>
   {% elif layers_id_matched %}
-      <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">graphs NOW ::</span></span></span> at <strong>7h, 24h, 7d and 30d</strong> for anomaly at <strong>{{ human_date }}</strong> when <strong>layers id {{ layers_id_matched }} <font color="green">MATCHED</font></strong></h4>
+      <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">graphs {{ graphite_now_graphs_title }} ::</span></span></span> at <strong>7h, 24h, 7d and 30d</strong> for anomaly at <strong>{{ human_date }}</strong> when <strong>layers id {{ layers_id_matched }} <font color="green">MATCHED</font></strong></h4>
   {% elif saved_metric_td_requested %}
-      <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">graphs when saved ::</span></span></span> at <strong>7h, 24h, 7d and 30d</strong> for anomaly at <strong>{{ human_date }}</strong></h4>
+      <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">graphs when saved as {{ graphite_now_graphs_title }} ::</span></span></span> at <strong>7h, 24h, 7d and 30d</strong> for anomaly at <strong>{{ human_date }}</strong></h4>
   {% else %}
-      <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">graphs NOW ::</span></span></span> at <strong>7h, 24h, 7d and 30d</strong> for anomaly at <strong>{{ human_date }}</strong></h4>
+      <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">graphs {{ graphite_now_graphs_title }} ::</span></span></span> at <strong>7h, 24h, 7d and 30d</strong> for anomaly at <strong>{{ human_date }}</strong></h4>
   {% endif %}
 <!-- @added 20170106 - Feature #1842: Ionosphere - Graphite now graphs -->
   {% for gimage in graphite_now_images %}
