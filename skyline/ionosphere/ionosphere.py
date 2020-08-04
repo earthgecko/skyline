@@ -331,9 +331,14 @@ class Ionosphere(Thread):
 
     def purge_old_data_dirs(self, dir_path, older_than):
         time_now = time()
-        logger.info(
-            'Cleaning old training data from %s older than %s seconds' %
-            (dir_path, str(older_than)))
+
+        # @added 20200731 - Feature #3462: Add IONOSPHERE_MANAGE_PURGE
+        # Still manage ionsphere.training_data
+        if IONOSPHERE_MANAGE_PURGE:
+            logger.info('Cleaning old training data from %s older than %s seconds' % (
+                dir_path, str(older_than)))
+        else:
+            logger.info('IONOSPHERE_MANAGE_PURGE set to False managing ionosphere.training_data only, not purging')
 
         # @added 20200409 - Feature #3472: ionosphere.training_data Redis set
         #                   Feature #3474: webapp api - training_data
@@ -355,7 +360,13 @@ class Ionosphere(Thread):
                     current_time = int(time())
                     last_logged = current_time - last_log_time
                     if last_logged > 29:
-                        logger.info('still purging')
+                        # @modified 20200731 - Feature #3462: Add IONOSPHERE_MANAGE_PURGE
+                        # Still manage ionsphere.training_data
+                        if IONOSPHERE_MANAGE_PURGE:
+                            logger.info('still purging')
+                        else:
+                            logger.info('still managing ionosphere.training_data')
+
                         last_log_time = current_time
                         # @added 20200626 - Feature #3472: ionosphere.training_data Redis set
                         # Report app up to stop other apps not finding the
@@ -371,24 +382,37 @@ class Ionosphere(Thread):
                     if re.match('\d{10}', folder):
                         if ENABLE_IONOSPHERE_DEBUG:
                             logger.info('debug :: matched - %s' % folder_path)
-                        if (time_now - os.path.getmtime(folder_path)) > older_than:
-                            try:
-                                rmtree(folder_path)
-                                logger.info('removed - %s' % folder_path)
-                            except:
-                                logger.error('error :: failed to rmtree %s' % folder_path)
-                        # @added 20200409 - Feature #3472: ionosphere.training_data Redis set
-                        #                   Feature #3474: webapp api - training_data
+
+                        # @modified 20200731 - Feature #3462: Add IONOSPHERE_MANAGE_PURGE
+                        # Still manage ionosphere.training_data
+                        if IONOSPHERE_MANAGE_PURGE:
+                            if (time_now - os.path.getmtime(folder_path)) > older_than:
+                                try:
+                                    rmtree(folder_path)
+                                    logger.info('removed - %s' % folder_path)
+                                except:
+                                    logger.error('error :: failed to rmtree %s' % folder_path)
+                            # @added 20200409 - Feature #3472: ionosphere.training_data Redis set
+                            #                   Feature #3474: webapp api - training_data
+                            else:
+                                if settings.IONOSPHERE_DATA_FOLDER in folder_path:
+                                    training_data_list.append(folder_path)
+                        # @added 20200731 - Feature #3462: Add IONOSPHERE_MANAGE_PURGE
+                        # Still manage ionosphere.training_data
                         else:
                             if settings.IONOSPHERE_DATA_FOLDER in folder_path:
                                 training_data_list.append(folder_path)
+
         except:
             logger.info(traceback.format_exc())
             logger.error('error :: purge_old_data_dirs - os.walk')
 
         # @added 20200529 - Feature #3472: ionosphere.training_data Redis set
         #                   Feature #3474: webapp api - training_data
-        logger.info('cleaned old training data')
+        # @modified 20200731 - Feature #3462: Add IONOSPHERE_MANAGE_PURGE
+        # Still manage ionosphere.training_data
+        if IONOSPHERE_MANAGE_PURGE:
+            logger.info('cleaned old training data')
 
         # @added 20200409 - Feature #3472: ionosphere.training_data Redis set
         #                   Feature #3474: webapp api - training_data
@@ -3562,6 +3586,21 @@ class Ionosphere(Thread):
                                     settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR)
             else:
                 logger.info('purge is not managed by Ionosphere - IONOSPHERE_MANAGE_PURGE = %s' % str(IONOSPHERE_MANAGE_PURGE))
+                # @added 20200731 - Feature #3462: Add IONOSPHERE_MANAGE_PURGE
+                # Still manage training data
+                try:
+                    last_purge_timestamp = self.redis_conn.get(last_purge_key)
+                except:
+                    logger.error('error :: failed to get Redis key %s' % last_purge_key)
+                    last_purge_timestamp = 0
+                if not last_purge_timestamp:
+                    try:
+                        logger.info('running purge_old_data_dirs only to manage ionosphere.training_data')
+                        self.purge_old_data_dirs(
+                            settings.IONOSPHERE_DATA_FOLDER,
+                            settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR)
+                    except:
+                        logger.error('error :: purge_old_data_dirs - %s' % traceback.print_exc())
 
             # @added 20170916 - Feature #1996: Ionosphere - matches page
             # Create the ionosphere_summary_memcache_object
