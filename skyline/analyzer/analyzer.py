@@ -975,6 +975,28 @@ class Analyzer(Thread):
                 if not sorted_and_deduplicated_timeseries:
                     logger.error('error :: failed to sort and deduplicate flux/mirage filled timeseries for %s' % str(metric_name))
 
+                # @added 20200804 - Bug #3660: Handle flux and flux.filled lags
+                #                   Feature #3400: Identify air gaps in the metric data
+                # In cases where the Skyline instance is not processing all the
+                # metrics within ANALYZER_OPTIMUM_RUN_DURATION and flux is
+                # constantly filling or populating metrics and IDENTIFY_AIRGAPS
+                # is enabled, analyzer can get into a state where:
+                # - Sorting and de-duplicating flux metrics is never achieved on
+                #   a number of metrics as there are new data points added during
+                #   the processing period.
+                # - Analyzer never gets through the processing in ANALYZER_OPTIMUM_RUN_DURATION
+                #   as it is sorting and de-duplicating every flux metric. This
+                #   results in all the sort and de-duplication processing being
+                #   ineffective and unless.
+                # Solution - Add any missing data points and timestamps to the
+                # sorted and de-duplicated time series and use it, rather than
+                # discarding it. This can result in dropped data points. However
+                # if INDENTIFY_AIRGAPS is enabled, this will be mitigated as
+                # metric will probably be reconciled in a subsequent run to fill
+                # any airgap created by possibly dropping any unordered data
+                # points/timestamps.
+                append_to_sorted_and_deduplicated_timeseries = False
+
                 # @added 20200723 - Feature #3532: Sort all time series
                 # Reduce the time. Check if the last timestamps are equal before
                 # submitting to Redis as if they are not at this point then they
@@ -982,9 +1004,34 @@ class Analyzer(Thread):
                 try:
                     last_new_sort_ts = int(sorted_and_deduplicated_timeseries[-1][0])
                     if last_timeseries_timestamp != last_new_sort_ts:
-                        logger.info('the sorted and deduplicated last timestamp (%s) does not match the current data last timestamp (%s) before populating Redis, skipping %s' % (
+                        # @modified 20200804 - Bug #3660: Handle flux and flux.filled lags
+                        #                      Feature #3400: Identify air gaps in the metric data
+                        # Do not discard the sorted_and_deduplicated_timeseries
+                        # just append missing data points to it.
+                        # logger.info('the sorted and deduplicated last timestamp (%s) does not match the current data last timestamp (%s) before populating Redis, skipping %s' % (
+                        #     str(last_new_sort_ts), str(last_timeseries_timestamp), str(metric_name)))
+                        # sorted_and_deduplicated_timeseries = []
+                        logger.info('the sorted and deduplicated last timestamp (%s) does not match the current data last timestamp (%s) before populating Redis, appending to %s' % (
                             str(last_new_sort_ts), str(last_timeseries_timestamp), str(metric_name)))
-                        sorted_and_deduplicated_timeseries = []
+                        # @added 20200804 - Bug #3660: Handle flux and flux.filled lags
+                        #                   Feature #3400: Identify air gaps in the metric data
+                        # Just append
+                        try:
+                            last_ten_datapoints_in_current_redis_ts = timeseries[-60:]
+                            last_ten_sorted_current_redis_ts = sorted(last_ten_datapoints_in_current_redis_ts, key=lambda x: x[0])
+                            last_ten_datapoints_in_sorted_and_deduplicated_timeseries = sorted_and_deduplicated_timeseries[-60:]
+                            last_ten_ts_in_sorted_and_deduplicated_timeseries = [x[0] for x in last_ten_datapoints_in_sorted_and_deduplicated_timeseries]
+                            appended_count = 0
+                            for ts, value in last_ten_sorted_current_redis_ts:
+                                if ts not in last_ten_ts_in_sorted_and_deduplicated_timeseries:
+                                    sorted_and_deduplicated_timeseries.append((ts, value))
+                                    appended_count += 1
+                            logger.info('appended %s new data points to the sorted_and_deduplicated_timeseries for %s' % (
+                                str(appended_count), str(metric_name)))
+                        except:
+                            logger.info(traceback.format_exc())
+                            logger.error('error :: failed to append new data points to the sorted_and_deduplicated_timeseries')
+
                     else:
                         logger.info('the sorted and deduplicated last timestamp (%s) matches the current data last timestamp (%s) before populating Redis on %s' % (
                             str(last_new_sort_ts), str(last_timeseries_timestamp), str(metric_name)))
@@ -1011,9 +1058,7 @@ class Analyzer(Thread):
                         pipe.append(str(new_metric_name_key), packb(metric[1]))
                     # self.redis_conn.set(str(new_metric_name_key), packb(metric_ts_data))
                     pipe.execute()
-
-                    del metric_ts_data
-
+                    # del metric_ts_data
                     populated_redis_key = True
                 except:
                     logger.info(traceback.format_exc())
