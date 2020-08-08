@@ -745,8 +745,25 @@ class UploadedDataWorker(Process):
                         logger.info('uploaded_data_worker :: determined date columns, %s' % str(date_columns))
                         if len(date_columns) == 0:
                             logger.info('uploaded_data_worker :: no date column determined trying to convert data column to datetime64')
+                            # @added 20200807 - Feature #3550: flux.uploaded_data_worker
+                            # Handle unix timestamps
+                            first_date = None
+                            unix_timestamp = False
                             try:
-                                df['date'] = pd.to_datetime(df['date'])
+                                first_date = df['date'].values.tolist()[0]
+                                if len(str(first_date)) == 10:
+                                    if int(first_date) > 1:
+                                        unix_timestamp = True
+                            except:
+                                logger.error(traceback.format_exc())
+                                logger.error('error :: uploaded_data_worker :: failed to determine if date columns values are unix timestamps')
+                            try:
+                                # @modified 20200807 - Feature #3550: flux.uploaded_data_worker
+                                # Handle unix timestamps
+                                if unix_timestamp:
+                                    df['date'] = pd.to_datetime(df['date'], unit='s')
+                                else:
+                                    df['date'] = pd.to_datetime(df['date'])
                             except:
                                 logger.error(traceback.format_exc())
                                 logger.error('error :: uploaded_data_worker :: failed to convert date column to datetime64')
