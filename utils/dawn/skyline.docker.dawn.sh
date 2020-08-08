@@ -4,6 +4,7 @@
 # @author Gary Wilson (@earthgecko)
 # @created 20190519 - Branch #3002: docker
 # @modified 20191114 - Bug #3318: Make Skyline docker handle OOMkiller
+# @modified 20200808 - Branch #3262: py3 - DEPRECATED - no more dockerrr
 # @modified
 # @license
 # @source https://github.com/earthgecko/skyline/utils/dawn/skyline.docker.dawn.sh
@@ -24,7 +25,15 @@
 # * This script manages the basic requirements on firewall-cmd and firewalld
 #   it allows public access to port 22, 80 and 443 and restricted access to port
 #   8888 for Graphite
-
+#
+#
+#
+#
+#                 NO LONGER MAINTAINED, rtfm
+#
+#
+#
+#
 #### USER DEFINED VARIABLES ####
 # Please replace the values here and populate these variables as appropriate
 # with the values of YOUR set up or write them to /etc/skyline/skyline.dawn.conf
