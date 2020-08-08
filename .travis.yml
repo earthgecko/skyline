@@ -1,6 +1,8 @@
 language: python
 python:
-  - "2.7"
+# @modified 20200808 - Task #3608: Update Skyline to Python 3.8.3 and deps
+#  - "2.7"
+  - "3.8"
 install:
   - wget http://repo.continuum.io/archive/Anaconda-1.6.0-Linux-x86_64.sh
   - chmod +x Anaconda-1.6.0-Linux-x86_64.sh
