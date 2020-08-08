@@ -18,7 +18,7 @@ import os
 # import skyline
 # import skyline_version
 # VERSION = skyline_version.__version__
-VERSION = '1.2.0'
+VERSION = '2.0.0'
 
 # @added 20161127 - Branch #922: ionosphere
 # Added setup_package
@@ -49,13 +49,13 @@ def setup_package():
             'Topic :: System :: Monitoring',
             'Topic :: Scientific/Engineering :: Information Analysis',
             'License :: OSI Approved :: MIT License',
-            'Programming Language :: Python :: 2.7',
+            'Programming Language :: Python :: 3.8',
             'Natural Language :: English',
             'Operating System :: POSIX :: Linux',
         ],
         keywords='timeseries anomaly detection numpy pandas statsmodels',
         packages=['skyline'],
-        dependency_links=['http://cdn.mysql.com/Downloads/Connector-Python/mysql-connector-python-1.2.3.zip#md5=6d42998cfec6e85b902d4ffa5a35ce86'],
+        # dependency_links=['http://cdn.mysql.com/Downloads/Connector-Python/mysql-connector-python-1.2.3.zip#md5=6d42998cfec6e85b902d4ffa5a35ce86'],
         # install_requires=[
         #     'setuptools', 'pip', 'wheel', 'redis==2.10.5', 'hiredis==0.2.0',
         #     'python-daemon==2.1.1', 'Flask==0.11.1', 'simplejson==3.8.2',
