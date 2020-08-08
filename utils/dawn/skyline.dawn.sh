@@ -11,6 +11,8 @@
 # @modified 20181018 - Task #2596: Build Skyline on nodes at v1.2.8
 # @modified 20190412 - Task #2926: Update dependencies
 # @modified 20191016 - Branch #3262: py3
+# @modified 20200703 - Task #3608: Update Skyline to Python 3.8.3 and deps
+#                      Branch #3262: py3
 # @modified
 # @license
 # @source https://github.com/earthgecko/skyline/utils/dawn/skyline.dawn.sh
@@ -38,7 +40,8 @@
 # Please replace the values here and populate these variables as appropriate
 # with the values of YOUR set up or write them to /etc/skyline/skyline.dawn.conf
 # to be sourced.
-YOUR_SERVER_IP_ADDRESS="$(ifconfig eth0 | grep "inet addr" | cut -d ':' -f2)"  # YOUR Skyline server public IP address
+YOUR_SERVER_IP_ADDRESS="YOUR_SERVER_IP"  # YOUR Skyline server public IP address
+# e.g. YOUR_SERVER_IP_ADDRESS="$(ifconfig eth0 | grep "inet addr" | cut -d ':' -f2)"  # YOUR Skyline server public IP address
 YOUR_SKYLINE_SERVER_FQDN="skyline-test.example.com"        # YOUR Skyline server FQDN
 YOUR_EMAIL="me@example.com"                                # YOUR email address for the httpd server admin
 YOUR_OTHER_IP_ADDRESS="127.0.0.1"                          # YOUR current public IP address that you will be connecting from
@@ -79,20 +82,31 @@ fi
 # @modified 20190412 - Task #2926: Update dependencies
 # Update to redis-4.0.14
 #REDIS_VERSION="redis-3.2.12"
-REDIS_VERSION="redis-4.0.14"
+# @modified 20200703 - Task #3608: Update Skyline to Python 3.8.3 and deps
+#REDIS_VERSION="redis-4.0.14"
+REDIS_VERSION="redis-5.0.8"
+
 # @modified 20190412 - Task #2926: Update dependencies
 # Update to Python-2.7.16
 #PYTHON_VERSION="2.7.14"
-PYTHON_VERSION="3.7.6"
-PYTHON_MAJOR_VERSION="3.7"
+# @modified 20200703 - Task #3608: Update Skyline to Python 3.8.3 and deps
+#PYTHON_VERSION="3.7.6"
+#PYTHON_MAJOR_VERSION="3.7"
+PYTHON_VERSION="3.8.3"
+PYTHON_MAJOR_VERSION="3.8"
+
 PYTHON_VIRTUALENV_DIR="/opt/python_virtualenv"
 # @modified 20190412 - Task #2926: Update dependencies
 #PROJECT="skyline-py2714"
-PROJECT="skyline-py376"
+# @modified 20200703 - Task #3608: Update Skyline to Python 3.8.3 and deps
+#PROJECT="skyline-py376"
+PROJECT="skyline-py383"
 #VIRTUALENV_VERSION="15.2.0"
 VIRTUALENV_VERSION="16.7.9"
 
-OPENSSL_VERSION="1.1.1d"
+# @modified 20200703 - Task #3608: Update Skyline to Python 3.8.3 and deps
+#OPENSSL_VERSION="1.1.1d"
+OPENSSL_VERSION="1.1.1g"
 
 #### Check USER DEFINED VARIABLES ####
 echo "sanity checking USER DEFINED VARIABLES"
@@ -151,6 +165,12 @@ if [ -f /etc/redhat-release ]; then
     CENTOS_7=$(cat /etc/redhat-release | grep -c "release 7")
     if [ $CENTOS_7 -eq 1 ]; then
       OS_MAJOR_VERSION="7"
+    fi
+# @added 20200703 - Task #3608: Update Skyline to Python 3.8.3 and deps
+# Added CentOS 8
+    CENTOS_8=$(cat /etc/redhat-release | grep -c "release 8")
+    if [ $CENTOS_8 -eq 1 ]; then
+      OS_MAJOR_VERSION="8"
     fi
   fi
 fi
@@ -231,7 +251,9 @@ if [ "$OS" == "CentOS" ]; then
     #  exit 1
     #fi
   fi
-  if [ "$OS_MAJOR_VERSION" == "7" ]; then
+# @added 20200703 - Task #3608: Update Skyline to Python 3.8.3 and deps
+# Added CentOS 8
+  if [[ "$OS_MAJOR_VERSION" == "7" || "$OS_MAJOR_VERSION" == "8" ]]; then
     if [ ! -f /tmp/skyline.dawn.yum.mariadb-server.install.run.txt ]; then
       echo "Installing mariadb-server"
       sleep 1
@@ -240,7 +262,13 @@ if [ "$OS" == "CentOS" ]; then
 #                      Task #2596: Build Skyline on nodes at v1.2.8
 # Added innodb_file_per_table
 #      sed -i 's/\[mysqld\]/\[mysqld\]\nbind-address = 127.0.0.1/g' /etc/my.cnf.d/server.cnf
-      sed -i 's/\[mysqld\]/\[mysqld\]\nbind-address = 127.0.0.1\ninnodb_file_per_table=1/g' /etc/my.cnf.d/server.cnf
+      if [ "$OS_MAJOR_VERSION" == "7" ]; then
+        sed -i 's/\[mysqld\]/\[mysqld\]\nbind-address = 127.0.0.1\ninnodb_file_per_table=1/g' /etc/my.cnf.d/server.cnf
+      fi
+# @added 20200703 - Task #3608: Update Skyline to Python 3.8.3 and deps
+      if [ "$OS_MAJOR_VERSION" == "8" ]; then
+        sed -i 's/\[mysqld\]/\[mysqld\]\nbind-address = 127.0.0.1\ninnodb_file_per_table=1/g' /etc/my.cnf.d/mariadb-server.cnf
+      fi
       systemctl start mariadb
       MYSQL_START_EXIT_CODE=$?
       if [ $MYSQL_START_EXIT_CODE -ne 0 ]; then
@@ -297,12 +325,16 @@ if [ ! -f /tmp/skyline.dawn.secure.mysql.txt ]; then
   fi
 
   if [ "$OS" == "CentOS" ]; then
-    echo "Dropping anonymous MySQL user at localhost"
-    $MYSQL_COMMAND "DROP USER ''@'localhost'"
-    MYSQL_EXIT_CODE=$?
-    if [ $MYSQL_EXIT_CODE -ne 0 ]; then
-      echo "error :: failed to drop anonymous MySQL user from localhost"
-      exit 1
+# @modified 20200703 - Task #3608: Update Skyline to Python 3.8.3 and deps
+# No anonymous MySQL user on CentOS 8 MariaDB
+    if [[ "$OS_MAJOR_VERSION" == "6" || "$OS_MAJOR_VERSION" == "7" ]]; then
+      echo "Dropping anonymous MySQL user at localhost"
+      $MYSQL_COMMAND "DROP USER ''@'localhost'"
+      MYSQL_EXIT_CODE=$?
+      if [ $MYSQL_EXIT_CODE -ne 0 ]; then
+        echo "error :: failed to drop anonymous MySQL user from localhost"
+        exit 1
+      fi
     fi
   fi
 
@@ -316,12 +348,16 @@ if [ ! -f /tmp/skyline.dawn.secure.mysql.txt ]; then
     fi
   fi
   if [ "$OS" == "CentOS" ]; then
-    echo "Dropping test MySQL database"
-    $MYSQL_COMMAND "DROP DATABASE test"
-    MYSQL_EXIT_CODE=$?
-    if [ $MYSQL_EXIT_CODE -ne 0 ]; then
-      echo "error :: failed to drop test MySQL database"
-      exit 1
+# @modified 20200703 - Task #3608: Update Skyline to Python 3.8.3 and deps
+# No test database on CentOS 8 MariaDB
+    if [[ "$OS_MAJOR_VERSION" == "6" || "$OS_MAJOR_VERSION" == "7" ]]; then
+      echo "Dropping test MySQL database"
+      $MYSQL_COMMAND "DROP DATABASE test"
+      MYSQL_EXIT_CODE=$?
+      if [ $MYSQL_EXIT_CODE -ne 0 ]; then
+        echo "error :: failed to drop test MySQL database"
+        exit 1
+      fi
     fi
   fi
   echo "flushing MySQL privileges"
@@ -344,7 +380,9 @@ if [ ! -f /tmp/skyline.dawn.redis.make.txt ]; then
   if [ "$OS" == "CentOS" ]; then
     yum -y install wget make gcc
     # @added 20190822 - Branch #3002: docker
-    if [ "$OS_MAJOR_VERSION" == "7" ]; then
+# @modified 20200703 - Task #3608: Update Skyline to Python 3.8.3 and deps
+#    if [ "$OS_MAJOR_VERSION" == "7" ]; then
+    if [[ "$OS_MAJOR_VERSION" == "7" || "$OS_MAJOR_VERSION" == "8" ]]; then
       yum -y install gcc-c++ kernel-devel
     fi
   else
@@ -496,9 +534,18 @@ if [ ! -f "${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}/bin/python${PYTHO
   if [ "$OS" == "CentOS" ]; then
     # epel-release is required before all the build deps as it provide python-pip
     yum -y install epel-release
-    yum -y install autoconf zlib-devel openssl-devel sqlite-devel bzip2-devel \
-      gcc gcc-c++ readline-devel ncurses-devel gdbm-devel compat-readline5 \
-      freetype-devel libpng-devel python-pip wget tar git
+# @modified 20200703 - Task #3608: Update Skyline to Python 3.8.3 and deps
+    if [[ "$OS_MAJOR_VERSION" == "6" || "$OS_MAJOR_VERSION" == "7" ]]; then
+      yum -y install autoconf zlib-devel openssl-devel sqlite-devel bzip2-devel \
+        gcc gcc-c++ readline-devel ncurses-devel gdbm-devel compat-readline5 \
+        freetype-devel libpng-devel python-pip wget tar git
+    fi
+# @added 20200703 - Task #3608: Update Skyline to Python 3.8.3 and deps
+    if [ "$OS_MAJOR_VERSION" == "8" ]; then
+      yum -y install autoconf zlib-devel openssl-devel sqlite-devel bzip2-devel \
+        gcc gcc-c++ readline-devel ncurses-devel gdbm-devel freetype-devel \
+        libpng-devel python38 wget tar git xz-devel # compat-readline5 none no 6 or 7
+    fi
     YUM_EXIT_CODE=$?
     if [ $YUM_EXIT_CODE -ne 0 ]; then
       echo "error :: yum failed to install requirements to build Python"
@@ -560,7 +607,13 @@ if [ ! -f "${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}/bin/python${PYTHO
     fi
   fi
 
-  pip install virtualenv==${VIRTUALENV_VERSION}
+# @modified 20200703 - Task #3608: Update Skyline to Python 3.8.3 and deps
+  if [ "$OS_MAJOR_VERSION" == "8" ]; then
+    pip3 install --user virtualenv
+  else
+    pip install virtualenv==${VIRTUALENV_VERSION}
+  fi
+
   PIP_EXIT_CODE=$?
   if [ $PIP_EXIT_CODE -ne 0 ]; then
     echo "error :: pip failed to install virtualenv==${VIRTUALENV_VERSION}"
@@ -744,7 +797,7 @@ if [ ! -f /tmp/skyline.dawn.skyline.requirements.txt ]; then
   # statsmodels in requirements
   # https://github.com/statsmodels/statsmodels/issues/4654
   "bin/pip${PYTHON_MAJOR_VERSION}" install $(cat /opt/skyline/github/skyline/requirements.txt | grep "^numpy\|^scipy\|^patsy" | tr '\n' ' ')
-  "bin/pip${PYTHON_MAJOR_VERSION}" install $(cat /opt/skyline/github/skyline/requirements.txt | grep "^pandas")
+  "bin/pip${PYTHON_MAJOR_VERSION}" install $(cat /opt/skyline/github/skyline/requirements.txt | grep "^pandas==")
 
   # @added 20190412 - Task #2926: Update dependencies
   #                   Bug #2590: mysql-connector-python - use_pure
@@ -967,7 +1020,7 @@ fi
 if [ ! -f "/opt/python_virtualenv/projects/${PROJECT}/lib/python${PYTHON_MAJOR_VERSION}/site-packages/daemon/runner.py.skyline" ]; then
   cd "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}" || exit 1
   source bin/activate
-  FIX_DAEMON=$("bin/pip${PYTHON_MAJOR_VERSION}" list | grep daemon | grep -c "2.2.3")
+  FIX_DAEMON=$("bin/pip${PYTHON_MAJOR_VERSION}" list | grep daemon | grep -c "2.2.3\|2.2.4")
   if [ $FIX_DAEMON -eq 1 ]; then
     cat "/opt/python_virtualenv/projects/${PROJECT}/lib/python${PYTHON_MAJOR_VERSION}/site-packages/daemon/runner.py" > "/opt/python_virtualenv/projects/${PROJECT}/lib/python${PYTHON_MAJOR_VERSION}/site-packages/daemon/runner.py.original.bak"
     cat "/opt/python_virtualenv/projects/${PROJECT}/lib/python${PYTHON_MAJOR_VERSION}/site-packages/daemon/runner.py.original.bak" | sed -e "s/app.stderr_path, 'w+t', buffering=0/app.stderr_path, 'wb+', buffering=0/g" > "/opt/python_virtualenv/projects/${PROJECT}/lib/python${PYTHON_MAJOR_VERSION}/site-packages/daemon/runner.py.skyline"
@@ -1003,7 +1056,9 @@ ps aux | grep -v grep | grep skyline
 # @added 20181018 - Task #2596: Build Skyline on nodes at v1.2.8
 # SELinux prevents Apache from initiating outbound connections
 if [ "$OS" == "CentOS" ]; then
-  if [ $CENTOS_7 -eq 1 ]; then
+# @modified 20200703 - Task #3608: Update Skyline to Python 3.8.3 and deps
+#  if [ $CENTOS_7 -eq 1 ]; then
+  if [[ $CENTOS_7 -eq 1 || $CENTOS_8 -eq 1 ]]; then
     /usr/sbin/setsebool -P httpd_can_network_connect 1
   fi
 fi
