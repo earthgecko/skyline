@@ -1,0 +1,140 @@
+####    skyline.nginx.conf.d.example    ####
+#
+#
+#  THIS IS AN EXAMPLE
+#  User variables are all prefixed with <YOUR_
+#  This example assumes you have this Skyline host binding to port 443
+#  and serving SSL on the machine
+#
+
+  upstream skyline-webapp {
+    server 127.0.0.1:1500;
+    # maintain a maximum of 20 idle connections to each upstream server
+    keepalive 20;
+  }
+
+  # Only required if you are posting metrics to Skyline via HTTP
+#  upstream skyline-flux {
+#    server 127.0.0.1:8000;
+#    # maintain a maximum of 20 idle connections to each upstream server
+#    keepalive 20;
+#  }
+
+  server {
+      listen 80 default_server;
+      listen [::]:80 default_server;
+
+      return 301 https://$host$request_uri;
+  }
+
+  server {
+
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+
+    # nginx requires the certificate  plus_intermediates be in the same single
+    # file with all certificates included.
+    ssl_certificate <YOUR_PATH_TO_YOUR_SIGNED_CERTIFICATE_PLUS_INTERMEDIATES_FILE>;
+    ssl_certificate_key <YOUR_PATH_TO_YOUR_KEY_FILE>;
+
+    # 1m cache size, 1m holds 4000 sessions
+    ssl_session_cache   shared:SSL:1m;
+    ssl_session_timeout 1d;
+    ssl_session_tickets off;
+
+    # As per https://mozilla.github.io/server-side-tls/ssl-config-generator/
+    # generated 2020-08-08, Mozilla Guideline v5.6, nginx 1.14.1, OpenSSL 1.1.1c, modern configuration
+    # https://ssl-config.mozilla.org/#server=nginx&version=1.14.1&config=modern&openssl=1.1.1c&guideline=5.6
+    # YOU MUST RUN THE FOLLOWING
+    # wget -O <YOUR_PATH_TO_YOUR_NGINX_CONFIG_DIR>/dhparam.pem "https://ssl-config.mozilla.org/ffdhe2048.txt"
+    # e.g.
+    # wget -O /etc/nginx/dhparam.pem "https://ssl-config.mozilla.org/ffdhe2048.txt"
+    ssl_dhparam /etc/nginx/dhparam.pem;
+
+    # modern configuration
+    ssl_protocols TLSv1.3;
+    ssl_prefer_server_ciphers off;
+
+    # HSTS (ngx_http_headers_module is required) (63072000 seconds)
+    add_header Strict-Transport-Security "max-age=63072000" always;
+
+    # OCSP stapling
+    ssl_stapling on;
+    ssl_stapling_verify on;
+
+    # verify chain of trust of OCSP response using Root CA and Intermediate certs
+    # if you are using a letsencrypt certificate this is same as your certificate
+    # declared above is ssl_certificate
+    ssl_trusted_certificate <YOUR_PATH_TO_YOUR_ROOT_CA_CERTIFICATE_PLUS_INTERMEDIATES_FILE>;
+
+    # replace with the IP address of your resolver
+    resolver 8.8.8.8;
+
+    server_name <YOUR_SKYLINE_SERVER_FQDN>;
+
+    access_log /var/log/nginx/<YOUR_SKYLINE_SERVER_FQDN>.access.log;
+    error_log  /var/log/nginx/<YOUR_SKYLINE_SERVER_FQDN>.error.log;
+
+    gzip on;
+    gzip_types  text/plain application/javascript application/x-javascript text/javascript text/xml text/css text/html application/json application/x-font-ttf font/opentype image/svg+xml image/x-icon;
+    gzip_proxied    no-cache no-store private expired auth;
+    gzip_min_length 1000;
+
+    # Allow authorized IPs to access /api without auth
+    location /api {
+      satisfy any;
+      allow <YOUR_SERVER_IP_ADDRESS>;
+      allow <YOUR_OTHER_IP_ADDRESS>;
+      deny all;
+      auth_basic "Authorization required";
+      auth_basic_user_file /etc/nginx/conf.d/.skyline_htpasswd;
+      proxy_set_header Host $host;
+      proxy_set_header Forwarded $proxy_add_forwarded;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header X-Forwarded-Proto $scheme";
+      proxy_pass http://skyline-webapp;
+    }
+
+# Only required if you are posting metrics to Skyline via HTTP
+#    location /flux/ {
+#      auth_basic "off";
+#      allow all;
+#      proxy_set_header Host $host;
+#      proxy_set_header Forwarded $proxy_add_forwarded;
+#      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+#      proxy_set_header X-Forwarded-Proto $scheme";
+#      proxy_pass http://skyline-flux/;
+#    }
+
+    auth_basic "Authorization required";
+    auth_basic_user_file /etc/nginx/conf.d/.skyline_htpasswd;
+
+    location / {
+      # Allow from self
+      allow 127.0.0.1;
+      allow <YOUR_SERVER_IP_ADDRESS>;
+      allow <YOUR_OTHER_IP_ADDRESS>;
+      deny all;
+
+      proxy_set_header Host $host;
+      proxy_set_header Forwarded $proxy_add_forwarded;
+      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header X-Forwarded-Proto $scheme";
+
+      proxy_pass http://skyline-webapp;
+
+    }
+
+    # Redirect server error pages to the static page /50x.html
+    error_page 500 502 503 504 /50x.html;
+    location = /50x.html {
+      root /usr/share/nginx/html;
+    }
+
+    # Deny access to . files, for security
+    location ~ /\. {
+      log_not_found off;
+      deny all;
+    }
+
+  }

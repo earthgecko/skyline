@@ -684,7 +684,7 @@ An example layer
 For instance, say occasionally we can expect to see a spike of 404s status codes
 on a web app due to bots or your own scanning, with layers we can tell Ionosphere
 that a time series was not anomalous if the datapoint is less than 120 and has
-values in the last 3 datapoints is less than 50.  This allows for a somewhat
+values in the last 3 datapoints is less than 5.  This allows for a somewhat
 moving window and an alert that would be delayed by say 3 minutes, but it is a
 signal, rather than noise. Let us describe that layer as gt_120-5_in_3
 

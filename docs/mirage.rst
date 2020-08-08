@@ -244,18 +244,21 @@ A real world example with tenfold.com
   window, it depends on the metrics really, but it may not be noisy at 3 days
   resolution, even at the weekends.
 
-Mirage "normalizes"
+Mirage "smooths"
 -------------------
 
 Mirage is a "tuning" tool for seasonal metrics and it is important to understand
-that Mirage is probably using aggregated data (unless your Graphite is not using
-retentions and aggregating) and due to this Mirage will lose some resolution
-resulting in it being less sensitive to anomalies than Analyzer is.
+that Mirage is probably using aggregated/downsampled data (unless your Graphite
+is not using multiple retentions and aggregating) and due to this Mirage can
+lose some resolution if your metrics are set to `aggregationMethod = average` in
+Graphite, resulting in it being less sensitive to anomalies than Analyzer is.
 
-So Mirage does some "normalizing" if your have aggregations in Graphite (e.g
-retentions), however it is analyzing the timeseries at the aggregated resolution
-so it is "normalised" as the data point that Analyzer triggered on is ALSO
-aggregated in the timeseries resolution that Mirage is analyzing.
+So Mirage does some "smoothing" if the data is crossing a retention boundary and
+you have aggregations in Graphite.  However it is analyzing the time series at
+the aggregated resolution so it is "smoothed" as the data point that Analyzer
+triggered on is ALSO aggregated in the time series resolution that Mirage is
+analyzing.
+
 Intuitively one may think it may miss it in the aggregation then.  This is true
 to an extent, but Analyzer will likely trigger multiple times if the metric
 **IS** anomalous, so when Analyzer pushes to Mirage again, each aggregation is

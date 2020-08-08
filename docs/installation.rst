@@ -9,7 +9,8 @@ Intended audience
 
 Skyline is not really a ``localhost`` application, it needs lots of data, unless
 you have a ``localhost`` Graphite or pickle Graphite to your localhost, however
-Skyline can run on localhost using Docker (experimental and not for production).
+Skyline can run on localhost using Docker (experimental, not for production and
+no longer maintained).
 
 Given the specific nature of Skyline, it is assumed that the audience will have
 a certain level of technical knowledge, e.g. it is assumed that the user will be
@@ -40,7 +41,7 @@ Skyline's default settings and documentation are aimed to run behind a SSL
 terminated and authenticated reverse proxy and use Redis authentication.  This
 makes the installation process more tedious, but it means that all these
 inconvenient factors are not left as an after thought or added to some TODO list
-or issue when you decide after trying Skyline, "Yes! I want to Skyline, this is
+or issue when you decide after trying Skyline, "Yes! I want Skyline, this is
 cool".
 
 For notes regarding automation and configuration management see the section at
@@ -77,11 +78,9 @@ Steps
 -----
 
 .. note:: All the documentation and testing is based on running Skyline in a
-  Python-2.7.16 virtualenv, if you choose to deploy Skyline another way, you are
+  Python-3.8.3 virtualenv, if you choose to deploy Skyline another way, you are
   on your own.  Although it is possible to run Skyline in a different type of
   environment, it does not lend itself to repeatability or a common known state.
-  Python-2.7.14 should still work as well, but all documentation has been
-  updated to use Python-2.7.16.
 
 Skyline configuration
 ~~~~~~~~~~~~~~~~~~~~~
@@ -102,9 +101,10 @@ Dawn
 Python virtualenv
 ~~~~~~~~~~~~~~~~~
 
-- Create a python-2.7.16 virtualenv for Skyline to run in see `Running in
-  Python virtualenv <running-in-python-virtualenv.html>`__ (Python-2.7.14 should
-  still work as well).
+- The first part of the installation is to build Python and create a
+  Python-3.8.3 virtualenv for Skyline to run in.  For this first step in the
+  installation process see and follow the steps laid out in
+  `Running Skyline in a Python virtualenv <running-in-python-virtualenv.html>`__
 
 Firewall
 ~~~~~~~~
@@ -122,16 +122,20 @@ Firewall
     in :mod:`settings.PANORAMA_DBPORT` (default 3306) is only accessible to
     specified IPs in iptables/ip6tables
   - Allow the IP address of your Graphite server/s on ports 2024 and 2025 (the
-    default Graphite pickle ports)
-  - The IP address and port being used by Redis, which if you are not running
-    multiple distributed Skyline instances should be 127.0.0.1, even if you are
-    running multiple distributed Skyline instances this can and still should be
-    127.0.0.1 as Skyline makes an API endpoint available to remote Skyline
-    instances for any required remote Redis data retrieval and preprocessing.
+    default Graphite to Skyline Horizon ports)
+  - The IP address and port being used by Redis should be mentioned here, just
+    in case you are NOT running Redis with `bind 127.0.0.1`.  You should be for
+    Skyline.  Consider only running Redis bound to the 127.0.0.1 interface.  If
+    you have some reason for wanting Redis accessible on any other IP read the
+    Redis section below, specifically the review https://redis.io/topics/security
+    part.  Even if you are running multiple distributed Skyline instances Redis
+    should still be bound to 127.0.0.1 only, as Skyline makes an API endpoint
+    available to remote Skyline instances for any required remote Redis data
+    retrieval and preprocessing.
   - If you are going to run Vista and Flux, ensure that the Skyline IP is
     allowed to connect to the Graphite node on the `PICKLE_RECEIVER_PORT`
   - Please ensure you handle all of these with iptables AND ip6tables (or the
-    equivalent) before continuing.
+    equivalent) **before continuing**.
 
 Redis
 ~~~~~
@@ -218,7 +222,7 @@ Skyline and dependencies install
     #cd /opt/skyline/github/skyline
     #git checkout <COMMITREF>
 
-- Once again using the Python-2.7.16 virtualenv,  install the requirements using
+- Once again using the Python-3.8.3 virtualenv,  install the requirements using
   the virtualenv pip, this can take some time.
 
 .. warning:: When working with virtualenv Python versions you must always
@@ -226,27 +230,16 @@ Skyline and dependencies install
   the correct version of Python.  Although running a virtualenv does not affect
   the system Python, not using activate can result in the user making errors
   that MAY affect the system Python and packages.  For example, a user does not
-  use activate and just uses pip not bin/pip2.7 and pip installs some packages.
+  use activate and just uses pip not bin/pip3 and pip installs some packages.
   User error can result in the system Python being affected.  Get in to the
-  habit of always using explicit bin/pip2.7 and bin/python2.7 commands to ensure
+  habit of always using explicit bin/pip3 and bin/python3 commands to ensure
   that it is harder for you to err.
-
-.. warning:: If you are running on CentOS 6 mysql-connector-python needs to be
-  fixed to 8.0.6 on CentOS 6 as if you use MySQL 5.1 rpm from mainstream, as of
-  mysql-connector-python 8.0.11 support for 5.1 was dropped and results in a bad
-  handshake error.  Further to this there is a reported vulnerability with
-  mysql-connector-python-8.0.6
-  High severity vulnerability found on mysql-connector-python-8.0.6
-  desc: Improper Access Control
-  info: https://snyk.io/vuln/SNYK-PYTHON-MYSQLCONNECTORPYTHON-173986
-  info: https://cve.mitre.org/cgi-bin/cvename.cgi?name=CVE-2019-2435
-  You have been advised, so now you know.
 
 .. code-block:: bash
 
-    PYTHON_MAJOR_VERSION="2.7"
+    PYTHON_MAJOR_VERSION="3"
     PYTHON_VIRTUALENV_DIR="/opt/python_virtualenv"
-    PROJECT="skyline-py2716"
+    PROJECT="skyline-py383"
 
     cd "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}"
     source bin/activate
@@ -257,31 +250,15 @@ Skyline and dependencies install
     bin/"pip${PYTHON_MAJOR_VERSION}" install $(cat /opt/skyline/github/skyline/requirements.txt | grep "^numpy\|^scipy\|^patsy" | tr '\n' ' ')
     bin/"pip${PYTHON_MAJOR_VERSION}" install $(cat /opt/skyline/github/skyline/requirements.txt | grep "^pandas")
 
-    # CentOS 6 ONLY
-    # mysql-connector-python needs to be fixed to 8.0.6 on CentOS 6 as it uses
-    # MySQL 5.1 rpm from mainstream, as of mysql-connector-python 8.0.11 support
-    # for 5.1 was dropped and results in a bad handshake error.
-    if [ -f /etc/redhat-release ]; then
-      CENTOS=$(cat /etc/redhat-release | grep -c "CentOS")
-      if [ $CENTOS -eq 1 ]; then
-        CENTOS_6=$(cat /etc/redhat-release | grep -c "release 6")
-        if [ $CENTOS_6 -eq 1 ]; then
-          echo "Replacing mysql-connector-python version in requirements.txt as CentOS 6 requires mysql-connector-python==8.0.6"
-          cat /opt/skyline/github/skyline/requirements.txt > /opt/skyline/github/skyline/requirements.txt.original
-          cat /opt/skyline/github/skyline/requirements.txt.original | sed -e 's/^mysql-connector-python==.*/mysql-connector-python==8\.0\.6/g' > /opt/skyline/github/skyline/requirements.txt.centos6
-          cat /opt/skyline/github/skyline/requirements.txt.centos6 > /opt/skyline/github/skyline/requirements.txt
-        fi
-      fi
-    fi
-
     # This can take lots of minutes...
     bin/"pip${PYTHON_MAJOR_VERSION}" install -r /opt/skyline/github/skyline/requirements.txt
 
     deactivate
 
+
 - Copy the ``skyline.conf`` and edit the ``USE_PYTHON`` as appropriate to your
   set up if it is not using PATH
-  ``/opt/python_virtualenv/projects/skyline-py2716/bin/python2.7``
+  ``/opt/python_virtualenv/projects/skyline-py383/bin/python3.8``
 
 .. code-block:: bash
 
@@ -291,11 +268,13 @@ Skyline and dependencies install
 Apache reverse proxy
 ~~~~~~~~~~~~~~~~~~~~
 
-- OPTIONAL but **recommended**, serving the Webapp via gunicorn with an Apache
-  reverse proxy.
+- OPTIONAL but **recommended**, serving the Webapp via gunicorn with Apache or
+  nginx reverse proxy.  Below highlights Apache but similar steps are required
+  with nginx.
 
   - Setup Apache (httpd) and see the example configuration file in your cloned
     directory ``/opt/skyline/github/skyline/etc/skyline.httpd.conf.d.example``
+    for nginx see ``/opt/skyline/github/skyline/etc/skyline.nginx.conf.d.example``
     modify all the ``<YOUR_`` variables as appropriate for you environment - see
     `Apache and gunicorn <webapp.html#apache-and-gunicorn>`__
   - Create a SSL certificate and update the SSL configurations in the Skyline
@@ -307,7 +286,7 @@ Apache reverse proxy
     SSLCertificateKeyFile "<YOUR_PATH_TO_YOUR_KEY_FILE>"
     SSLCertificateChainFile "<YOUR_PATH_TO_YOUR_CHAIN_FILE_IF_YOU_HAVE_ONE_OTHERWISE_COMMENT_THIS_LINE_OUT>"
 
-- Update your Apache (or reverse proxy config) with the X-Forwarded-Proto header.
+- Update your reverse proxy config with the X-Forwarded-Proto header.
 
 ::
 
@@ -324,7 +303,9 @@ Apache reverse proxy
   password that you provide in `settings.py` for
   :mod:`settings.WEBAPP_AUTH_USER` and :mod:`settings.WEBAPP_AUTH_USER_PASSWORD`
 
-- Deploy your Skyline Apache configuration file and restart httpd.
+- Deploy your Skyline Apache or nginx configuration file and restart httpd or
+  nginx
+
 
 Skyline database
 ~~~~~~~~~~~~~~~~
@@ -524,6 +505,6 @@ a few things need to be highlighted:
    updated with any new versions of packages (with the possible exception of
    pandas).  It is obviously possible to provision each requirement individually
    directly in configuration management and not use pip to ``install -r`` the
-   ``requirements.txt``, however remember the the virtualenv pip needs to be used
+   ``requirements.txt``, however remember that the virtualenv pip needs to be used
    and pandas needs a LONG timeout value, which not all package classes provide,
    if you use an exec of any sort, ensure the pandas install has a long timeout.

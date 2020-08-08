@@ -63,7 +63,7 @@ production.
 Flask has a Deploying Options sections that covers running Flask apps in
 production environments.  See http://flask.pocoo.org/docs/0.11/deploying/
 
-In addition to that, considering that the Webapp now has MySQL in the mix, this
+In addition to that, considering that the Webapp has MySQL in the mix, this
 element adds further reason to properly secure the environment.
 
 There is potential for XSS and SQL injection via the Webapp, ensure TRUSTED
@@ -81,19 +81,18 @@ virtualenv, therefore it keeps it within the Skyline Python environment, rather
 than offloading very complex Python and mod_wsgi compiles to the user,
 orchestration and package management.
 
-Apache is a common enough pattern and gunicorn can be handled within the Skyline
-package and requirements.txt
+Apache nd ngiinx are common webservers and gunicorn can be handled within the
+Skyline package and requirements.txt
 
-See ``etc/skyline.httpd.conf.d.example`` for an example of an Apache conf.d
-configuration file to serve the Webapp via gunicorn and reverse proxy on port
-443 with basic HTTP authentication and restricted IP access.  Note that your
-username and password must match in both the Apache htpasswd and the
-:mod:`settings.WEBAPP_AUTH_USER`/:mod:`settings.WEBAPP_AUTH_USER_PASSWORD`
-contexts as Apache will authenticate the user and forward on the authentication
-details to gunicorn for the Webapp to also authenticate the user.
-Authentication is enabled by default in ``settings.py``.
-
-Feel free to use nginx, lighttpd, et al.
+See ``etc/skyline.httpd.conf.d.example`` or ``etc/skyline.nginx.conf.d.example``
+for examples Apache aand ngnx conf.d configuration files to serve the Webapp via
+gunicorn and reverse proxy on port 443 with basic HTTP authentication and
+restricted IP access.  Note that your username and password must match in both
+the Apache htpasswd and the :mod:`settings.WEBAPP_AUTH_USER`/
+:mod:`settings.WEBAPP_AUTH_USER_PASSWORD` contexts as Apache/nginx will
+authenticate the user and forward on the authentication details to gunicorn for
+the Webapp to also authenticate the user.  Authentication is enabled by default
+in ``settings.py``.
 
 Securing the Webapp
 ===================

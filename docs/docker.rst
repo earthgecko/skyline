@@ -1,7 +1,19 @@
-docker - EXPERIMENTAL
-=====================
+docker - EXPERIMENTAL AND NO LONGER MAINTAINED
+==============================================
 
 *NOT SUITABLE FOR PRODUCTION*
+
+No longer maintained
+--------------------
+
+Running Skyline on docker is possible but it is no longer maintained.  It is a
+very complex pattern that is not realistic to maintain with every release,
+building, testing and updating deps, building new dockerrr layers every time a
+change is made... who can be bothered?  Add to that supporting the divergence of
+all things container is not something that aids or has anything to do with
+anomaly detection.  Therefore dealing with docker, docker-composer, podman,
+buildah, skopeo, runc, k8s and all the other container facets is no longer
+being maintained.
 
 Why docker was added
 --------------------
@@ -98,9 +110,9 @@ The data for the Skyline, Graphite, Redis and MySQL containers are persisted in
 the below patterns.
 
 There is a convenience build script for testing purposes only in
-utils/dawn/skyline.docker.dawn.sh see see
-`Development - dawn-docker <development/dawn-docker.html>`__ section or you can
-follow the simple steps below.
+utils/dawn/skyline.docker.dawn.sh see
+`Development - dawn-docker <development/dawn-docker.html>`__ section (NO LONGER
+MAINTAINED) or you can follow the simple steps below.
 
 .. note:: Ensure you provide the appropriate ownership and permissions to the
   below specified directories for the user you wish to run the Skyline process

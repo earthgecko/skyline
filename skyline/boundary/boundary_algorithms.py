@@ -137,7 +137,7 @@ def greater_than(timeseries, metric_name, metric_expiration_time, metric_min_ave
 
     if timeseries[-1][1] > metric_trigger:
         if ENABLE_BOUNDARY_DEBUG:
-            logger.debug('debug :: grater_than - %s grater_than %s' % (
+            logger.debug('debug :: greater_than - %s greater_than %s' % (
                 str(timeseries[-1][1]), str(metric_trigger)))
         return True
 
