@@ -1132,9 +1132,88 @@ class Mirage(Thread):
             cache_key = 'mirage.last_alert.smtp.%s' % (base_name)
             last_alert = False
             try:
-                last_alert = self.redis_conn.get(cache_key)
+                # @modified 20200805 - Task #3662: Change mirage.last_check keys to timestamp value
+                #                      Feature #3486: analyzer_batch
+                #                      Feature #3480: batch_processing
+                # Changed the last_alert cache key to hold the last
+                # anomaly timestamp
+                # last_alert = self.redis_conn.get(cache_key)
+                last_alert = self.redis_conn_decoded.get(cache_key)
             except Exception as e:
                 logger.error('error :: could not query Redis for cache_key: %s' % str(e))
+
+            # @added 20200805 - Task #3662: Change mirage.last_check keys to timestamp value
+            #                   Feature #3486: analyzer_batch
+            #                   Feature #3480: batch_processing
+            # Evaluate the reported anomaly timestamp to determine whether
+            # EXPIRATION_TIME should be applied to a batch metric
+            if last_alert:
+                # Is this a analyzer_batch related anomaly
+                analyzer_batch_anomaly = None
+                analyzer_batch_metric_anomaly_key = 'analyzer_batch.anomaly.%s.%s' % (
+                    str(int_metric_timestamp), base_name)
+                try:
+                    analyzer_batch_anomaly = self.redis_conn_decoded.get(analyzer_batch_metric_anomaly_key)
+                except Exception as e:
+                    logger.error(
+                        'error :: could not query cache_key - %s - %s' % (
+                            analyzer_batch_metric_anomaly_key, e))
+                    analyzer_batch_anomaly = None
+                if analyzer_batch_anomaly:
+                    logger.info('identified as an analyzer_batch triggered anomaly from the presence of the Redis key %s' % analyzer_batch_metric_anomaly_key)
+                else:
+                    logger.info('not identified as an analyzer_batch triggered anomaly as no Redis key found - %s' % analyzer_batch_metric_anomaly_key)
+                if last_alert and analyzer_batch_anomaly:
+                    mirage_metrics_expiration_times = []
+                    try:
+                        mirage_metrics_expiration_times = list(self.redis_conn_decoded.smembers('mirage.metrics_expiration_times'))
+                        if LOCAL_DEBUG:
+                            logger.info('debug :: fetched the mirage.metrics_expiration_times Redis set')
+                    except:
+                        logger.info('failed to fetch the mirage.metrics_expiration_times Redis set')
+                        mirage_metrics_expiration_times = []
+                    metric_expiration_time = 3600
+                    try:
+                        for item_list_string in mirage_metrics_expiration_times:
+                            mirage_alert_expiration_data = literal_eval(item_list_string)
+                            if mirage_alert_expiration_data[0] == base_name:
+                                metric_expiration_time = int(mirage_alert_expiration_data[1])
+                                break
+                    except:
+                        if LOCAL_DEBUG:
+                            logger.error('error :: failed to determine mirage_alert_expiration_data for %s from the mirage.metrics_expiration_times Redis set' % str(base_name))
+                        metric_expiration_time = 3600
+                    last_timestamp = None
+                    try:
+                        last_timestamp = int(last_alert)
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to determine last_timestamp from the last Mirage alert key - %s' % cache_key)
+                        last_timestamp = None
+                    seconds_between_batch_anomalies = None
+                    if last_timestamp:
+                        try:
+                            seconds_between_batch_anomalies = int(int_metric_timestamp) - int(last_timestamp)
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: failed to determine seconds_between_batch_anomalies for batch metric Panorama key- %s' % cache_key)
+                            last_timestamp = None
+                    if seconds_between_batch_anomalies:
+                        if seconds_between_batch_anomalies > int(metric_expiration_time):
+                            logger.info('the difference between the last anomaly timestamp (%s) and the batch anomaly timestamp (%s) for batch metric %s is greater than the metric EXPIRATION_TIME of %s' % (
+                                str(last_timestamp), str(int_metric_timestamp), base_name,
+                                str(metric_expiration_time)))
+                            logger.info('alerting on anomaly for batch metric %s, so setting last_alert to None' % (
+                                metric))
+                            last_alert = None
+                        else:
+                            logger.info('the difference between the last anomaly timestamp (%s) and the batch anomaly timestamp (%s) for batch metric %s is less than the metric EXPIRATION_TIME of %s, not alerting' % (
+                                str(last_timestamp), str(int_metric_timestamp), base_name,
+                                str(metric_expiration_time)))
+                        if int(int_metric_timestamp) < last_timestamp:
+                            logger.info('batch anomaly timestamp (%s) less than the last_check timestamp (%s), alerting on anomaly for batch metric %s, so setting last_alert to None' % (
+                                str(int_metric_timestamp), str(last_timestamp), base_name))
+                            last_alert = None
 
             # @added 20170308 - Feature #1960: ionosphere_layers
             # Allow Ionosphere to send Panorama checks, it is an ionosphere_metric
@@ -2214,7 +2293,77 @@ class Mirage(Thread):
                             cache_key = 'mirage.last_alert.%s.%s' % (alert[1], metric[1])
 
                         try:
-                            last_alert = self.redis_conn.get(cache_key)
+                            # @modified 20200805 - Task #3662: Change mirage.last_check keys to timestamp value
+                            #                      Feature #3486: analyzer_batch
+                            #                      Feature #3480: batch_processing
+                            # Changed the last_alert cache key to hold the last
+                            # anomaly timestamp
+                            # last_alert = self.redis_conn.get(cache_key)
+                            last_alert = self.redis_conn_decoded.get(cache_key)
+
+                            # @added 20200805 - Task #3662: Change mirage.last_check keys to timestamp value
+                            #                   Feature #3486: analyzer_batch
+                            #                   Feature #3480: batch_processing
+                            # Evaluate the reported anomaly timestamp to determine whether
+                            # EXPIRATION_TIME should be applied to a batch metric
+                            if last_alert:
+                                # Is this a analyzer_batch related anomaly
+                                analyzer_batch_anomaly = None
+                                metric_timestamp = metric[2]
+                                analyzer_batch_metric_anomaly_key = 'analyzer_batch.anomaly.%s.%s' % (
+                                    str(metric_timestamp), metric[1])
+                                try:
+                                    analyzer_batch_anomaly = self.redis_conn_decoded.get(analyzer_batch_metric_anomaly_key)
+                                except Exception as e:
+                                    logger.error(
+                                        'error :: could not query cache_key - %s - %s' % (
+                                            analyzer_batch_metric_anomaly_key, e))
+                                    analyzer_batch_anomaly = None
+                                if analyzer_batch_anomaly:
+                                    logger.info('identified as an analyzer_batch triggered anomaly from the presence of the Redis key %s' % analyzer_batch_metric_anomaly_key)
+                                else:
+                                    logger.info('not identified as an analyzer_batch triggered anomaly as no Redis key found - %s' % analyzer_batch_metric_anomaly_key)
+                                if last_alert and analyzer_batch_anomaly:
+                                    last_timestamp = None
+                                    try:
+                                        last_timestamp = int(last_alert)
+                                    except:
+                                        logger.error(traceback.format_exc())
+                                        logger.error('error :: failed to determine last_timestamp from the last Mirage alert key - %s' % cache_key)
+                                        last_timestamp = None
+                                    seconds_between_batch_anomalies = None
+                                    if last_timestamp:
+                                        try:
+                                            seconds_between_batch_anomalies = int(metric_timestamp) - int(last_timestamp)
+                                        except:
+                                            logger.error(traceback.format_exc())
+                                            logger.error('error :: failed to determine seconds_between_batch_anomalies for batch metric Panorama key- %s' % cache_key)
+                                            last_timestamp = None
+                                    if seconds_between_batch_anomalies:
+                                        if seconds_between_batch_anomalies > int(alert[2]):
+                                            logger.info('the difference between the last anomaly timestamp (%s) and the batch anomaly timestamp (%s) for batch metric %s is greater than the metric EXPIRATION_TIME of %s' % (
+                                                str(last_timestamp), str(metric_timestamp), metric[1],
+                                                str(alert[2])))
+                                            logger.info('alerting on anomaly for batch metric %s, so setting last_alert to None' % (
+                                                metric))
+                                            last_alert = None
+                                        else:
+                                            logger.info('the difference between the last anomaly timestamp (%s) and the batch anomaly timestamp (%s) for batch metric %s is less than the metric EXPIRATION_TIME of %s, not alerting' % (
+                                                str(last_timestamp), str(metric_timestamp), metric[1],
+                                                str(alert[2])))
+
+                                        # @added 20200805 - Task #3662: Change mirage.last_check keys to timestamp value
+                                        #                   Task #3562: Change panorama.last_check keys to timestamp value
+                                        #                   Feature #3486: analyzer_batch
+                                        #                   Feature #3480: batch_processing
+                                        # If the metric is a batch processing metric and the anomaly
+                                        # timestamp is less than the last_check timestamp, insert
+                                        # the anomaly
+                                        if int(metric_timestamp) < last_timestamp:
+                                            logger.info('batch anomaly timestamp (%s) less than the last_check timestamp (%s), alerting on anomaly for batch metric %s, so setting last_alert to None' % (
+                                                str(metric_timestamp), str(last_timestamp), metric))
+                                            last_alert = None
+
                             if not last_alert:
                                 if ionosphere_alerts_returned:
                                     # @modified 20190410 - Feature #2882: Mirage - periodic_check
@@ -2235,7 +2384,23 @@ class Mirage(Thread):
                                 # @modified 20190524 - Branch #3002
                                 # Wrapped in try except
                                 try:
-                                    self.redis_conn.setex(cache_key, alert[2], packb(metric[0]))
+                                    # @modified 20200805 - Task #3662: Change mirage.last_check keys to timestamp value
+                                    #                      Feature #3486: analyzer_batch
+                                    #                      Feature #3480: batch_processing
+                                    # Change the last_alert cache key to hold the
+                                    # the anomaly timestamp for which the alert
+                                    # was sent, not the packb anomaly value.
+                                    # Using the timestamp of the anomaly allows
+                                    # it to be used to determine if a batch
+                                    # anomaly should be alerted on based on the
+                                    # comparison of the timestamps rather than
+                                    # just the presence of the last_alert key
+                                    # based on it not having reach its TTL as
+                                    # analyzer_batch could send multiple
+                                    # anomalies in one batch that might be
+                                    # EXPIRATION_TIME apart.
+                                    # self.redis_conn.setex(cache_key, alert[2], packb(metric[0]))
+                                    self.redis_conn.setex(cache_key, str(alert[2]), int(metric[2]))
                                 except:
                                     logger.error(traceback.format_exc())
                                     logger.error('error :: failed to set Redis key %s for %s' % (
@@ -2360,6 +2525,52 @@ class Mirage(Thread):
                 logger.info('sent_to_ionosphere :: %s' % sent_to_ionosphere)
                 send_metric_name = '%s.sent_to_ionosphere' % skyline_app_graphite_namespace
                 send_graphite_metric(skyline_app, send_metric_name, sent_to_ionosphere)
+
+            # @added 20200805 - Task #3662: Change mirage.last_check keys to timestamp value
+            #                   Feature #3486: analyzer_batch
+            #                   Feature #3480: batch_processing
+            # Add the mirage metric and its EXPIRATION_TIME to
+            # the mirage.metrics_expiration_times so that Mirage
+            # can determine the metric EXPIRATION_TIME without
+            # having to create and iterate the all_alerts
+            # object in the Mirage analysis phase so that the
+            # reported anomaly timestamp can be used to determine
+            # whether the EXPIRATION_TIME should be applied to a
+            # batch metric in the alerting and Ionosphere contexts
+            mirage_metrics_expiration_times = []
+            try:
+                mirage_metrics_expiration_times = list(self.redis_conn_decoded.smembers('mirage.metrics_expiration_times'))
+                if LOCAL_DEBUG:
+                    logger.info('debug :: fetched the mirage.metrics_expiration_times Redis set')
+            except:
+                logger.info('failed to fetch the mirage.metrics_expiration_times Redis set')
+                mirage_metrics_expiration_times = []
+            try:
+                mirage_unique_metrics = list(self.redis_conn_decoded.smembers('mirage.unique_metrics'))
+                mirage_unique_metrics_count = len(mirage_unique_metrics)
+                logger.info('mirage.unique_metrics Redis set count - %s' % str(mirage_unique_metrics_count))
+                if LOCAL_DEBUG:
+                    logger.info('debug :: fetched the mirage.unique_metrics Redis set')
+                    logger.info('debug :: %s' % str(mirage_unique_metrics))
+            except:
+                logger.info('failed to fetch the mirage.unique_metrics Redis set')
+                mirage_unique_metrics == []
+            for metric in mirage_unique_metrics:
+                if metric.startswith(settings.FULL_NAMESPACE):
+                    base_name = metric.replace(settings.FULL_NAMESPACE, '', 1)
+                else:
+                    base_name = metric
+
+                mirage_alert_expiration_data = [base_name, int(alert[2])]
+                if str(mirage_alert_expiration_data) not in mirage_metrics_expiration_times:
+                    try:
+                        self.redis_conn.sadd('mirage.metrics_expiration_times', str(mirage_alert_expiration_data))
+                        if LOCAL_DEBUG:
+                            logger.info('debug :: added %s to mirage.metrics_expiration_times' % str(mirage_alert_expiration_data))
+                    except:
+                        if LOCAL_DEBUG:
+                            logger.error('error :: failed to add %s to mirage.metrics_expiration_times set' % str(mirage_alert_expiration_data))
+
 
             # Reset counters
             # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage

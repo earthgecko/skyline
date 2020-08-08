@@ -2829,12 +2829,30 @@ class Analyzer(Thread):
                                 except:
                                     if LOCAL_DEBUG:
                                         logger.error('error :: failed to add %s to mirage.unique_metrics set' % metric)
-
                                 try:
                                     key_timestamp = int(time())
                                     self.redis_conn.setex('analyzer.manage_mirage_unique_metrics', 300, key_timestamp)
                                 except:
                                     logger.error('error :: failed to set key :: analyzer.manage_mirage_unique_metrics')
+                                # @added 20200805 - Task #3662: Change mirage.last_check keys to timestamp value
+                                #                   Feature #3486: analyzer_batch
+                                #                   Feature #3480: batch_processing
+                                # Add the mirage metric and its EXPIRATION_TIME to
+                                # the mirage.metrics_expiration_times so that Mirage
+                                # can determine the metric EXPIRATION_TIME without
+                                # having to create and iterate the all_alerts
+                                # object in the Mirage analysis phase so that the
+                                # reported anomaly timestamp can be used to determine
+                                # whether the EXPIRATION_TIME should be applied to a
+                                # batch metric in the alerting and Ionosphere contexts
+                                mirage_alert_expiration_data = [base_name, int(alert[2])]
+                                try:
+                                    self.redis_conn.sadd('mirage.metrics_expiration_times', str(mirage_alert_expiration_data))
+                                    if LOCAL_DEBUG:
+                                        logger.info('debug :: added %s to mirage.metrics_expiration_times' % str(mirage_alert_expiration_data))
+                                except:
+                                    if LOCAL_DEBUG:
+                                        logger.error('error :: failed to add %s to mirage.metrics_expiration_times set' % str(mirage_alert_expiration_data))
 
                     # @added 20200723 - Feature #3560: External alert config
                     # Add debug count
