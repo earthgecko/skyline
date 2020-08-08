@@ -1042,6 +1042,15 @@ class Ionosphere(Thread):
         if settings.ENABLE_IONOSPHERE_DEBUG:
             logger.info('debug :: failed_check_file - %s' % failed_check_file)
 
+        # @added 20200807 - Feature #3486: analyzer_batch
+        #                   Feature #3480: batch_processing
+        # From batch_processing metrics the learn check is being added and
+        # removed as the learn check for batch metrics happens immediately as
+        # the learn after duration can have passed.  To the check file needs to
+        # be loaded to determine if was added by ionosphere_learn before the
+        # check is just removed.
+        removed_check_file_work_done = False
+
         # @added 20170307 - Feature #1960: ionosphere_layers - ionosphere_check_cache_key
         # This Redis cache key check was added to prevent Ionosphere from
         # running riot on checks if for some reason the check_file is not
@@ -1063,10 +1072,15 @@ class Ionosphere(Thread):
             # logger.error('error :: failing check to prevent multiple iterations over this check')
             # fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             logger.info('a check cache key exists - %s' % (ionosphere_check_cache_key))
-            logger.info('to prevent multiple iterations over this check removing %s' % (
+            # @modified 20200807 - Feature #3480: batch_processing
+            # logger.info('to prevent multiple iterations over this check removing %s' % (
+            logger.info('to prevent multiple iterations over this check it will be removed if not added by ionosphere_learn - %s' % (
                 str(metric_check_file)))
-            self.remove_metric_check_file(str(metric_check_file))
-            return
+            # self.remove_metric_check_file(str(metric_check_file))
+            # return
+            # @added 20200807 - Feature #3480: batch_processing
+            removed_check_file_work_done = True
+
         try:
             check_process_start = int(time())
             # @modified 20190412 - Task #2824: Test redis-py upgrade
@@ -1236,6 +1250,21 @@ class Ionosphere(Thread):
         # @added 20170117 - Feature #1854: Ionosphere learn - generations
         if str(added_by) == 'ionosphere_learn':
             logger.info('debug :: metric variable - added_by - %s' % added_by)
+
+            # @added 20200807 - Feature #3486: analyzer_batch
+            #                   Feature #3480: batch_processing
+            if removed_check_file_work_done:
+                logger.info('this check was added by ionosphere_learn so not removing check even though a check done Redis key exists')
+                removed_check_file_work_done = False
+
+        # @added 20200807 - Feature #3486: analyzer_batch
+        #                   Feature #3480: batch_processing
+        if removed_check_file_work_done:
+            logger.info('a check cache key exists and the check was not added by ionosphere_learn - %s' % (ionosphere_check_cache_key))
+            logger.info('to prevent multiple iterations over this check removing %s' % (
+                str(metric_check_file)))
+            self.remove_metric_check_file(str(metric_check_file))
+            return
 
         # @added 20200413 - Feature #3486: analyzer_batch
         #                   Feature #3480: batch_processing
