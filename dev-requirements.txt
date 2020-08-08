@@ -10,8 +10,11 @@ wheel
 #hiredis==0.2.0
 # @modified 20190822 - Task #3060: Update dependencies
 #redis==3.2.1
-redis==3.3.8
-hiredis==1.0.0
+# @modified 20200701 - Task #3608: Update Skyline to Python 3.8.3 and deps
+#redis==3.3.8
+#hiredis==1.0.0
+redis==3.5.3
+hiredis==1.0.1
 
 ## python-daemon and deps
 # @modified 20161224 - Task #1758: Update deps in Ionosphere
@@ -20,7 +23,9 @@ hiredis==1.0.0
 #docutils==0.13.1
 # @modified 20190822 - Task #3060: Update dependencies
 #docutils==0.14
-docutils==0.15.2
+# @modified 20200701 - Task #3608: Update Skyline to Python 3.8.3 and deps
+#docutils==0.15.2
+docutils==0.16
 
 lockfile==0.12.2
 # @modified 20161119 - Branch #922: ionosphere
@@ -30,7 +35,9 @@ lockfile==0.12.2
 #python-daemon==2.1.2
 # @modified 20190411 - Task #2926: Update dependencies
 #python-daemon==2.2.0
-python-daemon==2.2.3
+# @modified 20200701 - Task #3608: Update Skyline to Python 3.8.3 and deps
+#python-daemon==2.2.3
+python-daemon==2.2.4
 
 ## Flask and deps
 # @modified 20190412 - Task #2926: Update dependencies
@@ -44,7 +51,9 @@ itsdangerous==1.1.0
 #Jinja2==2.9.6
 # @modified 20190411 - Task #2926: Update dependencies
 #Jinja2==2.10
-Jinja2==2.10.1
+# @modified 20200701 - Task #3608: Update Skyline to Python 3.8.3 and deps
+#Jinja2==2.10.1
+Jinja2==2.11.2
 
 # @modified 20190412 - Task #2926: Update dependencies
 #MarkupSafe==1.0
@@ -63,13 +72,17 @@ MarkupSafe==1.1.1
 #Werkzeug==0.15.2
 # @modified 20190822 - Task #3060: Update dependencies
 #Werkzeug==0.15.4
-Werkzeug==0.15.5
+# @modified 20200701 - Task #3608: Update Skyline to Python 3.8.3 and deps
+#Werkzeug==0.15.5
+Werkzeug==1.0.1
 
 # @modified 20180105 - Task #2272: update deps for luminosity branch
 #click==6.6
 # @modified 20190412 - Task #2926: Update dependencies
 #click==6.7
-click==7.0
+# @modified 20200701 - Task #3608: Update Skyline to Python 3.8.3 and deps
+#click==7.0
+click==7.1.2
 
 # @modified 20161224 - Task #1758: Update deps in Ionosphere
 #Flask==0.11.1
@@ -81,7 +94,9 @@ click==7.0
 #Flask==1.0.2
 # @modified 20190822 - Task #3060: Update dependencies
 #Flask==1.0.3
-Flask==1.1.1
+# @modified 20200701 - Task #3608: Update Skyline to Python 3.8.3 and deps
+#Flask==1.1.1
+Flask==1.1.2
 
 # @modified 20161119 - Branch #922: ionosphere
 #                      Task #1758: Update deps in Ionosphere
@@ -100,7 +115,9 @@ simplejson==3.17.0
 #six==1.10.0
 # @modified 20190412 - Task #2926: Update dependencies
 #six==1.11.0
-six==1.12.0
+# @modified 20200701 - Task #3608: Update Skyline to Python 3.8.3 and deps
+#six==1.12.0
+six==1.15.0
 
 ## unittest2 and deps
 argparse==1.4.0
@@ -122,11 +139,15 @@ funcsigs==1.0.2
 #pbr==5.1.3
 # @modified 20190822 - Task #3060: Update dependencies
 #pbr==5.2.0
-pbr==5.4.2
+# @modified 20200701 - Task #3608: Update Skyline to Python 3.8.3 and deps
+#pbr==5.4.2
+pbr==5.4.5
 
 # @modified 20190529 - Task #3060: Update dependencies
 #mock==2.0.0
-mock==3.0.5
+# @modified 20200701 - Task #3608: Update Skyline to Python 3.8.3 and deps
+#mock==3.0.5
+mock==4.0.2
 
 # If python-2.6 is being used, distribute is probably still required
 #distribute
@@ -156,7 +177,9 @@ mock==3.0.5
 #numpy==1.16.2
 # @modified 20190529 - Task #3060: Update dependencies
 #numpy==1.16.3
-numpy==1.16.4
+# @modified 20200701 - Task #3608: Update Skyline to Python 3.8.3 and deps
+#numpy==1.16.4
+numpy==1.19.0
 
 ## scipy and deps
 # @modified 20160820 - Issue #23 Test dependency updates
@@ -176,7 +199,9 @@ numpy==1.16.4
 #scipy==1.1.0
 # @modified 20190822 - Task #3060: Update dependencies
 #scipy==1.2.1
-scipy==1.2.2
+# @modified 20200701 - Task #3608: Update Skyline to Python 3.8.3 and deps
+#scipy==1.2.2
+scipy==1.5.0
 
 ## matplotlib and co
 # @modified 20161119 - Branch #922: ionosphere
@@ -190,7 +215,9 @@ scipy==1.2.2
 #python-dateutil==2.7.2
 # @modified 20190412 - Task #2926: Update dependencies
 #python-dateutil==2.7.3
-python-dateutil==2.8.0
+# @modified 20200701 - Task #3608: Update Skyline to Python 3.8.3 and deps
+#python-dateutil==2.8.0
+python-dateutil==2.8.1
 
 # @modified 20160820 - Issue #23 Test dependency updates
 #pytz==2016.4
@@ -211,7 +238,9 @@ python-dateutil==2.8.0
 #pytz==2018.5
 # @modified 20190822 - Task #3060: Update dependencies
 #pytz==2019.1
-pytz==2019.2
+# @modified 20200701 - Task #3608: Update Skyline to Python 3.8.3 and deps
+#pytz==2019.2
+pytz==2020.1
 
 cycler==0.10.0
 # @modified 20160820 - Issue #23 Test dependency updates
@@ -225,7 +254,9 @@ cycler==0.10.0
 #pyparsing==2.2.0
 # @modified 20190822 - Task #3060: Update dependencies
 #pyparsing==2.4.0
-pyparsing==2.4.2
+# @modified 20200701 - Task #3608: Update Skyline to Python 3.8.3 and deps
+#pyparsing==2.4.2
+pyparsing==2.4.7
 
 # @modified 20160820 - Issue #23 Test dependency updates
 #matplotlib==1.5.1
@@ -242,7 +273,9 @@ pyparsing==2.4.2
 #matplotlib==2.2.2
 # @modified 20190412 - Task #2926: Update dependencies
 #matplotlib==2.2.3
-matplotlib==2.2.4
+# @modified 20200701 - Task #3608: Update Skyline to Python 3.8.3 and deps
+#matplotlib==2.2.4
+matplotlib==3.2.2
 
 ## pandas and deps
 # @modified 20161119 - Branch #922: ionosphere
@@ -260,7 +293,9 @@ matplotlib==2.2.4
 # Upgraded from 0.20.3, 0.22.0 was skipped due to #2274
 # @modified 20190411 - Task #2926: Update dependencies
 #pandas==0.23.4
-pandas==0.24.2
+# @modified 20200701 - Task #3608: Update Skyline to Python 3.8.3 and deps
+#pandas==0.24.2
+pandas==0.25.3
 
 # @modified 20180416 - Task #2272: update deps for luminosity branch
 #patsy==0.4.1
@@ -289,7 +324,9 @@ patsy==0.5.1
 #statsmodels==0.9.0; python_version >= '3.6'
 # @modified 20190822 - Task #3060: Update dependencies
 #statsmodels==0.9.0
-statsmodels==0.10.1
+# @modified 20200701 - Task #3608: Update Skyline to Python 3.8.3 and deps
+#statsmodels==0.10.1
+statsmodels==0.11.1
 
 # @modified 20160820 - Issue #23 Test dependency updates
 #msgpack-python==0.4.7
@@ -317,7 +354,9 @@ msgpack-python==0.5.6
 #requests==2.20.0
 # @modified 20190529 - Task #3060: Update dependencies
 #requests==2.21.0
-requests==2.22.0
+# @modified 20200701 - Task #3608: Update Skyline to Python 3.8.3 and deps
+#requests==2.22.0
+requests==2.24.0
 
 # ALERTERS - uncomment any alerters you want to enable
 python-simple-hipchat==0.4.0
@@ -335,7 +374,9 @@ python-simple-hipchat==0.4.0
 #pygerduty==0.37.0
 # @modified 20190508 - Task #2926: Update dependencies
 #pygerduty==0.38.1
-pygerduty==0.38.2
+# @modified 20200701 - Task #3608: Update Skyline to Python 3.8.3 and deps
+#pygerduty==0.38.2
+pygerduty==0.38.3
 
 # for panorama - direct from MySQL as the package has broken in the context of
 # pip and virtualenv - NOTE: once you have installed this once, if it is run in
@@ -364,14 +405,18 @@ pygerduty==0.38.2
 #mysql-connector-python==8.0.6
 # @modified 20190426 - Task #2964: Update dependencies
 #mysql-connector-python==8.0.15
-mysql-connector-python==8.0.16
+# @modified 20200701 - Task #3608: Update Skyline to Python 3.8.3 and deps
+#mysql-connector-python==8.0.16
+mysql-connector-python==8.0.20
 
 # For a production WSGI HTTP Server for the Webapp
 # @modified 20170809 - Task #2138: Update deps
 #gunicorn==19.6.0
 # @modified 20180910 - Task #2588: Update dependencies
 #gunicorn==19.7.1
-gunicorn==19.9.0
+# @modified 20200701 - Task #3608: Update Skyline to Python 3.8.3 and deps
+#gunicorn==19.9.0
+gunicorn==20.0.4
 
 # For dependencies management and helpful for debugging
 # @modified 20161119 - Branch #922: ionosphere
@@ -385,7 +430,9 @@ gunicorn==19.9.0
 #pipdeptree==0.12.1
 # @modified 20190412 - Task #2926: Update dependencies
 #pipdeptree==0.13.0
-pipdeptree==0.13.2
+# @modified 20200701 - Task #3608: Update Skyline to Python 3.8.3 and deps
+#pipdeptree==0.13.2
+pipdeptree==1.0.0
 
 # @added 20161119 - Branch #922: ionosphere
 ## tsfresh and deps
@@ -397,11 +444,15 @@ pipdeptree==0.13.2
 #scikit_learn==0.19.1
 # @modified 20190412 - Task #2926: Update dependencies
 #scikit_learn==0.19.2
-scikit_learn==0.20.3
+# @modified 20200701 - Task #3608: Update Skyline to Python 3.8.3 and deps
+#scikit_learn==0.20.3
+scikit-learn==0.23.1
 
 # @modified 20190412 - Task #2926: Update dependencies
 #future==0.16.0
-future==0.17.1
+# @modified 20200701 - Task #3608: Update Skyline to Python 3.8.3 and deps
+#future==0.17.1
+future==0.18.2
 
 # @modified 20161203 - Task #1658: Patterning Skyline Ionosphere - updated to tsfresh-0.3.0
 #tsfresh==0.1.2
@@ -438,14 +489,19 @@ termcolor==1.1.0
 # @modified 20190412 - Task #2926: Update dependencies
 #py==1.6.0
 #pytest==3.8.0
-py==1.8.0
+# @modified 20200701 - Task #3608: Update Skyline to Python 3.8.3 and deps
+#py==1.8.0
+py==1.9.0
+
 # @modified 20190426 - Task #2964: Update dependencies
 #pytest==4.4.0
 # @modified 20190529 - Task #3060: Update dependencies
 #pytest==4.4.1
 # @modified 20190822 - Task #3060: Update dependencies
 #pytest==4.5.0
-pytest==4.6.5
+# @modified 20200701 - Task #3608: Update Skyline to Python 3.8.3 and deps
+#pytest==4.6.5
+pytest==5.4.3
 
 # @added 20161130 - Branch #922: ionosphere
 ## sqlalchemy by this stage of the (no deps)
@@ -465,7 +521,9 @@ pytest==4.6.5
 #SQLAlchemy==1.3.3
 # @modified 20190822 - Task #3060: Update dependencies
 #SQLAlchemy==1.3.4
-SQLAlchemy==1.3.7
+# @modified 20200701 - Task #3608: Update Skyline to Python 3.8.3 and deps
+#SQLAlchemy==1.3.7
+SQLAlchemy==1.3.18
 
 # @added 20170809 - Task #2132: Optimise Ionosphere DB usage
 # @modified 20180416 - Task #2272: update deps for luminosity branch
@@ -474,7 +532,9 @@ SQLAlchemy==1.3.7
 #pymemcache==1.4.4
 # @modified 20190822 - Task #3060: Update dependencies
 #pymemcache==2.1.1
-pymemcache==2.2.2
+# @modified 20200701 - Task #3608: Update Skyline to Python 3.8.3 and deps
+#pymemcache==2.2.2
+pymemcache==3.2.0
 
 # @added 20180520 - Feature #2378: Add redis auth to Skyline and rebrow
 # pycrypto replaced with pycryptodome
@@ -501,7 +561,9 @@ git+git://github.com/earthgecko/luminol@d429044#egg=luminol
 #slackclient==1.3.0
 # @modified 20190822 - Task #3060: Update dependencies
 #slackclient==1.3.1
-slackclient==1.3.2
+# @modified 20200701 - Task #3608: Update Skyline to Python 3.8.3 and deps
+#slackclient==1.3.2
+slackclient==2.7.2
 
 # @added 20190412 - Task #2926: Update dependencies
 # Added to address CVE-2018-20060 as is required by requests at >=1.21.1,<1.25
@@ -513,7 +575,9 @@ slackclient==1.3.2
 #urllib3>=1.25.1
 # @modified 20190529 - Task #3060: Update dependencies
 #urllib3==1.24.3
-urllib3==1.25.3
+# @modified 20200701 - Task #3608: Update Skyline to Python 3.8.3 and deps
+#urllib3==1.25.3
+urllib3==1.25.9
 
 # @added 201906025 - Branch #956: flux
 graphyte==1.6.0
