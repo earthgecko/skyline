@@ -96,13 +96,14 @@ formats.  Tested date formats known to work:
     16-05-2020 11:00     # %d-%m-%Y %H:%M
     16-05-2020 11:00:00  # %d-%m-%Y %H:%M:%S
     2020/05/16 11:00:00  # %Y/%m/%d %H:%M:%S
+    1589623200           # unix timestamp
 
 Known incapable date format, this date format has failed to be interpreted as a
-date column in the ``pandas.to_datetime`` conversion:
+naive date column in the ``pandas.to_datetime`` conversion:
 
 ::
 
-    2020-05-16 11:00:00  # %d-%m-%Y %H:%M:%S
+    2020-05-16 11:00:00  # %Y-%m-%d %H:%M:%S
 
 **info.json**
 
