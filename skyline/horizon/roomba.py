@@ -49,7 +49,7 @@ python_version = int(sys.version_info[0])
 try:
     from settings import ROOMBA_DO_NOT_PROCESS_BATCH_METRICS
 except:
-    ROOMBA_DO_NOT_PROCESS_BATCH_METRICS = Fale
+    ROOMBA_DO_NOT_PROCESS_BATCH_METRICS = False
 try:
     from settings import BATCH_PROCESSING
 except:
