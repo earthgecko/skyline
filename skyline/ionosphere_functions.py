@@ -1607,7 +1607,11 @@ def get_correlations(current_skyline_app, anomaly_id):
         sorted_correlations = sorted(correlations, key=lambda x: x[1], reverse=True)
         correlations = sorted_correlations
 
-    del metrics_list
+    try:
+        del metrics_list
+    except:
+        pass
+
     return correlations, fail_msg, trace
 
 
@@ -1624,7 +1628,7 @@ def get_related(current_skyline_app, anomaly_id, anomaly_timestamp):
     :type anomaly_id: int
     :type anomaly_timestamp: int
     :return: list
-    :return: [[metric_name, related_timestamp],[metric_name, related_timestamp],...]
+    :return: [[metric_name, related_timestamp],[metric_name, related_timestamp],...], [[timestamp, label]]
     :rtype: [[str, int]]
     """
 
@@ -1633,6 +1637,9 @@ def get_related(current_skyline_app, anomaly_id, anomaly_timestamp):
     func_name = 'get_related'
 
     related = []
+
+    # @added 20200808 - Feature #3568: Ionosphere - report anomalies in training period
+    labelled_anomalies = []
 
     # @added 20200419 - Feature #3390: luminosity related anomalies
     #                   Branch #2270: luminosity
@@ -1722,5 +1729,61 @@ def get_related(current_skyline_app, anomaly_id, anomaly_timestamp):
         del metrics_list
         raise
 
-    del metrics_list
-    return related, fail_msg, trace
+    # @added 20200808 - Feature #3568: Ionosphere - report anomalies in training period
+    anomaly_details = []
+    try:
+        connection = engine.connect()
+        stmt = select([anomalies_table]).where(anomalies_table.c.id == anomaly_id)
+        results = connection.execute(stmt)
+        for row in results:
+            related_anomaly_id = row['id']
+            metric_id = row['metric_id']
+            metric_name = None
+            if metric_id:
+                metric_name_list = [metrics_list_name for metrics_list_id, metrics_list_name in metrics_list if int(metric_id) == int(metrics_list_id)]
+                metric_name = str(metric_name_list[0])
+            full_duration = row['full_duration']
+            anomaly_details = [int(anomaly_id), int(metric_id), str(metric_name), int(full_duration)]
+            break
+        connection.close()
+    except:
+        current_logger.error(traceback.format_exc())
+        current_logger.error('error :: could not determine anomaly details from DB for anomaly id -  %s' % str(anomaly_id))
+        if engine:
+            fp_create_engine_disposal(current_skyline_app, engine)
+        raise
+    if anomaly_details:
+        try:
+            from_timestamp = int(anomaly_timestamp) - int(full_duration)
+            until_timestamp = int(anomaly_timestamp) + 600
+            connection = engine.connect()
+            stmt = select([anomalies_table]).where(anomalies_table.c.metric_id == int(metric_id)).\
+                where(anomalies_table.c.anomaly_timestamp >= from_timestamp).\
+                where(anomalies_table.c.anomaly_timestamp < until_timestamp).\
+                where(anomalies_table.c.label.isnot(None)).\
+                where(anomalies_table.c.label != 'None')
+            results = connection.execute(stmt)
+            for row in results:
+                labelled_anomaly_id = row['id']
+                labelled_anomaly_creeated_timestamp = row['created_timestamp']
+                labelled_anomaly_timestamp = row['anomaly_timestamp']
+                labelled_anomaly_label = row['label']
+                labelled_anomalies.append([int(labelled_anomaly_id), labelled_anomaly_creeated_timestamp, int(labelled_anomaly_timestamp), labelled_anomaly_label])
+            connection.close()
+        except:
+            current_logger.error(traceback.format_exc())
+            current_logger.error('error :: could not determine anomaly details from DB for anomaly id -  %s' % str(anomaly_id))
+            if engine:
+                fp_create_engine_disposal(current_skyline_app, engine)
+            raise
+
+    try:
+        del metrics_list
+    except:
+        pass
+
+    # @modified 20200808 - Feature #3568: Ionosphere - report anomalies in training period
+    # return related, fail_msg, trace
+    if len(labelled_anomalies) == 0:
+        labelled_anomalies = None
+    return related, labelled_anomalies, fail_msg, trace

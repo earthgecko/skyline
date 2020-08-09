@@ -4470,6 +4470,9 @@ def ionosphere():
                                 settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
                         correlations_with_graph_links.append([metric_name, coefficient, shifted, shifted_coefficient, str(correlation_graphite_link)])
 
+            # @added 20200808 - Feature #3568: Ionosphere - report anomalies in training period
+            labelled_anomalies = None
+
             # @added 20200113 - Feature #3390: luminosity related anomalies
             #                   Branch #2270: luminosity
             related = False
@@ -4477,7 +4480,9 @@ def ionosphere():
             related_matches = []
             if p_id:
                 try:
-                    related, fail_msg, trace = get_related(skyline_app, p_id, requested_timestamp)
+                    # @modified 20200808 - Feature #3568: Ionosphere - report anomalies in training period
+                    # related, fail_msg, trace = get_related(skyline_app, p_id, requested_timestamp)
+                    related, labelled_anomalies, fail_msg, trace = get_related(skyline_app, p_id, requested_timestamp)
                 except:
                     trace = traceback.format_exc()
                     fail_msg = 'error :: Webapp error with get_related'
@@ -4533,6 +4538,9 @@ def ionosphere():
                             related_matches = []
                 if related_matches:
                     logger.info('%s possible related matches found' % (str(len(related_matches))))
+                # @added 20200808 - Feature #3568: Ionosphere - report anomalies in training period
+                if labelled_anomalies:
+                    logger.info('%s labelled anomalies found in the trying period' % (str(len(labelled_anomalies))))
 
             # @added 20190510 - Feature #2990: Add metrics id to relevant web pages
             # By this point in the request the previous function calls will have
@@ -4677,6 +4685,8 @@ def ionosphere():
                 anomalous_timeseries_length=anomalous_timeseries_length,
                 # @added 20200731 - Feature #3654: IONOSPHERE_GRAPHITE_NOW_GRAPHS_OVERRIDE
                 graphite_now_graphs_title=graphite_now_graphs_title,
+                # @added 20200808 - Feature #3568: Ionosphere - report anomalies in training period
+                labelled_anomalies=labelled_anomalies,
                 version=skyline_version, duration=(time.time() - start),
                 print_debug=debug_on), 200
         except:

@@ -725,6 +725,34 @@ and a metric is checking and found anomalous a number of times in a row.
     {% endif %}
   {% endif %}
 
+<!-- # @added 20200808 - Feature #3568: Ionosphere - report anomalies in training period -->
+    {% if labelled_anomalies == None %}
+		  <h4><span class="logo"><span class="sky">Labelled ::</span> <span class="re">anomalies :: </span></span>no labelled anomalies were found in the training period</h4>
+    {% else %}
+		  <h4><span class="logo"><span class="sky">Labelled ::</span> <span class="re">anomalies :: </span></span>labelled anomalies were found in the training period</h4>
+			<table class="table table-hover">
+				<thead>
+					<tr>
+<!-- [id, timestamp, label] -->
+            <th>id</th>
+            <th>created_timestamp</th>
+            <th>timestamp</th>
+            <th>label</th>
+					</tr>
+				</thead>
+				<tbody>
+    {% for item in labelled_anomalies %}
+          <tr>
+            <td>{{ item[0] }}</td>
+            <td>{{ item[1] }}</td>
+            <td>{{ item[2] }}</td>
+            <td>{{ item[3] }}</td>
+          </tr>
+    {% endfor %}
+				</tbody>
+			</table>
+    {% endif %}
+
   {% for image in metric_images %}
     {% if (( not '.redis.plot' in image) and ( not '.matplotlib' in image)) %}
       {% if metric_second_order_resolution_hours != False %}
