@@ -213,7 +213,7 @@ class Ionosphere(Thread):
         """
         Initialize Ionosphere
 
-        Define Redis and memcached connections
+        Define Redis, mysql and memcached connections
 
         """
         super(Ionosphere, self).__init__()

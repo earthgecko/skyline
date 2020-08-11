@@ -9,7 +9,12 @@ import datetime
 from time import sleep
 from ast import literal_eval
 import socket
-import pickle
+
+# @modified 20200808 - Task #3608: Update Skyline to Python 3.8.3 and deps
+# bandit [B403:blacklist] Consider possible security implications associated
+# with pickle module.  These have been considered.
+import pickle  # nosec
+
 import struct
 import shutil
 import glob

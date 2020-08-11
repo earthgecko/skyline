@@ -457,7 +457,15 @@ def alert_smtp(alert, metric, context):
                     #                      Branch #3262: py3
                     # request = urllib2.Request(link)
                     if python_version == 2:
-                        request = urllib2.Request(link)
+                        # @modified 20200808 - Task #3608: Update Skyline to Python 3.8.3 and deps
+                        # Added nosec for bandit [B310:blacklist] Audit url open for
+                        # permitted schemes. Allowing use of file:/ or custom schemes is
+                        # often unexpected.
+                        if link.lower().startswith('http'):
+                            request = urllib2.Request(link)  # nosec
+                        else:
+                            logger.error(
+                                'error :: %s :: link does not start with http - %s' % (str(link)))
                     if python_version == 3:
                         request = urllib.request(link)
                 # @modified 20191021 - Task #3290: Handle urllib2 in py3
@@ -1608,7 +1616,15 @@ def alert_slack(alert, metric, context):
                 #                      Branch #3262: py3
                 # request = urllib2.Request(link, headers=graphite_custom_headers)
                 if python_version == 2:
-                    request = urllib.Request(link, headers=graphite_custom_headers)
+                    # @modified 20200808 - Task #3608: Update Skyline to Python 3.8.3 and deps
+                    # Added nosec for bandit [B310:blacklist] Audit url open for
+                    # permitted schemes. Allowing use of file:/ or custom schemes is
+                    # often unexpected.
+                    if link.lower().startswith('http'):
+                        request = urllib.Request(link, headers=graphite_custom_headers)  # nosec
+                    else:
+                        logger.error(
+                            'error :: %s :: link does not start with http - %s' % (str(link)))
                 if python_version == 3:
                     request = urllib.request(link, headers=graphite_custom_headers)
             else:
@@ -1616,7 +1632,15 @@ def alert_slack(alert, metric, context):
                 #                      Branch #3262: py3
                 # request = urllib2.Request(link)
                 if python_version == 2:
-                    request = urllib2.Request(link)
+                    # @modified 20200808 - Task #3608: Update Skyline to Python 3.8.3 and deps
+                    # Added nosec for bandit [B310:blacklist] Audit url open for
+                    # permitted schemes. Allowing use of file:/ or custom schemes is
+                    # often unexpected.
+                    if link.lower().startswith('http'):
+                        request = urllib2.Request(link)  # nosec
+                    else:
+                        logger.error(
+                            'error :: %s :: link does not start with http - %s' % (str(link)))
                 if python_version == 3:
                     request = urllib.request(link)
             # @modified 20191021 - Task #3290: Handle urllib2 in py3
@@ -2249,16 +2273,16 @@ def trigger_alert(alert, metric, context):
     tuples.
 
     :param alert:
-        The alert tuple specified in settings.py.\n
-        alert[0]: The matched substring of the anomalous metric\n
-        alert[1]: the name of the strategy being used to alert\n
-        alert[2]: The timeout of the alert that was triggered\n
-        alert[3]: The second order resolution hours [optional for Mirage]\n
-    :param meric:
-        The metric tuple.\n
-        metric[0]: the anomalous value\n
-        metric[1]: The full name of the anomalous metric\n
-        metric[2]: anomaly timestamp\n
+        The alert tuple specified in settings.py e.g. ('stats.*', 'smtp', 3600, 168)\n
+        alert[0]: The matched substring of the anomalous metric (str)\n
+        alert[1]: the name of the strategy being used to alert (str)\n
+        alert[2]: The timeout of the alert that was triggered (int)\n
+        alert[3]: The second order resolution hours [optional for Mirage] (int)\n
+    :param metric:
+        The metric tuple e.g. (2.345, 'server-1.cpu.user', 1462172400)\n
+        metric[0]: the anomalous value (float)\n
+        metric[1]: The base_name of the anomalous metric (str)\n
+        metric[2]: anomaly timestamp (float or int)\n
     :param context: app name
     :type context: str
 

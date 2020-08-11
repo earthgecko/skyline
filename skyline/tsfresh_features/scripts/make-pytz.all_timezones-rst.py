@@ -27,14 +27,14 @@ pytz_version = pkg_resources.get_distribution('pytz').version
 # pytz_all_timezones = list(pytz.all_timezones)
 pytz_all_timezones = list(pytz.all_timezones)
 
-print colored('notice: skyline/tsfresh/scripts/make-pytz.all_timezones-rst.py is creating docs/development/pytz.rst', 'cyan')
+print(colored('notice: skyline/tsfresh/scripts/make-pytz.all_timezones-rst.py is creating docs/development/pytz.rst', 'cyan'))
 # Note: when developing with jupyter the __file__ is non-existent e.g.
 # not hasattr __file_, so
 try:
     script_path = os.path.dirname(__file__)
 except:
     print('You are running this in jupyter?')
-    print colored('warning: You are running this in jupyter?', 'yellow')
+    print(colored('warning: You are running this in jupyter?', 'yellow'))
 
     script_path = '/home/gary/sandbox/of/github/earthgecko/skyline/ionosphere/skyline/skyline/tsfresh/scripts'
 
@@ -98,22 +98,22 @@ full_page_text = '''%s
 # Test that the text is as expected
 if 'automatically generated' in full_page_text:
     test_text = True
-    print colored('notice: the expected automatically generated text was found in the full_page_text - OK', 'cyan')
+    print(colored('notice: the expected automatically generated text was found in the full_page_text - OK', 'cyan'))
 else:
     test_text = False
-    print colored('warning: the expected automatically generated text was not found in the full_page_text', 'yellow')
+    print(colored('warning: the expected automatically generated text was not found in the full_page_text', 'yellow'))
 
 if 'Greenwich' in full_page_text:
     test_pytz_text = True
-    print colored('notice: the expected pytz timezone text was found in the full_page_text - OK', 'cyan')
+    print(colored('notice: the expected pytz timezone text was found in the full_page_text - OK', 'cyan'))
 else:
     test_pytz_text = False
-    print colored('warning: the expected pytz timezone text was not found in the full_page_text', 'yellow')
+    print(colored('warning: the expected pytz timezone text was not found in the full_page_text', 'yellow'))
 
 try:
     with open(write_to_file, 'w') as fh:
         fh.write(full_page_text)
-    print colored('info: docs/development/pytz.rst created - OK', 'green')
+    print(colored('info: docs/development/pytz.rst created - OK', 'green'))
 except:
     print(traceback.format_exc())
-    print colored('error: an error was encountered creating docs/development/pytz.rst, please review.', 'red')
+    print(colored('error: an error was encountered creating docs/development/pytz.rst, please review.', 'red'))

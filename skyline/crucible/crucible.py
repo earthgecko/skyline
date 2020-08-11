@@ -831,9 +831,25 @@ class Crucible(Thread):
                     # Use urlretrieve
                     # image_data = urllib2.urlopen(image_url, timeout=image_url_timeout).read()  # nosec
                     if python_version == 2:
-                        urllib.urlretrieve(image_url, graphite_image_file)
+                        # @modified 20200808 - Task #3608: Update Skyline to Python 3.8.3 and deps
+                        # Added nosec for bandit [B310:blacklist] Audit url open for
+                        # permitted schemes. Allowing use of file:/ or custom schemes is
+                        # often unexpected.
+                        if image_url.lower().startswith('http'):
+                            urllib.urlretrieve(image_url, graphite_image_file)  # nosec
+                        else:
+                            logger.error(
+                                'error :: %s :: image_url does not start with http - %s' % (str(image_url)))
                     if python_version == 3:
-                        urllib.request.urlretrieve(image_url, graphite_image_file)
+                        # @modified 20200808 - Task #3608: Update Skyline to Python 3.8.3 and deps
+                        # Added nosec for bandit [B310:blacklist] Audit url open for
+                        # permitted schemes. Allowing use of file:/ or custom schemes is
+                        # often unexpected.
+                        if image_url.lower().startswith('http'):
+                            urllib.request.urlretrieve(image_url, graphite_image_file)  # nosec
+                        else:
+                            logger.error(
+                                'error :: %s :: image_url does not start with http - %s' % (str(image_url)))
                     logger.info('url OK - %s' % (image_url))
                 # except urllib2.URLError:
                 except:

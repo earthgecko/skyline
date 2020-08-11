@@ -53,7 +53,7 @@ def run():
     """
     Check that all the `ALGORITHMS` can be run.
 
-    Start the AnalyzerAgent.
+    Start the AnalyzerBatchAgent.
 
     Start the logger.
     """
