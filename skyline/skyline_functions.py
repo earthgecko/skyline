@@ -366,11 +366,27 @@ def get_graphite_graph_image(current_skyline_app, url=None, image_file=None):
         current_logger.info('%s :: get_graphite_graph_image :: saving %s to %s' % (
             str(current_skyline_app), str(url), str(image_file)))
         if python_version == 2:
-            urllib.urlretrieve(url, image_file)
-            os.chmod(image_file, 0o644)
+            # @modified 20200808 - Task #3608: Update Skyline to Python 3.8.3 and deps
+            # Added nosec for bandit [B310:blacklist] Audit url open for
+            # permitted schemes. Allowing use of file:/ or custom schemes is
+            # often unexpected.
+            if url.lower().startswith('http'):
+                urllib.urlretrieve(url, image_file)  # nosec
+                os.chmod(image_file, 0o644)
+            else:
+                current_logger.error(
+                    'error :: %s :: get_graphite_graph_image - url does not start with http - %s' % (str(url)))
         if python_version == 3:
-            urllib.request.urlretrieve(url, image_file)
-            os.chmod(image_file, mode=0o644)
+            # @modified 20200808 - Task #3608: Update Skyline to Python 3.8.3 and deps
+            # Added nosec for bandit [B310:blacklist] Audit url open for
+            # permitted schemes. Allowing use of file:/ or custom schemes is
+            # often unexpected.
+            if url.lower().startswith('http'):
+                urllib.request.urlretrieve(url, image_file)  # nosec
+                os.chmod(image_file, mode=0o644)
+            else:
+                current_logger.error(
+                    'error :: %s :: get_graphite_graph_image - url does not start with http - %s' % (str(url)))
         current_logger.info('%s :: get_graphite_graph_image :: saved %s to %s' % (
             str(current_skyline_app), str(url), str(image_file)))
     except:

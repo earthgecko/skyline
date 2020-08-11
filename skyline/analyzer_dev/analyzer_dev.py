@@ -657,7 +657,8 @@ class AnalyzerDev(Thread):
 
         if not os.path.exists(settings.SKYLINE_TMP_DIR):
             if python_version == 2:
-                os.makedirs(settings.SKYLINE_TMP_DIR, 0750)
+                # os.makedirs(settings.SKYLINE_TMP_DIR, 0750)
+                os.makedirs(settings.SKYLINE_TMP_DIR, mode=0o755)
             if python_version == 3:
                 os.makedirs(settings.SKYLINE_TMP_DIR, mode=0o750)
 

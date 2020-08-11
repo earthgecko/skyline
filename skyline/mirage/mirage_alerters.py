@@ -2022,16 +2022,16 @@ def trigger_alert(alert, metric, second_order_resolution_seconds, context):
     tuples.
 
     :param alert:
-        The alert tuple specified in settings.py.\n
-        alert[0]: The matched substring of the anomalous metric\n
-        alert[1]: the name of the strategy being used to alert\n
-        alert[2]: The timeout of the alert that was triggered\n
-        alert[3]: The SECOND_ORDER_RESOLUTION_HOURS in seconds\n
-    :param meric:
-        The metric tuple.\n
-        metric[0]: the anomalous value\n
-        metric[1]: The full name of the anomalous metric\n
-        metric[2]: anomaly timestamp\n
+        The alert tuple specified in settings.py e.g. ('stats.*', 'smtp', 3600, 168)\n
+        alert[0]: The matched substring of the anomalous metric (str)\n
+        alert[1]: the name of the strategy being used to alert (str)\n
+        alert[2]: The timeout of the alert that was triggered (int)\n
+        alert[3]: The second order resolution hours [optional for Mirage] (int)\n
+    :param metric:
+        The metric tuple e.g. (2.345, 'server-1.cpu.user', 1462172400)\n
+        metric[0]: the anomalous value (float)\n
+        metric[1]: The base_name of the anomalous metric (str)\n
+        metric[2]: anomaly timestamp (float or int)\n
     :param context: app name
     :type context: str
 

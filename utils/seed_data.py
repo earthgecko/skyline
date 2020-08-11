@@ -14,7 +14,10 @@ import msgpack
 # @added 20180823 - Bug #2552: seed_data.py testing with UDP does not work
 import random
 
-import pickle
+# @modified 20200808 - Task #3608: Update Skyline to Python 3.8.3 and deps
+# bandit [B403:blacklist] Consider possible security implications associated
+# with pickle module.  These have been considered.
+import pickle  # nosec
 import struct
 
 # Get the current working directory of this file.
@@ -169,8 +172,11 @@ def seed():
             datapoint[0] = initial
             initial += 1
             if initial >= (end_timestamp - 14):
-                # Send an anomalous data point
-                add_random = random.randint(18500, 24000)
+                # Send an anomalous data point, with random data apply nosec for
+                # bandit B311 blacklist - Standard pseudo-random generators are
+                # not suitable for security/cryptographic purposes, this is not
+                # for security/cryptographic purposes
+                add_random = random.randint(18500, 24000)  # nosec
                 original_value = int(datapoint[1])
                 anomalous_datapoint = original_value + add_random
                 datapoint[1] = float(anomalous_datapoint)
@@ -284,8 +290,11 @@ def seed():
             if initial >= (end_timestamp - 14):
                 # sleep a little so UDP does not drop the anomalous data points
                 time.sleep(0.4)
-                # Send an anomalous data point
-                add_random = random.randint(500, 2000)
+                # Send an anomalous data point with random data apply nosec for
+                # bandit B311 blacklist - Standard pseudo-random generators are
+                # not suitable for security/cryptographic purposes, this is not
+                # for security/cryptographic purposes
+                add_random = random.randint(500, 2000)  # nosec
                 original_value = int(datapoint[1])
                 if initial == (end_timestamp - 10):
                     anomalous_datapoint = int(datapoint[1]) + 8000

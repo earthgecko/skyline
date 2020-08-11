@@ -63,10 +63,10 @@ class AnalyzerDevAgent():
             pid = int(open(pidfile_path).read())
             try:
                 kill(pid, signal.SIGTERM)
-                print '%s pid %s stopped' % (skyline_app, str(pid))
+                print('%s pid %s stopped' % (skyline_app, str(pid)))
                 sys.exit(0)
-            except OSError, exc:
-                print 'Failed to kill pid %s' % str(pid)
+            except OSError as e:
+                print('Failed to kill pid %s - OSError %s' % (str(pid), str(e)))
                 sys.exit(1)
         else:
             logger.info('starting skyline ' + skyline_app)
@@ -101,10 +101,10 @@ def run():
         pid = int(open(pidfile_path).read())
         try:
             kill(pid, signal.SIGTERM)
-            print '%s pid %s stopped' % (skyline_app, str(pid))
+            print('%s pid %s stopped' % (skyline_app, str(pid)))
             sys.exit(0)
-        except OSError, exc:
-            print 'Failed to kill pid %s' % str(pid)
+        except OSError as e:
+            print('Failed to kill pid %s - OSError - %s' % (str(pid), str(e)))
             sys.exit(1)
 
     logger.setLevel(logging.DEBUG)
@@ -132,7 +132,7 @@ def run():
     valid_settings = validate_settings_variables(skyline_app)
 
     if not valid_settings:
-        print ('error :: invalid variables in settings.py - cannot start')
+        print('error :: invalid variables in settings.py - cannot start')
         sys.exit(1)
 
     if len(sys.argv) > 1 and sys.argv[1] == 'stop':
@@ -179,6 +179,7 @@ def run():
         do_not_overwrite_log = True
     else:
         logger.info('stopped analyzer_dev')
+
 
 if __name__ == '__main__':
     run()

@@ -251,6 +251,23 @@ def minmax_scale_check(
     fp_id_metric_ts, anomalous_timeseries, range_tolerance,
         range_tolerance_percentage, fp_id, base_name, metric_timestamp,
         features_percentage_diff):
+    """
+    Called by nothing yet.  Used to run a minmax scaling check and determine if
+    the features_sum of the 2 minmax scaled timeseries match.
+
+    :param fp_id_metric_ts:
+    :param anomalous_timeseries:
+    :param range_tolerance:
+    :param range_tolerance_percentage
+    :param fp_id:
+    :param base_name:
+    :param metric_timestamp:
+    :param features_percentage_diff:
+    :type fp_id_metric_ts: int
+    :return: (minmax_not_anomalous, minmax_fp_features_sum, minmax_fp_features_count, minmax_anomalous_features_sum, minmax_anomalous_features_count)
+    :rtype: tuple
+
+    """
 
     # @modified 20191115 - Branch #3262: py3
     # not_anomalous = False

@@ -3519,6 +3519,9 @@ def ionosphere():
                         # accessed
                         elif fp_search_req:
                             logger.info('IONOSPHERE_REQUEST_ARGS check - %s not in Redis, but fp_search request so continuing' % metric_name)
+                        # @added 20200808
+                        elif saved_training_data:
+                            logger.info('IONOSPHERE_REQUEST_ARGS check - %s not in Redis, but saved_training_data request so continuing' % metric_name)
                         else:
                             error_string = 'error :: no metric - %s - exists in Redis' % metric_name
                             logger.error(error_string)
@@ -5438,9 +5441,15 @@ def get_client_details():
     logger.info('rebrow access :: %s client_user_agent set to %s' % (str(client_ip), str(client_user_agent)))
     client_id = '%s_%s' % (client_ip, client_user_agent)
     if python_version == 2:
-        client_id = hashlib.md5(client_id).hexdigest()
+        # @modified 20200808 - Task #3608: Update Skyline to Python 3.8.3 and deps
+        # Added nosec for bandit [B303:blacklist] Use of insecure MD2, MD4, MD5,
+        # or SHA1 hash function.  For internal use only.
+        client_id = hashlib.md5(client_id).hexdigest()  # nosec
     else:
-        client_id = hashlib.md5(client_id.encode('utf-8')).hexdigest()
+        # @modified 20200808 - Task #3608: Update Skyline to Python 3.8.3 and deps
+        # Added nosec for bandit [B303:blacklist] Use of insecure MD2, MD4, MD5,
+        # or SHA1 hash function.  For internal use only.
+        client_id = hashlib.md5(client_id.encode('utf-8')).hexdigest()  # nosec
     logger.info('rebrow access :: %s has client_id %s' % (str(client_ip), str(client_id)))
 
     if request.headers.getlist('X-Forwarded-Proto'):
