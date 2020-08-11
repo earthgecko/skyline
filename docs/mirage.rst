@@ -89,7 +89,9 @@ The difference between the Analyzer and Mirage views of a timeseries
     import string
     import os
     import datetime as dt
-    import urllib2
+    # @modified 20200808 - Task #3608: Update Skyline to Python 3.8.3 and deps
+    # import urllib2
+    from urllib.request import urlopen
 
     # Department for Education real-time energy data: October 2015
     # https://www.gov.uk/government/uploads/system/uploads/attachment_data/file/476574/Real_time_energy_data_October.csv
@@ -97,16 +99,29 @@ The difference between the Analyzer and Mirage views of a timeseries
     if not os.path.exists(datafile):
         datafile = '/tmp/Real_time_energy_data_October.csv'
         url = 'https://www.gov.uk/government/uploads/system/uploads/attachment_data/file/476574/Real_time_energy_data_October.csv'
-        response = urllib2.urlopen(url)
+        # @modified 20200808 - Task #3608: Update Skyline to Python 3.8.3 and deps
+        # Change to urlopen and added nosec for bandit [B310:blacklist] Audit
+        # url open for permitted schemes. Allowing use of file:/ or custom
+        # schemes is often unexpected.
+        # response = urllib2.urlopen(url)
+        if url.lower().startswith('http'):
+            response = urlopen(url)  # nosec
+        else:
+            response = None
+
         with open(datafile, 'w') as fw:
             fw.write(response.read())
 
     values = []
-    with open(datafile, 'rb') as csvfile:
+    # @modified 20200808 - Task #3608: Update Skyline to Python 3.8.3 and deps
+    # with open(datafile, 'rb') as csvfile:
+    with open(datafile, 'rt') as csvfile:
         reader = csv.reader(csvfile, delimiter=',')
         for row in reader:
             values_row = ', '.join(row)
-            values_only_string = string.replace(values_row, ' ', '')
+            # @modified 20200808 - Task #3608: Update Skyline to Python 3.8.3 and deps
+            # values_only_string = string.replace(values_row, ' ', '')
+            values_only_string = values_row.replace(' ', '')
             values_list = values_only_string.split(',')
             values.append(values_list)
 
@@ -140,10 +155,18 @@ The difference between the Analyzer and Mirage views of a timeseries
         with open(tmp_datafile, 'a') as fw:
             fw.write(ts_line)
 
+    # @added 20200808 - Task #3608: Update Skyline to Python 3.8.3 and deps
+    def bytespdate2num(b):
+        return mdates.datestr2num(b)
+
     hours, consumption = np.loadtxt(
         tmp_datafile, unpack=True,
         delimiter=',',
-        converters={0: mdates.strpdate2num('%d/%m/%Y %H:%M')})
+        # @modified 20200808 - Task #3608: Update Skyline to Python 3.8.3 and deps
+        # converters={0: mdates.strpdate2num('%d/%m/%Y %H:%M')},
+        # converters={0: mdates.datestr2num('%d/%m/%Y %H:%M')},
+        converters={0: bytespdate2num},
+        encoding='latin1')
 
     if os.path.exists(tmp_datafile):
         os.remove(tmp_datafile)

@@ -1,4 +1,6 @@
-# Logging
+=======
+Logging
+=======
 
 A few considerations to note about logging.
 
@@ -20,7 +22,8 @@ Although logging is very mature, especially in an ecosystem as mature as Python
 and one may be led to believe it should be easy, however in reality it is
 non-trivial.
 
-## A modified logging methodology
+A modified logging methodology
+------------------------------
 
 The logging implementation in Skyline is quite complicated due to the
 abovementioned reasons.  It is important to note that some optimisations have
@@ -42,7 +45,8 @@ the performance or operation of Skyline in anyway.
 
 This achieves a balance.
 
-## Skyline app logs
+Skyline app logs
+----------------
 
 Each Skyline app has its own log.  These logs are important from a Skyline
 perspective in terms of monitoring the Skyline processes.
@@ -60,13 +64,13 @@ tuples on some of the skyline. Graphite namespace metrics.
 Log rotation is handled by the Python TimedRotatingFileHandler and by default
 keeps the 5 last logs:
 
-```
+.. code-block:: python
+
         handler = logging.handlers.TimedRotatingFileHandler(
             settings.LOG_PATH + '/' + skyline_app + '.log',
             when="midnight",
             interval=1,
             backupCount=5)
-```
 
 The Skyline app logs and the rotation is relatively cheap on disk space.
 
@@ -77,7 +81,8 @@ The Skyline app logs and the rotation is relatively cheap on disk space.
 330M    /var/log/skyline
 ```
 
-## Skyline app log preservation
+Skyline app log preservation
+----------------------------
 
 It should be noted that the bin/ bash scripts are used to ensure logs are
 preserved and not overwritten by any Python multiprocessing processes or the
@@ -103,7 +108,8 @@ logging is working and needs to work.  So it is horribly fixed, but works and
 testing something else new under all possible conditions is difficult.  So it
 reamins this way for the forseeable future.
 
-## syslog
+syslog
+------
 
 With this in mind a syslog alert trigger was added to Skyline apps to handle the
 logging the details of anomalous time series to syslog,  groking the syslog for

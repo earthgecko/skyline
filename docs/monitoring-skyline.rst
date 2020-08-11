@@ -1,13 +1,17 @@
-# Monitoring Skyline
+==================
+Monitoring Skyline
+==================
 
 It should be noted that something should monitor the Skyline processes.
 Over a long enough timeline Python or Redis or some I/O issue is going to lock
 up and the Python process is just going to hang.  This means that it is not
 really sufficient to just monitor the process with something like monit.
 
-## KISS
+KISS
+====
 
-### Skyline logs
+Skyline logs
+------------
 
 Each Skyline app is expected to log at a certain intervals, by design for this
 very purpose.  So if a Skyline app has not written to its log in 120 seconds, it
@@ -17,7 +21,8 @@ if the log has not been written to in 120 seconds.
 This very simple mechanism solves a very difficult problem to solve within
 Python itself.  It works.
 
-### The Graphite pickle
+The Graphite pickle
+-------------------
 
 The same can be said for the pickle from Graphite.  The same simple methodology
 can be employed on Graphite too, a simple script to determine the number of

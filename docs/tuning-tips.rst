@@ -1,15 +1,17 @@
-## Tuning tips
+===========
+Tuning tips
+===========
 
 Okay, so you've got everything all set up, data is flowing through, and...what?
 You can't consume everything on time? Allow me to help:
 
-1. Try increasing `settings.CHUNK_SIZE` - this increases the size of a chunk of
+1. Try increasing :mod:`settings.CHUNK_SIZE` - this increases the size of a chunk of
 metrics that gets added onto the queue. Bigger chunks == smaller network traffic.
 
-2. Try increasing `settings.WORKER_PROCESSES` - this will add more workers to
+2. Try increasing :mod:`settings.WORKER_PROCESSES` - this will add more workers to
 consume metrics off the queue and insert them into Redis.
 
-3. Try decreasing `settings.ANALYZER_PROCESSES` - this all runs on one box (for
+3. Try decreasing :mod:`settings.ANALYZER_PROCESSES` - this all runs on one box (for
 now), so share the resources!
 
 4. Still can't fix the performance? Try reducing your `settings.FULL_DURATION`.
@@ -22,7 +24,7 @@ faster, or use fewer algorithms in your ensemble.
 variations for each metric (sum, median, lower, upper, etc). These are largely
 identical, so it might be worth it to put them in `settings.SKIP_LIST`.
 
-7. Disable Oculus - if you set settings.OCULUS_HOST to '', Skyline will not
+7. Disable Oculus - if you set :mod:`settings.OCULUS_HOST` to '', Skyline will not
 write metrics into the `mini.` namespace - this should result in dramatic speed
 improvements.  At Etsy, they had a flow of about 5k metrics coming in every
 second on average (with 250k distinct metrics). They used a 32 core Sandy Bridge
@@ -35,14 +37,16 @@ WORKER_PROCESSES: 2
 ANALYZER_PROCESSES: 25
 FULL_DURATION: 86400
 ```
-## Smaller deployments
+
+Smaller deployments
+-------------------
 
 Skyline runs OK on much less.  It can handle ~45000 metrics per minute on a 4
 vCore, 4GB RAM cloud SSD server where the metric resolution is 1 datapoint per
 60 seconds, it will run loaded, but OK.
 
-Do take note of the notes in settings.py related to the `settings.ANALYZER_PROCESSES`
-and `settings.ANALYZER_OPTIMUM_RUN_DURATION` if you are only processing a few
+Do take note of the notes in settings.py related to the :mod:`settings.ANALYZER_PROCESSES`
+and :mod:`settings.ANALYZER_OPTIMUM_RUN_DURATION` if you are only processing a few
 1000 metrics with a datapoint every minute then the optimum settings will most
 likely be something similar to:
 
@@ -51,7 +55,8 @@ ANALYZER_PROCESSES = 1
 ANALYZER_OPTIMUM_RUN_DURATION = 60
 ```
 
-# Reliability
+Reliability
+-----------
 
 Skyline has been verified running in production against 6.5 million request per
 minute peak internet advertising infrastructure, since 20131016.
@@ -65,4 +70,4 @@ Skyline has made some progress in monitoring its own process threads and keeping
 itself running sanely, however not every possible issue can be mitigated against,
 therefore some another external to Python monitoring can help.
 
-See [Monitoring Skyline](monitoring-skyline.html)
+See `Monitoring Skyline <monitoring-skyline.html>`__

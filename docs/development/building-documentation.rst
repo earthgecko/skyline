@@ -34,9 +34,9 @@ docs-requirements.txt (as per documented `Running in Python virtualenv
 
 .. code-block:: bash
 
-    PYTHON_MAJOR_VERSION="2.7"
+    PYTHON_MAJOR_VERSION="3.8"
     PYTHON_VIRTUALENV_DIR="/opt/python_virtualenv"
-    PROJECT="skyline-py2716"
+    PROJECT="skyline-py383"
 
     cd "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}"
     source bin/activate
@@ -67,14 +67,25 @@ thanks to the awesome of Sphinx.  The original Skyline documentation was written
 in .md for github.  The documentation is being ported over to .rst to allow for
 the full functionality of Sphinx documentation.
 
+bandit
+======
+
+The below build script tests the code with bandit (https://github.com/PyCQA/bandit).
+A number of places in the code are flagged with `# nosec` to skip bandit checks
+all with valid reasons.  The build below also `--skip B110,B112` to exclude
+checks relating to except, pass patterns.  The except, pass patterns in the
+code are not flagged with `# nosec`.  Except, pass is used a lot as certain
+functions in Skyline could potentially log millions of lines.  The except, pass
+conditions are used where appropriate.
+
 Build
 =====
 
 .. code-block:: bash
 
-  PYTHON_MAJOR_VERSION="2.7"
+  PYTHON_MAJOR_VERSION="3.8"
   PYTHON_VIRTUALENV_DIR="/opt/python_virtualenv"
-  PROJECT="skyline-py2716"
+  PROJECT="skyline-py383"
 
   cd "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}"
   source bin/activate
@@ -127,7 +138,12 @@ Build
 
     # @added 20170913 - Task #2160: Test skyline with bandit
     # For static analysis - https://github.com/openstack/bandit
-    bandit -r "$APPDIR" -x "${APPDIR}/skyline/settings.py"
+    # @modified 20200808 - Task #3608: Update Skyline to Python 3.8.3 and deps
+    # Skip bandit except, pass checks
+    # [B110:try_except_pass] Try, Except, Pass detected.
+    # [B112:try_except_continue] Try, Except, Continue detected.
+    # bandit -r "$APPDIR" -x "${APPDIR}/skyline/settings.py"
+    bandit -r "$APPDIR" -x "${APPDIR}/skyline/settings.py" --skip B110,B112
 
     cd "$APPDIR/docs"
     echo "Building Skyline documentation - in $APPDIR/docs"
@@ -158,7 +174,7 @@ Build
 
   # Usage: build_docs <app_dir>
   # e.g.
-  # cd /opt/python_virtualenv/projects/skyline-ionosphere-py2716/
+  # cd /opt/python_virtualenv/projects/skyline-py383/
   # build_docs /home/gary/sandbox/of/github/earthgecko/skyline/ionosphere/skyline
 
 

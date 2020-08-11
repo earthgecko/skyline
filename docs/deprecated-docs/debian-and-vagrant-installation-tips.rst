@@ -1,4 +1,6 @@
-## Debian and Vagrant Installation Tips
+====================================
+Debian and Vagrant Installation Tips
+====================================
 
 Please note that this info is old and has not been updated since 25 Sep 2013
 

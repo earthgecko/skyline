@@ -1,33 +1,42 @@
-# What's new
+==========
+What's new
+==========
 
-## See Release Notes
+See Release Notes
+=================
 
 For v.1.1.1 and later see [Release Notes](releases.html)
 
-## Skyline v1.1.0-beta the ionosphere branch
+Skyline v1.1.0-beta the ionosphere branch
+-----------------------------------------
 
 See `Ionosphere <ionosphere.html>`__ and `Development - Ionosphere
 <development/ionosphere.html>`__
 
-## Skyline v1.0.4-beta - v1.0.8-beta the crucible branch
+Skyline v1.0.4-beta - v1.0.8-beta the crucible branch
+-----------------------------------------------------
 
 Mics changes and bug fixes.
 
-## Skyline v1.0.3-beta - the crucible branch
+Skyline v1.0.3-beta - the crucible branch
+-----------------------------------------
 
 Some documentation updates and setup.py things
 
-## Skyline v1.0.2-beta - the crucible branch
+Skyline v1.0.2-beta - the crucible branch
+-----------------------------------------
 
 Custom time zone settings for the rendering of Webapp Panorama dygraph graphs
 see [Webapp - Time zones](webapp.html#time-zones)
 
-## Skyline v1.0.1-beta - the crucible branch
+Skyline v1.0.1-beta - the crucible branch
+-----------------------------------------
 
 Analyzer alerts with a graph plotted from Redis data, not just the Graphite
 graph see [Analyzer SMTP alert graphs](analyzer.html#analyzer-smtp-alert-graphs)
 
-## Skyline v1.0.0-beta - the crucible branch
+Skyline v1.0.0-beta - the crucible branch
+-----------------------------------------
 
 The crucible branch had an issue open called `Bug #982: Too much in crucible branch`
 
@@ -43,7 +52,8 @@ That said the changes are/should be backwards compatible with older versions,
 mostly (best efforts applied) with a caveat on the skyline graphite metrics
 namespace and running Skyline under python virtualenv.
 
-### Conceptual changes
+Conceptual changes
+------------------
 
 The `FULL_DURATION` concept is a variable and it is a variable in more ways than
 the settings.py context.  Conceptually now `FULL_DURATION`, `full_duration`,
@@ -54,7 +64,8 @@ variably and is different within different scopes or apps within Skyline.  It is
 no longer really a single static variable, it is handled quite dynamically in a
 number of contexts now.
 
-### Etsy to `time()`
+Etsy to `time()`
+----------------
 
 This whats new will cover all the new things that the crucible branch
 introduces since the last Etsy commit on master of
@@ -62,29 +73,36 @@ introduces since the last Etsy commit on master of
 purposes of generality it shall be assumed that no one is running the new Skyline
 features that have not been merged to the Etsy Skyline.
 
-### anomaly_breakdown metrics
+anomaly_breakdown metrics
+-------------------------
 
-### mirage
+mirage
+------
 
 See [Mirage](mirage.html)
 
-### boundary
+boundary
+--------
 
 See [Boundary](boundary.html)
 
-### crucible
+crucible
+--------
 
 See [Crucible](crucible.html)
 
-### sphinx documentation
+sphinx documentation
+--------------------
 
 See [Building documentation](building-documentation.html)
 
-### Performance tuning
+Performance tuning
+------------------
 
 See [Analyzer Optimisations](analyzer-optimisation.html)
 
-### Process management
+Process management
+------------------
 
 A number of the apps have had better process management handling added and the
 parent process now spawns processes and terminates then if they have not
@@ -94,21 +112,25 @@ hardcoded one where appropriate.  This handles a very limited number of edge
 cases where something that is host machine related causes the Python process to
 hang.
 
-### Analyzer optimisations
+Analyzer optimisations
+----------------------
 
 See [Analyzer Optimisations](analyzer-optimisation.html)
 
-### algorithm_breakdown metrics
+algorithm_breakdown metrics
+---------------------------
 
 See [Analyzer Optimisations](analyzer-optimisation.html)
 
-### Improved log handling
+Improved log handling
+---------------------
 
 - Prevent log overwrites
 
 See [Logging](logging.html)
 
-### Webapp
+Webapp
+------
 
 Some simple and basic security was added to the Webapp now it can be enabled
 to access a MySQL database in the Panorama context.
@@ -121,6 +143,7 @@ to access a MySQL database in the Panorama context.
 
 See [Webapp](webapp.html)
 
-### Panorama
+Panorama
+--------
 
 See [Panorama](panorama.html)

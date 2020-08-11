@@ -16,13 +16,11 @@ Contents:
   requirements
   getting-started
   running-in-python-virtualenv
-  running-in-python-virtualenv-py2
   installation
   upgrading/index.rst
   getting-data-into-skyline
   alert-testing
   alerts
-  docker
   slack
   monotonic-metrics
   horizon
@@ -39,6 +37,7 @@ Contents:
   tsfresh
   luminosity
   flux
+  upload-data-to-flux
   vista
   redis-integration
   rebrow
@@ -47,7 +46,7 @@ Contents:
   logging
   tuning-tips
   monitoring-skyline
-  debian-and-vagrant-installation-tips
+  deprecated-docs/index.rst
   releases
   whats-new
   development/index.rst

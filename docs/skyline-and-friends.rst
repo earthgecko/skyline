@@ -1,8 +1,11 @@
-# Skyline and friends
+===================
+Skyline and friends
+===================
 
 Skyline has some close relationships to a number of metric pipelining things.
 
-## Graphite - a close relationship
+Graphite - a close relationship
+===============================
 
 Anyone having used Skyline may have wondered in the past why Skyline sent metrics
 to [Graphite](https://github.com/graphite-project).  One may have also wondered
@@ -17,7 +20,8 @@ monitor each other through a direct feedback loop or interaction.  If Statsd
 was ever an option, it would add a degree of separation between the 2 which is
 not required or desirable, although it would work.
 
-### Feedback loop
+Feedback loop
+=============
 
 Skyline's own metrics really are an important aspect of Skyline's operations
 over time, in terms of:
@@ -32,18 +36,21 @@ over time, in terms of:
   looked metrics, however over time they will describe your ups and downs,
   your highs and lows and hopefully add to your understanding of your "things"
 
-## Statsd
+Statsd
+======
 
-[Statsd](https://github.com/etsy/stats) feeds graphite so it is quite handy.
+Statsd (https://github.com/etsy/statsd) feeds graphite so it is quite handy.
 Use TCP, not UDP
 
-## BuckyServer
+BuckyServer
+===========
 
 Before tcp transport was added to Statsd was
-[BuckyServer](https://github.com/HubSpot/BuckyServer) for long haul TCP
+BuckyServer (https://github.com/HubSpot/BuckyServer) for long haul TCP
 transport of your metrics to Statsd -> Graphite.
 
-### Some advantages to using Buckyserver
+Some advantages to using Buckyserver
+====================================
 
 Although the introduction of another node app may seem like too much effort or
 additional complexity, using Buckyserver also has additional advantages.
@@ -62,22 +69,26 @@ individually, if you do not want the hassle of dealing with Multi-Metric Packet
 payload size.  Running Buckyserver and Statsd on the same instance allows for
 these types of advanced usage and has proved to be very reliable.
 
-## Sensu
+Sensu
+=====
 
-[Sensu](https://sensuapp.org/) can feed Graphite like collectd but uses TCP not
-UDP for transport - [Sensu on github](https://github.com/sensu/sensu)
+Sensu (https://sensuapp.org/) can feed Graphite like collectd but uses TCP not
+UDP for transport - Sensu on github (https://github.com/sensu/sensu)
 
-## Riemann
+Riemann
+=======
 
-[Riemann.io](http://riemann.io) can feed Graphite -
-[Riemann on github](https://github.com/riemann/riemann)
+Riemann.io (http://riemann.io) can feed Graphite -
+Riemann on github (https://github.com/riemann/riemann)
 
-## Logstash
+Logstash
+========
 
-[Logstash](https://www.elastic.co/products/logstash) can feed Graphite -
-[Logstash on github](https://github.com/elastic/logstash)
+Logstash (https://www.elastic.co/products/logstash) can feed Graphite -
+Logstash on github (https://github.com/elastic/logstash)
 
-## Many more
+Many more
+=========
 
 There are a great deal of apps that can feed Skyline, this is just mentioning
 a few.  However bear in mind, that whatever you use, try and ensure that it is

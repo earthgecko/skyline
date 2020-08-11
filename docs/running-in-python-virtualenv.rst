@@ -25,7 +25,7 @@ Dependencies
 Building Python versions from the Python sources in Python virtualenv
 requires the following system dependencies:
 
--  RedHat family - only CentOS 8 is tested, for el6 and el7 deps see `Running in
+- RedHat family - only CentOS 8 is tested, for el6 and el7 deps see `Running in
   a Python 2.7 virtualenv <running-in-python-virtualenv-py2.html>`__ .
 
 .. code-block:: bash
@@ -36,7 +36,7 @@ requires the following system dependencies:
       gcc gcc-c++ readline-devel ncurses-devel gdbm-devel freetype-devel \
       libpng-devel python38 wget tar git xz-devel
 
--  Debian family - only tested on Ubuntu 16.04 and 18.04
+- Debian family - only tested on Ubuntu 16.04 and 18.04
 
 .. code-block:: bash
 

@@ -9,8 +9,8 @@ Intended audience
 
 Skyline is not really a ``localhost`` application, it needs lots of data, unless
 you have a ``localhost`` Graphite or pickle Graphite to your localhost, however
-Skyline can run on localhost using Docker (experimental, not for production and
-no longer maintained).
+Skyline and all its components could be run on localhost if you wanted but it
+is not recommended.
 
 Given the specific nature of Skyline, it is assumed that the audience will have
 a certain level of technical knowledge, e.g. it is assumed that the user will be
