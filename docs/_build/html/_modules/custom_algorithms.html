@@ -1,0 +1,513 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>custom_algorithms &mdash; Skyline 2.0.0 documentation</title>
+  
+
+  
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/skyline.styles.css" type="text/css" />
+
+  
+  
+  
+  
+
+  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
+
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> Skyline
+          
+
+          
+          </a>
+
+          
+            
+            
+              <div class="version">
+                2.0
+              </div>
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../requirements.html">Requirements</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../upgrading/index.html">Upgrading</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../getting-data-into-skyline.html">Getting data into Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../alert-testing.html">Alert testing</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../alerts.html">Alerts</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../slack.html">slack</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../horizon.html">Horizon</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analyzer.html">Analyzer</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../analyzer-optimizations.html">Analyzer Optimizations</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../algorithms/index.html">Algorithms</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../mirage.html">Mirage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../boundary.html">Boundary</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../crucible.html">Crucible</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../panorama.html">Panorama</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../webapp.html">Webapp</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere.html">Ionosphere</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../ionosphere_echo.html">Ionosphere echo</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tsfresh.html">tsfresh</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../luminosity.html">Luminosity</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../vista.html">Vista</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../redis-integration.html">Redis integration</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
+<li class="toctree-l1"><a class="reference internal" href="../running-multiple-skylines.html">Running multiple Skyline instances</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../skyline-and-friends.html">Skyline and friends</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html">Tuning tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring Skyline</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../deprecated-docs/index.html">Deprecated docs</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../releases.html">Release Notes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What’s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../development/index.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../roadmap.html">Roadmap</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../skyline.html">skyline package</a></li>
+</ul>
+
+            
+          
+        </div>
+        
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Skyline</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
+          <li><a href="index.html">Module code</a> &raquo;</li>
+        
+      <li>custom_algorithms</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for custom_algorithms</h1><div class="highlight"><pre>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">import</span> <span class="nn">os.path</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">getpid</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">importlib.util</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">import</span> <span class="nn">timeout_decorator</span>
+<span class="kn">from</span> <span class="nn">timeit</span> <span class="kn">import</span> <span class="n">default_timer</span> <span class="k">as</span> <span class="n">timer</span>
+<span class="kn">from</span> <span class="nn">settings</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">SKYLINE_TMP_DIR</span><span class="p">,</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="get_function_name"><a class="viewcode-back" href="../skyline.html#custom_algorithms.get_function_name">[docs]</a><span class="k">def</span> <span class="nf">get_function_name</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This is a utility function is used to determine what algorithm is reporting</span>
+<span class="sd">    an algorithm error when the record_algorithm_error is used.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">traceback</span><span class="o">.</span><span class="n">extract_stack</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="mi">2</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="record_algorithm_error"><a class="viewcode-back" href="../skyline.html#custom_algorithms.record_algorithm_error">[docs]</a><span class="k">def</span> <span class="nf">record_algorithm_error</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">,</span> <span class="n">algorithm_name</span><span class="p">,</span> <span class="n">traceback_format_exc_string</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    This utility function is used to facilitate the traceback from any algorithm</span>
+<span class="sd">    errors.  The algorithm functions themselves we want to run super fast and</span>
+<span class="sd">    without fail in terms of stopping the function returning and not reporting</span>
+<span class="sd">    anything to the log, so the pythonic except is used to &quot;sample&quot; any</span>
+<span class="sd">    algorithm errors to a tmp file and report once per run rather than spewing</span>
+<span class="sd">    tons of errors into the log.</span>
+
+<span class="sd">    .. note::</span>
+<span class="sd">        algorithm errors tmp file clean up</span>
+<span class="sd">            the algorithm error tmp files are handled and cleaned up in</span>
+<span class="sd">            :class:`Analyzer` after all the spawned processes are completed.</span>
+
+<span class="sd">    :param current_skyline_app: the Skyline app</span>
+<span class="sd">    :param algorithm_name: the algoritm function name</span>
+<span class="sd">    :param traceback_format_exc_string: the traceback_format_exc string</span>
+<span class="sd">    :param parent_pid: the pid of the parent process that will be used to in</span>
+<span class="sd">        error file naming</span>
+<span class="sd">    :type current_skyline_app: str</span>
+<span class="sd">    :type algorithm_name: str</span>
+<span class="sd">    :type traceback_format_exc_string: str</span>
+<span class="sd">    :type parent_pid: int</span>
+<span class="sd">    :return:</span>
+<span class="sd">        - ``True`` the error string was written to the algorithm_error_file</span>
+<span class="sd">        - ``False`` the error string was not written to the algorithm_error_file</span>
+
+<span class="sd">    :rtype:</span>
+<span class="sd">        - boolean</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># current_process_pid = getpid()</span>
+    <span class="n">algorithm_error_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.algorithm.error&#39;</span> <span class="o">%</span> <span class="p">(</span>
+        <span class="n">SKYLINE_TMP_DIR</span><span class="p">,</span> <span class="n">current_skyline_app</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">parent_pid</span><span class="p">),</span> <span class="n">algorithm_name</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">algorithm_error_file</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">traceback_format_exc_string</span><span class="p">))</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+
+
+<span class="c1"># @added 20200603 - Feature #3566: custom_algorithms</span>
+<div class="viewcode-block" id="run_custom_algorithm_on_timeseries"><a class="viewcode-back" href="../skyline.html#custom_algorithms.run_custom_algorithm_on_timeseries">[docs]</a><span class="k">def</span> <span class="nf">run_custom_algorithm_on_timeseries</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">,</span> <span class="n">custom_algorithm</span><span class="p">,</span> <span class="n">custom_algorithm_dict</span><span class="p">,</span> <span class="n">debug_custom_algortihms</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return a dictionary of custom algoritms to run on a metric determined from</span>
+<span class="sd">    the :mod:`settings.CUSTOM_ALGORITHMS` dictionary.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">func_name</span> <span class="o">=</span> <span class="s1">&#39;run_custom_algorithm_on_timeseries&#39;</span>
+    <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">anomalyScore</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">current_logger</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">myPid</span> <span class="o">=</span> <span class="n">getpid</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">get_log</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">):</span>
+        <span class="n">current_skyline_app_logger</span> <span class="o">=</span> <span class="n">current_skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
+        <span class="n">current_logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="n">current_skyline_app_logger</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">current_logger</span>
+
+    <span class="k">def</span> <span class="nf">str_to_class</span><span class="p">(</span><span class="n">classname</span><span class="p">,</span> <span class="n">current_logger</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="n">classname</span><span class="p">],</span> <span class="n">classname</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">current_logger</span><span class="p">:</span>
+                <span class="n">current_logger</span> <span class="o">=</span> <span class="n">get_log</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: with pid </span><span class="si">%s</span><span class="s1"> failed load custom algorithm module - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">func_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">myPid</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">classname</span><span class="p">)))</span>
+            <span class="k">return</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="n">debug_logging</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">debug_logging</span> <span class="o">=</span> <span class="n">custom_algorithm_dict</span><span class="p">[</span><span class="s1">&#39;debug_logging&#39;</span><span class="p">]</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">debug_logging</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="n">debug_logging</span> <span class="ow">or</span> <span class="n">debug_custom_algortihms</span><span class="p">:</span>
+        <span class="n">current_logger</span> <span class="o">=</span> <span class="n">get_log</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+            <span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: pid </span><span class="si">%s</span><span class="s1">, running custom algorithm - </span><span class="si">%s</span><span class="s1"> with debug_logging for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">func_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">myPid</span><span class="p">),</span> <span class="n">custom_algorithm</span><span class="p">,</span> <span class="n">base_name</span><span class="p">))</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">algorithm_source</span> <span class="o">=</span> <span class="n">custom_algorithm_dict</span><span class="p">[</span><span class="s1">&#39;algorithm_source&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">debug_logging</span> <span class="ow">or</span> <span class="n">debug_custom_algortihms</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                <span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: pid </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1"> algorithm_source - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">func_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">myPid</span><span class="p">),</span> <span class="n">custom_algorithm</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">algorithm_source</span><span class="p">)))</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">current_logger</span><span class="p">:</span>
+            <span class="n">current_logger</span> <span class="o">=</span> <span class="n">get_log</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+            <span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: pid </span><span class="si">%s</span><span class="s1">, failed determine algorithm_source for custom algorithm - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">func_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">myPid</span><span class="p">),</span> <span class="n">custom_algorithm</span><span class="p">))</span>
+        <span class="k">return</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">algorithm_source</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">algorithm_source</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">current_logger</span><span class="p">:</span>
+                <span class="n">current_logger</span> <span class="o">=</span> <span class="n">get_log</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: pid </span><span class="si">%s</span><span class="s1">, failed to find custom algorithm - </span><span class="si">%s</span><span class="s1"> - algorithm_source file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">func_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">myPid</span><span class="p">),</span> <span class="n">custom_algorithm</span><span class="p">,</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">algorithm_source</span><span class="p">)))</span>
+            <span class="k">return</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">debug_logging</span> <span class="ow">or</span> <span class="n">debug_custom_algortihms</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                <span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: pid </span><span class="si">%s</span><span class="s1">, importing </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">func_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">myPid</span><span class="p">),</span> <span class="n">custom_algorithm</span><span class="p">))</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="n">algorithm_source</span><span class="p">)),</span> <span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">))</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">algorithm_source</span><span class="p">))</span>
+        <span class="n">module_name</span> <span class="o">=</span> <span class="n">custom_algorithm</span>
+        <span class="n">spec</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">spec_from_file_location</span><span class="p">(</span><span class="n">module_name</span><span class="p">,</span> <span class="n">algorithm_source</span><span class="p">)</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">module_from_spec</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
+        <span class="n">spec</span><span class="o">.</span><span class="n">loader</span><span class="o">.</span><span class="n">exec_module</span><span class="p">(</span><span class="n">module</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">modules</span><span class="p">[</span><span class="n">module_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">module</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">current_logger</span><span class="p">:</span>
+            <span class="n">current_logger</span> <span class="o">=</span> <span class="n">get_log</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+            <span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: pid </span><span class="si">%s</span><span class="s1">, failed to load custom algorithm - </span><span class="si">%s</span><span class="s1"> - from algorithm_source file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">func_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">myPid</span><span class="p">),</span> <span class="n">custom_algorithm</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">algorithm_source</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="n">use_custom_algorithm</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">use_custom_algorithm</span> <span class="o">=</span> <span class="n">str_to_class</span><span class="p">(</span><span class="n">custom_algorithm</span><span class="p">,</span> <span class="n">current_logger</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">current_logger</span><span class="p">:</span>
+            <span class="n">current_logger</span> <span class="o">=</span> <span class="n">get_log</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+            <span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: pid </span><span class="si">%s</span><span class="s1">, failed to interpolate module name for custom algorithm - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">func_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">myPid</span><span class="p">),</span> <span class="n">custom_algorithm</span><span class="p">))</span>
+        <span class="k">return</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">use_custom_algorithm</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">current_logger</span><span class="p">:</span>
+            <span class="n">current_logger</span> <span class="o">=</span> <span class="n">get_log</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+            <span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: pid </span><span class="si">%s</span><span class="s1">, failed to get module name for custom algorithm - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">func_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">myPid</span><span class="p">),</span> <span class="n">custom_algorithm</span><span class="p">))</span>
+        <span class="k">return</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="n">algorithm_parameters</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">algorithm_parameters</span> <span class="o">=</span> <span class="n">custom_algorithm_dict</span><span class="p">[</span><span class="s1">&#39;algorithm_parameters&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">debug_logging</span> <span class="ow">or</span> <span class="n">debug_custom_algortihms</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                <span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: pid </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1"> algorithm_parameters - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">func_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">myPid</span><span class="p">),</span> <span class="n">custom_algorithm</span><span class="p">,</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">algorithm_parameters</span><span class="p">)))</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">algorithm_parameters</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="n">max_execution_time</span> <span class="o">=</span> <span class="mf">0.05</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">max_execution_time</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">custom_algorithm_dict</span><span class="p">[</span><span class="s1">&#39;max_execution_time&#39;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">debug_logging</span> <span class="ow">or</span> <span class="n">debug_custom_algortihms</span><span class="p">:</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                <span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: pid </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1"> max_execution_time - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">func_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">myPid</span><span class="p">),</span> <span class="n">custom_algorithm</span><span class="p">,</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">max_execution_time</span><span class="p">)))</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">max_execution_time</span> <span class="o">=</span> <span class="mf">0.05</span>
+    <span class="k">if</span> <span class="n">debug_logging</span> <span class="ow">or</span> <span class="n">debug_custom_algortihms</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+            <span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: pid </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1"> on </span><span class="si">%s</span><span class="s1"> with max_execution_time - </span><span class="si">%s</span><span class="s1">, algorithm_parameters - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">func_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">myPid</span><span class="p">),</span> <span class="n">custom_algorithm</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">max_execution_time</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">algorithm_parameters</span><span class="p">)))</span>
+
+    <span class="nd">@timeout_decorator</span><span class="o">.</span><span class="n">timeout</span><span class="p">(</span><span class="n">max_execution_time</span><span class="p">,</span> <span class="n">timeout_exception</span><span class="o">=</span><span class="ne">StopIteration</span><span class="p">,</span> <span class="n">use_signals</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">run_custom_algorithm_with_timeout</span><span class="p">(</span><span class="n">current_logger</span><span class="p">,</span> <span class="n">custom_algorithm</span><span class="p">,</span> <span class="n">use_custom_algorithm</span><span class="p">,</span> <span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">,</span> <span class="n">algorithm_parameters</span><span class="p">,</span> <span class="n">debug_custom_algortihms</span><span class="p">,</span> <span class="n">max_execution_time</span><span class="p">):</span>
+        <span class="n">funcPid</span> <span class="o">=</span> <span class="n">getpid</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">debug_custom_algortihms</span><span class="p">:</span>
+            <span class="n">start_debug_timer</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+        <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">anomalyScore</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span> <span class="o">=</span> <span class="n">use_custom_algorithm</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">,</span> <span class="n">algorithm_parameters</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">debug_custom_algortihms</span><span class="p">:</span>
+                <span class="n">end_debug_timer</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">current_logger</span><span class="p">:</span>
+                    <span class="n">current_logger</span> <span class="o">=</span> <span class="n">get_log</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                    <span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: pid </span><span class="si">%s</span><span class="s1">, analysed </span><span class="si">%s</span><span class="s1"> (with run_custom_algorithm_with_timeout with max_execution_time set to </span><span class="si">%s</span><span class="s1">, in </span><span class="si">%.6f</span><span class="s1"> seconds) - anomalous - </span><span class="si">%s</span><span class="s1">, anomalyScore - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">func_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">funcPid</span><span class="p">),</span> <span class="n">custom_algorithm</span><span class="p">,</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">max_execution_time</span><span class="p">),</span>
+                        <span class="p">(</span><span class="n">end_debug_timer</span> <span class="o">-</span> <span class="n">start_debug_timer</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomalous</span><span class="p">),</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">anomalyScore</span><span class="p">)))</span>
+        <span class="k">except</span> <span class="ne">SystemExit</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">debug_custom_algortihms</span><span class="p">:</span>
+                <span class="n">end_debug_timer</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">current_logger</span><span class="p">:</span>
+                    <span class="n">current_logger</span> <span class="o">=</span> <span class="n">get_log</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span>
+                <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+                    <span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: pid </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1"> was timed out by max_execution_time of </span><span class="si">%s</span><span class="s1">, after running for </span><span class="si">%.6f</span><span class="s1"> seconds with returning a result&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">func_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">funcPid</span><span class="p">),</span> <span class="n">custom_algorithm</span><span class="p">,</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">max_execution_time</span><span class="p">),</span>
+                        <span class="p">(</span><span class="n">end_debug_timer</span> <span class="o">-</span> <span class="n">start_debug_timer</span><span class="p">)))</span>
+            <span class="k">return</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">current_logger</span><span class="p">:</span>
+                <span class="n">current_logger</span> <span class="o">=</span> <span class="n">get_log</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">end_debug_timer</span> <span class="o">=</span> <span class="n">timer</span><span class="p">()</span>
+            <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                <span class="s1">&#39;error :: run_custom_algorithm_with_timeout :: pid </span><span class="si">%s</span><span class="s1">, failed to evaluate time series with custom algorithm - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">funcPid</span><span class="p">),</span> <span class="n">custom_algorithm</span><span class="p">))</span>
+            <span class="k">return</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">debug_logging</span> <span class="ow">or</span> <span class="n">debug_custom_algortihms</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+            <span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: pid </span><span class="si">%s</span><span class="s1">, running </span><span class="si">%s</span><span class="s1"> with run_custom_algorithm_with_timeout set to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">func_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">myPid</span><span class="p">),</span> <span class="n">custom_algorithm</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">max_execution_time</span><span class="p">)))</span>
+        <span class="n">debug_custom_algortihms</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># anomalous, anomalyScore = use_custom_algorithm(current_skyline_app, timeseries, algorithm_parameters)</span>
+        <span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span> <span class="o">=</span> <span class="n">run_custom_algorithm_with_timeout</span><span class="p">(</span><span class="n">current_logger</span><span class="p">,</span> <span class="n">custom_algorithm</span><span class="p">,</span> <span class="n">use_custom_algorithm</span><span class="p">,</span> <span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">,</span> <span class="n">algorithm_parameters</span><span class="p">,</span> <span class="n">debug_custom_algortihms</span><span class="p">,</span> <span class="n">max_execution_time</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">StopIteration</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">current_logger</span><span class="p">:</span>
+            <span class="n">current_logger</span> <span class="o">=</span> <span class="n">get_log</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+            <span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: pid </span><span class="si">%s</span><span class="s1">, terminated evaluation of time series after max_execution_time </span><span class="si">%s</span><span class="s1"> was reached (timeout) with custom algorithm - </span><span class="si">%s</span><span class="s1"> - loaded from algorithm_source file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">func_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">myPid</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">max_execution_time</span><span class="p">),</span>
+                <span class="n">custom_algorithm</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">algorithm_source</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">current_logger</span><span class="p">:</span>
+            <span class="n">current_logger</span> <span class="o">=</span> <span class="n">get_log</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">)</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+            <span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: pid </span><span class="si">%s</span><span class="s1">, failed to evaluate time series with custom algorithm - </span><span class="si">%s</span><span class="s1"> - loaded from algorithm_source file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">func_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">myPid</span><span class="p">),</span> <span class="n">custom_algorithm</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">algorithm_source</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">debug_logging</span> <span class="ow">or</span> <span class="n">debug_custom_algortihms</span><span class="p">:</span>
+        <span class="n">current_logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span>
+            <span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> :: pid </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1"> with results (</span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">func_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">myPid</span><span class="p">),</span> <span class="n">custom_algorithm</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomalous</span><span class="p">),</span>
+                <span class="nb">str</span><span class="p">(</span><span class="n">anomalyScore</span><span class="p">)))</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">anomalous</span><span class="p">,</span> <span class="n">anomalyScore</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
+
+    </p>
+  </div>
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,51 +11,48 @@
   
 
   
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/skyline.styles.css" type="text/css" />
+
+  
+  
+  
   
 
   
-
-  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
 
-  
-
-  
-  
-    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  
-
-  
-    <link rel="stylesheet" href="../_static/skyline.styles.css" type="text/css" />
-  
-
-  
-        <link rel="index" title="Index"
-              href="../genindex.html"/>
-        <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Skyline 2.0.0 documentation" href="../index.html"/>
-        <link rel="up" title="Release Notes" href="../releases.html"/>
-        <link rel="next" title="1.2.3 - the luminosity branch" href="1_2_3.html"/>
-        <link rel="prev" title="1.2.5 - the luminosity branch" href="1_2_5.html"/> 
-
-  
-  <script src="../_static/js/modernizr.min.js"></script>
-
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="1.2.3 - the luminosity branch" href="1_2_3.html" />
+    <link rel="prev" title="1.2.5 - the luminosity branch" href="1_2_5.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
+   
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
-            <a href="../index.html" class="icon icon-home"> Skyline
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
 
           
@@ -83,22 +79,24 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
             
-                <ul class="current">
+              
+            
+            
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../alerts.html">Alerts</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../horizon.html">Horizon</a></li>
@@ -115,6 +113,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../vista.html">Vista</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
@@ -122,10 +121,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html#reliability">Reliability</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring Skyline</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../releases.html">Release Notes</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="1_3_1.html">1.3.1</a></li>
 <li class="toctree-l2"><a class="reference internal" href="1_3_0.html">1.3.0</a></li>
@@ -175,7 +172,7 @@
 <li class="toctree-l2"><a class="reference internal" href="1_0_0.html">1.0.0 - the crucible branch</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What’s new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../development/index.html">Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../roadmap.html">Roadmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../skyline.html">skyline package</a></li>
@@ -184,42 +181,63 @@
             
           
         </div>
+        
       </div>
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="../index.html">Skyline</a>
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Skyline</a>
+        
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="../index.html">Docs</a> &raquo;</li>
-      
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
           <li><a href="../releases.html">Release Notes</a> &raquo;</li>
-      
-    <li>1.2.4 - the luminosity branch</li>
+        
+      <li>1.2.4 - the luminosity branch</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
-            <a href="../_sources/releases/1_2_4.txt" rel="nofollow"> View page source</a>
+            
+            <a href="../_sources/releases/1_2_4.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -231,52 +249,52 @@
 <div class="section" id="changes-from-v1-2-3">
 <h2>Changes from v1.2.3<a class="headerlink" href="#changes-from-v1-2-3" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li>Bumped to v1.2.4-stable-luminosity</li>
-<li>Changed from &gt; to less intuitive but normally more accurate &gt;= which is mostly
+<li><p>Bumped to v1.2.4-stable-luminosity</p></li>
+<li><p>Changed from &gt; to less intuitive but normally more accurate &gt;= which is mostly
 used in D layer and from == to less intuitive but normally more accurate &lt;=
-which is mostly used in E layer (2446, 2464)</li>
-<li>Added the luminosity_remote_data API endpoint to replace the Redis method in
+which is mostly used in E layer (2446, 2464)</p></li>
+<li><p>Added the luminosity_remote_data API endpoint to replace the Redis method in
 get_remote_correlations in process_correlations.py.  This has been replaced
 by preprocessing the Luminosity data request on the remote Skyline instance
-and returning only the relevant fragments of the time series gzipped. (2464)</li>
-<li>Added the REMOTE_SKYLINE_INSTANCES variable to settings.py to begin the
+and returning only the relevant fragments of the time series gzipped. (2464)</p></li>
+<li><p>Added the REMOTE_SKYLINE_INSTANCES variable to settings.py to begin the
 deprecation of any requirement for Skyline to have to query a remote Redis
-with API endpoint replacements. Using &#8216;Gzip for particular views&#8217; as per
-<a class="reference external" href="http://flask.pocoo.org/snippets/122/">http://flask.pocoo.org/snippets/122/</a> (2464)</li>
-<li>Implement correlations and avg_runtime Graphite metrics for luminosity (2462)</li>
-<li>Added Graphite graph links to the Correlations block in training_data and
-features_profile pages. The [&#8216;metric_name&#8217;] string has been replaced with a
+with API endpoint replacements. Using ‘Gzip for particular views’ as per
+<a class="reference external" href="http://flask.pocoo.org/snippets/122/">http://flask.pocoo.org/snippets/122/</a> (2464)</p></li>
+<li><p>Implement correlations and avg_runtime Graphite metrics for luminosity (2462)</p></li>
+<li><p>Added Graphite graph links to the Correlations block in training_data and
+features_profile pages. The [‘metric_name’] string has been replaced with a
 link the the Graphite graph for the metric with the appropriate datetime
-values (from=&amp;until=) for the metric at the point of correlation. (2470)</li>
-<li>Added info about correlations and their contextual accuracy in the
-Correlations block in the UI (2470)</li>
-<li>Update Constellations in the roadmap</li>
-<li>Updated doc rst files, corrected typos and pasteos</li>
+values (from=&amp;until=) for the metric at the point of correlation. (2470)</p></li>
+<li><p>Added info about correlations and their contextual accuracy in the
+Correlations block in the UI (2470)</p></li>
+<li><p>Update Constellations in the roadmap</p></li>
+<li><p>Updated doc rst files, corrected typos and pasteos</p></li>
 </ul>
 </div>
 <div class="section" id="update-notes">
 <h2>Update notes<a class="headerlink" href="#update-notes" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li>NOTE: If you are running v1.x you CANNOT upgrade from v1.x directly to v1.2.4.</li>
-<li>There is are no SQL changes with this release.</li>
-<li>There is one settings.py change, the addition of
-<a class="reference internal" href="../skyline.html#settings.REMOTE_SKYLINE_INSTANCES" title="settings.REMOTE_SKYLINE_INSTANCES"><code class="xref py py-mod docutils literal"><span class="pre">settings.REMOTE_SKYLINE_INSTANCES</span></code></a></li>
-<li>There are no changes in requirements.txt</li>
+<li><p>NOTE: If you are running v1.x you CANNOT upgrade from v1.x directly to v1.2.4.</p></li>
+<li><p>There is are no SQL changes with this release.</p></li>
+<li><p>There is one settings.py change, the addition of
+<a class="reference internal" href="../skyline.html#settings.REMOTE_SKYLINE_INSTANCES" title="settings.REMOTE_SKYLINE_INSTANCES"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.REMOTE_SKYLINE_INSTANCES</span></code></a></p></li>
+<li><p>There are no changes in requirements.txt</p></li>
 </ul>
 </div>
 <div class="section" id="how-to-update-from-v1-2-2-or-v1-2-3">
 <h2>How to update from v1.2.2 or v1.2.3<a class="headerlink" href="#how-to-update-from-v1-2-2-or-v1-2-3" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li>Download the new release tag or clone/update to get it to a temp location,
-ready to be deployed.</li>
-<li>Diff your current running version skyline/settings.py with the new version of
+<li><p>Download the new release tag or clone/update to get it to a temp location,
+ready to be deployed.</p></li>
+<li><p>Diff your current running version skyline/settings.py with the new version of
 skyline/settings.py and create a new settings.py in the temp location
-appropriate for Skyline v1.2.4 and your set up, ready to be deployed.</li>
-<li>Stop all the Skyline services and ensure any service controls such as monit,
+appropriate for Skyline v1.2.4 and your set up, ready to be deployed.</p></li>
+<li><p>Stop all the Skyline services and ensure any service controls such as monit,
 supervisor or systemd do not start them again, (change as appropriate for
-your set up) e.g.</li>
+your set up) e.g.</p></li>
 </ul>
-<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nv">NEW_SKYLINE_VERSION</span><span class="o">=</span><span class="s2">&quot;v1.2.4-stable-luminosity&quot;</span>                     <span class="c1"># Your new Skyline version</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">NEW_SKYLINE_VERSION</span><span class="o">=</span><span class="s2">&quot;v1.2.4-stable-luminosity&quot;</span>                     <span class="c1"># Your new Skyline version</span>
 <span class="nv">OLD_SKYLINE_VERSION</span><span class="o">=</span><span class="s2">&quot;v1.2.3-stable-luminosity&quot;</span>                     <span class="c1"># Your old Skyline version</span>
 <span class="c1"># OR</span>
 <span class="c1"># OLD_SKYLINE_VERSION=&quot;v1.2.2-stable-luminosity&quot;</span>
@@ -306,18 +324,18 @@ git checkout <span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_VERSION
 </pre></div>
 </div>
 <ul class="simple">
-<li>Move your current Skyline directory to a backup directory and move the new
+<li><p>Move your current Skyline directory to a backup directory and move the new
 Skyline v1.2.4 with your new settings.py from the temp location to your
-working Skyline directory, (change your paths as appropriate) e.g.</li>
+working Skyline directory, (change your paths as appropriate) e.g.</p></li>
 </ul>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>mv /opt/skyline/github/skyline /opt/skyline/github/skyline.v1.2.2-luminosity-stable
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mv /opt/skyline/github/skyline /opt/skyline/github/skyline.v1.2.2-luminosity-stable
 mv <span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_PATH</span><span class="s2">&quot;</span> <span class="s2">&quot;</span><span class="nv">$CURRENT_SKYLINE_PATH</span><span class="s2">&quot;</span>
 </pre></div>
 </div>
 <ul class="simple">
-<li>Start the all Skyline services (change as appropriate for your set up) e.g.</li>
+<li><p>Start the all Skyline services (change as appropriate for your set up) e.g.</p></li>
 </ul>
-<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="c1"># Start all other Skyline services</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Start all other Skyline services</span>
 <span class="nv">SKYLINE_SERVICES</span><span class="o">=</span><span class="s2">&quot;panorama</span>
 <span class="s2">luminosity</span>
 <span class="s2">horizon</span>
@@ -338,15 +356,16 @@ mv <span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_PATH</span><span 
 
 
            </div>
+           
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="1_2_3.html" class="btn btn-neutral float-right" title="1.2.3 - the luminosity branch" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="1_2_3.html" class="btn btn-neutral float-right" title="1.2.3 - the luminosity branch" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="1_2_5.html" class="btn btn-neutral" title="1.2.5 - the luminosity branch" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="1_2_5.html" class="btn btn-neutral float-left" title="1.2.5 - the luminosity branch" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -355,11 +374,19 @@ mv <span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_PATH</span><span 
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
+        
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -371,36 +398,15 @@ mv <span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_PATH</span><span 
   </div>
   
 
-
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../',
-            VERSION:'2.0.0',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
-        };
-    </script>
-      <script type="text/javascript" src="../_static/jquery.js"></script>
-      <script type="text/javascript" src="../_static/underscore.js"></script>
-      <script type="text/javascript" src="../_static/doctools.js"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

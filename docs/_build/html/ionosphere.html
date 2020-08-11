@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,50 +11,48 @@
   
 
   
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
+
+  
+  
+  
   
 
   
-
-  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-
-  
-  
-    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  
-
-  
-    <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-  
-
-  
-        <link rel="index" title="Index"
-              href="genindex.html"/>
-        <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 2.0.0 documentation" href="index.html"/>
-        <link rel="next" title="Ionosphere echo" href="ionosphere_echo.html"/>
-        <link rel="prev" title="Webapp" href="webapp.html"/> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Ionosphere echo" href="ionosphere_echo.html" />
+    <link rel="prev" title="Webapp" href="webapp.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
+   
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
-            <a href="index.html" class="icon icon-home"> Skyline
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
 
           
@@ -82,22 +79,24 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
             
-                <ul class="current">
+              
+            
+            
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
-<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alerts.html">Alerts</a></li>
-<li class="toctree-l1"><a class="reference internal" href="docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
@@ -124,7 +123,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#things-to-consider">Things to consider</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#contextual-anomalies-earthquakes-and-earth-tremors">Contextual anomalies - Earthquakes and Earth tremors</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#negative-values">Negative values</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#create-or-create-and-learn">&#8220;Create&#8221; or &#8220;Create and LEARN&#8221;</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#create-or-create-and-learn">“Create” or “Create and LEARN”</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#bad-learnt-features-profiles">Bad LEARNT features profiles</a></li>
 </ul>
 </li>
@@ -135,7 +134,7 @@
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#input">Input</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#features-profiles">features profiles</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#how-ionosphere-is-learning">How Ionosphere is &#8220;learning&#8221;?</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#how-ionosphere-is-learning">How Ionosphere is “learning”?</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#evolutionary-learning-generations">Evolutionary learning - generations</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#disabled-features-profiles">DISABLED features profiles</a></li>
 </ul>
@@ -166,6 +165,7 @@
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
@@ -173,12 +173,10 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#reliability">Reliability</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
-<li class="toctree-l1"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What’s new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a></li>
@@ -187,40 +185,61 @@
             
           
         </div>
+        
       </div>
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="index.html">Skyline</a>
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Skyline</a>
+        
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="index.html">Docs</a> &raquo;</li>
-      
-    <li>Ionosphere</li>
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Ionosphere</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
-            <a href="_sources/ionosphere.txt" rel="nofollow"> View page source</a>
+            
+            <a href="_sources/ionosphere.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -241,11 +260,11 @@ peaks on the metric stats_counts.statsd.bad_lines_seen</p>
 <img alt="_images/21060819.stats_counts.statsd.bad_lines_seen1.png" src="_images/21060819.stats_counts.statsd.bad_lines_seen1.png" />
 <p>This is <span class="red">NOT ANOMALOUS</span></p>
 <p>Even in massive, workload intensive, dynamic systems there are always some
-metrics that are low rate and relatively low range.  And at 3sigma... that means
+metrics that are low rate and relatively low range.  And at 3sigma… that means
 noisy.</p>
-<p>Ionosphere&#8217;s goal is to allow us to train Skyline on what is not anomalous and
+<p>Ionosphere’s goal is to allow us to train Skyline on what is not anomalous and
 thereby compliment statistical 3simga means with some new methodologies of
-trying to &#8220;teach&#8221; the system.  Of course teaching statistics algorithms
+trying to “teach” the system.  Of course teaching statistics algorithms
 something new is unfortunately not possible, but luckily teaching the system is
 possible.  Giving the system better contextual data to work with is the key
 factor.</p>
@@ -259,23 +278,23 @@ is normal, even if normal includes spikes and dips and seasonality.</p>
 <div class="section" id="overview">
 <h2>Overview<a class="headerlink" href="#overview" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li>Ionosphere gives the operator an input into Skyline to allow them to train it
-and compliment the existing statistical 3sigma anomaly detection methods.</li>
-<li>Ionosphere then starts to learn, <strong>retrospectively</strong>.</li>
-<li>Is Ionosphere the panacea for anomaly detection?  No.</li>
-<li>Is Ionosphere immediately useful for web scale anomaly detection?  No.  Unless
+<li><p>Ionosphere gives the operator an input into Skyline to allow them to train it
+and compliment the existing statistical 3sigma anomaly detection methods.</p></li>
+<li><p>Ionosphere then starts to learn, <strong>retrospectively</strong>.</p></li>
+<li><p>Is Ionosphere the panacea for anomaly detection?  No.</p></li>
+<li><p>Is Ionosphere immediately useful for web scale anomaly detection?  No.  Unless
 you are already doing web scale anomaly detection with Skyline, then still no.
-However over time yes.  You cannot rush time series.</li>
-<li>Is Ionosphere a lot of work to train, yes.</li>
-<li>Ionosphere uses a time series similarity comparison method to compare two
-different time series for a metric.</li>
-<li>This method is based on summing the features that are calculated for the
-time series using <a href="https://github.com/blue-yonder/tsfresh" target="_blank">tsfresh</a> to &#8220;fingerprint&#8221; the data set.</li>
-<li>This allows the operator to fingerprint and profile what is not anomalous, but
-normal and to be expected, even if 3sigma will always detect it as anomalous.</li>
-<li>Ionosphere also allows for the creation of layers rules which allow the
+However over time yes.  You cannot rush time series.</p></li>
+<li><p>Is Ionosphere a lot of work to train, yes.</p></li>
+<li><p>Ionosphere uses a time series similarity comparison method to compare two
+different time series for a metric.</p></li>
+<li><p>This method is based on summing the features that are calculated for the
+time series using <a href="https://github.com/blue-yonder/tsfresh" target="_blank">tsfresh</a> to “fingerprint” the data set.</p></li>
+<li><p>This allows the operator to fingerprint and profile what is not anomalous, but
+normal and to be expected, even if 3sigma will always detect it as anomalous.</p></li>
+<li><p>Ionosphere also allows for the creation of layers rules which allow the
 operator to define ad hoc boundaries and conditions that can be considered as
-not anomalous for each features profile that is created.</li>
+not anomalous for each features profile that is created.</p></li>
 </ul>
 </div>
 <div class="section" id="how-well-does-it-work">
@@ -289,21 +308,21 @@ drop significantly, but it is not perfect.</p>
 <p>Significant events which happen infrequently and change machine metrics
 significantly are still difficult to handle.  Things like the occasional
 importing of a DB, reboots, zipping up a bunch of things, however layers do
-allow one to &#8220;describe&#8221; these events on metrics as normal should they so wish.</p>
+allow one to “describe” these events on metrics as normal should they so wish.</p>
 <p>And Ionosphere does <strong>not</strong> make handling downtime and missing data points in
 metrics any easier, in fact it can make it harder.</p>
-<p>&#8220;Do I want to train Skyline to think that the hole in this metric for 10 hours
+<p>“Do I want to train Skyline to think that the hole in this metric for 10 hours
 yesterday while OVH had 2 x 20 Kv lines down and generator problems in France,
 is normal?  Maybe I should wait a week before training Skyline on any metrics
-that have been OVH&#8217;d...&#8221;</p>
+that have been OVH’d…”</p>
 </div>
 <div class="section" id="deploying-and-setting-ionosphere-up">
 <h2>Deploying and setting Ionosphere up<a class="headerlink" href="#deploying-and-setting-ionosphere-up" title="Permalink to this headline">¶</a></h2>
 <p>Requires - Panorama to be enabled and running.</p>
-<p>Ionosphere has a specific section of variables in <code class="docutils literal"><span class="pre">settings.py</span></code> that are
+<p>Ionosphere has a specific section of variables in <code class="docutils literal notranslate"><span class="pre">settings.py</span></code> that are
 documented in the settings specific documentation see all the settings below:</p>
 <ul class="simple">
-<li><a class="reference internal" href="skyline.html#settings.IONOSPHERE_CHECK_PATH" title="settings.IONOSPHERE_CHECK_PATH"><code class="xref py py-mod docutils literal"><span class="pre">settings.IONOSPHERE_CHECK_PATH</span></code></a> - <a class="reference external" href="http://earthgecko-skyline.readthedocs.io/en/latest/skyline.html#settings.IONOSPHERE_CHECK_PATH">http://earthgecko-skyline.readthedocs.io/en/latest/skyline.html#settings.IONOSPHERE_CHECK_PATH</a></li>
+<li><p><a class="reference internal" href="skyline.html#settings.IONOSPHERE_CHECK_PATH" title="settings.IONOSPHERE_CHECK_PATH"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.IONOSPHERE_CHECK_PATH</span></code></a> - <a class="reference external" href="http://earthgecko-skyline.readthedocs.io/en/latest/skyline.html#settings.IONOSPHERE_CHECK_PATH">http://earthgecko-skyline.readthedocs.io/en/latest/skyline.html#settings.IONOSPHERE_CHECK_PATH</a></p></li>
 </ul>
 <p>The Ionosphere settings follow normal Skyline settings conventions in terms of
 being able to paint all metrics with certain defaults and allowing for specific
@@ -317,9 +336,9 @@ time series :)</p>
 <div class="section" id="ionosphere-static-demo-pages">
 <h2>Ionosphere static demo pages<a class="headerlink" href="#ionosphere-static-demo-pages" title="Permalink to this headline">¶</a></h2>
 <p>The demo pages show examples of how Ionosphere presents the operator with the
-metric&#8217;s details for the specific point anomaly and the all the Graphite
+metric’s details for the specific point anomaly and the all the Graphite
 metric graphs at multiple resolutions so that the operator can evaluation the
-anomaly in the full context of the metric&#8217;s history.</p>
+anomaly in the full context of the metric’s history.</p>
 <div class="section" id="graphs-demo-page-multiple-resolution-graphite-graphs-for-context">
 <h3>Graphs demo page - multiple resolution Graphite graphs for context<a class="headerlink" href="#graphs-demo-page-multiple-resolution-graphite-graphs-for-context" title="Permalink to this headline">¶</a></h3>
 <p>The demo page uses an edge case anomaly one which is not easy to decide whether
@@ -328,8 +347,8 @@ it is or is not an anomaly.</p>
 <p>Note that this is demo page is from an older version of Ionosphere before learn
 was introduced.  So it does not give the operator the 2 options:</p>
 <ul class="simple">
-<li>Create features profile and DO NOT LEARN</li>
-<li>Create features profile and LEARN</li>
+<li><p>Create features profile and DO NOT LEARN</p></li>
+<li><p>Create features profile and LEARN</p></li>
 </ul>
 <p>It only gives the one option, however this demo page is about the <strong>multiple
 resolution Graphite graphs</strong> giving the operator context, so do not worry about
@@ -345,8 +364,8 @@ that the profile was created, see the <span class="skyblue">Graphite ::</span> <
 section in the below demo page.</p>
 <p>A series of matched graphs, showing the instances where Ionosphere has
 analyzed the Mirage detected anomalous time series and found it be not
-anomalous because the calculated <code class="docutils literal"><span class="pre">features_sum</span></code> of the Mirage anomalous
-time series were within 1% difference of the <code class="docutils literal"><span class="pre">features_sum</span> <span class="pre">::</span> <span class="pre">4764.3152004300</span></code>
+anomalous because the calculated <code class="docutils literal notranslate"><span class="pre">features_sum</span></code> of the Mirage anomalous
+time series were within 1% difference of the <code class="docutils literal notranslate"><span class="pre">features_sum</span> <span class="pre">::</span> <span class="pre">4764.3152004300</span></code>
 that was calculated for features profile 989 see
 <span class="skyblue">Graphite ::</span> <span class="red">graphs MATCHED</span> section in the below demo page.</p>
 <p>See <a href="_static/ionosphere_demo/fp_matched_demo/Skyline.fp.matched.demo.html" target="_blank">Ionosphere static features profile demo page with matched graphs</a> for a clearer picture.</p>
@@ -379,28 +398,28 @@ called Alice and she directs him to <a class="reference external" href="http://e
 and shows him it is not that anomalous, it is quite normal.  Alice shows Bob to
 consider the context of these events in at a fuller duration.</p>
 <ul class="simple">
-<li>5 earthquakes in the past 24 hours</li>
-<li>5 earthquakes in the past 7 days</li>
-<li>28 earthquakes in the past 30 days</li>
-<li>381 earthquakes in the past 365 days</li>
+<li><p>5 earthquakes in the past 24 hours</p></li>
+<li><p>5 earthquakes in the past 7 days</p></li>
+<li><p>28 earthquakes in the past 30 days</p></li>
+<li><p>381 earthquakes in the past 365 days</p></li>
 </ul>
 <div class="admonition seealso">
-<p class="first admonition-title">See also</p>
-<p class="last">Bob&#8217;s Hampshire earthquake data, if there is any...</p>
+<p class="admonition-title">See also</p>
+<p>Bob’s Hampshire earthquake data, if there is any…</p>
 </div>
 <p>And the penny drops for Bob that HERE in the Bay Area this is obviously this
 quite normal.</p>
 <p>Bob then wonders to himself why he did not think about this before leaving
-his stable shire in the UK.  He consoles himself by thinking &#8220;Well all the VCs
-and players are here...&#8221; so it obviously cannot be a big single point of
+his stable shire in the UK.  He consoles himself by thinking “Well all the VCs
+and players are here…” so it obviously cannot be a big single point of
 failure.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">bob</span> <span class="o">=</span> <span class="s1">&#39;Skyline&#39;</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">bob</span> <span class="o">=</span> <span class="s1">&#39;Skyline&#39;</span>
 <span class="n">alice</span> <span class="o">=</span> <span class="s1">&#39;You&#39;</span>
 </pre></div>
 </div>
 <p>Skyline does not know all the contexts to the data, you do.  Ionosphere lets
 us teach Bob <strong>that is not an earthquake!!!</strong> and enables Bob to look and ask,
-&#8220;Did Alice say this was not an earthquake, let me look&#8221;.</p>
+“Did Alice say this was not an earthquake, let me look”.</p>
 </div>
 <div class="section" id="negative-values">
 <h3>Negative values<a class="headerlink" href="#negative-values" title="Permalink to this headline">¶</a></h3>
@@ -410,27 +429,27 @@ as having a negative value in that specific time series period will not be
 trainable.</p>
 </div>
 <div class="section" id="create-or-create-and-learn">
-<h3>&#8220;Create&#8221; or &#8220;Create and LEARN&#8221;<a class="headerlink" href="#create-or-create-and-learn" title="Permalink to this headline">¶</a></h3>
+<h3>“Create” or “Create and LEARN”<a class="headerlink" href="#create-or-create-and-learn" title="Permalink to this headline">¶</a></h3>
 <p>With Ionosphere, you have the option to allow it to learn these things for
 itself, as long as you tell it what it is ALLOWED to learn at the fuller
 duration.</p>
 <p>So Ionosphere gives you 2 options:</p>
-<div class="figure" id="id1">
+<div class="figure align-default" id="id1">
 <img alt="_images/create.and.do.not.learn.png" src="_images/create.and.do.not.learn.png" />
-<p class="caption"><span class="caption-text">Only make a features profile based on the <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a> data or the Mirage <code class="docutils literal"><span class="pre">SECOND_ORDER_RESOLUTION_SECONDS</span></code></span></p>
+<p class="caption"><span class="caption-text">Only make a features profile based on the <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FULL_DURATION</span></code></a> data or the Mirage <code class="docutils literal notranslate"><span class="pre">SECOND_ORDER_RESOLUTION_SECONDS</span></code></span><a class="headerlink" href="#id1" title="Permalink to this image">¶</a></p>
 </div>
-<div class="figure" id="id2">
+<div class="figure align-default" id="id2">
 <img alt="_images/create.and.learn.png" src="_images/create.and.learn.png" />
 <p class="caption"><span class="caption-text">This is not an anomaly now or then or in the forseeable future if it
-looks anything like the <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a> or any of the multiple
-resolution Graphite graphs, LEARN it at the <code class="docutils literal"><span class="pre">learn_full_duration</span></code>.</span></p>
+looks anything like the <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FULL_DURATION</span></code></a> or any of the multiple
+resolution Graphite graphs, LEARN it at the <code class="docutils literal notranslate"><span class="pre">learn_full_duration</span></code>.</span><a class="headerlink" href="#id2" title="Permalink to this image">¶</a></p>
 </div>
 <p>This means you do not have to ship that earthquake that happened 17 days ago into
-Ionosphere&#8217;s features profiles and teach it BAD, badly.  You can just tell it
-to see the relevant Analyzer <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a> or Mirage the
-<code class="docutils literal"><span class="pre">SECOND_ORDER_RESOLUTION_HOURS</span></code> data as not anomalous and <strong>not</strong> learn at
-the fuller duration of the metric&#8217;s <code class="docutils literal"><span class="pre">learn_full_duration</span></code>.</p>
-<p>You can teach Ionosphere badly, but to &#8220;unteach&#8221; it is just a click of the Disable
+Ionosphere’s features profiles and teach it BAD, badly.  You can just tell it
+to see the relevant Analyzer <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FULL_DURATION</span></code></a> or Mirage the
+<code class="docutils literal notranslate"><span class="pre">SECOND_ORDER_RESOLUTION_HOURS</span></code> data as not anomalous and <strong>not</strong> learn at
+the fuller duration of the metric’s <code class="docutils literal notranslate"><span class="pre">learn_full_duration</span></code>.</p>
+<p>You can teach Ionosphere badly, but to “unteach” it is just a click of the Disable
 features profile button.</p>
 <p>Use Ionosphere learning sparingly, although it is a feature, it will also
 generates an ongoing requirement for you to review and validate what it has
@@ -452,7 +471,7 @@ on the training page and using the Ionosphere Validate page for side-by-side
 comparisons.</p>
 <p>To begin with try and start with only creating features profiles and only
 implementing learning very occasionally when you are certain that a metric has a
-very &#8220;normal&#8221; pattern over 30 days.  Initially just creating features profiles
+very “normal” pattern over 30 days.  Initially just creating features profiles
 and not trying to learn on all of them, will give you a good idea of what
 Skyline Ionosphere is doing when you look at the Ionosphere matches pages and
 review matches.  Having a few learn features profiles as well, will also give
@@ -462,7 +481,7 @@ features profiles on the <span class="skyblue">Search ::</span> <span class="red
 </div>
 <div class="section" id="bad-learnt-features-profiles">
 <h3>Bad LEARNT features profiles<a class="headerlink" href="#bad-learnt-features-profiles" title="Permalink to this headline">¶</a></h3>
-<p>Due to Ionosphere using a <a class="reference internal" href="skyline.html#settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN" title="settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN"><code class="xref py py-mod docutils literal"><span class="pre">settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN</span></code></a>
+<p>Due to Ionosphere using a <a class="reference internal" href="skyline.html#settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN" title="settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN</span></code></a>
 percentage difference to learn with, it is going to get some learning wrong as
 far as we humans are concerned.  Due to the algorithm using a percentage
 difference and not exact matches means that occasionally Ionosphere is going to
@@ -473,14 +492,14 @@ that incorrect LEARNT features profiles are disabled as soon as possible.</p>
 <p>The validate features profile page is useful for this. See
 <a href="_static/ionosphere_demo/fp_validate_demo_page/validate_features_profiles.demo.html" target="_blank">Ionosphere validate features profile demo page</a></p>
 <div class="admonition warning">
-<p class="first admonition-title">Warning</p>
-<p class="last">A <strong>important</strong> note on learning.  When you let Ionosphere learn
+<p class="admonition-title">Warning</p>
+<p>A <strong>important</strong> note on learning.  When you let Ionosphere learn
 you create a lot of work for yourself in terms of validating every learnt
 profile that Ionosphere learns.  If Ionosphere learns badly and you do not
 keep up to date with validating learnt features profiles, Ionosphere could end
 up silencing genuine anomalies which you would <strong>want</strong> to be alerted on.
 The minimise and mitigate Ionosphere learning badly too many times, it is
-possible to set the <a class="reference internal" href="skyline.html#settings.IONOSPHERE_LEARN_DEFAULT_MAX_GENERATIONS" title="settings.IONOSPHERE_LEARN_DEFAULT_MAX_GENERATIONS"><code class="xref py py-mod docutils literal"><span class="pre">settings.IONOSPHERE_LEARN_DEFAULT_MAX_GENERATIONS</span></code></a>
+possible to set the <a class="reference internal" href="skyline.html#settings.IONOSPHERE_LEARN_DEFAULT_MAX_GENERATIONS" title="settings.IONOSPHERE_LEARN_DEFAULT_MAX_GENERATIONS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.IONOSPHERE_LEARN_DEFAULT_MAX_GENERATIONS</span></code></a>
 variable to 2 instead of the current default of 16 (as of v1.2.5), but as a
 general rule of thumb, using learning sparingly and validate often.</p>
 </div>
@@ -498,7 +517,7 @@ feature calculations and comparisons and a role centered on learning.</p>
 <p>The features role is based on the sum of the calculated features of a time series.
 What are calculated features?  Between 150 and 210 features are calculated, here
 are a few examples:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="p">[</span><span class="s1">&#39;value__minimum&#39;</span><span class="p">,</span> <span class="s1">&#39;1507.1&#39;</span><span class="p">]</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="p">[</span><span class="s1">&#39;value__minimum&#39;</span><span class="p">,</span> <span class="s1">&#39;1507.1&#39;</span><span class="p">]</span>
 <span class="p">[</span><span class="s1">&#39;value__maximum&#39;</span><span class="p">,</span> <span class="s1">&#39;3806.75&#39;</span><span class="p">]</span>
 <span class="p">[</span><span class="s1">&#39;value__median&#39;</span><span class="p">,</span> <span class="s1">&#39;1853.95&#39;</span><span class="p">]</span>
 <span class="p">[</span><span class="s1">&#39;value__count_above_mean&#39;</span><span class="p">,</span> <span class="s1">&#39;474.0&#39;</span><span class="p">],</span>
@@ -512,83 +531,84 @@ are a few examples:</p>
 <span class="p">[</span><span class="s1">&#39;value__large_number_of_peaks__n_3&#39;</span><span class="p">,</span> <span class="s1">&#39;1.0&#39;</span><span class="p">]</span>
 </pre></div>
 </div>
-<p>For the current full list of all features that are calculated see <a class="reference internal" href="skyline.html#tsfresh_feature_names.TSFRESH_FEATURES" title="tsfresh_feature_names.TSFRESH_FEATURES"><code class="xref py py-mod docutils literal"><span class="pre">tsfresh_feature_names.TSFRESH_FEATURES</span></code></a>
+<p>For the current full list of all features that are calculated see <a class="reference internal" href="skyline.html#tsfresh_feature_names.TSFRESH_FEATURES" title="tsfresh_feature_names.TSFRESH_FEATURES"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tsfresh_feature_names.TSFRESH_FEATURES</span></code></a>
 Ionosphere calculates the features and then then use the sum of these values.</p>
 <ul class="simple">
-<li>Ionosphere <strong>only</strong> analyses SMTP alerter enabled metrics.</li>
-<li>Once Ionosphere is enabled, if Analyzer or Mirage detect an anomaly on a
-metric they:<ul>
-<li>Save the training data set and the anomaly details</li>
-<li>If the metric is not an <code class="docutils literal"><span class="pre">ionosphere_enabled</span></code> metric and a SMTP alert enabled
+<li><p>Ionosphere <strong>only</strong> analyses SMTP alerter enabled metrics.</p></li>
+<li><p>Once Ionosphere is enabled, if Analyzer or Mirage detect an anomaly on a
+metric they:</p>
+<ul>
+<li><p>Save the training data set and the anomaly details</p></li>
+<li><p>If the metric is not an <code class="docutils literal notranslate"><span class="pre">ionosphere_enabled</span></code> metric and a SMTP alert enabled
 metric, an alert is triggered and all the created alert images are saved in
-the training data directory as well.</li>
-<li>If the metric is an <code class="docutils literal"><span class="pre">ionosphere_enabled</span></code> metric, Analyzer and Mirage defer
+the training data directory as well.</p></li>
+<li><p>If the metric is an <code class="docutils literal notranslate"><span class="pre">ionosphere_enabled</span></code> metric, Analyzer and Mirage defer
 the time series to Ionosphere, via a check file, for Ionosphere to make a
-decision on.  More on that below.</li>
+decision on.  More on that below.</p></li>
 </ul>
 </li>
-<li>Ionosphere serves the training data set for each triggered anomaly, ready for
-a human to come along in the Webapp Ionosphere UI and say, &#8220;that is not
-anomalous&#8221; (if it is not).</li>
-<li>At the point the operator makes a features profile, all the features values
+<li><p>Ionosphere serves the training data set for each triggered anomaly, ready for
+a human to come along in the Webapp Ionosphere UI and say, “that is not
+anomalous” (if it is not).</p></li>
+<li><p>At the point the operator makes a features profile, all the features values
 that are created for the not anomalous time series are entered into the
-database and the metric becomes an <code class="docutils literal"><span class="pre">ionosphere_enabled</span></code> metric, if it was
-not one already.</li>
-<li>All the anomaly resources are then copied to the specific features profile
-directory that is created for the features profile.</li>
-<li>Once a metric is <code class="docutils literal"><span class="pre">ionosphere_enabled</span></code>, both Analyzer and Mirage will refer
-any anomalies found for the metric to Ionosphere instead of just alerting.</li>
-<li>When a 3sigma anomalous time series is sent to Ionosphere, it calculates the
+database and the metric becomes an <code class="docutils literal notranslate"><span class="pre">ionosphere_enabled</span></code> metric, if it was
+not one already.</p></li>
+<li><p>All the anomaly resources are then copied to the specific features profile
+directory that is created for the features profile.</p></li>
+<li><p>Once a metric is <code class="docutils literal notranslate"><span class="pre">ionosphere_enabled</span></code>, both Analyzer and Mirage will refer
+any anomalies found for the metric to Ionosphere instead of just alerting.</p></li>
+<li><p>When a 3sigma anomalous time series is sent to Ionosphere, it calculates the
 features with <a href="https://github.com/blue-yonder/tsfresh" target="_blank">tsfresh</a> for the 3sigma anomalous time series and then compares
 the common features sums with those of previously recorded features profiles.
 If the two values are less than
-<a class="reference internal" href="skyline.html#settings.IONOSPHERE_FEATURES_PERCENT_SIMILAR" title="settings.IONOSPHERE_FEATURES_PERCENT_SIMILAR"><code class="xref py py-mod docutils literal"><span class="pre">settings.IONOSPHERE_FEATURES_PERCENT_SIMILAR</span></code></a>,
+<a class="reference internal" href="skyline.html#settings.IONOSPHERE_FEATURES_PERCENT_SIMILAR" title="settings.IONOSPHERE_FEATURES_PERCENT_SIMILAR"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.IONOSPHERE_FEATURES_PERCENT_SIMILAR</span></code></a>,
 Ionosphere will deem the time series as not anomalous and update the related
 training data as MATCHED and update the features profile matched count in the
-database.</li>
-<li>If the values are not matched Ionosphere will apply Min-Max scaling (ONLY if
+database.</p></li>
+<li><p>If the values are not matched Ionosphere will apply Min-Max scaling (ONLY if
 the features profile time series and the anomalous time series are of a
 similar range) and try the same technique with temporary Min-Max scaled time
 series from the original features profile time series (which is stored in the
 database) and the 3sigma anomalous time series.  It creates a features profile
 for each Min-Max scaled (standardized) time series and then compares the
 features sums and determines whether the difference is below the
-<a class="reference internal" href="skyline.html#settings.IONOSPHERE_FEATURES_PERCENT_SIMILAR" title="settings.IONOSPHERE_FEATURES_PERCENT_SIMILAR"><code class="xref py py-mod docutils literal"><span class="pre">settings.IONOSPHERE_FEATURES_PERCENT_SIMILAR</span></code></a> and
+<a class="reference internal" href="skyline.html#settings.IONOSPHERE_FEATURES_PERCENT_SIMILAR" title="settings.IONOSPHERE_FEATURES_PERCENT_SIMILAR"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.IONOSPHERE_FEATURES_PERCENT_SIMILAR</span></code></a> and
 will deem it as not anomalous and update the related training data as MATCHED
-and update the features profile matched count in the database.</li>
-<li>If Ionosphere does <strong>not</strong> find a features profile match, it analyses the time
+and update the features profile matched count in the database.</p></li>
+<li><p>If Ionosphere does <strong>not</strong> find a features profile match, it analyses the time
 series against any defined layers, if there are any and if a match is found
 Ionosphere will deem the time series as not anomalous and update the related
 training data as MATCHED and update the features profile layers matched count
-in the database.</li>
-<li>If Ionosphere does <strong>not</strong> find a match, it tells the originating app
+in the database.</p></li>
+<li><p>If Ionosphere does <strong>not</strong> find a match, it tells the originating app
 (Analyzer or Mirage) to send out the anomaly alert with a
-<code class="docutils literal"><span class="pre">[Skyline</span> <span class="pre">alert]</span> <span class="pre">-</span> <span class="pre">Ionosphere</span> <span class="pre">ALERT</span></code> subject field.</li>
+<code class="docutils literal notranslate"><span class="pre">[Skyline</span> <span class="pre">alert]</span> <span class="pre">-</span> <span class="pre">Ionosphere</span> <span class="pre">ALERT</span></code> subject field.</p></li>
 </ul>
 </div>
 <div class="section" id="the-learning-role">
 <h3>The learning role<a class="headerlink" href="#the-learning-role" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>Once a features profile has been made for a metric with the LEARN option, for
+<li><p>Once a features profile has been made for a metric with the LEARN option, for
 every unmatched anomaly that training_data is created for, after the
-<code class="docutils literal"><span class="pre">learn_valid_ts_older_than</span></code> seconds have been reached, Ionosphere will
-attempt to &#8220;learn&#8221; whether the anomalous event after <code class="docutils literal"><span class="pre">learn_valid_ts_older_than</span></code>
+<code class="docutils literal notranslate"><span class="pre">learn_valid_ts_older_than</span></code> seconds have been reached, Ionosphere will
+attempt to “learn” whether the anomalous event after <code class="docutils literal notranslate"><span class="pre">learn_valid_ts_older_than</span></code>
 seconds and any subsequent aggregation has had time to occur, if the time series
-features at <code class="docutils literal"><span class="pre">learn_full_duration</span></code> seconds match any feature profiles that
-were created for the metric at the <code class="docutils literal"><span class="pre">learn_full_duration</span></code>.</li>
-<li>If Ionosphere finds a match to the features calculated from the metric
-time series that it surfaces from Graphite at <code class="docutils literal"><span class="pre">learn_full_duration</span></code>, it
+features at <code class="docutils literal notranslate"><span class="pre">learn_full_duration</span></code> seconds match any feature profiles that
+were created for the metric at the <code class="docutils literal notranslate"><span class="pre">learn_full_duration</span></code>.</p></li>
+<li><p>If Ionosphere finds a match to the features calculated from the metric
+time series that it surfaces from Graphite at <code class="docutils literal notranslate"><span class="pre">learn_full_duration</span></code>, it
 will use the anomaly training data to create a features profile for the metric
-at the metric&#8217;s <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a> or <code class="docutils literal"><span class="pre">SECOND_ORDER_RESOLUTION_HOURS</span></code>
+at the metric’s <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FULL_DURATION</span></code></a> or <code class="docutils literal notranslate"><span class="pre">SECOND_ORDER_RESOLUTION_HOURS</span></code>
 (whichever is applicable) <strong>and</strong> it will also create a features profile with
-the <code class="docutils literal"><span class="pre">learn_full_duration</span></code> data that matched, as long as the <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a>
-or <code class="docutils literal"><span class="pre">SECOND_ORDER_RESOLUTION_HOURS</span></code> features sum difference is within the
-<a class="reference internal" href="skyline.html#settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN" title="settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN"><code class="xref py py-mod docutils literal"><span class="pre">settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN</span></code></a> or the
-metric specific <code class="docutils literal"><span class="pre">max_percent_diff_from_origin</span></code></li>
+the <code class="docutils literal notranslate"><span class="pre">learn_full_duration</span></code> data that matched, as long as the <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FULL_DURATION</span></code></a>
+or <code class="docutils literal notranslate"><span class="pre">SECOND_ORDER_RESOLUTION_HOURS</span></code> features sum difference is within the
+<a class="reference internal" href="skyline.html#settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN" title="settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN</span></code></a> or the
+metric specific <code class="docutils literal notranslate"><span class="pre">max_percent_diff_from_origin</span></code></p></li>
 </ul>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">Ionosphere does not currently use Min-Max scaling in the learning role,
+<p class="admonition-title">Note</p>
+<p>Ionosphere does not currently use Min-Max scaling in the learning role,
 the learnt features profiles are only created with the time series at the
 original scale.</p>
 </div>
@@ -609,28 +629,28 @@ on this page).</p>
 profile is extracted from the time series using <a href="https://github.com/blue-yonder/tsfresh" target="_blank">tsfresh</a>.  This features profile
 contains the values of 210 features (currently as of tsfresh-0.4.0), such
 as median, mean, variance, etc, for a full list of known features that are
-calculated see <a class="reference internal" href="skyline.html#tsfresh_feature_names.TSFRESH_FEATURES" title="tsfresh_feature_names.TSFRESH_FEATURES"><code class="xref py py-mod docutils literal"><span class="pre">tsfresh_feature_names.TSFRESH_FEATURES</span></code></a>.</p>
+calculated see <a class="reference internal" href="skyline.html#tsfresh_feature_names.TSFRESH_FEATURES" title="tsfresh_feature_names.TSFRESH_FEATURES"><code class="xref py py-mod docutils literal notranslate"><span class="pre">tsfresh_feature_names.TSFRESH_FEATURES</span></code></a>.</p>
 <p>This features profile is then stored in the Skyline MySQL database in the
 following manner.  For every metric that has a features profile that is created,
 2 MySQL InnoDB tables are created for the metric.</p>
 <ul class="simple">
-<li>The features profile details are inserted into the ionosphere table and the
-features profile gets a unique id.</li>
-<li>z_fp_&lt;metric_id&gt; - features profile metric table which contains the features
-profile id, feature name id and the calculated value of the feature.</li>
-<li>z_ts_&lt;metric_id&gt; - the time series data for the metric on which a features
-profile was calculated.</li>
+<li><p>The features profile details are inserted into the ionosphere table and the
+features profile gets a unique id.</p></li>
+<li><p>z_fp_&lt;metric_id&gt; - features profile metric table which contains the features
+profile id, feature name id and the calculated value of the feature.</p></li>
+<li><p>z_ts_&lt;metric_id&gt; - the time series data for the metric on which a features
+profile was calculated.</p></li>
 </ul>
-<p>These tables are prefixed with <code class="docutils literal"><span class="pre">z_</span></code> so that they are all listed after all core
+<p>These tables are prefixed with <code class="docutils literal notranslate"><span class="pre">z_</span></code> so that they are all listed after all core
 Skyline database tables.  Once a metric has a z_fp_&lt;metric_id&gt; and a
 z_ts_&lt;metric_id&gt; table, these tables are updated with any future features
 profiles and time series data.  So there is are 2 tables per metric, not tables
 per features profile.</p>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">Just a note on when features are extracted.  The user may notice that
+<p class="admonition-title">Note</p>
+<p>Just a note on when features are extracted.  The user may notice that
 when they extract features on a training data set, that sometimes they are
-advised that the features were &#8220;previously calculated by Ionosphere&#8221; and
+advised that the features were “previously calculated by Ionosphere” and
 sometimes not.  This is because if the metric has been previously trained,
 it is an Ionosphere metric and Ionosphere will have extracted the features
 to analyse the metric.  If the metric has not been previously trained then
@@ -641,15 +661,15 @@ anomaly.</p>
 </div>
 </div>
 <div class="section" id="how-ionosphere-is-learning">
-<h2>How Ionosphere is &#8220;learning&#8221;?<a class="headerlink" href="#how-ionosphere-is-learning" title="Permalink to this headline">¶</a></h2>
+<h2>How Ionosphere is “learning”?<a class="headerlink" href="#how-ionosphere-is-learning" title="Permalink to this headline">¶</a></h2>
 <p>Ionosphere may have had humble beginnings, but adding this seemingly trivial
 function was anything but humble, simple or easy.  So to solve the seemingly
 simple problem, something completely new had to be pieced together.</p>
-<p>Ionosphere &#8220;learns&#8221; time series and makes decisions based on a time series
+<p>Ionosphere “learns” time series and makes decisions based on a time series
 similarities comparison method using the <a href="https://github.com/blue-yonder/tsfresh" target="_blank">tsfresh</a> package.</p>
-<p>This &#8220;learning&#8221; is base upon determining the similarities in time series that
+<p>This “learning” is base upon determining the similarities in time series that
 could be best described as attempting to determine how similar 2 time series are
-in terms of the amount of &#8220;power/energy&#8221;, range and &#8220;movement&#8221; there is within
+in terms of the amount of “power/energy”, range and “movement” there is within
 the time series data set.  A fingerprint or signature if you like, but understand
 that neither are perfect.  This time series similarities comparison method is not
 perfect in the dynamic, operational arena, but it achieves the goal of being useful.
@@ -663,17 +683,17 @@ definitely at differing and sometimes multiple seasonality.</p>
 <p>For a very good overview of Active Brownian Motion please see the &#64;kempa-liehr
 description at</p>
 <div class="admonition seealso">
-<p class="first admonition-title">See also</p>
-<p class="last"><a class="reference external" href="https://github.com/blue-yonder/tsfresh/pull/143#issuecomment-272314801">https://github.com/blue-yonder/tsfresh/pull/143#issuecomment-272314801</a> -
-&#8220;Dynamic systems have stable and unstable fixed points. Without noise these
+<p class="admonition-title">See also</p>
+<p><a class="reference external" href="https://github.com/blue-yonder/tsfresh/pull/143#issuecomment-272314801">https://github.com/blue-yonder/tsfresh/pull/143#issuecomment-272314801</a> -
+“Dynamic systems have stable and unstable fixed points. Without noise these
 systems would be driven to one of their stable fixed points and stay there for
-ever. So, fixed points resemble an equilibrium state&#8221;</p>
+ever. So, fixed points resemble an equilibrium state”</p>
 </div>
 <p>Ionosphere enables us to try and profile something similar to Active Brownian
 Motion as the norm, again for want of a better way of trying to explain it.</p>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">Ionosphere does not use Min-Max scaling in the learning context</p>
+<p class="admonition-title">Note</p>
+<p>Ionosphere does not use Min-Max scaling in the learning context</p>
 </div>
 <p>However, contextually, Ionosphere nor the <a href="https://github.com/blue-yonder/tsfresh" target="_blank">tsfresh</a> implemented method, will ever
 be perfect, unless 2 time series have identical data, consistently, without
@@ -687,8 +707,8 @@ attaining a working, functional state is usually the norm in evolution it seems.
 <h3>Evolutionary learning - generations<a class="headerlink" href="#evolutionary-learning-generations" title="Permalink to this headline">¶</a></h3>
 <p>Ionosphere uses an evolutionary learning model that records (and limits) the
 generations of trained and learnt features profiles per metric.  Limits can be
-set in <code class="docutils literal"><span class="pre">settings.py</span></code> and played around with.  For veterans of Skyline, these
-tend to be much like <a class="reference internal" href="skyline.html#settings.CONSENSUS" title="settings.CONSENSUS"><code class="xref py py-mod docutils literal"><span class="pre">settings.CONSENSUS</span></code></a>, what is the correct <code class="docutils literal"><span class="pre">CONSENSUS</span></code>?</p>
+set in <code class="docutils literal notranslate"><span class="pre">settings.py</span></code> and played around with.  For veterans of Skyline, these
+tend to be much like <a class="reference internal" href="skyline.html#settings.CONSENSUS" title="settings.CONSENSUS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.CONSENSUS</span></code></a>, what is the correct <code class="docutils literal notranslate"><span class="pre">CONSENSUS</span></code>?</p>
 <p>They are tweak and tunable.  Keep them low, you give Ionosphere less
 leverage to learn.  But you will bump them up so that it can learn more and
 better.</p>
@@ -704,8 +724,8 @@ and NeuroEvolution.js (thanks for the inspiration from &#64;nylar and &#64;xvini
 they are all tied together with a splash of seasonality and a dash of
 similarities, it gets quite complicated.</p>
 <p>However, all Skyline pieces, individually, are relatively simple.  Seeing them
-work helps or hinders depending on your outlook...
-&#8220;Shit lots of stuff is anomalous&#8221; can often lead to lots of work, debugging,
+work helps or hinders depending on your outlook…
+“Shit lots of stuff is anomalous” can often lead to lots of work, debugging,
 fine tuning and making better or polishing a turd or diamante.</p>
 </div>
 <div class="section" id="disabled-features-profiles">
@@ -716,9 +736,9 @@ human is concerned.  Luckily that does not happen often, but it will happen.</p>
 anomalous.  This can be due to a features profile having been LEARNT and the
 operator thinks it to be anomalous or an operator could create a features
 profile that they decide was in error, this can especially be true when on
-re-evaluating after creating with the &#8220;and LEARN&#8221; option enabled, but looking at
-the 30 day data and thinking... &#8220;hmmm actually I do not really want it to learn
-that spike from 2 weeks ago&#8221;.</p>
+re-evaluating after creating with the “and LEARN” option enabled, but looking at
+the 30 day data and thinking… “hmmm actually I do not really want it to learn
+that spike from 2 weeks ago”.</p>
 <p>If a features profile is DISABLED, all its progeny features profiles are
 disabled as well.  This ensures that every features profile was LEARNT from the
 profile and any that were LEARNT from any of them are disabled too so that the
@@ -729,26 +749,26 @@ pattern is removed from evaluation during analysis of the metric in the future.<
 <h2>Layers<a class="headerlink" href="#layers" title="Permalink to this headline">¶</a></h2>
 <p>Ionosphere allows the operator to train Skyline a not anomalous time series
 in terms of generating a features profile to be compared to anomalies in the
-future, however Ionosphere also allows the operator to define &#8220;layers&#8221; rules at
+future, however Ionosphere also allows the operator to define “layers” rules at
 the time of feature profile creation.</p>
 <p>Layers rules allow us to train Skyline on boundaries as well, on the fly via the
 UI at the time of features profile creation, which puts all the work for the
 operator in the one place.  Think of them as metric AND feature profile specific
 algorithms.  A layer should only ever be used to describe the features profile
-and ONLY at <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a> time series.  The operator should
+and ONLY at <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FULL_DURATION</span></code></a> time series.  The operator should
 limit their layers values to within acceptable bounds of the range within the
 features profile.  The operator should not try and use a single layer to try and
-describe the entire range they &#8220;think&#8221; the metric can go to, a layer is meant to
+describe the entire range they “think” the metric can go to, a layer is meant to
 match with a features profile, not a metric, however see the Matching
 approximately close section immediate below. If this methodology is followed,
-layers and features profiles &#8220;retire&#8221; around the same time as metrics change
+layers and features profiles “retire” around the same time as metrics change
 over time, an old features profile that no longer describes the current active
 motion state will no longer ever be matched, neither should its layers.  One of
 the things some way down the road on the Ionosphere roadmap is
 Feature #1888: Ionosphere learn - evolutionary maturity forget</p>
 <p>Layers were added to reduce the number of features profiles one has to train
 Skyline on.  They were introduced for humans and to make it easier and more
-useful.  However they come at a cost.  Every layer created reduces Ionosphere&#8217;s
+useful.  However they come at a cost.  Every layer created reduces Ionosphere’s
 opportunities to be trained and learn.  It is a compromise to save on the amount
 of monkeys you have to have or need to be to train Skyline properly.  Unfortunately
 someone has to be the monkey, but for every features profile/layer you create,
@@ -757,9 +777,9 @@ instructions.</p>
 <p>A layer consist of a series of simple algorithms that are run against a
 time series after Analyzer/Mirage and Ionosphere features comparisons.</p>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">It is IMPORTANT to understand that layers are only evaluated against
-the <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a> time series, regardless if it is a Mirage
+<p class="admonition-title">Note</p>
+<p>It is IMPORTANT to understand that layers are only evaluated against
+the <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FULL_DURATION</span></code></a> time series, regardless if it is a Mirage
 metric being checked.  The operator should define their layers values in
 relation to the Redis graph that is presented in the Train :: layers section
 and to the Last :: 30 datapoints :: at FULL_DURATION section just below that
@@ -772,14 +792,14 @@ never have to worry about an invalid layer match thereafter.  However, do ensure
 that you just try to validate a few layers every now and then.</p>
 <div class="section" id="matching-approximately-close">
 <h3>Matching approximately close<a class="headerlink" href="#matching-approximately-close" title="Permalink to this headline">¶</a></h3>
-<p>The <a class="reference internal" href="skyline.html#settings.IONOSPHERE_LAYERS_USE_APPROXIMATELY_CLOSE" title="settings.IONOSPHERE_LAYERS_USE_APPROXIMATELY_CLOSE"><code class="xref py py-mod docutils literal"><span class="pre">settings.IONOSPHERE_LAYERS_USE_APPROXIMATELY_CLOSE</span></code></a> variable
+<p>The <a class="reference internal" href="skyline.html#settings.IONOSPHERE_LAYERS_USE_APPROXIMATELY_CLOSE" title="settings.IONOSPHERE_LAYERS_USE_APPROXIMATELY_CLOSE"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.IONOSPHERE_LAYERS_USE_APPROXIMATELY_CLOSE</span></code></a> variable
 enables a margin of tolerance to be applied to layers D and E.  This is enabled
 by default and D and E boundary limits are matched if the value is approximately
 close to the limit.  This is only implemented on boundary values that are &gt; 10.
 The approximately close value is calculated as 10 percent for limit values
 between 11 and 29 and within 5 percent when the limit value &gt;= 30.  It is only
-applied to the D layer with a &#8216;&gt;&#8217; or &#8216;&gt;=&#8217; condition and to the E layer with a
-&#8216;&lt;&#8217; or &#8216;&lt;=&#8217; condition.  This makes the layers more effect and means that if a
+applied to the D layer with a ‘&gt;’ or ‘&gt;=’ condition and to the E layer with a
+‘&lt;’ or ‘&lt;=’ condition.  This makes the layers more effect and means that if a
 limit on a layer is set to 52 and the data point is 53, the layer will match
 and you probably want it to as well.  If approximately_close is not used you
 will find it frustrating the number of times an anomaly is triggered where it
@@ -788,7 +808,7 @@ did not match a layer by small margin.</p>
 <div class="section" id="how-layers-are-defined">
 <h3>How layers are defined<a class="headerlink" href="#how-layers-are-defined" title="Permalink to this headline">¶</a></h3>
 <p>The layers are defined as:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">D</span> <span class="n">layer</span> <span class="p">[</span><span class="n">required</span><span class="p">]</span> <span class="k">if</span> <span class="n">last_datapoint</span> <span class="p">[</span><span class="o">&lt;</span><span class="p">,</span> <span class="o">&gt;</span><span class="p">,</span> <span class="o">==</span><span class="p">,</span> <span class="o">!=</span><span class="p">,</span> <span class="o">&lt;=</span><span class="p">,</span> <span class="o">&gt;=</span><span class="p">]</span> <span class="n">x</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">D</span> <span class="n">layer</span> <span class="p">[</span><span class="n">required</span><span class="p">]</span> <span class="k">if</span> <span class="n">last_datapoint</span> <span class="p">[</span><span class="o">&lt;</span><span class="p">,</span> <span class="o">&gt;</span><span class="p">,</span> <span class="o">==</span><span class="p">,</span> <span class="o">!=</span><span class="p">,</span> <span class="o">&lt;=</span><span class="p">,</span> <span class="o">&gt;=</span><span class="p">]</span> <span class="n">x</span>
 <span class="n">DISCARD</span> <span class="o">-</span> <span class="n">not_anomalous</span> <span class="kc">False</span>
 </pre></div>
 </div>
@@ -799,14 +819,14 @@ set it to -1 or &gt; 0.1 or &gt; 1. On a high constant rate metric the D layer c
 used to discard if &lt; x so the the layer does not silence a drop.  This layer can
 be complimented by the optional D1 layer below. Remember a match here disables
 any of the other below layers being checked</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">D1</span> <span class="n">layer</span> <span class="p">[</span><span class="n">optional</span><span class="p">]</span> <span class="k">if</span> <span class="n">datapoint</span> <span class="p">[</span><span class="o">&lt;</span><span class="p">,</span> <span class="o">&gt;</span><span class="p">,</span> <span class="o">==</span><span class="p">,</span> <span class="o">!=</span><span class="p">,</span> <span class="o">&lt;=</span><span class="p">,</span> <span class="o">&gt;=</span><span class="p">]</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">last</span> <span class="n">y</span> <span class="n">values</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">time</span> <span class="n">series</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">D1</span> <span class="n">layer</span> <span class="p">[</span><span class="n">optional</span><span class="p">]</span> <span class="k">if</span> <span class="n">datapoint</span> <span class="p">[</span><span class="o">&lt;</span><span class="p">,</span> <span class="o">&gt;</span><span class="p">,</span> <span class="o">==</span><span class="p">,</span> <span class="o">!=</span><span class="p">,</span> <span class="o">&lt;=</span><span class="p">,</span> <span class="o">&gt;=</span><span class="p">]</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">last</span> <span class="n">y</span> <span class="n">values</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">time</span> <span class="n">series</span>
 <span class="n">DISCARD</span> <span class="o">-</span> <span class="n">not_anomalous</span> <span class="kc">False</span>
 </pre></div>
 </div>
 <p>The D1 layer can be used as an upper or lower limit, so the D layer does not
 silence a drop.  Remember a match here disables any of the other below layer
 conditions from being checked.</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">E</span> <span class="n">layer</span> <span class="p">[</span><span class="n">required</span><span class="p">]</span> <span class="k">if</span> <span class="n">datapoint</span> <span class="p">[</span><span class="o">&lt;</span><span class="p">,</span> <span class="o">&gt;</span><span class="p">,</span> <span class="o">==</span><span class="p">,</span> <span class="o">!=</span><span class="p">,</span> <span class="o">&lt;=</span><span class="p">,</span> <span class="o">&gt;=</span><span class="p">]</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">last</span> <span class="n">y</span> <span class="n">values</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">time</span> <span class="n">series</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">E</span> <span class="n">layer</span> <span class="p">[</span><span class="n">required</span><span class="p">]</span> <span class="k">if</span> <span class="n">datapoint</span> <span class="p">[</span><span class="o">&lt;</span><span class="p">,</span> <span class="o">&gt;</span><span class="p">,</span> <span class="o">==</span><span class="p">,</span> <span class="o">!=</span><span class="p">,</span> <span class="o">&lt;=</span><span class="p">,</span> <span class="o">&gt;=</span><span class="p">]</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">last</span> <span class="n">y</span> <span class="n">values</span> <span class="ow">in</span> <span class="n">the</span> <span class="n">time</span> <span class="n">series</span>
 <span class="ow">not</span> <span class="n">anomalous</span>
 </pre></div>
 </div>
@@ -815,11 +835,11 @@ conditions from being checked.</p>
 <p>For instance, say occasionally we can expect to see a spike of 404s status codes
 on a web app due to bots or your own scanning, with layers we can tell Ionosphere
 that a time series was not anomalous if the datapoint is less than 120 and has
-values in the last 3 datapoints is less than 50.  This allows for a somewhat
+values in the last 3 datapoints is less than 5.  This allows for a somewhat
 moving window and an alert that would be delayed by say 3 minutes, but it is a
 signal, rather than noise. Let us describe that layer as gt_120-5_in_3</p>
 <p>To demonstrate how the above layer would work, an example of 404 counts per minute:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">D</span> <span class="n">layer</span>  <span class="p">::</span> <span class="k">if</span> <span class="n">value</span> <span class="o">&gt;</span> <span class="mi">120</span>                          <span class="p">::</span> <span class="p">[</span><span class="n">do</span> <span class="ow">not</span> <span class="n">check</span><span class="p">]</span>  <span class="p">::</span>  <span class="p">[</span><span class="s1">&#39;ACTIVE&#39;</span><span class="p">]</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">D</span> <span class="n">layer</span>  <span class="p">::</span> <span class="k">if</span> <span class="n">value</span> <span class="o">&gt;</span> <span class="mi">120</span>                          <span class="p">::</span> <span class="p">[</span><span class="n">do</span> <span class="ow">not</span> <span class="n">check</span><span class="p">]</span>  <span class="p">::</span>  <span class="p">[</span><span class="s1">&#39;ACTIVE&#39;</span><span class="p">]</span>
 <span class="n">D1</span> <span class="n">layer</span> <span class="p">::</span> <span class="k">if</span> <span class="n">value</span> <span class="n">none</span> <span class="n">none</span> <span class="ow">in</span> <span class="n">last</span> <span class="n">none</span> <span class="n">values</span>  <span class="p">::</span> <span class="p">[</span><span class="n">do</span> <span class="ow">not</span> <span class="n">check</span><span class="p">]</span>  <span class="p">::</span>   <span class="p">[</span><span class="s1">&#39;NOT ACTIVE - D1 layer not created&#39;</span><span class="p">]</span>
 <span class="n">E</span> <span class="n">layer</span>  <span class="p">::</span> <span class="k">if</span> <span class="n">value</span> <span class="o">&lt;</span> <span class="mi">5</span> <span class="ow">in</span> <span class="n">last</span> <span class="mi">3</span> <span class="n">values</span>           <span class="p">::</span> <span class="p">[</span><span class="n">not_anomalous</span><span class="p">,</span> <span class="k">if</span> <span class="n">active</span> <span class="n">Es</span><span class="p">,</span> <span class="n">F1</span> <span class="ow">and</span> <span class="n">F2</span> <span class="n">layers</span> <span class="n">match</span><span class="p">]</span>  <span class="p">::</span>  <span class="p">[</span><span class="s1">&#39;ACTIVE&#39;</span><span class="p">]</span>
 <span class="n">Es</span> <span class="n">layer</span> <span class="p">::</span> <span class="k">if</span> <span class="n">day</span> <span class="kc">None</span> <span class="kc">None</span>                        <span class="p">::</span> <span class="p">[</span><span class="n">not_anomalous</span><span class="p">,</span> <span class="k">if</span> <span class="n">active</span> <span class="n">F1</span> <span class="ow">and</span> <span class="n">F2</span> <span class="n">layers</span> <span class="n">match</span><span class="p">]</span>  <span class="p">::</span>   <span class="p">[</span><span class="s1">&#39;NOT ACTIVE - Es layer not created&#39;</span><span class="p">]</span>
@@ -828,7 +848,7 @@ signal, rather than noise. Let us describe that layer as gt_120-5_in_3</p>
 </pre></div>
 </div>
 <p>Apply against</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="mi">13</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mi">11</span> <span class="mi">2</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">13</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mi">11</span> <span class="mi">2</span>
 <span class="mi">13</span><span class="p">:</span><span class="mi">11</span><span class="p">:</span><span class="mi">11</span> <span class="mi">0</span>
 <span class="mi">13</span><span class="p">:</span><span class="mi">12</span><span class="p">:</span><span class="mi">11</span> <span class="mi">8</span>
 <span class="mi">13</span><span class="p">:</span><span class="mi">13</span><span class="p">:</span><span class="mi">11</span> <span class="mi">60</span>
@@ -837,7 +857,7 @@ signal, rather than noise. Let us describe that layer as gt_120-5_in_3</p>
 </div>
 <p>With the above described layer, this would be classified as not anomalous,
 however if the data was:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="mi">13</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mi">11</span> <span class="mi">2</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="mi">13</span><span class="p">:</span><span class="mi">10</span><span class="p">:</span><span class="mi">11</span> <span class="mi">2</span>
 <span class="mi">13</span><span class="p">:</span><span class="mi">11</span><span class="p">:</span><span class="mi">11</span> <span class="mi">0</span>
 <span class="mi">13</span><span class="p">:</span><span class="mi">12</span><span class="p">:</span><span class="mi">11</span> <span class="mi">800</span>
 </pre></div>
@@ -845,8 +865,8 @@ however if the data was:</p>
 <p>The layer would not ever report the time series as not anomalous as the 800
 exceeds the gt_120, so the rest of the layer definition would not be evaluated.</p>
 <div class="admonition warning">
-<p class="first admonition-title">Warning</p>
-<p class="last">Layers may seem simple, but the layers must be thought about
+<p class="admonition-title">Warning</p>
+<p>Layers may seem simple, but the layers must be thought about
 carefully as it is possible for a metric to have multiple layers created on
 multiple features profiles, that could silence any anomalies on the metric.
 Specifically D layer, however layer D1 was added to remove this possibility,
@@ -876,18 +896,18 @@ an Apollo Program refit.  Enabling the pilots to take control, have inputs.</p>
 <p>If Ionosphere achieves the sentiments expressed in Brian L. Troutwine &#64;bltroutwine
 seminal Belgium 2014 devopsdays presentation, then it has achieved a goal.</p>
 <ul class="simple">
-<li>Automation with Humans in Mind: Making Complex Systems Predictable, Reliable and
-Humane - <a class="reference external" href="https://legacy.devopsdays.org/events/2014-belgium/proposals/automation-with-humans-in-mind/">https://legacy.devopsdays.org/events/2014-belgium/proposals/automation-with-humans-in-mind/</a></li>
-<li>video - <a class="reference external" href="http://www.ustream.tv/recorded/54703629">http://www.ustream.tv/recorded/54703629</a></li>
+<li><p>Automation with Humans in Mind: Making Complex Systems Predictable, Reliable and
+Humane - <a class="reference external" href="https://legacy.devopsdays.org/events/2014-belgium/proposals/automation-with-humans-in-mind/">https://legacy.devopsdays.org/events/2014-belgium/proposals/automation-with-humans-in-mind/</a></p></li>
+<li><p>video - <a class="reference external" href="http://www.ustream.tv/recorded/54703629">http://www.ustream.tv/recorded/54703629</a></p></li>
 </ul>
 <p>Ionosphere first and foremost was created to give this dimension of human
 piloting where necessary.  Giving Skyline that ability to allow human input in
-some from to &#8220;teach&#8221; Skyline what is not anomalous comes with a number
+some from to “teach” Skyline what is not anomalous comes with a number
 additional benefits, like giving the Skyline the information needed to learn
 how to make decisions based on the input data it is provided within.</p>
 <p>The initial goal has been achieved, but it comes at a price.  Everything has a
 cost and here the cost is the operator needs to
-<code class="docutils literal"><span class="pre">train_ionosphere_learn</span> <span class="pre">==</span> <span class="pre">time_in_seconds</span>&#160; <span class="pre">#</span> <span class="pre">about</span> <span class="pre">12</span> <span class="pre">seconds</span></code>.</p>
+<code class="docutils literal notranslate"><span class="pre">train_ionosphere_learn</span> <span class="pre">==</span> <span class="pre">time_in_seconds</span>&#160; <span class="pre">#</span> <span class="pre">about</span> <span class="pre">12</span> <span class="pre">seconds</span></code>.</p>
 <p>Ionosphere can only be activated by the input from a human neocortex to tell it
 what is not anomalous.  Some brain CPU cycles, opening emails and clicks,
 assess 1 or 2 more clicks.  It is not easy, however that said it is effective at
@@ -902,8 +922,8 @@ doing what it was not intended for.  All time series not being created equal.</p
 first light at least.  This is not to say that it does not do high rate, highly
 variable metrics, it just needs a lot more features profiles for the metric
 describing what is not anomalous. However it is possible that a larger
-<a class="reference internal" href="skyline.html#settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN" title="settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN"><code class="xref py py-mod docutils literal"><span class="pre">settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN</span></code></a> or metric
-specific <code class="docutils literal"><span class="pre">max_percent_diff_from_origin</span></code> may work quite well on large volume
+<a class="reference internal" href="skyline.html#settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN" title="settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN</span></code></a> or metric
+specific <code class="docutils literal notranslate"><span class="pre">max_percent_diff_from_origin</span></code> may work quite well on large volume
 and high variability metrics, time will tell.</p>
 <p>Over the fullness of time and data, these learning efficiency metrics will be
 available via the database data for analysis.</p>
@@ -917,8 +937,8 @@ features calculation on a wholesale scale, without having to design lots of
 algorithms to calculate the time series features for.  The <a href="https://github.com/blue-yonder/tsfresh" target="_blank">tsfresh</a> package
 enabled Ionosphere to happen much FASTER, it calculates all the features that
 are required to make this method viable and work.  They said:</p>
-<p><code class="docutils literal"><span class="pre">&quot;Spend</span> <span class="pre">less</span> <span class="pre">time</span> <span class="pre">on</span> <span class="pre">feature</span> <span class="pre">engineering&quot;</span></code></p>
-<p>They were not wrong.  Skyline has added a lot of &#8220;checks&#8221; to ensure consistency
+<p><code class="docutils literal notranslate"><span class="pre">&quot;Spend</span> <span class="pre">less</span> <span class="pre">time</span> <span class="pre">on</span> <span class="pre">feature</span> <span class="pre">engineering&quot;</span></code></p>
+<p>They were not wrong.  Skyline has added a lot of “checks” to ensure consistency
 in the <a href="https://github.com/blue-yonder/tsfresh" target="_blank">tsfresh</a> calculated features so that a features profile is not affected
 by any changes that may be implemented in the <a href="https://github.com/blue-yonder/tsfresh" target="_blank">tsfresh</a> package.  All of this
 has been pushed back into <a href="https://github.com/blue-yonder/tsfresh" target="_blank">tsfresh</a> and may be one of the reasons why the actual
@@ -943,15 +963,15 @@ to use and well documented.</p>
 <h3>Cached data<a class="headerlink" href="#cached-data" title="Permalink to this headline">¶</a></h3>
 <p>Ionosphere caches the following data:</p>
 <ul class="simple">
-<li>features profile features values from the <cite>z_fp_&lt;metric_id&gt;</cite> table - no expiry</li>
-<li>metrics table metric record - <cite>expire=3600</cite></li>
-<li>metric feature profile ids - <cite>expire=3600</cite></li>
-<li>features profile features time series from the <cite>z_ts_&lt;metric_id&gt;</cite> table - no
-expiry</li>
+<li><p>features profile features values from the <cite>z_fp_&lt;metric_id&gt;</cite> table - no expiry</p></li>
+<li><p>metrics table metric record - <cite>expire=3600</cite></p></li>
+<li><p>metric feature profile ids - <cite>expire=3600</cite></p></li>
+<li><p>features profile features time series from the <cite>z_ts_&lt;metric_id&gt;</cite> table - no
+expiry</p></li>
 </ul>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">due to caching a metric and a features profile can take up to 1 hour
+<p class="admonition-title">Note</p>
+<p>due to caching a metric and a features profile can take up to 1 hour
 to become live.</p>
 </div>
 </div>
@@ -963,29 +983,29 @@ to become live.</p>
 <p>There is no method to modify the DB data via the UI.  If you want to make any
 changes, they must be made directly against the DB.  Deleting features profiles,
 changing any of the metrics values once set for metrics e.g.
-<code class="docutils literal"><span class="pre">learn_full_duration</span></code>, <code class="docutils literal"><span class="pre">learn_valid_ts_older_than</span></code>, <code class="docutils literal"><span class="pre">max_generations</span></code> or
-<code class="docutils literal"><span class="pre">max_percent_diff_from_origin</span></code></p>
+<code class="docutils literal notranslate"><span class="pre">learn_full_duration</span></code>, <code class="docutils literal notranslate"><span class="pre">learn_valid_ts_older_than</span></code>, <code class="docutils literal notranslate"><span class="pre">max_generations</span></code> or
+<code class="docutils literal notranslate"><span class="pre">max_percent_diff_from_origin</span></code></p>
 </div>
 <div class="section" id="backup">
 <h3>Backup<a class="headerlink" href="#backup" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>Backup the MySQL DB to another machine or better slave it and backup the slave.</li>
-<li>rsync backup /opt/skyline/ionosphere/features_profiles to another machine,
+<li><p>Backup the MySQL DB to another machine or better slave it and backup the slave.</p></li>
+<li><p>rsync backup /opt/skyline/ionosphere/features_profiles to another machine,
 frequently (for the time being, until autobuild is available, however
-autobuild will not a able to recreate all the resources, but most).</li>
+autobuild will not a able to recreate all the resources, but most).</p></li>
 </ul>
 </div>
 <div class="section" id="mysql-configuration">
 <h3>MySQL configuration<a class="headerlink" href="#mysql-configuration" title="Permalink to this headline">¶</a></h3>
-<p>There could be a lot of tables. <strong>DEFINITELY</strong> implement <code class="docutils literal"><span class="pre">innodb_file_per_table</span></code>
+<p>There could be a lot of tables. <strong>DEFINITELY</strong> implement <code class="docutils literal notranslate"><span class="pre">innodb_file_per_table</span></code>
 in MySQL.</p>
 </div>
 </div>
 <div class="section" id="ionosphere-autobuild-features-profiles-dir">
 <h2>Ionosphere - autobuild features_profiles dir<a class="headerlink" href="#ionosphere-autobuild-features-profiles-dir" title="Permalink to this headline">¶</a></h2>
 <div class="admonition warning">
-<p class="first admonition-title">Warning</p>
-<p class="last">autobuild - TBD at some point in the future, for now see the Backup
+<p class="admonition-title">Warning</p>
+<p>autobuild - TBD at some point in the future, for now see the Backup
 section above.</p>
 </div>
 <p>The number of features_profiles dirs that Ionosphere learn could spawn and the
@@ -1003,8 +1023,8 @@ with whatever resolution is available for that time period.</p>
 matched by age, etc or all and still be able to surface the available features
 profile page data on-demand.</p>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">expire features profiles older than?  Ionosphere forget.</p>
+<p class="admonition-title">Note</p>
+<p>expire features profiles older than?  Ionosphere forget.</p>
 </div>
 <p>See <a class="reference external" href="development/ionosphere.html">Development - Ionosphere</a></p>
 </div>
@@ -1012,15 +1032,16 @@ profile page data on-demand.</p>
 
 
            </div>
+           
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="ionosphere_echo.html" class="btn btn-neutral float-right" title="Ionosphere echo" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="ionosphere_echo.html" class="btn btn-neutral float-right" title="Ionosphere echo" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="webapp.html" class="btn btn-neutral" title="Webapp" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="webapp.html" class="btn btn-neutral float-left" title="Webapp" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -1029,11 +1050,19 @@ profile page data on-demand.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
+        
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -1045,36 +1074,15 @@ profile page data on-demand.</p>
   </div>
   
 
-
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'2.0.0',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

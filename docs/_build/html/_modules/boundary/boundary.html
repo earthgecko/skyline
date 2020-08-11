@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,49 +11,46 @@
   
 
   
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
+
+  
+  
+  
   
 
   
-
-  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
-  
-
-  
-  
-    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  
-
-  
-    <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
-  
-
-  
-        <link rel="index" title="Index"
-              href="../../genindex.html"/>
-        <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 2.0.0 documentation" href="../../index.html"/>
-        <link rel="up" title="Module code" href="../index.html"/> 
-
-  
-  <script src="../../_static/js/modernizr.min.js"></script>
-
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
+   
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
-            <a href="../../index.html" class="icon icon-home"> Skyline
+            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
 
           
@@ -81,22 +77,24 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
             
-                <ul>
+              
+            
+            
+              <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
@@ -113,6 +111,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
@@ -120,12 +119,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html#reliability">Reliability</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../releases.html">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What’s new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../skyline.html">skyline package</a></li>
@@ -134,64 +131,83 @@
             
           
         </div>
+        
       </div>
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="../../index.html">Skyline</a>
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Skyline</a>
+        
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
+
+
+
+
+
+
+
+
+
+
 
 
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="../../index.html">Docs</a> &raquo;</li>
-      
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
           <li><a href="../index.html">Module code</a> &raquo;</li>
-      
-    <li>boundary.boundary</li>
+        
+      <li>boundary.boundary</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
-        
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
   <h1>Source code for boundary.boundary</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="k">try</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">Queue</span> <span class="k">import</span> <span class="n">Empty</span>
+    <span class="kn">from</span> <span class="nn">Queue</span> <span class="kn">import</span> <span class="n">Empty</span>
 <span class="k">except</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">queue</span> <span class="k">import</span> <span class="n">Empty</span>
+    <span class="kn">from</span> <span class="nn">queue</span> <span class="kn">import</span> <span class="n">Empty</span>
 <span class="c1"># from redis import StrictRedis</span>
-<span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">time</span><span class="p">,</span> <span class="n">sleep</span>
-<span class="kn">from</span> <span class="nn">threading</span> <span class="k">import</span> <span class="n">Thread</span>
-<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">defaultdict</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span><span class="p">,</span> <span class="n">sleep</span>
+<span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">Thread</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
 <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
 <span class="c1"># Use Redis sets in place of Manager().list to reduce memory and number of</span>
 <span class="c1"># processes</span>
 <span class="c1"># from multiprocessing import Process, Manager, Queue</span>
-<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="k">import</span> <span class="n">Process</span><span class="p">,</span> <span class="n">Queue</span>
-<span class="kn">from</span> <span class="nn">msgpack</span> <span class="k">import</span> <span class="n">Unpacker</span><span class="p">,</span> <span class="n">packb</span>
-<span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">path</span><span class="p">,</span> <span class="n">kill</span><span class="p">,</span> <span class="n">getpid</span>
-<span class="kn">from</span> <span class="nn">math</span> <span class="k">import</span> <span class="n">ceil</span>
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Process</span><span class="p">,</span> <span class="n">Queue</span>
+<span class="kn">from</span> <span class="nn">msgpack</span> <span class="kn">import</span> <span class="n">Unpacker</span><span class="p">,</span> <span class="n">packb</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">path</span><span class="p">,</span> <span class="n">kill</span><span class="p">,</span> <span class="n">getpid</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">ceil</span>
 <span class="kn">import</span> <span class="nn">traceback</span>
 <span class="kn">import</span> <span class="nn">operator</span>
 <span class="kn">import</span> <span class="nn">re</span>
@@ -201,12 +217,12 @@
 <span class="kn">import</span> <span class="nn">os.path</span>
 <span class="c1"># @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
 <span class="c1"># literal_eval required to evaluate Redis sets</span>
-<span class="kn">from</span> <span class="nn">ast</span> <span class="k">import</span> <span class="n">literal_eval</span>
+<span class="kn">from</span> <span class="nn">ast</span> <span class="kn">import</span> <span class="n">literal_eval</span>
 
 <span class="kn">import</span> <span class="nn">settings</span>
 <span class="c1"># @modified 20171216 - Task #2236: Change Boundary to only send to Panorama on alert</span>
 <span class="c1"># Added move_file</span>
-<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">send_graphite_metric</span><span class="p">,</span> <span class="n">write_data_to_file</span><span class="p">,</span> <span class="n">move_file</span><span class="p">,</span>
     <span class="c1"># @added 20181126 - Task #2742: Update Boundary</span>
     <span class="c1">#                   Feature #2034: analyse_derivatives</span>
@@ -219,9 +235,15 @@
     <span class="c1"># @added 20200506 - Feature #3532: Sort all time series</span>
     <span class="n">sort_timeseries</span><span class="p">)</span>
 
-<span class="kn">from</span> <span class="nn">boundary_alerters</span> <span class="k">import</span> <span class="n">trigger_alert</span>
-<span class="kn">from</span> <span class="nn">boundary_algorithms</span> <span class="k">import</span> <span class="n">run_selected_algorithm</span>
-<span class="kn">from</span> <span class="nn">algorithm_exceptions</span> <span class="k">import</span> <span class="p">(</span><span class="n">TooShort</span><span class="p">,</span> <span class="n">Stale</span><span class="p">,</span> <span class="n">Boring</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">boundary_alerters</span> <span class="kn">import</span> <span class="n">trigger_alert</span>
+<span class="kn">from</span> <span class="nn">boundary_algorithms</span> <span class="kn">import</span> <span class="n">run_selected_algorithm</span>
+<span class="kn">from</span> <span class="nn">algorithm_exceptions</span> <span class="kn">import</span> <span class="p">(</span><span class="n">TooShort</span><span class="p">,</span> <span class="n">Stale</span><span class="p">,</span> <span class="n">Boring</span><span class="p">)</span>
+
+<span class="c1"># @added 20200622 - Task #3586: Change all alert pattern checks to matched_or_regexed_in_list</span>
+<span class="c1">#                   Feature #3512: matched_or_regexed_in_list function</span>
+<span class="c1"># Changed original alert matching pattern to use new</span>
+<span class="c1"># method</span>
+<span class="kn">from</span> <span class="nn">matched_or_regexed_in_list</span> <span class="kn">import</span> <span class="n">matched_or_regexed_in_list</span>
 
 <span class="n">skyline_app</span> <span class="o">=</span> <span class="s1">&#39;boundary&#39;</span>
 <span class="n">skyline_app_logger</span> <span class="o">=</span> <span class="n">skyline_app</span> <span class="o">+</span> <span class="s1">&#39;Log&#39;</span>
@@ -261,7 +283,7 @@
 
 
 <div class="viewcode-block" id="Boundary"><a class="viewcode-back" href="../../skyline.boundary.html#boundary.boundary.Boundary">[docs]</a><span class="k">class</span> <span class="nc">Boundary</span><span class="p">(</span><span class="n">Thread</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize the Boundary</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -357,9 +379,9 @@
         <span class="c1"># Compile assigned metrics</span>
         <span class="n">assigned_metrics_and_algos</span> <span class="o">=</span> <span class="p">[</span><span class="n">boundary_metrics</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">assigned_keys</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: printing assigned_metrics_and_algos&#39;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: printing assigned_metrics_and_algos&#39;</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">assigned_metric_and_algo</span> <span class="ow">in</span> <span class="n">assigned_metrics_and_algos</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: assigned_metric_and_algo - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">assigned_metric_and_algo</span><span class="p">))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: assigned_metric_and_algo - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">assigned_metric_and_algo</span><span class="p">))</span>
 
         <span class="c1"># Compile assigned metrics</span>
         <span class="n">assigned_metrics</span> <span class="o">=</span> <span class="p">[]</span>
@@ -374,10 +396,10 @@
         <span class="n">unique_assigned_metrics</span> <span class="o">=</span> <span class="n">unique_noHash</span><span class="p">(</span><span class="n">assigned_metrics</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: unique_assigned_metrics - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">unique_assigned_metrics</span><span class="p">))</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: printing unique_assigned_metrics:&#39;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: unique_assigned_metrics - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">unique_assigned_metrics</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: printing unique_assigned_metrics:&#39;</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">unique_assigned_metric</span> <span class="ow">in</span> <span class="n">unique_assigned_metrics</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: unique_assigned_metric - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">unique_assigned_metric</span><span class="p">))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: unique_assigned_metric - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">unique_assigned_metric</span><span class="p">))</span>
 
         <span class="c1"># Check if this process is unnecessary</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">unique_assigned_metrics</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -402,7 +424,7 @@
         <span class="c1"># The unique algorithms that are being used</span>
         <span class="n">boundary_algorithms</span> <span class="o">=</span> <span class="n">unique_noHash</span><span class="p">(</span><span class="n">all_boundary_algorithms</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: boundary_algorithms - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">boundary_algorithms</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: boundary_algorithms - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">boundary_algorithms</span><span class="p">))</span>
 
         <span class="n">discover_run_metrics</span> <span class="o">=</span> <span class="p">[]</span>
 
@@ -412,7 +434,7 @@
 
             <span class="k">try</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: unpacking timeseries for </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)))</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: unpacking timeseries for </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)))</span>
                 <span class="n">raw_series</span> <span class="o">=</span> <span class="n">raw_assigned</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
                 <span class="n">unpacker</span> <span class="o">=</span> <span class="n">Unpacker</span><span class="p">(</span><span class="n">use_list</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
                 <span class="n">unpacker</span><span class="o">.</span><span class="n">feed</span><span class="p">(</span><span class="n">raw_series</span><span class="p">)</span>
@@ -434,19 +456,46 @@
             <span class="n">base_name</span> <span class="o">=</span> <span class="n">metric_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
 
             <span class="c1"># Determine the metrics BOUNDARY_METRICS metric tuple settings</span>
-            <span class="k">for</span> <span class="n">metrick</span> <span class="ow">in</span> <span class="n">BOUNDARY_METRICS</span><span class="p">:</span>
-                <span class="n">CHECK_MATCH_PATTERN</span> <span class="o">=</span> <span class="n">metrick</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                <span class="n">check_match_pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">CHECK_MATCH_PATTERN</span><span class="p">)</span>
-                <span class="n">pattern_match</span> <span class="o">=</span> <span class="n">check_match_pattern</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+            <span class="c1"># @modified 20200622 - Task #3586: Change all alert pattern checks to matched_or_regexed_in_list</span>
+            <span class="c1">#                      Feature #3512: matched_or_regexed_in_list function</span>
+            <span class="c1"># Changed original alert matching pattern to use new</span>
+            <span class="c1"># method</span>
+            <span class="c1"># for metrick in BOUNDARY_METRICS:</span>
+            <span class="c1">#    CHECK_MATCH_PATTERN = metrick[0]</span>
+            <span class="c1"># Determine the metrics BOUNDARY_METRICS metric tuple settings</span>
+            <span class="k">for</span> <span class="n">boundary_alerter</span> <span class="ow">in</span> <span class="n">BOUNDARY_METRICS</span><span class="p">:</span>
+                <span class="n">CHECK_MATCH_PATTERN</span> <span class="o">=</span> <span class="n">boundary_alerter</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">pattern_match</span><span class="p">,</span> <span class="n">metric_matched_by</span> <span class="o">=</span> <span class="n">matched_or_regexed_in_list</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="p">[</span><span class="n">boundary_alerter</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+                    <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span> <span class="ow">and</span> <span class="n">pattern_match</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> matched alert - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="n">boundary_alerter</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="k">del</span> <span class="n">metric_matched_by</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="k">pass</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">pattern_match</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="c1"># check_match_pattern = re.compile(CHECK_MATCH_PATTERN)</span>
+                <span class="c1"># pattern_match = check_match_pattern.match(base_name)</span>
                 <span class="n">metric_pattern_matched</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="k">if</span> <span class="n">pattern_match</span><span class="p">:</span>
                     <span class="n">metric_pattern_matched</span> <span class="o">=</span> <span class="kc">True</span>
                     <span class="n">algo_pattern_matched</span> <span class="o">=</span> <span class="kc">False</span>
                     <span class="k">for</span> <span class="n">algo</span> <span class="ow">in</span> <span class="n">boundary_algorithms</span><span class="p">:</span>
                         <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">BOUNDARY_METRICS</span><span class="p">:</span>
-                            <span class="n">CHECK_MATCH_PATTERN</span> <span class="o">=</span> <span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                            <span class="n">check_match_pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">CHECK_MATCH_PATTERN</span><span class="p">)</span>
-                            <span class="n">pattern_match</span> <span class="o">=</span> <span class="n">check_match_pattern</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+                            <span class="c1"># CHECK_MATCH_PATTERN = metric[0]</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="n">pattern_match</span><span class="p">,</span> <span class="n">metric_matched_by</span> <span class="o">=</span> <span class="n">matched_or_regexed_in_list</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="p">[</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+                                <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span> <span class="ow">and</span> <span class="n">pattern_match</span><span class="p">:</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> and </span><span class="si">%s</span><span class="s1"> matched alert - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="n">algo</span><span class="p">,</span> <span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+                                <span class="k">try</span><span class="p">:</span>
+                                    <span class="k">del</span> <span class="n">metric_matched_by</span>
+                                <span class="k">except</span><span class="p">:</span>
+                                    <span class="k">pass</span>
+                            <span class="k">except</span><span class="p">:</span>
+                                <span class="n">pattern_match</span> <span class="o">=</span> <span class="kc">False</span>
+                            <span class="c1"># check_match_pattern = re.compile(CHECK_MATCH_PATTERN)</span>
+                            <span class="c1"># pattern_match = check_match_pattern.match(base_name)</span>
                             <span class="k">if</span> <span class="n">pattern_match</span><span class="p">:</span>
                                 <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
                                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;debug :: metric and algo pattern MATCHED - &quot;</span> <span class="o">+</span> <span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot; | &quot;</span> <span class="o">+</span> <span class="n">base_name</span> <span class="o">+</span> <span class="s2">&quot; | &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
@@ -456,7 +505,8 @@
                                 <span class="n">metric_trigger</span> <span class="o">=</span> <span class="kc">False</span>
                                 <span class="n">algorithm</span> <span class="o">=</span> <span class="kc">False</span>
                                 <span class="n">algo_pattern_matched</span> <span class="o">=</span> <span class="kc">True</span>
-                                <span class="n">algorithm</span> <span class="o">=</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                                <span class="c1"># algorithm = metric[1]</span>
+                                <span class="n">algorithm</span> <span class="o">=</span> <span class="n">boundary_alerter</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
                                 <span class="k">try</span><span class="p">:</span>
                                     <span class="k">if</span> <span class="n">metric</span><span class="p">[</span><span class="mi">2</span><span class="p">]:</span>
                                         <span class="n">metric_expiration_time</span> <span class="o">=</span> <span class="n">metric</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
@@ -489,22 +539,22 @@
                                     <span class="n">metric_alerters</span> <span class="o">=</span> <span class="kc">False</span>
                             <span class="k">if</span> <span class="n">metric_pattern_matched</span> <span class="ow">and</span> <span class="n">algo_pattern_matched</span><span class="p">:</span>
                                 <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
-                                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: added metric - </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="n">metric_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_expiration_time</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_min_average</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_min_average_seconds</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_trigger</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">alert_threshold</span><span class="p">),</span> <span class="n">metric_alerters</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">))</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: added metric - </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="n">metric_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_expiration_time</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_min_average</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_min_average_seconds</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_trigger</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">alert_threshold</span><span class="p">),</span> <span class="n">metric_alerters</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">))</span>
                                 <span class="n">discover_run_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">i</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">metric_expiration_time</span><span class="p">,</span> <span class="n">metric_min_average</span><span class="p">,</span> <span class="n">metric_min_average_seconds</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">,</span> <span class="n">alert_threshold</span><span class="p">,</span> <span class="n">metric_alerters</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">])</span>
 
         <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: printing discover_run_metrics&#39;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: printing discover_run_metrics&#39;</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">discover_run_metric</span> <span class="ow">in</span> <span class="n">discover_run_metrics</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: discover_run_metrics - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">discover_run_metric</span><span class="p">))</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: build unique boundary metrics to analyze&#39;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: discover_run_metrics - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">discover_run_metric</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: build unique boundary metrics to analyze&#39;</span><span class="p">)</span>
 
         <span class="c1"># Determine the unique set of metrics to run</span>
         <span class="n">run_metrics</span> <span class="o">=</span> <span class="n">unique_noHash</span><span class="p">(</span><span class="n">discover_run_metrics</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: printing run_metrics&#39;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: printing run_metrics&#39;</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">run_metric</span> <span class="ow">in</span> <span class="n">run_metrics</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: run_metrics - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">run_metric</span><span class="p">))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: run_metrics - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">run_metric</span><span class="p">))</span>
 
         <span class="c1"># Distill timeseries strings and submit to run_selected_algorithm</span>
         <span class="k">for</span> <span class="n">metric_and_algo</span> <span class="ow">in</span> <span class="n">run_metrics</span><span class="p">:</span>
@@ -523,7 +573,7 @@
                 <span class="n">algorithm</span> <span class="o">=</span> <span class="n">metric_and_algo</span><span class="p">[</span><span class="mi">8</span><span class="p">]</span>
 
                 <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: unpacking timeseries for </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">raw_assigned_id</span><span class="p">)))</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: unpacking timeseries for </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">raw_assigned_id</span><span class="p">)))</span>
 
                 <span class="n">raw_series</span> <span class="o">=</span> <span class="n">raw_assigned</span><span class="p">[</span><span class="n">metric_and_algo</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
                 <span class="n">unpacker</span> <span class="o">=</span> <span class="n">Unpacker</span><span class="p">(</span><span class="n">use_list</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -540,7 +590,7 @@
                     <span class="k">del</span> <span class="n">original_timeseries</span>
 
                 <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: unpacked OK - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">raw_assigned_id</span><span class="p">)))</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: unpacked OK - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">raw_assigned_id</span><span class="p">)))</span>
 
                 <span class="n">autoaggregate</span> <span class="o">=</span> <span class="kc">False</span>
                 <span class="n">autoaggregate_value</span> <span class="o">=</span> <span class="mi">0</span>
@@ -552,14 +602,30 @@
                         <span class="n">autoaggregate_value</span> <span class="o">=</span> <span class="mi">0</span>
                         <span class="n">CHECK_MATCH_PATTERN</span> <span class="o">=</span> <span class="n">autoaggregate_metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
                         <span class="n">base_name</span> <span class="o">=</span> <span class="n">metric_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-                        <span class="n">check_match_pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">CHECK_MATCH_PATTERN</span><span class="p">)</span>
-                        <span class="n">pattern_match</span> <span class="o">=</span> <span class="n">check_match_pattern</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+
+                        <span class="c1"># @modified 20200622 - Task #3586: Change all alert pattern checks to matched_or_regexed_in_list</span>
+                        <span class="c1">#                      Feature #3512: matched_or_regexed_in_list function</span>
+                        <span class="c1"># Changed original alert matching pattern to use new</span>
+                        <span class="c1"># method</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">pattern_match</span><span class="p">,</span> <span class="n">metric_matched_by</span> <span class="o">=</span> <span class="n">matched_or_regexed_in_list</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="p">[</span><span class="n">autoaggregate_metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+                            <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span> <span class="ow">and</span> <span class="n">pattern_match</span><span class="p">:</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> matched alert - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="n">autoaggregate_metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="k">del</span> <span class="n">metric_matched_by</span>
+                            <span class="k">except</span><span class="p">:</span>
+                                <span class="k">pass</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">pattern_match</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="c1"># check_match_pattern = re.compile(CHECK_MATCH_PATTERN)</span>
+                        <span class="c1"># pattern_match = check_match_pattern.match(base_name)</span>
+
                         <span class="k">if</span> <span class="n">pattern_match</span><span class="p">:</span>
                             <span class="n">autoaggregate</span> <span class="o">=</span> <span class="kc">True</span>
                             <span class="n">autoaggregate_value</span> <span class="o">=</span> <span class="n">autoaggregate_metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
                 <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: BOUNDARY_AUTOAGGRERATION passed - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">autoaggregate</span><span class="p">)))</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: BOUNDARY_AUTOAGGRERATION passed - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">autoaggregate</span><span class="p">)))</span>
 
                 <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
@@ -591,9 +657,23 @@
                 <span class="n">wildcard_namespace</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="k">for</span> <span class="n">metric_tuple</span> <span class="ow">in</span> <span class="n">BOUNDARY_METRICS</span><span class="p">:</span>
                     <span class="k">if</span> <span class="ow">not</span> <span class="n">has_unique_tuple</span><span class="p">:</span>
-                        <span class="n">CHECK_MATCH_PATTERN</span> <span class="o">=</span> <span class="n">metric_tuple</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                        <span class="n">check_match_pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">CHECK_MATCH_PATTERN</span><span class="p">)</span>
-                        <span class="n">pattern_match</span> <span class="o">=</span> <span class="n">check_match_pattern</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
+                        <span class="c1"># @modified 20200622 - Task #3586: Change all alert pattern checks to matched_or_regexed_in_list</span>
+                        <span class="c1">#                      Feature #3512: matched_or_regexed_in_list function</span>
+                        <span class="c1"># Changed original alert matching pattern to use new</span>
+                        <span class="c1"># method</span>
+                        <span class="c1"># CHECK_MATCH_PATTERN = metric_tuple[0]</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">pattern_match</span><span class="p">,</span> <span class="n">metric_matched_by</span> <span class="o">=</span> <span class="n">matched_or_regexed_in_list</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="p">[</span><span class="n">metric_tuple</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+                            <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span> <span class="ow">and</span> <span class="n">pattern_match</span><span class="p">:</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> matched alert - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_tuple</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span>
+                            <span class="k">try</span><span class="p">:</span>
+                                <span class="k">del</span> <span class="n">metric_matched_by</span>
+                            <span class="k">except</span><span class="p">:</span>
+                                <span class="k">pass</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">pattern_match</span> <span class="o">=</span> <span class="kc">False</span>
+                        <span class="c1"># check_match_pattern = re.compile(CHECK_MATCH_PATTERN)</span>
+                        <span class="c1"># pattern_match = check_match_pattern.match(base_name)</span>
                         <span class="k">if</span> <span class="n">pattern_match</span><span class="p">:</span>
                             <span class="k">if</span> <span class="n">metric_tuple</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">base_name</span><span class="p">:</span>
                                 <span class="n">wildcard_namespace</span> <span class="o">=</span> <span class="kc">False</span>
@@ -651,6 +731,13 @@
                         <span class="k">except</span><span class="p">:</span>
                             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: nonNegativeDerivative failed&#39;</span><span class="p">)</span>
 
+                    <span class="c1"># @added 20200624 - Task #3594: Add timestamp to ENABLE_BOUNDARY_DEBUG output</span>
+                    <span class="c1">#                   Feature #3532: Sort all time series</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">metric_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">metric_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+
                     <span class="c1"># Submit the timeseries and settings to run_selected_algorithm</span>
                     <span class="n">anomalous</span><span class="p">,</span> <span class="n">ensemble</span><span class="p">,</span> <span class="n">datapoint</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span> <span class="n">metric_expiration_time</span><span class="p">,</span> <span class="n">metric_min_average</span><span class="p">,</span> <span class="n">metric_min_average_seconds</span><span class="p">,</span> <span class="n">metric_trigger</span><span class="p">,</span> <span class="n">alert_threshold</span><span class="p">,</span> <span class="n">metric_alerters</span><span class="p">,</span> <span class="n">algorithm</span> <span class="o">=</span> <span class="n">run_selected_algorithm</span><span class="p">(</span>
                         <span class="n">timeseries</span><span class="p">,</span> <span class="n">metric_name</span><span class="p">,</span>
@@ -665,7 +752,17 @@
                         <span class="n">algorithm</span>
                     <span class="p">)</span>
                     <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: analysed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_name</span><span class="p">))</span>
+                        <span class="c1"># @modified 20200624 - Task #3594: Add timestamp to ENABLE_BOUNDARY_DEBUG output</span>
+                        <span class="c1">#                      Feature #3532: Sort all time series</span>
+                        <span class="c1"># logger.debug(&#39;debug :: analysed - %s&#39; % (metric_name))</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: analysed - </span><span class="si">%s</span><span class="s1">, with datapoint </span><span class="si">%s</span><span class="s1"> at timestamp </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="n">metric_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">datapoint</span><span class="p">),</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">)))</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: debug :: analysed - </span><span class="si">%s</span><span class="s1">, but unknown datapoint or timestamp&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="n">metric_name</span><span class="p">))</span>
+
                     <span class="c1"># @added 20171214 - Bug #2232: Expiry boundary last_seen keys appropriately</span>
                     <span class="c1"># If it&#39;s not anomalous, add it to list</span>
                     <span class="k">if</span> <span class="ow">not</span> <span class="n">anomalous</span><span class="p">:</span>
@@ -680,7 +777,7 @@
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">anomalous</span> <span class="o">=</span> <span class="kc">False</span>
                     <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: more unique metric tuple not analysed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_name</span><span class="p">))</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: more unique metric tuple not analysed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_name</span><span class="p">))</span>
 
                 <span class="c1"># If it&#39;s anomalous, add it to list</span>
                 <span class="k">if</span> <span class="n">anomalous</span><span class="p">:</span>
@@ -873,11 +970,11 @@
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">anomaly_breakdown</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">anomaly_breakdown_q</span><span class="o">.</span><span class="n">put</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
             <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: anomaly_breakdown.item - </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: anomaly_breakdown.item - </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)))</span>
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">exceptions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">exceptions_q</span><span class="o">.</span><span class="n">put</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
             <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: exceptions.item - </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)))</span></div>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: exceptions.item - </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)))</span></div>
 
 <div class="viewcode-block" id="Boundary.run"><a class="viewcode-back" href="../../skyline.boundary.html#boundary.boundary.Boundary.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1019,7 +1116,13 @@
                         <span class="c1"># @added 20191021 - Branch #3262: py3</span>
                         <span class="n">metric_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_name</span><span class="p">)</span>
 
-                        <span class="n">base_name</span> <span class="o">=</span> <span class="n">metric_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                        <span class="c1"># @modified 20200728 - Bug #3652: Handle multiple metrics in base_name conversion</span>
+                        <span class="c1"># base_name = metric_name.replace(settings.FULL_NAMESPACE, &#39;&#39;, 1)</span>
+                        <span class="k">if</span> <span class="n">metric_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">):</span>
+                            <span class="n">base_name</span> <span class="o">=</span> <span class="n">metric_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">base_name</span> <span class="o">=</span> <span class="n">metric_name</span>
+
                         <span class="n">pattern_match</span> <span class="o">=</span> <span class="n">check_match_pattern</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
                     <span class="k">except</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
@@ -1031,7 +1134,7 @@
                         <span class="n">boundary_metrics</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">metric_name</span><span class="p">,</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span>
 
             <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: boundary metrics - &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">boundary_metrics</span><span class="p">))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: boundary metrics - &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">boundary_metrics</span><span class="p">))</span>
 
             <span class="c1"># @added 20191106 - Branch #3262: py3</span>
             <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">alert_test_file</span><span class="p">):</span>
@@ -1149,7 +1252,7 @@
                     <span class="k">try</span><span class="p">:</span>
                         <span class="n">anomaly_cache_key</span> <span class="o">=</span> <span class="s1">&#39;anomaly_seen.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">algorithm</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
                         <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
-                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: anomaly_cache_key - anomaly_seen.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">algorithm</span><span class="p">,</span> <span class="n">base_name</span><span class="p">))</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: anomaly_cache_key - anomaly_seen.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">algorithm</span><span class="p">,</span> <span class="n">base_name</span><span class="p">))</span>
                     <span class="k">except</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to determine string for anomaly_cache_key&#39;</span><span class="p">)</span>
@@ -1158,10 +1261,10 @@
                     <span class="k">try</span><span class="p">:</span>
                         <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="n">anomaly_cache_key</span><span class="p">,</span> <span class="n">anomaly_cache_key_expiration_time</span><span class="p">,</span> <span class="n">packb</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">times_seen</span><span class="p">)))</span>
                         <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
-                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: redis - anomaly_cache_key set OK - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_cache_key</span><span class="p">))</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: redis - anomaly_cache_key set OK - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_cache_key</span><span class="p">))</span>
                     <span class="k">except</span><span class="p">:</span>
                         <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
-                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: redis failed - anomaly_cache_key set failed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_cache_key</span><span class="p">))</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: redis failed - anomaly_cache_key set failed - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_cache_key</span><span class="p">))</span>
                     <span class="c1"># @added 20171216 - Task #2236: Change Boundary to only send to Panorama on alert</span>
                     <span class="c1"># Remove tmp_panaroma_anomaly_file</span>
                     <span class="c1"># @modified 20171228 - Task #2236: Change Boundary to only send to Panorama on alert</span>
@@ -1170,15 +1273,15 @@
                     <span class="n">tmp_panaroma_anomaly_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.panorama_anomaly.txt&#39;</span> <span class="o">%</span> <span class="p">(</span>
                         <span class="n">settings</span><span class="o">.</span><span class="n">SKYLINE_TMP_DIR</span><span class="p">,</span> <span class="n">added_at</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: set tmp_panaroma_anomaly_file to - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmp_panaroma_anomaly_file</span><span class="p">)))</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: set tmp_panaroma_anomaly_file to - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmp_panaroma_anomaly_file</span><span class="p">)))</span>
                     <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">tmp_panaroma_anomaly_file</span><span class="p">):</span>
                         <span class="k">try</span><span class="p">:</span>
                             <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
-                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: removing tmp_panaroma_anomaly_file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmp_panaroma_anomaly_file</span><span class="p">)))</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: removing tmp_panaroma_anomaly_file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmp_panaroma_anomaly_file</span><span class="p">)))</span>
                             <span class="n">os</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmp_panaroma_anomaly_file</span><span class="p">))</span>
                         <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
                             <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
-                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: error removing tmp_panaroma_anomaly_file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmp_panaroma_anomaly_file</span><span class="p">)))</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: error removing tmp_panaroma_anomaly_file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmp_panaroma_anomaly_file</span><span class="p">)))</span>
                             <span class="k">pass</span>
 
             <span class="c1"># @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
@@ -1236,7 +1339,7 @@
 
                     <span class="k">if</span> <span class="n">alert_threshold</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
                         <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
-                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: alert_threshold - &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">alert_threshold</span><span class="p">))</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: alert_threshold - &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">alert_threshold</span><span class="p">))</span>
                         <span class="n">anomaly_cache_key_count_set</span> <span class="o">=</span> <span class="kc">False</span>
                         <span class="n">anomaly_cache_key_expiration_time</span> <span class="o">=</span> <span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">alert_threshold</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="mi">60</span>
                         <span class="n">anomaly_cache_key</span> <span class="o">=</span> <span class="s1">&#39;anomaly_seen.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">algorithm</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
@@ -1245,10 +1348,10 @@
                             <span class="k">if</span> <span class="ow">not</span> <span class="n">anomaly_cache_key_count</span><span class="p">:</span>
                                 <span class="k">try</span><span class="p">:</span>
                                     <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
-                                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: redis no anomaly_cache_key - &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_cache_key</span><span class="p">))</span>
+                                        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: redis no anomaly_cache_key - &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_cache_key</span><span class="p">))</span>
                                     <span class="n">times_seen</span> <span class="o">=</span> <span class="mi">1</span>
                                     <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
-                                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: redis setex anomaly_cache_key - &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_cache_key</span><span class="p">))</span>
+                                        <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: redis setex anomaly_cache_key - &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_cache_key</span><span class="p">))</span>
                                     <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="n">anomaly_cache_key</span><span class="p">,</span> <span class="n">anomaly_cache_key_expiration_time</span><span class="p">,</span> <span class="n">packb</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">times_seen</span><span class="p">)))</span>
                                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;set anomaly seen key :: </span><span class="si">%s</span><span class="s1"> seen </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">anomaly_cache_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">times_seen</span><span class="p">)))</span>
                                 <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
@@ -1256,11 +1359,11 @@
                                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not set key: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">e</span><span class="p">)</span>
                             <span class="k">else</span><span class="p">:</span>
                                 <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
-                                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: redis anomaly_cache_key retrieved OK - &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_cache_key</span><span class="p">))</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: redis anomaly_cache_key retrieved OK - &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_cache_key</span><span class="p">))</span>
                                 <span class="n">anomaly_cache_key_count_set</span> <span class="o">=</span> <span class="kc">True</span>
                         <span class="k">except</span><span class="p">:</span>
                             <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
-                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: redis failed - anomaly_cache_key retrieval failed - &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_cache_key</span><span class="p">))</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: redis failed - anomaly_cache_key retrieval failed - &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">anomaly_cache_key</span><span class="p">))</span>
                             <span class="n">anomaly_cache_key_count_set</span> <span class="o">=</span> <span class="kc">False</span>
 
                         <span class="k">if</span> <span class="n">anomaly_cache_key_count_set</span><span class="p">:</span>
@@ -1278,7 +1381,7 @@
                     <span class="c1"># Alert the alerters if times_seen &gt; alert_threshold</span>
                     <span class="k">if</span> <span class="n">times_seen</span> <span class="o">&gt;=</span> <span class="n">alert_threshold</span><span class="p">:</span>
                         <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
-                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: times_seen </span><span class="si">%s</span><span class="s1"> is greater than or equal to alert_threshold </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">times_seen</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">alert_threshold</span><span class="p">)))</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: times_seen </span><span class="si">%s</span><span class="s1"> is greater than or equal to alert_threshold </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">times_seen</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">alert_threshold</span><span class="p">)))</span>
 
                         <span class="c1"># @added 20171216 - Task #2236: Change Boundary to only send to Panorama on alert</span>
                         <span class="n">tmp_panaroma_anomaly_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.panorama_anomaly.txt&#39;</span> <span class="o">%</span> <span class="p">(</span>
@@ -1288,7 +1391,7 @@
                             <span class="c1"># multiple rules covering a number of algorithms</span>
                             <span class="n">algorithm</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
                         <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
-                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: tmp_panaroma_anomaly_file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmp_panaroma_anomaly_file</span><span class="p">)))</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: tmp_panaroma_anomaly_file - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">tmp_panaroma_anomaly_file</span><span class="p">)))</span>
                         <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">tmp_panaroma_anomaly_file</span><span class="p">):</span>
                             <span class="n">panaroma_anomaly_file</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.txt&#39;</span> <span class="o">%</span> <span class="p">(</span>
                                 <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_CHECK_PATH</span><span class="p">,</span> <span class="n">added_at</span><span class="p">,</span> <span class="n">base_name</span><span class="p">)</span>
@@ -1321,14 +1424,14 @@
                             <span class="n">send_alert</span> <span class="o">=</span> <span class="kc">False</span>
                             <span class="n">alerts_sent</span> <span class="o">=</span> <span class="mi">0</span>
                             <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
-                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: checking alerter - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">alerter</span><span class="p">)</span>
+                                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: checking alerter - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">alerter</span><span class="p">)</span>
                             <span class="k">try</span><span class="p">:</span>
                                 <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
-                                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: determining alerter_expiration_time for settings&#39;</span><span class="p">)</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: determining alerter_expiration_time for settings&#39;</span><span class="p">)</span>
                                 <span class="n">alerter_expiration_time_setting</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">BOUNDARY_ALERTER_OPTS</span><span class="p">[</span><span class="s1">&#39;alerter_expiration_time&#39;</span><span class="p">][</span><span class="n">alerter</span><span class="p">]</span>
                                 <span class="n">alerter_expiration_time</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">alerter_expiration_time_setting</span><span class="p">)</span>
                                 <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
-                                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: determined alerter_expiration_time from settings - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">alerter_expiration_time</span><span class="p">))</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: determined alerter_expiration_time from settings - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">alerter_expiration_time</span><span class="p">))</span>
                             <span class="k">except</span><span class="p">:</span>
                                 <span class="c1"># Set an arbitrary expiry time if not set</span>
                                 <span class="n">alerter_expiration_time</span> <span class="o">=</span> <span class="mi">160</span>
@@ -1364,7 +1467,7 @@
                                             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;debug :: send_alert set to </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">send_alert</span><span class="p">))</span>
                                     <span class="k">else</span><span class="p">:</span>
                                         <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
-                                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: redis alerter key retrieved, unpacking </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">alerter_sent_count_key</span><span class="p">))</span>
+                                            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: redis alerter key retrieved, unpacking </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">alerter_sent_count_key</span><span class="p">))</span>
                                         <span class="n">unpacker</span> <span class="o">=</span> <span class="n">Unpacker</span><span class="p">(</span><span class="n">use_list</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
                                         <span class="n">unpacker</span><span class="o">.</span><span class="n">feed</span><span class="p">(</span><span class="n">alerter_sent_count_key_data</span><span class="p">)</span>
                                         <span class="n">raw_alerts_sent</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">unpacker</span><span class="p">)</span>
@@ -1397,7 +1500,7 @@
                                         <span class="k">try</span><span class="p">:</span>
                                             <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">anomalous_metric</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span> <span class="n">packb</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">anomalous_metric</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span>
                                             <span class="k">if</span> <span class="n">ENABLE_BOUNDARY_DEBUG</span><span class="p">:</span>
-                                                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: key setex OK - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">cache_key</span><span class="p">))</span>
+                                                <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: key setex OK - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">cache_key</span><span class="p">))</span>
                                             <span class="c1"># @modified 20200122 - Feature #3396: http_alerter</span>
                                             <span class="c1"># Add the metric timestamp for the http_alerter resend queue</span>
                                             <span class="c1"># trigger_alert(alerter, datapoint, base_name, expiration_time, metric_trigger, algorithm)</span>
@@ -1621,6 +1724,7 @@
 </pre></div>
 
            </div>
+           
           </div>
           <footer>
   
@@ -1629,11 +1733,19 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
+        
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -1645,36 +1757,15 @@
   </div>
   
 
-
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../../',
-            VERSION:'2.0.0',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
-        };
-    </script>
-      <script type="text/javascript" src="../../_static/jquery.js"></script>
-      <script type="text/javascript" src="../../_static/underscore.js"></script>
-      <script type="text/javascript" src="../../_static/doctools.js"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

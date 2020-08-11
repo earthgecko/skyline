@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,49 +11,46 @@
   
 
   
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
+
+  
+  
+  
   
 
   
-
-  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
-  
-
-  
-  
-    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  
-
-  
-    <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
-  
-
-  
-        <link rel="index" title="Index"
-              href="../../genindex.html"/>
-        <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 2.0.0 documentation" href="../../index.html"/>
-        <link rel="up" title="Module code" href="../index.html"/> 
-
-  
-  <script src="../../_static/js/modernizr.min.js"></script>
-
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
+   
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
-            <a href="../../index.html" class="icon icon-home"> Skyline
+            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
 
           
@@ -81,22 +77,24 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
             
-                <ul>
+              
+            
+            
+              <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
@@ -113,6 +111,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
@@ -120,12 +119,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html#reliability">Reliability</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../releases.html">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What’s new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../skyline.html">skyline package</a></li>
@@ -134,40 +131,59 @@
             
           
         </div>
+        
       </div>
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="../../index.html">Skyline</a>
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Skyline</a>
+        
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
+
+
+
+
+
+
+
+
+
+
 
 
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="../../index.html">Docs</a> &raquo;</li>
-      
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
           <li><a href="../index.html">Module code</a> &raquo;</li>
-      
-    <li>mirage.mirage</li>
+        
+      <li>mirage.mirage</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
-        
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -176,20 +192,20 @@
   <h1>Source code for mirage.mirage</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">logging</span>
 <span class="k">try</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">Queue</span> <span class="k">import</span> <span class="n">Empty</span>
+    <span class="kn">from</span> <span class="nn">Queue</span> <span class="kn">import</span> <span class="n">Empty</span>
 <span class="k">except</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">queue</span> <span class="k">import</span> <span class="n">Empty</span>
+    <span class="kn">from</span> <span class="nn">queue</span> <span class="kn">import</span> <span class="n">Empty</span>
 <span class="c1"># from redis import StrictRedis</span>
-<span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">time</span><span class="p">,</span> <span class="n">sleep</span>
-<span class="kn">from</span> <span class="nn">threading</span> <span class="k">import</span> <span class="n">Thread</span>
-<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">defaultdict</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span><span class="p">,</span> <span class="n">sleep</span>
+<span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">Thread</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
 <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
 <span class="c1"># Use Redis sets in place of Manager().list() to reduce memory and number of</span>
 <span class="c1"># processes</span>
 <span class="c1"># from multiprocessing import Process, Manager, Queue</span>
-<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="k">import</span> <span class="n">Process</span><span class="p">,</span> <span class="n">Queue</span>
-<span class="kn">from</span> <span class="nn">msgpack</span> <span class="k">import</span> <span class="n">packb</span>
-<span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">kill</span><span class="p">,</span> <span class="n">getpid</span>
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Process</span><span class="p">,</span> <span class="n">Queue</span>
+<span class="kn">from</span> <span class="nn">msgpack</span> <span class="kn">import</span> <span class="n">packb</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">kill</span><span class="p">,</span> <span class="n">getpid</span>
 <span class="kn">import</span> <span class="nn">traceback</span>
 <span class="kn">import</span> <span class="nn">re</span>
 <span class="c1"># imports required for surfacing graphite JSON formatted timeseries for use in</span>
@@ -207,18 +223,18 @@
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="c1"># import errno</span>
 <span class="c1"># import imp</span>
-<span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">listdir</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">listdir</span>
 <span class="kn">import</span> <span class="nn">datetime</span>
 
 <span class="kn">import</span> <span class="nn">os.path</span>
 <span class="kn">import</span> <span class="nn">resource</span>
-<span class="kn">from</span> <span class="nn">shutil</span> <span class="k">import</span> <span class="n">rmtree</span>
-<span class="kn">from</span> <span class="nn">ast</span> <span class="k">import</span> <span class="n">literal_eval</span>
+<span class="kn">from</span> <span class="nn">shutil</span> <span class="kn">import</span> <span class="n">rmtree</span>
+<span class="kn">from</span> <span class="nn">ast</span> <span class="kn">import</span> <span class="n">literal_eval</span>
 
 <span class="kn">import</span> <span class="nn">settings</span>
 <span class="c1"># @modified 20160922 - Branch #922: Ionosphere</span>
 <span class="c1"># Added the send_anomalous_metric_to skyline_functions.py</span>
-<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">write_data_to_file</span><span class="p">,</span> <span class="n">fail_check</span><span class="p">,</span> <span class="n">send_anomalous_metric_to</span><span class="p">,</span>
     <span class="n">mkdir_p</span><span class="p">,</span> <span class="n">send_graphite_metric</span><span class="p">,</span> <span class="n">filesafe_metricname</span><span class="p">,</span>
     <span class="c1"># @added 20170603 - Feature #2034: analyse_derivatives</span>
@@ -232,13 +248,13 @@
 <span class="c1"># @added 20200425 - Feature #3512: matched_or_regexed_in_list function</span>
 <span class="c1">#                   Feature #3508: ionosphere.untrainable_metrics</span>
 <span class="c1">#                   Feature #3486: analyzer_batch</span>
-<span class="kn">from</span> <span class="nn">matched_or_regexed_in_list</span> <span class="k">import</span> <span class="n">matched_or_regexed_in_list</span>
+<span class="kn">from</span> <span class="nn">matched_or_regexed_in_list</span> <span class="kn">import</span> <span class="n">matched_or_regexed_in_list</span>
 
-<span class="kn">from</span> <span class="nn">mirage_alerters</span> <span class="k">import</span> <span class="n">trigger_alert</span>
-<span class="kn">from</span> <span class="nn">negaters</span> <span class="k">import</span> <span class="n">trigger_negater</span>
-<span class="kn">from</span> <span class="nn">mirage_algorithms</span> <span class="k">import</span> <span class="n">run_selected_algorithm</span>
-<span class="kn">from</span> <span class="nn">algorithm_exceptions</span> <span class="k">import</span> <span class="n">TooShort</span><span class="p">,</span> <span class="n">Stale</span><span class="p">,</span> <span class="n">Boring</span>
-<span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">join</span><span class="p">,</span> <span class="n">isfile</span>
+<span class="kn">from</span> <span class="nn">mirage_alerters</span> <span class="kn">import</span> <span class="n">trigger_alert</span>
+<span class="kn">from</span> <span class="nn">negaters</span> <span class="kn">import</span> <span class="n">trigger_negater</span>
+<span class="kn">from</span> <span class="nn">mirage_algorithms</span> <span class="kn">import</span> <span class="n">run_selected_algorithm</span>
+<span class="kn">from</span> <span class="nn">algorithm_exceptions</span> <span class="kn">import</span> <span class="n">TooShort</span><span class="p">,</span> <span class="n">Stale</span><span class="p">,</span> <span class="n">Boring</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">join</span><span class="p">,</span> <span class="n">isfile</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">ENABLE_MEMORY_PROFILING - DEVELOPMENT ONLY</span>
@@ -261,7 +277,7 @@
     <span class="c1"># As per http://stackoverflow.com/a/1641280</span>
     <span class="c1"># This got useable understandable data</span>
     <span class="k">if</span> <span class="n">garbage_collection_enabled</span><span class="p">:</span>
-        <span class="kn">from</span> <span class="nn">gc</span> <span class="k">import</span> <span class="n">get_objects</span>
+        <span class="kn">from</span> <span class="nn">gc</span> <span class="kn">import</span> <span class="n">get_objects</span>
         <span class="c1"># Debug with garbage collection - http://code.activestate.com/recipes/65333/</span>
         <span class="kn">import</span> <span class="nn">gc</span>
 
@@ -291,7 +307,7 @@
 <span class="c1"># @added 20200413 - Feature #3486: analyzer_batch</span>
 <span class="c1">#                   Feature #3480: batch_processing</span>
 <span class="k">try</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">settings</span> <span class="k">import</span> <span class="n">BATCH_PROCESSING</span>
+    <span class="kn">from</span> <span class="nn">settings</span> <span class="kn">import</span> <span class="n">BATCH_PROCESSING</span>
 <span class="k">except</span><span class="p">:</span>
     <span class="n">BATCH_PROCESSING</span> <span class="o">=</span> <span class="kc">None</span>
 <span class="k">try</span><span class="p">:</span>
@@ -312,7 +328,7 @@
 
 <span class="c1"># @added 20200604 - Mirage - populate_redis</span>
 <span class="k">try</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">settings</span> <span class="k">import</span> <span class="n">MIRAGE_AUTOFILL_TOOSHORT</span>
+    <span class="kn">from</span> <span class="nn">settings</span> <span class="kn">import</span> <span class="n">MIRAGE_AUTOFILL_TOOSHORT</span>
 <span class="k">except</span><span class="p">:</span>
     <span class="n">MIRAGE_AUTOFILL_TOOSHORT</span> <span class="o">=</span> <span class="kc">False</span>
 
@@ -325,6 +341,20 @@
     <span class="n">DEBUG_CUSTOM_ALGORITHMS</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">DEBUG_CUSTOM_ALGORITHMS</span>
 <span class="k">except</span><span class="p">:</span>
     <span class="n">DEBUG_CUSTOM_ALGORITHMS</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="c1"># @added 20200723 - Feature #3472: ionosphere.training_data Redis set</span>
+<span class="c1">#                   Feature #3566: custom_algorithms</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">MIRAGE_ALWAYS_METRICS</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">MIRAGE_ALWAYS_METRICS</span><span class="p">)</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">MIRAGE_ALWAYS_METRICS</span> <span class="o">=</span> <span class="p">[]</span>
+
+<span class="c1"># @added 20200610 - Feature #3560: External alert config</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">EXTERNAL_ALERTS</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">EXTERNAL_ALERTS</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">EXTERNAL_ALERTS</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="k">if</span> <span class="n">EXTERNAL_ALERTS</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">external_alert_configs</span> <span class="kn">import</span> <span class="n">get_external_alert_configs</span>
 
 <span class="n">skyline_app_graphite_namespace</span> <span class="o">=</span> <span class="s1">&#39;skyline.</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">SERVER_METRIC_PATH</span><span class="p">)</span>
 <span class="n">failed_checks_dir</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">_failed&#39;</span> <span class="o">%</span> <span class="n">settings</span><span class="o">.</span><span class="n">MIRAGE_CHECK_PATH</span>
@@ -333,7 +363,7 @@
 
 
 <div class="viewcode-block" id="Mirage"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage.Mirage">[docs]</a><span class="k">class</span> <span class="nc">Mirage</span><span class="p">(</span><span class="n">Thread</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize the Mirage</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -1194,7 +1224,13 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">anomalous</span><span class="p">:</span>
-            <span class="n">base_name</span> <span class="o">=</span> <span class="n">metric</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="c1"># @modified 20200728 - Bug #3652: Handle multiple metrics in base_name conversion</span>
+            <span class="c1"># base_name = metric.replace(settings.FULL_NAMESPACE, &#39;&#39;, 1)</span>
+            <span class="k">if</span> <span class="n">metric</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">):</span>
+                <span class="n">base_name</span> <span class="o">=</span> <span class="n">metric</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">base_name</span> <span class="o">=</span> <span class="n">metric</span>
+
             <span class="n">not_anomalous_metric</span> <span class="o">=</span> <span class="p">[</span><span class="n">datapoint</span><span class="p">,</span> <span class="n">base_name</span><span class="p">]</span>
             <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
             <span class="c1"># self.not_anomalous_metrics.append(not_anomalous_metric)</span>
@@ -1211,7 +1247,12 @@
 
         <span class="c1"># If it&#39;s anomalous, add it to list</span>
         <span class="k">if</span> <span class="n">anomalous</span><span class="p">:</span>
-            <span class="n">base_name</span> <span class="o">=</span> <span class="n">metric</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="c1"># @modified 20200728 - Bug #3652: Handle multiple metrics in base_name conversion</span>
+            <span class="c1"># base_name = metric.replace(settings.FULL_NAMESPACE, &#39;&#39;, 1)</span>
+            <span class="k">if</span> <span class="n">metric</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">):</span>
+                <span class="n">base_name</span> <span class="o">=</span> <span class="n">metric</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">base_name</span> <span class="o">=</span> <span class="n">metric</span>
             <span class="c1"># metric_timestamp = int(timeseries[-1][0])</span>
             <span class="n">metric_timestamp</span> <span class="o">=</span> <span class="n">int_metric_timestamp</span>
             <span class="n">anomalous_metric</span> <span class="o">=</span> <span class="p">[</span><span class="n">datapoint</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">metric_timestamp</span><span class="p">]</span>
@@ -1283,9 +1324,88 @@
             <span class="n">cache_key</span> <span class="o">=</span> <span class="s1">&#39;mirage.last_alert.smtp.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">)</span>
             <span class="n">last_alert</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">last_alert</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span>
+                <span class="c1"># @modified 20200805 - Task #3662: Change mirage.last_check keys to timestamp value</span>
+                <span class="c1">#                      Feature #3486: analyzer_batch</span>
+                <span class="c1">#                      Feature #3480: batch_processing</span>
+                <span class="c1"># Changed the last_alert cache key to hold the last</span>
+                <span class="c1"># anomaly timestamp</span>
+                <span class="c1"># last_alert = self.redis_conn.get(cache_key)</span>
+                <span class="n">last_alert</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not query Redis for cache_key: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">))</span>
+
+            <span class="c1"># @added 20200805 - Task #3662: Change mirage.last_check keys to timestamp value</span>
+            <span class="c1">#                   Feature #3486: analyzer_batch</span>
+            <span class="c1">#                   Feature #3480: batch_processing</span>
+            <span class="c1"># Evaluate the reported anomaly timestamp to determine whether</span>
+            <span class="c1"># EXPIRATION_TIME should be applied to a batch metric</span>
+            <span class="k">if</span> <span class="n">last_alert</span><span class="p">:</span>
+                <span class="c1"># Is this a analyzer_batch related anomaly</span>
+                <span class="n">analyzer_batch_anomaly</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="n">analyzer_batch_metric_anomaly_key</span> <span class="o">=</span> <span class="s1">&#39;analyzer_batch.anomaly.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">int_metric_timestamp</span><span class="p">),</span> <span class="n">base_name</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">analyzer_batch_anomaly</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">analyzer_batch_metric_anomaly_key</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                        <span class="s1">&#39;error :: could not query cache_key - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">analyzer_batch_metric_anomaly_key</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                    <span class="n">analyzer_batch_anomaly</span> <span class="o">=</span> <span class="kc">None</span>
+                <span class="k">if</span> <span class="n">analyzer_batch_anomaly</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;identified as an analyzer_batch triggered anomaly from the presence of the Redis key </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">analyzer_batch_metric_anomaly_key</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;not identified as an analyzer_batch triggered anomaly as no Redis key found - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">analyzer_batch_metric_anomaly_key</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">last_alert</span> <span class="ow">and</span> <span class="n">analyzer_batch_anomaly</span><span class="p">:</span>
+                    <span class="n">mirage_metrics_expiration_times</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">mirage_metrics_expiration_times</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;mirage.metrics_expiration_times&#39;</span><span class="p">))</span>
+                        <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: fetched the mirage.metrics_expiration_times Redis set&#39;</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;failed to fetch the mirage.metrics_expiration_times Redis set&#39;</span><span class="p">)</span>
+                        <span class="n">mirage_metrics_expiration_times</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="n">metric_expiration_time</span> <span class="o">=</span> <span class="mi">3600</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="k">for</span> <span class="n">item_list_string</span> <span class="ow">in</span> <span class="n">mirage_metrics_expiration_times</span><span class="p">:</span>
+                            <span class="n">mirage_alert_expiration_data</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">item_list_string</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">mirage_alert_expiration_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">base_name</span><span class="p">:</span>
+                                <span class="n">metric_expiration_time</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">mirage_alert_expiration_data</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                                <span class="k">break</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to determine mirage_alert_expiration_data for </span><span class="si">%s</span><span class="s1"> from the mirage.metrics_expiration_times Redis set&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">base_name</span><span class="p">))</span>
+                        <span class="n">metric_expiration_time</span> <span class="o">=</span> <span class="mi">3600</span>
+                    <span class="n">last_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">last_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">last_alert</span><span class="p">)</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to determine last_timestamp from the last Mirage alert key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">cache_key</span><span class="p">)</span>
+                        <span class="n">last_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="n">seconds_between_batch_anomalies</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="k">if</span> <span class="n">last_timestamp</span><span class="p">:</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">seconds_between_batch_anomalies</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">int_metric_timestamp</span><span class="p">)</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">last_timestamp</span><span class="p">)</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to determine seconds_between_batch_anomalies for batch metric Panorama key- </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">cache_key</span><span class="p">)</span>
+                            <span class="n">last_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+                    <span class="k">if</span> <span class="n">seconds_between_batch_anomalies</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">seconds_between_batch_anomalies</span> <span class="o">&gt;</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_expiration_time</span><span class="p">):</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;the difference between the last anomaly timestamp (</span><span class="si">%s</span><span class="s1">) and the batch anomaly timestamp (</span><span class="si">%s</span><span class="s1">) for batch metric </span><span class="si">%s</span><span class="s1"> is greater than the metric EXPIRATION_TIME of </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">last_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">int_metric_timestamp</span><span class="p">),</span> <span class="n">base_name</span><span class="p">,</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">metric_expiration_time</span><span class="p">)))</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alerting on anomaly for batch metric </span><span class="si">%s</span><span class="s1">, so setting last_alert to None&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="n">metric</span><span class="p">))</span>
+                            <span class="n">last_alert</span> <span class="o">=</span> <span class="kc">None</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;the difference between the last anomaly timestamp (</span><span class="si">%s</span><span class="s1">) and the batch anomaly timestamp (</span><span class="si">%s</span><span class="s1">) for batch metric </span><span class="si">%s</span><span class="s1"> is less than the metric EXPIRATION_TIME of </span><span class="si">%s</span><span class="s1">, not alerting&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">last_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">int_metric_timestamp</span><span class="p">),</span> <span class="n">base_name</span><span class="p">,</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">metric_expiration_time</span><span class="p">)))</span>
+                        <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">int_metric_timestamp</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">last_timestamp</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;batch anomaly timestamp (</span><span class="si">%s</span><span class="s1">) less than the last_check timestamp (</span><span class="si">%s</span><span class="s1">), alerting on anomaly for batch metric </span><span class="si">%s</span><span class="s1">, so setting last_alert to None&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">int_metric_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">last_timestamp</span><span class="p">),</span> <span class="n">base_name</span><span class="p">))</span>
+                            <span class="n">last_alert</span> <span class="o">=</span> <span class="kc">None</span>
 
             <span class="c1"># @added 20170308 - Feature #1960: ionosphere_layers</span>
             <span class="c1"># Allow Ionosphere to send Panorama checks, it is an ionosphere_metric</span>
@@ -1466,6 +1586,22 @@
                     <span class="c1"># Moved to the mirage.sent_to_ionosphere Redis set Redis set</span>
                     <span class="c1"># block below</span>
                     <span class="c1"># self.sent_to_ionosphere.append(base_name)</span>
+
+                    <span class="c1"># @added 20200804 - Feature #3462: Add IONOSPHERE_MANAGE_PURGE</span>
+                    <span class="c1">#                   Feature #3472: ionosphere.training_data Redis set</span>
+                    <span class="c1">#                   Feature #3474: webapp api - training_data</span>
+                    <span class="c1"># Add training data to the ionosphere.training_data so that</span>
+                    <span class="c1"># the ionosphere purge_old_data_dirs can happen less</span>
+                    <span class="c1"># frequently for reduced I/O</span>
+                    <span class="n">redis_set</span> <span class="o">=</span> <span class="s1">&#39;ionosphere.training_data&#39;</span>
+                    <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">base_name</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">int_metric_timestamp</span><span class="p">),</span> <span class="n">second_order_resolution_seconds</span><span class="p">]</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;adding to Redis set </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">redis_set</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">)))</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="n">redis_set</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1"> Redis set&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">redis_set</span><span class="p">))</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alert expiry key exists not sending to Ionosphere :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span><span class="p">)</span>
                 <span class="c1"># @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
@@ -1507,10 +1643,25 @@
             <span class="k">except</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to rmtree </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">metric_data_dir</span><span class="p">)</span>
 
+        <span class="c1"># @added 20200723 - Feature #3472: ionosphere.training_data Redis set</span>
+        <span class="c1">#                   Feature #3566: custom_algorithms</span>
+        <span class="c1"># Optimize for MIRAGE_ALWAYS_METRICS which can create a lot</span>
+        <span class="c1"># of training_data dirs a Analyzer always hands them off to</span>
+        <span class="c1"># mirage.</span>
+        <span class="n">remove_ionosphere_data_dir</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">anomalous</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">base_name</span> <span class="ow">in</span> <span class="n">MIRAGE_ALWAYS_METRICS</span><span class="p">:</span>
+                <span class="n">remove_ionosphere_data_dir</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">anomalous</span> <span class="ow">and</span> <span class="n">periodic_mirage_check</span><span class="p">:</span>
+                <span class="n">remove_ionosphere_data_dir</span> <span class="o">=</span> <span class="kc">True</span>
+
         <span class="c1"># @added 20190408 - Feature #2882: Mirage - periodic_check</span>
         <span class="c1"># Remove the training_dir for mirage_periodic_check_metrics if not</span>
         <span class="c1"># anomalous</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">anomalous</span> <span class="ow">and</span> <span class="n">periodic_mirage_check</span><span class="p">:</span>
+        <span class="c1"># @modified 20200723 - Feature #3472: ionosphere.training_data Redis set</span>
+        <span class="c1">#                   Feature #3566: custom_algorithms</span>
+        <span class="c1"># if not anomalous and periodic_mirage_check:</span>
+        <span class="k">if</span> <span class="n">remove_ionosphere_data_dir</span><span class="p">:</span>
             <span class="n">timeseries_dir</span> <span class="o">=</span> <span class="n">base_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;/&#39;</span><span class="p">)</span>
             <span class="n">training_dir</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                 <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_DATA_FOLDER</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">),</span>
@@ -1518,10 +1669,11 @@
             <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">training_dir</span><span class="p">):</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">rmtree</span><span class="p">(</span><span class="n">training_dir</span><span class="p">)</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;removed Mirage periodic check training_data dir - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">training_dir</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;removed Mirage always or periodic check training_data dir - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">training_dir</span><span class="p">)</span>
                 <span class="k">except</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to rmtree Mirage periodic check training_dir - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">training_dir</span><span class="p">)</span>
-            <span class="k">del</span> <span class="n">mirage_periodic_check_metrics</span></div>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to rmtree Mirage always or periodic check training_dir - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">training_dir</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">anomalous</span> <span class="ow">and</span> <span class="n">periodic_mirage_check</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">mirage_periodic_check_metrics</span></div>
 
 <div class="viewcode-block" id="Mirage.run"><a class="viewcode-back" href="../../skyline.mirage.html#mirage.mirage.Mirage.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -2199,7 +2351,33 @@
                 <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to determine list from mirage.anomalous_metrics Redis set&#39;</span><span class="p">)</span>
                 <span class="n">mirage_anomalous_metrics</span> <span class="o">=</span> <span class="p">[]</span>
 
-            <span class="k">for</span> <span class="n">alert</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">ALERTS</span><span class="p">:</span>
+            <span class="c1"># @added 20200610 - Feature #3560: External alert config</span>
+            <span class="n">external_alerts</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">external_from_cache</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">internal_alerts</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">internal_from_cache</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">all_alerts</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">ALERTS</span><span class="p">)</span>
+            <span class="n">all_from_cache</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="n">EXTERNAL_ALERTS</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">external_alerts</span><span class="p">,</span> <span class="n">external_from_cache</span><span class="p">,</span> <span class="n">internal_alerts</span><span class="p">,</span> <span class="n">internal_from_cache</span><span class="p">,</span> <span class="n">all_alerts</span><span class="p">,</span> <span class="n">all_from_cache</span> <span class="o">=</span> <span class="n">get_external_alert_configs</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not determine external alert configs&#39;</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;retrieved </span><span class="si">%s</span><span class="s1"> external_alerts configurations from_cache </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1"> internal_alerts from_cache </span><span class="si">%s</span><span class="s1"> and </span><span class="si">%s</span><span class="s1"> all_alerts from_cache </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">external_alerts</span><span class="p">)),</span> <span class="nb">str</span><span class="p">(</span><span class="n">external_from_cache</span><span class="p">),</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">internal_alerts</span><span class="p">)),</span> <span class="nb">str</span><span class="p">(</span><span class="n">internal_from_cache</span><span class="p">),</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">all_alerts</span><span class="p">)),</span> <span class="nb">str</span><span class="p">(</span><span class="n">all_from_cache</span><span class="p">)))</span>
+                <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: all_alerts :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">all_alerts</span><span class="p">))</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">all_alerts</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: all_alerts is not set, so creating from settings.ALERTS&#39;</span><span class="p">)</span>
+                <span class="n">all_alerts</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">ALERTS</span><span class="p">)</span>
+
+            <span class="c1"># @modified 20200610 - Feature #3560: External alert config</span>
+            <span class="c1"># for alert in settings.ALERTS:</span>
+            <span class="k">for</span> <span class="n">alert</span> <span class="ow">in</span> <span class="n">all_alerts</span><span class="p">:</span>
+
                 <span class="c1"># @added 20181114 - Bug #2682: Reduce mirage ionosphere alert loop</span>
                 <span class="n">not_an_ionosphere_metric_check_done</span> <span class="o">=</span> <span class="s1">&#39;none&#39;</span>
 
@@ -2260,23 +2438,124 @@
                                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;not an Ionosphere metric checking whether to alert - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
                                 <span class="n">not_an_ionosphere_metric_check_done</span> <span class="o">=</span> <span class="n">metric_name</span>
 
-                    <span class="n">ALERT_MATCH_PATTERN</span> <span class="o">=</span> <span class="n">alert</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-                    <span class="n">METRIC_PATTERN</span> <span class="o">=</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="c1"># ALERT_MATCH_PATTERN = alert[0]</span>
+                    <span class="c1"># METRIC_PATTERN = metric[1]</span>
+                    <span class="c1"># @modified 20200622 - Task #3586: Change all alert pattern checks to matched_or_regexed_in_list</span>
+                    <span class="c1">#                      Feature #3512: matched_or_regexed_in_list function</span>
+                    <span class="c1"># Changed original alert matching pattern to use new</span>
+                    <span class="c1"># method</span>
+                    <span class="n">base_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
                     <span class="k">try</span><span class="p">:</span>
-                        <span class="n">alert_match_pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="n">ALERT_MATCH_PATTERN</span><span class="p">)</span>
-                        <span class="n">pattern_match</span> <span class="o">=</span> <span class="n">alert_match_pattern</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">METRIC_PATTERN</span><span class="p">)</span>
+                        <span class="n">pattern_match</span><span class="p">,</span> <span class="n">metric_matched_by</span> <span class="o">=</span> <span class="n">matched_or_regexed_in_list</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="p">[</span><span class="n">alert</span><span class="p">[</span><span class="mi">0</span><span class="p">]])</span>
+                        <span class="k">if</span> <span class="n">LOCAL_DEBUG</span> <span class="ow">and</span> <span class="n">pattern_match</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1"> matched alert - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">base_name</span><span class="p">,</span> <span class="n">alert</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="k">del</span> <span class="n">metric_matched_by</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="k">pass</span>
                     <span class="k">except</span><span class="p">:</span>
                         <span class="n">pattern_match</span> <span class="o">=</span> <span class="kc">False</span>
-                    <span class="c1"># @modified 20160806 - Reintroduced the original</span>
-                    <span class="c1"># substring matching after wildcard matching, to allow</span>
-                    <span class="c1"># more flexibility</span>
-                    <span class="k">if</span> <span class="ow">not</span> <span class="n">pattern_match</span><span class="p">:</span>
-                        <span class="k">if</span> <span class="n">alert</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
-                            <span class="n">pattern_match</span> <span class="o">=</span> <span class="kc">True</span>
+
                     <span class="k">if</span> <span class="n">pattern_match</span><span class="p">:</span>
-                        <span class="n">cache_key</span> <span class="o">=</span> <span class="s1">&#39;mirage.last_alert.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">alert</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+                        <span class="c1"># @added 20200610 - Feature #3560: External alert config</span>
+                        <span class="c1"># @modified 20200624 - Feature #3560: External alert config</span>
+                        <span class="c1"># Set the alert key to the external alerter id</span>
+                        <span class="c1"># external_alerter_alerter = None</span>
+                        <span class="n">external_alerter_id</span> <span class="o">=</span> <span class="kc">None</span>
                         <span class="k">try</span><span class="p">:</span>
-                            <span class="n">last_alert</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">alert</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;external&#39;</span><span class="p">:</span>
+                                <span class="c1"># @modified 20200624 - Feature #3560: External alert config</span>
+                                <span class="c1"># Set the alert key to the external alerter id</span>
+                                <span class="c1"># external_alerter_alerter = alert[4][&#39;alerter&#39;]</span>
+                                <span class="n">external_alerter_id</span> <span class="o">=</span> <span class="n">alert</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;external-&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+                        <span class="k">except</span><span class="p">:</span>
+                            <span class="n">external_alerter_id</span> <span class="o">=</span> <span class="kc">None</span>
+
+                        <span class="c1"># @modified 20200610 - Feature #3560: External alert config</span>
+                        <span class="c1"># Use the all_alerts list which includes external alert configs</span>
+                        <span class="c1"># cache_key = &#39;mirage.last_alert.%s.%s&#39; % (alert[1], metric[1])</span>
+                        <span class="c1"># @modified 20200624 - Feature #3560: External alert config</span>
+                        <span class="c1"># Set the alert key to the external alerter id</span>
+                        <span class="c1"># if external_alerter_alerter:</span>
+                        <span class="c1">#     cache_key = &#39;mirage.last_alert.%s.%s.%s&#39; % (str(external_alerter_alerter), alert[1], metric[1])</span>
+                        <span class="k">if</span> <span class="n">external_alerter_id</span><span class="p">:</span>
+                            <span class="n">cache_key</span> <span class="o">=</span> <span class="s1">&#39;mirage.last_alert.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">external_alerter_id</span><span class="p">),</span> <span class="n">alert</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">cache_key</span> <span class="o">=</span> <span class="s1">&#39;mirage.last_alert.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">alert</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="c1"># @modified 20200805 - Task #3662: Change mirage.last_check keys to timestamp value</span>
+                            <span class="c1">#                      Feature #3486: analyzer_batch</span>
+                            <span class="c1">#                      Feature #3480: batch_processing</span>
+                            <span class="c1"># Changed the last_alert cache key to hold the last</span>
+                            <span class="c1"># anomaly timestamp</span>
+                            <span class="c1"># last_alert = self.redis_conn.get(cache_key)</span>
+                            <span class="n">last_alert</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span>
+
+                            <span class="c1"># @added 20200805 - Task #3662: Change mirage.last_check keys to timestamp value</span>
+                            <span class="c1">#                   Feature #3486: analyzer_batch</span>
+                            <span class="c1">#                   Feature #3480: batch_processing</span>
+                            <span class="c1"># Evaluate the reported anomaly timestamp to determine whether</span>
+                            <span class="c1"># EXPIRATION_TIME should be applied to a batch metric</span>
+                            <span class="k">if</span> <span class="n">last_alert</span><span class="p">:</span>
+                                <span class="c1"># Is this a analyzer_batch related anomaly</span>
+                                <span class="n">analyzer_batch_anomaly</span> <span class="o">=</span> <span class="kc">None</span>
+                                <span class="n">metric_timestamp</span> <span class="o">=</span> <span class="n">metric</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+                                <span class="n">analyzer_batch_metric_anomaly_key</span> <span class="o">=</span> <span class="s1">&#39;analyzer_batch.anomaly.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                    <span class="nb">str</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">),</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                                <span class="k">try</span><span class="p">:</span>
+                                    <span class="n">analyzer_batch_anomaly</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">analyzer_batch_metric_anomaly_key</span><span class="p">)</span>
+                                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                                        <span class="s1">&#39;error :: could not query cache_key - </span><span class="si">%s</span><span class="s1"> - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                            <span class="n">analyzer_batch_metric_anomaly_key</span><span class="p">,</span> <span class="n">e</span><span class="p">))</span>
+                                    <span class="n">analyzer_batch_anomaly</span> <span class="o">=</span> <span class="kc">None</span>
+                                <span class="k">if</span> <span class="n">analyzer_batch_anomaly</span><span class="p">:</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;identified as an analyzer_batch triggered anomaly from the presence of the Redis key </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">analyzer_batch_metric_anomaly_key</span><span class="p">)</span>
+                                <span class="k">else</span><span class="p">:</span>
+                                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;not identified as an analyzer_batch triggered anomaly as no Redis key found - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">analyzer_batch_metric_anomaly_key</span><span class="p">)</span>
+                                <span class="k">if</span> <span class="n">last_alert</span> <span class="ow">and</span> <span class="n">analyzer_batch_anomaly</span><span class="p">:</span>
+                                    <span class="n">last_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+                                    <span class="k">try</span><span class="p">:</span>
+                                        <span class="n">last_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">last_alert</span><span class="p">)</span>
+                                    <span class="k">except</span><span class="p">:</span>
+                                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to determine last_timestamp from the last Mirage alert key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">cache_key</span><span class="p">)</span>
+                                        <span class="n">last_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+                                    <span class="n">seconds_between_batch_anomalies</span> <span class="o">=</span> <span class="kc">None</span>
+                                    <span class="k">if</span> <span class="n">last_timestamp</span><span class="p">:</span>
+                                        <span class="k">try</span><span class="p">:</span>
+                                            <span class="n">seconds_between_batch_anomalies</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">)</span> <span class="o">-</span> <span class="nb">int</span><span class="p">(</span><span class="n">last_timestamp</span><span class="p">)</span>
+                                        <span class="k">except</span><span class="p">:</span>
+                                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to determine seconds_between_batch_anomalies for batch metric Panorama key- </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">cache_key</span><span class="p">)</span>
+                                            <span class="n">last_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+                                    <span class="k">if</span> <span class="n">seconds_between_batch_anomalies</span><span class="p">:</span>
+                                        <span class="k">if</span> <span class="n">seconds_between_batch_anomalies</span> <span class="o">&gt;</span> <span class="nb">int</span><span class="p">(</span><span class="n">alert</span><span class="p">[</span><span class="mi">2</span><span class="p">]):</span>
+                                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;the difference between the last anomaly timestamp (</span><span class="si">%s</span><span class="s1">) and the batch anomaly timestamp (</span><span class="si">%s</span><span class="s1">) for batch metric </span><span class="si">%s</span><span class="s1"> is greater than the metric EXPIRATION_TIME of </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                                <span class="nb">str</span><span class="p">(</span><span class="n">last_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">),</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                                <span class="nb">str</span><span class="p">(</span><span class="n">alert</span><span class="p">[</span><span class="mi">2</span><span class="p">])))</span>
+                                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alerting on anomaly for batch metric </span><span class="si">%s</span><span class="s1">, so setting last_alert to None&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                                <span class="n">metric</span><span class="p">))</span>
+                                            <span class="n">last_alert</span> <span class="o">=</span> <span class="kc">None</span>
+                                        <span class="k">else</span><span class="p">:</span>
+                                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;the difference between the last anomaly timestamp (</span><span class="si">%s</span><span class="s1">) and the batch anomaly timestamp (</span><span class="si">%s</span><span class="s1">) for batch metric </span><span class="si">%s</span><span class="s1"> is less than the metric EXPIRATION_TIME of </span><span class="si">%s</span><span class="s1">, not alerting&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                                <span class="nb">str</span><span class="p">(</span><span class="n">last_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">),</span> <span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+                                                <span class="nb">str</span><span class="p">(</span><span class="n">alert</span><span class="p">[</span><span class="mi">2</span><span class="p">])))</span>
+
+                                        <span class="c1"># @added 20200805 - Task #3662: Change mirage.last_check keys to timestamp value</span>
+                                        <span class="c1">#                   Task #3562: Change panorama.last_check keys to timestamp value</span>
+                                        <span class="c1">#                   Feature #3486: analyzer_batch</span>
+                                        <span class="c1">#                   Feature #3480: batch_processing</span>
+                                        <span class="c1"># If the metric is a batch processing metric and the anomaly</span>
+                                        <span class="c1"># timestamp is less than the last_check timestamp, insert</span>
+                                        <span class="c1"># the anomaly</span>
+                                        <span class="k">if</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">last_timestamp</span><span class="p">:</span>
+                                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;batch anomaly timestamp (</span><span class="si">%s</span><span class="s1">) less than the last_check timestamp (</span><span class="si">%s</span><span class="s1">), alerting on anomaly for batch metric </span><span class="si">%s</span><span class="s1">, so setting last_alert to None&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                                <span class="nb">str</span><span class="p">(</span><span class="n">metric_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">last_timestamp</span><span class="p">),</span> <span class="n">metric</span><span class="p">))</span>
+                                            <span class="n">last_alert</span> <span class="o">=</span> <span class="kc">None</span>
+
                             <span class="k">if</span> <span class="ow">not</span> <span class="n">last_alert</span><span class="p">:</span>
                                 <span class="k">if</span> <span class="n">ionosphere_alerts_returned</span><span class="p">:</span>
                                     <span class="c1"># @modified 20190410 - Feature #2882: Mirage - periodic_check</span>
@@ -2297,7 +2576,23 @@
                                 <span class="c1"># @modified 20190524 - Branch #3002</span>
                                 <span class="c1"># Wrapped in try except</span>
                                 <span class="k">try</span><span class="p">:</span>
-                                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="n">alert</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">packb</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+                                    <span class="c1"># @modified 20200805 - Task #3662: Change mirage.last_check keys to timestamp value</span>
+                                    <span class="c1">#                      Feature #3486: analyzer_batch</span>
+                                    <span class="c1">#                      Feature #3480: batch_processing</span>
+                                    <span class="c1"># Change the last_alert cache key to hold the</span>
+                                    <span class="c1"># the anomaly timestamp for which the alert</span>
+                                    <span class="c1"># was sent, not the packb anomaly value.</span>
+                                    <span class="c1"># Using the timestamp of the anomaly allows</span>
+                                    <span class="c1"># it to be used to determine if a batch</span>
+                                    <span class="c1"># anomaly should be alerted on based on the</span>
+                                    <span class="c1"># comparison of the timestamps rather than</span>
+                                    <span class="c1"># just the presence of the last_alert key</span>
+                                    <span class="c1"># based on it not having reach its TTL as</span>
+                                    <span class="c1"># analyzer_batch could send multiple</span>
+                                    <span class="c1"># anomalies in one batch that might be</span>
+                                    <span class="c1"># EXPIRATION_TIME apart.</span>
+                                    <span class="c1"># self.redis_conn.setex(cache_key, alert[2], packb(metric[0]))</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span><span class="n">cache_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">alert</span><span class="p">[</span><span class="mi">2</span><span class="p">]),</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
                                 <span class="k">except</span><span class="p">:</span>
                                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to set Redis key </span><span class="si">%s</span><span class="s1"> for </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
@@ -2345,7 +2640,9 @@
                 <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
                 <span class="c1"># if len(self.anomalous_metrics) == 0:</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">mirage_anomalous_metrics</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-                    <span class="k">for</span> <span class="n">negate_alert</span> <span class="ow">in</span> <span class="n">settings</span><span class="o">.</span><span class="n">ALERTS</span><span class="p">:</span>
+                    <span class="c1"># @modified 20200610 - Feature #3560: External alert config</span>
+                    <span class="c1"># for negate_alert in settings.ALERTS:</span>
+                    <span class="k">for</span> <span class="n">negate_alert</span> <span class="ow">in</span> <span class="n">all_alerts</span><span class="p">:</span>
                         <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
                         <span class="c1"># for not_anomalous_metric in self.not_anomalous_metrics:</span>
                         <span class="k">for</span> <span class="n">not_anomalous_metric</span> <span class="ow">in</span> <span class="n">mirage_not_anomalous_metrics</span><span class="p">:</span>
@@ -2420,6 +2717,52 @@
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;sent_to_ionosphere :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">sent_to_ionosphere</span><span class="p">)</span>
                 <span class="n">send_metric_name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.sent_to_ionosphere&#39;</span> <span class="o">%</span> <span class="n">skyline_app_graphite_namespace</span>
                 <span class="n">send_graphite_metric</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">send_metric_name</span><span class="p">,</span> <span class="n">sent_to_ionosphere</span><span class="p">)</span>
+
+            <span class="c1"># @added 20200805 - Task #3662: Change mirage.last_check keys to timestamp value</span>
+            <span class="c1">#                   Feature #3486: analyzer_batch</span>
+            <span class="c1">#                   Feature #3480: batch_processing</span>
+            <span class="c1"># Add the mirage metric and its EXPIRATION_TIME to</span>
+            <span class="c1"># the mirage.metrics_expiration_times so that Mirage</span>
+            <span class="c1"># can determine the metric EXPIRATION_TIME without</span>
+            <span class="c1"># having to create and iterate the all_alerts</span>
+            <span class="c1"># object in the Mirage analysis phase so that the</span>
+            <span class="c1"># reported anomaly timestamp can be used to determine</span>
+            <span class="c1"># whether the EXPIRATION_TIME should be applied to a</span>
+            <span class="c1"># batch metric in the alerting and Ionosphere contexts</span>
+            <span class="n">mirage_metrics_expiration_times</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">mirage_metrics_expiration_times</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;mirage.metrics_expiration_times&#39;</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: fetched the mirage.metrics_expiration_times Redis set&#39;</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;failed to fetch the mirage.metrics_expiration_times Redis set&#39;</span><span class="p">)</span>
+                <span class="n">mirage_metrics_expiration_times</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">mirage_unique_metrics</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="s1">&#39;mirage.unique_metrics&#39;</span><span class="p">))</span>
+                <span class="n">mirage_unique_metrics_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">mirage_unique_metrics</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;mirage.unique_metrics Redis set count - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">mirage_unique_metrics_count</span><span class="p">))</span>
+                <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: fetched the mirage.unique_metrics Redis set&#39;</span><span class="p">)</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">mirage_unique_metrics</span><span class="p">))</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;failed to fetch the mirage.unique_metrics Redis set&#39;</span><span class="p">)</span>
+                <span class="n">mirage_unique_metrics</span> <span class="o">==</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">metric</span> <span class="ow">in</span> <span class="n">mirage_unique_metrics</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">metric</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">):</span>
+                    <span class="n">base_name</span> <span class="o">=</span> <span class="n">metric</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">base_name</span> <span class="o">=</span> <span class="n">metric</span>
+
+                <span class="n">mirage_alert_expiration_data</span> <span class="o">=</span> <span class="p">[</span><span class="n">base_name</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">alert</span><span class="p">[</span><span class="mi">2</span><span class="p">])]</span>
+                <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">mirage_alert_expiration_data</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">mirage_metrics_expiration_times</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="s1">&#39;mirage.metrics_expiration_times&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">mirage_alert_expiration_data</span><span class="p">))</span>
+                        <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: added </span><span class="si">%s</span><span class="s1"> to mirage.metrics_expiration_times&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">mirage_alert_expiration_data</span><span class="p">))</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">LOCAL_DEBUG</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add </span><span class="si">%s</span><span class="s1"> to mirage.metrics_expiration_times set&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">mirage_alert_expiration_data</span><span class="p">))</span>
+
 
             <span class="c1"># Reset counters</span>
             <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
@@ -2496,6 +2839,7 @@
 </pre></div>
 
            </div>
+           
           </div>
           <footer>
   
@@ -2504,11 +2848,19 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
+        
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -2520,36 +2872,15 @@
   </div>
   
 
-
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../../',
-            VERSION:'2.0.0',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
-        };
-    </script>
-      <script type="text/javascript" src="../../_static/jquery.js"></script>
-      <script type="text/javascript" src="../../_static/underscore.js"></script>
-      <script type="text/javascript" src="../../_static/doctools.js"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

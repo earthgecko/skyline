@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,50 +11,48 @@
   
 
   
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
+
+  
+  
+  
   
 
   
-
-  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-
-  
-  
-    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  
-
-  
-    <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-  
-
-  
-        <link rel="index" title="Index"
-              href="genindex.html"/>
-        <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 2.0.0 documentation" href="index.html"/>
-        <link rel="next" title="docker - EXPERIMENTAL" href="docker.html"/>
-        <link rel="prev" title="Alert testing" href="alert-testing.html"/> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="slack" href="slack.html" />
+    <link rel="prev" title="Alert testing" href="alert-testing.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
+   
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
-            <a href="index.html" class="icon icon-home"> Skyline
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
 
           
@@ -82,16 +79,19 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
             
-                <ul class="current">
+              
+            
+            
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
-<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
@@ -106,7 +106,6 @@
 <li class="toctree-l2"><a class="reference internal" href="#external-alert-configs">External alert configs</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
@@ -123,6 +122,7 @@
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
@@ -130,12 +130,10 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#reliability">Reliability</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
-<li class="toctree-l1"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What’s new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a></li>
@@ -144,40 +142,61 @@
             
           
         </div>
+        
       </div>
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="index.html">Skyline</a>
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Skyline</a>
+        
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="index.html">Docs</a> &raquo;</li>
-      
-    <li>Alerts</li>
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Alerts</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
-            <a href="_sources/alerts.txt" rel="nofollow"> View page source</a>
+            
+            <a href="_sources/alerts.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -197,21 +216,21 @@ defined for Boundary metrics.</p>
 tightly coupled to SMTP alerts.  Many of the resources required for further
 analysis and for other alerters are created during the SMTP alert process.
 Further to this, the full spectrum of analysis is only done on metrics that have
-a SMTP alert tuple configured for the namespace in <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALERTS</span></code></a>.  This
+a SMTP alert tuple configured for the namespace in <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ALERTS</span></code></a>.  This
 is because the more extensive analysis is only done on the metrics that you care
 about, your KPI metrics.  Doing the extended analysis beyond the 3sigma related
 analysis of metrics that have no alerts configured for them makes no sense as no
 one wants to know.  Therefore only metrics in namespaces that are defined with a
-stmp alerter in <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALERTS</span></code></a> get analysed by Mirage and Ionosphere.
+stmp alerter in <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ALERTS</span></code></a> get analysed by Mirage and Ionosphere.
 It is via the smtp alert tuple that metrics get configured to be Mirage metrics
 by declaring the SECOND_ORDER_RESOLUTION_HOURS in the tuple.</p>
 <p>However if you do not want to be SMTP alerted, you can set the
-<a class="reference internal" href="skyline.html#settings.SMTP_OPTS" title="settings.SMTP_OPTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.SMTP_OPTS</span></code></a> to <cite>&#8216;no_email&#8217;</cite> as shown in an example below, but you
+<a class="reference internal" href="skyline.html#settings.SMTP_OPTS" title="settings.SMTP_OPTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SMTP_OPTS</span></code></a> to <cite>‘no_email’</cite> as shown in an example below, but you
 must still declare the namespace with a SMTP alert tuple in
-<a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALERTS</span></code></a></p>
-<p>The following example, we want to alert via Slack, your <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALERTS</span></code></a>
-and <a class="reference internal" href="skyline.html#settings.SMTP_OPTS" title="settings.SMTP_OPTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.SMTP_OPTS</span></code></a> would need to look like this.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">ALERTS</span> <span class="o">=</span> <span class="p">(</span>
+<a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ALERTS</span></code></a></p>
+<p>The following example, we want to alert via Slack, your <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ALERTS</span></code></a>
+and <a class="reference internal" href="skyline.html#settings.SMTP_OPTS" title="settings.SMTP_OPTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SMTP_OPTS</span></code></a> would need to look like this.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ALERTS</span> <span class="o">=</span> <span class="p">(</span>
   <span class="p">(</span><span class="s1">&#39;carbon&#39;</span><span class="p">,</span> <span class="s1">&#39;smtp&#39;</span><span class="p">,</span> <span class="mi">3600</span><span class="p">),</span>  <span class="c1"># Analyzer metric, only analysed at FULL_DURATION</span>
   <span class="p">(</span><span class="s1">&#39;skyline&#39;</span><span class="p">,</span> <span class="s1">&#39;smtp&#39;</span><span class="p">,</span> <span class="mi">3600</span><span class="p">,</span> <span class="mi">168</span><span class="p">),</span>  <span class="c1"># Mirage enabled as 168 is passed as SECOND_ORDER_RESOLUTION_HOURS</span>
   <span class="p">(</span><span class="s1">&#39;stats&#39;</span><span class="p">,</span> <span class="s1">&#39;smtp&#39;</span><span class="p">,</span> <span class="mi">1800</span><span class="p">,</span> <span class="mi">168</span><span class="p">),</span>  <span class="c1"># Mirage enabled as 168 is passed as SECOND_ORDER_RESOLUTION_HOURS</span>
@@ -233,7 +252,7 @@ and <a class="reference internal" href="skyline.html#settings.SMTP_OPTS" title="
     <span class="c1"># This is the default recipient which acts as a catchall for alert tuples</span>
     <span class="c1"># that do not have a matching namespace defined in recipients</span>
     <span class="s1">&#39;default_recipient&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;no_email&#39;</span><span class="p">],</span>
-    <span class="s1">&#39;embed-images&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+    <span class="s1">&#39;embed-images&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">}</span>
 </pre></div>
 </div>
@@ -244,54 +263,54 @@ and <a class="reference internal" href="skyline.html#settings.SMTP_OPTS" title="
 a setting to enable the specific alerter which must be set to <cite>True</cite> to enable
 the alerter:</p>
 <ul class="simple">
-<li><a class="reference internal" href="skyline.html#settings.SYSLOG_ENABLED" title="settings.SYSLOG_ENABLED"><code class="xref py py-mod docutils literal"><span class="pre">settings.SYSLOG_ENABLED</span></code></a></li>
-<li><a class="reference internal" href="skyline.html#settings.PAGERDUTY_ENABLED" title="settings.PAGERDUTY_ENABLED"><code class="xref py py-mod docutils literal"><span class="pre">settings.PAGERDUTY_ENABLED</span></code></a></li>
-<li><a class="reference internal" href="skyline.html#settings.SLACK_ENABLED" title="settings.SLACK_ENABLED"><code class="xref py py-mod docutils literal"><span class="pre">settings.SLACK_ENABLED</span></code></a></li>
-<li><a class="reference internal" href="skyline.html#settings.HTTP_ALERTERS_ENABLED" title="settings.HTTP_ALERTERS_ENABLED"><code class="xref py py-mod docutils literal"><span class="pre">settings.HTTP_ALERTERS_ENABLED</span></code></a></li>
+<li><p><a class="reference internal" href="skyline.html#settings.SYSLOG_ENABLED" title="settings.SYSLOG_ENABLED"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SYSLOG_ENABLED</span></code></a></p></li>
+<li><p><a class="reference internal" href="skyline.html#settings.PAGERDUTY_ENABLED" title="settings.PAGERDUTY_ENABLED"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.PAGERDUTY_ENABLED</span></code></a></p></li>
+<li><p><a class="reference internal" href="skyline.html#settings.SLACK_ENABLED" title="settings.SLACK_ENABLED"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SLACK_ENABLED</span></code></a></p></li>
+<li><p><a class="reference internal" href="skyline.html#settings.HTTP_ALERTERS_ENABLED" title="settings.HTTP_ALERTERS_ENABLED"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.HTTP_ALERTERS_ENABLED</span></code></a></p></li>
 </ul>
 <p>Analyzer, Mirage and Ionosphere related alert settings (anomaly detection) are:</p>
 <ul class="simple">
-<li><a class="reference internal" href="skyline.html#settings.ENABLE_ALERTS" title="settings.ENABLE_ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ENABLE_ALERTS</span></code></a> - must be set to <cite>True</cite> to enable alerting</li>
-<li><a class="reference internal" href="skyline.html#settings.ENABLE_FULL_DURATION_ALERTS" title="settings.ENABLE_FULL_DURATION_ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ENABLE_FULL_DURATION_ALERTS</span></code></a> - must be set to <cite>True</cite> to enable
-Analyzer to alert</li>
-<li><a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALERTS</span></code></a> - must be defined to enable alerts via Analyzer and
-Mirage</li>
-<li><a class="reference internal" href="skyline.html#settings.SMTP_OPTS" title="settings.SMTP_OPTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.SMTP_OPTS</span></code></a> - must be defined</li>
-<li><a class="reference internal" href="skyline.html#settings.SLACK_OPTS" title="settings.SLACK_OPTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.SLACK_OPTS</span></code></a> - must be defined if you want to alert via Slack</li>
-<li><a class="reference internal" href="skyline.html#settings.PAGERDUTY_OPTS" title="settings.PAGERDUTY_OPTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.PAGERDUTY_OPTS</span></code></a> - must be defined if you want to alert via
-Pagerduty</li>
-<li><a class="reference internal" href="skyline.html#settings.SYSLOG_OPTS" title="settings.SYSLOG_OPTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.SYSLOG_OPTS</span></code></a> - can be used to change syslog settings</li>
-<li><a class="reference internal" href="skyline.html#settings.HTTP_ALERTERS_OPTS" title="settings.HTTP_ALERTERS_OPTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.HTTP_ALERTERS_OPTS</span></code></a> - must be defined if you want to push
-alerts to a http endpoint</li>
-<li><a class="reference internal" href="skyline.html#settings.MIRAGE_ENABLE_ALERTS" title="settings.MIRAGE_ENABLE_ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.MIRAGE_ENABLE_ALERTS</span></code></a> - must be set to <cite>True</cite> to enable alerts
-from Mirage</li>
+<li><p><a class="reference internal" href="skyline.html#settings.ENABLE_ALERTS" title="settings.ENABLE_ALERTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ENABLE_ALERTS</span></code></a> - must be set to <cite>True</cite> to enable alerting</p></li>
+<li><p><a class="reference internal" href="skyline.html#settings.ENABLE_FULL_DURATION_ALERTS" title="settings.ENABLE_FULL_DURATION_ALERTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ENABLE_FULL_DURATION_ALERTS</span></code></a> - must be set to <cite>True</cite> to enable
+Analyzer to alert</p></li>
+<li><p><a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ALERTS</span></code></a> - must be defined to enable alerts via Analyzer and
+Mirage</p></li>
+<li><p><a class="reference internal" href="skyline.html#settings.SMTP_OPTS" title="settings.SMTP_OPTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SMTP_OPTS</span></code></a> - must be defined</p></li>
+<li><p><a class="reference internal" href="skyline.html#settings.SLACK_OPTS" title="settings.SLACK_OPTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SLACK_OPTS</span></code></a> - must be defined if you want to alert via Slack</p></li>
+<li><p><a class="reference internal" href="skyline.html#settings.PAGERDUTY_OPTS" title="settings.PAGERDUTY_OPTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.PAGERDUTY_OPTS</span></code></a> - must be defined if you want to alert via
+Pagerduty</p></li>
+<li><p><a class="reference internal" href="skyline.html#settings.SYSLOG_OPTS" title="settings.SYSLOG_OPTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SYSLOG_OPTS</span></code></a> - can be used to change syslog settings</p></li>
+<li><p><a class="reference internal" href="skyline.html#settings.HTTP_ALERTERS_OPTS" title="settings.HTTP_ALERTERS_OPTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.HTTP_ALERTERS_OPTS</span></code></a> - must be defined if you want to push
+alerts to a http endpoint</p></li>
+<li><p><a class="reference internal" href="skyline.html#settings.MIRAGE_ENABLE_ALERTS" title="settings.MIRAGE_ENABLE_ALERTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.MIRAGE_ENABLE_ALERTS</span></code></a> - must be set to <cite>True</cite> to enable alerts
+from Mirage</p></li>
 </ul>
 <p>Boundary related alert settings (static and dynamic thresholds) are:</p>
 <ul class="simple">
-<li><a class="reference internal" href="skyline.html#settings.BOUNDARY_ENABLE_ALERTS" title="settings.BOUNDARY_ENABLE_ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.BOUNDARY_ENABLE_ALERTS</span></code></a> - must be set to <cite>True</cite> to enable
-alerting</li>
-<li><a class="reference internal" href="skyline.html#settings.BOUNDARY_METRICS" title="settings.BOUNDARY_METRICS"><code class="xref py py-mod docutils literal"><span class="pre">settings.BOUNDARY_METRICS</span></code></a> - must be defined to enable checks and alerts
-for Boundary</li>
-<li><a class="reference internal" href="skyline.html#settings.BOUNDARY_ALERTER_OPTS" title="settings.BOUNDARY_ALERTER_OPTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.BOUNDARY_ALERTER_OPTS</span></code></a> - can be used to change the Boundary
-alert rate limits</li>
-<li><a class="reference internal" href="skyline.html#settings.BOUNDARY_SMTP_OPTS" title="settings.BOUNDARY_SMTP_OPTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.BOUNDARY_SMTP_OPTS</span></code></a> - must be defined if you want to send SMTP
-alerts</li>
-<li><a class="reference internal" href="skyline.html#settings.BOUNDARY_PAGERDUTY_OPTS" title="settings.BOUNDARY_PAGERDUTY_OPTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.BOUNDARY_PAGERDUTY_OPTS</span></code></a> - must be defined if you want to alert
-via Pagerduty</li>
-<li><a class="reference internal" href="skyline.html#settings.BOUNDARY_SLACK_OPTS" title="settings.BOUNDARY_SLACK_OPTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.BOUNDARY_SLACK_OPTS</span></code></a> - must be defined if you want to alert via
-Slack</li>
-<li><code class="xref py py-mod docutils literal"><span class="pre">settings.BOUNDARY_HTTP_ALERTERS_OPTS</span></code> - must be defined if you want to
-push alerts to a http endpoint</li>
+<li><p><a class="reference internal" href="skyline.html#settings.BOUNDARY_ENABLE_ALERTS" title="settings.BOUNDARY_ENABLE_ALERTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.BOUNDARY_ENABLE_ALERTS</span></code></a> - must be set to <cite>True</cite> to enable
+alerting</p></li>
+<li><p><a class="reference internal" href="skyline.html#settings.BOUNDARY_METRICS" title="settings.BOUNDARY_METRICS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.BOUNDARY_METRICS</span></code></a> - must be defined to enable checks and alerts
+for Boundary</p></li>
+<li><p><a class="reference internal" href="skyline.html#settings.BOUNDARY_ALERTER_OPTS" title="settings.BOUNDARY_ALERTER_OPTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.BOUNDARY_ALERTER_OPTS</span></code></a> - can be used to change the Boundary
+alert rate limits</p></li>
+<li><p><a class="reference internal" href="skyline.html#settings.BOUNDARY_SMTP_OPTS" title="settings.BOUNDARY_SMTP_OPTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.BOUNDARY_SMTP_OPTS</span></code></a> - must be defined if you want to send SMTP
+alerts</p></li>
+<li><p><a class="reference internal" href="skyline.html#settings.BOUNDARY_PAGERDUTY_OPTS" title="settings.BOUNDARY_PAGERDUTY_OPTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.BOUNDARY_PAGERDUTY_OPTS</span></code></a> - must be defined if you want to alert
+via Pagerduty</p></li>
+<li><p><a class="reference internal" href="skyline.html#settings.BOUNDARY_SLACK_OPTS" title="settings.BOUNDARY_SLACK_OPTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.BOUNDARY_SLACK_OPTS</span></code></a> - must be defined if you want to alert via
+Slack</p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.BOUNDARY_HTTP_ALERTERS_OPTS</span></code> - must be defined if you want to
+push alerts to a http endpoint</p></li>
 </ul>
 </div>
 <div class="section" id="http-alerter-alerts">
 <h2>http_alerter alerts<a class="headerlink" href="#http-alerter-alerts" title="Permalink to this headline">¶</a></h2>
 <p>The http_alerter alert type, enables Skyline to send alerts to a HTTP endpoint.
 http_alerters are configured under the following settings.</p>
-<p>In <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALERTS</span></code></a> and <a class="reference internal" href="skyline.html#settings.BOUNDARY_METRICS" title="settings.BOUNDARY_METRICS"><code class="xref py py-mod docutils literal"><span class="pre">settings.BOUNDARY_METRICS</span></code></a> you defined the
+<p>In <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ALERTS</span></code></a> and <a class="reference internal" href="skyline.html#settings.BOUNDARY_METRICS" title="settings.BOUNDARY_METRICS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.BOUNDARY_METRICS</span></code></a> you defined the
 namespace and http_alerter and expiry (how long to not send an alert after an
 alert has been sent).</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># For Analzyer, Mirage and Ionosphere</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># For Analzyer, Mirage and Ionosphere</span>
 <span class="n">ALERTS</span> <span class="o">=</span> <span class="p">(</span>
     <span class="o">...</span>
     <span class="p">(</span><span class="s1">&#39;stats&#39;</span><span class="p">,</span> <span class="s1">&#39;http_alerter-external_endpoint&#39;</span><span class="p">,</span> <span class="mi">30</span><span class="p">),</span>
@@ -306,16 +325,16 @@ alert has been sent).</p>
 <span class="p">)</span>
 </pre></div>
 </div>
-<p>Each http_alerter can be defined in a common <a class="reference internal" href="skyline.html#settings.HTTP_ALERTERS_OPTS" title="settings.HTTP_ALERTERS_OPTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.HTTP_ALERTERS_OPTS</span></code></a>
+<p>Each http_alerter can be defined in a common <a class="reference internal" href="skyline.html#settings.HTTP_ALERTERS_OPTS" title="settings.HTTP_ALERTERS_OPTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.HTTP_ALERTERS_OPTS</span></code></a>
 which all the apps refer to.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">HTTP_ALERTERS_OPTS</span> <span class="o">=</span> <span class="p">{</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">HTTP_ALERTERS_OPTS</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s1">&#39;http_alerter-external_endpoint&#39;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s1">&#39;enabled&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+        <span class="s1">&#39;enabled&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="s1">&#39;endpoint&#39;</span><span class="p">:</span> <span class="s1">&#39;https://http-alerter.example.org/alert_reciever&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;token&#39;</span><span class="p">:</span> <span class="bp">None</span>
+        <span class="s1">&#39;token&#39;</span><span class="p">:</span> <span class="kc">None</span>
     <span class="p">},</span>
     <span class="s1">&#39;http_alerter-otherapp&#39;</span><span class="p">:</span> <span class="p">{</span>
-        <span class="s1">&#39;enabled&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+        <span class="s1">&#39;enabled&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="s1">&#39;endpoint&#39;</span><span class="p">:</span> <span class="s1">&#39;https://other-http-alerter.example.org/alerts&#39;</span><span class="p">,</span>
         <span class="s1">&#39;token&#39;</span><span class="p">:</span> <span class="s1">&#39;1234567890abcdefg&#39;</span>
     <span class="p">},</span>
@@ -324,7 +343,7 @@ which all the apps refer to.</p>
 </div>
 <p>The http_alerter will post an alert json object to an HTTP endpoint.  Here is
 an example of the alert json POST data:</p>
-<div class="highlight-json"><div class="highlight"><pre><span></span><span class="p">{</span>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
   <span class="nt">&quot;status&quot;</span><span class="p">:</span> <span class="p">{},</span>
   <span class="nt">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
     <span class="nt">&quot;alert&quot;</span><span class="p">:</span> <span class="p">{</span>
@@ -364,9 +383,10 @@ http_alerter endpoint that is down.</p>
 <div class="section" id="external-alert-configs">
 <h2>External alert configs<a class="headerlink" href="#external-alert-configs" title="Permalink to this headline">¶</a></h2>
 <p>Skyline can fetch alert configs from external sources</p>
-<ul>
-<li><p class="first"><strong>Example</strong>:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">EXTERNAL_ALERTS</span> <span class="o">=</span> <span class="p">{</span>
+<ul class="simple">
+<li><p><strong>Example</strong></p></li>
+</ul>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">EXTERNAL_ALERTS</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s1">&#39;test_alert_config&#39;</span><span class="p">:</span> <span class="p">{</span>
         <span class="s1">&#39;url&#39;</span><span class="p">:</span> <span class="s1">&#39;http://127.0.0.1:1500/mock_api?test_alert_config&#39;</span><span class="p">,</span>
         <span class="s1">&#39;method&#39;</span><span class="p">:</span> <span class="s1">&#39;GET&#39;</span><span class="p">,</span>
@@ -385,22 +405,44 @@ http_alerter endpoint that is down.</p>
 <span class="p">}</span>
 </pre></div>
 </div>
-</li>
+<ul class="simple">
+<li><p>The external source endpoint must return a json response with a <code class="docutils literal notranslate"><span class="pre">data</span></code> item
+which contains named alert items with the following keys and values:</p></li>
 </ul>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span><span class="nt">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span>
+  <span class="nt">&quot;1&quot;</span><span class="p">:</span> <span class="p">{</span><span class="nt">&quot;alerter&quot;</span><span class="p">:</span> <span class="s2">&quot;http_alerter-example.org&quot;</span><span class="p">,</span>
+   <span class="nt">&quot;namespace_prefix&quot;</span><span class="p">:</span> <span class="s2">&quot;vista.remote_hosts.example.org&quot;</span><span class="p">,</span>
+   <span class="nt">&quot;namespace&quot;</span><span class="p">:</span> <span class="s2">&quot;nginx.GET&quot;</span><span class="p">,</span>
+   <span class="nt">&quot;expiration&quot;</span><span class="p">:</span> <span class="s2">&quot;3600&quot;</span><span class="p">,</span>
+   <span class="nt">&quot;second_order_resolution&quot;</span><span class="p">:</span> <span class="s2">&quot;604800&quot;</span><span class="p">,</span>
+   <span class="nt">&quot;learn_days&quot;</span><span class="p">:</span> <span class="s2">&quot;30&quot;</span><span class="p">,</span>
+   <span class="nt">&quot;inactive_after&quot;</span><span class="p">:</span> <span class="s2">&quot;1800&quot;</span><span class="p">},</span>
+  <span class="nt">&quot;nginx_errors&quot;</span><span class="p">:</span> <span class="p">{</span><span class="nt">&quot;alerter&quot;</span><span class="p">:</span> <span class="s2">&quot;http_alerter-example.org&quot;</span><span class="p">,</span>
+   <span class="nt">&quot;namespace_prefix&quot;</span><span class="p">:</span> <span class="s2">&quot;vista.remote_hosts.example.org&quot;</span><span class="p">,</span>
+   <span class="nt">&quot;namespace&quot;</span><span class="p">:</span> <span class="s2">&quot;nginx.errors&quot;</span><span class="p">,</span>
+   <span class="nt">&quot;expiration&quot;</span><span class="p">:</span> <span class="s2">&quot;900&quot;</span><span class="p">,</span>
+   <span class="nt">&quot;second_order_resolution&quot;</span><span class="p">:</span> <span class="s2">&quot;86400&quot;</span><span class="p">,</span>
+   <span class="nt">&quot;learn_days&quot;</span><span class="p">:</span> <span class="s2">&quot;30&quot;</span><span class="p">,</span>
+   <span class="nt">&quot;inactive_after&quot;</span><span class="p">:</span> <span class="s2">&quot;1800&quot;</span><span class="p">}</span>
+  <span class="p">}</span>
+<span class="p">}</span>
+</pre></div>
+</div>
 </div>
 </div>
 
 
            </div>
+           
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="docker.html" class="btn btn-neutral float-right" title="docker - EXPERIMENTAL" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="slack.html" class="btn btn-neutral float-right" title="slack" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="alert-testing.html" class="btn btn-neutral" title="Alert testing" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="alert-testing.html" class="btn btn-neutral float-left" title="Alert testing" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -409,11 +451,19 @@ http_alerter endpoint that is down.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
+        
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -425,36 +475,15 @@ http_alerter endpoint that is down.</p>
   </div>
   
 
-
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'2.0.0',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

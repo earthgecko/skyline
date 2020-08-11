@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,49 +11,46 @@
   
 
   
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
+
+  
+  
+  
   
 
   
-
-  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
-  
-
-  
-  
-    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  
-
-  
-    <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
-  
-
-  
-        <link rel="index" title="Index"
-              href="../../genindex.html"/>
-        <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 2.0.0 documentation" href="../../index.html"/>
-        <link rel="up" title="Module code" href="../index.html"/> 
-
-  
-  <script src="../../_static/js/modernizr.min.js"></script>
-
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
+   
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
-            <a href="../../index.html" class="icon icon-home"> Skyline
+            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
 
           
@@ -81,22 +77,24 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
             
-                <ul>
+              
+            
+            
+              <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
@@ -113,6 +111,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
@@ -120,12 +119,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html#reliability">Reliability</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../releases.html">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What’s new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../skyline.html">skyline package</a></li>
@@ -134,47 +131,66 @@
             
           
         </div>
+        
       </div>
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="../../index.html">Skyline</a>
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Skyline</a>
+        
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
+
+
+
+
+
+
+
+
+
+
 
 
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="../../index.html">Docs</a> &raquo;</li>
-      
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
           <li><a href="../index.html">Module code</a> &raquo;</li>
-      
-    <li>webapp.webapp</li>
+        
+      <li>webapp.webapp</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
-        
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
   <h1>Source code for webapp.webapp</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
 <span class="kn">import</span> <span class="nn">redis</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">simplejson</span> <span class="k">as</span> <span class="nn">json</span>
@@ -182,23 +198,23 @@
 <span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">csv</span>
 <span class="kn">import</span> <span class="nn">traceback</span>
-<span class="kn">from</span> <span class="nn">msgpack</span> <span class="k">import</span> <span class="n">Unpacker</span>
-<span class="kn">from</span> <span class="nn">functools</span> <span class="k">import</span> <span class="n">wraps</span>
-<span class="kn">from</span> <span class="nn">flask</span> <span class="k">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">msgpack</span> <span class="kn">import</span> <span class="n">Unpacker</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">wraps</span>
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">Flask</span><span class="p">,</span> <span class="n">request</span><span class="p">,</span> <span class="n">render_template</span><span class="p">,</span> <span class="n">redirect</span><span class="p">,</span> <span class="n">Response</span><span class="p">,</span> <span class="n">abort</span><span class="p">,</span> <span class="n">flash</span><span class="p">,</span>
     <span class="n">send_file</span><span class="p">,</span> <span class="n">jsonify</span><span class="p">)</span>
-<span class="kn">from</span> <span class="nn">daemon</span> <span class="k">import</span> <span class="n">runner</span>
-<span class="kn">from</span> <span class="nn">os.path</span> <span class="k">import</span> <span class="n">isdir</span>
-<span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">path</span>
+<span class="kn">from</span> <span class="nn">daemon</span> <span class="kn">import</span> <span class="n">runner</span>
+<span class="kn">from</span> <span class="nn">os.path</span> <span class="kn">import</span> <span class="n">isdir</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">path</span>
 <span class="kn">import</span> <span class="nn">string</span>
-<span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">remove</span> <span class="k">as</span> <span class="n">os_remove</span>
-<span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">sleep</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">remove</span> <span class="k">as</span> <span class="n">os_remove</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">sleep</span>
 
 <span class="c1"># @added 20160703 - Feature #1464: Webapp Redis browser</span>
 <span class="kn">import</span> <span class="nn">time</span>
 <span class="c1"># @modified 20180918 - Feature #2602: Graphs in search_features_profiles</span>
 <span class="c1"># from datetime import datetime, timedelta</span>
-<span class="kn">from</span> <span class="nn">datetime</span> <span class="k">import</span> <span class="n">timedelta</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">timedelta</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">base64</span>
@@ -206,7 +222,7 @@
 <span class="c1"># flask things for rebrow</span>
 <span class="c1"># @modified 20180918 - Feature #2602: Graphs in search_features_profiles</span>
 <span class="c1"># from flask import session, g, url_for, flash, Markup, json</span>
-<span class="kn">from</span> <span class="nn">flask</span> <span class="k">import</span> <span class="n">url_for</span><span class="p">,</span> <span class="n">Markup</span>
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">url_for</span><span class="p">,</span> <span class="n">Markup</span>
 
 <span class="c1"># For secret_key</span>
 <span class="kn">import</span> <span class="nn">uuid</span>
@@ -220,13 +236,13 @@
 <span class="c1"># @added 20180520 - Feature #2378: Add redis auth to Skyline and rebrow</span>
 <span class="c1"># Added auth to rebrow as per https://github.com/marians/rebrow/pull/20 by</span>
 <span class="c1"># elky84</span>
-<span class="kn">from</span> <span class="nn">six.moves.urllib.parse</span> <span class="k">import</span> <span class="n">quote</span>
+<span class="kn">from</span> <span class="nn">six.moves.urllib.parse</span> <span class="kn">import</span> <span class="n">quote</span>
 
 <span class="c1"># @modified 20180918 - Feature #2602: Graphs in search_features_profiles</span>
 <span class="c1"># from features_profile import feature_name_id, calculate_features_profile</span>
-<span class="kn">from</span> <span class="nn">features_profile</span> <span class="k">import</span> <span class="n">calculate_features_profile</span>
+<span class="kn">from</span> <span class="nn">features_profile</span> <span class="kn">import</span> <span class="n">calculate_features_profile</span>
 
-<span class="kn">from</span> <span class="nn">tsfresh_feature_names</span> <span class="k">import</span> <span class="n">TSFRESH_VERSION</span>
+<span class="kn">from</span> <span class="nn">tsfresh_feature_names</span> <span class="kn">import</span> <span class="n">TSFRESH_VERSION</span>
 
 <span class="c1"># @modified 20180526 - Feature #2378: Add redis auth to Skyline and rebrow</span>
 <span class="c1"># Use PyJWT instead of pycryptodome</span>
@@ -236,32 +252,32 @@
 <span class="kn">import</span> <span class="nn">jwt</span>
 <span class="c1"># @added 20180527 - Feature #2378: Add redis auth to Skyline and rebrow</span>
 <span class="kn">import</span> <span class="nn">hashlib</span>
-<span class="kn">from</span> <span class="nn">sys</span> <span class="k">import</span> <span class="n">version_info</span>
-<span class="kn">from</span> <span class="nn">ast</span> <span class="k">import</span> <span class="n">literal_eval</span>
+<span class="kn">from</span> <span class="nn">sys</span> <span class="kn">import</span> <span class="n">version_info</span>
+<span class="kn">from</span> <span class="nn">ast</span> <span class="kn">import</span> <span class="n">literal_eval</span>
 
 <span class="c1"># @added 20180721 - Feature #2464: luminosity_remote_data</span>
 <span class="c1"># Use a gzipped response as the response as raw preprocessed time series</span>
 <span class="c1"># added cStringIO, gzip and functools to implement Gzip for particular views</span>
 <span class="c1"># http://flask.pocoo.org/snippets/122/</span>
-<span class="kn">from</span> <span class="nn">flask</span> <span class="k">import</span> <span class="n">after_this_request</span>
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">after_this_request</span>
 <span class="c1"># from cStringIO import StringIO as IO</span>
 <span class="kn">import</span> <span class="nn">gzip</span>
 <span class="kn">import</span> <span class="nn">functools</span>
 
-<span class="kn">from</span> <span class="nn">logging.handlers</span> <span class="k">import</span> <span class="n">TimedRotatingFileHandler</span><span class="p">,</span> <span class="n">MemoryHandler</span>
+<span class="kn">from</span> <span class="nn">logging.handlers</span> <span class="kn">import</span> <span class="n">TimedRotatingFileHandler</span><span class="p">,</span> <span class="n">MemoryHandler</span>
 
 <span class="kn">import</span> <span class="nn">os.path</span>
 <span class="c1"># @added 20190116 - Cross-Site Scripting Security Vulnerability #85</span>
 <span class="c1">#                   Bug #2816: Cross-Site Scripting Security Vulnerability</span>
-<span class="kn">from</span> <span class="nn">flask</span> <span class="k">import</span> <span class="n">escape</span> <span class="k">as</span> <span class="n">flask_escape</span>
+<span class="kn">from</span> <span class="nn">flask</span> <span class="kn">import</span> <span class="n">escape</span> <span class="k">as</span> <span class="n">flask_escape</span>
 
 <span class="k">if</span> <span class="kc">True</span><span class="p">:</span>
     <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">realpath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)),</span> <span class="n">os</span><span class="o">.</span><span class="n">pardir</span><span class="p">))</span>
     <span class="n">sys</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">))</span>
     <span class="kn">import</span> <span class="nn">settings</span>
-    <span class="kn">from</span> <span class="nn">validate_settings</span> <span class="k">import</span> <span class="n">validate_settings_variables</span>
+    <span class="kn">from</span> <span class="nn">validate_settings</span> <span class="kn">import</span> <span class="n">validate_settings_variables</span>
     <span class="kn">import</span> <span class="nn">skyline_version</span>
-    <span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="kn">import</span> <span class="p">(</span>
         <span class="n">get_graphite_metric</span><span class="p">,</span>
         <span class="c1"># @added 20170604 - Feature #2034: analyse_derivatives</span>
         <span class="n">in_list</span><span class="p">,</span>
@@ -279,11 +295,11 @@
         <span class="c1"># charset=&#39;utf-8&#39;, decode_responses=True arguments required in py3</span>
         <span class="n">get_redis_conn</span><span class="p">,</span> <span class="n">get_redis_conn_decoded</span><span class="p">)</span>
 
-    <span class="kn">from</span> <span class="nn">backend</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="kn">from</span> <span class="nn">backend</span> <span class="kn">import</span> <span class="p">(</span>
         <span class="n">panorama_request</span><span class="p">,</span> <span class="n">get_list</span><span class="p">,</span>
         <span class="c1"># @added 20180720 - Feature #2464: luminosity_remote_data</span>
         <span class="n">luminosity_remote_data</span><span class="p">)</span>
-    <span class="kn">from</span> <span class="nn">ionosphere_backend</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="kn">from</span> <span class="nn">ionosphere_backend</span> <span class="kn">import</span> <span class="p">(</span>
         <span class="n">ionosphere_data</span><span class="p">,</span> <span class="n">ionosphere_metric_data</span><span class="p">,</span>
         <span class="c1"># @modified 20170114 - Feature #1854: Ionosphere learn</span>
         <span class="c1"># Decoupled create_features_profile from ionosphere_backend</span>
@@ -332,7 +348,7 @@
     <span class="c1"># @added 20170114 - Feature #1854: Ionosphere learn</span>
     <span class="c1"># Decoupled the create_features_profile from ionosphere_backend and moved to</span>
     <span class="c1"># ionosphere_functions so it can be used by ionosphere/learn</span>
-    <span class="kn">from</span> <span class="nn">ionosphere_functions</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="kn">from</span> <span class="nn">ionosphere_functions</span> <span class="kn">import</span> <span class="p">(</span>
         <span class="n">create_features_profile</span><span class="p">,</span> <span class="n">get_ionosphere_learn_details</span><span class="p">,</span>
         <span class="c1"># @added 20180414 - Branch #2270: luminosity</span>
         <span class="n">get_correlations</span><span class="p">,</span>
@@ -343,7 +359,7 @@
     <span class="c1"># @added 20200420 - Feature #3500: webapp - crucible_process_metrics</span>
     <span class="c1">#                   Feature #1448: Crucible web UI</span>
     <span class="c1">#                   Branch #868: crucible</span>
-    <span class="kn">from</span> <span class="nn">crucible_backend</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="kn">from</span> <span class="nn">crucible_backend</span> <span class="kn">import</span> <span class="p">(</span>
         <span class="n">submit_crucible_job</span><span class="p">,</span> <span class="n">get_crucible_jobs</span><span class="p">,</span> <span class="n">get_crucible_job</span><span class="p">,</span>
         <span class="n">send_crucible_job_metric_to_panorama</span><span class="p">)</span>
 
@@ -359,8 +375,8 @@
     <span class="k">except</span><span class="p">:</span>
         <span class="n">file_uploads_enabled</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="k">if</span> <span class="n">file_uploads_enabled</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">werkzeug.utils</span> <span class="k">import</span> <span class="n">secure_filename</span>
-    <span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="n">mkdir_p</span><span class="p">,</span> <span class="n">write_data_to_file</span>
+    <span class="kn">from</span> <span class="nn">werkzeug.utils</span> <span class="kn">import</span> <span class="n">secure_filename</span>
+    <span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="kn">import</span> <span class="n">mkdir_p</span><span class="p">,</span> <span class="n">write_data_to_file</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">DATA_UPLOADS_PATH</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">DATA_UPLOADS_PATH</span>
     <span class="k">except</span><span class="p">:</span>
@@ -397,7 +413,7 @@
 <span class="c1"># added cStringIO to implement Gzip for particular views</span>
 <span class="c1"># http://flask.pocoo.org/snippets/122/</span>
 <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">StringIO</span> <span class="k">import</span> <span class="n">StringIO</span> <span class="k">as</span> <span class="n">IO</span>
+    <span class="kn">from</span> <span class="nn">StringIO</span> <span class="kn">import</span> <span class="n">StringIO</span> <span class="k">as</span> <span class="n">IO</span>
 <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">io</span> <span class="k">as</span> <span class="nn">IO</span>
 
@@ -477,8 +493,14 @@
 <span class="k">except</span><span class="p">:</span>
     <span class="n">GRAPHITE_RENDER_URI</span> <span class="o">=</span> <span class="s1">&#39;render&#39;</span>
 
+<span class="c1"># @added 20200731 - Feature #3654: IONOSPHERE_GRAPHITE_NOW_GRAPHS_OVERRIDE</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="n">IONOSPHERE_GRAPHITE_NOW_GRAPHS_OVERRIDE</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_GRAPHITE_NOW_GRAPHS_OVERRIDE</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">IONOSPHERE_GRAPHITE_NOW_GRAPHS_OVERRIDE</span> <span class="o">=</span> <span class="kc">False</span>
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">before_request</span>
+
+<div class="viewcode-block" id="limit_remote_addr"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.limit_remote_addr">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">before_request</span>
 <span class="c1"># def setup_logging():</span>
 <span class="c1">#    if not app.debug:</span>
 <span class="c1">#        stream_handler = logging.StreamHandler()</span>
@@ -504,7 +526,7 @@
 <span class="c1">#        handler.setFormatter(formatter)</span>
 <span class="c1">#        app.logger.addHandler(memory_handler)</span>
 <span class="c1">#        app.logger.addHandler(handler)</span>
-<div class="viewcode-block" id="limit_remote_addr"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.limit_remote_addr">[docs]</a><span class="k">def</span> <span class="nf">limit_remote_addr</span><span class="p">():</span>
+<span class="k">def</span> <span class="nf">limit_remote_addr</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    This function is called to check if the requesting IP address is in the</span>
 <span class="sd">    settings.WEBAPP_ALLOWED_IPS array, if not 403.</span>
@@ -593,8 +615,8 @@
     <span class="k">return</span> <span class="n">view_func</span></div>
 
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">errorhandler</span><span class="p">(</span><span class="mi">500</span><span class="p">)</span>
-<div class="viewcode-block" id="internal_error"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.internal_error">[docs]</a><span class="k">def</span> <span class="nf">internal_error</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">traceback_format_exc</span><span class="p">):</span>
+<div class="viewcode-block" id="internal_error"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.internal_error">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">errorhandler</span><span class="p">(</span><span class="mi">500</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">internal_error</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">traceback_format_exc</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Show traceback in the browser when running a flask app on a production</span>
 <span class="sd">    server.</span>
@@ -629,9 +651,9 @@
         <span class="n">message</span><span class="o">=</span><span class="n">fail_msg</span><span class="p">,</span> <span class="n">traceback</span><span class="o">=</span><span class="n">trace</span><span class="p">,</span> <span class="n">bad_machine</span><span class="o">=</span><span class="n">server_name</span><span class="p">),</span> <span class="mi">500</span></div>
 
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="index"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.index">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/&quot;</span><span class="p">)</span>
 <span class="nd">@requires_auth</span>
-<div class="viewcode-block" id="index"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.index">[docs]</a><span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
+<span class="k">def</span> <span class="nf">index</span><span class="p">():</span>
 
     <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
     <span class="k">if</span> <span class="s1">&#39;uh_oh&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
@@ -654,9 +676,9 @@
         <span class="k">return</span> <span class="s1">&#39;Uh oh ... a Skyline 500 :(&#39;</span><span class="p">,</span> <span class="mi">500</span></div>
 
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/a_500&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="a_500"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.a_500">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/a_500&quot;</span><span class="p">)</span>
 <span class="nd">@requires_auth</span>
-<div class="viewcode-block" id="a_500"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.a_500">[docs]</a><span class="k">def</span> <span class="nf">a_500</span><span class="p">():</span>
+<span class="k">def</span> <span class="nf">a_500</span><span class="p">():</span>
 
     <span class="k">if</span> <span class="s1">&#39;message&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
         <span class="n">message</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="s1">&#39;message&#39;</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
@@ -683,9 +705,9 @@
     <span class="k">return</span> <span class="n">resp</span><span class="p">,</span> <span class="mi">501</span></div>
 
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/now&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="now"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.now">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/now&quot;</span><span class="p">)</span>
 <span class="nd">@requires_auth</span>
-<div class="viewcode-block" id="now"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.now">[docs]</a><span class="k">def</span> <span class="nf">now</span><span class="p">():</span>
+<span class="k">def</span> <span class="nf">now</span><span class="p">():</span>
     <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span>
@@ -696,9 +718,9 @@
         <span class="k">return</span> <span class="s1">&#39;Uh oh ... a Skyline 500 :(&#39;</span><span class="p">,</span> <span class="mi">500</span></div>
 
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/then&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="then"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.then">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/then&quot;</span><span class="p">)</span>
 <span class="nd">@requires_auth</span>
-<div class="viewcode-block" id="then"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.then">[docs]</a><span class="k">def</span> <span class="nf">then</span><span class="p">():</span>
+<span class="k">def</span> <span class="nf">then</span><span class="p">():</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;then.html&#39;</span><span class="p">),</span> <span class="mi">200</span>
     <span class="k">except</span><span class="p">:</span>
@@ -707,8 +729,8 @@
         <span class="k">return</span> <span class="s1">&#39;Uh oh ... a Skyline 500 :(&#39;</span><span class="p">,</span> <span class="mi">500</span></div>
 
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/anomalies.json&quot;</span><span class="p">)</span>
-<div class="viewcode-block" id="anomalies"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.anomalies">[docs]</a><span class="k">def</span> <span class="nf">anomalies</span><span class="p">():</span>
+<div class="viewcode-block" id="anomalies"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.anomalies">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/anomalies.json&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">anomalies</span><span class="p">():</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">anomalies_json</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">ANOMALY_DUMP</span><span class="p">))</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">anomalies_json</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
@@ -719,8 +741,8 @@
     <span class="k">return</span> <span class="n">json_data</span><span class="p">,</span> <span class="mi">200</span></div>
 
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/panorama.json&quot;</span><span class="p">)</span>
-<div class="viewcode-block" id="panorama_anomalies"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.panorama_anomalies">[docs]</a><span class="k">def</span> <span class="nf">panorama_anomalies</span><span class="p">():</span>
+<div class="viewcode-block" id="panorama_anomalies"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.panorama_anomalies">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/panorama.json&quot;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">panorama_anomalies</span><span class="p">():</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">anomalies_json</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="vm">__file__</span><span class="p">),</span> <span class="s1">&#39;..&#39;</span><span class="p">,</span> <span class="n">settings</span><span class="o">.</span><span class="n">ANOMALY_DUMP</span><span class="p">))</span>
         <span class="c1"># @modified 20191014 - Task #3270: Deprecate string.replace for py3</span>
@@ -735,9 +757,9 @@
     <span class="k">return</span> <span class="n">json_data</span><span class="p">,</span> <span class="mi">200</span></div>
 
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/app_settings&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="app_settings"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.app_settings">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/app_settings&quot;</span><span class="p">)</span>
 <span class="nd">@requires_auth</span>
-<div class="viewcode-block" id="app_settings"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.app_settings">[docs]</a><span class="k">def</span> <span class="nf">app_settings</span><span class="p">():</span>
+<span class="k">def</span> <span class="nf">app_settings</span><span class="p">():</span>
 
     <span class="k">try</span><span class="p">:</span>
         <span class="n">app_settings</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;GRAPH_URL&#39;</span><span class="p">:</span> <span class="n">settings</span><span class="o">.</span><span class="n">GRAPH_URL</span><span class="p">,</span>
@@ -764,9 +786,9 @@
     <span class="k">return</span> <span class="n">resp</span><span class="p">,</span> <span class="mi">200</span></div>
 
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/version&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="version"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.version">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/version&quot;</span><span class="p">)</span>
 <span class="nd">@requires_auth</span>
-<div class="viewcode-block" id="version"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.version">[docs]</a><span class="k">def</span> <span class="nf">version</span><span class="p">():</span>
+<span class="k">def</span> <span class="nf">version</span><span class="p">():</span>
 
     <span class="k">try</span><span class="p">:</span>
         <span class="n">version_settings</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;SKYLINE_VERSION&#39;</span><span class="p">:</span> <span class="n">skyline_version</span><span class="p">}</span>
@@ -776,14 +798,47 @@
         <span class="k">return</span> <span class="s2">&quot;Not Found&quot;</span><span class="p">,</span> <span class="mi">404</span></div>
 
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/api&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+<div class="viewcode-block" id="api"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.api">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/api&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
 <span class="c1"># @modified 20180720 - Feature #2464: luminosity_remote_data</span>
 <span class="c1"># Rnamed def from data to api for the purpose of trying to add some</span>
 <span class="c1"># documentation relating to the API endpoints and their required parameters,</span>
 <span class="c1"># the results or error and status codes they return and the context in which</span>
 <span class="c1"># they are used.</span>
 <span class="c1"># def data():</span>
-<div class="viewcode-block" id="api"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.api">[docs]</a><span class="k">def</span> <span class="nf">api</span><span class="p">():</span>
+<span class="k">def</span> <span class="nf">api</span><span class="p">():</span>
+
+    <span class="c1"># @added 20200611 - Feature #3578: Test alerts</span>
+    <span class="k">if</span> <span class="s1">&#39;test_alert&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;/api?test_alert request&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;skyline_app&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+            <span class="n">test_skyline_app</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;skyline_app&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">test_skyline_app</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: /api?test_alert request no skyline_app parameter sent&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="s1">&#39;Bad Request&#39;</span><span class="p">,</span> <span class="mi">400</span>
+        <span class="k">if</span> <span class="s1">&#39;metric&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+            <span class="n">metric</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;metric&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">metric</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: /api?test_alert request no metric parameter sent&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="s1">&#39;Bad Request&#39;</span><span class="p">,</span> <span class="mi">400</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;/api?test_alert request with skyline_app - </span><span class="si">%s</span><span class="s1"> and metric - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">test_skyline_app</span><span class="p">,</span> <span class="n">metric</span><span class="p">))</span>
+        <span class="n">test_alert_redis_key</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.test_alerts&#39;</span> <span class="o">%</span> <span class="n">test_skyline_app</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">REDIS_CONN</span><span class="o">.</span><span class="n">sadd</span><span class="p">(</span><span class="n">test_alert_redis_key</span><span class="p">,</span> <span class="n">metric</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not add </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1"> Redis set&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">test_skyline_app</span><span class="p">,</span> <span class="n">metric</span><span class="p">))</span>
+            <span class="k">return</span> <span class="s1">&#39;Internal Server Error&#39;</span><span class="p">,</span> <span class="mi">500</span>
+        <span class="n">test_alert_dict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s1">&#39;skyline_app&#39;</span><span class="p">:</span> <span class="n">test_skyline_app</span><span class="p">,</span>
+            <span class="s1">&#39;metric&#39;</span><span class="p">:</span> <span class="n">metric</span>
+        <span class="p">}</span>
+        <span class="n">data_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="p">{},</span> <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;test_alert&quot;</span><span class="p">:</span> <span class="n">test_alert_dict</span><span class="p">}}</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;/api?test_alert request returning data - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="nb">str</span><span class="p">(</span><span class="n">data_dict</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="n">jsonify</span><span class="p">(</span><span class="n">data_dict</span><span class="p">),</span> <span class="mi">200</span>
 
     <span class="c1"># @added 20200517 - Feature #3538: webapp - upload_data endpoint</span>
     <span class="c1">#                   Feature #3550: flux.uploaded_data_worker</span>
@@ -1341,8 +1396,8 @@
 
 
 <span class="c1"># @added 20200116: Feature #3396: http_alerter</span>
-<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/mock_api&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="s1">&#39;POST&#39;</span><span class="p">])</span>
-<div class="viewcode-block" id="mock_api"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.mock_api">[docs]</a><span class="k">def</span> <span class="nf">mock_api</span><span class="p">():</span>
+<div class="viewcode-block" id="mock_api"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.mock_api">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/mock_api&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">mock_api</span><span class="p">():</span>
     <span class="k">if</span> <span class="s1">&#39;alert_reciever&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;POST&#39;</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
@@ -1483,9 +1538,9 @@
 <span class="c1"># Add a specific route for the luminosity_remote_data endpoint so that the</span>
 <span class="c1"># response can be gzipped as even the preprocessed data can run into megabyte</span>
 <span class="c1"># reponses.</span>
-<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/luminosity_remote_data&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+<div class="viewcode-block" id="luminosity_remote_data_endpoint"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.luminosity_remote_data_endpoint">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/luminosity_remote_data&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
 <span class="nd">@gzipped</span>
-<div class="viewcode-block" id="luminosity_remote_data_endpoint"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.luminosity_remote_data_endpoint">[docs]</a><span class="k">def</span> <span class="nf">luminosity_remote_data_endpoint</span><span class="p">():</span>
+<span class="k">def</span> <span class="nf">luminosity_remote_data_endpoint</span><span class="p">():</span>
     <span class="c1"># The luminosity_remote_data_endpoint, requires onerequest parameter:</span>
     <span class="k">if</span> <span class="s1">&#39;anomaly_timestamp&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
         <span class="n">anomaly_timestamp_str</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="s1">&#39;anomaly_timestamp&#39;</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
@@ -1511,9 +1566,9 @@
             <span class="k">return</span> <span class="n">resp</span><span class="p">,</span> <span class="mi">404</span></div>
 
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/docs&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="docs"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.docs">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/docs&quot;</span><span class="p">)</span>
 <span class="nd">@requires_auth</span>
-<div class="viewcode-block" id="docs"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.docs">[docs]</a><span class="k">def</span> <span class="nf">docs</span><span class="p">():</span>
+<span class="k">def</span> <span class="nf">docs</span><span class="p">():</span>
     <span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span>
@@ -1522,9 +1577,9 @@
         <span class="k">return</span> <span class="s1">&#39;Uh oh ... a Skyline 500 :(&#39;</span><span class="p">,</span> <span class="mi">500</span></div>
 
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/panorama&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+<div class="viewcode-block" id="panorama"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.panorama">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/panorama&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
 <span class="nd">@requires_auth</span>
-<div class="viewcode-block" id="panorama"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.panorama">[docs]</a><span class="k">def</span> <span class="nf">panorama</span><span class="p">():</span>
+<span class="k">def</span> <span class="nf">panorama</span><span class="p">():</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">settings</span><span class="o">.</span><span class="n">PANORAMA_ENABLED</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span>
@@ -1715,14 +1770,21 @@
                                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> found in derivative_metrics in Redis at </span><span class="si">%s</span><span class="s1"> on port </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">redis_ip</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">redis_port</span><span class="p">)))</span>
 
                     <span class="k">if</span> <span class="n">metric_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">unique_metrics</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">metric_found_in_other_redis</span><span class="p">:</span>
-                        <span class="n">error_string</span> <span class="o">=</span> <span class="s1">&#39;error :: no metric - </span><span class="si">%s</span><span class="s1"> - exists in Redis&#39;</span> <span class="o">%</span> <span class="n">metric_name</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error_string</span><span class="p">)</span>
-                        <span class="n">resp</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
-                            <span class="p">{</span><span class="s1">&#39;404 Not Found&#39;</span><span class="p">:</span> <span class="n">error_string</span><span class="p">})</span>
-                        <span class="c1"># @modified 20190116 - Cross-Site Scripting Security Vulnerability #85</span>
-                        <span class="c1">#                      Bug #2816: Cross-Site Scripting Security Vulnerability</span>
-                        <span class="c1"># return resp, 404</span>
-                        <span class="k">return</span> <span class="n">flask_escape</span><span class="p">(</span><span class="n">resp</span><span class="p">),</span> <span class="mi">404</span>
+                        <span class="c1"># @added 20200715 - Task #3648: webapp - fp_search - do not use Redis metric check</span>
+                        <span class="c1"># Do not use the Redis metric check result in a webapp</span>
+                        <span class="c1"># fp_search request as this allows retried metric fps to</span>
+                        <span class="c1"># accessed</span>
+                        <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="s1">&#39;fp_search&#39;</span><span class="p">),</span> <span class="kc">None</span><span class="p">):</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;check request.args -  </span><span class="si">%s</span><span class="s1"> not in Redis, but fp_search request so continuing&#39;</span> <span class="o">%</span> <span class="n">metric_name</span><span class="p">)</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">error_string</span> <span class="o">=</span> <span class="s1">&#39;error :: no metric - </span><span class="si">%s</span><span class="s1"> - exists in Redis&#39;</span> <span class="o">%</span> <span class="n">metric_name</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error_string</span><span class="p">)</span>
+                            <span class="n">resp</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
+                                <span class="p">{</span><span class="s1">&#39;404 Not Found&#39;</span><span class="p">:</span> <span class="n">error_string</span><span class="p">})</span>
+                            <span class="c1"># @modified 20190116 - Cross-Site Scripting Security Vulnerability #85</span>
+                            <span class="c1">#                      Bug #2816: Cross-Site Scripting Security Vulnerability</span>
+                            <span class="c1"># return resp, 404</span>
+                            <span class="k">return</span> <span class="n">flask_escape</span><span class="p">(</span><span class="n">resp</span><span class="p">),</span> <span class="mi">404</span>
 
             <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;count_by_metric&#39;</span><span class="p">:</span>
                 <span class="n">count_by_metric_invalid</span> <span class="o">=</span> <span class="kc">True</span>
@@ -1953,9 +2015,9 @@
 <span class="c1"># Branch #868: crucible - @earthgecko</span>
 <span class="c1"># This may actually need Django, perhaps this is starting to move outside the</span>
 <span class="c1"># realms of Flask..</span>
-<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/crucible&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+<div class="viewcode-block" id="crucible"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.crucible">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/crucible&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
 <span class="nd">@requires_auth</span>
-<div class="viewcode-block" id="crucible"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.crucible">[docs]</a><span class="k">def</span> <span class="nf">crucible</span><span class="p">():</span>
+<span class="k">def</span> <span class="nf">crucible</span><span class="p">():</span>
 
     <span class="n">crucible_web_ui_implemented</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">if</span> <span class="n">crucible_web_ui_implemented</span><span class="p">:</span>
@@ -2025,6 +2087,8 @@
     <span class="n">total_crucible_jobs</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">pagination_start_request</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="n">offset_request</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="c1"># @added 20200607 - Feature #3630: webapp - crucible_process_training_data</span>
+    <span class="n">training_data_json</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">if</span> <span class="n">request_args_len</span><span class="p">:</span>
         <span class="k">if</span> <span class="s1">&#39;process_metrics&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
@@ -2173,6 +2237,10 @@
             <span class="k">if</span> <span class="n">str_pad_timeseries</span><span class="p">:</span>
                 <span class="n">pad_timeseries</span> <span class="o">=</span> <span class="n">str_pad_timeseries</span>
 
+        <span class="c1"># @added 20200607 - Feature #3630: webapp - crucible_process_training_data</span>
+        <span class="k">if</span> <span class="s1">&#39;training_data_json&#39;</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+            <span class="n">training_data_json</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="s1">&#39;training_data_json&#39;</span><span class="p">),</span> <span class="kc">None</span><span class="p">)</span>
+
         <span class="n">do_process_metrics</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="n">from_timestamp</span> <span class="ow">and</span> <span class="n">until_timestamp</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">metrics</span><span class="p">:</span>
@@ -2183,6 +2251,11 @@
                 <span class="n">do_process_metrics</span> <span class="o">=</span> <span class="kc">True</span>
                 <span class="n">namespaces_list</span> <span class="o">=</span> <span class="n">namespaces</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;crucible_process_metrics namespaces_list - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">namespaces_list</span><span class="p">))</span>
+
+        <span class="c1"># @added 20200607 - Feature #3630: webapp - crucible_process_training_data</span>
+        <span class="k">if</span> <span class="n">source</span> <span class="o">==</span> <span class="s1">&#39;training_data&#39;</span> <span class="ow">and</span> <span class="n">training_data_json</span><span class="p">:</span>
+            <span class="n">do_process_metrics</span> <span class="o">=</span> <span class="kc">True</span>
+
         <span class="n">crucible_job_id</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">metrics_submitted_to_process</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="n">do_process_metrics</span><span class="p">:</span>
@@ -2194,7 +2267,9 @@
                 <span class="c1"># @modified 20200422 - Feature #3500: webapp - crucible_process_metrics</span>
                 <span class="c1">#                      Feature #1448: Crucible web UI</span>
                 <span class="c1"># Added pad_timeseries</span>
-                <span class="n">crucible_job_id</span><span class="p">,</span> <span class="n">metrics_submitted_to_process</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">submit_crucible_job</span><span class="p">(</span><span class="n">from_timestamp</span><span class="p">,</span> <span class="n">until_timestamp</span><span class="p">,</span> <span class="n">metrics_list</span><span class="p">,</span> <span class="n">namespaces_list</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">alert_interval</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="n">add_to_panorama</span><span class="p">,</span> <span class="n">pad_timeseries</span><span class="p">)</span>
+                <span class="c1"># @added 20200607 - Feature #3630: webapp - crucible_process_training_data</span>
+                <span class="c1"># Added training_data_json</span>
+                <span class="n">crucible_job_id</span><span class="p">,</span> <span class="n">metrics_submitted_to_process</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">submit_crucible_job</span><span class="p">(</span><span class="n">from_timestamp</span><span class="p">,</span> <span class="n">until_timestamp</span><span class="p">,</span> <span class="n">metrics_list</span><span class="p">,</span> <span class="n">namespaces_list</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">alert_interval</span><span class="p">,</span> <span class="n">user_id</span><span class="p">,</span> <span class="n">user</span><span class="p">,</span> <span class="n">add_to_panorama</span><span class="p">,</span> <span class="n">pad_timeseries</span><span class="p">,</span> <span class="n">training_data_json</span><span class="p">)</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;crucible_process_metrics - submit_crucible_job returned (</span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span>
                     <span class="nb">str</span><span class="p">(</span><span class="n">crucible_job_id</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metrics_submitted_to_process</span><span class="p">),</span>
                     <span class="nb">str</span><span class="p">(</span><span class="n">message</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">trace</span><span class="p">)))</span>
@@ -2301,9 +2376,9 @@
 
 
 <span class="c1"># @added 20161123 - Branch #922: ionosphere</span>
-<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/ionosphere&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+<div class="viewcode-block" id="ionosphere"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.ionosphere">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/ionosphere&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
 <span class="nd">@requires_auth</span>
-<div class="viewcode-block" id="ionosphere"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.ionosphere">[docs]</a><span class="k">def</span> <span class="nf">ionosphere</span><span class="p">():</span>
+<span class="k">def</span> <span class="nf">ionosphere</span><span class="p">():</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">settings</span><span class="o">.</span><span class="n">IONOSPHERE_ENABLED</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span>
@@ -2651,6 +2726,12 @@
         <span class="n">limited_by</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="n">get_metric_profiles</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="n">not_metric_wildcard</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="c1"># @added 20200710 - Feature #1996: Ionosphere - matches page</span>
+        <span class="c1"># Moved from within the loop below</span>
+        <span class="n">matching</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">metric_like</span> <span class="o">=</span> <span class="kc">False</span>
+
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">request</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
             <span class="n">key</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">REQUEST_ARGS</span><span class="p">:</span>
@@ -2761,21 +2842,32 @@
                                 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> found in derivative_metrics in Redis at </span><span class="si">%s</span><span class="s1"> on port </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">metric_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">redis_ip</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">redis_port</span><span class="p">)))</span>
 
                 <span class="k">if</span> <span class="n">metric_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">unique_metrics</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">metric_found_in_other_redis</span><span class="p">:</span>
-                    <span class="n">error_string</span> <span class="o">=</span> <span class="s1">&#39;error :: no metric - </span><span class="si">%s</span><span class="s1"> - exists in Redis&#39;</span> <span class="o">%</span> <span class="n">metric_name</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error_string</span><span class="p">)</span>
-                    <span class="n">resp</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
-                        <span class="p">{</span><span class="s1">&#39;results&#39;</span><span class="p">:</span> <span class="n">error_string</span><span class="p">})</span>
-                    <span class="c1"># @modified 20190116 - Cross-Site Scripting Security Vulnerability #85</span>
-                    <span class="c1">#                      Bug #2816: Cross-Site Scripting Security Vulnerability</span>
-                    <span class="c1"># return resp, 404</span>
-                    <span class="k">return</span> <span class="n">flask_escape</span><span class="p">(</span><span class="n">resp</span><span class="p">),</span> <span class="mi">404</span>
+                    <span class="c1"># @added 20200715 - Task #3648: webapp - fp_search - do not use Redis metric check</span>
+                    <span class="c1"># Do not use the Redis metric check result in a webapp</span>
+                    <span class="c1"># fp_search request as this allows retried metric fps to</span>
+                    <span class="c1"># accessed</span>
+                    <span class="k">if</span> <span class="n">fp_search_req</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fp_search_or_matches_req - </span><span class="si">%s</span><span class="s1"> not in Redis, but fp_search request so continuing&#39;</span> <span class="o">%</span> <span class="n">metric_name</span><span class="p">)</span>
+                        <span class="n">get_metric_profiles</span> <span class="o">=</span> <span class="kc">True</span>
+                        <span class="n">metric</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">error_string</span> <span class="o">=</span> <span class="s1">&#39;error :: no metric - </span><span class="si">%s</span><span class="s1"> - exists in Redis&#39;</span> <span class="o">%</span> <span class="n">metric_name</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error_string</span><span class="p">)</span>
+                        <span class="n">resp</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span>
+                            <span class="p">{</span><span class="s1">&#39;results&#39;</span><span class="p">:</span> <span class="n">error_string</span><span class="p">})</span>
+                        <span class="c1"># @modified 20190116 - Cross-Site Scripting Security Vulnerability #85</span>
+                        <span class="c1">#                      Bug #2816: Cross-Site Scripting Security Vulnerability</span>
+                        <span class="c1"># return resp, 404</span>
+                        <span class="k">return</span> <span class="n">flask_escape</span><span class="p">(</span><span class="n">resp</span><span class="p">),</span> <span class="mi">404</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">get_metric_profiles</span> <span class="o">=</span> <span class="kc">True</span>
                     <span class="n">metric</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
             <span class="c1"># @added 20170917 - Feature #1996: Ionosphere - matches page</span>
-            <span class="n">matching</span> <span class="o">=</span> <span class="kc">False</span>
-            <span class="n">metric_like</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="c1"># @modified 20170917 - Feature #1996: Ionosphere - matches page</span>
+            <span class="c1"># Move outside the loop</span>
+            <span class="c1"># matching = False</span>
+            <span class="c1"># metric_like = False</span>
             <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;metric_like&#39;</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">value</span> <span class="o">==</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
                     <span class="n">metric_namespace_pattern</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
@@ -2801,6 +2893,10 @@
                         <span class="c1">#                      Bug #2816: Cross-Site Scripting Security Vulnerability</span>
                         <span class="c1"># return resp, 404</span>
                         <span class="k">return</span> <span class="n">flask_escape</span><span class="p">(</span><span class="n">resp</span><span class="p">),</span> <span class="mi">404</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="c1"># @added 20200710 - Feature #1996: Ionosphere - matches page</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;metric_like </span><span class="si">%s</span><span class="s1"> was passed, </span><span class="si">%s</span><span class="s1"> metrics found matching&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">matching</span><span class="p">))))</span>
+                        <span class="n">metric_like</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">matching</span><span class="p">:</span>
                     <span class="n">metric_like</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
@@ -2809,7 +2905,7 @@
             <span class="c1"># @modified 20180717 - Task #2446: Optimize Ionosphere</span>
             <span class="c1"># Added missing search_success variable</span>
             <span class="n">features_profiles</span><span class="p">,</span> <span class="n">fps_count</span><span class="p">,</span> <span class="n">mc</span><span class="p">,</span> <span class="n">cc</span><span class="p">,</span> <span class="n">gc</span><span class="p">,</span> <span class="n">full_duration_list</span><span class="p">,</span> <span class="n">enabled_list</span><span class="p">,</span> <span class="n">tsfresh_version_list</span><span class="p">,</span> <span class="n">generation_list</span><span class="p">,</span> <span class="n">search_success</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">ionosphere_search</span><span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;fp_search_req returning response&#39;</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span>
                 <span class="s1">&#39;ionosphere.html&#39;</span><span class="p">,</span> <span class="n">fp_search</span><span class="o">=</span><span class="n">fp_search_req</span><span class="p">,</span>
                 <span class="n">fp_search_results</span><span class="o">=</span><span class="n">fp_search_req</span><span class="p">,</span>
@@ -3609,6 +3705,15 @@
                         <span class="c1"># but an fp exists so continue and do not 404</span>
                         <span class="k">if</span> <span class="n">fp_view</span><span class="p">:</span>
                             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> not in Redis, but fp passed so continuing&#39;</span> <span class="o">%</span> <span class="n">metric_name</span><span class="p">)</span>
+                        <span class="c1"># @added 20200715 - Task #3648: webapp - fp_search - do not use Redis metric check</span>
+                        <span class="c1"># Do not use the Redis metric check result in a webapp</span>
+                        <span class="c1"># fp_search request as this allows retried metric fps to</span>
+                        <span class="c1"># accessed</span>
+                        <span class="k">elif</span> <span class="n">fp_search_req</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;IONOSPHERE_REQUEST_ARGS check - </span><span class="si">%s</span><span class="s1"> not in Redis, but fp_search request so continuing&#39;</span> <span class="o">%</span> <span class="n">metric_name</span><span class="p">)</span>
+                        <span class="c1"># @added 20200808</span>
+                        <span class="k">elif</span> <span class="n">saved_training_data</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;IONOSPHERE_REQUEST_ARGS check - </span><span class="si">%s</span><span class="s1"> not in Redis, but saved_training_data request so continuing&#39;</span> <span class="o">%</span> <span class="n">metric_name</span><span class="p">)</span>
                         <span class="k">else</span><span class="p">:</span>
                             <span class="n">error_string</span> <span class="o">=</span> <span class="s1">&#39;error :: no metric - </span><span class="si">%s</span><span class="s1"> - exists in Redis&#39;</span> <span class="o">%</span> <span class="n">metric_name</span>
                             <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">error_string</span><span class="p">)</span>
@@ -3797,7 +3902,11 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="c1"># @modified 20170221 - Feature #1862: Ionosphere features profiles search page</span>
             <span class="c1"># fd_list, en_list, tsfresh_list, gen_list, fail_msg, trace = ionosphere_search_defaults(get_options)</span>
-            <span class="n">features_profiles</span><span class="p">,</span> <span class="n">fp_count</span><span class="p">,</span> <span class="n">mc</span><span class="p">,</span> <span class="n">cc</span><span class="p">,</span> <span class="n">gc</span><span class="p">,</span> <span class="n">fd_list</span><span class="p">,</span> <span class="n">en_list</span><span class="p">,</span> <span class="n">tsfresh_list</span><span class="p">,</span> <span class="n">gen_list</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">ionosphere_search</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
+            <span class="c1"># @modified 20200715 - Task #3648: webapp - fp_search - do not use Redis metric check</span>
+            <span class="c1">#                      Task #2446: Optimize Ionosphere</span>
+            <span class="c1"># Added missing search_success variable</span>
+            <span class="c1"># features_profiles, fp_count, mc, cc, gc, fd_list, en_list, tsfresh_list, gen_list, fail_msg, trace = ionosphere_search(True, False)</span>
+            <span class="n">features_profiles</span><span class="p">,</span> <span class="n">fp_count</span><span class="p">,</span> <span class="n">mc</span><span class="p">,</span> <span class="n">cc</span><span class="p">,</span> <span class="n">gc</span><span class="p">,</span> <span class="n">fd_list</span><span class="p">,</span> <span class="n">en_list</span><span class="p">,</span> <span class="n">tsfresh_list</span><span class="p">,</span> <span class="n">gen_list</span><span class="p">,</span> <span class="n">search_success</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">ionosphere_search</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;debug :: fd_list - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">fd_list</span><span class="p">))</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;Uh oh ... a Skyline 500 :(&#39;</span>
@@ -4172,11 +4281,17 @@
             <span class="c1"># Added fp_anomaly_timestamp ionosphere_echo features profiles</span>
             <span class="n">mpaths</span><span class="p">,</span> <span class="n">images</span><span class="p">,</span> <span class="n">hdate</span><span class="p">,</span> <span class="n">m_vars</span><span class="p">,</span> <span class="n">ts_json</span><span class="p">,</span> <span class="n">data_to_process</span><span class="p">,</span> <span class="n">p_id</span><span class="p">,</span> <span class="n">gimages</span><span class="p">,</span> <span class="n">gmimages</span><span class="p">,</span> <span class="n">times_matched</span><span class="p">,</span> <span class="n">glm_images</span><span class="p">,</span> <span class="n">l_id_matched</span><span class="p">,</span> <span class="n">ts_fd</span><span class="p">,</span> <span class="n">i_ts_json</span><span class="p">,</span> <span class="n">anomalous_timeseries</span><span class="p">,</span> <span class="n">f_id_matched</span><span class="p">,</span> <span class="n">fp_details_list</span><span class="p">,</span> <span class="n">fp_anomaly_timestamp</span> <span class="o">=</span> <span class="n">ionosphere_metric_data</span><span class="p">(</span><span class="n">requested_timestamp</span><span class="p">,</span> <span class="n">base_name</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">fp_id</span><span class="p">)</span>
 
+            <span class="c1"># @added 20200711 - Feature #3634: webapp - ionosphere - report number of data points</span>
+            <span class="n">ts_json_length</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">anomalous_timeseries_length</span> <span class="o">=</span> <span class="mi">0</span>
+
             <span class="c1"># @added 20170309  - Feature #1960: ionosphere_layers - i_ts_json</span>
             <span class="c1"># Show the last 30</span>
             <span class="k">if</span> <span class="n">ts_json</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">sample_ts_json</span> <span class="o">=</span> <span class="n">ts_json</span><span class="p">[</span><span class="o">-</span><span class="mi">30</span><span class="p">:]</span>
+                    <span class="c1"># @added 20200711 - Feature #3634: webapp - ionosphere - report number of data points</span>
+                    <span class="n">ts_json_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ts_json</span><span class="p">)</span>
                 <span class="k">except</span><span class="p">:</span>
                     <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
                     <span class="n">message</span> <span class="o">=</span> <span class="s1">&#39;Failed to sample ts_json&#39;</span>
@@ -4189,6 +4304,8 @@
             <span class="c1">#     sample_i_ts_json = i_ts_json[-30:]</span>
             <span class="k">if</span> <span class="n">anomalous_timeseries</span><span class="p">:</span>
                 <span class="n">sample_i_ts_json</span> <span class="o">=</span> <span class="n">anomalous_timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">30</span><span class="p">:]</span>
+                <span class="c1"># @added 20200711 - Feature #3634: webapp - ionosphere - report number of data points</span>
+                <span class="n">anomalous_timeseries_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">anomalous_timeseries</span><span class="p">)</span>
 
             <span class="k">if</span> <span class="n">fp_details_list</span><span class="p">:</span>
                 <span class="n">f_id_created</span> <span class="o">=</span> <span class="n">fp_details_list</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -4548,6 +4665,9 @@
                                 <span class="n">settings</span><span class="o">.</span><span class="n">GRAPHITE_GRAPH_SETTINGS</span><span class="p">,</span> <span class="n">graph_title</span><span class="p">)</span>
                         <span class="n">correlations_with_graph_links</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">metric_name</span><span class="p">,</span> <span class="n">coefficient</span><span class="p">,</span> <span class="n">shifted</span><span class="p">,</span> <span class="n">shifted_coefficient</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">correlation_graphite_link</span><span class="p">)])</span>
 
+            <span class="c1"># @added 20200808 - Feature #3568: Ionosphere - report anomalies in training period</span>
+            <span class="n">labelled_anomalies</span> <span class="o">=</span> <span class="kc">None</span>
+
             <span class="c1"># @added 20200113 - Feature #3390: luminosity related anomalies</span>
             <span class="c1">#                   Branch #2270: luminosity</span>
             <span class="n">related</span> <span class="o">=</span> <span class="kc">False</span>
@@ -4555,7 +4675,9 @@
             <span class="n">related_matches</span> <span class="o">=</span> <span class="p">[]</span>
             <span class="k">if</span> <span class="n">p_id</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
-                    <span class="n">related</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">get_related</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">p_id</span><span class="p">,</span> <span class="n">requested_timestamp</span><span class="p">)</span>
+                    <span class="c1"># @modified 20200808 - Feature #3568: Ionosphere - report anomalies in training period</span>
+                    <span class="c1"># related, fail_msg, trace = get_related(skyline_app, p_id, requested_timestamp)</span>
+                    <span class="n">related</span><span class="p">,</span> <span class="n">labelled_anomalies</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span> <span class="o">=</span> <span class="n">get_related</span><span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">p_id</span><span class="p">,</span> <span class="n">requested_timestamp</span><span class="p">)</span>
                 <span class="k">except</span><span class="p">:</span>
                     <span class="n">trace</span> <span class="o">=</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
                     <span class="n">fail_msg</span> <span class="o">=</span> <span class="s1">&#39;error :: Webapp error with get_related&#39;</span>
@@ -4611,6 +4733,9 @@
                             <span class="n">related_matches</span> <span class="o">=</span> <span class="p">[]</span>
                 <span class="k">if</span> <span class="n">related_matches</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> possible related matches found&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">related_matches</span><span class="p">))))</span>
+                <span class="c1"># @added 20200808 - Feature #3568: Ionosphere - report anomalies in training period</span>
+                <span class="k">if</span> <span class="n">labelled_anomalies</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> labelled anomalies found in the trying period&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">labelled_anomalies</span><span class="p">))))</span>
 
             <span class="c1"># @added 20190510 - Feature #2990: Add metrics id to relevant web pages</span>
             <span class="c1"># By this point in the request the previous function calls will have</span>
@@ -4665,6 +4790,11 @@
                         <span class="k">if</span> <span class="n">fp_exists</span><span class="p">:</span>
                             <span class="n">data_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;created&quot;</span><span class="p">:</span> <span class="s2">&quot;already exists&quot;</span><span class="p">},</span> <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;fp_id&quot;</span><span class="p">:</span> <span class="n">fp_id</span><span class="p">}}</span>
                     <span class="k">return</span> <span class="n">jsonify</span><span class="p">(</span><span class="n">data_dict</span><span class="p">),</span> <span class="mi">200</span>
+
+            <span class="c1"># @added 20200731 - Feature #3654: IONOSPHERE_GRAPHITE_NOW_GRAPHS_OVERRIDE</span>
+            <span class="n">graphite_now_graphs_title</span> <span class="o">=</span> <span class="s1">&#39;NOW&#39;</span>
+            <span class="k">if</span> <span class="n">IONOSPHERE_GRAPHITE_NOW_GRAPHS_OVERRIDE</span><span class="p">:</span>
+                <span class="n">graphite_now_graphs_title</span> <span class="o">=</span> <span class="s1">&#39;THEN&#39;</span>
 
             <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span>
                 <span class="s1">&#39;ionosphere.html&#39;</span><span class="p">,</span> <span class="n">timestamp</span><span class="o">=</span><span class="n">requested_timestamp</span><span class="p">,</span>
@@ -4745,6 +4875,13 @@
                 <span class="c1">#                   Branch #2270: luminosity</span>
                 <span class="n">related</span><span class="o">=</span><span class="n">related</span><span class="p">,</span> <span class="n">related_with_graph_links</span><span class="o">=</span><span class="n">related_with_graph_links</span><span class="p">,</span>
                 <span class="n">related_matches</span><span class="o">=</span><span class="n">related_matches</span><span class="p">,</span>
+                <span class="c1"># @added 20200711 - Feature #3634: webapp - ionosphere - report number of data points</span>
+                <span class="n">ts_json_length</span><span class="o">=</span><span class="n">ts_json_length</span><span class="p">,</span>
+                <span class="n">anomalous_timeseries_length</span><span class="o">=</span><span class="n">anomalous_timeseries_length</span><span class="p">,</span>
+                <span class="c1"># @added 20200731 - Feature #3654: IONOSPHERE_GRAPHITE_NOW_GRAPHS_OVERRIDE</span>
+                <span class="n">graphite_now_graphs_title</span><span class="o">=</span><span class="n">graphite_now_graphs_title</span><span class="p">,</span>
+                <span class="c1"># @added 20200808 - Feature #3568: Ionosphere - report anomalies in training period</span>
+                <span class="n">labelled_anomalies</span><span class="o">=</span><span class="n">labelled_anomalies</span><span class="p">,</span>
                 <span class="n">version</span><span class="o">=</span><span class="n">skyline_version</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">),</span>
                 <span class="n">print_debug</span><span class="o">=</span><span class="n">debug_on</span><span class="p">),</span> <span class="mi">200</span>
         <span class="k">except</span><span class="p">:</span>
@@ -4764,8 +4901,8 @@
         <span class="k">return</span> <span class="n">internal_error</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">trace</span><span class="p">)</span></div>
 
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/ionosphere_images&#39;</span><span class="p">)</span>
-<div class="viewcode-block" id="ionosphere_images"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.ionosphere_images">[docs]</a><span class="k">def</span> <span class="nf">ionosphere_images</span><span class="p">():</span>
+<div class="viewcode-block" id="ionosphere_images"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.ionosphere_images">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/ionosphere_images&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">ionosphere_images</span><span class="p">():</span>
 
     <span class="n">request_args_present</span> <span class="o">=</span> <span class="kc">False</span>
     <span class="k">try</span><span class="p">:</span>
@@ -4821,9 +4958,9 @@
 <span class="c1">#                   Branch #922: ionosphere</span>
 <span class="c1">#                   Task #1658: Patterning Skyline Ionosphere</span>
 <span class="c1"># Added utilities TODO</span>
-<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/utilities&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="utilities"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.utilities">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/utilities&quot;</span><span class="p">)</span>
 <span class="nd">@requires_auth</span>
-<div class="viewcode-block" id="utilities"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.utilities">[docs]</a><span class="k">def</span> <span class="nf">utilities</span><span class="p">():</span>
+<span class="k">def</span> <span class="nf">utilities</span><span class="p">():</span>
     <span class="c1"># start = time.time()</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">render_template</span><span class="p">(</span><span class="s1">&#39;utilities.html&#39;</span><span class="p">),</span> <span class="mi">200</span>
@@ -4835,9 +4972,9 @@
 
 <span class="c1"># @added 20200516 - Feature #3538: webapp - upload_data endpoint</span>
 <span class="c1">#                   Feature #3550: flux.uploaded_data_worker</span>
-<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/flux_frontend&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
+<div class="viewcode-block" id="flux_frontend"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.flux_frontend">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/flux_frontend&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">])</span>
 <span class="nd">@requires_auth</span>
-<div class="viewcode-block" id="flux_frontend"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.flux_frontend">[docs]</a><span class="k">def</span> <span class="nf">flux_frontend</span><span class="p">():</span>
+<span class="k">def</span> <span class="nf">flux_frontend</span><span class="p">():</span>
     <span class="n">debug_on</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="c1"># file_uploads_enabled = True</span>
@@ -4922,8 +5059,8 @@
 
 <span class="c1"># @added 20200514 - Feature #3538: webapp - upload_data endpoint</span>
 <span class="c1">#                   Feature #3550: flux.uploaded_data_worker</span>
-<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/upload_data&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">])</span>
-<div class="viewcode-block" id="upload_data"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.upload_data">[docs]</a><span class="k">def</span> <span class="nf">upload_data</span><span class="p">():</span>
+<div class="viewcode-block" id="upload_data"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.upload_data">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/upload_data&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<span class="k">def</span> <span class="nf">upload_data</span><span class="p">():</span>
 
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;/upload_data request&#39;</span><span class="p">)</span>
 
@@ -5496,9 +5633,15 @@
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;rebrow access :: </span><span class="si">%s</span><span class="s1"> client_user_agent set to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">client_ip</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">client_user_agent</span><span class="p">)))</span>
     <span class="n">client_id</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">client_ip</span><span class="p">,</span> <span class="n">client_user_agent</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-        <span class="n">client_id</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">(</span><span class="n">client_id</span><span class="p">)</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+        <span class="c1"># @modified 20200808 - Task #3608: Update Skyline to Python 3.8.3 and deps</span>
+        <span class="c1"># Added nosec for bandit [B303:blacklist] Use of insecure MD2, MD4, MD5,</span>
+        <span class="c1"># or SHA1 hash function.  For internal use only.</span>
+        <span class="n">client_id</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">(</span><span class="n">client_id</span><span class="p">)</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>  <span class="c1"># nosec</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">client_id</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">(</span><span class="n">client_id</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>
+        <span class="c1"># @modified 20200808 - Task #3608: Update Skyline to Python 3.8.3 and deps</span>
+        <span class="c1"># Added nosec for bandit [B303:blacklist] Use of insecure MD2, MD4, MD5,</span>
+        <span class="c1"># or SHA1 hash function.  For internal use only.</span>
+        <span class="n">client_id</span> <span class="o">=</span> <span class="n">hashlib</span><span class="o">.</span><span class="n">md5</span><span class="p">(</span><span class="n">client_id</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">))</span><span class="o">.</span><span class="n">hexdigest</span><span class="p">()</span>  <span class="c1"># nosec</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;rebrow access :: </span><span class="si">%s</span><span class="s1"> has client_id </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">client_ip</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">client_id</span><span class="p">)))</span>
 
     <span class="k">if</span> <span class="n">request</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">getlist</span><span class="p">(</span><span class="s1">&#39;X-Forwarded-Proto&#39;</span><span class="p">):</span>
@@ -5634,10 +5777,10 @@
     <span class="k">return</span> <span class="n">token</span><span class="p">,</span> <span class="n">decoded_redis_password</span><span class="p">,</span> <span class="n">fail_msg</span><span class="p">,</span> <span class="n">trace</span></div>
 
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/rebrow&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<div class="viewcode-block" id="rebrow"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.rebrow">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s1">&#39;/rebrow&#39;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="s1">&#39;POST&#39;</span><span class="p">])</span>
 <span class="nd">@requires_auth</span>
 <span class="c1"># def login():</span>
-<div class="viewcode-block" id="rebrow"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.rebrow">[docs]</a><span class="k">def</span> <span class="nf">rebrow</span><span class="p">():</span>
+<span class="k">def</span> <span class="nf">rebrow</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Start page</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -5769,9 +5912,9 @@
             <span class="n">duration</span><span class="o">=</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">))</span></div>
 
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/rebrow_server_db/&lt;host&gt;:&lt;int:port&gt;/&lt;int:db&gt;/&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="rebrow_server_db"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.rebrow_server_db">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/rebrow_server_db/&lt;host&gt;:&lt;int:port&gt;/&lt;int:db&gt;/&quot;</span><span class="p">)</span>
 <span class="nd">@requires_auth</span>
-<div class="viewcode-block" id="rebrow_server_db"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.rebrow_server_db">[docs]</a><span class="k">def</span> <span class="nf">rebrow_server_db</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">db</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">rebrow_server_db</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">db</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    List all databases and show info on server</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -5827,9 +5970,9 @@
         <span class="n">duration</span><span class="o">=</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">))</span></div>
 
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/rebrow_keys/&lt;host&gt;:&lt;int:port&gt;/&lt;int:db&gt;/keys/&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="s1">&#39;POST&#39;</span><span class="p">])</span>
+<div class="viewcode-block" id="rebrow_keys"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.rebrow_keys">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/rebrow_keys/&lt;host&gt;:&lt;int:port&gt;/&lt;int:db&gt;/keys/&quot;</span><span class="p">,</span> <span class="n">methods</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;GET&#39;</span><span class="p">,</span> <span class="s1">&#39;POST&#39;</span><span class="p">])</span>
 <span class="nd">@requires_auth</span>
-<div class="viewcode-block" id="rebrow_keys"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.rebrow_keys">[docs]</a><span class="k">def</span> <span class="nf">rebrow_keys</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">db</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">rebrow_keys</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">db</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    List keys for one database</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -5917,9 +6060,9 @@
             <span class="n">duration</span><span class="o">=</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span><span class="p">))</span></div>
 
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/rebrow_key/&lt;host&gt;:&lt;int:port&gt;/&lt;int:db&gt;/keys/&lt;key&gt;/&quot;</span><span class="p">)</span>
+<div class="viewcode-block" id="rebrow_key"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.rebrow_key">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">route</span><span class="p">(</span><span class="s2">&quot;/rebrow_key/&lt;host&gt;:&lt;int:port&gt;/&lt;int:db&gt;/keys/&lt;key&gt;/&quot;</span><span class="p">)</span>
 <span class="nd">@requires_auth</span>
-<div class="viewcode-block" id="rebrow_key"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.rebrow_key">[docs]</a><span class="k">def</span> <span class="nf">rebrow_key</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">db</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">rebrow_key</span><span class="p">(</span><span class="n">host</span><span class="p">,</span> <span class="n">port</span><span class="p">,</span> <span class="n">db</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Show a specific key.</span>
 <span class="sd">    key is expected to be URL-safe base64 encoded</span>
@@ -6006,9 +6149,17 @@
         <span class="c1"># val = r.get(key)</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">val</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-            <span class="c1"># val = r_d.get(key)</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">abort</span><span class="p">(</span><span class="mi">404</span><span class="p">)</span>
+
+        <span class="c1"># @modified 20200610 - Bug #3266: py3 Redis binary objects not strings</span>
+        <span class="c1">#                      Branch #3262: py3</span>
+        <span class="c1"># Try decode val so that bytes-like objects are decoded, this will fail</span>
+        <span class="c1"># sliently and if it is a msg_packed_key</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">UnicodeDecodeError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">):</span>
+            <span class="k">pass</span>
 
         <span class="c1"># @modified 20191014 - Bug #3266: py3 Redis binary objects not strings</span>
         <span class="c1">#                      Branch #3262: py3</span>
@@ -6037,6 +6188,13 @@
         <span class="n">val</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">hgetall</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">t</span> <span class="o">==</span> <span class="s1">&#39;set&#39;</span><span class="p">:</span>
         <span class="n">val</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">smembers</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="c1"># @modified 20200610 - Bug #3266: py3 Redis binary objects not strings</span>
+        <span class="c1">#                      Branch #3262: py3</span>
+        <span class="c1"># Try decode val so that bytes-like objects are decoded</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="n">val</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="p">(</span><span class="ne">UnicodeDecodeError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">):</span>
+            <span class="k">pass</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;rebrow :: set key - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
     <span class="k">elif</span> <span class="n">t</span> <span class="o">==</span> <span class="s1">&#39;zset&#39;</span><span class="p">:</span>
         <span class="n">val</span> <span class="o">=</span> <span class="n">r</span><span class="o">.</span><span class="n">zrange</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="n">withscores</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -6062,8 +6220,8 @@
         <span class="n">msg_packed_key</span><span class="o">=</span><span class="n">msg_pack_key</span><span class="p">)</span></div>
 
 
-<span class="nd">@app</span><span class="o">.</span><span class="n">template_filter</span><span class="p">(</span><span class="s1">&#39;urlsafe_base64&#39;</span><span class="p">)</span>
-<div class="viewcode-block" id="urlsafe_base64_encode"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.urlsafe_base64_encode">[docs]</a><span class="k">def</span> <span class="nf">urlsafe_base64_encode</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
+<div class="viewcode-block" id="urlsafe_base64_encode"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.urlsafe_base64_encode">[docs]</a><span class="nd">@app</span><span class="o">.</span><span class="n">template_filter</span><span class="p">(</span><span class="s1">&#39;urlsafe_base64&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">urlsafe_base64_encode</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
     <span class="c1"># @modified 20180520 - Feature #2378: Add redis auth to Skyline and rebrow</span>
     <span class="c1"># if type(s) == &#39;Markup&#39;:</span>
     <span class="c1">#     s = s.unescape()</span>
@@ -6102,7 +6260,7 @@
 
 
 <div class="viewcode-block" id="App"><a class="viewcode-back" href="../../skyline.webapp.html#webapp.webapp.App">[docs]</a><span class="k">class</span> <span class="nc">App</span><span class="p">():</span>
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">stdin_path</span> <span class="o">=</span> <span class="s1">&#39;/dev/null&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">stdout_path</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.log&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">stderr_path</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">/</span><span class="si">%s</span><span class="s1">.log&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">LOG_PATH</span><span class="p">,</span> <span class="n">skyline_app</span><span class="p">)</span>
@@ -6255,6 +6413,7 @@
 </pre></div>
 
            </div>
+           
           </div>
           <footer>
   
@@ -6263,11 +6422,19 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
+        
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -6279,36 +6446,15 @@
   </div>
   
 
-
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../../',
-            VERSION:'2.0.0',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
-        };
-    </script>
-      <script type="text/javascript" src="../../_static/jquery.js"></script>
-      <script type="text/javascript" src="../../_static/underscore.js"></script>
-      <script type="text/javascript" src="../../_static/doctools.js"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

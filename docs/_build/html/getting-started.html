@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,50 +11,48 @@
   
 
   
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
+
+  
+  
+  
   
 
   
-
-  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-
-  
-  
-    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  
-
-  
-    <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-  
-
-  
-        <link rel="index" title="Index"
-              href="genindex.html"/>
-        <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 2.0.0 documentation" href="index.html"/>
-        <link rel="next" title="Running Skyline in a Python virtualenv" href="running-in-python-virtualenv.html"/>
-        <link rel="prev" title="Requirements" href="requirements.html"/> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Running Skyline in a Python virtualenv" href="running-in-python-virtualenv.html" />
+    <link rel="prev" title="Requirements" href="requirements.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
+   
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
-            <a href="index.html" class="icon icon-home"> Skyline
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
 
           
@@ -82,11 +79,15 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
             
-                <ul class="current">
+              
+            
+            
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Getting started</a><ul>
@@ -95,20 +96,18 @@
 <li class="toctree-l2"><a class="reference internal" href="#enabling-metrics-incrementally">Enabling metrics incrementally</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#enabling-skyline-modules-incrementally">Enabling Skyline modules incrementally</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#start-with-horizon-analyzer-webapp-luminosity-and-panorama">Start with Horizon, Analyzer, Webapp, Luminosity and Panorama</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#add-mirage-parameters-to-settings-alerts">Add Mirage parameters to <code class="docutils literal"><span class="pre">settings.ALERTS</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#add-mirage-parameters-to-settings-alerts">Add Mirage parameters to <code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ALERTS</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#add-boundary-settings">Add Boundary settings</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#train-ionosphere">Train Ionosphere</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#ignore-crucible">Ignore Crucible</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
-<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alerts.html">Alerts</a></li>
-<li class="toctree-l1"><a class="reference internal" href="docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
@@ -125,6 +124,7 @@
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
@@ -132,12 +132,10 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#reliability">Reliability</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
-<li class="toctree-l1"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What’s new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a></li>
@@ -146,40 +144,61 @@
             
           
         </div>
+        
       </div>
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="index.html">Skyline</a>
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Skyline</a>
+        
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="index.html">Docs</a> &raquo;</li>
-      
-    <li>Getting started</li>
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Getting started</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
-            <a href="_sources/getting-started.txt" rel="nofollow"> View page source</a>
+            
+            <a href="_sources/getting-started.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -194,8 +213,8 @@
 <p>Anomaly detection is not easy.  Skyline is not easy to set up, it has a number
 of moving parts that need to be orchestrated.  Further to this, for Skyline to
 be configured, trained and start learning takes a lot of time.</p>
-<p>Take time to read through the documentation and review <code class="docutils literal"><span class="pre">settings.py</span></code> at the
-same time.  There are lots of settings in <code class="docutils literal"><span class="pre">settings.py</span></code> do not feel
+<p>Take time to read through the documentation and review <code class="docutils literal notranslate"><span class="pre">settings.py</span></code> at the
+same time.  There are lots of settings in <code class="docutils literal notranslate"><span class="pre">settings.py</span></code> do not feel
 intimidated by this. The default settings should be adequate and reasonable for
 starting out with.  The settings that you must change and take note of are all
 documented on the <a class="reference external" href="../html/installation.html">Installation</a> page</p>
@@ -208,30 +227,30 @@ equally.</p>
 <p>It helps to think of anomaly detection as an ongoing journey.  Although ideally
 it would be great to be able to computationally detect anomalies with a high
 degree of certainty, there is no getting away from the fact that the more
-<strong>you</strong> learn, &#8220;help&#8221; and tune your anomaly detection, the better it will become.</p>
+<strong>you</strong> learn, “help” and tune your anomaly detection, the better it will become.</p>
 <p>The fact that Skyline <strong>does</strong> computationally detect anomalies with a
 high degree of certainty, can be a problem in itself.  <strong>But</strong> it is not
-Skyline&#8217;s fault that:</p>
+Skyline’s fault that:</p>
 <ul class="simple">
-<li>a lot of your metrics <strong>are</strong> anomalous</li>
-<li>that feeding all your metrics to Skyline and setting alerting on all your
-metric namespaces is too noisy to be generally considered useful</li>
+<li><p>a lot of your metrics <strong>are</strong> anomalous</p></li>
+<li><p>that feeding all your metrics to Skyline and setting alerting on all your
+metric namespaces is too noisy to be generally considered useful</p></li>
 </ul>
 </div>
 <div class="section" id="enabling-metrics-incrementally">
 <h2>Enabling metrics incrementally<a class="headerlink" href="#enabling-metrics-incrementally" title="Permalink to this headline">¶</a></h2>
 <p>Skyline was originally pitched to automatically monitor #allthethings, all your
-metrics, it can but...</p>
+metrics, it can but…</p>
 <p>Skyline should have been pitched to monitor your KEY metrics.</p>
 <p>To begin with decide what your 10 most important Graphite metrics are and
-<strong>only</strong> configure <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALERTS</span></code></a> and <a class="reference internal" href="skyline.html#settings.SMTP_OPTS" title="settings.SMTP_OPTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.SMTP_OPTS</span></code></a> on those
+<strong>only</strong> configure <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ALERTS</span></code></a> and <a class="reference internal" href="skyline.html#settings.SMTP_OPTS" title="settings.SMTP_OPTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SMTP_OPTS</span></code></a> on those
 to begin with and get to know what Skyline does with those.  Add more key metric
 groups as you get the hang of it.</p>
 <p>You cannot rush time series.</p>
 </div>
 <div class="section" id="enabling-skyline-modules-incrementally">
 <h2>Enabling Skyline modules incrementally<a class="headerlink" href="#enabling-skyline-modules-incrementally" title="Permalink to this headline">¶</a></h2>
-<p>Skyline&#8217;s modules do different things differently and understanding the process
+<p>Skyline’s modules do different things differently and understanding the process
 and pipeline helps to tune each Skyline module appropriately for your data.</p>
 <p>Each analysis based module, Analyzer, Mirage, Boundary, Ionosphere, Luminosity
 (and Crucible), have their own specific configurations.  These configurations are
@@ -244,14 +263,14 @@ easier.  Easier than trying to get the whole stack up and running straight off.<
 <h2>Start with Horizon, Analyzer, Webapp, Luminosity and Panorama<a class="headerlink" href="#start-with-horizon-analyzer-webapp-luminosity-and-panorama" title="Permalink to this headline">¶</a></h2>
 <p>It is advisable to only start the Horizon, Analyzer, Luminosity, Webapp and
 Panorama daemons initially and take time to understand what Skyline is doing.
-Take some time to tune Analyzer&#8217;s <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALERTS</span></code></a> and learn the patterns
+Take some time to tune Analyzer’s <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ALERTS</span></code></a> and learn the patterns
 in your IMPORTANT metrics:</p>
 <ul class="simple">
-<li>which metrics trigger anomalies?</li>
-<li>when the metrics trigger anomalies?</li>
-<li>why/what known events are triggering anomalies?</li>
-<li>are there seasonality/periodicity in anomalies some metrics?</li>
-<li>what metrics are critical and what metrics are just &#8220;normal&#8221;/expected noise</li>
+<li><p>which metrics trigger anomalies?</p></li>
+<li><p>when the metrics trigger anomalies?</p></li>
+<li><p>why/what known events are triggering anomalies?</p></li>
+<li><p>are there seasonality/periodicity in anomalies some metrics?</p></li>
+<li><p>what metrics are critical and what metrics are just “normal”/expected noise</p></li>
 </ul>
 <p>Panorama will help you view what things are triggering as anomalous.</p>
 <p>Once you have got an idea of what you want to anomaly detect on and more
@@ -261,15 +280,15 @@ bring them online too.  However do consider enabling Ionosphere from the outset
 as well.</p>
 </div>
 <div class="section" id="add-mirage-parameters-to-settings-alerts">
-<h2>Add Mirage parameters to <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALERTS</span></code></a><a class="headerlink" href="#add-mirage-parameters-to-settings-alerts" title="Permalink to this headline">¶</a></h2>
+<h2>Add Mirage parameters to <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ALERTS</span></code></a><a class="headerlink" href="#add-mirage-parameters-to-settings-alerts" title="Permalink to this headline">¶</a></h2>
 <p>Once you have an overview of metrics that have seasonality that are greater
-than the <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a>, you can add their Mirage parameters to
-the <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALERTS</span></code></a> tuples and start the Mirage daemon.</p>
+than the <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FULL_DURATION</span></code></a>, you can add their Mirage parameters to
+the <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ALERTS</span></code></a> tuples and start the Mirage daemon.</p>
 </div>
 <div class="section" id="add-boundary-settings">
 <h2>Add Boundary settings<a class="headerlink" href="#add-boundary-settings" title="Permalink to this headline">¶</a></h2>
 <p>You will know what your <strong>key</strong> metrics are and you can define their acceptable
-boundaries and alerting channels in the <a class="reference internal" href="skyline.html#settings.BOUNDARY_METRICS" title="settings.BOUNDARY_METRICS"><code class="xref py py-mod docutils literal"><span class="pre">settings.BOUNDARY_METRICS</span></code></a> tuples
+boundaries and alerting channels in the <a class="reference internal" href="skyline.html#settings.BOUNDARY_METRICS" title="settings.BOUNDARY_METRICS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.BOUNDARY_METRICS</span></code></a> tuples
 and start the Boundary daemon.</p>
 </div>
 <div class="section" id="train-ionosphere">
@@ -280,18 +299,18 @@ is NOT anomalous.</p>
 <div class="section" id="ignore-crucible">
 <h2>Ignore Crucible<a class="headerlink" href="#ignore-crucible" title="Permalink to this headline">¶</a></h2>
 <p>Still EXPERIMENTAL - for the time being.</p>
-<p>By default Crucible is enabled in the <code class="docutils literal"><span class="pre">settings.py</span></code> however, for other Skyline
+<p>By default Crucible is enabled in the <code class="docutils literal notranslate"><span class="pre">settings.py</span></code> however, for other Skyline
 modules to send Crucible data, Crucible has to be enabled via the appropriate
-<code class="docutils literal"><span class="pre">settings.py</span></code> variable for each module, Analyzer and Mirage, etc.</p>
+<code class="docutils literal notranslate"><span class="pre">settings.py</span></code> variable for each module, Analyzer and Mirage, etc.</p>
 <p>Crucible has 2 roles:</p>
 <ol class="arabic simple">
-<li>Store resources (time series json and graph pngs) for triggered anomalies -
-note this can consume a lot of disk space if enabled.</li>
-<li>Run ad hoc analysis on any time series and create matplotlib plots for the
-run algorithms.</li>
+<li><p>Store resources (time series json and graph pngs) for triggered anomalies -
+note this can consume a lot of disk space if enabled.</p></li>
+<li><p>Run ad hoc analysis on any time series and create matplotlib plots for the
+run algorithms.</p></li>
 </ol>
 <p>It is not advisable to enable Crucible on any of the other modules unless you
-really want to &#8220;see&#8221; anomalies in great depth.  Crucible is enabled as there is
+really want to “see” anomalies in great depth.  Crucible is enabled as there is
 a Crucible frontend view on the roadmap that will allow the user to test any
 time series of any metric directly through the UI.</p>
 </div>
@@ -299,15 +318,16 @@ time series of any metric directly through the UI.</p>
 
 
            </div>
+           
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="running-in-python-virtualenv.html" class="btn btn-neutral float-right" title="Running Skyline in a Python virtualenv" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="running-in-python-virtualenv.html" class="btn btn-neutral float-right" title="Running Skyline in a Python virtualenv" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="requirements.html" class="btn btn-neutral" title="Requirements" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="requirements.html" class="btn btn-neutral float-left" title="Requirements" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -316,11 +336,19 @@ time series of any metric directly through the UI.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
+        
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -332,36 +360,15 @@ time series of any metric directly through the UI.</p>
   </div>
   
 
-
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'2.0.0',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

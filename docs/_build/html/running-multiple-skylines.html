@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,50 +11,48 @@
   
 
   
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
+
+  
+  
+  
   
 
   
-
-  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-
-  
-  
-    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  
-
-  
-    <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-  
-
-  
-        <link rel="index" title="Index"
-              href="genindex.html"/>
-        <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 2.0.0 documentation" href="index.html"/>
-        <link rel="next" title="Skyline and friends" href="skyline-and-friends.html"/>
-        <link rel="prev" title="rebrow" href="rebrow.html"/> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Skyline and friends" href="skyline-and-friends.html" />
+    <link rel="prev" title="rebrow" href="rebrow.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
+   
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
-            <a href="index.html" class="icon icon-home"> Skyline
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
 
           
@@ -82,22 +79,24 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
             
-                <ul class="current">
+              
+            
+            
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
-<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alerts.html">Alerts</a></li>
-<li class="toctree-l1"><a class="reference internal" href="docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
@@ -114,6 +113,7 @@
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
@@ -125,12 +125,10 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#reliability">Reliability</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
-<li class="toctree-l1"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What’s new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a></li>
@@ -139,40 +137,61 @@
             
           
         </div>
+        
       </div>
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="index.html">Skyline</a>
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Skyline</a>
+        
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="index.html">Docs</a> &raquo;</li>
-      
-    <li>Running multiple Skyline instances</li>
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Running multiple Skyline instances</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
-            <a href="_sources/running-multiple-skylines.txt" rel="nofollow"> View page source</a>
+            
+            <a href="_sources/running-multiple-skylines.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -190,8 +209,8 @@ would pickle to a Skyline instance and for there to be multiple Skyline
 instances.</p>
 <p>The following settings pertain to running multiple Skyline instances:</p>
 <ul class="simple">
-<li><a class="reference internal" href="skyline.html#settings.ALTERNATIVE_SKYLINE_URLS" title="settings.ALTERNATIVE_SKYLINE_URLS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALTERNATIVE_SKYLINE_URLS</span></code></a></li>
-<li><a class="reference internal" href="skyline.html#settings.REMOTE_SKYLINE_INSTANCES" title="settings.REMOTE_SKYLINE_INSTANCES"><code class="xref py py-mod docutils literal"><span class="pre">settings.REMOTE_SKYLINE_INSTANCES</span></code></a></li>
+<li><p><a class="reference internal" href="skyline.html#settings.ALTERNATIVE_SKYLINE_URLS" title="settings.ALTERNATIVE_SKYLINE_URLS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ALTERNATIVE_SKYLINE_URLS</span></code></a></p></li>
+<li><p><a class="reference internal" href="skyline.html#settings.REMOTE_SKYLINE_INSTANCES" title="settings.REMOTE_SKYLINE_INSTANCES"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.REMOTE_SKYLINE_INSTANCES</span></code></a></p></li>
 </ul>
 <p>With the introduction of Luminosity a requirement for Skyline to pull the time
 series data from remote Skyline instances was added to allow for cross
@@ -220,13 +239,13 @@ and a standby Graphite instance.  With the standby Graphite instance pickling
 data to the standby Skyline instance.</p>
 <p>In terms of the Skyline configuration of the hot standby you configure skyline-2
 the same as skyline-1 in terms of alerts, etc, but you set
-<a class="reference internal" href="skyline.html#settings.ANALYZER_ENABLED" title="settings.ANALYZER_ENABLED"><code class="xref py py-mod docutils literal"><span class="pre">settings.ANALYZER_ENABLED</span></code></a> and <code class="xref py py-mod docutils literal"><span class="pre">settings.LUMINOSITY_ENABLED</span></code> to
+<a class="reference internal" href="skyline.html#settings.ANALYZER_ENABLED" title="settings.ANALYZER_ENABLED"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ANALYZER_ENABLED</span></code></a> and <code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.LUMINOSITY_ENABLED</span></code> to
 <cite>False</cite>.</p>
 <p>In the event of a failure of graphite-1 you reconfigure your things to send
-their metrics to graphite-2 and set skyline-2 <a class="reference internal" href="skyline.html#settings.ANALYZER_ENABLED" title="settings.ANALYZER_ENABLED"><code class="xref py py-mod docutils literal"><span class="pre">settings.ANALYZER_ENABLED</span></code></a>
-and <code class="xref py py-mod docutils literal"><span class="pre">settings.LUMINOSITY_ENABLED</span></code> to <cite>True</cite>.</p>
+their metrics to graphite-2 and set skyline-2 <a class="reference internal" href="skyline.html#settings.ANALYZER_ENABLED" title="settings.ANALYZER_ENABLED"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ANALYZER_ENABLED</span></code></a>
+and <code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.LUMINOSITY_ENABLED</span></code> to <cite>True</cite>.</p>
 <p>In the event of a failure of skyline-1 you set skyline-2
-<a class="reference internal" href="skyline.html#settings.ANALYZER_ENABLED" title="settings.ANALYZER_ENABLED"><code class="xref py py-mod docutils literal"><span class="pre">settings.ANALYZER_ENABLED</span></code></a> and <code class="xref py py-mod docutils literal"><span class="pre">settings.LUMINOSITY_ENABLED</span></code> to
+<a class="reference internal" href="skyline.html#settings.ANALYZER_ENABLED" title="settings.ANALYZER_ENABLED"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ANALYZER_ENABLED</span></code></a> and <code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.LUMINOSITY_ENABLED</span></code> to
 <cite>True</cite>.</p>
 <p>The setting up of a hot standby Graphite instance requires pickling AND periodic
 flock rsyncing of all the whisper files from graphite-1 to graphite-2 to ensure
@@ -239,22 +258,23 @@ your backup Graphite instance.</p>
 <div class="section" id="webapp-ui">
 <h2>Webapp UI<a class="headerlink" href="#webapp-ui" title="Permalink to this headline">¶</a></h2>
 <p>In terms of the functionality in webapp, the webapp is multiple instance aware.
-Where any &#8220;not in Redis&#8221; UI errors are found, webapp responds to the request
+Where any “not in Redis” UI errors are found, webapp responds to the request
 with a 301 redirect to the alternate Skyline URL.</p>
 </div>
 </div>
 
 
            </div>
+           
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="skyline-and-friends.html" class="btn btn-neutral float-right" title="Skyline and friends" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="skyline-and-friends.html" class="btn btn-neutral float-right" title="Skyline and friends" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="rebrow.html" class="btn btn-neutral" title="rebrow" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="rebrow.html" class="btn btn-neutral float-left" title="rebrow" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -263,11 +283,19 @@ with a 301 redirect to the alternate Skyline URL.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
+        
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -279,36 +307,15 @@ with a 301 redirect to the alternate Skyline URL.</p>
   </div>
   
 
-
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'2.0.0',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

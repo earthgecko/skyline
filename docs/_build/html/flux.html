@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,50 +11,48 @@
   
 
   
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
+
+  
+  
+  
   
 
   
-
-  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-
-  
-  
-    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  
-
-  
-    <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-  
-
-  
-        <link rel="index" title="Index"
-              href="genindex.html"/>
-        <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 2.0.0 documentation" href="index.html"/>
-        <link rel="next" title="Vista" href="vista.html"/>
-        <link rel="prev" title="Luminosity" href="luminosity.html"/> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="upload_data to Flux - EXPERIMENTAL" href="upload-data-to-flux.html" />
+    <link rel="prev" title="Luminosity" href="luminosity.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
+   
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
-            <a href="index.html" class="icon icon-home"> Skyline
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
 
           
@@ -82,22 +79,24 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
             
-                <ul class="current">
+              
+            
+            
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
-<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alerts.html">Alerts</a></li>
-<li class="toctree-l1"><a class="reference internal" href="docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
@@ -121,6 +120,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#process-uploaded-data">Process uploaded data</a></li>
 </ul>
 </li>
+<li class="toctree-l1"><a class="reference internal" href="upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
@@ -128,12 +128,10 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#reliability">Reliability</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
-<li class="toctree-l1"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What’s new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a></li>
@@ -142,40 +140,61 @@
             
           
         </div>
+        
       </div>
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="index.html">Skyline</a>
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Skyline</a>
+        
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="index.html">Docs</a> &raquo;</li>
-      
-    <li>Flux</li>
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Flux</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
-            <a href="_sources/flux.txt" rel="nofollow"> View page source</a>
+            
+            <a href="_sources/flux.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -204,7 +223,7 @@ Redis key, flux discards the data.</p>
 <h2>POST request<a class="headerlink" href="#post-request" title="Permalink to this headline">¶</a></h2>
 <p>The POST endpoint is <cite>/flux/metric_data_post</cite> and this accepts JSON data.
 Here is an example of the data it requires and an example POST request.</p>
-<div class="highlight-json"><div class="highlight"><pre><span></span><span class="p">{</span>
+<div class="highlight-json notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
       <span class="nt">&quot;metric&quot;</span><span class="p">:</span> <span class="s2">&quot;vista.nodes.skyline-1.cpu.user&quot;</span><span class="p">,</span>
       <span class="nt">&quot;timestamp&quot;</span><span class="p">:</span> <span class="s2">&quot;1478021700&quot;</span><span class="p">,</span>
       <span class="nt">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;1.0&quot;</span><span class="p">,</span>
@@ -212,7 +231,7 @@ Here is an example of the data it requires and an example POST request.</p>
 <span class="p">}</span>
 </pre></div>
 </div>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>curl -vvv -u username:password -d <span class="s1">&#39;{&quot;metric&quot;:&quot;vista.nodes.skyline-1.cpu.user&quot;,&quot;timestamp&quot;:&quot;1478021700&quot;,&quot;value&quot;:&quot;1.0&quot;,&quot;key&quot;:&quot;YOURown32charSkylineAPIkeySecret&quot;}&#39;</span> -H <span class="s2">&quot;Content-Type: application/json&quot;</span> -X POST https://skyline.example.org/flux/metric_data_post
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>curl -vvv -u username:password -d <span class="s1">&#39;{&quot;metric&quot;:&quot;vista.nodes.skyline-1.cpu.user&quot;,&quot;timestamp&quot;:&quot;1478021700&quot;,&quot;value&quot;:&quot;1.0&quot;,&quot;key&quot;:&quot;YOURown32charSkylineAPIkeySecret&quot;}&#39;</span> -H <span class="s2">&quot;Content-Type: application/json&quot;</span> -X POST https://skyline.example.org/flux/metric_data_post
 </pre></div>
 </div>
 </div>
@@ -223,7 +242,7 @@ network or protected network and you do not mind sending the API key in
 plaintext, the GET method can be used.</p>
 <p>The <cite>/flux/metric_data</cite> endpoint is called via a GET request with the URI
 parameters as defined below:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="c1"># /flux/metric_data?metric=&lt;metric|str&gt;&amp;timestamp=&lt;timestamp|int&gt;&amp;value=&lt;value|float&gt;&amp;key=&lt;key|str&gt;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># /flux/metric_data?metric=&lt;metric|str&gt;&amp;timestamp=&lt;timestamp|int&gt;&amp;value=&lt;value|float&gt;&amp;key=&lt;key|str&gt;</span>
 <span class="c1"># For example:</span>
 curl -vvv -u username:password <span class="s2">&quot;https://skyline.example.org/flux/metric_data?metric=vista.nodes.skyline-1.cpu.user&amp;timestamp=1478021700&amp;value=1.0&amp;key=YOURown32charSkylineAPIkeySecret&quot;</span>
 </pre></div>
@@ -234,7 +253,7 @@ curl -vvv -u username:password <span class="s2">&quot;https://skyline.example.or
 <p>Skyline Vista is tightly integrated with Flux. Vista uses flux to submit metric
 data to Graphite for the metrics that Vista fetches.  Vista does not connect
 to flux via the reverse proxy, it connects directly to flux and uses the
-<a class="reference internal" href="skyline.html#settings.FLUX_SELF_API_KEY" title="settings.FLUX_SELF_API_KEY"><code class="xref py py-mod docutils literal"><span class="pre">settings.FLUX_SELF_API_KEY</span></code></a> to authenticate itself.  Flux has a specific
+<a class="reference internal" href="skyline.html#settings.FLUX_SELF_API_KEY" title="settings.FLUX_SELF_API_KEY"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FLUX_SELF_API_KEY</span></code></a> to authenticate itself.  Flux has a specific
 <cite>/flux/populate_metric</cite> endpoint and worker so that Vista can submit historical
 metric data to in order to pre-populate Graphite with data when new
 metrics are added to Vista at multiple resolutions.  However, this endpoint is
@@ -263,52 +282,53 @@ report of wind related metrics that had a reading every 5 minutes for an hour
 period, for x number of stations.  As long as the data is in uploaded in an
 acceptable format, it can be preprocessed by flux and submitted to Graphite.
 The metric namespace/s need be declared as batch processing metrics in
-<a class="reference internal" href="skyline.html#settings.BATCH_PROCESSING_NAMESPACES" title="settings.BATCH_PROCESSING_NAMESPACES"><code class="xref py py-mod docutils literal"><span class="pre">settings.BATCH_PROCESSING_NAMESPACES</span></code></a> and <a class="reference internal" href="skyline.html#settings.BATCH_PROCESSING" title="settings.BATCH_PROCESSING"><code class="xref py py-mod docutils literal"><span class="pre">settings.BATCH_PROCESSING</span></code></a>
+<a class="reference internal" href="skyline.html#settings.BATCH_PROCESSING_NAMESPACES" title="settings.BATCH_PROCESSING_NAMESPACES"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.BATCH_PROCESSING_NAMESPACES</span></code></a> and <a class="reference internal" href="skyline.html#settings.BATCH_PROCESSING" title="settings.BATCH_PROCESSING"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.BATCH_PROCESSING</span></code></a>
 has to be enabled.</p>
 <p>By default flux is not enabled to process uploaded data and the webapp is not
 configured to accept uploaded data.</p>
 <p>To enable Flux to process uploaded data the following settings need to be set
 and services running:</p>
 <ul class="simple">
-<li>analyzer_batch needs to be enabled and running, see <a class="reference external" href="analyzer.html#analyzer_batch">Analyzer - analyzer_batch</a>.</li>
-<li><a class="reference internal" href="skyline.html#settings.BATCH_PROCESSING" title="settings.BATCH_PROCESSING"><code class="xref py py-mod docutils literal"><span class="pre">settings.BATCH_PROCESSING</span></code></a> need to be set to <cite>True</cite></li>
-<li>The <cite>parent_metric_namespace</cite> or all the metric namespace in question relating
+<li><p>analyzer_batch needs to be enabled and running, see <a class="reference external" href="analyzer.html#analyzer_batch">Analyzer - analyzer_batch</a>.</p></li>
+<li><p><a class="reference internal" href="skyline.html#settings.BATCH_PROCESSING" title="settings.BATCH_PROCESSING"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.BATCH_PROCESSING</span></code></a> need to be set to <cite>True</cite></p></li>
+<li><p>The <cite>parent_metric_namespace</cite> or all the metric namespace in question relating
 to the specific data being uploaded need to be declared in
-<a class="reference internal" href="skyline.html#settings.BATCH_PROCESSING_NAMESPACES" title="settings.BATCH_PROCESSING_NAMESPACES"><code class="xref py py-mod docutils literal"><span class="pre">settings.BATCH_PROCESSING_NAMESPACES</span></code></a></li>
-<li><a class="reference internal" href="skyline.html#settings.DATA_UPLOADS_PATH" title="settings.DATA_UPLOADS_PATH"><code class="xref py py-mod docutils literal"><span class="pre">settings.DATA_UPLOADS_PATH</span></code></a> is required</li>
-<li><a class="reference internal" href="skyline.html#settings.WEBAPP_ACCEPT_DATA_UPLOADS" title="settings.WEBAPP_ACCEPT_DATA_UPLOADS"><code class="xref py py-mod docutils literal"><span class="pre">settings.WEBAPP_ACCEPT_DATA_UPLOADS</span></code></a> must be enabled</li>
-<li><a class="reference internal" href="skyline.html#settings.FLUX_PROCESS_UPLOADS" title="settings.FLUX_PROCESS_UPLOADS"><code class="xref py py-mod docutils literal"><span class="pre">settings.FLUX_PROCESS_UPLOADS</span></code></a> must be enabled</li>
-<li>If the data is being uploaded ia an automated process, curl, etc the
+<a class="reference internal" href="skyline.html#settings.BATCH_PROCESSING_NAMESPACES" title="settings.BATCH_PROCESSING_NAMESPACES"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.BATCH_PROCESSING_NAMESPACES</span></code></a></p></li>
+<li><p><a class="reference internal" href="skyline.html#settings.DATA_UPLOADS_PATH" title="settings.DATA_UPLOADS_PATH"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.DATA_UPLOADS_PATH</span></code></a> is required</p></li>
+<li><p><a class="reference internal" href="skyline.html#settings.WEBAPP_ACCEPT_DATA_UPLOADS" title="settings.WEBAPP_ACCEPT_DATA_UPLOADS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.WEBAPP_ACCEPT_DATA_UPLOADS</span></code></a> must be enabled</p></li>
+<li><p><a class="reference internal" href="skyline.html#settings.FLUX_PROCESS_UPLOADS" title="settings.FLUX_PROCESS_UPLOADS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FLUX_PROCESS_UPLOADS</span></code></a> must be enabled</p></li>
+<li><p>If the data is being uploaded ia an automated process, curl, etc the
 <cite>parent_metric_namespace</cite> needs a key set in the
-<a class="reference internal" href="skyline.html#settings.FLUX_UPLOADS_KEYS" title="settings.FLUX_UPLOADS_KEYS"><code class="xref py py-mod docutils literal"><span class="pre">settings.FLUX_UPLOADS_KEYS</span></code></a> dictionary e.g.</li>
+<a class="reference internal" href="skyline.html#settings.FLUX_UPLOADS_KEYS" title="settings.FLUX_UPLOADS_KEYS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FLUX_UPLOADS_KEYS</span></code></a> dictionary e.g.</p></li>
 </ul>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">FLUX_UPLOADS_KEYS</span> <span class="o">=</span> <span class="p">{</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">FLUX_UPLOADS_KEYS</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s1">&#39;temp_monitoring.warehouse.2.012383&#39;</span><span class="p">:</span> <span class="s1">&#39;484166bf-df66-4f7d-ad4a-9336da9ef620&#39;</span><span class="p">,</span>
 <span class="p">}</span>
 </pre></div>
 </div>
 <ul class="simple">
-<li>Optionally <a class="reference internal" href="skyline.html#settings.FLUX_SAVE_UPLOADS" title="settings.FLUX_SAVE_UPLOADS"><code class="xref py py-mod docutils literal"><span class="pre">settings.FLUX_SAVE_UPLOADS</span></code></a> and
-<a class="reference internal" href="skyline.html#settings.FLUX_SAVE_UPLOADS_PATH" title="settings.FLUX_SAVE_UPLOADS_PATH"><code class="xref py py-mod docutils literal"><span class="pre">settings.FLUX_SAVE_UPLOADS_PATH</span></code></a> can be used if you wish to save the
-uploaded data.</li>
+<li><p>Optionally <a class="reference internal" href="skyline.html#settings.FLUX_SAVE_UPLOADS" title="settings.FLUX_SAVE_UPLOADS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FLUX_SAVE_UPLOADS</span></code></a> and
+<a class="reference internal" href="skyline.html#settings.FLUX_SAVE_UPLOADS_PATH" title="settings.FLUX_SAVE_UPLOADS_PATH"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FLUX_SAVE_UPLOADS_PATH</span></code></a> can be used if you wish to save the
+uploaded data.</p></li>
 </ul>
 <p>For specific details about the data formats and methods for uploading and
-processing data files see the <a class="reference external" href="uploa-data-to-flux.html">upload_data to Flux</a>
+processing data files see the <a class="reference external" href="upload-data-to-flux.html">upload_data to Flux</a>
 page.</p>
 </div>
 </div>
 
 
            </div>
+           
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="vista.html" class="btn btn-neutral float-right" title="Vista" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="upload-data-to-flux.html" class="btn btn-neutral float-right" title="upload_data to Flux - EXPERIMENTAL" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="luminosity.html" class="btn btn-neutral" title="Luminosity" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="luminosity.html" class="btn btn-neutral float-left" title="Luminosity" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -317,11 +337,19 @@ page.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
+        
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -333,36 +361,15 @@ page.</p>
   </div>
   
 
-
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'2.0.0',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

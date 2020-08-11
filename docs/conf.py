@@ -36,8 +36,7 @@ if not on_rtd:
     venv_lib_site_packages_path = 'lib/python%s.%s/site-packages' % (
         str(python_major_version), str(python_minor_version))
     python_site_packages_path = python_path.replace('bin', venv_lib_site_packages_path)
-
-#    sys.path.insert(0, os.path.abspath('/opt/python_virtualenv/projects/skyline-py2712/lib/python2.7/site-packages'))
+    # sys.path.insert(0, os.path.abspath('/opt/python_virtualenv/projects/skyline-py2712/lib/python2.7/site-packages'))
     sys.path.insert(0, os.path.abspath(python_site_packages_path))
 
     import matplotlib
@@ -51,7 +50,9 @@ if not on_rtd:
 # Sphinx version error:
 # This project needs at least Sphinx v1.4.8 and therefore cannot be built with this version.
 if not on_rtd:
-    needs_sphinx = '1.4.8'
+    # @modified 20200808 - Task #3608: Update Skyline to Python 3.8.3 and deps
+    # needs_sphinx = '1.4.8'
+    needs_sphinx = '3.2.0'
 # else:
 #     needs_sphinx = '1.3.5'
 
@@ -75,7 +76,9 @@ templates_path = ['_templates']
 
 
 def setup(app):
-    app.add_stylesheet('skyline.styles.css')
+    # @modified 20200808 - Task #3608: Update Skyline to Python 3.8.3 and deps
+    # app.add_stylesheet('skyline.styles.css')
+    app.add_css_file('skyline.styles.css')
 
 
 source_parsers = {

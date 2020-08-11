@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,51 +11,48 @@
   
 
   
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/skyline.styles.css" type="text/css" />
+
+  
+  
+  
   
 
   
-
-  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
 
-  
-
-  
-  
-    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  
-
-  
-    <link rel="stylesheet" href="../_static/skyline.styles.css" type="text/css" />
-  
-
-  
-        <link rel="index" title="Index"
-              href="../genindex.html"/>
-        <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Skyline 2.0.0 documentation" href="../index.html"/>
-        <link rel="up" title="Development" href="index.html"/>
-        <link rel="next" title="Development - Webapp" href="webapp.html"/>
-        <link rel="prev" title="Development - dawn" href="dawn.html"/> 
-
-  
-  <script src="../_static/js/modernizr.min.js"></script>
-
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Development - Webapp" href="webapp.html" />
+    <link rel="prev" title="Development - dawn" href="dawn.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
+   
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
-            <a href="../index.html" class="icon icon-home"> Skyline
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
 
           
@@ -83,22 +79,24 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
             
-                <ul class="current">
+              
+            
+            
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../alerts.html">Alerts</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../horizon.html">Horizon</a></li>
@@ -115,6 +113,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../vista.html">Vista</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
@@ -122,12 +121,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html#reliability">Reliability</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring Skyline</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../releases.html">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What’s new</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Development</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="building-documentation.html">Building documentation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="dawn.html">Development - dawn</a></li>
@@ -156,42 +153,63 @@
             
           
         </div>
+        
       </div>
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="../index.html">Skyline</a>
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Skyline</a>
+        
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="../index.html">Docs</a> &raquo;</li>
-      
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
           <li><a href="index.html">Development</a> &raquo;</li>
-      
-    <li>Development - dawn-docker</li>
+        
+      <li>Development - dawn-docker</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
-            <a href="../_sources/development/dawn-docker.txt" rel="nofollow"> View page source</a>
+            
+            <a href="../_sources/development/dawn-docker.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -210,10 +228,10 @@ running in docker containers on CentOS 7.6.</p>
 <div class="section" id="important-notes">
 <h3>IMPORTANT NOTES<a class="headerlink" href="#important-notes" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>The script is IPv4 ONLY.  It DISABLES IPv6 is on the system.</li>
-<li>This script manages the basic requirements on firewall-cmd and firewalld
+<li><p>The script is IPv4 ONLY.  It DISABLES IPv6 is on the system.</p></li>
+<li><p>This script manages the basic requirements on firewall-cmd and firewalld
 it allows public access to port 22, 80 and 443 and restricted access to port
-8888 for Graphite.</li>
+8888 for Graphite.</p></li>
 </ul>
 </div>
 <div class="section" id="user-defined-variables">
@@ -221,7 +239,7 @@ it allows public access to port 22, 80 and 443 and restricted access to port
 <p>Please populate these variables as appropriate with the values of YOUR set up
 and write them to /etc/skyline/skyline.dawn.conf to be sourced by the build
 script.</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nv">YOUR_SERVER_IP_ADDRESS</span><span class="o">=</span><span class="s2">&quot;x.x.x.x&quot;</span>  <span class="c1"># YOUR Skyline server public IPv4 address</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">YOUR_SERVER_IP_ADDRESS</span><span class="o">=</span><span class="s2">&quot;x.x.x.x&quot;</span>  <span class="c1"># YOUR Skyline server public IPv4 address</span>
 <span class="nv">YOUR_OTHER_IP_ADDRESS</span><span class="o">=</span><span class="s2">&quot;x.x.x.x&quot;</span>   <span class="c1"># YOUR current public IPv4 address that you will be connecting from</span>
 <span class="nv">SKYLINE_RELEASE</span><span class="o">=</span><span class="s2">&quot;v1.2.18&quot;</span>         <span class="c1"># The Skyline release to deploy</span>
 </pre></div>
@@ -230,7 +248,7 @@ script.</p>
 <div class="section" id="deploying-skyline-on-centos-7-6-using-skyline-docker-dawn-sh">
 <h3>Deploying Skyline on CentOS 7.6 using skyline.docker.dawn.sh<a class="headerlink" href="#deploying-skyline-on-centos-7-6-using-skyline-docker-dawn-sh" title="Permalink to this headline">¶</a></h3>
 <p>Use sudo as appropriate.</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="c1"># Create the skyline.dawn.conf files and add the USER DEFINED VARIABLES</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create the skyline.dawn.conf files and add the USER DEFINED VARIABLES</span>
 vi /etc/skyline/skyline.dawn.conf
 
 <span class="c1"># Fetch the build script</span>
@@ -245,7 +263,7 @@ chmod <span class="m">0755</span> /tmp/skyline.docker.dawn.sh
 /tmp/skyline.docker.dawn.sh
 </pre></div>
 </div>
-<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="c1"># Check the logs</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check the logs</span>
 tail -n <span class="m">60</span> /var/log/skyline/*.log
 </pre></div>
 </div>
@@ -255,15 +273,16 @@ tail -n <span class="m">60</span> /var/log/skyline/*.log
 
 
            </div>
+           
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="webapp.html" class="btn btn-neutral float-right" title="Development - Webapp" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="webapp.html" class="btn btn-neutral float-right" title="Development - Webapp" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="dawn.html" class="btn btn-neutral" title="Development - dawn" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="dawn.html" class="btn btn-neutral float-left" title="Development - dawn" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -272,11 +291,19 @@ tail -n <span class="m">60</span> /var/log/skyline/*.log
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
+        
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -288,36 +315,15 @@ tail -n <span class="m">60</span> /var/log/skyline/*.log
   </div>
   
 
-
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../',
-            VERSION:'2.0.0',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
-        };
-    </script>
-      <script type="text/javascript" src="../_static/jquery.js"></script>
-      <script type="text/javascript" src="../_static/underscore.js"></script>
-      <script type="text/javascript" src="../_static/doctools.js"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,51 +11,48 @@
   
 
   
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/skyline.styles.css" type="text/css" />
+
+  
+  
+  
   
 
   
-
-  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
 
-  
-
-  
-  
-    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  
-
-  
-    <link rel="stylesheet" href="../_static/skyline.styles.css" type="text/css" />
-  
-
-  
-        <link rel="index" title="Index"
-              href="../genindex.html"/>
-        <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Skyline 2.0.0 documentation" href="../index.html"/>
-        <link rel="up" title="Development" href="index.html"/>
-        <link rel="next" title="Development - Ionosphere" href="ionosphere.html"/>
-        <link rel="prev" title="Development - Webapp" href="webapp.html"/> 
-
-  
-  <script src="../_static/js/modernizr.min.js"></script>
-
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Development - Ionosphere" href="ionosphere.html" />
+    <link rel="prev" title="Development - Webapp" href="webapp.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
+   
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
-            <a href="../index.html" class="icon icon-home"> Skyline
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
 
           
@@ -83,22 +79,24 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
             
-                <ul class="current">
+              
+            
+            
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../alerts.html">Alerts</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../horizon.html">Horizon</a></li>
@@ -115,6 +113,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../vista.html">Vista</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
@@ -122,12 +121,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html#reliability">Reliability</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring Skyline</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../releases.html">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What’s new</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Development</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="building-documentation.html">Building documentation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="dawn.html">Development - dawn</a></li>
@@ -165,42 +162,63 @@
             
           
         </div>
+        
       </div>
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="../index.html">Skyline</a>
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Skyline</a>
+        
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="../index.html">Docs</a> &raquo;</li>
-      
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
           <li><a href="index.html">Development</a> &raquo;</li>
-      
-    <li>Development - Debugging</li>
+        
+      <li>Development - Debugging</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
-            <a href="../_sources/development/debugging.txt" rel="nofollow"> View page source</a>
+            
+            <a href="../_sources/development/debugging.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -209,10 +227,10 @@
   <div class="section" id="development-debugging">
 <h1>Development - Debugging<a class="headerlink" href="#development-debugging" title="Permalink to this headline">¶</a></h1>
 <p>A large number of tools and techniques have been used to get to grips
-with the Skyline code base, it&#8217;s debugging, profiling, performance tuning, memory
-leaking and so forth.  These tools and techniques give &#8220;some&#8221; insight
+with the Skyline code base, it’s debugging, profiling, performance tuning, memory
+leaking and so forth.  These tools and techniques give “some” insight
 into the number of objects, calls, reference counts, etc, etc.  A myriad maze of
-Python&#8217;s intestinal details, where it is possible to get lost and tangled up
+Python’s intestinal details, where it is possible to get lost and tangled up
 fairly quickly.  Python being such a vast and mature ecosystem, the choices are
 vast.  The following is for future reference on what works, where and how and
 how well.  Due to the number of objects and calls that Skyline makes in a run
@@ -233,13 +251,13 @@ useful for future reference.</p>
 <a class="reference external" href="http://www.lshift.net/blog/2008/11/14/tracing-python-memory-leaks">http://www.lshift.net/blog/2008/11/14/tracing-python-memory-leaks</a></p>
 <p>There are only a few reasons for memory leaks in Python.</p>
 <ul class="simple">
-<li>There&#8217;s some object you are opening (repeatedly) but not closing - <code class="docutils literal"><span class="pre">plt.savefig</span></code></li>
-<li>You are repeatedly adding data to a list/dict and not removing the old data.
-(for instance, if you&#8217;re appending data to an array instead of replacing the
-array) - <code class="docutils literal"><span class="pre">self.mirage_metrics.append(metric)</span></code></li>
-<li>There&#8217;s a memory leak in one of the libraries you&#8217;re calling. (unlikely)</li>
+<li><p>There’s some object you are opening (repeatedly) but not closing - <code class="docutils literal notranslate"><span class="pre">plt.savefig</span></code></p></li>
+<li><p>You are repeatedly adding data to a list/dict and not removing the old data.
+(for instance, if you’re appending data to an array instead of replacing the
+array) - <code class="docutils literal notranslate"><span class="pre">self.mirage_metrics.append(metric)</span></code></p></li>
+<li><p>There’s a memory leak in one of the libraries you’re calling. (unlikely)</p></li>
 </ul>
-<p>This is <code class="docutils literal"><span class="pre">True</span></code>, the hard part is finding 1 and 2 if you do not know what you
+<p>This is <code class="docutils literal notranslate"><span class="pre">True</span></code>, the hard part is finding 1 and 2 if you do not know what you
 are looking for or how to find it.</p>
 <div class="section" id="analyzer-debug">
 <h3>analyzer_debug<a class="headerlink" href="#analyzer-debug" title="Permalink to this headline">¶</a></h3>
@@ -271,7 +289,7 @@ multiprocessing process, yes 80 MB of memory to send an email :)</p>
 after trying all of the below listed tools, the one which end up pin pointing
 them was literally stepping through the code operation by operation and wrapping
 each operation in analyzer.py and alerters.py in:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">resource</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">resource</span>
 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: Memory usage before blah: </span><span class="si">%s</span><span class="s1"> (kb)&#39;</span> <span class="o">%</span> <span class="n">resource</span><span class="o">.</span><span class="n">getrusage</span><span class="p">(</span><span class="n">resource</span><span class="o">.</span><span class="n">RUSAGE_SELF</span><span class="p">)</span><span class="o">.</span><span class="n">ru_maxrss</span><span class="p">)</span>
 <span class="c1"># do blah</span>
 <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;debug :: Memory usage after blah: </span><span class="si">%s</span><span class="s1"> (kb)&#39;</span> <span class="o">%</span> <span class="n">resource</span><span class="o">.</span><span class="n">getrusage</span><span class="p">(</span><span class="n">resource</span><span class="o">.</span><span class="n">RUSAGE_SELF</span><span class="p">)</span><span class="o">.</span><span class="n">ru_maxrss</span><span class="p">)</span>
@@ -283,7 +301,7 @@ memory usage where in terms of when functions where executed and after the
 process the memory usage incremented up and the increment remained.</p>
 <p>Days were spent trying to glean this exact information with all the below
 mentioned tools and techniques, but in terms of debugging and understanding
-Analyzer&#8217;s memory usage and allocation none provided exact enough actionable
+Analyzer’s memory usage and allocation none provided exact enough actionable
 information, in all likelihood this was probably a result of a PEBKAB type of
 problem and possibly not wielding the tools to their full potential.  That said
 they definitely do provide some insight in other ways.</p>
@@ -295,11 +313,11 @@ of anon allocations and also gives a good overview of what the process is using
 in terms of memory and by what.</p>
 <p>From the command line query the app parent pid to determine all the allocations
 using more than 1000 kb of memory e.g.</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>pmap <span class="m">4306</span> <span class="p">|</span> sed <span class="s1">&#39;s/\]//&#39;</span> <span class="p">|</span> awk <span class="s1">&#39;{print $2 &quot; &quot; $NF}&#39;</span> <span class="p">|</span> sed <span class="s1">&#39;s/K / /&#39;</span> <span class="p">|</span> sort -n <span class="p">|</span> awk <span class="s1">&#39;$1 &gt; 1000&#39;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pmap <span class="m">4306</span> <span class="p">|</span> sed <span class="s1">&#39;s/\]//&#39;</span> <span class="p">|</span> awk <span class="s1">&#39;{print $2 &quot; &quot; $NF}&#39;</span> <span class="p">|</span> sed <span class="s1">&#39;s/K / /&#39;</span> <span class="p">|</span> sort -n <span class="p">|</span> awk <span class="s1">&#39;$1 &gt; 1000&#39;</span>
 </pre></div>
 </div>
 <p>The output is similar to</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="m">1012</span> /opt/python_virtualenv/projects/skyline2711/lib/python2.7/site-packages/pandas/lib.so
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="m">1012</span> /opt/python_virtualenv/projects/skyline2711/lib/python2.7/site-packages/pandas/lib.so
 <span class="m">1392</span> /opt/python_virtualenv/projects/skyline2711/lib/python2.7/site-packages/scipy/special/_ufuncs.so
 <span class="m">1504</span> /opt/python_virtualenv/projects/skyline2711/lib/python2.7/site-packages/pandas/tslib.so
 <span class="m">1516</span> /opt/python_virtualenv/projects/skyline2711/bin/python2.7
@@ -315,7 +333,7 @@ using more than 1000 kb of memory e.g.</p>
 results are expected.</p>
 <p>In terms of catching python memory leaks, you can grep out the anon allocations
 at intervals between app runs</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>pmap <span class="m">4306</span> <span class="p">|</span> sed <span class="s1">&#39;s/\]//&#39;</span> <span class="p">|</span> awk <span class="s1">&#39;{print $2 &quot; &quot; $NF}&#39;</span> <span class="p">|</span> sed <span class="s1">&#39;s/K / /&#39;</span> <span class="p">|</span> sort -n <span class="p">|</span> awk <span class="s1">&#39;$1 &gt; 1000&#39;</span> <span class="p">|</span> grep anon <span class="p">|</span> tee /tmp/pmap.4306.anon.1
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pmap <span class="m">4306</span> <span class="p">|</span> sed <span class="s1">&#39;s/\]//&#39;</span> <span class="p">|</span> awk <span class="s1">&#39;{print $2 &quot; &quot; $NF}&#39;</span> <span class="p">|</span> sed <span class="s1">&#39;s/K / /&#39;</span> <span class="p">|</span> sort -n <span class="p">|</span> awk <span class="s1">&#39;$1 &gt; 1000&#39;</span> <span class="p">|</span> grep anon <span class="p">|</span> tee /tmp/pmap.4306.anon.1
 <span class="c1"># Some minutes later</span>
 pmap <span class="m">4306</span> <span class="p">|</span> sed <span class="s1">&#39;s/\]//&#39;</span> <span class="p">|</span> awk <span class="s1">&#39;{print $2 &quot; &quot; $NF}&#39;</span> <span class="p">|</span> sed <span class="s1">&#39;s/K / /&#39;</span> <span class="p">|</span> sort -n <span class="p">|</span> awk <span class="s1">&#39;$1 &gt; 1000&#39;</span> <span class="p">|</span> grep anon <span class="p">|</span> tee /tmp/pmap.4306.anon.2
 diff /tmp/pmap.4306.anon.1 /tmp/pmap.4306.anon.2
@@ -324,13 +342,13 @@ diff /tmp/pmap.4306.anon.1 /tmp/pmap.4306.anon.2
 <p>An anon process with incrementing memory usage is a likely list candidate.
 More and more added anon objects is likely something/s with a reference cycle or
 some object not closed, e.g. a matplotlib savefig which does not have
-<code class="docutils literal"><span class="pre">fig.clf()</span></code> and <code class="docutils literal"><span class="pre">plt.close()</span></code> on it (although did not help).</p>
+<code class="docutils literal notranslate"><span class="pre">fig.clf()</span></code> and <code class="docutils literal notranslate"><span class="pre">plt.close()</span></code> on it (although did not help).</p>
 </div>
 <div class="section" id="gc">
 <h3>gc<a class="headerlink" href="#gc" title="Permalink to this headline">¶</a></h3>
 <p>Forcing Python garbage collection can be useful in terms of determining objects,
 type and reference counts</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gc</span> <span class="kn">import</span> <span class="n">get_objects</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">gc</span> <span class="kn">import</span> <span class="n">get_objects</span>
 <span class="c1"># Debug with garbage collection - http://code.activestate.com/recipes/65333/</span>
 <span class="kn">import</span> <span class="nn">gc</span>
 
@@ -351,7 +369,7 @@ type and reference counts</p>
 </pre></div>
 </div>
 <p>In the relevant log there will be a ton of output similar to this</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>tail -n <span class="m">1000</span> /var/log/skyline/analyzer.log <span class="p">|</span> grep <span class="s2">&quot; (&lt;&quot;</span> <span class="p">|</span> grep <span class="s2">&quot;14:21:4&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>tail -n <span class="m">1000</span> /var/log/skyline/analyzer.log <span class="p">|</span> grep <span class="s2">&quot; (&lt;&quot;</span> <span class="p">|</span> grep <span class="s2">&quot;14:21:4&quot;</span>
 <span class="m">2016</span>-08-06 <span class="m">14</span>:21:44 :: <span class="m">1349</span> :: <span class="o">(</span>&lt;class <span class="s1">&#39;_ast.Eq&#39;</span>&gt;, <span class="m">36</span><span class="o">)</span>
 <span class="m">2016</span>-08-06 <span class="m">14</span>:21:44 :: <span class="m">1349</span> :: <span class="o">(</span>&lt;class <span class="s1">&#39;_ast.AugLoad&#39;</span>&gt;, <span class="m">36</span><span class="o">)</span>
 <span class="m">2016</span>-08-06 <span class="m">14</span>:21:44 :: <span class="m">1349</span> :: <span class="o">(</span>&lt;class <span class="s1">&#39;six.Module_six_moves_urllib&#39;</span>&gt;, <span class="m">36</span><span class="o">)</span>
@@ -363,8 +381,8 @@ type and reference counts</p>
 ...
 </pre></div>
 </div>
-<p>Forcing <code class="docutils literal"><span class="pre">gc.collect()</span></code> every run did seem ease a memory leak initially, but it
-did not solve it and <code class="docutils literal"><span class="pre">gc.collect()</span></code> over the period of 12 hours took
+<p>Forcing <code class="docutils literal notranslate"><span class="pre">gc.collect()</span></code> every run did seem ease a memory leak initially, but it
+did not solve it and <code class="docutils literal notranslate"><span class="pre">gc.collect()</span></code> over the period of 12 hours took
 increasing long to run.  Preferably gc should only ever be used in Skyline for
 debugging and development.</p>
 </div>
@@ -372,7 +390,7 @@ debugging and development.</p>
 <h3>pyflakes<a class="headerlink" href="#pyflakes" title="Permalink to this headline">¶</a></h3>
 <p>pyflakes is useful for finding imported and defined things that are not used and
 do not need to be imported, every little helps.</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="o">(</span>skyline2711<span class="o">)</span> earthgecko@localhost:/opt/python_virtualenv/projects/skyline2711$ bin/python2.7 -m flake8 --ignore<span class="o">=</span>E501 /home/earthgecko/github/skyline/develop/skyline/skyline/analyzer/analyzer.py
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">(</span>skyline2711<span class="o">)</span> earthgecko@localhost:/opt/python_virtualenv/projects/skyline2711$ bin/python2.7 -m flake8 --ignore<span class="o">=</span>E501 /home/earthgecko/github/skyline/develop/skyline/skyline/analyzer/analyzer.py
 /home/earthgecko/github/skyline/develop/skyline/skyline/analyzer/analyzer.py:11:1: F401 <span class="s1">&#39;msgpack.unpackb&#39;</span> imported but unused
 /home/earthgecko/github/skyline/develop/skyline/skyline/analyzer/analyzer.py:13:1: F401 <span class="s1">&#39;os.system&#39;</span> imported but unused
 /home/earthgecko/github/skyline/develop/skyline/skyline/analyzer/analyzer.py:17:1: F401 <span class="s1">&#39;socket&#39;</span> imported but unused
@@ -409,15 +427,16 @@ in agent.py could not get any Trackable outputs in analyzer.py all None?</p>
 
 
            </div>
+           
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="ionosphere.html" class="btn btn-neutral float-right" title="Development - Ionosphere" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="ionosphere.html" class="btn btn-neutral float-right" title="Development - Ionosphere" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="webapp.html" class="btn btn-neutral" title="Development - Webapp" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="webapp.html" class="btn btn-neutral float-left" title="Development - Webapp" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -426,11 +445,19 @@ in agent.py could not get any Trackable outputs in analyzer.py all None?</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
+        
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -442,36 +469,15 @@ in agent.py could not get any Trackable outputs in analyzer.py all None?</p>
   </div>
   
 
-
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../',
-            VERSION:'2.0.0',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
-        };
-    </script>
-      <script type="text/javascript" src="../_static/jquery.js"></script>
-      <script type="text/javascript" src="../_static/underscore.js"></script>
-      <script type="text/javascript" src="../_static/doctools.js"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

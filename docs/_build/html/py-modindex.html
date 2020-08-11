@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,51 +11,49 @@
   
 
   
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
+
+  
+  
+  
   
 
   
-
-  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-
-  
-  
-    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  
-
-  
-    <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-  
-
-  
-        <link rel="index" title="Index"
-              href="genindex.html"/>
-        <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 2.0.0 documentation" href="index.html"/>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
  
 
 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
+   
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
-            <a href="index.html" class="icon icon-home"> Skyline
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
 
           
@@ -83,22 +80,24 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
             
-                <ul>
+              
+            
+            
+              <ul>
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
-<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alerts.html">Alerts</a></li>
-<li class="toctree-l1"><a class="reference internal" href="docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
@@ -115,6 +114,7 @@
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
@@ -122,12 +122,10 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#reliability">Reliability</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
-<li class="toctree-l1"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What’s new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a></li>
@@ -136,38 +134,57 @@
             
           
         </div>
+        
       </div>
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="index.html">Skyline</a>
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Skyline</a>
+        
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
+
+
+
+
+
+
+
+
+
+
 
 
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="index.html">Docs</a> &raquo;</li>
-      
-    <li>Python Module Index</li>
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Python Module Index</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
-        
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -194,7 +211,7 @@
    <a href="#cap-w"><strong>w</strong></a>
    </div>
 
-   <table class="indextable modindextable" cellspacing="0" cellpadding="2">
+   <table class="indextable modindextable">
      <tr class="pcap"><td></td><td>&#160;</td><td></td></tr>
      <tr class="cap" id="cap-a"><td></td><td>
        <strong>a</strong></td><td></td></tr>
@@ -208,11 +225,6 @@
               id="toggle-1" style="display: none" alt="-" /></td>
        <td>
        <a href="skyline.analyzer.html#module-analyzer"><code class="xref">analyzer</code></a></td><td>
-       <em></em></td></tr>
-     <tr class="cg-1">
-       <td></td>
-       <td>&#160;&#160;&#160;
-       <a href="skyline.analyzer.html#module-analyzer.agent"><code class="xref">analyzer.agent</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-1">
        <td></td>
@@ -253,16 +265,6 @@
      <tr class="cg-2">
        <td></td>
        <td>&#160;&#160;&#160;
-       <a href="skyline.analyzer_dev.html#module-analyzer_dev.agent"><code class="xref">analyzer_dev.agent</code></a></td><td>
-       <em></em></td></tr>
-     <tr class="cg-2">
-       <td></td>
-       <td>&#160;&#160;&#160;
-       <a href="skyline.analyzer_dev.html#module-analyzer_dev.alerters"><code class="xref">analyzer_dev.alerters</code></a></td><td>
-       <em></em></td></tr>
-     <tr class="cg-2">
-       <td></td>
-       <td>&#160;&#160;&#160;
        <a href="skyline.analyzer_dev.html#module-analyzer_dev.algorithms_dev"><code class="xref">analyzer_dev.algorithms_dev</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-2">
@@ -278,11 +280,6 @@
               id="toggle-3" style="display: none" alt="-" /></td>
        <td>
        <a href="skyline.boundary.html#module-boundary"><code class="xref">boundary</code></a></td><td>
-       <em></em></td></tr>
-     <tr class="cg-3">
-       <td></td>
-       <td>&#160;&#160;&#160;
-       <a href="skyline.boundary.html#module-boundary.agent"><code class="xref">boundary.agent</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-3">
        <td></td>
@@ -316,17 +313,17 @@
      <tr class="cg-4">
        <td></td>
        <td>&#160;&#160;&#160;
-       <a href="skyline.crucible.html#module-crucible.agent"><code class="xref">crucible.agent</code></a></td><td>
-       <em></em></td></tr>
-     <tr class="cg-4">
-       <td></td>
-       <td>&#160;&#160;&#160;
        <a href="skyline.crucible.html#module-crucible.crucible"><code class="xref">crucible.crucible</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-4">
        <td></td>
        <td>&#160;&#160;&#160;
        <a href="skyline.crucible.html#module-crucible.crucible_algorithms"><code class="xref">crucible.crucible_algorithms</code></a></td><td>
+       <em></em></td></tr>
+     <tr>
+       <td></td>
+       <td>
+       <a href="skyline.html#module-custom_algorithms"><code class="xref">custom_algorithms</code></a></td><td>
        <em></em></td></tr>
      <tr>
        <td></td>
@@ -415,11 +412,6 @@
      <tr class="cg-6">
        <td></td>
        <td>&#160;&#160;&#160;
-       <a href="skyline.horizon.html#module-horizon.agent"><code class="xref">horizon.agent</code></a></td><td>
-       <em></em></td></tr>
-     <tr class="cg-6">
-       <td></td>
-       <td>&#160;&#160;&#160;
        <a href="skyline.horizon.html#module-horizon.listen"><code class="xref">horizon.listen</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-6">
@@ -440,11 +432,6 @@
               id="toggle-7" style="display: none" alt="-" /></td>
        <td>
        <a href="skyline.ionosphere.html#module-ionosphere"><code class="xref">ionosphere</code></a></td><td>
-       <em></em></td></tr>
-     <tr class="cg-7">
-       <td></td>
-       <td>&#160;&#160;&#160;
-       <a href="skyline.ionosphere.html#module-ionosphere.agent"><code class="xref">ionosphere.agent</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-7">
        <td></td>
@@ -488,11 +475,6 @@
      <tr class="cg-8">
        <td></td>
        <td>&#160;&#160;&#160;
-       <a href="skyline.luminosity.html#module-luminosity.agent"><code class="xref">luminosity.agent</code></a></td><td>
-       <em></em></td></tr>
-     <tr class="cg-8">
-       <td></td>
-       <td>&#160;&#160;&#160;
        <a href="skyline.luminosity.html#module-luminosity.luminosity"><code class="xref">luminosity.luminosity</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-8">
@@ -513,11 +495,6 @@
               id="toggle-9" style="display: none" alt="-" /></td>
        <td>
        <a href="skyline.mirage.html#module-mirage"><code class="xref">mirage</code></a></td><td>
-       <em></em></td></tr>
-     <tr class="cg-9">
-       <td></td>
-       <td>&#160;&#160;&#160;
-       <a href="skyline.mirage.html#module-mirage.agent"><code class="xref">mirage.agent</code></a></td><td>
        <em></em></td></tr>
      <tr class="cg-9">
        <td></td>
@@ -551,11 +528,6 @@
      <tr class="cg-10">
        <td></td>
        <td>&#160;&#160;&#160;
-       <a href="skyline.panorama.html#module-panorama.agent"><code class="xref">panorama.agent</code></a></td><td>
-       <em></em></td></tr>
-     <tr class="cg-10">
-       <td></td>
-       <td>&#160;&#160;&#160;
        <a href="skyline.panorama.html#module-panorama.panorama"><code class="xref">panorama.panorama</code></a></td><td>
        <em></em></td></tr>
      <tr class="pcap"><td></td><td>&#160;</td><td></td></tr>
@@ -565,11 +537,6 @@
        <td></td>
        <td>
        <a href="skyline.html#module-settings"><code class="xref">settings</code></a></td><td>
-       <em></em></td></tr>
-     <tr>
-       <td></td>
-       <td>
-       <a href="skyline.html#module-skyline"><code class="xref">skyline</code></a></td><td>
        <em></em></td></tr>
      <tr>
        <td></td>
@@ -682,6 +649,7 @@
 
 
            </div>
+           
           </div>
           <footer>
   
@@ -690,11 +658,19 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
+        
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -706,36 +682,15 @@
   </div>
   
 
-
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'2.0.0',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

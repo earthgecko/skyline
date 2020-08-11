@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,51 +11,48 @@
   
 
   
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
+
+  
+  
+  
   
 
   
-
-  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-
-  
-  
-    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  
-
-  
-    <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-  
-
-  
-        <link rel="index" title="Index"
-              href="genindex.html"/>
-        <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 2.0.0 documentation" href="index.html"/>
-        <link rel="up" title="skyline package" href="skyline.html"/>
-        <link rel="next" title="skyline.horizon package" href="skyline.horizon.html"/>
-        <link rel="prev" title="skyline.crucible package" href="skyline.crucible.html"/> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="skyline.horizon package" href="skyline.horizon.html" />
+    <link rel="prev" title="skyline.crucible package" href="skyline.crucible.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
+   
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
-            <a href="index.html" class="icon icon-home"> Skyline
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
 
           
@@ -83,22 +79,24 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
             
-                <ul class="current">
+              
+            
+            
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
-<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alerts.html">Alerts</a></li>
-<li class="toctree-l1"><a class="reference internal" href="docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
@@ -115,6 +113,7 @@
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
@@ -122,12 +121,10 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#reliability">Reliability</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
-<li class="toctree-l1"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What’s new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="skyline.html">skyline package</a><ul class="current">
@@ -162,7 +159,7 @@
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-algorithm_exceptions">skyline.algorithm_exceptions module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-create_matplotlib_graph">skyline.create_matplotlib_graph module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="skyline.html#skyline-custom-algorithms-module">skyline.custom_algorithms module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-custom_algorithms">skyline.custom_algorithms module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-custom_algorithms_to_run">skyline.custom_algorithms_to_run module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-database">skyline.database module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-external_alert_configs">skyline.external_alert_configs module</a></li>
@@ -183,42 +180,63 @@
             
           
         </div>
+        
       </div>
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="index.html">Skyline</a>
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Skyline</a>
+        
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="index.html">Docs</a> &raquo;</li>
-      
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
           <li><a href="skyline.html">skyline package</a> &raquo;</li>
-      
-    <li>skyline.flux package</li>
+        
+      <li>skyline.flux package</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
-            <a href="_sources/skyline.flux.txt" rel="nofollow"> View page source</a>
+            
+            <a href="_sources/skyline.flux.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -237,23 +255,23 @@
 </div>
 <div class="section" id="module-flux.listen">
 <span id="skyline-flux-listen-module"></span><h2>skyline.flux.listen module<a class="headerlink" href="#module-flux.listen" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
+<dl class="py function">
 <dt id="flux.listen.validate_key">
-<code class="descname">validate_key</code><span class="sig-paren">(</span><em>caller</em>, <em>apikey</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/listen.html#validate_key"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flux.listen.validate_key" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">validate_key</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">caller</span></em>, <em class="sig-param"><span class="n">apikey</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/listen.html#validate_key"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flux.listen.validate_key" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="flux.listen.validate_timestamp">
-<code class="descname">validate_timestamp</code><span class="sig-paren">(</span><em>caller</em>, <em>timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/listen.html#validate_timestamp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flux.listen.validate_timestamp" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">validate_timestamp</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">caller</span></em>, <em class="sig-param"><span class="n">timestamp</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/listen.html#validate_timestamp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flux.listen.validate_timestamp" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="class">
+<dl class="py class">
 <dt id="flux.listen.MetricData">
-<em class="property">class </em><code class="descname">MetricData</code><a class="reference internal" href="_modules/flux/listen.html#MetricData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flux.listen.MetricData" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
-<dl class="method">
+<em class="property">class </em><code class="sig-name descname">MetricData</code><a class="reference internal" href="_modules/flux/listen.html#MetricData"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flux.listen.MetricData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
 <dt id="flux.listen.MetricData.on_get">
-<code class="descname">on_get</code><span class="sig-paren">(</span><em>req</em>, <em>resp</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/listen.html#MetricData.on_get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flux.listen.MetricData.on_get" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">on_get</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">req</span></em>, <em class="sig-param"><span class="n">resp</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/listen.html#MetricData.on_get"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flux.listen.MetricData.on_get" title="Permalink to this definition">¶</a></dt>
 <dd><p>The /flux/metric_data endpoint is called via a GET with the URI
 parameters as defined below, with the optional fill parameter to allow
 flux to backfill airgap data for a metric:
@@ -265,18 +283,18 @@ For example:
 
 </dd></dl>
 
-<dl class="class">
+<dl class="py class">
 <dt id="flux.listen.MetricDataPost">
-<em class="property">class </em><code class="descname">MetricDataPost</code><a class="reference internal" href="_modules/flux/listen.html#MetricDataPost"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flux.listen.MetricDataPost" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
-<dl class="method">
+<em class="property">class </em><code class="sig-name descname">MetricDataPost</code><a class="reference internal" href="_modules/flux/listen.html#MetricDataPost"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flux.listen.MetricDataPost" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
 <dt id="flux.listen.MetricDataPost.on_post">
-<code class="descname">on_post</code><span class="sig-paren">(</span><em>req</em>, <em>resp</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/listen.html#MetricDataPost.on_post"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flux.listen.MetricDataPost.on_post" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">on_post</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">req</span></em>, <em class="sig-param"><span class="n">resp</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/listen.html#MetricDataPost.on_post"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flux.listen.MetricDataPost.on_post" title="Permalink to this definition">¶</a></dt>
 <dd><p>The /flux/metric_data_post endpoint is called via a POST with a json
 object as defined below, with the optional fill parameter to allow
 flux to backfill airgap data for a metric:</p>
 <p>For example:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">{</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
     <span class="s2">&quot;metric&quot;</span><span class="p">:</span> <span class="s2">&quot;metric|str&quot;</span><span class="p">,</span>
     <span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="s2">&quot;timestamp|int&quot;</span><span class="p">,</span>
     <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;value|float&quot;</span><span class="p">,</span>
@@ -286,7 +304,7 @@ flux to backfill airgap data for a metric:</p>
 </pre></div>
 </div>
 <p>For example:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">{</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">{</span>
     <span class="s2">&quot;metric&quot;</span><span class="p">:</span> <span class="s2">&quot;vista.nodes.skyline-1.cpu.user&quot;</span><span class="p">,</span>
     <span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="s2">&quot;1478021700&quot;</span><span class="p">,</span>
     <span class="s2">&quot;value&quot;</span><span class="p">:</span> <span class="s2">&quot;1.0&quot;</span><span class="p">,</span>
@@ -309,21 +327,21 @@ flux to backfill airgap data for a metric:</p>
 </div>
 <div class="section" id="module-flux.logger">
 <span id="skyline-flux-logger-module"></span><h2>skyline.flux.logger module<a class="headerlink" href="#module-flux.logger" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
+<dl class="py function">
 <dt id="flux.logger.set_up_logging">
-<code class="descname">set_up_logging</code><span class="sig-paren">(</span><em>app</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/logger.html#set_up_logging"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flux.logger.set_up_logging" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">set_up_logging</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">app</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/logger.html#set_up_logging"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flux.logger.set_up_logging" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>
 <div class="section" id="module-flux.populate_metric">
 <span id="skyline-flux-populate-metric-module"></span><h2>skyline.flux.populate_metric module<a class="headerlink" href="#module-flux.populate_metric" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<dl class="py class">
 <dt id="flux.populate_metric.PopulateMetric">
-<em class="property">class </em><code class="descname">PopulateMetric</code><a class="reference internal" href="_modules/flux/populate_metric.html#PopulateMetric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flux.populate_metric.PopulateMetric" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
-<dl class="method">
+<em class="property">class </em><code class="sig-name descname">PopulateMetric</code><a class="reference internal" href="_modules/flux/populate_metric.html#PopulateMetric"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flux.populate_metric.PopulateMetric" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
 <dt id="flux.populate_metric.PopulateMetric.on_post">
-<code class="descname">on_post</code><span class="sig-paren">(</span><em>req</em>, <em>resp</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/populate_metric.html#PopulateMetric.on_post"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flux.populate_metric.PopulateMetric.on_post" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">on_post</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">req</span></em>, <em class="sig-param"><span class="n">resp</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/populate_metric.html#PopulateMetric.on_post"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flux.populate_metric.PopulateMetric.on_post" title="Permalink to this definition">¶</a></dt>
 <dd><p>The endpoint is called via a POST with a json payload as defined in the
 payload variable in skyline/vista/fetcher.py</p>
 </dd></dl>
@@ -333,21 +351,21 @@ payload variable in skyline/vista/fetcher.py</p>
 </div>
 <div class="section" id="module-flux.populate_metric_worker">
 <span id="skyline-flux-populate-metric-worker-module"></span><h2>skyline.flux.populate_metric_worker module<a class="headerlink" href="#module-flux.populate_metric_worker" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<dl class="py class">
 <dt id="flux.populate_metric_worker.PopulateMetricWorker">
-<em class="property">class </em><code class="descname">PopulateMetricWorker</code><span class="sig-paren">(</span><em>queue</em>, <em>parent_pid</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/populate_metric_worker.html#PopulateMetricWorker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flux.populate_metric_worker.PopulateMetricWorker" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">multiprocessing.process.Process</span></code></p>
+<em class="property">class </em><code class="sig-name descname">PopulateMetricWorker</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">queue</span></em>, <em class="sig-param"><span class="n">parent_pid</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/populate_metric_worker.html#PopulateMetricWorker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flux.populate_metric_worker.PopulateMetricWorker" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">multiprocessing.context.Process</span></code></p>
 <p>The worker grabs metrics from the queue, surfaces the data from the remote
 Graphite and sends them to the Skyline Graphite.</p>
-<dl class="method">
+<dl class="py method">
 <dt id="flux.populate_metric_worker.PopulateMetricWorker.check_if_parent_is_alive">
-<code class="descname">check_if_parent_is_alive</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/populate_metric_worker.html#PopulateMetricWorker.check_if_parent_is_alive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flux.populate_metric_worker.PopulateMetricWorker.check_if_parent_is_alive" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">check_if_parent_is_alive</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/populate_metric_worker.html#PopulateMetricWorker.check_if_parent_is_alive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flux.populate_metric_worker.PopulateMetricWorker.check_if_parent_is_alive" title="Permalink to this definition">¶</a></dt>
 <dd><p>Self explanatory.</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="flux.populate_metric_worker.PopulateMetricWorker.run">
-<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/populate_metric_worker.html#PopulateMetricWorker.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flux.populate_metric_worker.PopulateMetricWorker.run" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/populate_metric_worker.html#PopulateMetricWorker.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flux.populate_metric_worker.PopulateMetricWorker.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Called when the process intializes.</p>
 </dd></dl>
 
@@ -356,21 +374,21 @@ Graphite and sends them to the Skyline Graphite.</p>
 </div>
 <div class="section" id="module-flux.uploaded_data_worker">
 <span id="skyline-flux-uploaded-data-worker-module"></span><h2>skyline.flux.uploaded_data_worker module<a class="headerlink" href="#module-flux.uploaded_data_worker" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<dl class="py class">
 <dt id="flux.uploaded_data_worker.UploadedDataWorker">
-<em class="property">class </em><code class="descname">UploadedDataWorker</code><span class="sig-paren">(</span><em>parent_pid</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/uploaded_data_worker.html#UploadedDataWorker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flux.uploaded_data_worker.UploadedDataWorker" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">multiprocessing.process.Process</span></code></p>
-<p>The worker grabs data files from the <a class="reference internal" href="skyline.html#settings.DATA_UPLOADS_PATH" title="settings.DATA_UPLOADS_PATH"><code class="xref py py-mod docutils literal"><span class="pre">settings.DATA_UPLOADS_PATH</span></code></a> and
+<em class="property">class </em><code class="sig-name descname">UploadedDataWorker</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent_pid</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/uploaded_data_worker.html#UploadedDataWorker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flux.uploaded_data_worker.UploadedDataWorker" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">multiprocessing.context.Process</span></code></p>
+<p>The worker grabs data files from the <a class="reference internal" href="skyline.html#settings.DATA_UPLOADS_PATH" title="settings.DATA_UPLOADS_PATH"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.DATA_UPLOADS_PATH</span></code></a> and
 processes the data files and sends to data to Graphite.</p>
-<dl class="method">
+<dl class="py method">
 <dt id="flux.uploaded_data_worker.UploadedDataWorker.check_if_parent_is_alive">
-<code class="descname">check_if_parent_is_alive</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/uploaded_data_worker.html#UploadedDataWorker.check_if_parent_is_alive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flux.uploaded_data_worker.UploadedDataWorker.check_if_parent_is_alive" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">check_if_parent_is_alive</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/uploaded_data_worker.html#UploadedDataWorker.check_if_parent_is_alive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flux.uploaded_data_worker.UploadedDataWorker.check_if_parent_is_alive" title="Permalink to this definition">¶</a></dt>
 <dd><p>Self explanatory.</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="flux.uploaded_data_worker.UploadedDataWorker.run">
-<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/uploaded_data_worker.html#UploadedDataWorker.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flux.uploaded_data_worker.UploadedDataWorker.run" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/uploaded_data_worker.html#UploadedDataWorker.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flux.uploaded_data_worker.UploadedDataWorker.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Called when the process intializes.</p>
 </dd></dl>
 
@@ -379,20 +397,20 @@ processes the data files and sends to data to Graphite.</p>
 </div>
 <div class="section" id="module-flux.worker">
 <span id="skyline-flux-worker-module"></span><h2>skyline.flux.worker module<a class="headerlink" href="#module-flux.worker" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<dl class="py class">
 <dt id="flux.worker.Worker">
-<em class="property">class </em><code class="descname">Worker</code><span class="sig-paren">(</span><em>queue</em>, <em>parent_pid</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/worker.html#Worker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flux.worker.Worker" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">multiprocessing.process.Process</span></code></p>
+<em class="property">class </em><code class="sig-name descname">Worker</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">queue</span></em>, <em class="sig-param"><span class="n">parent_pid</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/worker.html#Worker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flux.worker.Worker" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">multiprocessing.context.Process</span></code></p>
 <p>The worker processes metric from the queue and sends them to Graphite.</p>
-<dl class="method">
+<dl class="py method">
 <dt id="flux.worker.Worker.check_if_parent_is_alive">
-<code class="descname">check_if_parent_is_alive</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/worker.html#Worker.check_if_parent_is_alive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flux.worker.Worker.check_if_parent_is_alive" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">check_if_parent_is_alive</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/worker.html#Worker.check_if_parent_is_alive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flux.worker.Worker.check_if_parent_is_alive" title="Permalink to this definition">¶</a></dt>
 <dd><p>Self explanatory.</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="flux.worker.Worker.run">
-<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/worker.html#Worker.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flux.worker.Worker.run" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/flux/worker.html#Worker.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#flux.worker.Worker.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Called when the process intializes.</p>
 </dd></dl>
 
@@ -406,15 +424,16 @@ processes the data files and sends to data to Graphite.</p>
 
 
            </div>
+           
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="skyline.horizon.html" class="btn btn-neutral float-right" title="skyline.horizon package" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="skyline.horizon.html" class="btn btn-neutral float-right" title="skyline.horizon package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="skyline.crucible.html" class="btn btn-neutral" title="skyline.crucible package" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="skyline.crucible.html" class="btn btn-neutral float-left" title="skyline.crucible package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -423,11 +442,19 @@ processes the data files and sends to data to Graphite.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
+        
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -439,36 +466,15 @@ processes the data files and sends to data to Graphite.</p>
   </div>
   
 
-
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'2.0.0',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

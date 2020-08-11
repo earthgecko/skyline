@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,50 +11,48 @@
   
 
   
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
+
+  
+  
+  
   
 
   
-
-  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-
-  
-  
-    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  
-
-  
-    <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-  
-
-  
-        <link rel="index" title="Index"
-              href="genindex.html"/>
-        <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 2.0.0 documentation" href="index.html"/>
-        <link rel="next" title="Running Skyline in a Python 2.7 virtualenv" href="running-in-python-virtualenv-py2.html"/>
-        <link rel="prev" title="Getting started" href="getting-started.html"/> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Installation" href="installation.html" />
+    <link rel="prev" title="Getting started" href="getting-started.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
+   
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
-            <a href="index.html" class="icon icon-home"> Skyline
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
 
           
@@ -82,32 +79,35 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
             
-                <ul class="current">
+              
+            
+            
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Running Skyline in a Python virtualenv</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#sudo"><code class="docutils literal"><span class="pre">sudo</span></code></a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#sudo"><code class="docutils literal notranslate"><span class="pre">sudo</span></code></a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#howto-python-virtualenv-skyline">HOWTO Python virtualenv Skyline</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#dependencies">Dependencies</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#virtualenv">virtualenv</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#openssl-optional">openssl (optional)</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#python-version">Python version</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#create-a-skyline-python-virtualenv">Create a Skyline Python virtualenv</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alerts.html">Alerts</a></li>
-<li class="toctree-l1"><a class="reference internal" href="docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
@@ -124,6 +124,7 @@
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
@@ -131,12 +132,10 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#reliability">Reliability</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
-<li class="toctree-l1"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What’s new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a></li>
@@ -145,40 +144,61 @@
             
           
         </div>
+        
       </div>
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="index.html">Skyline</a>
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Skyline</a>
+        
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="index.html">Docs</a> &raquo;</li>
-      
-    <li>Running Skyline in a Python virtualenv</li>
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Running Skyline in a Python virtualenv</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
-            <a href="_sources/running-in-python-virtualenv.txt" rel="nofollow"> View page source</a>
+            
+            <a href="_sources/running-in-python-virtualenv.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -189,13 +209,13 @@
 <p>Running Skyline in a Python virtualenv is the recommended way to run
 Skyline. This allows for Skyline apps and all dependencies to be
 isolated from the system Python version and packages and allows Skyline
-be be run with a specific version of Python and as importantly specific
+to be run with a specific version of Python and as importantly specific
 versions of the dependencies packages.</p>
 <p>The possible overhead of adding Python virtualenv functionality to any
 configuration management is probably worth the effort in the long run.</p>
 <div class="section" id="sudo">
-<h2><code class="docutils literal"><span class="pre">sudo</span></code><a class="headerlink" href="#sudo" title="Permalink to this headline">¶</a></h2>
-<p>Use <code class="docutils literal"><span class="pre">sudo</span></code> appropriately for your environment wherever necessary.</p>
+<h2><code class="docutils literal notranslate"><span class="pre">sudo</span></code><a class="headerlink" href="#sudo" title="Permalink to this headline">¶</a></h2>
+<p>Use <code class="docutils literal notranslate"><span class="pre">sudo</span></code> appropriately for your environment wherever necessary.</p>
 <div class="section" id="howto-python-virtualenv-skyline">
 <h3>HOWTO Python virtualenv Skyline<a class="headerlink" href="#howto-python-virtualenv-skyline" title="Permalink to this headline">¶</a></h3>
 </div>
@@ -205,18 +225,20 @@ configuration management is probably worth the effort in the long run.</p>
 <p>Building Python versions from the Python sources in Python virtualenv
 requires the following system dependencies:</p>
 <ul class="simple">
-<li>RedHat family</li>
+<li><p>RedHat family - only CentOS 8 is tested, for el6 and el7 deps see <a class="reference external" href="running-in-python-virtualenv-py2.html">Running in
+a Python 2.7 virtualenv</a> .</p></li>
 </ul>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>yum -y install epel-release
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>yum -y install epel-release
+<span class="c1"># CentOS 8 only tested</span>
 yum -y install autoconf zlib-devel openssl-devel sqlite-devel bzip2-devel <span class="se">\</span>
-  gcc gcc-c++ readline-devel ncurses-devel gdbm-devel compat-readline5 <span class="se">\</span>
-  freetype-devel libpng-devel python-pip wget tar git
+  gcc gcc-c++ readline-devel ncurses-devel gdbm-devel freetype-devel <span class="se">\</span>
+  libpng-devel python38 wget tar git xz-devel
 </pre></div>
 </div>
 <ul class="simple">
-<li>Debian family</li>
+<li><p>Debian family - only tested on Ubuntu 16.04 and 18.04</p></li>
 </ul>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>apt-get -y install build-essential
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>apt-get -y install build-essential
 apt-get -y install autoconf zlib1g-dev libssl-dev libsqlite3-dev libbz2-dev <span class="se">\</span>
   libreadline6-dev libgdbm-dev libncurses5 libncurses5-dev libncursesw5 <span class="se">\</span>
   libfreetype6-dev libxft-dev python-pip wget tar git
@@ -227,29 +249,41 @@ apt-get -y install autoconf zlib1g-dev libssl-dev libsqlite3-dev libbz2-dev <spa
 <h2>virtualenv<a class="headerlink" href="#virtualenv" title="Permalink to this headline">¶</a></h2>
 <p>Regardless of your OS as long as you have pip installed you can install
 virtualenv. <em>NOTE:</em> if you are using a version of Python virtualenv
-already, this may not suit your setup.</p>
-<p>virtualenv must be &gt;= 15.0.1 and &lt;16.0.0 due to some recent changes in pip,
-setuptools and virtualenv, see <strong>Recent changes in the pip environment</strong> section
-in <a class="reference external" href="requirements.html#recent-changes-in-the-pip-environment">Requirements</a>
-for more details.</p>
+already, this may not suit your set up.</p>
 <p>This is using your <strong>system</strong> pip at this point only to install virtualenv.</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>pip install <span class="s1">&#39;virtualenv==15.2.0&#39;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># CentOS 8</span>
+pip3 install --user <span class="nv">virtualenv</span><span class="o">==</span><span class="m">16</span>.7.9
+
+<span class="c1"># Ubuntu 16.04 and 18.04</span>
+pip install <span class="nv">virtualenv</span><span class="o">==</span><span class="m">16</span>.7.9
+</pre></div>
+</div>
+</div>
+<div class="section" id="openssl-optional">
+<h2>openssl (optional)<a class="headerlink" href="#openssl-optional" title="Permalink to this headline">¶</a></h2>
+<p>Depending on your OS if it is a bit older you may need to compile Python with a
+newer version of openssl.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">openssl_version</span><span class="o">=</span><span class="s2">&quot;1.1.1g&quot;</span>
+mkdir /opt/openssl
+mkdir -p <span class="s2">&quot;/usr/local/openssl/openssl-</span><span class="si">${</span><span class="nv">openssl_version</span><span class="si">}</span><span class="s2">&quot;</span>
+<span class="nb">cd</span> /opt/openssl
+wget -q <span class="s2">&quot;https://www.openssl.org/source/openssl-</span><span class="si">${</span><span class="nv">openssl_version</span><span class="si">}</span><span class="s2">.tar.gz&quot;</span>
+tar -zxvf <span class="s2">&quot;openssl-</span><span class="si">${</span><span class="nv">openssl_version</span><span class="si">}</span><span class="s2">.tar.gz&quot;</span>
+<span class="nb">cd</span> <span class="s2">&quot;/opt/openssl/openssl-</span><span class="si">${</span><span class="nv">openssl_version</span><span class="si">}</span><span class="s2">&quot;</span>
+/opt/openssl/openssl-<span class="si">${</span><span class="nv">openssl_version</span><span class="si">}</span>/config --prefix<span class="o">=</span>/usr/local/openssl/openssl-<span class="si">${</span><span class="nv">openssl_version</span><span class="si">}</span> --openssldir<span class="o">=</span>/usr/local/openssl/openssl-<span class="si">${</span><span class="nv">openssl_version</span><span class="si">}</span>
+make
+make install
 </pre></div>
 </div>
 </div>
 <div class="section" id="python-version">
 <h2>Python version<a class="headerlink" href="#python-version" title="Permalink to this headline">¶</a></h2>
-<div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">Python-2.7.14 should still work as well, but all documentation has
-been updated to use Python-2.7.16.</p>
-</div>
-<p>Below we use the path <code class="docutils literal"><span class="pre">/opt/python_virtualenv</span></code>, which you can substitute
-with any path you choose.  We are going to use the Python-2.7.16 source and
-build and install an isolated Python-2.7.16, this has no effect on your system
+<p>Below we use the path <code class="docutils literal notranslate"><span class="pre">/opt/python_virtualenv</span></code>, which you can substitute
+with any path you choose.  We are going to use the Python-3.8.3 source and
+build and install an isolated Python-3.8.3, this has no effect on your system
 Python:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nv">PYTHON_VERSION</span><span class="o">=</span><span class="s2">&quot;2.7.16&quot;</span>
-<span class="nv">PYTHON_MAJOR_VERSION</span><span class="o">=</span><span class="s2">&quot;2.7&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">PYTHON_VERSION</span><span class="o">=</span><span class="s2">&quot;3.8.3&quot;</span>
+<span class="nv">PYTHON_MAJOR_VERSION</span><span class="o">=</span><span class="s2">&quot;3.8&quot;</span>
 <span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="o">=</span><span class="s2">&quot;/opt/python_virtualenv&quot;</span>
 
 mkdir -p <span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/versions/</span><span class="si">${</span><span class="nv">PYTHON_VERSION</span><span class="si">}</span><span class="s2">&quot;</span>
@@ -260,7 +294,20 @@ wget -q <span class="s2">&quot;https://www.python.org/ftp/python/</span><span cl
 tar -zxvf <span class="s2">&quot;Python-</span><span class="si">${</span><span class="nv">PYTHON_VERSION</span><span class="si">}</span><span class="s2">.tgz&quot;</span>
 
 <span class="nb">cd</span> <span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span>/versions/<span class="si">${</span><span class="nv">PYTHON_VERSION</span><span class="si">}</span>/Python-<span class="si">${</span><span class="nv">PYTHON_VERSION</span><span class="si">}</span>
+
+<span class="c1"># TAKE NOTE THERE ARE 2 DIFFERENT ./configure options depending on which</span>
+<span class="c1"># openssl your are using</span>
+
+<span class="c1"># 1. CONFIGURE with system openssl</span>
 ./configure --prefix<span class="o">=</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span>/versions/<span class="si">${</span><span class="nv">PYTHON_VERSION</span><span class="si">}</span>
+
+<span class="c1"># 2. SELF COMPILED OPENSSL ONLY</span>
+<span class="c1"># If you want to compile with a version of openssl that you compiled use the</span>
+<span class="c1"># following configure command instead</span>
+<span class="nv">with_openssl_configure</span><span class="o">=</span><span class="s2">&quot;--with-openssl=/usr/local/openssl/openssl-</span><span class="si">${</span><span class="nv">openssl_version</span><span class="si">}</span><span class="s2"> &quot;</span>
+<span class="nb">echo</span> <span class="s2">&quot;SSL=/usr/local/openssl/openssl-</span><span class="si">${</span><span class="nv">openssl_version</span><span class="si">}</span><span class="s2">&quot;</span> &gt;&gt; Modules/Setup.local
+<span class="nv">LDFLAGS</span><span class="o">=</span>-Wl,-rpath<span class="o">=</span><span class="si">${</span><span class="nv">with_openssl</span><span class="si">}</span>/lib ./configure --prefix<span class="o">=</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span>/versions/<span class="si">${</span><span class="nv">PYTHON_VERSION</span><span class="si">}</span> <span class="si">${</span><span class="nv">with_openssl_configure</span><span class="si">}</span>
+
 make
 
 <span class="c1"># Optionally here if you have the time or interest you can run</span>
@@ -269,47 +316,38 @@ make
 make altinstall
 </pre></div>
 </div>
-<p>You will now have a Python-2.7.16 environment with the Python
-executable: <code class="docutils literal"><span class="pre">/opt/python_virtualenv/versions/2.7.16/bin/python2.7</span></code></p>
+<p>You will now have a Python-3.8.3 environment with the Python
+executable: <code class="docutils literal notranslate"><span class="pre">/opt/python_virtualenv/versions/3.8.3/bin/python3.8</span></code></p>
 </div>
 <div class="section" id="create-a-skyline-python-virtualenv">
 <h2>Create a Skyline Python virtualenv<a class="headerlink" href="#create-a-skyline-python-virtualenv" title="Permalink to this headline">¶</a></h2>
-<p>A word of warning relating to pip, setuptools and distribute if you have
-opted not to use the above as you have Python virtualenv already. As of
-virtualenv 15.0.1 the pip community adopted the new pkg_resources
-_markerlib package structure, which means the following in the
-virtualenv context:</p>
-<ul class="simple">
-<li>distribute cannot be installed</li>
-<li>pip must be &gt;=8.1.0</li>
-<li>setuptools must be &gt;=20.2.2</li>
-</ul>
-<p>Once again using Python-2.7.16:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nv">PYTHON_VERSION</span><span class="o">=</span><span class="s2">&quot;2.7.16&quot;</span>
-<span class="nv">PYTHON_MAJOR_VERSION</span><span class="o">=</span><span class="s2">&quot;2.7&quot;</span>
+<p>Once again using Python-3.8.3:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">PYTHON_VERSION</span><span class="o">=</span><span class="s2">&quot;3.8.3&quot;</span>
+<span class="nv">PYTHON_MAJOR_VERSION</span><span class="o">=</span><span class="s2">&quot;3.8&quot;</span>
 <span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="o">=</span><span class="s2">&quot;/opt/python_virtualenv&quot;</span>
-<span class="nv">PROJECT</span><span class="o">=</span><span class="s2">&quot;skyline-py2716&quot;</span>
+<span class="nv">PROJECT</span><span class="o">=</span><span class="s2">&quot;skyline-py383&quot;</span>
 
 <span class="nb">cd</span> <span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/projects&quot;</span>
 virtualenv --python<span class="o">=</span><span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/versions/</span><span class="si">${</span><span class="nv">PYTHON_VERSION</span><span class="si">}</span><span class="s2">/bin/python</span><span class="si">${</span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="si">}</span><span class="s2">&quot;</span> <span class="s2">&quot;</span><span class="nv">$PROJECT</span><span class="s2">&quot;</span>
 </pre></div>
 </div>
-<p>Make sure to add the <code class="docutils literal"><span class="pre">/etc/skyline/skyline.conf</span></code> file - see
+<p>Make sure to add the <code class="docutils literal notranslate"><span class="pre">/etc/skyline/skyline.conf</span></code> file with the Python - see
 <a class="reference external" href="installation.html">Installation</a></p>
 </div>
 </div>
 
 
            </div>
+           
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="running-in-python-virtualenv-py2.html" class="btn btn-neutral float-right" title="Running Skyline in a Python 2.7 virtualenv" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="installation.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="getting-started.html" class="btn btn-neutral" title="Getting started" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="getting-started.html" class="btn btn-neutral float-left" title="Getting started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -318,11 +356,19 @@ virtualenv --python<span class="o">=</span><span class="s2">&quot;</span><span c
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
+        
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -334,36 +380,15 @@ virtualenv --python<span class="o">=</span><span class="s2">&quot;</span><span c
   </div>
   
 
-
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'2.0.0',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

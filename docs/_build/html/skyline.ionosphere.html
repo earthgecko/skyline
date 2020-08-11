@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,51 +11,48 @@
   
 
   
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
+
+  
+  
+  
   
 
   
-
-  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-
-  
-  
-    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  
-
-  
-    <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-  
-
-  
-        <link rel="index" title="Index"
-              href="genindex.html"/>
-        <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 2.0.0 documentation" href="index.html"/>
-        <link rel="up" title="skyline package" href="skyline.html"/>
-        <link rel="next" title="skyline.luminosity package" href="skyline.luminosity.html"/>
-        <link rel="prev" title="skyline.horizon package" href="skyline.horizon.html"/> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="skyline.luminosity package" href="skyline.luminosity.html" />
+    <link rel="prev" title="skyline.horizon package" href="skyline.horizon.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
+   
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
-            <a href="index.html" class="icon icon-home"> Skyline
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
 
           
@@ -83,22 +79,24 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
             
-                <ul class="current">
+              
+            
+            
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
-<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alerts.html">Alerts</a></li>
-<li class="toctree-l1"><a class="reference internal" href="docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
@@ -115,6 +113,7 @@
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
@@ -122,12 +121,10 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#reliability">Reliability</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
-<li class="toctree-l1"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What’s new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="skyline.html">skyline package</a><ul class="current">
@@ -140,7 +137,7 @@
 <li class="toctree-l3"><a class="reference internal" href="skyline.horizon.html">skyline.horizon package</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">skyline.ionosphere package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-ionosphere.agent">skyline.ionosphere.agent module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#skyline-ionosphere-agent-module">skyline.ionosphere.agent module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-ionosphere.common_functions">skyline.ionosphere.common_functions module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-ionosphere.echo">skyline.ionosphere.echo module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-ionosphere.ionosphere">skyline.ionosphere.ionosphere module</a></li>
@@ -160,7 +157,7 @@
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-algorithm_exceptions">skyline.algorithm_exceptions module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-create_matplotlib_graph">skyline.create_matplotlib_graph module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="skyline.html#skyline-custom-algorithms-module">skyline.custom_algorithms module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-custom_algorithms">skyline.custom_algorithms module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-custom_algorithms_to_run">skyline.custom_algorithms_to_run module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-database">skyline.database module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-external_alert_configs">skyline.external_alert_configs module</a></li>
@@ -181,42 +178,63 @@
             
           
         </div>
+        
       </div>
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="index.html">Skyline</a>
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Skyline</a>
+        
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="index.html">Docs</a> &raquo;</li>
-      
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
           <li><a href="skyline.html">skyline package</a> &raquo;</li>
-      
-    <li>skyline.ionosphere package</li>
+        
+      <li>skyline.ionosphere package</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
-            <a href="_sources/skyline.ionosphere.txt" rel="nofollow"> View page source</a>
+            
+            <a href="_sources/skyline.ionosphere.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -227,143 +245,142 @@
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="module-ionosphere.agent">
-<span id="skyline-ionosphere-agent-module"></span><h2>skyline.ionosphere.agent module<a class="headerlink" href="#module-ionosphere.agent" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="ionosphere.agent.IonosphereAgent">
-<em class="property">class </em><code class="descname">IonosphereAgent</code><a class="reference internal" href="_modules/ionosphere/agent.html#IonosphereAgent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.agent.IonosphereAgent" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
-<dt id="ionosphere.agent.IonosphereAgent.purge_old_data_dirs">
-<code class="descname">purge_old_data_dirs</code><span class="sig-paren">(</span><em>dir_path</em>, <em>older_than</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/agent.html#IonosphereAgent.purge_old_data_dirs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.agent.IonosphereAgent.purge_old_data_dirs" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-<dl class="method">
-<dt id="ionosphere.agent.IonosphereAgent.run">
-<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/agent.html#IonosphereAgent.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.agent.IonosphereAgent.run" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
-
-</dd></dl>
-
+<div class="section" id="skyline-ionosphere-agent-module">
+<h2>skyline.ionosphere.agent module<a class="headerlink" href="#skyline-ionosphere-agent-module" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="module-ionosphere.common_functions">
 <span id="skyline-ionosphere-common-functions-module"></span><h2>skyline.ionosphere.common_functions module<a class="headerlink" href="#module-ionosphere.common_functions" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
+<dl class="py function">
 <dt id="ionosphere.common_functions.get_metrics_db_object">
-<code class="descname">get_metrics_db_object</code><span class="sig-paren">(</span><em>base_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/common_functions.html#get_metrics_db_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.common_functions.get_metrics_db_object" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_metrics_db_object</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">base_name</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/common_functions.html#get_metrics_db_object"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.common_functions.get_metrics_db_object" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the data of a metric from metrics table as an object and populates
 memcached with a dict of the object</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>base_name</strong> (<em>str</em>) &#8211; the metric base_name</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">metrics_db_object</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">object</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>base_name</strong> (<em>str</em>) – the metric base_name</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>metrics_db_object</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>object</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="ionosphere.common_functions.get_calculated_features">
-<code class="descname">get_calculated_features</code><span class="sig-paren">(</span><em>calculated_feature_file</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/common_functions.html#get_calculated_features"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.common_functions.get_calculated_features" title="Permalink to this definition">¶</a></dt>
-<dd><p>Called by <code class="xref py py-class docutils literal"><span class="pre">spin_process</span></code> to
+<code class="sig-name descname">get_calculated_features</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">calculated_feature_file</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/common_functions.html#get_calculated_features"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.common_functions.get_calculated_features" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called by <code class="xref py py-class docutils literal notranslate"><span class="pre">spin_process</span></code> to
 create a list of feature_names and their calc_values.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>calculated_feature_file</strong> (<em>str</em>) &#8211; the full path and file name of the
-features.transposed.csv file</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">calculated_features</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>calculated_feature_file</strong> (<em>str</em>) – the full path and file name of the
+features.transposed.csv file</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>calculated_features</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="ionosphere.common_functions.minmax_scale_check">
-<code class="descname">minmax_scale_check</code><span class="sig-paren">(</span><em>fp_id_metric_ts</em>, <em>anomalous_timeseries</em>, <em>range_tolerance</em>, <em>range_tolerance_percentage</em>, <em>fp_id</em>, <em>base_name</em>, <em>metric_timestamp</em>, <em>features_percentage_diff</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/common_functions.html#minmax_scale_check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.common_functions.minmax_scale_check" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<code class="sig-name descname">minmax_scale_check</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fp_id_metric_ts</span></em>, <em class="sig-param"><span class="n">anomalous_timeseries</span></em>, <em class="sig-param"><span class="n">range_tolerance</span></em>, <em class="sig-param"><span class="n">range_tolerance_percentage</span></em>, <em class="sig-param"><span class="n">fp_id</span></em>, <em class="sig-param"><span class="n">base_name</span></em>, <em class="sig-param"><span class="n">metric_timestamp</span></em>, <em class="sig-param"><span class="n">features_percentage_diff</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/common_functions.html#minmax_scale_check"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.common_functions.minmax_scale_check" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called by nothing yet.  Used to run a minmax scaling check and determine if
+the features_sum of the 2 minmax scaled timeseries match.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fp_id_metric_ts</strong> – </p></li>
+<li><p><strong>anomalous_timeseries</strong> – </p></li>
+<li><p><strong>range_tolerance</strong> – </p></li>
+</ul>
+</dd>
+</dl>
+<p>:param range_tolerance_percentage
+:param fp_id:
+:param base_name:
+:param metric_timestamp:
+:param features_percentage_diff:
+:type fp_id_metric_ts: int
+:return: (minmax_not_anomalous, minmax_fp_features_sum, minmax_fp_features_count, minmax_anomalous_features_sum, minmax_anomalous_features_count)
+:rtype: tuple</p>
+</dd></dl>
 
 </div>
 <div class="section" id="module-ionosphere.echo">
 <span id="skyline-ionosphere-echo-module"></span><h2>skyline.ionosphere.echo module<a class="headerlink" href="#module-ionosphere.echo" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
+<dl class="py function">
 <dt id="ionosphere.echo.echo_get_metric_from_metrics">
-<code class="descname">echo_get_metric_from_metrics</code><span class="sig-paren">(</span><em>base_name</em>, <em>engine</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/echo.html#echo_get_metric_from_metrics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.echo.echo_get_metric_from_metrics" title="Permalink to this definition">¶</a></dt>
-<dd><p>Called by <code class="xref py py-func docutils literal"><span class="pre">learn()</span></code> and returns the metric id and metric db object</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>timestamp</strong> (<em>int</em>) &#8211; timestamp at which learn was called</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">tuple</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">(int, object)</td>
-</tr>
-</tbody>
-</table>
+<code class="sig-name descname">echo_get_metric_from_metrics</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">base_name</span></em>, <em class="sig-param"><span class="n">engine</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/echo.html#echo_get_metric_from_metrics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.echo.echo_get_metric_from_metrics" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called by <code class="xref py py-func docutils literal notranslate"><span class="pre">learn()</span></code> and returns the metric id and metric db object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>timestamp</strong> (<em>int</em>) – timestamp at which learn was called</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>tuple</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(int, object)</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="ionosphere.echo.ionosphere_echo">
-<code class="descname">ionosphere_echo</code><span class="sig-paren">(</span><em>base_name</em>, <em>mirage_full_duration</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/echo.html#ionosphere_echo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.echo.ionosphere_echo" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">ionosphere_echo</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">base_name</span></em>, <em class="sig-param"><span class="n">mirage_full_duration</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/echo.html#ionosphere_echo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.echo.ionosphere_echo" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </div>
 <div class="section" id="module-ionosphere.ionosphere">
 <span id="skyline-ionosphere-ionosphere-module"></span><h2>skyline.ionosphere.ionosphere module<a class="headerlink" href="#module-ionosphere.ionosphere" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<dl class="py class">
 <dt id="ionosphere.ionosphere.Ionosphere">
-<em class="property">class </em><code class="descname">Ionosphere</code><span class="sig-paren">(</span><em>parent_pid</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/ionosphere.html#Ionosphere"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.ionosphere.Ionosphere" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">threading.Thread</span></code></p>
+<em class="property">class </em><code class="sig-name descname">Ionosphere</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent_pid</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/ionosphere.html#Ionosphere"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.ionosphere.Ionosphere" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">threading.Thread</span></code></p>
 <p>The Ionosphere class which controls the ionosphere thread and spawned
 processes.</p>
-<dl class="method">
+<dl class="py method">
 <dt id="ionosphere.ionosphere.Ionosphere.check_if_parent_is_alive">
-<code class="descname">check_if_parent_is_alive</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/ionosphere.html#Ionosphere.check_if_parent_is_alive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.ionosphere.Ionosphere.check_if_parent_is_alive" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">check_if_parent_is_alive</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/ionosphere.html#Ionosphere.check_if_parent_is_alive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.ionosphere.Ionosphere.check_if_parent_is_alive" title="Permalink to this definition">¶</a></dt>
 <dd><p>Self explanatory</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="ionosphere.ionosphere.Ionosphere.mysql_insert">
-<code class="descname">mysql_insert</code><span class="sig-paren">(</span><em>insert</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/ionosphere.html#Ionosphere.mysql_insert"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.ionosphere.Ionosphere.mysql_insert" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">mysql_insert</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">insert</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/ionosphere.html#Ionosphere.mysql_insert"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.ionosphere.Ionosphere.mysql_insert" title="Permalink to this definition">¶</a></dt>
 <dd><p>Insert data into mysql table</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>insert</strong> (<em>str</em>) &#8211; the insert string</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">int</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">int or boolean</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>insert</strong> (<em>str</em>) – the insert string</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>int</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>int or boolean</p>
+</dd>
+</dl>
 <ul>
-<li><p class="first"><strong>Example usage</strong>:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">query</span> <span class="o">=</span> <span class="s1">&#39;insert into host (host) VALUES (&#39;</span><span class="n">this_host</span><span class="s1">&#39;)&#39;</span>
+<li><p><strong>Example usage</strong>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">query</span> <span class="o">=</span> <span class="s1">&#39;insert into host (host) VALUES (&#39;</span><span class="n">this_host</span><span class="s1">&#39;)&#39;</span>
 <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mysql_insert</span><span class="p">(</span><span class="n">query</span><span class="p">)</span>
 </pre></div>
 </div>
 </li>
 </ul>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<ul class="last simple">
-<li><dl class="first docutils">
-<dt>If the MySQL query fails a boolean will be returned not a tuple</dt>
-<dd><ul class="first last">
-<li><code class="docutils literal"><span class="pre">False</span></code></li>
-<li><code class="docutils literal"><span class="pre">None</span></code></li>
+<p class="admonition-title">Note</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt>If the MySQL query fails a boolean will be returned not a tuple</dt><dd><ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">False</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">None</span></code></p></li>
 </ul>
 </dd>
 </dl>
@@ -372,57 +389,54 @@ processes.</p>
 </div>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="ionosphere.ionosphere.Ionosphere.purge_old_data_dirs">
-<code class="descname">purge_old_data_dirs</code><span class="sig-paren">(</span><em>dir_path</em>, <em>older_than</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/ionosphere.html#Ionosphere.purge_old_data_dirs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.ionosphere.Ionosphere.purge_old_data_dirs" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">purge_old_data_dirs</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">dir_path</span></em>, <em class="sig-param"><span class="n">older_than</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/ionosphere.html#Ionosphere.purge_old_data_dirs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.ionosphere.Ionosphere.purge_old_data_dirs" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="ionosphere.ionosphere.Ionosphere.remove_metric_check_file">
-<code class="descname">remove_metric_check_file</code><span class="sig-paren">(</span><em>metric_check_file</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/ionosphere.html#Ionosphere.remove_metric_check_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.ionosphere.Ionosphere.remove_metric_check_file" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">remove_metric_check_file</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">metric_check_file</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/ionosphere.html#Ionosphere.remove_metric_check_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.ionosphere.Ionosphere.remove_metric_check_file" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="ionosphere.ionosphere.Ionosphere.manage_ionosphere_unique_metrics">
-<code class="descname">manage_ionosphere_unique_metrics</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/ionosphere.html#Ionosphere.manage_ionosphere_unique_metrics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.ionosphere.Ionosphere.manage_ionosphere_unique_metrics" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">manage_ionosphere_unique_metrics</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/ionosphere.html#Ionosphere.manage_ionosphere_unique_metrics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.ionosphere.Ionosphere.manage_ionosphere_unique_metrics" title="Permalink to this definition">¶</a></dt>
 <dd><ul class="simple">
-<li>Create a Redis set of all Ionosphere enabled metrics.</li>
-<li>Manage the ionosphere.untrainable_metrics set, removing items when
-they &#8216;expire&#8217;</li>
+<li><p>Create a Redis set of all Ionosphere enabled metrics.</p></li>
+<li><p>Manage the ionosphere.untrainable_metrics set, removing items when
+they ‘expire’</p></li>
 </ul>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>i</strong> &#8211; python process id</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">returns True</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>i</strong> – python process id</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>returns True</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="ionosphere.ionosphere.Ionosphere.new_load_metric_vars">
-<code class="descname">new_load_metric_vars</code><span class="sig-paren">(</span><em>metric_vars_file</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/ionosphere.html#Ionosphere.new_load_metric_vars"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.ionosphere.Ionosphere.new_load_metric_vars" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">new_load_metric_vars</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">metric_vars_file</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/ionosphere.html#Ionosphere.new_load_metric_vars"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.ionosphere.Ionosphere.new_load_metric_vars" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load the metric variables for a check from a metric check variables file</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>metric_vars_file</strong> (<em>str</em>) &#8211; the path and filename to the metric variables files</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the metric_vars list or <code class="docutils literal"><span class="pre">False</span></code></td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>metric_vars_file</strong> (<em>str</em>) – the path and filename to the metric variables files</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>the metric_vars list or <code class="docutils literal notranslate"><span class="pre">False</span></code></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="ionosphere.ionosphere.Ionosphere.spawn_learn_process">
-<code class="descname">spawn_learn_process</code><span class="sig-paren">(</span><em>i</em>, <em>timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/ionosphere.html#Ionosphere.spawn_learn_process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.ionosphere.Ionosphere.spawn_learn_process" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">spawn_learn_process</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">i</span></em>, <em class="sig-param"><span class="n">timestamp</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/ionosphere.html#Ionosphere.spawn_learn_process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.ionosphere.Ionosphere.spawn_learn_process" title="Permalink to this definition">¶</a></dt>
 <dd><p>Spawn a process to learn.</p>
 <p>This is used for Ionosphere to learn if anomalous metrics remain
 anomalous over time, as the resolution decreases.  It follows the
@@ -432,60 +446,52 @@ processes cannot create memory leaks as the process always terminates or
 is terminated this prevents any memory leaks in the parent.</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="ionosphere.ionosphere.Ionosphere.process_ionosphere_echo">
-<code class="descname">process_ionosphere_echo</code><span class="sig-paren">(</span><em>i</em>, <em>metric_check_file</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/ionosphere.html#Ionosphere.process_ionosphere_echo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.ionosphere.Ionosphere.process_ionosphere_echo" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">process_ionosphere_echo</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">i</span></em>, <em class="sig-param"><span class="n">metric_check_file</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/ionosphere.html#Ionosphere.process_ionosphere_echo"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.ionosphere.Ionosphere.process_ionosphere_echo" title="Permalink to this definition">¶</a></dt>
 <dd><p>Spawn a process_ionosphere_echo check to create features profiles at
 settings.FULL_DURATION for Mirage metrics</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>i</strong> (<em>object</em>) &#8211; python process id</li>
-<li><strong>metric_check_file</strong> (<em>str</em>) &#8211; full path to the metric check file</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>i</strong> (<em>object</em>) – python process id</p></li>
+<li><p><strong>metric_check_file</strong> (<em>str</em>) – full path to the metric check file</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">boolean</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">boolean</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>boolean</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>boolean</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="ionosphere.ionosphere.Ionosphere.spin_process">
-<code class="descname">spin_process</code><span class="sig-paren">(</span><em>i</em>, <em>metric_check_file</em>, <em>ionosphere_busy</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/ionosphere.html#Ionosphere.spin_process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.ionosphere.Ionosphere.spin_process" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">spin_process</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">i</span></em>, <em class="sig-param"><span class="n">metric_check_file</span></em>, <em class="sig-param"><span class="n">ionosphere_busy</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/ionosphere.html#Ionosphere.spin_process"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.ionosphere.Ionosphere.spin_process" title="Permalink to this definition">¶</a></dt>
 <dd><p>Assign an anomalous metric to check against features profiles.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>i</strong> (<em>object</em>) &#8211; python process id</li>
-<li><strong>metric_check_file</strong> (<em>str</em>) &#8211; full path to the metric check file</li>
-<li><strong>ionosphere_busy</strong> (<em>boolen</em>) &#8211; whether to Ionosphere manage and alternate
-between normal Ionosphere and echo analysis</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>i</strong> (<em>object</em>) – python process id</p></li>
+<li><p><strong>metric_check_file</strong> (<em>str</em>) – full path to the metric check file</p></li>
+<li><p><strong>ionosphere_busy</strong> (<em>boolen</em>) – whether to Ionosphere manage and alternate
+between normal Ionosphere and echo analysis</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">int</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">int or boolean</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>int</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>int or boolean</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="ionosphere.ionosphere.Ionosphere.run">
-<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/ionosphere.html#Ionosphere.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.ionosphere.Ionosphere.run" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/ionosphere.html#Ionosphere.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.ionosphere.Ionosphere.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Called when the process intializes.</p>
 </dd></dl>
 
@@ -494,146 +500,139 @@ between normal Ionosphere and echo analysis</li>
 </div>
 <div class="section" id="module-ionosphere.layers">
 <span id="skyline-ionosphere-layers-module"></span><h2>skyline.ionosphere.layers module<a class="headerlink" href="#module-ionosphere.layers" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
+<dl class="py function">
 <dt id="ionosphere.layers.run_layer_algorithms">
-<code class="descname">run_layer_algorithms</code><span class="sig-paren">(</span><em>base_name</em>, <em>layers_id</em>, <em>timeseries</em>, <em>layers_count</em>, <em>layers_checked</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/layers.html#run_layer_algorithms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.layers.run_layer_algorithms" title="Permalink to this definition">¶</a></dt>
-<dd><p>Called by <code class="xref py py-class docutils literal"><span class="pre">spin_process</span></code> to
+<code class="sig-name descname">run_layer_algorithms</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">base_name</span></em>, <em class="sig-param"><span class="n">layers_id</span></em>, <em class="sig-param"><span class="n">timeseries</span></em>, <em class="sig-param"><span class="n">layers_count</span></em>, <em class="sig-param"><span class="n">layers_checked</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/layers.html#run_layer_algorithms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.layers.run_layer_algorithms" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called by <code class="xref py py-class docutils literal notranslate"><span class="pre">spin_process</span></code> to
 evaluate anomalies against a custom layers boundary algorithm.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>metric</strong> (<em>str</em>) &#8211; the metric base_name</li>
-<li><strong>layers_id</strong> &#8211; the layer id</li>
-<li><strong>timeseries</strong> (<em>list</em>) &#8211; the time series list</li>
-<li><strong>layers_count</strong> (<em>int</em>) &#8211; the number of layers for the metric</li>
-<li><strong>layers_checked</strong> (<em>int</em>) &#8211; the number of layers that have been checked</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>metric</strong> (<em>str</em>) – the metric base_name</p></li>
+<li><p><strong>layers_id</strong> – the layer id</p></li>
+<li><p><strong>timeseries</strong> (<em>list</em>) – the time series list</p></li>
+<li><p><strong>layers_count</strong> (<em>int</em>) – the number of layers for the metric</p></li>
+<li><p><strong>layers_checked</strong> (<em>int</em>) – the number of layers that have been checked</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">True or False</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">boolean</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>True or False</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>boolean</p>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
 <div class="section" id="module-ionosphere.learn">
 <span id="skyline-ionosphere-learn-module"></span><h2>skyline.ionosphere.learn module<a class="headerlink" href="#module-ionosphere.learn" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
+<dl class="py function">
 <dt id="ionosphere.learn.learn_load_metric_vars">
-<code class="descname">learn_load_metric_vars</code><span class="sig-paren">(</span><em>metric_vars_file</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/learn.html#learn_load_metric_vars"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.learn.learn_load_metric_vars" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">learn_load_metric_vars</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">metric_vars_file</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/learn.html#learn_load_metric_vars"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.learn.learn_load_metric_vars" title="Permalink to this definition">¶</a></dt>
 <dd><p>Load the metric variables for a check from a metric check variables file</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>metric_vars_file</strong> (<em>str</em>) &#8211; the path and filename to the metric variables files</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">the metric_vars list or <code class="docutils literal"><span class="pre">False</span></code></td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>metric_vars_file</strong> (<em>str</em>) – the path and filename to the metric variables files</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>the metric_vars list or <code class="docutils literal notranslate"><span class="pre">False</span></code></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="ionosphere.learn.get_learn_json">
-<code class="descname">get_learn_json</code><span class="sig-paren">(</span><em>learn_json_file</em>, <em>base_name</em>, <em>use_full_duration</em>, <em>metric_timestamp</em>, <em>learn_full_duration_days</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/learn.html#get_learn_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.learn.get_learn_json" title="Permalink to this definition">¶</a></dt>
-<dd><p>Called by <code class="xref py py-func docutils literal"><span class="pre">learn()</span></code> to surface a use_full_duration timeseries for the
+<code class="sig-name descname">get_learn_json</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">learn_json_file</span></em>, <em class="sig-param"><span class="n">base_name</span></em>, <em class="sig-param"><span class="n">use_full_duration</span></em>, <em class="sig-param"><span class="n">metric_timestamp</span></em>, <em class="sig-param"><span class="n">learn_full_duration_days</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/learn.html#get_learn_json"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.learn.get_learn_json" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called by <code class="xref py py-func docutils literal notranslate"><span class="pre">learn()</span></code> to surface a use_full_duration timeseries for the
 metric from Graphite and save as json.</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="ionosphere.learn.get_metric_from_metrics">
-<code class="descname">get_metric_from_metrics</code><span class="sig-paren">(</span><em>base_name</em>, <em>engine</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/learn.html#get_metric_from_metrics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.learn.get_metric_from_metrics" title="Permalink to this definition">¶</a></dt>
-<dd><p>Called by <code class="xref py py-func docutils literal"><span class="pre">learn()</span></code> and returns the metric id and metric db object</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>timestamp</strong> (<em>int</em>) &#8211; timestamp at which learn was called</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">tuple</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">(int, object)</td>
-</tr>
-</tbody>
-</table>
+<code class="sig-name descname">get_metric_from_metrics</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">base_name</span></em>, <em class="sig-param"><span class="n">engine</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/learn.html#get_metric_from_metrics"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.learn.get_metric_from_metrics" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called by <code class="xref py py-func docutils literal notranslate"><span class="pre">learn()</span></code> and returns the metric id and metric db object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>timestamp</strong> (<em>int</em>) – timestamp at which learn was called</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>tuple</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(int, object)</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="ionosphere.learn.get_ionosphere_fp_ids">
-<code class="descname">get_ionosphere_fp_ids</code><span class="sig-paren">(</span><em>base_name</em>, <em>metrics_id</em>, <em>engine</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/learn.html#get_ionosphere_fp_ids"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.learn.get_ionosphere_fp_ids" title="Permalink to this definition">¶</a></dt>
-<dd><p>Called by <code class="xref py py-func docutils literal"><span class="pre">learn()</span></code> and returns the fp_ids list</p>
+<code class="sig-name descname">get_ionosphere_fp_ids</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">base_name</span></em>, <em class="sig-param"><span class="n">metrics_id</span></em>, <em class="sig-param"><span class="n">engine</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/learn.html#get_ionosphere_fp_ids"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.learn.get_ionosphere_fp_ids" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called by <code class="xref py py-func docutils literal notranslate"><span class="pre">learn()</span></code> and returns the fp_ids list</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="ionosphere.learn.get_ionosphere_record">
-<code class="descname">get_ionosphere_record</code><span class="sig-paren">(</span><em>fp_id</em>, <em>engine</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/learn.html#get_ionosphere_record"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.learn.get_ionosphere_record" title="Permalink to this definition">¶</a></dt>
-<dd><p>Called by <code class="xref py py-func docutils literal"><span class="pre">learn()</span></code> and returns the fp row object</p>
+<code class="sig-name descname">get_ionosphere_record</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fp_id</span></em>, <em class="sig-param"><span class="n">engine</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/learn.html#get_ionosphere_record"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.learn.get_ionosphere_record" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called by <code class="xref py py-func docutils literal notranslate"><span class="pre">learn()</span></code> and returns the fp row object</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="ionosphere.learn.remove_work_list_from_redis_set">
-<code class="descname">remove_work_list_from_redis_set</code><span class="sig-paren">(</span><em>learn_metric_list</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/learn.html#remove_work_list_from_redis_set"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.learn.remove_work_list_from_redis_set" title="Permalink to this definition">¶</a></dt>
-<dd><p>Called by <code class="xref py py-func docutils literal"><span class="pre">learn()</span></code> to remove a work item from the Redis set</p>
+<code class="sig-name descname">remove_work_list_from_redis_set</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">learn_metric_list</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/learn.html#remove_work_list_from_redis_set"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.learn.remove_work_list_from_redis_set" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called by <code class="xref py py-func docutils literal notranslate"><span class="pre">learn()</span></code> to remove a work item from the Redis set</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="ionosphere.learn.ionosphere_learn">
-<code class="descname">ionosphere_learn</code><span class="sig-paren">(</span><em>timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/learn.html#ionosphere_learn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.learn.ionosphere_learn" title="Permalink to this definition">¶</a></dt>
-<dd><p>Called by <code class="xref py py-class docutils literal"><span class="pre">spawn_learn_process</span></code> to
+<code class="sig-name descname">ionosphere_learn</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">timestamp</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/ionosphere/learn.html#ionosphere_learn"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#ionosphere.learn.ionosphere_learn" title="Permalink to this definition">¶</a></dt>
+<dd><p>Called by <code class="xref py py-class docutils literal notranslate"><span class="pre">spawn_learn_process</span></code> to
 re-evaluate anomalies and such, like creating learning features profiles,
 when a human makes a features profile and the automated creation of learnt
 features profiles and learn features profiles.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>timestamp</strong> (<em>int</em>) &#8211; timestamp at which learn was called</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">True or False</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">boolean</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>timestamp</strong> (<em>int</em>) – timestamp at which learn was called</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>True or False</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>boolean</p>
+</dd>
+</dl>
 <p>learn uses a Redis set as a work queue.  This set is populated with the
 learn jobs, jobs being pieces of work that learn needs to do.  The learn
 Redis work set list item has the following elements:</p>
-<p><code class="docutils literal"><span class="pre">[str(deadline_type),</span> <span class="pre">str(job_type),</span> <span class="pre">int(metric_timestamp),</span> <span class="pre">str(base_name),</span> <span class="pre">int(parent_id),</span> <span class="pre">int(generation)]</span></code></p>
+<p><code class="docutils literal notranslate"><span class="pre">[str(deadline_type),</span> <span class="pre">str(job_type),</span> <span class="pre">int(metric_timestamp),</span> <span class="pre">str(base_name),</span> <span class="pre">int(parent_id),</span> <span class="pre">int(generation)]</span></code></p>
 <p>Each job_type has a deadline_time that learn calculates from the job_type</p>
 <p>ionosphere.learn.work deadlines - deadline_types</p>
 <ul class="simple">
-<li>Hard - missing a deadline is a total system failure.</li>
-<li>Firm - infrequent deadline misses are tolerable, but may degrade the
-system&#8217;s quality of service. The usefulness of a result is zero after
-its deadline.</li>
-<li>Soft - the usefulness of a result degrades after its deadline, thereby
-degrading the system&#8217;s quality of service.</li>
+<li><p>Hard - missing a deadline is a total system failure.</p></li>
+<li><p>Firm - infrequent deadline misses are tolerable, but may degrade the
+system’s quality of service. The usefulness of a result is zero after
+its deadline.</p></li>
+<li><p>Soft - the usefulness of a result degrades after its deadline, thereby
+degrading the system’s quality of service.</p></li>
 </ul>
 <p>references:</p>
 <ul class="simple">
-<li>Brian L. Troutwine &#64;bltroutwine - seminal Belgium 2014 devopsdays
+<li><p>Brian L. Troutwine &#64;bltroutwine - seminal Belgium 2014 devopsdays
 presentation - Automation with Humans in Mind: Making Complex Systems Predictable, Reliable and Humane -
 <a class="reference external" href="https://legacy.devopsdays.org/events/2014-belgium/proposals/automation-with-humans-in-mind/">https://legacy.devopsdays.org/events/2014-belgium/proposals/automation-with-humans-in-mind/</a> -
-video - <a class="reference external" href="http://www.ustream.tv/recorded/54703629">http://www.ustream.tv/recorded/54703629</a></li>
-<li><a class="reference external" href="https://en.wikipedia.org/wiki/Real-time_computing#Criteria_for_real-time_computing">https://en.wikipedia.org/wiki/Real-time_computing#Criteria_for_real-time_computing</a></li>
+video - <a class="reference external" href="http://www.ustream.tv/recorded/54703629">http://www.ustream.tv/recorded/54703629</a></p></li>
+<li><p><a class="reference external" href="https://en.wikipedia.org/wiki/Real-time_computing#Criteria_for_real-time_computing">https://en.wikipedia.org/wiki/Real-time_computing#Criteria_for_real-time_computing</a></p></li>
 </ul>
 <p>learn work types:</p>
 <ul class="simple">
-<li><strong>learn_fp_human</strong> - Create a features profile for the human created features profile
-after <code class="docutils literal"><span class="pre">LEARN_VALID_TIMESERIES_OLDER_THAN_SECONDS</span></code> at <code class="docutils literal"><span class="pre">LEARN_FULL_DURATION_DAYS</span></code>
+<li><p><strong>learn_fp_human</strong> - Create a features profile for the human created features profile
+after <code class="docutils literal notranslate"><span class="pre">LEARN_VALID_TIMESERIES_OLDER_THAN_SECONDS</span></code> at <code class="docutils literal notranslate"><span class="pre">LEARN_FULL_DURATION_DAYS</span></code>
 whatever those maybe it, will find out.  Copy the training_data dir to
-<a class="reference internal" href="skyline.html#settings.IONOSPHERE_LEARN_FOLDER" title="settings.IONOSPHERE_LEARN_FOLDER"><code class="xref py py-mod docutils literal"><span class="pre">settings.IONOSPHERE_LEARN_FOLDER</span></code></a> and the metric_check_file is rewritten
-with the determined (<code class="docutils literal"><span class="pre">LEARN_FULL_DURATION_DAYS</span></code> * 86400) as the new
+<a class="reference internal" href="skyline.html#settings.IONOSPHERE_LEARN_FOLDER" title="settings.IONOSPHERE_LEARN_FOLDER"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.IONOSPHERE_LEARN_FOLDER</span></code></a> and the metric_check_file is rewritten
+with the determined (<code class="docutils literal notranslate"><span class="pre">LEARN_FULL_DURATION_DAYS</span></code> * 86400) as the new
 full_duration.  Then this features profile is created as a generation 0
 features profile at the learn use_full_duration seconds.  This jobs is
 only ever add via the Ionosphere UI
@@ -644,27 +643,27 @@ profile was created later.  This prevents the pollution of metric_timestamp
 training data features profile.  This is a new features profile.  Is it
 generation 0 or generation 1?  The more I think I am edging to generation
 1, however as long as the first automated full_duration profiles that they
-create are generation 1 as well... hmm the generation game... TDB
-- deadline: &#8216;Soft&#8217;</li>
-<li><strong>learn_fp_automatic</strong> - Create a features profile for the automatic
+create are generation 1 as well… hmm the generation game… TDB
+- deadline: ‘Soft’</p></li>
+<li><p><strong>learn_fp_automatic</strong> - Create a features profile for the automatic
 created features profile as per the learn_fp_human above.
-- deadline: &#8216;Soft&#8217;</li>
-<li><strong>learn_fp_generation</strong> - Create a features profile for the Ionosphere
-training_data metric after <code class="docutils literal"><span class="pre">LEARN_VALID_TIMESERIES_OLDER_THAN_SECONDS</span></code> at
-<code class="docutils literal"><span class="pre">LEARN_FULL_DURATION_DAYS</span></code> have passed and compare to other known
-<code class="docutils literal"><span class="pre">LEARN_FULL_DURATION_DAYS</span></code> features profiles.  If it matches any, then the
+- deadline: ‘Soft’</p></li>
+<li><p><strong>learn_fp_generation</strong> - Create a features profile for the Ionosphere
+training_data metric after <code class="docutils literal notranslate"><span class="pre">LEARN_VALID_TIMESERIES_OLDER_THAN_SECONDS</span></code> at
+<code class="docutils literal notranslate"><span class="pre">LEARN_FULL_DURATION_DAYS</span></code> have passed and compare to other known
+<code class="docutils literal notranslate"><span class="pre">LEARN_FULL_DURATION_DAYS</span></code> features profiles.  If it matches any, then the
 metric training_data is added as features profile incremented by 1
-generation if <code class="docutils literal"><span class="pre">MAX_GENERATIONS</span></code> is not breached.
-- deadline: &#8216;Soft&#8217;</li>
-<li><strong>learn_fp_learnt</strong> - Create a features profile for the Ionosphere learnt
-features profile after <code class="docutils literal"><span class="pre">LEARN_VALID_TIMESERIES_OLDER_THAN_SECONDS</span></code> at <code class="docutils literal"><span class="pre">LEARN_FULL_DURATION_DAYS</span></code>
+generation if <code class="docutils literal notranslate"><span class="pre">MAX_GENERATIONS</span></code> is not breached.
+- deadline: ‘Soft’</p></li>
+<li><p><strong>learn_fp_learnt</strong> - Create a features profile for the Ionosphere learnt
+features profile after <code class="docutils literal notranslate"><span class="pre">LEARN_VALID_TIMESERIES_OLDER_THAN_SECONDS</span></code> at <code class="docutils literal notranslate"><span class="pre">LEARN_FULL_DURATION_DAYS</span></code>
 whatever those maybe it, will find out.  Copies the training_data dir to
-<a class="reference internal" href="skyline.html#settings.IONOSPHERE_LEARN_FOLDER" title="settings.IONOSPHERE_LEARN_FOLDER"><code class="xref py py-mod docutils literal"><span class="pre">settings.IONOSPHERE_LEARN_FOLDER</span></code></a>/now_timestamp/ where the now_timestamp
+<a class="reference internal" href="skyline.html#settings.IONOSPHERE_LEARN_FOLDER" title="settings.IONOSPHERE_LEARN_FOLDER"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.IONOSPHERE_LEARN_FOLDER</span></code></a>/now_timestamp/ where the now_timestamp
 relaces the metric_timestamp context and the metric_check_file has the
 full_duration replace by the relevant use_full_duration.  Then this
 features profile is created as an incremented generation features profile
 at use_full_duration via learn.
-- deadline: &#8216;Soft&#8217;</li>
+- deadline: ‘Soft’</p></li>
 </ul>
 </dd></dl>
 
@@ -676,15 +675,16 @@ at use_full_duration via learn.
 
 
            </div>
+           
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="skyline.luminosity.html" class="btn btn-neutral float-right" title="skyline.luminosity package" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="skyline.luminosity.html" class="btn btn-neutral float-right" title="skyline.luminosity package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="skyline.horizon.html" class="btn btn-neutral" title="skyline.horizon package" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="skyline.horizon.html" class="btn btn-neutral float-left" title="skyline.horizon package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -693,11 +693,19 @@ at use_full_duration via learn.
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
+        
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -709,36 +717,15 @@ at use_full_duration via learn.
   </div>
   
 
-
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'2.0.0',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>
