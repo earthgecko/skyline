@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,49 +11,46 @@
   
 
   
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
+
+  
+  
+  
   
 
   
-
-  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
-  
-
-  
-  
-    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  
-
-  
-    <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
-  
-
-  
-        <link rel="index" title="Index"
-              href="../../genindex.html"/>
-        <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 2.0.0 documentation" href="../../index.html"/>
-        <link rel="up" title="Module code" href="../index.html"/> 
-
-  
-  <script src="../../_static/js/modernizr.min.js"></script>
-
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
+   
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
-            <a href="../../index.html" class="icon icon-home"> Skyline
+            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
 
           
@@ -81,22 +77,24 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
             
-                <ul>
+              
+            
+            
+              <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
@@ -113,6 +111,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
@@ -120,12 +119,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html#reliability">Reliability</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../releases.html">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What’s new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../skyline.html">skyline package</a></li>
@@ -134,71 +131,90 @@
             
           
         </div>
+        
       </div>
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="../../index.html">Skyline</a>
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Skyline</a>
+        
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
+
+
+
+
+
+
+
+
+
+
 
 
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="../../index.html">Docs</a> &raquo;</li>
-      
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
           <li><a href="../index.html">Module code</a> &raquo;</li>
-      
-    <li>analyzer.analyzer_batch</li>
+        
+      <li>analyzer.analyzer_batch</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
-        
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
   <h1>Source code for analyzer.analyzer_batch</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="k">try</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">Queue</span> <span class="k">import</span> <span class="n">Empty</span>
+    <span class="kn">from</span> <span class="nn">Queue</span> <span class="kn">import</span> <span class="n">Empty</span>
 <span class="k">except</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">queue</span> <span class="k">import</span> <span class="n">Empty</span>
-<span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">time</span><span class="p">,</span> <span class="n">sleep</span>
-<span class="kn">from</span> <span class="nn">threading</span> <span class="k">import</span> <span class="n">Thread</span>
-<span class="kn">from</span> <span class="nn">collections</span> <span class="k">import</span> <span class="n">defaultdict</span>
+    <span class="kn">from</span> <span class="nn">queue</span> <span class="kn">import</span> <span class="n">Empty</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">time</span><span class="p">,</span> <span class="n">sleep</span>
+<span class="kn">from</span> <span class="nn">threading</span> <span class="kn">import</span> <span class="n">Thread</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">defaultdict</span>
 <span class="c1"># @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage</span>
 <span class="c1"># Use Redis sets in place of Manager().list to reduce memory and number of</span>
 <span class="c1"># processes</span>
 <span class="c1"># from multiprocessing import Process, Manager, Queue</span>
-<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="k">import</span> <span class="n">Process</span><span class="p">,</span> <span class="n">Queue</span>
-<span class="kn">from</span> <span class="nn">msgpack</span> <span class="k">import</span> <span class="n">Unpacker</span>
+<span class="kn">from</span> <span class="nn">multiprocessing</span> <span class="kn">import</span> <span class="n">Process</span><span class="p">,</span> <span class="n">Queue</span>
+<span class="kn">from</span> <span class="nn">msgpack</span> <span class="kn">import</span> <span class="n">Unpacker</span>
 <span class="kn">import</span> <span class="nn">os</span>
-<span class="kn">from</span> <span class="nn">os</span> <span class="k">import</span> <span class="n">kill</span><span class="p">,</span> <span class="n">getpid</span>
+<span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">kill</span><span class="p">,</span> <span class="n">getpid</span>
 <span class="kn">import</span> <span class="nn">traceback</span>
 <span class="kn">import</span> <span class="nn">re</span>
-<span class="kn">from</span> <span class="nn">sys</span> <span class="k">import</span> <span class="n">version_info</span>
+<span class="kn">from</span> <span class="nn">sys</span> <span class="kn">import</span> <span class="n">version_info</span>
 <span class="kn">import</span> <span class="nn">os.path</span>
-<span class="kn">from</span> <span class="nn">ast</span> <span class="k">import</span> <span class="n">literal_eval</span>
+<span class="kn">from</span> <span class="nn">ast</span> <span class="kn">import</span> <span class="n">literal_eval</span>
 
 <span class="kn">import</span> <span class="nn">settings</span>
-<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">write_data_to_file</span><span class="p">,</span> <span class="n">send_anomalous_metric_to</span><span class="p">,</span> <span class="n">mkdir_p</span><span class="p">,</span>
     <span class="n">filesafe_metricname</span><span class="p">,</span>
     <span class="c1"># @added 20170602 - Feature #2034: analyse_derivatives</span>
@@ -214,7 +230,7 @@
 <span class="c1"># @added 20200425 - Feature #3512: matched_or_regexed_in_list function</span>
 <span class="c1">#                   Feature #3508: ionosphere_untrainable_metrics</span>
 <span class="c1">#                   Feature #3486: analyzer_batch</span>
-<span class="kn">from</span> <span class="nn">matched_or_regexed_in_list</span> <span class="k">import</span> <span class="n">matched_or_regexed_in_list</span>
+<span class="kn">from</span> <span class="nn">matched_or_regexed_in_list</span> <span class="kn">import</span> <span class="n">matched_or_regexed_in_list</span>
 
 <span class="c1"># @modified 20200423 - Feature #3504: Handle airgaps in batch metrics</span>
 <span class="c1">#                      Feature #3480: batch_processing</span>
@@ -222,9 +238,9 @@
 <span class="c1"># Changed to algoritms_batch so there is no pollution and</span>
 <span class="c1"># analyzer and analyzer_batch are totally independent</span>
 <span class="c1"># from algorithms import run_selected_algorithm</span>
-<span class="kn">from</span> <span class="nn">algorithms_batch</span> <span class="k">import</span> <span class="n">run_selected_batch_algorithm</span>
+<span class="kn">from</span> <span class="nn">algorithms_batch</span> <span class="kn">import</span> <span class="n">run_selected_batch_algorithm</span>
 
-<span class="kn">from</span> <span class="nn">algorithm_exceptions</span> <span class="k">import</span> <span class="n">TooShort</span><span class="p">,</span> <span class="n">Stale</span><span class="p">,</span> <span class="n">Boring</span>
+<span class="kn">from</span> <span class="nn">algorithm_exceptions</span> <span class="kn">import</span> <span class="n">TooShort</span><span class="p">,</span> <span class="n">Stale</span><span class="p">,</span> <span class="n">Boring</span>
 
 <span class="c1"># TODO if settings.ENABLE_CRUCIBLE: and ENABLE_PANORAMA</span>
 <span class="c1">#    from spectrum import push_to_crucible</span>
@@ -256,7 +272,7 @@
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;warning :: ANALYZER_ENABLED is not declared in settings.py, defaults to True&#39;</span><span class="p">)</span>
 
 <span class="k">try</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">settings</span> <span class="k">import</span> <span class="n">BATCH_PROCESSING</span>
+    <span class="kn">from</span> <span class="nn">settings</span> <span class="kn">import</span> <span class="n">BATCH_PROCESSING</span>
 <span class="k">except</span><span class="p">:</span>
     <span class="n">BATCH_PROCESSING</span> <span class="o">=</span> <span class="kc">None</span>
 
@@ -278,6 +294,21 @@
     <span class="n">DEBUG_CUSTOM_ALGORITHMS</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">DEBUG_CUSTOM_ALGORITHMS</span>
 <span class="k">except</span><span class="p">:</span>
     <span class="n">DEBUG_CUSTOM_ALGORITHMS</span> <span class="o">=</span> <span class="kc">False</span>
+
+<span class="c1"># @added 20200727 - Feature #3650: ROOMBA_DO_NOT_PROCESS_BATCH_METRICS</span>
+<span class="c1">#                   Feature #3480: batch_processing</span>
+<span class="c1">#                   Feature #3486: analyzer_batch</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">settings</span> <span class="kn">import</span> <span class="n">ROOMBA_DO_NOT_PROCESS_BATCH_METRICS</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="n">ROOMBA_DO_NOT_PROCESS_BATCH_METRICS</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="k">if</span> <span class="n">ROOMBA_DO_NOT_PROCESS_BATCH_METRICS</span><span class="p">:</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">types</span> <span class="kn">import</span> <span class="n">TupleType</span>
+    <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+        <span class="n">eliminated_in_python3</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="kn">from</span> <span class="nn">redis</span> <span class="kn">import</span> <span class="n">WatchError</span>
+    <span class="kn">from</span> <span class="nn">msgpack</span> <span class="kn">import</span> <span class="n">packb</span>
 
 <span class="n">skyline_app_graphite_namespace</span> <span class="o">=</span> <span class="s1">&#39;skyline.</span><span class="si">%s%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">skyline_app</span><span class="p">,</span> <span class="n">SERVER_METRIC_PATH</span><span class="p">)</span>
 
@@ -305,7 +336,7 @@
 <span class="sd">    https://soundcloud.com/musicthatmakesmewannasurf/mixtape-2-w-kosson</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Initialize the AnalyzerBatch</span>
 
@@ -357,20 +388,62 @@
         <span class="c1"># Handle EXPIRATION_TIME</span>
         <span class="c1"># Ship to Analyzer, Mirage or Ionosphere</span>
 
-        <span class="n">raw_series</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">raw_series</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">metric_name</span><span class="p">)</span>
-        <span class="k">except</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get </span><span class="si">%s</span><span class="s1"> from Redis&#39;</span> <span class="o">%</span> <span class="n">metric_name</span><span class="p">)</span>
-            <span class="n">raw_series</span> <span class="o">=</span> <span class="kc">None</span>
-
         <span class="c1"># Make process-specific dicts</span>
         <span class="n">exceptions</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
         <span class="n">anomaly_breakdown</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
 
+        <span class="c1"># @added 20200728 - Feature #3480: batch_processing</span>
+        <span class="c1">#                   Feature #3486: analyzer_batch</span>
+        <span class="c1"># If multiple work items exist and the timestamp in the work item is</span>
+        <span class="c1"># older than the last analyzed timestamp reported by Redis key, just</span>
+        <span class="c1"># skip and remove the work item</span>
+        <span class="k">if</span> <span class="n">metric_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">):</span>
+            <span class="n">base_name</span> <span class="o">=</span> <span class="n">metric_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">base_name</span> <span class="o">=</span> <span class="n">metric_name</span>
+        <span class="c1"># Check the last_timestamp metric Redis key</span>
+        <span class="n">last_metric_timestamp_key</span> <span class="o">=</span> <span class="s1">&#39;last_timestamp.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">base_name</span>
+        <span class="n">redis_key_set</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">last_redis_timestamp</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">last_redis_timestamp_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn_decoded</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">last_metric_timestamp_key</span><span class="p">)</span>
+            <span class="n">last_redis_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">last_redis_timestamp_data</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get Redis key </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">last_metric_timestamp_key</span><span class="p">)</span>
+        <span class="n">get_raw_series</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">last_redis_timestamp</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">last_redis_timestamp</span> <span class="o">&gt;</span> <span class="n">last_analyzed_timestamp</span><span class="p">:</span>
+                <span class="n">get_raw_series</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;The </span><span class="si">%s</span><span class="s1"> is </span><span class="si">%s</span><span class="s1">, the passed last_analyzed_timestamp is </span><span class="si">%s</span><span class="s1">, not getting raw_series returning&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">last_metric_timestamp_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">last_redis_timestamp</span><span class="p">),</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="n">last_analyzed_timestamp</span><span class="p">)))</span>
+
+        <span class="n">raw_series</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># @modified 20200728 - Feature #3480: batch_processing</span>
+        <span class="c1">#                      Feature #3486: analyzer_batch</span>
+        <span class="c1"># Only resurface the timeseries if the work item timestamp is greater</span>
+        <span class="c1"># than the last analyzed timestamp reported by Redis key</span>
+        <span class="k">if</span> <span class="n">get_raw_series</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">raw_series</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">metric_name</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get </span><span class="si">%s</span><span class="s1"> from Redis&#39;</span> <span class="o">%</span> <span class="n">metric_name</span><span class="p">)</span>
+                <span class="n">raw_series</span> <span class="o">=</span> <span class="kc">None</span>
+
         <span class="k">if</span> <span class="ow">not</span> <span class="n">raw_series</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;No raw_series defined, returning&#39;</span><span class="p">)</span>
+
+            <span class="c1"># Remove for work list</span>
+            <span class="n">redis_set</span> <span class="o">=</span> <span class="s1">&#39;analyzer.batch&#39;</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">metric_name</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">last_analyzed_timestamp</span><span class="p">)]</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">srem</span><span class="p">(</span><span class="n">redis_set</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;analyzer_batch :: removed batch metric item - </span><span class="si">%s</span><span class="s1"> - from Redis set - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">redis_set</span><span class="p">))</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: analyzer_batch :: failed to remove batch metric item - </span><span class="si">%s</span><span class="s1"> - from Redis set - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">redis_set</span><span class="p">))</span>
+
             <span class="k">return</span>
 
         <span class="c1"># Determine the unique Mirage and Ionosphere metrics once, which are</span>
@@ -425,6 +498,144 @@
             <span class="k">del</span> <span class="n">raw_series</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="k">pass</span>
+
+        <span class="c1"># @added 20200727 - Feature #3650: ROOMBA_DO_NOT_PROCESS_BATCH_METRICS</span>
+        <span class="c1">#                   Feature #3480: batch_processing</span>
+        <span class="c1">#                   Feature #3486: analyzer_batch</span>
+        <span class="c1"># euthanize keys if not done in roomba, allows for backfill processing</span>
+        <span class="c1"># via analyzer_batch</span>
+        <span class="n">roombaed</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="n">ROOMBA_DO_NOT_PROCESS_BATCH_METRICS</span><span class="p">:</span>
+            <span class="n">now</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">time</span><span class="p">())</span>
+            <span class="n">duration</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span> <span class="o">+</span> <span class="n">settings</span><span class="o">.</span><span class="n">ROOMBA_GRACE_TIME</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">metric_name</span>
+            <span class="n">namespace_unique_metrics</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">unique_metrics&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">)</span>
+            <span class="n">euthanized</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">trimmed_keys</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">active_keys</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># Put pipe back in multi mode</span>
+                <span class="n">pipe</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">pipeline</span><span class="p">()</span>
+                <span class="c1"># WATCH the key</span>
+                <span class="n">pipe</span><span class="o">.</span><span class="n">watch</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                <span class="n">pipe</span><span class="o">.</span><span class="n">multi</span><span class="p">()</span>
+                <span class="c1"># There&#39;s one value. Purge if it&#39;s too old</span>
+                <span class="n">last_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                <span class="c1"># Do not purge if it has not been analyzed</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">last_timestamp</span> <span class="o">-</span> <span class="n">duration</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">last_analyzed_timestamp</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;batch_processing :: last_timestamp is </span><span class="si">%s</span><span class="s1">, but for roomba setting to the last_analyzed_timestamp (</span><span class="si">%s</span><span class="s1">) as it has not been analyzed&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">last_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">last_analyzed_timestamp</span><span class="p">)))</span>
+                    <span class="n">last_timestamp</span> <span class="o">=</span> <span class="n">last_analyzed_timestamp</span>
+                <span class="n">now</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">last_analyzed_timestamp</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;batch_processing :: doing roomba on </span><span class="si">%s</span><span class="s1"> with </span><span class="si">%s</span><span class="s1"> data points&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">))))</span>
+                <span class="n">roombaed</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">TupleType</span><span class="p">):</span>
+                            <span class="k">if</span> <span class="n">timeseries</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">last_timestamp</span> <span class="o">-</span> <span class="n">duration</span><span class="p">:</span>
+                                <span class="n">pipe</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                                <span class="n">pipe</span><span class="o">.</span><span class="n">srem</span><span class="p">(</span><span class="n">namespace_unique_metrics</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+                                <span class="n">pipe</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
+                                <span class="n">euthanized</span> <span class="o">+=</span> <span class="mi">1</span>
+                            <span class="n">timeseries</span> <span class="o">=</span> <span class="p">[]</span>
+                    <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">timeseries</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">tuple</span><span class="p">):</span>
+                            <span class="k">if</span> <span class="n">timeseries</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">now</span> <span class="o">-</span> <span class="n">duration</span><span class="p">:</span>
+                                <span class="n">pipe</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                                <span class="n">pipe</span><span class="o">.</span><span class="n">srem</span><span class="p">(</span><span class="n">namespace_unique_metrics</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+                                <span class="n">pipe</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
+                                <span class="n">euthanized</span> <span class="o">+=</span> <span class="mi">1</span>
+                            <span class="n">timeseries</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+                    <span class="n">timeseries</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="c1"># Check if the last value is too old and purge</span>
+                <span class="k">if</span> <span class="n">timeseries</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">now</span> <span class="o">-</span> <span class="n">duration</span><span class="p">:</span>
+                    <span class="n">pipe</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                    <span class="n">pipe</span><span class="o">.</span><span class="n">srem</span><span class="p">(</span><span class="n">namespace_unique_metrics</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+                    <span class="n">pipe</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
+                    <span class="n">euthanized</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">timeseries</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="c1"># Remove old datapoints and duplicates from timeseries</span>
+                <span class="n">temp</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+                <span class="n">temp_add</span> <span class="o">=</span> <span class="n">temp</span><span class="o">.</span><span class="n">add</span>
+                <span class="n">delta</span> <span class="o">=</span> <span class="n">now</span> <span class="o">-</span> <span class="n">duration</span>
+                <span class="n">trimmed</span> <span class="o">=</span> <span class="p">[</span>
+                    <span class="nb">tuple</span> <span class="k">for</span> <span class="nb">tuple</span> <span class="ow">in</span> <span class="n">timeseries</span>
+                    <span class="k">if</span> <span class="nb">tuple</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">delta</span> <span class="ow">and</span>
+                    <span class="nb">tuple</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">temp</span> <span class="ow">and</span> <span class="ow">not</span>
+                    <span class="n">temp_add</span><span class="p">(</span><span class="nb">tuple</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="p">]</span>
+                <span class="c1"># Purge if everything was deleted, set key otherwise</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">trimmed</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="c1"># Serialize and turn key back into not-an-array</span>
+                    <span class="n">btrimmed</span> <span class="o">=</span> <span class="n">packb</span><span class="p">(</span><span class="n">trimmed</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">trimmed</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">15</span><span class="p">:</span>
+                        <span class="n">value</span> <span class="o">=</span> <span class="n">btrimmed</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+                    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">trimmed</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">65535</span><span class="p">:</span>
+                        <span class="n">value</span> <span class="o">=</span> <span class="n">btrimmed</span><span class="p">[</span><span class="mi">3</span><span class="p">:]</span>
+                        <span class="n">trimmed_keys</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">value</span> <span class="o">=</span> <span class="n">btrimmed</span><span class="p">[</span><span class="mi">5</span><span class="p">:]</span>
+                        <span class="n">trimmed_keys</span> <span class="o">+=</span> <span class="mi">1</span>
+                    <span class="n">pipe</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+                    <span class="n">active_keys</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">pipe</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                    <span class="n">pipe</span><span class="o">.</span><span class="n">srem</span><span class="p">(</span><span class="n">namespace_unique_metrics</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
+                    <span class="n">euthanized</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">pipe</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
+            <span class="k">except</span> <span class="n">WatchError</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;batch_processing :: blocked from euthanizing </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">))</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="c1"># If something bad happens, zap the key and hope it goes away</span>
+                <span class="c1"># pipe.delete(key)</span>
+                <span class="c1"># pipe.srem(namespace_unique_metrics, key)</span>
+                <span class="c1"># pipe.execute()</span>
+                <span class="c1"># euthanized += 1</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">e</span><span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;batch_processing :: something bad happened but not euthanizing </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">))</span>
+            <span class="k">finally</span><span class="p">:</span>
+                <span class="n">pipe</span><span class="o">.</span><span class="n">reset</span><span class="p">()</span>
+            <span class="n">raw_series</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">raw_series</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">metric_name</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to get </span><span class="si">%s</span><span class="s1"> from Redis&#39;</span> <span class="o">%</span> <span class="n">metric_name</span><span class="p">)</span>
+                <span class="n">raw_series</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">raw_series</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;No raw_series defined after euthanizing </span><span class="si">%s</span><span class="s1">, returning&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">))</span>
+                <span class="c1"># Remove for work list</span>
+                <span class="n">redis_set</span> <span class="o">=</span> <span class="s1">&#39;analyzer.batch&#39;</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">metric_name</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">last_analyzed_timestamp</span><span class="p">)]</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">srem</span><span class="p">(</span><span class="n">redis_set</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">))</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;analyzer_batch :: removed batch metric item - </span><span class="si">%s</span><span class="s1"> - from Redis set - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">redis_set</span><span class="p">))</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: analyzer_batch :: failed to remove batch metric item - </span><span class="si">%s</span><span class="s1"> - from Redis set - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">data</span><span class="p">),</span> <span class="n">redis_set</span><span class="p">))</span>
+                <span class="k">return</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">unpacker</span> <span class="o">=</span> <span class="n">Unpacker</span><span class="p">(</span><span class="n">use_list</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                <span class="n">unpacker</span><span class="o">.</span><span class="n">feed</span><span class="p">(</span><span class="n">raw_series</span><span class="p">)</span>
+                <span class="n">timeseries</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">unpacker</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">roombaed</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;batch_processing :: after roomba </span><span class="si">%s</span><span class="s1"> has </span><span class="si">%s</span><span class="s1"> data points&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">timeseries</span><span class="p">))))</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">timeseries</span> <span class="o">=</span> <span class="p">[]</span>
+
+            <span class="c1"># @added 20200506 - Feature #3532: Sort all time series</span>
+            <span class="c1"># To ensure that there are no unordered timestamps in the time</span>
+            <span class="c1"># series which are artefacts of the collector or carbon-relay, sort</span>
+            <span class="c1"># all time series by timestamp before analysis.</span>
+            <span class="n">original_timeseries</span> <span class="o">=</span> <span class="n">timeseries</span>
+            <span class="k">if</span> <span class="n">original_timeseries</span><span class="p">:</span>
+                <span class="n">timeseries</span> <span class="o">=</span> <span class="n">sort_timeseries</span><span class="p">(</span><span class="n">original_timeseries</span><span class="p">)</span>
+                <span class="k">del</span> <span class="n">original_timeseries</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">raw_series</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
 
         <span class="n">timestamps_to_analyse</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="c1"># Reverse the time series so that only the first (last) items now to be</span>
@@ -514,7 +725,12 @@
                 <span class="nb">str</span><span class="p">(</span><span class="n">number_of_timestamps_to_analyze</span><span class="p">),</span> <span class="n">metric_name</span><span class="p">,</span>
                 <span class="nb">str</span><span class="p">(</span><span class="n">last_analyzed_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">last_redis_data_timestamp</span><span class="p">)))</span>
 
-        <span class="n">base_name</span> <span class="o">=</span> <span class="n">metric_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="c1"># @modified 20200728 - Bug #3652: Handle multiple metrics in base_name conversion</span>
+        <span class="c1"># base_name = metric_name.replace(settings.FULL_NAMESPACE, &#39;&#39;, 1)</span>
+        <span class="k">if</span> <span class="n">metric_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">):</span>
+            <span class="n">base_name</span> <span class="o">=</span> <span class="n">metric_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">base_name</span> <span class="o">=</span> <span class="n">metric_name</span>
 
         <span class="c1"># @added 20200425 - Feature #3508: ionosphere.untrainable_metrics</span>
         <span class="c1"># Determine if any metrcs have negatives values some they can be</span>
@@ -639,6 +855,8 @@
                 <span class="k">except</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to add metric to Redis new_non_derivative_metrics set&#39;</span><span class="p">)</span>
+
+        <span class="n">not_anomalos_count</span> <span class="o">=</span> <span class="mi">0</span>
 
         <span class="c1"># Distill timeseries strings into lists</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">batch_timestamp</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">timestamps_to_analyse</span><span class="p">):</span>
@@ -783,9 +1001,15 @@
                         <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to set Redis key </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">analyzer_batch_metric_anomaly_key</span><span class="p">)</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">if</span> <span class="n">redis_key_set</span><span class="p">:</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;not anomalous :: </span><span class="si">%s</span><span class="s1"> at </span><span class="si">%s</span><span class="s1"> with </span><span class="si">%s</span><span class="s1">, set Redis key </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                            <span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">int_metric_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">datapoint</span><span class="p">),</span>
-                            <span class="n">last_metric_timestamp_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">int_metric_timestamp</span><span class="p">)))</span>
+                        <span class="n">not_anomalos_count</span> <span class="o">+=</span> <span class="mi">1</span>
+                        <span class="c1"># @modified 20200728 - Feature #3480: batch_processing</span>
+                        <span class="c1">#                      Feature #3486: analyzer_batch</span>
+                        <span class="c1"># Only log on the last data point, not on all</span>
+                        <span class="k">if</span> <span class="n">int_metric_timestamp</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">last_redis_data_timestamp</span><span class="p">):</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;not anomalous :: </span><span class="si">%s</span><span class="s1"> at </span><span class="si">%s</span><span class="s1"> with </span><span class="si">%s</span><span class="s1"> (along with </span><span class="si">%s</span><span class="s1"> other not anomalous data points), set Redis key </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                                <span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">int_metric_timestamp</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">datapoint</span><span class="p">),</span>
+                                <span class="nb">str</span><span class="p">(</span><span class="n">not_anomalos_count</span><span class="p">),</span>
+                                <span class="n">last_metric_timestamp_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">int_metric_timestamp</span><span class="p">)))</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;not anomalous :: </span><span class="si">%s</span><span class="s1"> at </span><span class="si">%s</span><span class="s1"> with </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
                             <span class="n">base_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">int_metric_timestamp</span><span class="p">),</span>
@@ -1124,8 +1348,12 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span>
                         <span class="n">last_metric_timestamp_key</span><span class="p">,</span> <span class="mi">2592000</span><span class="p">,</span>
                         <span class="n">int_metric_timestamp</span><span class="p">)</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;set Redis key </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1">, even though it is too short&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                        <span class="n">last_metric_timestamp_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">int_metric_timestamp</span><span class="p">)))</span>
+                    <span class="c1"># @modified 20200728 - Feature #3480: batch_processing</span>
+                    <span class="c1">#                      Feature #3486: analyzer_batch</span>
+                    <span class="c1"># Only log on the last data point, not on all</span>
+                    <span class="k">if</span> <span class="n">int_metric_timestamp</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">last_redis_data_timestamp</span><span class="p">):</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;set Redis key </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1">, even though it is too short&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">last_metric_timestamp_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">int_metric_timestamp</span><span class="p">)))</span>
                 <span class="k">except</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to set Redis key </span><span class="si">%s</span><span class="s1">, even though it is too short&#39;</span> <span class="o">%</span> <span class="n">last_metric_timestamp_key</span><span class="p">)</span>
             <span class="k">except</span> <span class="n">Stale</span><span class="p">:</span>
@@ -1139,8 +1367,12 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span>
                         <span class="n">last_metric_timestamp_key</span><span class="p">,</span> <span class="mi">2592000</span><span class="p">,</span>
                         <span class="n">int_metric_timestamp</span><span class="p">)</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;set Redis key </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1">, even though it is stale&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                        <span class="n">last_metric_timestamp_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">int_metric_timestamp</span><span class="p">)))</span>
+                    <span class="c1"># @modified 20200728 - Feature #3480: batch_processing</span>
+                    <span class="c1">#                      Feature #3486: analyzer_batch</span>
+                    <span class="c1"># Only log on the last data point, not on all</span>
+                    <span class="k">if</span> <span class="n">int_metric_timestamp</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">last_redis_data_timestamp</span><span class="p">):</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;set Redis key </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1">, even though it is stale&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">last_metric_timestamp_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">int_metric_timestamp</span><span class="p">)))</span>
                 <span class="k">except</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to set Redis key </span><span class="si">%s</span><span class="s1">, even though it is stale&#39;</span> <span class="o">%</span> <span class="n">last_metric_timestamp_key</span><span class="p">)</span>
             <span class="k">except</span> <span class="n">Boring</span><span class="p">:</span>
@@ -1154,8 +1386,12 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">redis_conn</span><span class="o">.</span><span class="n">setex</span><span class="p">(</span>
                         <span class="n">last_metric_timestamp_key</span><span class="p">,</span> <span class="mi">2592000</span><span class="p">,</span>
                         <span class="n">int_metric_timestamp</span><span class="p">)</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;set Redis key </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1">, even though it is boring&#39;</span> <span class="o">%</span> <span class="p">(</span>
-                        <span class="n">last_metric_timestamp_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">int_metric_timestamp</span><span class="p">)))</span>
+                    <span class="c1"># @modified 20200728 - Feature #3480: batch_processing</span>
+                    <span class="c1">#                      Feature #3486: analyzer_batch</span>
+                    <span class="c1"># Only log on the last data point, not on all</span>
+                    <span class="k">if</span> <span class="n">int_metric_timestamp</span> <span class="o">==</span> <span class="nb">int</span><span class="p">(</span><span class="n">last_redis_data_timestamp</span><span class="p">):</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;set Redis key </span><span class="si">%s</span><span class="s1"> to </span><span class="si">%s</span><span class="s1">, even though it is boring&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                            <span class="n">last_metric_timestamp_key</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">int_metric_timestamp</span><span class="p">)))</span>
                 <span class="k">except</span><span class="p">:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: failed to set Redis key </span><span class="si">%s</span><span class="s1">, even though it is boring&#39;</span> <span class="o">%</span> <span class="n">last_metric_timestamp_key</span><span class="p">)</span>
             <span class="k">except</span><span class="p">:</span>
@@ -1376,6 +1612,7 @@
 
             <span class="n">metric_name</span> <span class="o">=</span> <span class="kc">None</span>
             <span class="n">last_analyzed_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
+
             <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">analyzer_batch</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">analyzer_batch_work</span><span class="p">):</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">batch_processing_metric</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">analyzer_batch</span><span class="p">)</span>
@@ -1389,6 +1626,26 @@
                     <span class="n">last_analyzed_timestamp</span> <span class="o">=</span> <span class="kc">None</span>
                     <span class="n">batch_processing_metric</span> <span class="o">=</span> <span class="kc">None</span>
                     <span class="n">sleep</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+
+            <span class="c1"># @added 20200728 - Feature #3480: batch_processing</span>
+            <span class="c1">#                   Feature #3486: analyzer_batch</span>
+            <span class="c1"># If multiple work items exist sort them by oldest timestamp and</span>
+            <span class="c1"># process the item with the oldest timestamp first</span>
+            <span class="k">if</span> <span class="n">analyzer_batch_work</span><span class="p">:</span>
+                <span class="n">unsorted_analyzer_batch_work</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">analyzer_batch</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">analyzer_batch_work</span><span class="p">):</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">batch_processing_metric</span> <span class="o">=</span> <span class="n">literal_eval</span><span class="p">(</span><span class="n">analyzer_batch</span><span class="p">)</span>
+                        <span class="n">metric_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">batch_processing_metric</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                        <span class="n">last_analyzed_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">batch_processing_metric</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                        <span class="n">unsorted_analyzer_batch_work</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">metric_name</span><span class="p">,</span> <span class="n">last_analyzed_timestamp</span><span class="p">])</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: could not determine details from analyzer_batch entry&#39;</span><span class="p">)</span>
+                <span class="n">sorted_analyzer_batch_work</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">unsorted_analyzer_batch_work</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">metric_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">sorted_analyzer_batch_work</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">last_analyzed_timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">sorted_analyzer_batch_work</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">batch_processing_metric</span> <span class="o">=</span> <span class="p">[</span><span class="n">metric_name</span><span class="p">,</span> <span class="n">last_analyzed_timestamp</span><span class="p">]</span>
 
             <span class="k">if</span> <span class="ow">not</span> <span class="n">metric_name</span><span class="p">:</span>
                 <span class="k">break</span>
@@ -1520,6 +1777,7 @@
 </pre></div>
 
            </div>
+           
           </div>
           <footer>
   
@@ -1528,11 +1786,19 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
+        
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -1544,36 +1810,15 @@
   </div>
   
 
-
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../../',
-            VERSION:'2.0.0',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
-        };
-    </script>
-      <script type="text/javascript" src="../../_static/jquery.js"></script>
-      <script type="text/javascript" src="../../_static/underscore.js"></script>
-      <script type="text/javascript" src="../../_static/doctools.js"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

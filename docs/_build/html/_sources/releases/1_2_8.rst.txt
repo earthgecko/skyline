@@ -1,0 +1,178 @@
+========================================
+1.2.8 - the luminosity and dawn branches
+========================================
+
+v1.2.8-luminosity - October 17, 2018
+
+New functionality
+-----------------
+
+- This use of approximately close with Ionosphere layers
+- A testing build script for CentOS 6 & 7 and Ubuntu 16.06
+- The ability to validate all learnt features profiles for a metric
+- Slack alerting
+- Updated dependencies
+
+Minor bug fixes and maintenance
+-------------------------------
+
+- Updated dependencies
+- A fix to Analyzer Ionosphere alerts
+- A fix to alert graph timestamp parameters order
+
+Changes from v1.2.7
+-------------------
+
+- Bumped version to v1.2.8
+- Added the skyline.dawn.sh build script for testing and dawn documentation
+  (2548, 2550)
+- Updated dependencies (2588)
+- Updated algorithms adding the rcond=-1 parameter to the np.linalg.lstsq
+  functions (2588)
+- Updated documentation for v1.2.8 and log strings (2598)
+- Fixed Analyzer/Ionosphere alerting.  Due to ionosphere_alerts being added to
+  the self.all_anomalous_metrics after Analyzer metrics here we need to ensure
+  that we only alert on the last item for the metric in the list so that the
+  alert is not sent out with any current anomaly data from the current Analyzer
+  run, but with the data from the ionosphere_alerts item (2594)
+- Added a concept test for illuminance/flux to analyzer.py (2580, 1986)
+- Extended the validate_fp function to validate a single fp id or all the
+  unvalidated, enabled features profiles for a metric_id in
+  ionosphere_backend.py (2430)
+- Added value approx_close in ionosphere_backend.py (2558)
+- SQL update for approx_close  (2558)
+- Added alert_slack to alerters (2618)
+- Added SLACK_OPTS to settings.py (2618)
+- Corrected the from_timestamp and until_timestamp as they were incorrectly
+  order, however Graphite still rendered the correct graph as it plotted
+  reverse, which is the same.  Also using the metric[0] value instead of time()
+  in alerters (2498)
+
+Update notes
+------------
+
+- NOTE: If you are running v1.x you CANNOT upgrade from v1.x directly to v1.2.8
+- You can update directly to v1.2.8 from any version between v1.2.2 to v1.2.7
+- There is a change to the DB and SQL
+- There are changes to settings.py
+
+How to update from v1.2.2 - v1.2.7
+----------------------------------
+
+- Download the new release tag or clone/update to get it to a temp location,
+  ready to be deployed.
+
+.. code-block:: bash
+
+    NEW_SKYLINE_VERSION="v1.2.8-stable-luminosity"    # Your new Skyline version
+    OLD_SKYLINE_VERSION="v1.2.7-stable-luminosity"    # Your old Skyline version
+    # OR
+    # OLD_SKYLINE_VERSION="v1.2.2-stable-luminosity"
+    # OLD_SKYLINE_VERSION="v1.2.5-stable-luminosity"
+    # etc
+
+    CURRENT_SKYLINE_PATH="/opt/skyline/github/skyline"                 # Your Skyline path
+    NEW_SKYLINE_PATH="${CURRENT_SKYLINE_PATH}.${NEW_SKYLINE_VERSION}"  # Your new Skyline path
+
+    mkdir -p "${CURRENT_SKYLINE_PATH}.${NEW_SKYLINE_VERSION}"
+    cd "${CURRENT_SKYLINE_PATH}.${NEW_SKYLINE_VERSION}"
+    git clone https://github.com/earthgecko/skyline .
+    git checkout "$NEW_SKYLINE_VERSION"
+
+- Diff your current running version skyline/settings.py with the new version of
+  skyline/settings.py and create a new settings.py in the temp location
+  appropriate for Skyline v1.2.8 and your set up, ready to be deployed.
+
+.. code-block:: bash
+
+    diff "${CURRENT_SKYLINE_PATH}/skyline/settings.py" "${NEW_SKYLINE_PATH}/skyline/settings.py"
+    # Create the new settings.py with your variables and the newly required
+    # variables and save as ${NEW_SKYLINE_PATH}/skyline/settings.py
+
+- Stop Skyline Ionosphere and Panorama services.
+- Backup your Skyline database.
+- Apply the SQL update to your Skyline database as per described below, change
+  the below variables as appropriate to your set up.
+
+.. code-block:: bash
+
+    BACKUP_DIR="/tmp"  # Where you want to backup the DB to
+    MYSQL_USER="<YOUR_MYSQL_USER>"
+    MYSQL_HOST="127.0.0.1"  # Your MySQL IP
+    MYSQL_DB="skyline"  # Your MySQL Skyline DB name
+    SKYLINE_PATH="/opt/skyline/github/skyline"  # Your Skyline path
+
+    # Backup DB
+    mkdir -p $BACKUP_DIR
+    mysqldump -u$MYSQL_USER -p $MYSQL_DB > $BACKUP_DIR/pre.v1.2.8.$MYSQL_DB.sql
+
+    # Update DB
+    mysql -u$MYSQL_USER -p $MYSQL_DB < $SKYLINE_PATH/updates/sql/luminosity-v1.2.8-stable.sql
+
+- Stop all the Skyline services and ensure any service controls such as monit,
+  supervisor or systemd do not start them again, (change as appropriate for
+  your set up) e.g.
+
+.. code-block:: bash
+
+    # Stop all other Skyline services
+    SKYLINE_SERVICES="horizon
+    analyzer
+    mirage
+    crucible
+    boundary
+    ionosphere
+    luminosity
+    panorama
+    webapp"
+    for i in $SKYLINE_SERVICES
+    do
+      /etc/init.d/$i stop
+    done
+
+- Move your current Skyline directory to a backup directory and move the new
+  Skyline v1.2.8 with your new settings.py from the temp location to your
+  working Skyline directory, (change your paths as appropriate) e.g.
+
+.. code-block:: bash
+
+    mv "$CURRENT_SKYLINE_PATH" "/opt/skyline/github/skyline.$OLD_SKYLINE_VERSION"
+    mv "$NEW_SKYLINE_PATH" "$CURRENT_SKYLINE_PATH"
+
+- Update the pip dependencies, e.g.
+
+.. code-block:: bash
+
+    PYTHON_MAJOR_VERSION="2.7"
+    PYTHON_VIRTUALENV_DIR="/opt/python_virtualenv"
+    PROJECT="skyline-py2714"
+    cd "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}"
+    source bin/activate
+    # As of statsmodels 0.9.0 numpy, et al need to be installed before
+    # statsmodels in requirements
+    # https://github.com/statsmodels/statsmodels/issues/4654
+    # This can take lots of minutes with the new pandas
+    bin/"pip${PYTHON_MAJOR_VERSION}" install $(cat /opt/skyline/github/skyline/requirements.txt | grep "^numpy\|^scipy\|^patsy\|^pandas" | tr '\n' ' ')
+    # Remove the luminol egg as it will already be installed and pip will moan
+    cat /opt/skyline/github/skyline/requirements.txt | grep -v luminol > /tmp/requirements.txt
+    bin/"pip${PYTHON_MAJOR_VERSION}" install -r /tmp/requirements.txt
+    deactivate
+
+- Start the all Skyline services (change as appropriate for your set up) e.g.
+
+.. code-block:: bash
+
+    # Start all other Skyline services
+    SKYLINE_SERVICES="panorama
+    luminosity
+    horizon
+    analyzer
+    mirage
+    crucible
+    boundary
+    ionosphere
+    webapp"
+    for i in $SKYLINE_SERVICES
+    do
+      /etc/init.d/$i start
+    done

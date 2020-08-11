@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,51 +11,48 @@
   
 
   
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/skyline.styles.css" type="text/css" />
+
+  
+  
+  
   
 
   
-
-  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
 
-  
-
-  
-  
-    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  
-
-  
-    <link rel="stylesheet" href="../_static/skyline.styles.css" type="text/css" />
-  
-
-  
-        <link rel="index" title="Index"
-              href="../genindex.html"/>
-        <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Skyline 2.0.0 documentation" href="../index.html"/>
-        <link rel="up" title="Release Notes" href="../releases.html"/>
-        <link rel="next" title="1.2.17" href="1_2_17.html"/>
-        <link rel="prev" title="1.3.1" href="1_3_1.html"/> 
-
-  
-  <script src="../_static/js/modernizr.min.js"></script>
-
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="1.2.17" href="1_2_17.html" />
+    <link rel="prev" title="1.3.1" href="1_3_1.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
+   
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
-            <a href="../index.html" class="icon icon-home"> Skyline
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
 
           
@@ -83,22 +79,24 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
             
-                <ul class="current">
+              
+            
+            
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../alerts.html">Alerts</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../horizon.html">Horizon</a></li>
@@ -115,6 +113,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../vista.html">Vista</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
@@ -122,10 +121,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html#reliability">Reliability</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring Skyline</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../releases.html">Release Notes</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="1_3_1.html">1.3.1</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">1.3.0</a><ul>
@@ -178,7 +175,7 @@
 <li class="toctree-l2"><a class="reference internal" href="1_0_0.html">1.0.0 - the crucible branch</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What’s new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../development/index.html">Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../roadmap.html">Roadmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../skyline.html">skyline package</a></li>
@@ -187,42 +184,63 @@
             
           
         </div>
+        
       </div>
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="../index.html">Skyline</a>
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Skyline</a>
+        
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="../index.html">Docs</a> &raquo;</li>
-      
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
           <li><a href="../releases.html">Release Notes</a> &raquo;</li>
-      
-    <li>1.3.0</li>
+        
+      <li>1.3.0</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
-            <a href="../_sources/releases/1_3_0.txt" rel="nofollow"> View page source</a>
+            
+            <a href="../_sources/releases/1_3_0.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -234,11 +252,11 @@
 <p>This is a features functionality release with minor bug fixes.  This release
 introduces a few new features and new functionality:</p>
 <ul class="simple">
-<li>A new Ionosphere feature related to validating matches.</li>
-<li>The ability to run the Skyline stack on docker</li>
-<li>Introduces Skyline Flux for receiving metrics via HTTP and submitting them to
-Graphite.</li>
-<li>Introduces Skyline Vista for fetching metrics from remote sources.</li>
+<li><p>A new Ionosphere feature related to validating matches.</p></li>
+<li><p>The ability to run the Skyline stack on docker</p></li>
+<li><p>Introduces Skyline Flux for receiving metrics via HTTP and submitting them to
+Graphite.</p></li>
+<li><p>Introduces Skyline Vista for fetching metrics from remote sources.</p></li>
 </ul>
 <p>Please see the new documentation pages for full details about each new addition.</p>
 <div class="section" id="changes-in-v1-3-0">
@@ -246,210 +264,211 @@ Graphite.</li>
 <p>Lots of changes have been introduced to accommodate docker and the addition of
 Flux and Vista.</p>
 <ul class="simple">
-<li>Use GRAPHITE_RENDER_URI and do not try to alert if the settings are default in
-analyzer/alerters.py (3002)</li>
-<li>Wrapped new get_graphite_render_uri and get_graphite_custom_headers functions
-in try and except in analyzer/alerters.py (3002)</li>
-<li>The management of the analyzer Redis algorithm exception sets was previously
+<li><p>Use GRAPHITE_RENDER_URI and do not try to alert if the settings are default in
+analyzer/alerters.py (3002)</p></li>
+<li><p>Wrapped new get_graphite_render_uri and get_graphite_custom_headers functions
+in try and except in analyzer/alerters.py (3002)</p></li>
+<li><p>The management of the analyzer Redis algorithm exception sets was previously
 handled a if settings.ENABLE_MIRAGE block.  This meant that if there are no
 mirage metrics, the sets were not managed.  Added manage_analyzer_algorithm_exception_sets
-in analyzer/analyzer.py to manage these sets in their own context. (3002, 3020)</li>
-<li>Re-enabled the illuminance metric in analyzer (2580)</li>
-<li>Declare and test if the derivative_metrics Redis set exists in analyzer so
-that errors are not thrown if there are actually no derivative metrics (3002)</li>
-<li>Use GRAPHITE_RENDER_URI and use new CARBON_HOST variable instead of
-GRAPHITE_HOST in send_graphite_metric (3002)</li>
-<li>Handle self signed certificate on Docker with requests (3002)</li>
-<li>Handle when Skyline is first installed, if luminosity is enabled it reports
-errors as there are no anomaly ids (3002, 3016)</li>
-<li>Log appropriate to whether memcache is enabled or not (3002, 3016)</li>
-<li>Handle self signed certificate on Docker with requests (3002)</li>
-<li>Do not analyse short time series, only return a time series sample if the
+in analyzer/analyzer.py to manage these sets in their own context. (3002, 3020)</p></li>
+<li><p>Re-enabled the illuminance metric in analyzer (2580)</p></li>
+<li><p>Declare and test if the derivative_metrics Redis set exists in analyzer so
+that errors are not thrown if there are actually no derivative metrics (3002)</p></li>
+<li><p>Use GRAPHITE_RENDER_URI and use new CARBON_HOST variable instead of
+GRAPHITE_HOST in send_graphite_metric (3002)</p></li>
+<li><p>Handle self signed certificate on Docker with requests (3002)</p></li>
+<li><p>Handle when Skyline is first installed, if luminosity is enabled it reports
+errors as there are no anomaly ids (3002, 3016)</p></li>
+<li><p>Log appropriate to whether memcache is enabled or not (3002, 3016)</p></li>
+<li><p>Handle self signed certificate on Docker with requests (3002)</p></li>
+<li><p>Do not analyse short time series, only return a time series sample if the
 sample has sufficient data points otherwise get_anomalies() will throw an
-error (3002, 3008)</li>
-<li>Added docker settings (3002)</li>
-<li>Allow rebrow to connect to Redis on the socket too and if docker dsplay the
-REDIS_PASSWORD in rebrow_login (3002)</li>
-<li>Use GRAPHITE_RENDER_URI (3002)</li>
-<li>Revert to original skyline.httpd.conf.d.example and added
-skyline.docker.apache2.conf.d.example (3002)</li>
-<li>Reformat print in analyzer/agent.py (3002)</li>
-<li>When there are multiple channels declared Skyline only wants to update the
+error (3002, 3008)</p></li>
+<li><p>Added docker settings (3002)</p></li>
+<li><p>Allow rebrow to connect to Redis on the socket too and if docker dsplay the
+REDIS_PASSWORD in rebrow_login (3002)</p></li>
+<li><p>Use GRAPHITE_RENDER_URI (3002)</p></li>
+<li><p>Revert to original skyline.httpd.conf.d.example and added
+skyline.docker.apache2.conf.d.example (3002)</p></li>
+<li><p>Reformat print in analyzer/agent.py (3002)</p></li>
+<li><p>When there are multiple channels declared Skyline only wants to update the
 panorama.slack_thread_ts Redis key once for the primary Skyline channel, so if
-the cache key exists do not update, analyzer/alerters.py (3110)</li>
-<li>Added a hashlib hexdigest method which has not been verified so using the
+the cache key exists do not update, analyzer/alerters.py (3110)</p></li>
+<li><p>Added a hashlib hexdigest method which has not been verified so using the
 original method useless the base_name is longer than 254 chars,
-analyzer/alerters.py (3002)</li>
-<li>Allow for DOCKER_FAKE_EMAIL_ALERTS and GRAPHITE_CUSTOM_HEADERS,
-analyzer/alerters.py (3002)</li>
-<li>Added get_graphite_port, get_graphite_render_uri and
-get_graphite_custom_headers functions, analyzer/alerters.py (3002)</li>
-<li>Reduce amount of Manager instances that are used as each requires a copy of
+analyzer/alerters.py (3002)</p></li>
+<li><p>Allow for DOCKER_FAKE_EMAIL_ALERTS and GRAPHITE_CUSTOM_HEADERS,
+analyzer/alerters.py (3002)</p></li>
+<li><p>Added get_graphite_port, get_graphite_render_uri and
+get_graphite_custom_headers functions, analyzer/alerters.py (3002)</p></li>
+<li><p>Reduce amount of Manager instances that are used as each requires a copy of
 entire memory to be copied into each subprocess so this results in a python
 process per Manager instance, using as much memory as the parent.  OK on a
 server, not so much in a container.  Disabled all the Manager() lists and
-replaced with Redis sets, analyzer/analyzer.py (3002, 3032, 3034)</li>
-<li>Moved the interpolation of the MIRAGE_PERIODIC variables to the top of the
+replaced with Redis sets, analyzer/analyzer.py (3002, 3032, 3034)</p></li>
+<li><p>Moved the interpolation of the MIRAGE_PERIODIC variables to the top of the
 file out of spawn_process so they can be accessed in run too and check the
 added mirage_periodic_check_keys list rather than checking each and every
-metric name key, analyzer/analyzer.py (2882)</li>
-<li>Disabled for now as in concept phase, analyzer/analyzer.py (2580)</li>
-<li>The management of the analyzer Redis algorithm exception sets was previously
+metric name key, analyzer/analyzer.py (2882)</p></li>
+<li><p>Disabled for now as in concept phase, analyzer/analyzer.py (2580)</p></li>
+<li><p>The management of the analyzer Redis algorithm exception sets was previously
 handled in an if settings.ENABLE_MIRAGE block This meant that if there are no
-mirage metrics, the sets were not managed, analyzer/analyzer.py (3020)</li>
-<li>Changes for docker, not complete or fully tested.</li>
-<li>Reduce amount of Manager instances that are used as each requires a copy of
+mirage metrics, the sets were not managed, analyzer/analyzer.py (3020)</p></li>
+<li><p>Changes for docker, not complete or fully tested.</p></li>
+<li><p>Reduce amount of Manager instances that are used as each requires a copy of
 entire memory to be copied into each subprocess so this results in a python
 process per Manager instance, using as much memory as the parent.  OK on a
 server, not so much in a container.  Disabled all the Manager() lists and
-replaced with Redis sets, boundary/boundary.py (3002, 3032, 3034)</li>
-<li>Use GRAPHITE_RENDER_URI, boundary/boundary.py (3002)</li>
-<li>Reduce amount of Manager instances that are used as each requires a copy of
+replaced with Redis sets, boundary/boundary.py (3002, 3032, 3034)</p></li>
+<li><p>Use GRAPHITE_RENDER_URI, boundary/boundary.py (3002)</p></li>
+<li><p>Reduce amount of Manager instances that are used as each requires a copy of
 entire memory to be copied into each subprocess so this results in a python
 process per Manager instance, using as much memory as the parent.  OK on a
 server, not so much in a container.  Disabled all the Manager() lists and
-replaced with Redis sets, crucible/crucible.py (3002, 3032)</li>
-<li>Add a crucible - skyline.consensus.anomalies.png to plot Skyline anomalies if
+replaced with Redis sets, crucible/crucible.py (3002, 3032)</p></li>
+<li><p>Add a crucible - skyline.consensus.anomalies.png to plot Skyline anomalies if
 CONSENSUS is achieved and create file resources skyline.anomalies_score.txt
-and skyline.anomalies.csv, crucible/crucible_algorithms.py (3106)</li>
-<li>Reduce amount of Manager instances that are used as each requires a copy of
+and skyline.anomalies.csv, crucible/crucible_algorithms.py (3106)</p></li>
+<li><p>Reduce amount of Manager instances that are used as each requires a copy of
 entire memory to be copied into each subprocess so this results in a python
 process per Manager instance, using as much memory as the parent.  OK on a
 server, not so much in a container.  Disabled all the Manager() lists and
-replaced with Redis sets, skyline/ionosphere/ionosphere.py (3002, 3032)</li>
-<li>Do not run checks if namespace has matched multiple times in the last 10
+replaced with Redis sets, skyline/ionosphere/ionosphere.py (3002, 3032)</p></li>
+<li><p>Do not run checks if namespace has matched multiple times in the last 10
 minutes.  However determining which Skyline related metrics are feeding back
 are quite difficult to ascertain.  So use the ionosphere_busy logic again and
 use or find the skyline host namespace and if busy do not analyse the Skyline
 host namespace while ionosphere is busy related to SKYLINE_FEEDBACK_NAMESPACES,
-skyline/ionosphere/ionosphere.py (3050)</li>
-<li>Only process FULL_DURATION feature profiles if there is a
-ionosphere.unique_metrics Redis set (2484)</li>
-<li>Handle self signed certificate on Docker, skyline/ionosphere/learn.py (3002)</li>
-<li>Reduce amount of Manager instances that are used as each requires a copy of
+skyline/ionosphere/ionosphere.py (3050)</p></li>
+<li><p>Only process FULL_DURATION feature profiles if there is a
+ionosphere.unique_metrics Redis set (2484)</p></li>
+<li><p>Handle self signed certificate on Docker, skyline/ionosphere/learn.py (3002)</p></li>
+<li><p>Reduce amount of Manager instances that are used as each requires a copy of
 entire memory to be copied into each subprocess so this results in a python
 process per Manager instance, using as much memory as the parent.  OK on a
 server, not so much in a container.  Disabled all the Manager() lists and
-replaced with Redis sets, skyline/luminosity/luminosity.py (3002, 3032)</li>
-<li>When Skyline is first installed, if luminosity is enabled it reports errors as
-there are no anomaly ids, skyline/luminosity/luminosity.py (3016)</li>
-<li>Handle self signed certificate on Docker,
-skyline/luminosity/process_correlations.py (3002)</li>
-<li>Reduce amount of Manager instances that are used as each requires a copy of
+replaced with Redis sets, skyline/luminosity/luminosity.py (3002, 3032)</p></li>
+<li><p>When Skyline is first installed, if luminosity is enabled it reports errors as
+there are no anomaly ids, skyline/luminosity/luminosity.py (3016)</p></li>
+<li><p>Handle self signed certificate on Docker,
+skyline/luminosity/process_correlations.py (3002)</p></li>
+<li><p>Reduce amount of Manager instances that are used as each requires a copy of
 entire memory to be copied into each subprocess so this results in a python
 process per Manager instance, using as much memory as the parent.  OK on a
 server, not so much in a container.  Disabled all the Manager() lists and
-replaced with Redis sets, skyline/mirage/mirage.py (3002, 3032)</li>
-<li>When there are multiple channels declared Skyline only wants to update the
+replaced with Redis sets, skyline/mirage/mirage.py (3002, 3032)</p></li>
+<li><p>When there are multiple channels declared Skyline only wants to update the
 panorama.slack_thread_ts Redis key once for the primary Skyline channel, so if
-the cache key exists do not update, skyline/mirage/mirage_alerters.py (3110)</li>
-<li>Reduce amount of Manager instances that are used as each requires a copy of
+the cache key exists do not update, skyline/mirage/mirage_alerters.py (3110)</p></li>
+<li><p>Reduce amount of Manager instances that are used as each requires a copy of
 entire memory to be copied into each subprocess so this results in a python
 process per Manager instance, using as much memory as the parent.  OK on a
 server, not so much in a container.  Disabled all the Manager() lists and
-replaced with Redis sets, skyline/mirage/mirage.py (3002, 3032)</li>
-<li>Allow webapp to connect on reborw via socket if running on docker,
-skyline/webapp/templates/rebrow_login.html (3002)</li>
-<li>Handle self signed certificate on Docker, skyline/webapp/ionosphere_backend.py
-(3190)</li>
-<li>Handle if all features profiles have been disabled in the ionosphere_search
-function, skyline/webapp/ionosphere_backend.py (3190)</li>
-<li>Added Ionosphere - validated matches (3082, 3084)</li>
-<li>Added metrics id to relevant web pages, skyline/webapp/webapp.py (2990)</li>
-<li>Added docker related settings to settings.py (3002)</li>
-<li>Added Ionosphere - validated matches DB changes to skyline.sql (3084)</li>
-<li>Added docker changes and some Pyton 3.7 testing changes to
-skyline/skyline_functions.py (3002, 2828)</li>
-<li>Updated version and branch in skyline/skyline_version.py (3002)</li>
-<li>Updated to 1.3.0 - skyline/utils/dawn/skyline.dawn.sh (3002)</li>
-<li>Uppdated dependencies</li>
-<li>skyline.dawn.sh changes related to docker (3002)</li>
-<li>Update version and dependencies</li>
-<li>Added a users tables to the DB to allow to map user to actions, labels, etc
-(3230, 2476, 2516)</li>
+replaced with Redis sets, skyline/mirage/mirage.py (3002, 3032)</p></li>
+<li><p>Allow webapp to connect on reborw via socket if running on docker,
+skyline/webapp/templates/rebrow_login.html (3002)</p></li>
+<li><p>Handle self signed certificate on Docker, skyline/webapp/ionosphere_backend.py
+(3190)</p></li>
+<li><p>Handle if all features profiles have been disabled in the ionosphere_search
+function, skyline/webapp/ionosphere_backend.py (3190)</p></li>
+<li><p>Added Ionosphere - validated matches (3082, 3084)</p></li>
+<li><p>Added metrics id to relevant web pages, skyline/webapp/webapp.py (2990)</p></li>
+<li><p>Added docker related settings to settings.py (3002)</p></li>
+<li><p>Added Ionosphere - validated matches DB changes to skyline.sql (3084)</p></li>
+<li><p>Added docker changes and some Pyton 3.7 testing changes to
+skyline/skyline_functions.py (3002, 2828)</p></li>
+<li><p>Updated version and branch in skyline/skyline_version.py (3002)</p></li>
+<li><p>Updated to 1.3.0 - skyline/utils/dawn/skyline.dawn.sh (3002)</p></li>
+<li><p>Uppdated dependencies</p></li>
+<li><p>skyline.dawn.sh changes related to docker (3002)</p></li>
+<li><p>Update version and dependencies</p></li>
+<li><p>Added a users tables to the DB to allow to map user to actions, labels, etc
+(3230, 2476, 2516)</p></li>
 </ul>
 </div>
 <div class="section" id="update-notes">
 <h2>Update notes<a class="headerlink" href="#update-notes" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li>These update instruction apply to upgrading from v1.2.17 to v1.3.0 only.
+<li><p>These update instruction apply to upgrading from v1.2.17 to v1.3.0 only.
 However as with all Skyline updates it is possible to go through the update
 notes for each version and make your own update notes/process to take you from
-version x to version y.</li>
-<li>There are changes to the DB in v1.3.0</li>
+version x to version y.</p></li>
+<li><p>There are changes to the DB in v1.3.0</p></li>
 </ul>
 <div class="admonition warning">
-<p class="first admonition-title">Warning</p>
-<p class="last">It is assumed that the database is not running with an offset and
+<p class="admonition-title">Warning</p>
+<p>It is assumed that the database is not running with an offset and
 the database increments ids by 1.  If you are running an offset please review
 all SQL updates to determine if you need to change anything in the SQL when
 you apply Skyline SQL updates.</p>
 </div>
 <ul class="simple">
-<li>There are changes to settings.py in v1.3.0, please ensure you diff your
+<li><p>There are changes to settings.py in v1.3.0, please ensure you diff your
 current and the new settings.py as there are appended additions but there are
 also additional settings that have been added to existing settings blocks.
-The additions and changes described below.</li>
+The additions and changes described below.</p></li>
 </ul>
 <div class="section" id="settings-py-changes">
 <h3>settings.py Changes<a class="headerlink" href="#settings-py-changes" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>New settings:<ul>
-<li><a class="reference internal" href="../skyline.html#settings.GRAPHITE_AUTH_HEADER" title="settings.GRAPHITE_AUTH_HEADER"><code class="xref py py-mod docutils literal"><span class="pre">settings.GRAPHITE_AUTH_HEADER</span></code></a></li>
-<li><a class="reference internal" href="../skyline.html#settings.GRAPHITE_CUSTOM_HEADERS" title="settings.GRAPHITE_CUSTOM_HEADERS"><code class="xref py py-mod docutils literal"><span class="pre">settings.GRAPHITE_CUSTOM_HEADERS</span></code></a></li>
-<li><a class="reference internal" href="../skyline.html#settings.GRAPHITE_RENDER_URI" title="settings.GRAPHITE_RENDER_URI"><code class="xref py py-mod docutils literal"><span class="pre">settings.GRAPHITE_RENDER_URI</span></code></a></li>
-<li><a class="reference internal" href="../skyline.html#settings.CARBON_HOST" title="settings.CARBON_HOST"><code class="xref py py-mod docutils literal"><span class="pre">settings.CARBON_HOST</span></code></a></li>
-<li><a class="reference internal" href="../skyline.html#settings.SKYLINE_FEEDBACK_NAMESPACES" title="settings.SKYLINE_FEEDBACK_NAMESPACES"><code class="xref py py-mod docutils literal"><span class="pre">settings.SKYLINE_FEEDBACK_NAMESPACES</span></code></a></li>
-<li><a class="reference internal" href="../skyline.html#settings.CUSTOM_ALERT_OPTS" title="settings.CUSTOM_ALERT_OPTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.CUSTOM_ALERT_OPTS</span></code></a></li>
-<li><a class="reference internal" href="../skyline.html#settings.DOCKER" title="settings.DOCKER"><code class="xref py py-mod docutils literal"><span class="pre">settings.DOCKER</span></code></a></li>
-<li><a class="reference internal" href="../skyline.html#settings.DOCKER_DISPLAY_REDIS_PASSWORD_IN_REBROW" title="settings.DOCKER_DISPLAY_REDIS_PASSWORD_IN_REBROW"><code class="xref py py-mod docutils literal"><span class="pre">settings.DOCKER_DISPLAY_REDIS_PASSWORD_IN_REBROW</span></code></a></li>
-<li><a class="reference internal" href="../skyline.html#settings.DOCKER_FAKE_EMAIL_ALERTS" title="settings.DOCKER_FAKE_EMAIL_ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.DOCKER_FAKE_EMAIL_ALERTS</span></code></a></li>
-<li><code class="xref py py-mod docutils literal"><span class="pre">settings.FLUX_IP</span> <span class="pre">=</span> <span class="pre">'127.0.0.1</span></code></li>
-<li><a class="reference internal" href="../skyline.html#settings.FLUX_PORT" title="settings.FLUX_PORT"><code class="xref py py-mod docutils literal"><span class="pre">settings.FLUX_PORT</span></code></a></li>
-<li><a class="reference internal" href="../skyline.html#settings.FLUX_WORKERS" title="settings.FLUX_WORKERS"><code class="xref py py-mod docutils literal"><span class="pre">settings.FLUX_WORKERS</span></code></a></li>
-<li><a class="reference internal" href="../skyline.html#settings.FLUX_SELF_API_KEY" title="settings.FLUX_SELF_API_KEY"><code class="xref py py-mod docutils literal"><span class="pre">settings.FLUX_SELF_API_KEY</span></code></a></li>
-<li><a class="reference internal" href="../skyline.html#settings.FLUX_BACKLOG" title="settings.FLUX_BACKLOG"><code class="xref py py-mod docutils literal"><span class="pre">settings.FLUX_BACKLOG</span></code></a></li>
-<li><a class="reference internal" href="../skyline.html#settings.FLUX_SEND_TO_CARBON" title="settings.FLUX_SEND_TO_CARBON"><code class="xref py py-mod docutils literal"><span class="pre">settings.FLUX_SEND_TO_CARBON</span></code></a></li>
-<li><a class="reference internal" href="../skyline.html#settings.FLUX_CARBON_HOST" title="settings.FLUX_CARBON_HOST"><code class="xref py py-mod docutils literal"><span class="pre">settings.FLUX_CARBON_HOST</span></code></a></li>
-<li><a class="reference internal" href="../skyline.html#settings.FLUX_CARBON_PORT" title="settings.FLUX_CARBON_PORT"><code class="xref py py-mod docutils literal"><span class="pre">settings.FLUX_CARBON_PORT</span></code></a></li>
-<li><a class="reference internal" href="../skyline.html#settings.FLUX_CARBON_PICKLE_PORT" title="settings.FLUX_CARBON_PICKLE_PORT"><code class="xref py py-mod docutils literal"><span class="pre">settings.FLUX_CARBON_PICKLE_PORT</span></code></a></li>
-<li><a class="reference internal" href="../skyline.html#settings.FLUX_SEND_TO_STATSD" title="settings.FLUX_SEND_TO_STATSD"><code class="xref py py-mod docutils literal"><span class="pre">settings.FLUX_SEND_TO_STATSD</span></code></a></li>
-<li><a class="reference internal" href="../skyline.html#settings.FLUX_STATSD_HOST" title="settings.FLUX_STATSD_HOST"><code class="xref py py-mod docutils literal"><span class="pre">settings.FLUX_STATSD_HOST</span></code></a></li>
-<li><a class="reference internal" href="../skyline.html#settings.FLUX_STATSD_PORT" title="settings.FLUX_STATSD_PORT"><code class="xref py py-mod docutils literal"><span class="pre">settings.FLUX_STATSD_PORT</span></code></a></li>
-<li><a class="reference internal" href="../skyline.html#settings.VISTA_ENABLED" title="settings.VISTA_ENABLED"><code class="xref py py-mod docutils literal"><span class="pre">settings.VISTA_ENABLED</span></code></a></li>
-<li><a class="reference internal" href="../skyline.html#settings.VISTA_FETCHER_PROCESSES" title="settings.VISTA_FETCHER_PROCESSES"><code class="xref py py-mod docutils literal"><span class="pre">settings.VISTA_FETCHER_PROCESSES</span></code></a></li>
-<li><a class="reference internal" href="../skyline.html#settings.VISTA_FETCHER_PROCESS_MAX_RUNTIME" title="settings.VISTA_FETCHER_PROCESS_MAX_RUNTIME"><code class="xref py py-mod docutils literal"><span class="pre">settings.VISTA_FETCHER_PROCESS_MAX_RUNTIME</span></code></a></li>
-<li><a class="reference internal" href="../skyline.html#settings.VISTA_WORKER_PROCESSES" title="settings.VISTA_WORKER_PROCESSES"><code class="xref py py-mod docutils literal"><span class="pre">settings.VISTA_WORKER_PROCESSES</span></code></a></li>
-<li><a class="reference internal" href="../skyline.html#settings.VISTA_DO_NOT_SUBMIT_CURRENT_MINUTE" title="settings.VISTA_DO_NOT_SUBMIT_CURRENT_MINUTE"><code class="xref py py-mod docutils literal"><span class="pre">settings.VISTA_DO_NOT_SUBMIT_CURRENT_MINUTE</span></code></a></li>
-<li><code class="xref py py-mod docutils literal"><span class="pre">settings.VISTA_FETCH_GRAPHITE_METRICS</span></code></li>
+<li><p>New settings:</p>
+<ul>
+<li><p><a class="reference internal" href="../skyline.html#settings.GRAPHITE_AUTH_HEADER" title="settings.GRAPHITE_AUTH_HEADER"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.GRAPHITE_AUTH_HEADER</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.GRAPHITE_CUSTOM_HEADERS" title="settings.GRAPHITE_CUSTOM_HEADERS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.GRAPHITE_CUSTOM_HEADERS</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.GRAPHITE_RENDER_URI" title="settings.GRAPHITE_RENDER_URI"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.GRAPHITE_RENDER_URI</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.CARBON_HOST" title="settings.CARBON_HOST"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.CARBON_HOST</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.SKYLINE_FEEDBACK_NAMESPACES" title="settings.SKYLINE_FEEDBACK_NAMESPACES"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SKYLINE_FEEDBACK_NAMESPACES</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.CUSTOM_ALERT_OPTS" title="settings.CUSTOM_ALERT_OPTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.CUSTOM_ALERT_OPTS</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.DOCKER" title="settings.DOCKER"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.DOCKER</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.DOCKER_DISPLAY_REDIS_PASSWORD_IN_REBROW" title="settings.DOCKER_DISPLAY_REDIS_PASSWORD_IN_REBROW"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.DOCKER_DISPLAY_REDIS_PASSWORD_IN_REBROW</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.DOCKER_FAKE_EMAIL_ALERTS" title="settings.DOCKER_FAKE_EMAIL_ALERTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.DOCKER_FAKE_EMAIL_ALERTS</span></code></a></p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FLUX_IP</span> <span class="pre">=</span> <span class="pre">'127.0.0.1</span></code></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.FLUX_PORT" title="settings.FLUX_PORT"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FLUX_PORT</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.FLUX_WORKERS" title="settings.FLUX_WORKERS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FLUX_WORKERS</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.FLUX_SELF_API_KEY" title="settings.FLUX_SELF_API_KEY"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FLUX_SELF_API_KEY</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.FLUX_BACKLOG" title="settings.FLUX_BACKLOG"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FLUX_BACKLOG</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.FLUX_SEND_TO_CARBON" title="settings.FLUX_SEND_TO_CARBON"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FLUX_SEND_TO_CARBON</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.FLUX_CARBON_HOST" title="settings.FLUX_CARBON_HOST"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FLUX_CARBON_HOST</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.FLUX_CARBON_PORT" title="settings.FLUX_CARBON_PORT"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FLUX_CARBON_PORT</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.FLUX_CARBON_PICKLE_PORT" title="settings.FLUX_CARBON_PICKLE_PORT"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FLUX_CARBON_PICKLE_PORT</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.FLUX_SEND_TO_STATSD" title="settings.FLUX_SEND_TO_STATSD"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FLUX_SEND_TO_STATSD</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.FLUX_STATSD_HOST" title="settings.FLUX_STATSD_HOST"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FLUX_STATSD_HOST</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.FLUX_STATSD_PORT" title="settings.FLUX_STATSD_PORT"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FLUX_STATSD_PORT</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.VISTA_ENABLED" title="settings.VISTA_ENABLED"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.VISTA_ENABLED</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.VISTA_FETCHER_PROCESSES" title="settings.VISTA_FETCHER_PROCESSES"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.VISTA_FETCHER_PROCESSES</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.VISTA_FETCHER_PROCESS_MAX_RUNTIME" title="settings.VISTA_FETCHER_PROCESS_MAX_RUNTIME"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.VISTA_FETCHER_PROCESS_MAX_RUNTIME</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.VISTA_WORKER_PROCESSES" title="settings.VISTA_WORKER_PROCESSES"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.VISTA_WORKER_PROCESSES</span></code></a></p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.VISTA_DO_NOT_SUBMIT_CURRENT_MINUTE" title="settings.VISTA_DO_NOT_SUBMIT_CURRENT_MINUTE"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.VISTA_DO_NOT_SUBMIT_CURRENT_MINUTE</span></code></a></p></li>
+<li><p><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.VISTA_FETCH_GRAPHITE_METRICS</span></code></p></li>
 </ul>
 </li>
-<li>New Graphite related settings have been added to the main settings block,
-<a class="reference internal" href="../skyline.html#settings.GRAPHITE_AUTH_HEADER" title="settings.GRAPHITE_AUTH_HEADER"><code class="xref py py-mod docutils literal"><span class="pre">settings.GRAPHITE_AUTH_HEADER</span></code></a> and
-<a class="reference internal" href="../skyline.html#settings.GRAPHITE_CUSTOM_HEADERS" title="settings.GRAPHITE_CUSTOM_HEADERS"><code class="xref py py-mod docutils literal"><span class="pre">settings.GRAPHITE_CUSTOM_HEADERS</span></code></a> neither are enabled by default.
-Additionally a <a class="reference internal" href="../skyline.html#settings.GRAPHITE_RENDER_URI" title="settings.GRAPHITE_RENDER_URI"><code class="xref py py-mod docutils literal"><span class="pre">settings.GRAPHITE_RENDER_URI</span></code></a> setting has been added that
-is now used in the existing and modified <a class="reference internal" href="../skyline.html#settings.GRAPH_URL" title="settings.GRAPH_URL"><code class="xref py py-mod docutils literal"><span class="pre">settings.GRAPH_URL</span></code></a> setting.</li>
-<li><a class="reference internal" href="../skyline.html#settings.CARBON_HOST" title="settings.CARBON_HOST"><code class="xref py py-mod docutils literal"><span class="pre">settings.CARBON_HOST</span></code></a> setting has been added that defaults to
-<a class="reference internal" href="../skyline.html#settings.GRAPHITE_HOST" title="settings.GRAPHITE_HOST"><code class="xref py py-mod docutils literal"><span class="pre">settings.GRAPHITE_HOST</span></code></a> to enable the use of a different CARBON_HOST.</li>
-<li>A new settings <a class="reference internal" href="../skyline.html#settings.SKYLINE_FEEDBACK_NAMESPACES" title="settings.SKYLINE_FEEDBACK_NAMESPACES"><code class="xref py py-mod docutils literal"><span class="pre">settings.SKYLINE_FEEDBACK_NAMESPACES</span></code></a> has been added to
+<li><p>New Graphite related settings have been added to the main settings block,
+<a class="reference internal" href="../skyline.html#settings.GRAPHITE_AUTH_HEADER" title="settings.GRAPHITE_AUTH_HEADER"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.GRAPHITE_AUTH_HEADER</span></code></a> and
+<a class="reference internal" href="../skyline.html#settings.GRAPHITE_CUSTOM_HEADERS" title="settings.GRAPHITE_CUSTOM_HEADERS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.GRAPHITE_CUSTOM_HEADERS</span></code></a> neither are enabled by default.
+Additionally a <a class="reference internal" href="../skyline.html#settings.GRAPHITE_RENDER_URI" title="settings.GRAPHITE_RENDER_URI"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.GRAPHITE_RENDER_URI</span></code></a> setting has been added that
+is now used in the existing and modified <a class="reference internal" href="../skyline.html#settings.GRAPH_URL" title="settings.GRAPH_URL"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.GRAPH_URL</span></code></a> setting.</p></li>
+<li><p><a class="reference internal" href="../skyline.html#settings.CARBON_HOST" title="settings.CARBON_HOST"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.CARBON_HOST</span></code></a> setting has been added that defaults to
+<a class="reference internal" href="../skyline.html#settings.GRAPHITE_HOST" title="settings.GRAPHITE_HOST"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.GRAPHITE_HOST</span></code></a> to enable the use of a different CARBON_HOST.</p></li>
+<li><p>A new settings <a class="reference internal" href="../skyline.html#settings.SKYLINE_FEEDBACK_NAMESPACES" title="settings.SKYLINE_FEEDBACK_NAMESPACES"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SKYLINE_FEEDBACK_NAMESPACES</span></code></a> has been added to
 to reduce analysis load during busy times, read the docstring for a full
-description.</li>
-<li>A new setting <a class="reference internal" href="../skyline.html#settings.CUSTOM_ALERT_OPTS" title="settings.CUSTOM_ALERT_OPTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.CUSTOM_ALERT_OPTS</span></code></a> allows to add custom labels,
-graph titles and subjects to alerts.</li>
-<li>A new Docker settings block has been added with all the Docker related
-settings, the defaults these settings are for Docker not being enabled.</li>
-<li>A new Flux settings block has been added for all the Flux settings</li>
-<li>A new Vista settings block has been added for all the Vista settings.</li>
+description.</p></li>
+<li><p>A new setting <a class="reference internal" href="../skyline.html#settings.CUSTOM_ALERT_OPTS" title="settings.CUSTOM_ALERT_OPTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.CUSTOM_ALERT_OPTS</span></code></a> allows to add custom labels,
+graph titles and subjects to alerts.</p></li>
+<li><p>A new Docker settings block has been added with all the Docker related
+settings, the defaults these settings are for Docker not being enabled.</p></li>
+<li><p>A new Flux settings block has been added for all the Flux settings</p></li>
+<li><p>A new Vista settings block has been added for all the Vista settings.</p></li>
 </ul>
 </div>
 </div>
 <div class="section" id="how-to-update-from-v1-2-17">
 <h2>How to update from v1.2.17<a class="headerlink" href="#how-to-update-from-v1-2-17" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li>Download the new release tag or clone/update to get it to a temp location,
-ready to be deployed.</li>
+<li><p>Download the new release tag or clone/update to get it to a temp location,
+ready to be deployed.</p></li>
 </ul>
-<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nv">NEW_SKYLINE_VERSION</span><span class="o">=</span><span class="s2">&quot;v1.3.0&quot;</span>    <span class="c1"># Your new Skyline version</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">NEW_SKYLINE_VERSION</span><span class="o">=</span><span class="s2">&quot;v1.3.0&quot;</span>    <span class="c1"># Your new Skyline version</span>
 <span class="nv">OLD_SKYLINE_VERSION</span><span class="o">=</span><span class="s2">&quot;v1.2.17&quot;</span>    <span class="c1"># Your old Skyline version</span>
 
 <span class="nv">CURRENT_SKYLINE_PATH</span><span class="o">=</span><span class="s2">&quot;/opt/skyline/github/skyline&quot;</span>                 <span class="c1"># Your Skyline path</span>
@@ -512,18 +531,18 @@ mysql -u<span class="nv">$MYSQL_USER</span> -p <span class="nv">$MYSQL_DB</span>
 </pre></div>
 </div>
 <ul class="simple">
-<li>Move your current Skyline directory to a backup directory and move the new
+<li><p>Move your current Skyline directory to a backup directory and move the new
 Skyline v1.3.0 with your new settings.py from the temp location to your
-working Skyline directory, (change your paths as appropriate) e.g.</li>
+working Skyline directory, (change your paths as appropriate) e.g.</p></li>
 </ul>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>mv <span class="s2">&quot;</span><span class="nv">$CURRENT_SKYLINE_PATH</span><span class="s2">&quot;</span> <span class="s2">&quot;</span><span class="si">${</span><span class="nv">CURRENT_SKYLINE_PATH</span><span class="si">}</span><span class="s2">.</span><span class="si">${</span><span class="nv">OLD_SKYLINE_VERSION</span><span class="si">}</span><span class="s2">&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mv <span class="s2">&quot;</span><span class="nv">$CURRENT_SKYLINE_PATH</span><span class="s2">&quot;</span> <span class="s2">&quot;</span><span class="si">${</span><span class="nv">CURRENT_SKYLINE_PATH</span><span class="si">}</span><span class="s2">.</span><span class="si">${</span><span class="nv">OLD_SKYLINE_VERSION</span><span class="si">}</span><span class="s2">&quot;</span>
 mv <span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_PATH</span><span class="s2">&quot;</span> <span class="s2">&quot;</span><span class="nv">$CURRENT_SKYLINE_PATH</span><span class="s2">&quot;</span>
 </pre></div>
 </div>
 <ul class="simple">
-<li>Update the dependencies</li>
+<li><p>Update the dependencies</p></li>
 </ul>
-<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="o">=</span><span class="s2">&quot;2.7&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="o">=</span><span class="s2">&quot;2.7&quot;</span>
 <span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="o">=</span><span class="s2">&quot;/opt/python_virtualenv&quot;</span>
 <span class="c1"># Handle 2.7.14 and 2.7.16</span>
 <span class="nv">PROJECT</span><span class="o">=</span><span class="s2">&quot;skyline-py2716&quot;</span>
@@ -545,9 +564,9 @@ bin/<span class="s2">&quot;pip</span><span class="si">${</span><span class="nv">
 </pre></div>
 </div>
 <ul class="simple">
-<li>Start the all Skyline services (change as appropriate for your set up) e.g.</li>
+<li><p>Start the all Skyline services (change as appropriate for your set up) e.g.</p></li>
 </ul>
-<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="c1"># Start all other Skyline services</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Start all other Skyline services</span>
 <span class="nv">SKYLINE_SERVICES</span><span class="o">=</span><span class="s2">&quot;panorama</span>
 <span class="s2">luminosity</span>
 <span class="s2">horizon</span>
@@ -564,9 +583,9 @@ bin/<span class="s2">&quot;pip</span><span class="si">${</span><span class="nv">
 </pre></div>
 </div>
 <ul class="simple">
-<li>Check the logs</li>
+<li><p>Check the logs</p></li>
 </ul>
-<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="c1"># How are they running</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># How are they running</span>
 tail -n <span class="m">20</span> /var/log/skyline/*.log
 
 <span class="c1"># Any errors - each app</span>
@@ -585,15 +604,16 @@ find /var/log/skyline -type f -name <span class="s2">&quot;*.log&quot;</span> <s
 
 
            </div>
+           
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="1_2_17.html" class="btn btn-neutral float-right" title="1.2.17" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="1_2_17.html" class="btn btn-neutral float-right" title="1.2.17" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="1_3_1.html" class="btn btn-neutral" title="1.3.1" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="1_3_1.html" class="btn btn-neutral float-left" title="1.3.1" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -602,11 +622,19 @@ find /var/log/skyline -type f -name <span class="s2">&quot;*.log&quot;</span> <s
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
+        
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -618,36 +646,15 @@ find /var/log/skyline -type f -name <span class="s2">&quot;*.log&quot;</span> <s
   </div>
   
 
-
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../',
-            VERSION:'2.0.0',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
-        };
-    </script>
-      <script type="text/javascript" src="../_static/jquery.js"></script>
-      <script type="text/javascript" src="../_static/underscore.js"></script>
-      <script type="text/javascript" src="../_static/doctools.js"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

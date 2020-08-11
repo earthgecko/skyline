@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,50 +11,47 @@
   
 
   
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
+
+  
+  
+  
   
 
   
-
-  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-
-  
-  
-    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  
-
-  
-    <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-  
-
-  
-        <link rel="index" title="Index"
-              href="genindex.html"/>
-        <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 2.0.0 documentation" href="index.html"/>
-        <link rel="up" title="skyline package" href="skyline.html"/>
-        <link rel="prev" title="skyline.vista package" href="skyline.vista.html"/> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="skyline.vista package" href="skyline.vista.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
+   
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
-            <a href="index.html" class="icon icon-home"> Skyline
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
 
           
@@ -82,22 +78,24 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
             
-                <ul class="current">
+              
+            
+            
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
-<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alerts.html">Alerts</a></li>
-<li class="toctree-l1"><a class="reference internal" href="docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
@@ -114,6 +112,7 @@
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
@@ -121,12 +120,10 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#reliability">Reliability</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
-<li class="toctree-l1"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What’s new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="skyline.html">skyline package</a><ul class="current">
@@ -159,7 +156,7 @@
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-algorithm_exceptions">skyline.algorithm_exceptions module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-create_matplotlib_graph">skyline.create_matplotlib_graph module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="skyline.html#skyline-custom-algorithms-module">skyline.custom_algorithms module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-custom_algorithms">skyline.custom_algorithms module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-custom_algorithms_to_run">skyline.custom_algorithms_to_run module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-database">skyline.database module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-external_alert_configs">skyline.external_alert_configs module</a></li>
@@ -180,42 +177,63 @@
             
           
         </div>
+        
       </div>
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="index.html">Skyline</a>
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Skyline</a>
+        
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="index.html">Docs</a> &raquo;</li>
-      
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
           <li><a href="skyline.html">skyline package</a> &raquo;</li>
-      
-    <li>skyline.webapp package</li>
+        
+      <li>skyline.webapp package</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
-            <a href="_sources/skyline.webapp.txt" rel="nofollow"> View page source</a>
+            
+            <a href="_sources/skyline.webapp.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -228,199 +246,182 @@
 </div>
 <div class="section" id="module-webapp.backend">
 <span id="skyline-webapp-backend-module"></span><h2>skyline.webapp.backend module<a class="headerlink" href="#module-webapp.backend" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.backend.panorama_request">
-<code class="descname">panorama_request</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/backend.html#panorama_request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.backend.panorama_request" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">panorama_request</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/backend.html#panorama_request"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.backend.panorama_request" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets the details of anomalies from the database, using the URL arguments
-that are passed in by the <code class="xref py py-obj docutils literal"><span class="pre">request.args</span></code> to build the MySQL select
+that are passed in by the <code class="xref py py-obj docutils literal notranslate"><span class="pre">request.args</span></code> to build the MySQL select
 query string and queries the database, parse the results and creates an
 array of the anomalies that matched the query and creates the
-<code class="docutils literal"><span class="pre">panaroma.json</span></code> file, then returns the array.  The Webapp needs both the
+<code class="docutils literal notranslate"><span class="pre">panaroma.json</span></code> file, then returns the array.  The Webapp needs both the
 array and the JSONP file to serve to the browser for the client side
-<code class="docutils literal"><span class="pre">panaroma.js</span></code>.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>None</strong> &#8211; determined from <code class="xref py py-obj docutils literal"><span class="pre">request.args</span></code></td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">array</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">array</td>
-</tr>
-</tbody>
-</table>
+<code class="docutils literal notranslate"><span class="pre">panaroma.js</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>None</strong> – determined from <code class="xref py py-obj docutils literal notranslate"><span class="pre">request.args</span></code></p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>array</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>array</p>
+</dd>
+</dl>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">And creates <code class="docutils literal"><span class="pre">panaroma.js</span></code> for client side javascript</p>
+<p class="admonition-title">Note</p>
+<p>And creates <code class="docutils literal notranslate"><span class="pre">panaroma.js</span></code> for client side javascript</p>
 </div>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.backend.get_list">
-<code class="descname">get_list</code><span class="sig-paren">(</span><em>thing</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/backend.html#get_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.backend.get_list" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_list</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">thing</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/backend.html#get_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.backend.get_list" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get a list of names for things in a database table.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>thing</strong> (<em>str</em>) &#8211; the thing, e.g. &#8216;algorithm&#8217;</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">list</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>thing</strong> (<em>str</em>) – the thing, e.g. ‘algorithm’</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>list</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.backend.luminosity_remote_data">
-<code class="descname">luminosity_remote_data</code><span class="sig-paren">(</span><em>anomaly_timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/backend.html#luminosity_remote_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.backend.luminosity_remote_data" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">luminosity_remote_data</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">anomaly_timestamp</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/backend.html#luminosity_remote_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.backend.luminosity_remote_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets all the unique_metrics from Redis and then mgets Redis data for all
 metrics.  The data is then preprocessed for the remote Skyline luminosity
 instance and only the relevant fragments of the time series are
 returned.  This return is then gzipped by the Flask Webapp response to
 ensure the minimum about of bandwidth is used.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>anomaly_timestamp</strong> (<em>int</em>) &#8211; the anomaly timestamp</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">list</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">list</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>anomaly_timestamp</strong> (<em>int</em>) – the anomaly timestamp</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>list</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
 <div class="section" id="module-webapp.crucible_backend">
 <span id="skyline-webapp-crucible-backend-module"></span><h2>skyline.webapp.crucible_backend module<a class="headerlink" href="#module-webapp.crucible_backend" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.crucible_backend.get_an_engine">
-<code class="descname">get_an_engine</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/crucible_backend.html#get_an_engine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.crucible_backend.get_an_engine" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_an_engine</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/crucible_backend.html#get_an_engine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.crucible_backend.get_an_engine" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.crucible_backend.engine_disposal">
-<code class="descname">engine_disposal</code><span class="sig-paren">(</span><em>engine</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/crucible_backend.html#engine_disposal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.crucible_backend.engine_disposal" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">engine_disposal</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">engine</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/crucible_backend.html#engine_disposal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.crucible_backend.engine_disposal" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.crucible_backend.submit_crucible_job">
-<code class="descname">submit_crucible_job</code><span class="sig-paren">(</span><em>from_timestamp</em>, <em>until_timestamp</em>, <em>metrics_list</em>, <em>namespaces_list</em>, <em>source</em>, <em>alert_interval</em>, <em>user_id</em>, <em>user</em>, <em>add_to_panorama</em>, <em>pad_timeseries</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/crucible_backend.html#submit_crucible_job"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.crucible_backend.submit_crucible_job" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">submit_crucible_job</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">from_timestamp</span></em>, <em class="sig-param"><span class="n">until_timestamp</span></em>, <em class="sig-param"><span class="n">metrics_list</span></em>, <em class="sig-param"><span class="n">namespaces_list</span></em>, <em class="sig-param"><span class="n">source</span></em>, <em class="sig-param"><span class="n">alert_interval</span></em>, <em class="sig-param"><span class="n">user_id</span></em>, <em class="sig-param"><span class="n">user</span></em>, <em class="sig-param"><span class="n">add_to_panorama</span></em>, <em class="sig-param"><span class="n">pad_timeseries</span></em>, <em class="sig-param"><span class="n">training_data_json</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/crucible_backend.html#submit_crucible_job"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.crucible_backend.submit_crucible_job" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get a list of all the metrics passed and generate Crucible check files for
 each</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>from_timestamp</strong> (<em>int</em>) &#8211; the timestamp at which to start the time series</li>
-<li><strong>until_timestamp</strong> (<em>int</em>) &#8211; the timestamp at which to end the time series</li>
-<li><strong>metrics_list</strong> (<em>list</em>) &#8211; a list of metric names to analyse</li>
-<li><strong>namespaces_list</strong> (<em>list</em>) &#8211; a list of metric namespaces to analyse</li>
-<li><strong>source</strong> (<em>str</em>) &#8211; the source webapp making the request</li>
-<li><strong>alert_interval</strong> (<em>int</em>) &#8211; the alert_interval at which Crucible should trigger
-anomalies</li>
-<li><strong>user_id</strong> (<em>int</em>) &#8211; the user id of the user making the request</li>
-<li><strong>user</strong> (<em>str</em>) &#8211; the username making the request</li>
-<li><strong>add_to_panorama</strong> (<em>boolean</em>) &#8211; whether Crucible should add Skyline CONSENSUS
-anomalies to Panorama</li>
-<li><strong>pad_timeseries</strong> (<em>str</em>) &#8211; the amount of data to pad the time series with</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>from_timestamp</strong> (<em>int</em>) – the timestamp at which to start the time series</p></li>
+<li><p><strong>until_timestamp</strong> (<em>int</em>) – the timestamp at which to end the time series</p></li>
+<li><p><strong>metrics_list</strong> (<em>list</em>) – a list of metric names to analyse</p></li>
+<li><p><strong>namespaces_list</strong> (<em>list</em>) – a list of metric namespaces to analyse</p></li>
+<li><p><strong>source</strong> (<em>str</em>) – the source webapp making the request</p></li>
+<li><p><strong>alert_interval</strong> (<em>int</em>) – the alert_interval at which Crucible should trigger
+anomalies</p></li>
+<li><p><strong>user_id</strong> (<em>int</em>) – the user id of the user making the request</p></li>
+<li><p><strong>user</strong> (<em>str</em>) – the username making the request</p></li>
+<li><p><strong>add_to_panorama</strong> (<em>boolean</em>) – whether Crucible should add Skyline CONSENSUS
+anomalies to Panorama</p></li>
+<li><p><strong>pad_timeseries</strong> (<em>str</em>) – the amount of data to pad the time series with</p></li>
+<li><p><strong>training_data_json</strong> (<em>str</em>) – the full path to the training_data json file if
+source is training_data</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">tuple of lists</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(list, list, list, list)</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>tuple of lists</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(list, list, list, list)</p>
+</dd>
+</dl>
 <p>Returns (crucible_job_id, metrics_submitted_to_process, fail_msg, trace)</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.crucible_backend.get_crucible_jobs">
-<code class="descname">get_crucible_jobs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/crucible_backend.html#get_crucible_jobs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.crucible_backend.get_crucible_jobs" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_crucible_jobs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/crucible_backend.html#get_crucible_jobs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.crucible_backend.get_crucible_jobs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get a list of all the metrics passed and generate Crucible check files for
 each</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>requested_timestamp</strong> (<em>str</em>) &#8211; the training data timestamp</li>
-<li><strong>context</strong> (<em>str</em>) &#8211; the request context, training_data or features_profiles</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>requested_timestamp</strong> (<em>str</em>) – the training data timestamp</p></li>
+<li><p><strong>context</strong> (<em>str</em>) – the request context, training_data or features_profiles</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">tuple of lists</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(list, list, list, list)</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>tuple of lists</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(list, list, list, list)</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.crucible_backend.get_crucible_job">
-<code class="descname">get_crucible_job</code><span class="sig-paren">(</span><em>crucible_job_id</em>, <em>metric</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/crucible_backend.html#get_crucible_job"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.crucible_backend.get_crucible_job" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_crucible_job</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">crucible_job_id</span></em>, <em class="sig-param"><span class="n">metric</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/crucible_backend.html#get_crucible_job"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.crucible_backend.get_crucible_job" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the crucible data for a Crucible analysis</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>crucible_job_id</strong> (<em>str</em>) &#8211; the crucible_job_id</li>
-<li><strong>metric</strong> (<em>str</em>) &#8211; the metric name</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>crucible_job_id</strong> (<em>str</em>) – the crucible_job_id</p></li>
+<li><p><strong>metric</strong> (<em>str</em>) – the metric name</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">tuple of lists</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(list, boolean, boolean, list, list, list, list, str, str, str)</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>tuple of lists</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(list, boolean, boolean, list, list, list, list, str, str, str)</p>
+</dd>
+</dl>
 <p>Returns (crucible_job_details, completed_job, has_anomalies, skyline_anomalies, skyline_consensus_anomalies, panorama_done, panorama_done_timestamp, panorama_done_user_id, image_files, image_file_names, graph_image_file, fail_msg, trace)</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.crucible_backend.send_crucible_job_metric_to_panorama">
-<code class="descname">send_crucible_job_metric_to_panorama</code><span class="sig-paren">(</span><em>crucible_job_id</em>, <em>base_name</em>, <em>user_id</em>, <em>user</em>, <em>skyline_consensus_anomalies</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/crucible_backend.html#send_crucible_job_metric_to_panorama"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.crucible_backend.send_crucible_job_metric_to_panorama" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">send_crucible_job_metric_to_panorama</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">crucible_job_id</span></em>, <em class="sig-param"><span class="n">base_name</span></em>, <em class="sig-param"><span class="n">user_id</span></em>, <em class="sig-param"><span class="n">user</span></em>, <em class="sig-param"><span class="n">skyline_consensus_anomalies</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/crucible_backend.html#send_crucible_job_metric_to_panorama"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.crucible_backend.send_crucible_job_metric_to_panorama" title="Permalink to this definition">¶</a></dt>
 <dd><p>Send the Crucible Skyline CONSENSUS anomalies for a crucible_job and metric
 to Panorama to insert into the anomalies database.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>crucible_job_id</strong> (<em>str</em>) &#8211; the crucible_job_id</li>
-<li><strong>base_name</strong> (<em>str</em>) &#8211; the metric name</li>
-<li><strong>user_id</strong> (<em>int</em>) &#8211; the user_id</li>
-<li><strong>user</strong> (<em>str</em>) &#8211; the username</li>
-<li><strong>skyline_consensus_anomalies</strong> (<em>list</em>) &#8211; the Crucible Skyline CONSENSUS anomalies</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>crucible_job_id</strong> (<em>str</em>) – the crucible_job_id</p></li>
+<li><p><strong>base_name</strong> (<em>str</em>) – the metric name</p></li>
+<li><p><strong>user_id</strong> (<em>int</em>) – the user_id</p></li>
+<li><p><strong>user</strong> (<em>str</em>) – the username</p></li>
+<li><p><strong>skyline_consensus_anomalies</strong> (<em>list</em>) – the Crucible Skyline CONSENSUS anomalies</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">tuple of lists</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(int, str, str)</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>tuple of lists</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(int, str, str)</p>
+</dd>
+</dl>
 <p>Returns (len(skyline_consensus_anomalies), fail_msg, trace)</p>
 </dd></dl>
 
@@ -430,558 +431,506 @@ to Panorama to insert into the anomalies database.</p>
 </div>
 <div class="section" id="module-webapp.ionosphere_backend">
 <span id="skyline-webapp-ionosphere-backend-module"></span><h2>skyline.webapp.ionosphere_backend module<a class="headerlink" href="#module-webapp.ionosphere_backend" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.ionosphere_backend.ionosphere_get_metrics_dir">
-<code class="descname">ionosphere_get_metrics_dir</code><span class="sig-paren">(</span><em>requested_timestamp</em>, <em>context</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#ionosphere_get_metrics_dir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.ionosphere_get_metrics_dir" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">ionosphere_get_metrics_dir</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">requested_timestamp</span></em>, <em class="sig-param"><span class="n">context</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#ionosphere_get_metrics_dir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.ionosphere_get_metrics_dir" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get a list of all the metrics in timestamp training data or features profile
 folder</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>requested_timestamp</strong> (<em>str</em>) &#8211; the training data timestamp</li>
-<li><strong>context</strong> (<em>str</em>) &#8211; the request context, training_data or features_profiles</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>requested_timestamp</strong> (<em>str</em>) – the training data timestamp</p></li>
+<li><p><strong>context</strong> (<em>str</em>) – the request context, training_data or features_profiles</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">tuple of lists</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(list, list, list, list)</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>tuple of lists</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(list, list, list, list)</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.ionosphere_backend.ionosphere_data">
-<code class="descname">ionosphere_data</code><span class="sig-paren">(</span><em>requested_timestamp</em>, <em>data_for_metric</em>, <em>context</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#ionosphere_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.ionosphere_data" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">ionosphere_data</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">requested_timestamp</span></em>, <em class="sig-param"><span class="n">data_for_metric</span></em>, <em class="sig-param"><span class="n">context</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#ionosphere_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.ionosphere_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get a list of all training data or profiles folders and metrics</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>requested_timestamp</strong> (<em>str</em>) &#8211; the training data or profile timestamp</li>
-<li><strong>data_for_metric</strong> (<em>str</em>) &#8211; the metric base_name</li>
-<li><strong>context</strong> (<em>str</em>) &#8211; the request context, training_data or features_profiles</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>requested_timestamp</strong> (<em>str</em>) – the training data or profile timestamp</p></li>
+<li><p><strong>data_for_metric</strong> (<em>str</em>) – the metric base_name</p></li>
+<li><p><strong>context</strong> (<em>str</em>) – the request context, training_data or features_profiles</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">tuple of lists</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(list, list, list, list)</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>tuple of lists</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(list, list, list, list)</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.ionosphere_backend.get_an_engine">
-<code class="descname">get_an_engine</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#get_an_engine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.get_an_engine" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_an_engine</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#get_an_engine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.get_an_engine" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.ionosphere_backend.engine_disposal">
-<code class="descname">engine_disposal</code><span class="sig-paren">(</span><em>engine</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#engine_disposal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.engine_disposal" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">engine_disposal</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">engine</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#engine_disposal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.engine_disposal" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.ionosphere_backend.ionosphere_metric_data">
-<code class="descname">ionosphere_metric_data</code><span class="sig-paren">(</span><em>requested_timestamp</em>, <em>data_for_metric</em>, <em>context</em>, <em>fp_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#ionosphere_metric_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.ionosphere_metric_data" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">ionosphere_metric_data</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">requested_timestamp</span></em>, <em class="sig-param"><span class="n">data_for_metric</span></em>, <em class="sig-param"><span class="n">context</span></em>, <em class="sig-param"><span class="n">fp_id</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#ionosphere_metric_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.ionosphere_metric_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get a list of all training data folders and metrics</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.ionosphere_backend.features_profile_details">
-<code class="descname">features_profile_details</code><span class="sig-paren">(</span><em>fp_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#features_profile_details"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.features_profile_details" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">features_profile_details</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fp_id</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#features_profile_details"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.features_profile_details" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the Ionosphere details of a fetures profile</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fp_id</strong> (<em>str</em>) &#8211; the features profile id</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">tuple</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">(str, boolean, str, str)</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>fp_id</strong> (<em>str</em>) – the features profile id</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>tuple</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(str, boolean, str, str)</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.ionosphere_backend.ionosphere_search">
-<code class="descname">ionosphere_search</code><span class="sig-paren">(</span><em>default_query</em>, <em>search_query</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#ionosphere_search"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.ionosphere_search" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">ionosphere_search</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">default_query</span></em>, <em class="sig-param"><span class="n">search_query</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#ionosphere_search"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.ionosphere_search" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets the details features profiles from the database, using the URL arguments
-that are passed in by the <code class="xref py py-obj docutils literal"><span class="pre">request.args</span></code> to build the MySQL select
+that are passed in by the <code class="xref py py-obj docutils literal notranslate"><span class="pre">request.args</span></code> to build the MySQL select
 query string and queries the database, parse the results and creates an
 array of the features profiles that matched the query.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>None</strong> &#8211; determined from <code class="xref py py-obj docutils literal"><span class="pre">request.args</span></code></td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">array</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">array</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>None</strong> – determined from <code class="xref py py-obj docutils literal notranslate"><span class="pre">request.args</span></code></p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>array</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>array</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.ionosphere_backend.create_ionosphere_layers">
-<code class="descname">create_ionosphere_layers</code><span class="sig-paren">(</span><em>base_name</em>, <em>fp_id</em>, <em>requested_timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#create_ionosphere_layers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.create_ionosphere_layers" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">create_ionosphere_layers</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">base_name</span></em>, <em class="sig-param"><span class="n">fp_id</span></em>, <em class="sig-param"><span class="n">requested_timestamp</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#create_ionosphere_layers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.create_ionosphere_layers" title="Permalink to this definition">¶</a></dt>
 <dd><p>Create a layers profile.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>None</strong> &#8211; determined from <code class="xref py py-obj docutils literal"><span class="pre">request.args</span></code></td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">array</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">array</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>None</strong> – determined from <code class="xref py py-obj docutils literal notranslate"><span class="pre">request.args</span></code></p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>array</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>array</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.ionosphere_backend.feature_profile_layers_detail">
-<code class="descname">feature_profile_layers_detail</code><span class="sig-paren">(</span><em>fp_layers_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#feature_profile_layers_detail"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.feature_profile_layers_detail" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">feature_profile_layers_detail</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fp_layers_id</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#feature_profile_layers_detail"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.feature_profile_layers_detail" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the Ionosphere layers details of a fetures profile</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fp_layers_id</strong> &#8211; the features profile layers_id</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">tuple</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">(str, boolean, str, str, object)</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>fp_layers_id</strong> – the features profile layers_id</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>tuple</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(str, boolean, str, str, object)</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.ionosphere_backend.feature_profile_layer_alogrithms">
-<code class="descname">feature_profile_layer_alogrithms</code><span class="sig-paren">(</span><em>fp_layers_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#feature_profile_layer_alogrithms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.feature_profile_layer_alogrithms" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">feature_profile_layer_alogrithms</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fp_layers_id</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#feature_profile_layer_alogrithms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.feature_profile_layer_alogrithms" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the Ionosphere layer algorithm details of a layer</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fp_layers_id</strong> &#8211; the features profile layers_id</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">tuple</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">(str, boolean, str, str)</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>fp_layers_id</strong> – the features profile layers_id</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>tuple</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(str, boolean, str, str)</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.ionosphere_backend.metric_layers_alogrithms">
-<code class="descname">metric_layers_alogrithms</code><span class="sig-paren">(</span><em>base_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#metric_layers_alogrithms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.metric_layers_alogrithms" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">metric_layers_alogrithms</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">base_name</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#metric_layers_alogrithms"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.metric_layers_alogrithms" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the Ionosphere layer algorithm details of a metric</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>base_name</strong> (<em>str</em>) &#8211; the metric base_name</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">tuple</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">(str, boolean, str, str)</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>base_name</strong> (<em>str</em>) – the metric base_name</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>tuple</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(str, boolean, str, str)</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.ionosphere_backend.edit_ionosphere_layers">
-<code class="descname">edit_ionosphere_layers</code><span class="sig-paren">(</span><em>layers_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#edit_ionosphere_layers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.edit_ionosphere_layers" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">edit_ionosphere_layers</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">layers_id</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#edit_ionosphere_layers"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.edit_ionosphere_layers" title="Permalink to this definition">¶</a></dt>
 <dd><p>Edit a layers profile.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>layers_id</strong> &#8211; the layer id to edit</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">array</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">array</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>layers_id</strong> – the layer id to edit</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>array</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>array</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.ionosphere_backend.validate_fp">
-<code class="descname">validate_fp</code><span class="sig-paren">(</span><em>update_id</em>, <em>id_column_name</em>, <em>user_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#validate_fp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.validate_fp" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">validate_fp</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">update_id</span></em>, <em class="sig-param"><span class="n">id_column_name</span></em>, <em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#validate_fp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.validate_fp" title="Permalink to this definition">¶</a></dt>
 <dd><p>Validate a single features profile or validate all enabled, unvalidated
 features profiles for a metric_id.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>update_id</strong> (<em>int</em>) &#8211; the features profile id or metric_id to validate</li>
-<li><strong>id_column_name</strong> (<em>str</em>) &#8211; the column name to select where on, e.g. id or metric_id</li>
-<li><strong>user_id</strong> (<em>int</em>) &#8211; the user id of the user that is validating</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>update_id</strong> (<em>int</em>) – the features profile id or metric_id to validate</p></li>
+<li><p><strong>id_column_name</strong> (<em>str</em>) – the column name to select where on, e.g. id or metric_id</p></li>
+<li><p><strong>user_id</strong> (<em>int</em>) – the user id of the user that is validating</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">tuple</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(boolean, str, str)</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>tuple</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(boolean, str, str)</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.ionosphere_backend.save_training_data_dir">
-<code class="descname">save_training_data_dir</code><span class="sig-paren">(</span><em>timestamp</em>, <em>base_name</em>, <em>label</em>, <em>hdate</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#save_training_data_dir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.save_training_data_dir" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">save_training_data_dir</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">timestamp</span></em>, <em class="sig-param"><span class="n">base_name</span></em>, <em class="sig-param"><span class="n">label</span></em>, <em class="sig-param"><span class="n">hdate</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#save_training_data_dir"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.save_training_data_dir" title="Permalink to this definition">¶</a></dt>
 <dd><p>Save training_data and return details or just return details if exists</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>timestamp</strong> (<em>str</em>) &#8211; the Ionosphere training_data metric timestamp</li>
-<li><strong>base_name</strong> (<em>str</em>) &#8211; metric base_name</li>
-<li><strong>label</strong> (<em>str</em>) &#8211; the saved training_data label</li>
-<li><strong>hdate</strong> (<em>str</em>) &#8211; human date for the saved training_data</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>timestamp</strong> (<em>str</em>) – the Ionosphere training_data metric timestamp</p></li>
+<li><p><strong>base_name</strong> (<em>str</em>) – metric base_name</p></li>
+<li><p><strong>label</strong> (<em>str</em>) – the saved training_data label</p></li>
+<li><p><strong>hdate</strong> (<em>str</em>) – human date for the saved training_data</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">saved_successful, details, fail_msg, trace</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">boolean, list, str, str</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>saved_successful, details, fail_msg, trace</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>boolean, list, str, str</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.ionosphere_backend.features_profile_family_tree">
-<code class="descname">features_profile_family_tree</code><span class="sig-paren">(</span><em>fp_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#features_profile_family_tree"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.features_profile_family_tree" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">features_profile_family_tree</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fp_id</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#features_profile_family_tree"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.features_profile_family_tree" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the all features profile ids of the related progeny features
 profiles, the whole family tree.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fp_id</strong> &#8211; the features profile id</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">array</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">array</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>fp_id</strong> – the features profile id</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>array</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>array</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.ionosphere_backend.disable_features_profile_family_tree">
-<code class="descname">disable_features_profile_family_tree</code><span class="sig-paren">(</span><em>fp_ids</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#disable_features_profile_family_tree"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.disable_features_profile_family_tree" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">disable_features_profile_family_tree</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">fp_ids</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#disable_features_profile_family_tree"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.disable_features_profile_family_tree" title="Permalink to this definition">¶</a></dt>
 <dd><p>Disable a features profile and all related progeny features profiles</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>fp_ids</strong> &#8211; a list of the the features profile ids to disable</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">array</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">array</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>fp_ids</strong> – a list of the the features profile ids to disable</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>array</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>array</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.ionosphere_backend.get_fp_matches">
-<code class="descname">get_fp_matches</code><span class="sig-paren">(</span><em>metric</em>, <em>metric_like</em>, <em>get_fp_id</em>, <em>get_layer_id</em>, <em>from_timestamp</em>, <em>until_timestamp</em>, <em>limit</em>, <em>sort</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#get_fp_matches"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.get_fp_matches" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_fp_matches</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">metric</span></em>, <em class="sig-param"><span class="n">metric_like</span></em>, <em class="sig-param"><span class="n">get_fp_id</span></em>, <em class="sig-param"><span class="n">get_layer_id</span></em>, <em class="sig-param"><span class="n">from_timestamp</span></em>, <em class="sig-param"><span class="n">until_timestamp</span></em>, <em class="sig-param"><span class="n">limit</span></em>, <em class="sig-param"><span class="n">sort</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#get_fp_matches"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.get_fp_matches" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get all the matches.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>metric</strong> &#8211; all or the metric name</li>
-<li><strong>metric_like</strong> &#8211; False or the metric MySQL like string e.g statsd.%</li>
-<li><strong>get_fp_id</strong> &#8211; None or int</li>
-<li><strong>get_layer_id</strong> &#8211; None or int</li>
-<li><strong>from_timestamp</strong> &#8211; timestamp or None</li>
-<li><strong>until_timestamp</strong> &#8211; timestamp or None</li>
-<li><strong>limit</strong> &#8211; None or number to limit to</li>
-<li><strong>sort</strong> &#8211; DESC or ASC</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>metric</strong> – all or the metric name</p></li>
+<li><p><strong>metric_like</strong> – False or the metric MySQL like string e.g statsd.%</p></li>
+<li><p><strong>get_fp_id</strong> – None or int</p></li>
+<li><p><strong>get_layer_id</strong> – None or int</p></li>
+<li><p><strong>from_timestamp</strong> – timestamp or None</p></li>
+<li><p><strong>until_timestamp</strong> – timestamp or None</p></li>
+<li><p><strong>limit</strong> – None or number to limit to</p></li>
+<li><p><strong>sort</strong> – DESC or ASC</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">list</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">list</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>list</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.ionosphere_backend.get_matched_id_resources">
-<code class="descname">get_matched_id_resources</code><span class="sig-paren">(</span><em>matched_id</em>, <em>matched_by</em>, <em>metric</em>, <em>requested_timestamp</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#get_matched_id_resources"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.get_matched_id_resources" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_matched_id_resources</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">matched_id</span></em>, <em class="sig-param"><span class="n">matched_by</span></em>, <em class="sig-param"><span class="n">metric</span></em>, <em class="sig-param"><span class="n">requested_timestamp</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#get_matched_id_resources"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.get_matched_id_resources" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the Ionosphere matched details of a features profile or layer</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>matched_id</strong> &#8211; the matched id</li>
-<li><strong>matched_by</strong> &#8211; either features_profile or layers</li>
-<li><strong>metric</strong> &#8211; metric base_name</li>
-<li><strong>requested_timestamp</strong> &#8211; the timestamp of the features profile</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>matched_id</strong> – the matched id</p></li>
+<li><p><strong>matched_by</strong> – either features_profile or layers</p></li>
+<li><p><strong>metric</strong> – metric base_name</p></li>
+<li><p><strong>requested_timestamp</strong> – the timestamp of the features profile</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">tuple</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(str, boolean, str, str)</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>tuple</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(str, boolean, str, str)</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.ionosphere_backend.get_features_profiles_to_validate">
-<code class="descname">get_features_profiles_to_validate</code><span class="sig-paren">(</span><em>base_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#get_features_profiles_to_validate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.get_features_profiles_to_validate" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_features_profiles_to_validate</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">base_name</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#get_features_profiles_to_validate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.get_features_profiles_to_validate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the details for Ionosphere features profiles that need to be validated
 for a metric and returns a list of the details for each of the features
 profile including the ionosphere_image API URIs for all the relevant graph
 images for the weabpp Ionosphere validate_features_profiles page.
 For example:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="p">[[</span>  <span class="n">fp_id</span><span class="p">,</span> <span class="n">metric_id</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">fp_full_duration</span><span class="p">,</span> <span class="n">anomaly_timestamp</span><span class="p">,</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="p">[[</span>  <span class="n">fp_id</span><span class="p">,</span> <span class="n">metric_id</span><span class="p">,</span> <span class="n">metric</span><span class="p">,</span> <span class="n">fp_full_duration</span><span class="p">,</span> <span class="n">anomaly_timestamp</span><span class="p">,</span>
     <span class="n">fp_parent_id</span><span class="p">,</span> <span class="n">parent_full_duration</span><span class="p">,</span> <span class="n">parent_anomaly_timestamp</span><span class="p">,</span> <span class="n">fp_date</span><span class="p">,</span>
     <span class="n">fp_graph_uri</span><span class="p">,</span> <span class="n">parent_fp_date</span><span class="p">,</span> <span class="n">parent_fp_graph_uri</span><span class="p">,</span> <span class="n">parent_parent_fp_id</span><span class="p">,</span>
     <span class="n">fp_learn_graph_uri</span><span class="p">,</span> <span class="n">parent_fp_learn_graph_uri</span><span class="p">,</span> <span class="n">minimum_full_duration</span><span class="p">,</span>
     <span class="n">maximum_full_duration</span><span class="p">,</span> <span class="n">generation</span><span class="p">]]</span>
 </pre></div>
 </div>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>base_name</strong> (<em>str</em>) &#8211; metric base_name</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">list of lists</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">[[int, int, str, int, int, int, int, int, str, str, str, str, int, str, str, int, int]]</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>base_name</strong> (<em>str</em>) – metric base_name</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>list of lists</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>[[int, int, str, int, int, int, int, int, str, str, str, str, int, str, str, int, int]]</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.ionosphere_backend.get_metrics_with_features_profiles_to_validate">
-<code class="descname">get_metrics_with_features_profiles_to_validate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#get_metrics_with_features_profiles_to_validate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.get_metrics_with_features_profiles_to_validate" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_metrics_with_features_profiles_to_validate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#get_metrics_with_features_profiles_to_validate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.get_metrics_with_features_profiles_to_validate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get the metrics with Ionosphere features profiles that need to be validated
 and return a list of the details for each metric.
 [[metric_id, metric, fps_to_validate_count]]</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">list of lists</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">[[int, str, int]]</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>list of lists</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>[[int, str, int]]</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.ionosphere_backend.ionosphere_show_graphs">
-<code class="descname">ionosphere_show_graphs</code><span class="sig-paren">(</span><em>requested_timestamp</em>, <em>data_for_metric</em>, <em>fp_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#ionosphere_show_graphs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.ionosphere_show_graphs" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">ionosphere_show_graphs</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">requested_timestamp</span></em>, <em class="sig-param"><span class="n">data_for_metric</span></em>, <em class="sig-param"><span class="n">fp_id</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#ionosphere_show_graphs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.ionosphere_show_graphs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get a list of all graphs</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.ionosphere_backend.webapp_update_slack_thread">
-<code class="descname">webapp_update_slack_thread</code><span class="sig-paren">(</span><em>base_name</em>, <em>metric_timestamp</em>, <em>value</em>, <em>message_context</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#webapp_update_slack_thread"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.webapp_update_slack_thread" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">webapp_update_slack_thread</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">base_name</span></em>, <em class="sig-param"><span class="n">metric_timestamp</span></em>, <em class="sig-param"><span class="n">value</span></em>, <em class="sig-param"><span class="n">message_context</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#webapp_update_slack_thread"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.webapp_update_slack_thread" title="Permalink to this definition">¶</a></dt>
 <dd><p>Update slack threads with enabled events.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>base_name</strong> (<em>str</em>) &#8211; metric base_name</li>
-<li><strong>metric_timestamp</strong> (<em>str or int</em>) &#8211; the anomaly_timestamp</li>
-<li><strong>value</strong> (<em>int or None</em>) &#8211; the features profile id, the validated_count or None</li>
-<li><strong>message_context</strong> (<em>str</em>) &#8211; training_data_viewed or layers_created</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>base_name</strong> (<em>str</em>) – metric base_name</p></li>
+<li><p><strong>metric_timestamp</strong> (<em>str</em><em> or </em><em>int</em>) – the anomaly_timestamp</p></li>
+<li><p><strong>value</strong> (<em>int</em><em> or </em><em>None</em>) – the features profile id, the validated_count or None</p></li>
+<li><p><strong>message_context</strong> (<em>str</em>) – training_data_viewed or layers_created</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">True or False</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">boolean</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>True or False</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>boolean</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.ionosphere_backend.validate_ionosphere_match">
-<code class="descname">validate_ionosphere_match</code><span class="sig-paren">(</span><em>match_id</em>, <em>validate_context</em>, <em>match_validated</em>, <em>user_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#validate_ionosphere_match"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.validate_ionosphere_match" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">validate_ionosphere_match</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">match_id</span></em>, <em class="sig-param"><span class="n">validate_context</span></em>, <em class="sig-param"><span class="n">match_validated</span></em>, <em class="sig-param"><span class="n">user_id</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#validate_ionosphere_match"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.validate_ionosphere_match" title="Permalink to this definition">¶</a></dt>
 <dd><p>Update the validated value in the DB for the match.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>match_id</strong> (<em>str</em>) &#8211; the match id</li>
-<li><strong>validate_context</strong> (<em>str</em>) &#8211; the context to validate either ionosphere_matched
-or ionosphere_layers_matched</li>
-<li><strong>match_validated</strong> (<em>int</em>) &#8211; 1 for valid or 2 for invalid</li>
-<li><strong>user_id</strong> (<em>int</em>) &#8211; the user id of the user validating</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>match_id</strong> (<em>str</em>) – the match id</p></li>
+<li><p><strong>validate_context</strong> (<em>str</em>) – the context to validate either ionosphere_matched
+or ionosphere_layers_matched</p></li>
+<li><p><strong>match_validated</strong> (<em>int</em>) – 1 for valid or 2 for invalid</p></li>
+<li><p><strong>user_id</strong> (<em>int</em>) – the user id of the user validating</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">True or False</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">boolean</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>True or False</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>boolean</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.ionosphere_backend.label_anomalies">
-<code class="descname">label_anomalies</code><span class="sig-paren">(</span><em>start_timestamp</em>, <em>end_timestamp</em>, <em>metrics</em>, <em>namespaces</em>, <em>label</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#label_anomalies"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.label_anomalies" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">label_anomalies</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">start_timestamp</span></em>, <em class="sig-param"><span class="n">end_timestamp</span></em>, <em class="sig-param"><span class="n">metrics</span></em>, <em class="sig-param"><span class="n">namespaces</span></em>, <em class="sig-param"><span class="n">label</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/ionosphere_backend.html#label_anomalies"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.ionosphere_backend.label_anomalies" title="Permalink to this definition">¶</a></dt>
 <dd><p>Label all anomalies from start_timestamp to end_timestamp for metrics and
 and metric namespaces with the given label.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>start_timestamp</strong> (<em>int</em>) &#8211; the start timestamp</li>
-<li><strong>end_timestamp</strong> (<em>int</em>) &#8211; the end timestamp</li>
-<li><strong>metrics</strong> (<em>list</em>) &#8211; a list of metric names</li>
-<li><strong>namespaces</strong> &#8211; a list of namespaces</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>start_timestamp</strong> (<em>int</em>) – the start timestamp</p></li>
+<li><p><strong>end_timestamp</strong> (<em>int</em>) – the end timestamp</p></li>
+<li><p><strong>metrics</strong> (<em>list</em>) – a list of metric names</p></li>
+<li><p><strong>namespaces</strong> – a list of namespaces</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">boolean</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last">(list, list, list, list)</p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>boolean</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>(list, list, list, list)</p>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
 <div class="section" id="module-webapp.utilities">
 <span id="skyline-webapp-utilities-module"></span><h2>skyline.webapp.utilities module<a class="headerlink" href="#module-webapp.utilities" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.utilities.alerts_matcher">
-<code class="descname">alerts_matcher</code><span class="sig-paren">(</span><em>base_name</em>, <em>pattern</em>, <em>alerter</em>, <em>second_order_resolution_hours</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/utilities.html#alerts_matcher"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.utilities.alerts_matcher" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">alerts_matcher</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">base_name</span></em>, <em class="sig-param"><span class="n">pattern</span></em>, <em class="sig-param"><span class="n">alerter</span></em>, <em class="sig-param"><span class="n">second_order_resolution_hours</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/utilities.html#alerts_matcher"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.utilities.alerts_matcher" title="Permalink to this definition">¶</a></dt>
 <dd><p>Get a list of all the metrics that would match an ALERTS pattern</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
-<li><strong>base_name</strong> (<em>str</em>) &#8211; The metric name</li>
-<li><strong>pattern</strong> (<em>str</em>) &#8211; the ALERT pattern</li>
-<li><strong>alerter</strong> (<em>str</em>) &#8211; the alerter name e.g. smtp, syslog, hipchat, pagerdaty</li>
-<li><strong>second_order_resolution_hours</strong> (<em>int</em>) &#8211; (optional) The number of hours that
-Mirage should surface the metric timeseries for</li>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>base_name</strong> (<em>str</em>) – The metric name</p></li>
+<li><p><strong>pattern</strong> (<em>str</em>) – the ALERT pattern</p></li>
+<li><p><strong>alerter</strong> (<em>str</em>) – the alerter name e.g. smtp, syslog, hipchat, pagerdaty</p></li>
+<li><p><strong>second_order_resolution_hours</strong> (<em>int</em>) – (optional) The number of hours that
+Mirage should surface the metric timeseries for</p></li>
 </ul>
-</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first">matched_by</p>
-</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body"><p class="first last"><p>str</p>
-<p>(&#8216;metric3&#8217;, &#8216;hipchat&#8217;, 600),
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>matched_by</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><p>str</p>
+<p>(‘metric3’, ‘hipchat’, 600),
 # Log all anomalies to syslog
-(&#8216;stats.&#8217;, &#8216;syslog&#8217;, 1),
+(‘stats.’, ‘syslog’, 1),
 # Wildcard namespaces can be used as well
-(&#8216;metric4.thing.*.requests&#8217;, &#8216;stmp&#8217;, 900),
+(‘metric4.thing.*.requests’, ‘stmp’, 900),
 # However beware of wildcards as the above wildcard should really be
-(&#8216;metric4.thing..*..requests&#8217;, &#8216;stmp&#8217;, 900),</p>
+(‘metric4.thing..*..requests’, ‘stmp’, 900),</p>
 </p>
-</td>
-</tr>
-</tbody>
-</table>
+</dd>
+</dl>
 </dd></dl>
 
 </div>
 <div class="section" id="module-webapp.webapp">
 <span id="skyline-webapp-webapp-module"></span><h2>skyline.webapp.webapp module<a class="headerlink" href="#module-webapp.webapp" title="Permalink to this headline">¶</a></h2>
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.webapp.limit_remote_addr">
-<code class="descname">limit_remote_addr</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#limit_remote_addr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.limit_remote_addr" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">limit_remote_addr</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#limit_remote_addr"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.limit_remote_addr" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function is called to check if the requesting IP address is in the
 settings.WEBAPP_ALLOWED_IPS array, if not 403.</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.webapp.allowed_file">
-<code class="descname">allowed_file</code><span class="sig-paren">(</span><em>filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#allowed_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.allowed_file" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">allowed_file</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">filename</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#allowed_file"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.allowed_file" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.webapp.check_auth">
-<code class="descname">check_auth</code><span class="sig-paren">(</span><em>username</em>, <em>password</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#check_auth"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.check_auth" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">check_auth</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">username</span></em>, <em class="sig-param"><span class="n">password</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#check_auth"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.check_auth" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function is called to check if a username /
 password combination is valid.</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.webapp.authenticate">
-<code class="descname">authenticate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#authenticate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.authenticate" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">authenticate</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#authenticate"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.authenticate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sends a 401 response that enables basic auth</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.webapp.requires_auth">
-<code class="descname">requires_auth</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#requires_auth"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.requires_auth" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">requires_auth</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">f</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#requires_auth"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.requires_auth" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.webapp.gzipped">
-<code class="descname">gzipped</code><span class="sig-paren">(</span><em>f</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#gzipped"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.gzipped" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">gzipped</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">f</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#gzipped"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.gzipped" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.webapp.internal_error">
-<code class="descname">internal_error</code><span class="sig-paren">(</span><em>message</em>, <em>traceback_format_exc</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#internal_error"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.internal_error" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">internal_error</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">message</span></em>, <em class="sig-param"><span class="n">traceback_format_exc</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#internal_error"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.internal_error" title="Permalink to this definition">¶</a></dt>
 <dd><p>Show traceback in the browser when running a flask app on a production
 server.
 By default, flask does not show any useful information when running on a
@@ -995,188 +944,186 @@ rendered nicely by Jinja2</p>
 <p>This can be tested by hitting SKYLINE_URL/a_500</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.webapp.index">
-<code class="descname">index</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.index" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">index</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#index"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.index" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.webapp.a_500">
-<code class="descname">a_500</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#a_500"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.a_500" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">a_500</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#a_500"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.a_500" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.webapp.now">
-<code class="descname">now</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#now"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.now" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">now</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#now"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.now" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.webapp.then">
-<code class="descname">then</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#then"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.then" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">then</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#then"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.then" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.webapp.anomalies">
-<code class="descname">anomalies</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#anomalies"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.anomalies" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">anomalies</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#anomalies"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.anomalies" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.webapp.panorama_anomalies">
-<code class="descname">panorama_anomalies</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#panorama_anomalies"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.panorama_anomalies" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">panorama_anomalies</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#panorama_anomalies"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.panorama_anomalies" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.webapp.app_settings">
-<code class="descname">app_settings</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#app_settings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.app_settings" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">app_settings</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#app_settings"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.app_settings" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.webapp.version">
-<code class="descname">version</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#version"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.version" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">version</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#version"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.version" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.webapp.api">
-<code class="descname">api</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#api"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.api" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">api</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#api"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.api" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.webapp.mock_api">
-<code class="descname">mock_api</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#mock_api"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.mock_api" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">mock_api</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#mock_api"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.mock_api" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.webapp.luminosity_remote_data_endpoint">
-<code class="descname">luminosity_remote_data_endpoint</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#luminosity_remote_data_endpoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.luminosity_remote_data_endpoint" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">luminosity_remote_data_endpoint</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#luminosity_remote_data_endpoint"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.luminosity_remote_data_endpoint" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.webapp.docs">
-<code class="descname">docs</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#docs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.docs" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">docs</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#docs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.docs" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.webapp.panorama">
-<code class="descname">panorama</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#panorama"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.panorama" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">panorama</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#panorama"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.panorama" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.webapp.crucible">
-<code class="descname">crucible</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#crucible"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.crucible" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">crucible</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#crucible"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.crucible" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.webapp.ionosphere">
-<code class="descname">ionosphere</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#ionosphere"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.ionosphere" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">ionosphere</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#ionosphere"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.ionosphere" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.webapp.ionosphere_images">
-<code class="descname">ionosphere_images</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#ionosphere_images"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.ionosphere_images" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">ionosphere_images</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#ionosphere_images"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.ionosphere_images" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.webapp.utilities">
-<code class="descname">utilities</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#utilities"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.utilities" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">utilities</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#utilities"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.utilities" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.webapp.flux_frontend">
-<code class="descname">flux_frontend</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#flux_frontend"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.flux_frontend" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">flux_frontend</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#flux_frontend"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.flux_frontend" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.webapp.upload_data">
-<code class="descname">upload_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#upload_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.upload_data" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">upload_data</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#upload_data"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.upload_data" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.webapp.get_redis">
-<code class="descname">get_redis</code><span class="sig-paren">(</span><em>host</em>, <em>port</em>, <em>db</em>, <em>password</em>, <em>decode</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#get_redis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.get_redis" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_redis</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">host</span></em>, <em class="sig-param"><span class="n">port</span></em>, <em class="sig-param"><span class="n">db</span></em>, <em class="sig-param"><span class="n">password</span></em>, <em class="sig-param"><span class="n">decode</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#get_redis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.get_redis" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.webapp.get_client_details">
-<code class="descname">get_client_details</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#get_client_details"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.get_client_details" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">get_client_details</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#get_client_details"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.get_client_details" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets the first X-Forwarded-For address and sets as the IP address.
 Gets the client_id by simply using a md5 hash of the client IP address
 and user agent.
 Determines whether the request was proxied.
 Determines the client protocol.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">client_id, protocol, proxied, salt</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Return type:</th><td class="field-body">str, str, boolean, str</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>client_id, protocol, proxied, salt</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>str, str, boolean, str</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.webapp.decode_token">
-<code class="descname">decode_token</code><span class="sig-paren">(</span><em>client_id</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#decode_token"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.decode_token" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">decode_token</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">client_id</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#decode_token"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.decode_token" title="Permalink to this definition">¶</a></dt>
 <dd><p>Use the app.secret, client_id and salt to decode the token JWT encoded
 payload and determine the Redis password.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>client_id</strong> (<em>str</em>) &#8211; the client_id string</td>
-</tr>
-<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">token, decoded_redis_password, fail_msg, trace</td>
-</tr>
-<tr class="field-odd field"><th class="field-name">Return type:</th><td class="field-body">str, str, str, str</td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>client_id</strong> (<em>str</em>) – the client_id string</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>token, decoded_redis_password, fail_msg, trace</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>str, str, str, str</p>
+</dd>
+</dl>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.webapp.rebrow">
-<code class="descname">rebrow</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#rebrow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.rebrow" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">rebrow</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#rebrow"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.rebrow" title="Permalink to this definition">¶</a></dt>
 <dd><p>Start page</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.webapp.rebrow_server_db">
-<code class="descname">rebrow_server_db</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#rebrow_server_db"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.rebrow_server_db" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">rebrow_server_db</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">host</span></em>, <em class="sig-param"><span class="n">port</span></em>, <em class="sig-param"><span class="n">db</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#rebrow_server_db"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.rebrow_server_db" title="Permalink to this definition">¶</a></dt>
 <dd><p>List all databases and show info on server</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.webapp.rebrow_keys">
-<code class="descname">rebrow_keys</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#rebrow_keys"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.rebrow_keys" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">rebrow_keys</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">host</span></em>, <em class="sig-param"><span class="n">port</span></em>, <em class="sig-param"><span class="n">db</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#rebrow_keys"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.rebrow_keys" title="Permalink to this definition">¶</a></dt>
 <dd><p>List keys for one database</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.webapp.rebrow_key">
-<code class="descname">rebrow_key</code><span class="sig-paren">(</span><em>*args</em>, <em>**kwargs</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#rebrow_key"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.rebrow_key" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">rebrow_key</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">host</span></em>, <em class="sig-param"><span class="n">port</span></em>, <em class="sig-param"><span class="n">db</span></em>, <em class="sig-param"><span class="n">key</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#rebrow_key"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.rebrow_key" title="Permalink to this definition">¶</a></dt>
 <dd><p>Show a specific key.
 key is expected to be URL-safe base64 encoded</p>
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.webapp.urlsafe_base64_encode">
-<code class="descname">urlsafe_base64_encode</code><span class="sig-paren">(</span><em>s</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#urlsafe_base64_encode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.urlsafe_base64_encode" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">urlsafe_base64_encode</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">s</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#urlsafe_base64_encode"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.urlsafe_base64_encode" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="class">
+<dl class="py class">
 <dt id="webapp.webapp.App">
-<em class="property">class </em><code class="descname">App</code><a class="reference internal" href="_modules/webapp/webapp.html#App"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.App" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
+<em class="property">class </em><code class="sig-name descname">App</code><a class="reference internal" href="_modules/webapp/webapp.html#App"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.App" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<dl class="py method">
 <dt id="webapp.webapp.App.run">
-<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#App.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.App.run" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#App.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.App.run" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
-<dl class="function">
+<dl class="py function">
 <dt id="webapp.webapp.run">
-<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.run" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/webapp/webapp.html#run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#webapp.webapp.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Start the Webapp server</p>
 </dd></dl>
 
@@ -1188,13 +1135,14 @@ key is expected to be URL-safe base64 encoded</p>
 
 
            </div>
+           
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
       
-        <a href="skyline.vista.html" class="btn btn-neutral" title="skyline.vista package" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="skyline.vista.html" class="btn btn-neutral float-left" title="skyline.vista package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -1203,11 +1151,19 @@ key is expected to be URL-safe base64 encoded</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
+        
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -1219,36 +1175,15 @@ key is expected to be URL-safe base64 encoded</p>
   </div>
   
 
-
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'2.0.0',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

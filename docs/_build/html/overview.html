@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,50 +11,48 @@
   
 
   
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
+
+  
+  
+  
   
 
   
-
-  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-
-  
-  
-    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  
-
-  
-    <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-  
-
-  
-        <link rel="index" title="Index"
-              href="genindex.html"/>
-        <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 2.0.0 documentation" href="index.html"/>
-        <link rel="next" title="Requirements" href="requirements.html"/>
-        <link rel="prev" title="Skyline documentation" href="index.html"/> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Requirements" href="requirements.html" />
+    <link rel="prev" title="Skyline documentation" href="index.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
+   
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
-            <a href="index.html" class="icon icon-home"> Skyline
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
 
           
@@ -82,11 +79,15 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
             
-                <ul class="current">
+              
+            
+            
+              <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Overview</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#what-is-skyline">What is Skyline?</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#what-you-need">What you need</a></li>
@@ -95,21 +96,19 @@
 <li class="toctree-l2"><a class="reference internal" href="#skyline-as-a-work-in-progress">Skyline - as a work in progress</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#the-new-look-of-skyline-apps">The new look of Skyline apps</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#a-simplified-workflow-of-skyline">A simplified workflow of Skyline</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#what-s-new">What&#8217;s new</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#what-s-old">What&#8217;s old</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#what-s-new">What’s new</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#what-s-old">What’s old</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#the-architecture-in-a-nutshell">The architecture in a nutshell</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
-<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alerts.html">Alerts</a></li>
-<li class="toctree-l1"><a class="reference internal" href="docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
@@ -126,6 +125,7 @@
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
@@ -133,12 +133,10 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#reliability">Reliability</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
-<li class="toctree-l1"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What’s new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a></li>
@@ -147,40 +145,61 @@
             
           
         </div>
+        
       </div>
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="index.html">Skyline</a>
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Skyline</a>
+        
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="index.html">Docs</a> &raquo;</li>
-      
-    <li>Overview</li>
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Overview</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
-            <a href="_sources/overview.txt" rel="nofollow"> View page source</a>
+            
+            <a href="_sources/overview.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -193,7 +212,7 @@
 <h2>What is Skyline?<a class="headerlink" href="#what-is-skyline" title="Permalink to this headline">¶</a></h2>
 <p>Skyline is your ears and eyes, it is remarkably good at telling you when a state
 changes.  It does not just chew bubblegum, it blows bubbles too.</p>
-<p>But really Skyline is ...
+<p>But really Skyline is …
 For those interested in anomaly detection and deflection in streamed time series
 data.</p>
 <p>Anomaly deflection.  The obvious next evolution in the use of all the anomaly
@@ -202,26 +221,26 @@ detection data?</p>
 anomaly detects, deflects, fingerprints and learns vast amounts of streamed
 time series data.  Skyline has a number of isolated modules/apps that:</p>
 <ul class="simple">
-<li>ingests streamed metric time series data - skyline/horizon</li>
-<li>use a <code class="docutils literal"><span class="pre">`CONSENSUS`</span></code> of 3-sigma algorithms to detect anomalies on
+<li><p>ingests streamed metric time series data - skyline/horizon</p></li>
+<li><p>use a <code class="docutils literal notranslate"><span class="pre">`CONSENSUS`</span></code> of 3-sigma algorithms to detect anomalies on
 batch processed, streamed metric time series data - skyline/analyzer - anomaly
-detector</li>
-<li>Handle large and small seasonality in the data - skyline/mirage - anomaly
-deflector and detector</li>
-<li>You can train it on what is NOT anomalous and it learns - skyline/ionosphere -
-anomaly deflector</li>
-<li>It records all your anomalies - skyline/panorama - anomaly memory</li>
-<li>It shows you all your data - skyline/webapp - anomaly view</li>
+detector</p></li>
+<li><p>Handle large and small seasonality in the data - skyline/mirage - anomaly
+deflector and detector</p></li>
+<li><p>You can train it on what is NOT anomalous and it learns - skyline/ionosphere -
+anomaly deflector</p></li>
+<li><p>It records all your anomalies - skyline/panorama - anomaly memory</p></li>
+<li><p>It shows you all your data - skyline/webapp - anomaly view</p></li>
 </ul>
 <p>Seeing as we desire our metrics to be not anomalous most of the time and we want
 to know when they ARE anomalous and given the fact that we try and build systems
 that try to behave within not anomalous bounds so they perform well, due to
 this we have:</p>
 <ul class="simple">
-<li>A lot of metric time series data that are not anomalous most of the time.</li>
-<li>A lot of data to train a system on what is NOT anomalous given a time series
+<li><p>A lot of metric time series data that are not anomalous most of the time.</p></li>
+<li><p>A lot of data to train a system on what is NOT anomalous given a time series
 data set, rather than simply focusing on what is anomalous, also focusing on
-what is not anomalous.</li>
+what is not anomalous.</p></li>
 </ul>
 <p>To achieve this Skyline implements a novel time series similarities comparison
 algorithm and a boundary layers methodology that generates fingerprints of time
@@ -234,14 +253,14 @@ known pattern in the data.</p>
 SITTSSCA first coined here :) compares the generated fingerprints of the two
 time series and can determine if they closely resemble each other in terms of:</p>
 <ul class="simple">
-<li>of the amount of &#8220;power/energy&#8221;, range and &#8220;movement&#8221; there is within the time
+<li><p>of the amount of “power/energy”, range and “movement” there is within the time
 series data set somewhat like RMS - Erol Kalkan from United States Geological Survey,
 “Another approach to compute the differences between two time series is moving
 window root-mean-square. RMS can be run for both series separately. This way,
 you can compare the similarities in energy (gain) level of time series. You
 may vary the window length for best resolution.”
 (<a class="reference external" href="https://www.researchgate.net/post/How_can_I_perform_time_series_data_similarity_measures_and_get_a_significance_level_p-value">https://www.researchgate.net/post/How_can_I_perform_time_series_data_similarity_measures_and_get_a_significance_level_p-value</a>)
-<a class="reference external" href="http://stackoverflow.com/questions/5613244/root-mean-square-in-numpy-and-complications-of-matrix-and-arrays-of-numpy">http://stackoverflow.com/questions/5613244/root-mean-square-in-numpy-and-complications-of-matrix-and-arrays-of-numpy</a></li>
+<a class="reference external" href="http://stackoverflow.com/questions/5613244/root-mean-square-in-numpy-and-complications-of-matrix-and-arrays-of-numpy">http://stackoverflow.com/questions/5613244/root-mean-square-in-numpy-and-complications-of-matrix-and-arrays-of-numpy</a></p></li>
 </ul>
 <p>The Skyline-Ionosphere-Tsfresh Time Series Similarities Comparison Algorithm
 compares how close the fingerprint values are as a percentage and
@@ -284,7 +303,7 @@ Skyline may have interest to the data science community.</p>
 <div class="section" id="too-much-effort">
 <h2>Too much effort?<a class="headerlink" href="#too-much-effort" title="Permalink to this headline">¶</a></h2>
 <p>Try our managed service.  We offer a managed version of Skyline for people that
-do not have a vast amount of time to spare.  You&#8217;ll get access to unreleased
+do not have a vast amount of time to spare.  You’ll get access to unreleased
 features and support from developers that have honed numerous Skyline
 integrations to alert on important metrics.</p>
 <p>We are looking for test partners as the product is currently in beta phase.
@@ -305,26 +324,23 @@ maintaining Skyline in 2014.</p>
 </div>
 <div class="section" id="skyline-as-a-work-in-progress">
 <h2>Skyline - as a work in progress<a class="headerlink" href="#skyline-as-a-work-in-progress" title="Permalink to this headline">¶</a></h2>
-<p><a class="reference external" href="https://www.etsy.com/">Etsy</a> found the &#8220;one size fits all approach&#8221; to anomaly detection wasn&#8217;t
+<p><a class="reference external" href="https://www.etsy.com/">Etsy</a> found the “one size fits all approach” to anomaly detection wasn’t
 actually proving all that useful to them.</p>
 <p>There is <strong>some truth</strong> in that in terms of the one size fits all methodology that
 Skyline was framed around.  With hundreds of thousands of metrics this does make
 Skyline fairly hard to tame, in terms of how useful it is and tuning the noise
 is difficult.  Tuning the noise to make it constantly useful and not just noisy,
-removes the &#8220;without the need to configure a model/thresholds&#8221; element somewhat.</p>
+removes the “without the need to configure a model/thresholds” element somewhat.</p>
 <p>It has been generally accepted now that a basic 3-sigma anomaly detection
 implementation is not generally useful in the operations and machine metrics
 space.</p>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">David Gildeh:</th><td class="field-body">&#8220;I still remember taking Skyline and applying it to one of our
-customer&#8217;s metrics, and turning 100,000 metrics into 10,000 anomalies. It just
-created more noise from the noise.&#8221; <a class="reference external" href="https://blog.outlyer.com/what-good-is-anomaly-detection">https://blog.outlyer.com/what-good-is-anomaly-detection</a></td>
-</tr>
-</tbody>
-</table>
+<dl class="field-list simple">
+<dt class="field-odd">David Gildeh</dt>
+<dd class="field-odd"><p>“I still remember taking Skyline and applying it to one of our
+customer’s metrics, and turning 100,000 metrics into 10,000 anomalies. It just
+created more noise from the noise.” <a class="reference external" href="https://blog.outlyer.com/what-good-is-anomaly-detection">https://blog.outlyer.com/what-good-is-anomaly-detection</a></p>
+</dd>
+</dl>
 <p>This is still true of Skyline today, it will still detect the 10000 anomalies
 and it <strong>should</strong>.</p>
 <p>So why continue developing Skyline?</p>
@@ -349,11 +365,11 @@ recording anomalies, correlating and alerting and training on your KEY metrics.
 The ongoing development of Skyline has been focused on improving Skyline in the
 following ways:</p>
 <ul class="simple">
-<li>Improving the anomaly detection methodologies used in the 3-sigma context.</li>
-<li>Extending Skyline&#8217;s 3-sigma methodology to enable the operator and Skyline to
-handle seasonality in metrics.</li>
-<li>The addition of an anomalies database for learning and root cause analysis.</li>
-<li>Adding the ability for the operator to teach Skyline and have Skyline learn
+<li><p>Improving the anomaly detection methodologies used in the 3-sigma context.</p></li>
+<li><p>Extending Skyline’s 3-sigma methodology to enable the operator and Skyline to
+handle seasonality in metrics.</p></li>
+<li><p>The addition of an anomalies database for learning and root cause analysis.</p></li>
+<li><p>Adding the ability for the operator to teach Skyline and have Skyline learn
 things that are NOT anomalous using a time series similarities comparison
 method based on features extraction and comparison using the <a class="reference external" href="https://github.com/blue-yonder/tsfresh">tsfresh</a>
 package.  With Ionosphere we are training Skyline on what is NOT anomalous,
@@ -362,13 +378,13 @@ Skyline as to what is normal, even if normal includes spikes and dips and
 seasonality.  After all we have some expectation that most of our metrics
 would be NOT anomalous most of the time, rather than anomalous most of the
 time.  So training Skyline what is NOT ANOMALOUS is more efficient than trying
-to label anomalies.</li>
-<li>Adding the ability to Skyline to determine what other metrics are related to
+to label anomalies.</p></li>
+<li><p>Adding the ability to Skyline to determine what other metrics are related to
 an anomaly event using cross correlation analysis of all the metrics using
-Linkedin&#8217;s <a class="reference external" href="https://github.com/linkedin/luminol">luminol</a> library when an anomaly event is triggered and
-recording these in the database to assist in root cause analysis.</li>
+Linkedin’s <a class="reference external" href="https://github.com/linkedin/luminol">luminol</a> library when an anomaly event is triggered and
+recording these in the database to assist in root cause analysis.</p></li>
 </ul>
-<p>And...</p>
+<p>And…</p>
 <p>The architecture/pipeline works very well at doing what it does.  It is solid
 and battle tested..</p>
 <p>Skyline is <strong>FAST</strong>!!!  Faster enough to handle 10s of 1000s of time series in
@@ -380,25 +396,25 @@ multiple resolutions, on a fairly low end commodity server.</p>
 development of Skyline is not focused on making it be better than other things
 or the best, it is focused on trying to make Skyline better than it was and
 currently is.  Unfortunately Skyline no longer fits the NAB benchmark method as
-it&#8217;s methods operate exclusively in the real time arena on real time data,
+it’s methods operate exclusively in the real time arena on real time data,
 historic data and trained patterns and this could not be bolted into a NAB test
 and would violate the NAB benchmark requirements.</p>
 </div>
 <div class="section" id="the-new-look-of-skyline-apps">
 <h2>The new look of Skyline apps<a class="headerlink" href="#the-new-look-of-skyline-apps" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li>Horizon - feed metrics to Redis via a pickle input from Graphite/s</li>
-<li>Analyzer - analyses metrics with 3-sigma algorithms</li>
-<li>Mirage - analyses specific metrics at a custom time range with 3-sigma algorithms</li>
-<li>Boundary - analyses specific time series for specific conditions</li>
-<li>Crucible - store anomalous time series resources and adhoc analysis of any
-time series</li>
-<li>Panorama - anomalies database, historical views and root cause analysis</li>
-<li>Webapp - frontend to view current and historical anomalies, training data,
+<li><p>Horizon - feed metrics to Redis via a pickle input from Graphite/s</p></li>
+<li><p>Analyzer - analyses metrics with 3-sigma algorithms</p></li>
+<li><p>Mirage - analyses specific metrics at a custom time range with 3-sigma algorithms</p></li>
+<li><p>Boundary - analyses specific time series for specific conditions</p></li>
+<li><p>Crucible - store anomalous time series resources and adhoc analysis of any
+time series</p></li>
+<li><p>Panorama - anomalies database, historical views and root cause analysis</p></li>
+<li><p>Webapp - frontend to view current and historical anomalies, training data,
 features profiles, layers, matches and can browse Redis with
-<span class="red">re</span><span class="brow">brow</span> and you manage Skyline&#8217;s learning with it</li>
-<li>Ionosphere - time series fingerprinting and learning</li>
-<li>Luminosity - Cross correlation of metrics for root cause analysis</li>
+<span class="red">re</span><span class="brow">brow</span> and you manage Skyline’s learning with it</p></li>
+<li><p>Ionosphere - time series fingerprinting and learning</p></li>
+<li><p>Luminosity - Cross correlation of metrics for root cause analysis</p></li>
 </ul>
 <p>Skyline is still a near real time anomaly detection system, however it has
 various modes of operation that are modular and self contained, so that only the
@@ -414,26 +430,26 @@ it to analyse historic data.</p>
 <div class="section" id="a-simplified-workflow-of-skyline">
 <h2>A simplified workflow of Skyline<a class="headerlink" href="#a-simplified-workflow-of-skyline" title="Permalink to this headline">¶</a></h2>
 <p>This is a bit out of date.</p>
-<div class="figure">
+<div class="figure align-default">
 <img alt="A simplified workflow of Skyline" src="_images/skyline.simplified.workflow.annotated.gif" />
 </div>
 <p><a class="reference external" href="_images/skyline.simplified.workflow.annotated.gif">Fullsize image</a> for a clearer picture.</p>
 </div>
 <div class="section" id="what-s-new">
-<h2>What&#8217;s new<a class="headerlink" href="#what-s-new" title="Permalink to this headline">¶</a></h2>
+<h2>What’s new<a class="headerlink" href="#what-s-new" title="Permalink to this headline">¶</a></h2>
 <p>See <a class="reference external" href="whats-new.html">whats-new</a> for a comprehensive overview and description
 of the latest version/s of Skyline.</p>
 </div>
 <div class="section" id="what-s-old">
-<h2>What&#8217;s old<a class="headerlink" href="#what-s-old" title="Permalink to this headline">¶</a></h2>
+<h2>What’s old<a class="headerlink" href="#what-s-old" title="Permalink to this headline">¶</a></h2>
 <p>It must be stated the original core of Skyline has not been altered in any way,
 other than some fairly minimal Pythonic performance improvements, a bit of
-optimization in terms of the logic used to reach <a class="reference internal" href="skyline.html#settings.CONSENSUS" title="settings.CONSENSUS"><code class="xref py py-mod docutils literal"><span class="pre">settings.CONSENSUS</span></code></a> and a
+optimization in terms of the logic used to reach <a class="reference internal" href="skyline.html#settings.CONSENSUS" title="settings.CONSENSUS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.CONSENSUS</span></code></a> and a
 package restructure.  In terms of the original Skyline Analyzer, it does the
 same things just a little differently, hopefully better and a bit more.</p>
 <p>There is little point in trying to improve something as simple and elegant in
 methodology and design as Skyline, which has worked so outstandingly well to
-date.  This is a testament to a number of things, in fact the sum of all it&#8217;s
+date.  This is a testament to a number of things, in fact the sum of all it’s
 parts, <a class="reference external" href="https://www.etsy.com/">Etsy</a>, Abe and co. did a great job in the conceptual design,
 methodology and actual implementation of Skyline and they did it with very good
 building blocks from the scientific community.</p>
@@ -442,34 +458,35 @@ building blocks from the scientific community.</p>
 <h2>The architecture in a nutshell<a class="headerlink" href="#the-architecture-in-a-nutshell" title="Permalink to this headline">¶</a></h2>
 <p>Skyline uses to following technologies and libraries at its core:</p>
 <ol class="arabic simple">
-<li><strong>Python</strong> - the main skyline application language - <a class="reference external" href="https://www.python.org/">Python</a></li>
-<li><strong>Redis</strong> - <a class="reference external" href="http://Redis.io/">Redis</a> an in-memory data structure store</li>
-<li><strong>numpy</strong> - <a class="reference external" href="http://www.numpy.org/">NumPy</a> is the fundamental package for scientific computing with Python</li>
-<li><strong>scipy</strong> - <a class="reference external" href="http://scipy.org/">SciPy</a> Library - Fundamental library for scientific computing</li>
-<li><strong>pandas</strong> - <a class="reference external" href="http://pandas.pydata.org/">pandas</a> - Python Data Analysis Library</li>
-<li><strong>mysql/mariadb</strong> - a database - <a class="reference external" href="https://www.mysql.com/">MySQL</a> or <a class="reference external" href="https://mariadb.org/">MariaDB</a></li>
-<li><span class="red">re</span><span class="brow">brow</span> - Skyline uses a modified port of Marian
-Steinbach&#8217;s excellent <a class="reference external" href="https://github.com/marians/rebrow">rebrow</a></li>
-<li><strong>tsfresh</strong> - <a class="reference external" href="https://github.com/blue-yonder/tsfresh">tsfresh</a> - Automatic extraction of relevant features from time series</li>
-<li><strong>memcached</strong> - <a class="reference external" href="https://memcached.org/">memcached</a> - memory object caching system</li>
-<li><strong>pymemcache</strong> - <a class="reference external" href="https://github.com/pinterest/pymemcache">pymemcache</a> - A comprehensive, fast, pure-Python memcached client</li>
-<li><strong>luminol</strong> - <a class="reference external" href="https://github.com/linkedin/luminol">luminol</a> - Anomaly Detection and Correlation library</li>
-<li><strong>falcon</strong> - <a class="reference external" href="https://falconframework.org">falcon</a> - bare-metal web API framework for Python</li>
+<li><p><strong>Python</strong> - the main skyline application language - <a class="reference external" href="https://www.python.org/">Python</a></p></li>
+<li><p><strong>Redis</strong> - <a class="reference external" href="http://Redis.io/">Redis</a> an in-memory data structure store</p></li>
+<li><p><strong>numpy</strong> - <a class="reference external" href="http://www.numpy.org/">NumPy</a> is the fundamental package for scientific computing with Python</p></li>
+<li><p><strong>scipy</strong> - <a class="reference external" href="http://scipy.org/">SciPy</a> Library - Fundamental library for scientific computing</p></li>
+<li><p><strong>pandas</strong> - <a class="reference external" href="http://pandas.pydata.org/">pandas</a> - Python Data Analysis Library</p></li>
+<li><p><strong>mysql/mariadb</strong> - a database - <a class="reference external" href="https://www.mysql.com/">MySQL</a> or <a class="reference external" href="https://mariadb.org/">MariaDB</a></p></li>
+<li><p><span class="red">re</span><span class="brow">brow</span> - Skyline uses a modified port of Marian
+Steinbach’s excellent <a class="reference external" href="https://github.com/marians/rebrow">rebrow</a></p></li>
+<li><p><strong>tsfresh</strong> - <a class="reference external" href="https://github.com/blue-yonder/tsfresh">tsfresh</a> - Automatic extraction of relevant features from time series</p></li>
+<li><p><strong>memcached</strong> - <a class="reference external" href="https://memcached.org/">memcached</a> - memory object caching system</p></li>
+<li><p><strong>pymemcache</strong> - <a class="reference external" href="https://github.com/pinterest/pymemcache">pymemcache</a> - A comprehensive, fast, pure-Python memcached client</p></li>
+<li><p><strong>luminol</strong> - <a class="reference external" href="https://github.com/linkedin/luminol">luminol</a> - Anomaly Detection and Correlation library</p></li>
+<li><p><strong>falcon</strong> - <a class="reference external" href="https://falconframework.org">falcon</a> - bare-metal web API framework for Python</p></li>
 </ol>
 </div>
 </div>
 
 
            </div>
+           
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="requirements.html" class="btn btn-neutral float-right" title="Requirements" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="requirements.html" class="btn btn-neutral float-right" title="Requirements" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="index.html" class="btn btn-neutral" title="Skyline documentation" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="index.html" class="btn btn-neutral float-left" title="Skyline documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -478,11 +495,19 @@ Steinbach&#8217;s excellent <a class="reference external" href="https://github.c
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
+        
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -494,36 +519,15 @@ Steinbach&#8217;s excellent <a class="reference external" href="https://github.c
   </div>
   
 
-
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'2.0.0',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

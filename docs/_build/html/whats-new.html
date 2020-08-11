@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,50 +11,48 @@
   
 
   
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
+
+  
+  
+  
   
 
   
-
-  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-
-  
-  
-    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  
-
-  
-    <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-  
-
-  
-        <link rel="index" title="Index"
-              href="genindex.html"/>
-        <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 2.0.0 documentation" href="index.html"/>
-        <link rel="next" title="Development" href="development/index.html"/>
-        <link rel="prev" title="1.0.0 - the crucible branch" href="releases/1_0_0.html"/> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Development" href="development/index.html" />
+    <link rel="prev" title="1.0.0 - the crucible branch" href="releases/1_0_0.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
+   
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
-            <a href="index.html" class="icon icon-home"> Skyline
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
 
           
@@ -82,22 +79,24 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
             
-                <ul class="current">
+              
+            
+            
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
-<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alerts.html">Alerts</a></li>
-<li class="toctree-l1"><a class="reference internal" href="docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
@@ -114,6 +113,7 @@
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
@@ -121,21 +121,19 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#reliability">Reliability</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
-<li class="toctree-l1"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">What&#8217;s new</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#see-release-notes">See Release Notes</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#skyline-v1-1-0-beta-the-ionosphere-branch">Skyline v1.1.0-beta the ionosphere branch</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#skyline-v1-0-4-beta-v1-0-8-beta-the-crucible-branch">Skyline v1.0.4-beta - v1.0.8-beta the crucible branch</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#skyline-v1-0-3-beta-the-crucible-branch">Skyline v1.0.3-beta - the crucible branch</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#skyline-v1-0-2-beta-the-crucible-branch">Skyline v1.0.2-beta - the crucible branch</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#skyline-v1-0-1-beta-the-crucible-branch">Skyline v1.0.1-beta - the crucible branch</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#skyline-v1-0-0-beta-the-crucible-branch">Skyline v1.0.0-beta - the crucible branch</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">What’s new</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#see-release-notes">See Release Notes</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#skyline-v1-1-0-beta-the-ionosphere-branch">Skyline v1.1.0-beta the ionosphere branch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#skyline-v1-0-4-beta-v1-0-8-beta-the-crucible-branch">Skyline v1.0.4-beta - v1.0.8-beta the crucible branch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#skyline-v1-0-3-beta-the-crucible-branch">Skyline v1.0.3-beta - the crucible branch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#skyline-v1-0-2-beta-the-crucible-branch">Skyline v1.0.2-beta - the crucible branch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#skyline-v1-0-1-beta-the-crucible-branch">Skyline v1.0.1-beta - the crucible branch</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#skyline-v1-0-0-beta-the-crucible-branch">Skyline v1.0.0-beta - the crucible branch</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#conceptual-changes">Conceptual changes</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#etsy-to-time">Etsy to <code class="docutils literal"><span class="pre">time()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#etsy-to-time">Etsy to <cite>time()</cite></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#anomaly-breakdown-metrics">anomaly_breakdown metrics</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#mirage">mirage</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#boundary">boundary</a></li>
@@ -160,184 +158,205 @@
             
           
         </div>
+        
       </div>
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="index.html">Skyline</a>
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Skyline</a>
+        
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="index.html">Docs</a> &raquo;</li>
-      
-    <li>What&#8217;s new</li>
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>What’s new</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
-            <a href="_sources/whats-new.txt" rel="nofollow"> View page source</a>
+            
+            <a href="_sources/whats-new.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
   <div class="section" id="what-s-new">
-<span id="what-s-new"></span><h1>What&#8217;s new<a class="headerlink" href="#what-s-new" title="Permalink to this headline">¶</a></h1>
+<h1>What’s new<a class="headerlink" href="#what-s-new" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="see-release-notes">
-<span id="see-release-notes"></span><h2>See Release Notes<a class="headerlink" href="#see-release-notes" title="Permalink to this headline">¶</a></h2>
-<p>For v.1.1.1 and later see <a class="reference external" href="releases.html">Release Notes</a></p>
-</div>
+<h2>See Release Notes<a class="headerlink" href="#see-release-notes" title="Permalink to this headline">¶</a></h2>
+<p>For v.1.1.1 and later see [Release Notes](releases.html)</p>
 <div class="section" id="skyline-v1-1-0-beta-the-ionosphere-branch">
-<span id="skyline-v1-1-0-beta-the-ionosphere-branch"></span><h2>Skyline v1.1.0-beta the ionosphere branch<a class="headerlink" href="#skyline-v1-1-0-beta-the-ionosphere-branch" title="Permalink to this headline">¶</a></h2>
-<p>See <code class="docutils literal"><span class="pre">Ionosphere</span> <span class="pre">&lt;ionosphere.html&gt;</span></code>__ and <code class="docutils literal"><span class="pre">Development</span> <span class="pre">-</span> <span class="pre">Ionosphere</span> <span class="pre">&lt;development/ionosphere.html&gt;</span></code>__</p>
+<h3>Skyline v1.1.0-beta the ionosphere branch<a class="headerlink" href="#skyline-v1-1-0-beta-the-ionosphere-branch" title="Permalink to this headline">¶</a></h3>
+<p>See <a class="reference external" href="ionosphere.html">Ionosphere</a> and <a class="reference external" href="development/ionosphere.html">Development - Ionosphere</a></p>
 </div>
 <div class="section" id="skyline-v1-0-4-beta-v1-0-8-beta-the-crucible-branch">
-<span id="skyline-v1-0-4-beta-v1-0-8-beta-the-crucible-branch"></span><h2>Skyline v1.0.4-beta - v1.0.8-beta the crucible branch<a class="headerlink" href="#skyline-v1-0-4-beta-v1-0-8-beta-the-crucible-branch" title="Permalink to this headline">¶</a></h2>
+<h3>Skyline v1.0.4-beta - v1.0.8-beta the crucible branch<a class="headerlink" href="#skyline-v1-0-4-beta-v1-0-8-beta-the-crucible-branch" title="Permalink to this headline">¶</a></h3>
 <p>Mics changes and bug fixes.</p>
 </div>
 <div class="section" id="skyline-v1-0-3-beta-the-crucible-branch">
-<span id="skyline-v1-0-3-beta-the-crucible-branch"></span><h2>Skyline v1.0.3-beta - the crucible branch<a class="headerlink" href="#skyline-v1-0-3-beta-the-crucible-branch" title="Permalink to this headline">¶</a></h2>
+<h3>Skyline v1.0.3-beta - the crucible branch<a class="headerlink" href="#skyline-v1-0-3-beta-the-crucible-branch" title="Permalink to this headline">¶</a></h3>
 <p>Some documentation updates and setup.py things</p>
 </div>
 <div class="section" id="skyline-v1-0-2-beta-the-crucible-branch">
-<span id="skyline-v1-0-2-beta-the-crucible-branch"></span><h2>Skyline v1.0.2-beta - the crucible branch<a class="headerlink" href="#skyline-v1-0-2-beta-the-crucible-branch" title="Permalink to this headline">¶</a></h2>
+<h3>Skyline v1.0.2-beta - the crucible branch<a class="headerlink" href="#skyline-v1-0-2-beta-the-crucible-branch" title="Permalink to this headline">¶</a></h3>
 <p>Custom time zone settings for the rendering of Webapp Panorama dygraph graphs
-see <a class="reference external" href="webapp.html#time-zones">Webapp - Time zones</a></p>
+see [Webapp - Time zones](webapp.html#time-zones)</p>
 </div>
 <div class="section" id="skyline-v1-0-1-beta-the-crucible-branch">
-<span id="skyline-v1-0-1-beta-the-crucible-branch"></span><h2>Skyline v1.0.1-beta - the crucible branch<a class="headerlink" href="#skyline-v1-0-1-beta-the-crucible-branch" title="Permalink to this headline">¶</a></h2>
+<h3>Skyline v1.0.1-beta - the crucible branch<a class="headerlink" href="#skyline-v1-0-1-beta-the-crucible-branch" title="Permalink to this headline">¶</a></h3>
 <p>Analyzer alerts with a graph plotted from Redis data, not just the Graphite
-graph see <a class="reference external" href="analyzer.html#analyzer-smtp-alert-graphs">Analyzer SMTP alert graphs</a></p>
+graph see [Analyzer SMTP alert graphs](analyzer.html#analyzer-smtp-alert-graphs)</p>
 </div>
 <div class="section" id="skyline-v1-0-0-beta-the-crucible-branch">
-<span id="skyline-v1-0-0-beta-the-crucible-branch"></span><h2>Skyline v1.0.0-beta - the crucible branch<a class="headerlink" href="#skyline-v1-0-0-beta-the-crucible-branch" title="Permalink to this headline">¶</a></h2>
-<p>The crucible branch had an issue open called <code class="docutils literal"><span class="pre">Bug</span> <span class="pre">#982:</span> <span class="pre">Too</span> <span class="pre">much</span> <span class="pre">in</span> <span class="pre">crucible</span> <span class="pre">branch</span></code></p>
-<blockquote>
-<div><p>Too much in crucible branch</p>
-<p>I have added some pep20, sphinx docs and python package restructuring from &#64;languitar etsy/skyline #93 - https://github.com/languitar/skyline/tree/setuptools - which turns skyline into a python package</p>
-</div></blockquote>
+<h3>Skyline v1.0.0-beta - the crucible branch<a class="headerlink" href="#skyline-v1-0-0-beta-the-crucible-branch" title="Permalink to this headline">¶</a></h3>
+<p>The crucible branch had an issue open called <cite>Bug #982: Too much in crucible branch</cite></p>
+<p>&gt; Too much in crucible branch
+&gt;
+&gt; I have added some pep20, sphinx docs and python package restructuring from &#64;languitar etsy/skyline #93 - <a class="reference external" href="https://github.com/languitar/skyline/tree/setuptools">https://github.com/languitar/skyline/tree/setuptools</a> - which turns skyline into a python package</p>
 <p>The reality was that it was too difficult to reverse engineer all the changes
-into separate branches, so it continued unabated...</p>
+into separate branches, so it continued unabated…</p>
 <p>This version of Skyline sees enough changes to worthy of a major version change.
 That said the changes are/should be backwards compatible with older versions,
 mostly (best efforts applied) with a caveat on the skyline graphite metrics
 namespace and running Skyline under python virtualenv.</p>
+</div>
 <div class="section" id="conceptual-changes">
-<span id="conceptual-changes"></span><h3>Conceptual changes<a class="headerlink" href="#conceptual-changes" title="Permalink to this headline">¶</a></h3>
-<p>The <code class="docutils literal"><span class="pre">FULL_DURATION</span></code> concept is a variable and it is a variable in more ways than
-the settings.py context.  Conceptually now <code class="docutils literal"><span class="pre">FULL_DURATION</span></code>, <code class="docutils literal"><span class="pre">full_duration</span></code>,
-<code class="docutils literal"><span class="pre">full_duration_seconds</span></code> and <code class="docutils literal"><span class="pre">full_duration_in_hours</span></code> are variables in different
-contexts.  The <code class="docutils literal"><span class="pre">FULL_DURATION</span></code> concept was important in the Analyzer context,
+<h3>Conceptual changes<a class="headerlink" href="#conceptual-changes" title="Permalink to this headline">¶</a></h3>
+<p>The <cite>FULL_DURATION</cite> concept is a variable and it is a variable in more ways than
+the settings.py context.  Conceptually now <cite>FULL_DURATION</cite>, <cite>full_duration</cite>,
+<cite>full_duration_seconds</cite> and <cite>full_duration_in_hours</cite> are variables in different
+contexts.  The <cite>FULL_DURATION</cite> concept was important in the Analyzer context,
 but the concept of the full duration of a timeseries has become somewhat more
 variably and is different within different scopes or apps within Skyline.  It is
 no longer really a single static variable, it is handled quite dynamically in a
 number of contexts now.</p>
 </div>
 <div class="section" id="etsy-to-time">
-<span id="etsy-to-time"></span><h3>Etsy to <code class="docutils literal"><span class="pre">time()</span></code><a class="headerlink" href="#etsy-to-time" title="Permalink to this headline">¶</a></h3>
+<h3>Etsy to <cite>time()</cite><a class="headerlink" href="#etsy-to-time" title="Permalink to this headline">¶</a></h3>
 <p>This whats new will cover all the new things that the crucible branch
 introduces since the last Etsy commit on master of
-<a class="reference external" href="https://github.com/etsy/skyline">etsy/skyline</a>, although not strictly accrurate, for the
+[etsy/skyline](<a class="reference external" href="https://github.com/etsy/skyline">https://github.com/etsy/skyline</a>), although not strictly accrurate, for the
 purposes of generality it shall be assumed that no one is running the new Skyline
 features that have not been merged to the Etsy Skyline.</p>
 </div>
 <div class="section" id="anomaly-breakdown-metrics">
-<span id="anomaly-breakdown-metrics"></span><h3>anomaly_breakdown metrics<a class="headerlink" href="#anomaly-breakdown-metrics" title="Permalink to this headline">¶</a></h3>
+<h3>anomaly_breakdown metrics<a class="headerlink" href="#anomaly-breakdown-metrics" title="Permalink to this headline">¶</a></h3>
 </div>
 <div class="section" id="mirage">
-<span id="mirage"></span><h3>mirage<a class="headerlink" href="#mirage" title="Permalink to this headline">¶</a></h3>
-<p>See <a class="reference external" href="mirage.html">Mirage</a></p>
+<h3>mirage<a class="headerlink" href="#mirage" title="Permalink to this headline">¶</a></h3>
+<p>See [Mirage](mirage.html)</p>
 </div>
 <div class="section" id="boundary">
-<span id="boundary"></span><h3>boundary<a class="headerlink" href="#boundary" title="Permalink to this headline">¶</a></h3>
-<p>See <a class="reference external" href="boundary.html">Boundary</a></p>
+<h3>boundary<a class="headerlink" href="#boundary" title="Permalink to this headline">¶</a></h3>
+<p>See [Boundary](boundary.html)</p>
 </div>
 <div class="section" id="crucible">
-<span id="crucible"></span><h3>crucible<a class="headerlink" href="#crucible" title="Permalink to this headline">¶</a></h3>
-<p>See <a class="reference external" href="crucible.html">Crucible</a></p>
+<h3>crucible<a class="headerlink" href="#crucible" title="Permalink to this headline">¶</a></h3>
+<p>See [Crucible](crucible.html)</p>
 </div>
 <div class="section" id="sphinx-documentation">
-<span id="sphinx-documentation"></span><h3>sphinx documentation<a class="headerlink" href="#sphinx-documentation" title="Permalink to this headline">¶</a></h3>
-<p>See <a class="reference external" href="building-documentation.html">Building documentation</a></p>
+<h3>sphinx documentation<a class="headerlink" href="#sphinx-documentation" title="Permalink to this headline">¶</a></h3>
+<p>See [Building documentation](building-documentation.html)</p>
 </div>
 <div class="section" id="performance-tuning">
-<span id="performance-tuning"></span><h3>Performance tuning<a class="headerlink" href="#performance-tuning" title="Permalink to this headline">¶</a></h3>
-<p>See <a class="reference external" href="analyzer-optimisation.html">Analyzer Optimisations</a></p>
+<h3>Performance tuning<a class="headerlink" href="#performance-tuning" title="Permalink to this headline">¶</a></h3>
+<p>See [Analyzer Optimisations](analyzer-optimisation.html)</p>
 </div>
 <div class="section" id="process-management">
-<span id="process-management"></span><h3>Process management<a class="headerlink" href="#process-management" title="Permalink to this headline">¶</a></h3>
+<h3>Process management<a class="headerlink" href="#process-management" title="Permalink to this headline">¶</a></h3>
 <p>A number of the apps have had better process management handling added and the
 parent process now spawns processes and terminates then if they have not
-completed in <code class="docutils literal"><span class="pre">MAX_ANALYZER_PROCESS_RUNTIME</span></code>, <code class="docutils literal"><span class="pre">ROOMBA_TIMEOUT</span></code> and other apps
-have this specified too, either using the <code class="docutils literal"><span class="pre">MAX_ANALYZER_PROCESS_RUNTIME</span></code> as a
+completed in <cite>MAX_ANALYZER_PROCESS_RUNTIME</cite>, <cite>ROOMBA_TIMEOUT</cite> and other apps
+have this specified too, either using the <cite>MAX_ANALYZER_PROCESS_RUNTIME</cite> as a
 hardcoded one where appropriate.  This handles a very limited number of edge
 cases where something that is host machine related causes the Python process to
 hang.</p>
 </div>
 <div class="section" id="analyzer-optimisations">
-<span id="analyzer-optimisations"></span><h3>Analyzer optimisations<a class="headerlink" href="#analyzer-optimisations" title="Permalink to this headline">¶</a></h3>
-<p>See <a class="reference external" href="analyzer-optimisation.html">Analyzer Optimisations</a></p>
+<h3>Analyzer optimisations<a class="headerlink" href="#analyzer-optimisations" title="Permalink to this headline">¶</a></h3>
+<p>See [Analyzer Optimisations](analyzer-optimisation.html)</p>
 </div>
 <div class="section" id="algorithm-breakdown-metrics">
-<span id="algorithm-breakdown-metrics"></span><h3>algorithm_breakdown metrics<a class="headerlink" href="#algorithm-breakdown-metrics" title="Permalink to this headline">¶</a></h3>
-<p>See <a class="reference external" href="analyzer-optimisation.html">Analyzer Optimisations</a></p>
+<h3>algorithm_breakdown metrics<a class="headerlink" href="#algorithm-breakdown-metrics" title="Permalink to this headline">¶</a></h3>
+<p>See [Analyzer Optimisations](analyzer-optimisation.html)</p>
 </div>
 <div class="section" id="improved-log-handling">
-<span id="improved-log-handling"></span><h3>Improved log handling<a class="headerlink" href="#improved-log-handling" title="Permalink to this headline">¶</a></h3>
+<h3>Improved log handling<a class="headerlink" href="#improved-log-handling" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>Prevent log overwrites</li>
+<li><p>Prevent log overwrites</p></li>
 </ul>
-<p>See <a class="reference external" href="logging.html">Logging</a></p>
+<p>See [Logging](logging.html)</p>
 </div>
 <div class="section" id="webapp">
-<span id="webapp"></span><h3>Webapp<a class="headerlink" href="#webapp" title="Permalink to this headline">¶</a></h3>
+<h3>Webapp<a class="headerlink" href="#webapp" title="Permalink to this headline">¶</a></h3>
 <p>Some simple and basic security was added to the Webapp now it can be enabled
 to access a MySQL database in the Panorama context.</p>
 <ul class="simple">
-<li>Only allow IP addresses in <code class="docutils literal"><span class="pre">WEBAPP_ALLOWED_IPS</span></code></li>
-<li>There is now a single HTTP auth user <code class="docutils literal"><span class="pre">WEBAPP_AUTH_USER</span></code> and
-<code class="docutils literal"><span class="pre">WEBAPP_AUTH_USER_PASSWORD</span></code></li>
-<li>The Webapp can now be served via gunicorn and Apache (or any other HTTP
-reverse proxy).</li>
+<li><p>Only allow IP addresses in <cite>WEBAPP_ALLOWED_IPS</cite></p></li>
+<li><p>There is now a single HTTP auth user <cite>WEBAPP_AUTH_USER</cite> and
+<cite>WEBAPP_AUTH_USER_PASSWORD</cite></p></li>
+<li><p>The Webapp can now be served via gunicorn and Apache (or any other HTTP
+reverse proxy).</p></li>
 </ul>
-<p>See <a class="reference external" href="webapp.html">Webapp</a></p>
+<p>See [Webapp](webapp.html)</p>
 </div>
 <div class="section" id="panorama">
-<span id="panorama"></span><h3>Panorama<a class="headerlink" href="#panorama" title="Permalink to this headline">¶</a></h3>
-<p>See <a class="reference external" href="panorama.html">Panorama</a></p>
+<h3>Panorama<a class="headerlink" href="#panorama" title="Permalink to this headline">¶</a></h3>
+<p>See [Panorama](panorama.html)</p>
 </div>
 </div>
 </div>
 
 
            </div>
+           
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="development/index.html" class="btn btn-neutral float-right" title="Development" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="development/index.html" class="btn btn-neutral float-right" title="Development" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="releases/1_0_0.html" class="btn btn-neutral" title="1.0.0 - the crucible branch" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="releases/1_0_0.html" class="btn btn-neutral float-left" title="1.0.0 - the crucible branch" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -346,11 +365,19 @@ reverse proxy).</li>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
+        
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -362,36 +389,15 @@ reverse proxy).</li>
   </div>
   
 
-
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'2.0.0',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

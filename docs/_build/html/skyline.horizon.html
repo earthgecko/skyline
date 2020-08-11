@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,51 +11,48 @@
   
 
   
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
+
+  
+  
+  
   
 
   
-
-  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-
-  
-  
-    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  
-
-  
-    <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-  
-
-  
-        <link rel="index" title="Index"
-              href="genindex.html"/>
-        <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 2.0.0 documentation" href="index.html"/>
-        <link rel="up" title="skyline package" href="skyline.html"/>
-        <link rel="next" title="skyline.ionosphere package" href="skyline.ionosphere.html"/>
-        <link rel="prev" title="skyline.flux package" href="skyline.flux.html"/> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="skyline.ionosphere package" href="skyline.ionosphere.html" />
+    <link rel="prev" title="skyline.flux package" href="skyline.flux.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
+   
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
-            <a href="index.html" class="icon icon-home"> Skyline
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
 
           
@@ -83,22 +79,24 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
             
-                <ul class="current">
+              
+            
+            
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
-<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alerts.html">Alerts</a></li>
-<li class="toctree-l1"><a class="reference internal" href="docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
@@ -115,6 +113,7 @@
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
@@ -122,12 +121,10 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#reliability">Reliability</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
-<li class="toctree-l1"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What’s new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="skyline.html">skyline package</a><ul class="current">
@@ -139,7 +136,7 @@
 <li class="toctree-l3"><a class="reference internal" href="skyline.flux.html">skyline.flux package</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">skyline.horizon package</a><ul>
 <li class="toctree-l4"><a class="reference internal" href="#submodules">Submodules</a></li>
-<li class="toctree-l4"><a class="reference internal" href="#module-horizon.agent">skyline.horizon.agent module</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#skyline-horizon-agent-module">skyline.horizon.agent module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-horizon.listen">skyline.horizon.listen module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-horizon.roomba">skyline.horizon.roomba module</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#module-horizon.worker">skyline.horizon.worker module</a></li>
@@ -158,7 +155,7 @@
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#submodules">Submodules</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-algorithm_exceptions">skyline.algorithm_exceptions module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-create_matplotlib_graph">skyline.create_matplotlib_graph module</a></li>
-<li class="toctree-l2"><a class="reference internal" href="skyline.html#skyline-custom-algorithms-module">skyline.custom_algorithms module</a></li>
+<li class="toctree-l2"><a class="reference internal" href="skyline.html#module-custom_algorithms">skyline.custom_algorithms module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-custom_algorithms_to_run">skyline.custom_algorithms_to_run module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-database">skyline.database module</a></li>
 <li class="toctree-l2"><a class="reference internal" href="skyline.html#module-external_alert_configs">skyline.external_alert_configs module</a></li>
@@ -179,42 +176,63 @@
             
           
         </div>
+        
       </div>
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="index.html">Skyline</a>
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Skyline</a>
+        
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="index.html">Docs</a> &raquo;</li>
-      
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
           <li><a href="skyline.html">skyline package</a> &raquo;</li>
-      
-    <li>skyline.horizon package</li>
+        
+      <li>skyline.horizon package</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
-            <a href="_sources/skyline.horizon.txt" rel="nofollow"> View page source</a>
+            
+            <a href="_sources/skyline.horizon.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -225,93 +243,76 @@
 <div class="section" id="submodules">
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 </div>
-<div class="section" id="module-horizon.agent">
-<span id="skyline-horizon-agent-module"></span><h2>skyline.horizon.agent module<a class="headerlink" href="#module-horizon.agent" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
-<dt id="horizon.agent.Horizon">
-<em class="property">class </em><code class="descname">Horizon</code><a class="reference internal" href="_modules/horizon/agent.html#Horizon"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#horizon.agent.Horizon" title="Permalink to this definition">¶</a></dt>
-<dd><p>Initializes Horizon</p>
-<dl class="method">
-<dt id="horizon.agent.Horizon.run">
-<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/agent.html#Horizon.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#horizon.agent.Horizon.run" title="Permalink to this definition">¶</a></dt>
-<dd><p>Determine the <cite>MAX_QUEUE_SIZE</cite> for the listen process.</p>
-<p>Determine if horizon should populate the mini redis store for Oculus.</p>
-<p>Starts the defined number of <cite>WORKER_PROCESSES</cite>, with the first worker
-populating the canary metric.</p>
-<p>Start the pickle (and UDP) listen processes.</p>
-<p>Start roomba.</p>
-</dd></dl>
-
-</dd></dl>
-
-<dl class="function">
-<dt id="horizon.agent.run">
-<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/agent.html#run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#horizon.agent.run" title="Permalink to this definition">¶</a></dt>
-<dd><p>Start the Horizon agent and logger.</p>
-</dd></dl>
-
+<div class="section" id="skyline-horizon-agent-module">
+<h2>skyline.horizon.agent module<a class="headerlink" href="#skyline-horizon-agent-module" title="Permalink to this headline">¶</a></h2>
 </div>
 <div class="section" id="module-horizon.listen">
 <span id="skyline-horizon-listen-module"></span><h2>skyline.horizon.listen module<a class="headerlink" href="#module-horizon.listen" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<dl class="py class">
 <dt id="horizon.listen.SafeUnpickler">
-<em class="property">class </em><code class="descname">SafeUnpickler</code><a class="reference internal" href="_modules/horizon/listen.html#SafeUnpickler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#horizon.listen.SafeUnpickler" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">object</span></code></p>
-<dl class="attribute">
+<em class="property">class </em><code class="sig-name descname">SafeUnpickler</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">file</span></em>, <em class="sig-param"><span class="o">*</span></em>, <em class="sig-param"><span class="n">fix_imports</span><span class="o">=</span><span class="default_value">True</span></em>, <em class="sig-param"><span class="n">encoding</span><span class="o">=</span><span class="default_value">'ASCII'</span></em>, <em class="sig-param"><span class="n">errors</span><span class="o">=</span><span class="default_value">'strict'</span></em>, <em class="sig-param"><span class="n">buffers</span><span class="o">=</span><span class="default_value">()</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/listen.html#SafeUnpickler"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#horizon.listen.SafeUnpickler" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">_pickle.Unpickler</span></code></p>
+<dl class="py attribute">
 <dt id="horizon.listen.SafeUnpickler.PICKLE_SAFE">
-<code class="descname">PICKLE_SAFE</code><em class="property"> = {'copy_reg': set(['_reconstructor']), '__builtin__': set(['object'])}</em><a class="headerlink" href="#horizon.listen.SafeUnpickler.PICKLE_SAFE" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">PICKLE_SAFE</code><em class="property"> = {'__builtin__': {'object'}, 'copy_reg': {'_reconstructor'}}</em><a class="headerlink" href="#horizon.listen.SafeUnpickler.PICKLE_SAFE" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
-<dl class="classmethod">
+<dl class="py method">
 <dt id="horizon.listen.SafeUnpickler.find_class">
-<em class="property">classmethod </em><code class="descname">find_class</code><span class="sig-paren">(</span><em>module</em>, <em>name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/listen.html#SafeUnpickler.find_class"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#horizon.listen.SafeUnpickler.find_class" title="Permalink to this definition">¶</a></dt>
-<dd></dd></dl>
+<code class="sig-name descname">find_class</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">module</span></em>, <em class="sig-param"><span class="n">name</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/listen.html#SafeUnpickler.find_class"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#horizon.listen.SafeUnpickler.find_class" title="Permalink to this definition">¶</a></dt>
+<dd><p>Return an object from a specified module.</p>
+<p>If necessary, the module will be imported. Subclasses may override
+this method (e.g. to restrict unpickling of arbitrary classes and
+functions).</p>
+<p>This method is called whenever a class or a function object is
+needed.  Both arguments passed are str objects.</p>
+</dd></dl>
 
-<dl class="classmethod">
+<dl class="py method">
 <dt id="horizon.listen.SafeUnpickler.loads">
-<em class="property">classmethod </em><code class="descname">loads</code><span class="sig-paren">(</span><em>pickle_string</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/listen.html#SafeUnpickler.loads"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#horizon.listen.SafeUnpickler.loads" title="Permalink to this definition">¶</a></dt>
+<em class="property">classmethod </em><code class="sig-name descname">loads</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">pickle_string</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/listen.html#SafeUnpickler.loads"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#horizon.listen.SafeUnpickler.loads" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 </dd></dl>
 
-<dl class="class">
+<dl class="py class">
 <dt id="horizon.listen.Listen">
-<em class="property">class </em><code class="descname">Listen</code><span class="sig-paren">(</span><em>port</em>, <em>queue</em>, <em>parent_pid</em>, <em>type='pickle'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/listen.html#Listen"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#horizon.listen.Listen" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">multiprocessing.process.Process</span></code></p>
+<em class="property">class </em><code class="sig-name descname">Listen</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">port</span></em>, <em class="sig-param"><span class="n">queue</span></em>, <em class="sig-param"><span class="n">parent_pid</span></em>, <em class="sig-param"><span class="n">type</span><span class="o">=</span><span class="default_value">'pickle'</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/listen.html#Listen"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#horizon.listen.Listen" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">multiprocessing.context.Process</span></code></p>
 <p>The listener is responsible for listening on a port.</p>
-<dl class="method">
+<dl class="py method">
 <dt id="horizon.listen.Listen.gen_unpickle">
-<code class="descname">gen_unpickle</code><span class="sig-paren">(</span><em>infile</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/listen.html#Listen.gen_unpickle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#horizon.listen.Listen.gen_unpickle" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">gen_unpickle</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">infile</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/listen.html#Listen.gen_unpickle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#horizon.listen.Listen.gen_unpickle" title="Permalink to this definition">¶</a></dt>
 <dd><p>Generate a pickle from a stream</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="horizon.listen.Listen.read_all">
-<code class="descname">read_all</code><span class="sig-paren">(</span><em>sock</em>, <em>n</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/listen.html#Listen.read_all"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#horizon.listen.Listen.read_all" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">read_all</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">sock</span></em>, <em class="sig-param"><span class="n">n</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/listen.html#Listen.read_all"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#horizon.listen.Listen.read_all" title="Permalink to this definition">¶</a></dt>
 <dd><p>Read n bytes from a stream</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="horizon.listen.Listen.check_if_parent_is_alive">
-<code class="descname">check_if_parent_is_alive</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/listen.html#Listen.check_if_parent_is_alive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#horizon.listen.Listen.check_if_parent_is_alive" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">check_if_parent_is_alive</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/listen.html#Listen.check_if_parent_is_alive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#horizon.listen.Listen.check_if_parent_is_alive" title="Permalink to this definition">¶</a></dt>
 <dd><p>Self explanatory</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="horizon.listen.Listen.listen_pickle">
-<code class="descname">listen_pickle</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/listen.html#Listen.listen_pickle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#horizon.listen.Listen.listen_pickle" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">listen_pickle</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/listen.html#Listen.listen_pickle"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#horizon.listen.Listen.listen_pickle" title="Permalink to this definition">¶</a></dt>
 <dd><p>Listen for pickles over tcp</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="horizon.listen.Listen.listen_udp">
-<code class="descname">listen_udp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/listen.html#Listen.listen_udp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#horizon.listen.Listen.listen_udp" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">listen_udp</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/listen.html#Listen.listen_udp"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#horizon.listen.Listen.listen_udp" title="Permalink to this definition">¶</a></dt>
 <dd><p>Listen over udp for MessagePack strings</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="horizon.listen.Listen.run">
-<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/listen.html#Listen.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#horizon.listen.Listen.run" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/listen.html#Listen.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#horizon.listen.Listen.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Called when process intializes.</p>
 </dd></dl>
 
@@ -320,27 +321,27 @@ populating the canary metric.</p>
 </div>
 <div class="section" id="module-horizon.roomba">
 <span id="skyline-horizon-roomba-module"></span><h2>skyline.horizon.roomba module<a class="headerlink" href="#module-horizon.roomba" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<dl class="py class">
 <dt id="horizon.roomba.Roomba">
-<em class="property">class </em><code class="descname">Roomba</code><span class="sig-paren">(</span><em>parent_pid</em>, <em>skip_mini</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/roomba.html#Roomba"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#horizon.roomba.Roomba" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">threading.Thread</span></code></p>
+<em class="property">class </em><code class="sig-name descname">Roomba</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">parent_pid</span></em>, <em class="sig-param"><span class="n">skip_mini</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/roomba.html#Roomba"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#horizon.roomba.Roomba" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">threading.Thread</span></code></p>
 <p>The Roomba is responsible for deleting keys older than DURATION.</p>
-<dl class="method">
+<dl class="py method">
 <dt id="horizon.roomba.Roomba.check_if_parent_is_alive">
-<code class="descname">check_if_parent_is_alive</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/roomba.html#Roomba.check_if_parent_is_alive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#horizon.roomba.Roomba.check_if_parent_is_alive" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">check_if_parent_is_alive</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/roomba.html#Roomba.check_if_parent_is_alive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#horizon.roomba.Roomba.check_if_parent_is_alive" title="Permalink to this definition">¶</a></dt>
 <dd><p>Self explanatory.</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="horizon.roomba.Roomba.vacuum">
-<code class="descname">vacuum</code><span class="sig-paren">(</span><em>i</em>, <em>namespace</em>, <em>duration</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/roomba.html#Roomba.vacuum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#horizon.roomba.Roomba.vacuum" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">vacuum</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">i</span></em>, <em class="sig-param"><span class="n">namespace</span></em>, <em class="sig-param"><span class="n">duration</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/roomba.html#Roomba.vacuum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#horizon.roomba.Roomba.vacuum" title="Permalink to this definition">¶</a></dt>
 <dd><p>Trim metrics that are older than settings.FULL_DURATION and purge old
 metrics.</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="horizon.roomba.Roomba.run">
-<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/roomba.html#Roomba.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#horizon.roomba.Roomba.run" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/roomba.html#Roomba.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#horizon.roomba.Roomba.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Called when process initializes.</p>
 </dd></dl>
 
@@ -349,30 +350,30 @@ metrics.</p>
 </div>
 <div class="section" id="module-horizon.worker">
 <span id="skyline-horizon-worker-module"></span><h2>skyline.horizon.worker module<a class="headerlink" href="#module-horizon.worker" title="Permalink to this headline">¶</a></h2>
-<dl class="class">
+<dl class="py class">
 <dt id="horizon.worker.Worker">
-<em class="property">class </em><code class="descname">Worker</code><span class="sig-paren">(</span><em>queue</em>, <em>parent_pid</em>, <em>skip_mini</em>, <em>canary=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/worker.html#Worker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#horizon.worker.Worker" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal"><span class="pre">multiprocessing.process.Process</span></code></p>
+<em class="property">class </em><code class="sig-name descname">Worker</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">queue</span></em>, <em class="sig-param"><span class="n">parent_pid</span></em>, <em class="sig-param"><span class="n">skip_mini</span></em>, <em class="sig-param"><span class="n">canary</span><span class="o">=</span><span class="default_value">False</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/worker.html#Worker"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#horizon.worker.Worker" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">multiprocessing.context.Process</span></code></p>
 <p>The worker processes chunks from the queue and appends
 the latest datapoints to their respective timesteps in Redis.</p>
-<dl class="method">
+<dl class="py method">
 <dt id="horizon.worker.Worker.check_if_parent_is_alive">
-<code class="descname">check_if_parent_is_alive</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/worker.html#Worker.check_if_parent_is_alive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#horizon.worker.Worker.check_if_parent_is_alive" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">check_if_parent_is_alive</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/worker.html#Worker.check_if_parent_is_alive"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#horizon.worker.Worker.check_if_parent_is_alive" title="Permalink to this definition">¶</a></dt>
 <dd><p>Self explanatory.</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="horizon.worker.Worker.in_skip_list">
-<code class="descname">in_skip_list</code><span class="sig-paren">(</span><em>metric_name</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/worker.html#Worker.in_skip_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#horizon.worker.Worker.in_skip_list" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">in_skip_list</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">metric_name</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/worker.html#Worker.in_skip_list"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#horizon.worker.Worker.in_skip_list" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check if the metric is in SKIP_LIST.</p>
 <p># &#64;added 20170319 - Feature #1978: worker - DO_NOT_SKIP_LIST
 The SKIP_LIST allows for a string match or a match on dotted elements
 within the metric namespace.</p>
 </dd></dl>
 
-<dl class="method">
+<dl class="py method">
 <dt id="horizon.worker.Worker.run">
-<code class="descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/worker.html#Worker.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#horizon.worker.Worker.run" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname">run</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/horizon/worker.html#Worker.run"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#horizon.worker.Worker.run" title="Permalink to this definition">¶</a></dt>
 <dd><p>Called when the process intializes.</p>
 </dd></dl>
 
@@ -386,15 +387,16 @@ within the metric namespace.</p>
 
 
            </div>
+           
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="skyline.ionosphere.html" class="btn btn-neutral float-right" title="skyline.ionosphere package" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="skyline.ionosphere.html" class="btn btn-neutral float-right" title="skyline.ionosphere package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="skyline.flux.html" class="btn btn-neutral" title="skyline.flux package" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="skyline.flux.html" class="btn btn-neutral float-left" title="skyline.flux package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -403,11 +405,19 @@ within the metric namespace.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
+        
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -419,36 +429,15 @@ within the metric namespace.</p>
   </div>
   
 
-
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'2.0.0',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

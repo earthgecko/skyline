@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,50 +11,48 @@
   
 
   
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
+
+  
+  
+  
   
 
   
-
-  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-
-  
-  
-    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  
-
-  
-    <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-  
-
-  
-        <link rel="index" title="Index"
-              href="genindex.html"/>
-        <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 2.0.0 documentation" href="index.html"/>
-        <link rel="next" title="rebrow" href="rebrow.html"/>
-        <link rel="prev" title="Vista" href="vista.html"/> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="rebrow" href="rebrow.html" />
+    <link rel="prev" title="Vista" href="vista.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
+   
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
-            <a href="index.html" class="icon icon-home"> Skyline
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
 
           
@@ -82,22 +79,24 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
             
-                <ul class="current">
+              
+            
+            
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
-<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alerts.html">Alerts</a></li>
-<li class="toctree-l1"><a class="reference internal" href="docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
@@ -114,13 +113,14 @@
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Redis integration</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#redis-security">Redis Security</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#types-of-skyline-and-redis-implementations">Types of Skyline and Redis implementations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#how-are-time-series-stored-in-redis">How are time series stored in Redis?</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#what-other-data-are-stored-in-redis">What other data are stored in Redis?</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#what-s-with-the-mini-and-metrics-namespaces">What&#8217;s with the &#8216;mini&#8217; and &#8216;metrics&#8217; namespaces?</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#what-s-with-the-mini-and-metrics-namespaces">What’s with the ‘mini’ and ‘metrics’ namespaces?</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
@@ -128,12 +128,10 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#reliability">Reliability</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
-<li class="toctree-l1"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What’s new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a></li>
@@ -142,40 +140,61 @@
             
           
         </div>
+        
       </div>
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="index.html">Skyline</a>
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Skyline</a>
+        
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="index.html">Docs</a> &raquo;</li>
-      
-    <li>Redis integration</li>
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Redis integration</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
-            <a href="_sources/redis-integration.txt" rel="nofollow"> View page source</a>
+            
+            <a href="_sources/redis-integration.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -190,37 +209,37 @@ at <a class="reference external" href="https://redis.io/topics/security">https:/
 <p>It is important that you understand factors relating to the default Redis
 security model.</p>
 <div class="admonition warning">
-<p class="first admonition-title">Warning</p>
-<p class="last">With the introduction of <span class="red">re</span><span class="brow">brow</span> and Luminosity it
+<p class="admonition-title">Warning</p>
+<p>With the introduction of <span class="red">re</span><span class="brow">brow</span> and Luminosity it
 is very important that Redis and your environment are configured correctly in
 terms of securing Redis and access to Redis.  Please ensure that you implement
 the recommendations described on redis.io security page and the Redis related
 Skyline recommendations described on the installations page in this
-documentation and <code class="docutils literal"><span class="pre">settings.py</span></code>.</p>
+documentation and <code class="docutils literal notranslate"><span class="pre">settings.py</span></code>.</p>
 </div>
 </div>
 <div class="section" id="types-of-skyline-and-redis-implementations">
 <h2>Types of Skyline and Redis implementations<a class="headerlink" href="#types-of-skyline-and-redis-implementations" title="Permalink to this headline">¶</a></h2>
 <p>There are two different types of Skyline implementations:</p>
 <ul class="simple">
-<li>A single Skyline instance, Redis only needs to bind to 127.0.0.1</li>
-<li>Multiple Skyline instances running in a distributed fashion Redis still
+<li><p>A single Skyline instance, Redis only needs to bind to 127.0.0.1</p></li>
+<li><p>Multiple Skyline instances running in a distributed fashion Redis still
 only needs to bind to 127.0.0.1 but stunnel need to be implmented to allow
 each Skyline server to connect to other Redis instances on Skyline servers via
-a stunnel SSL encrypted connection.  See <a class="reference external" href="running-multiple-skylines.html">Running multiple Skyline instances</a></li>
+a stunnel SSL encrypted connection.  See <a class="reference external" href="running-multiple-skylines.html">Running multiple Skyline instances</a></p></li>
 </ul>
 </div>
 <div class="section" id="how-are-time-series-stored-in-redis">
 <h2>How are time series stored in Redis?<a class="headerlink" href="#how-are-time-series-stored-in-redis" title="Permalink to this headline">¶</a></h2>
-<p>Part of the Horizon service&#8217;s job is to input data into Redis. Skyline uses
+<p>Part of the Horizon service’s job is to input data into Redis. Skyline uses
 MessagePack to store data in Redis. When a data point comes in, a
-Horizon worker will pack the data point with the schema <code class="docutils literal"><span class="pre">[timestamp,</span> <span class="pre">value]</span></code>
-into a MessagePack-encoded binary string and make a <code class="docutils literal"><span class="pre">redis.append()</span></code> call to
+Horizon worker will pack the data point with the schema <code class="docutils literal notranslate"><span class="pre">[timestamp,</span> <span class="pre">value]</span></code>
+into a MessagePack-encoded binary string and make a <code class="docutils literal notranslate"><span class="pre">redis.append()</span></code> call to
 append this string to the appropriate metric key. This way, Horizon can very
 easily make many updates to Redis at once, and this is how Skyline is able to
 support a very large firehose of metrics.</p>
 <p>One downside to this scheme is that once time series in Redis start to get very
-long, Redis&#8217; performance suffers. Redis was not designed to contain very large
+long, Redis’ performance suffers. Redis was not designed to contain very large
 strings. We may one day switch to an alternative storage design as proposed by
 Antirez - see <a class="reference external" href="https://github.com/antirez/redis-timeseries">https://github.com/antirez/redis-timeseries</a> - but for now, this is
 how it is. And given that the last update to that repo was in 10 Oct 2012, it is
@@ -238,48 +257,49 @@ the limitation of Skyline only being able to analyse data and be useful in the
 <p>In addition to all the metrics, there are a number of specialized Redis sets and
 keys:</p>
 <ul class="simple">
-<li><code class="docutils literal"><span class="pre">metrics.unique_metrics</span></code> and <code class="docutils literal"><span class="pre">mini.unique_metrics</span></code> These contain every key
+<li><p><code class="docutils literal notranslate"><span class="pre">metrics.unique_metrics</span></code> and <code class="docutils literal notranslate"><span class="pre">mini.unique_metrics</span></code> These contain every key
 that exists in Redis, and they are used by the Analyzer to make it easier for
 the Analyzer to know what to mget from Redis (as opposed to doing a very
-expensive keys * query)</li>
-<li>analyzer.boring - a set of all metrics deemed Boring by Analyzer</li>
-<li>analyzer.stale - a set of all metrics deemed Stale by Analyzer</li>
-<li>analyzer.too_short - a set of all metrics deemed TooShort by Analyzer</li>
-<li>derivative_metrics - a set of all metrics that have been defined as
-metrics to analyse as derivatives by Analyzer.</li>
-<li>non_derivative_metrics - a set of all metrics that have been defined as
-to opposite of derivative_metrics by Analyzer.</li>
-<li>ionosphere.learn.work - a set of metric anomalies with details that require
-learning.</li>
-<li>ionosphere.training_data.* keys containing anomalies that need to be learnt e.g.
-<code class="docutils literal"><span class="pre">[['metric_timestamp',</span> <span class="pre">1526755861],</span> <span class="pre">['base_name',</span> <span class="pre">'carbon.relays.graphite-a.metricsReceived'],</span> <span class="pre">['timeseries_dir',</span> <span class="pre">'carbon/relays/graphite-a/metricsReceived'],</span> <span class="pre">['added_by',</span> <span class="pre">'analyzer']]</span></code></li>
-<li>ionosphere.unique_metrics set</li>
-<li>&lt;skyline_app&gt;.last_alert.&lt;alerter&gt;.&lt;metric&gt; keys</li>
-<li>panorama.mysql_ids.* keys</li>
-<li>rebrow.client.key.* keys - expiring rebrow Redis password JWT encoded tokens</li>
-<li>etc, etc, feel free to browser Redis with <span class="red">re</span><span class="brow">brow</span> and take a
+expensive keys * query)</p></li>
+<li><p>analyzer.boring - a set of all metrics deemed Boring by Analyzer</p></li>
+<li><p>analyzer.stale - a set of all metrics deemed Stale by Analyzer</p></li>
+<li><p>analyzer.too_short - a set of all metrics deemed TooShort by Analyzer</p></li>
+<li><p>derivative_metrics - a set of all metrics that have been defined as
+metrics to analyse as derivatives by Analyzer.</p></li>
+<li><p>non_derivative_metrics - a set of all metrics that have been defined as
+to opposite of derivative_metrics by Analyzer.</p></li>
+<li><p>ionosphere.learn.work - a set of metric anomalies with details that require
+learning.</p></li>
+<li><p>ionosphere.training_data.* keys containing anomalies that need to be learnt e.g.
+<code class="docutils literal notranslate"><span class="pre">[['metric_timestamp',</span> <span class="pre">1526755861],</span> <span class="pre">['base_name',</span> <span class="pre">'carbon.relays.graphite-a.metricsReceived'],</span> <span class="pre">['timeseries_dir',</span> <span class="pre">'carbon/relays/graphite-a/metricsReceived'],</span> <span class="pre">['added_by',</span> <span class="pre">'analyzer']]</span></code></p></li>
+<li><p>ionosphere.unique_metrics set</p></li>
+<li><p>&lt;skyline_app&gt;.last_alert.&lt;alerter&gt;.&lt;metric&gt; keys</p></li>
+<li><p>panorama.mysql_ids.* keys</p></li>
+<li><p>rebrow.client.key.* keys - expiring rebrow Redis password JWT encoded tokens</p></li>
+<li><p>etc, etc, feel free to browser Redis with <span class="red">re</span><span class="brow">brow</span> and take a
 look and please free feel to PR update this doc if you find some that are
-missing here.</li>
+missing here.</p></li>
 </ul>
 </div>
 <div class="section" id="what-s-with-the-mini-and-metrics-namespaces">
-<h2>What&#8217;s with the &#8216;mini&#8217; and &#8216;metrics&#8217; namespaces?<a class="headerlink" href="#what-s-with-the-mini-and-metrics-namespaces" title="Permalink to this headline">¶</a></h2>
-<p>The &#8216;mini&#8217; namespace is used by the Webapp to display a <cite>settings.MINI_DURATION</cite>
+<h2>What’s with the ‘mini’ and ‘metrics’ namespaces?<a class="headerlink" href="#what-s-with-the-mini-and-metrics-namespaces" title="Permalink to this headline">¶</a></h2>
+<p>The ‘mini’ namespace is used by the Webapp to display a <cite>settings.MINI_DURATION</cite>
 seconds long view.</p>
 </div>
 </div>
 
 
            </div>
+           
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="rebrow.html" class="btn btn-neutral float-right" title="rebrow" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="rebrow.html" class="btn btn-neutral float-right" title="rebrow" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="vista.html" class="btn btn-neutral" title="Vista" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="vista.html" class="btn btn-neutral float-left" title="Vista" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -288,11 +308,19 @@ seconds long view.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
+        
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -304,36 +332,15 @@ seconds long view.</p>
   </div>
   
 
-
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'2.0.0',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

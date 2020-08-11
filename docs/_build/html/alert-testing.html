@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,50 +11,48 @@
   
 
   
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
+
+  
+  
+  
   
 
   
-
-  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-
-  
-  
-    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  
-
-  
-    <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-  
-
-  
-        <link rel="index" title="Index"
-              href="genindex.html"/>
-        <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 2.0.0 documentation" href="index.html"/>
-        <link rel="next" title="Alerts" href="alerts.html"/>
-        <link rel="prev" title="Getting data into Skyline" href="getting-data-into-skyline.html"/> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Alerts" href="alerts.html" />
+    <link rel="prev" title="Getting data into Skyline" href="getting-data-into-skyline.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
+   
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
-            <a href="index.html" class="icon icon-home"> Skyline
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
 
           
@@ -82,22 +79,24 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
             
-                <ul class="current">
+              
+            
+            
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
-<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alerts.html">Alerts</a></li>
-<li class="toctree-l1"><a class="reference internal" href="docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
@@ -114,6 +113,7 @@
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
@@ -121,12 +121,10 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#reliability">Reliability</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
-<li class="toctree-l1"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What’s new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a></li>
@@ -135,40 +133,61 @@
             
           
         </div>
+        
       </div>
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="index.html">Skyline</a>
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Skyline</a>
+        
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="index.html">Docs</a> &raquo;</li>
-      
-    <li>Alert testing</li>
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Alert testing</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
-            <a href="_sources/alert-testing.txt" rel="nofollow"> View page source</a>
+            
+            <a href="_sources/alert-testing.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -177,47 +196,47 @@
   <div class="section" id="alert-testing">
 <h1>Alert testing<a class="headerlink" href="#alert-testing" title="Permalink to this headline">¶</a></h1>
 <p>The settings.py has a default non-existent metric namespace for testing your
-alerters, in the <code class="docutils literal"><span class="pre">skyline_test.alerters.test</span></code> <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALERTS</span></code></a> tuple.</p>
+alerters, in the <code class="docutils literal notranslate"><span class="pre">skyline_test.alerters.test</span></code> <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ALERTS</span></code></a> tuple.</p>
 <p>If you want to test your email, Slack or Pagerduty OPTS are correctly configured
 and working, do the following.</p>
 <ul class="simple">
-<li>Ensure that all your email, slack and/or pagerduty options are all configured
-correctly with your strings/tokens/etc in settings.py</li>
-<li>Ensure the relevant <code class="docutils literal"><span class="pre">skyline_test.alerters.test</span></code> instances in settings.py
-are configured to your desired outputs</li>
-<li>Once again using the Python-2.7.16 virtualenv and documentation PATHs as an
-example:</li>
+<li><p>Ensure that all your email, slack and/or pagerduty options are all configured
+correctly with your strings/tokens/etc in settings.py</p></li>
+<li><p>Ensure the relevant <code class="docutils literal notranslate"><span class="pre">skyline_test.alerters.test</span></code> instances in settings.py
+are configured to your desired outputs</p></li>
+<li><p>Once again using the Python-3.8.3 virtualenv and documentation PATHs as an
+example:</p></li>
 </ul>
-<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="o">=</span><span class="s2">&quot;/opt/python_virtualenv&quot;</span>
-<span class="nv">PROJECT</span><span class="o">=</span><span class="s2">&quot;skyline-py2716&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="o">=</span><span class="s2">&quot;/opt/python_virtualenv&quot;</span>
+<span class="nv">PROJECT</span><span class="o">=</span><span class="s2">&quot;skyline-py383&quot;</span>
 
 <span class="nb">cd</span> <span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/projects/</span><span class="si">${</span><span class="nv">PROJECT</span><span class="si">}</span><span class="s2">&quot;</span>
 <span class="nb">source</span> bin/activate
 <span class="c1"># To test email alert</span>
-python /opt/skyline/github/skyline/utils/verify_alerts.py --trigger smtp --metric <span class="s1">&#39;skyline_test.alerters.test&#39;</span>
+bin/python3.8 /opt/skyline/github/skyline/utils/verify_alerts.py --trigger smtp --metric <span class="s1">&#39;skyline_test.alerters.test&#39;</span>
 <span class="c1"># To test slack alert</span>
-python /opt/skyline/github/skyline/utils/verify_alerts.py --trigger slack --metric <span class="s1">&#39;skyline_test.alerters.test&#39;</span>
+bin/python3.8 /opt/skyline/github/skyline/utils/verify_alerts.py --trigger slack --metric <span class="s1">&#39;skyline_test.alerters.test&#39;</span>
 <span class="c1"># To test pagerduty alert</span>
-python /opt/skyline/github/skyline/utils/verify_alerts.py --trigger pagerduty --metric <span class="s1">&#39;skyline_test.alerters.test&#39;</span>
+bin/python3.8 /opt/skyline/github/skyline/utils/verify_alerts.py --trigger pagerduty --metric <span class="s1">&#39;skyline_test.alerters.test&#39;</span>
 deactivate
 </pre></div>
 </div>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">You should get an alert on each alerter that you have enabled and
+<p class="admonition-title">Note</p>
+<p>You should get an alert on each alerter that you have enabled and
 tested.  Do note that the graphs sent with the alerts will have <strong>no data</strong> in
 them.</p>
 </div>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">the pagerduty alert_testing trigger has not been tested for a long
+<p class="admonition-title">Note</p>
+<p>the pagerduty alert_testing trigger has not been tested for a long
 time in the verify_alerts.py context.</p>
 </div>
 <p>You should get an alert on each alerter that you have enabled and tested.  Do
 note that the graphs sent with the alerts will have <strong>no data</strong> in them.</p>
 <p>You can expect output such as this, <strong>there will be errors</strong>, these are expected,
 the alerts still get sent.</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="o">(</span>skyline-py2716<span class="o">)</span> <span class="o">[</span>skyline@skyline skyline-py2716<span class="o">]</span> python /opt/skyline/github/skyline/utils/verify_alerts.py --trigger smtp --metric <span class="s1">&#39;skyline_test.alerters.test&#39;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="o">(</span>skyline-py383<span class="o">)</span> <span class="o">[</span>skyline@skyline skyline-py383<span class="o">]</span> bin/python3.8 /opt/skyline/github/skyline/utils/verify_alerts.py --trigger smtp --metric <span class="s1">&#39;skyline_test.alerters.test&#39;</span>
 Verifying alerts <span class="k">for</span>: <span class="s2">&quot;skyline_test.alerters.test&quot;</span>
 Testing Analyzer alerting on skyline_test.alerters.test
     Testing Analyzer alerting - against <span class="s2">&quot;skyline_test.alerters.test&quot;</span> to send via smtp...triggered
@@ -230,7 +249,7 @@ ERROR:mirageLog:error :: alerters - alert_smtp - getattr error
     Testing Mirage alerting - against <span class="s2">&quot;skyline_test.alerters.test&quot;</span> to send via syslog ...triggered
 Testing Boundary alerting on skyline_test.alerters.test
     Testing Boundary alerting against <span class="s2">&quot;skyline_test.alerters.test&quot;</span> to send <span class="k">for</span> smtp<span class="p">|</span>slack via smtp
-<span class="o">(</span>skyline-py2716<span class="o">)</span> <span class="o">[</span>skyline@skyline skyline-py2716<span class="o">]</span> python /opt/skyline/github/skyline/utils/verify_alerts.py --trigger slack --metric <span class="s1">&#39;skyline_test.alerters.test&#39;</span>
+<span class="o">(</span>skyline-py383<span class="o">)</span> <span class="o">[</span>skyline@skyline skyline-py383<span class="o">]</span> bin/python3.8 /opt/skyline/github/skyline/utils/verify_alerts.py --trigger slack --metric <span class="s1">&#39;skyline_test.alerters.test&#39;</span>
 Verifying alerts <span class="k">for</span>: <span class="s2">&quot;skyline_test.alerters.test&quot;</span>
 Testing Analyzer alerting on skyline_test.alerters.test
     Testing Analyzer alerting - against <span class="s2">&quot;skyline_test.alerters.test&quot;</span> to send via slack...triggered
@@ -240,22 +259,23 @@ Testing Mirage alerting on skyline_test.alerters.test
     Testing Mirage alerting - against <span class="s2">&quot;skyline_test.alerters.test&quot;</span> to send via syslog ...triggered
 Testing Boundary alerting on skyline_test.alerters.test
     Testing Boundary alerting against <span class="s2">&quot;skyline_test.alerters.test&quot;</span> to send <span class="k">for</span> smtp<span class="p">|</span>slack via slack
-<span class="o">(</span>skyline-py2716<span class="o">)</span> <span class="o">[</span>skyline@skyline skyline-py2716<span class="o">]</span>
+<span class="o">(</span>skyline-py383<span class="o">)</span> <span class="o">[</span>skyline@skyline skyline-py383<span class="o">]</span>
 </pre></div>
 </div>
 </div>
 
 
            </div>
+           
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="alerts.html" class="btn btn-neutral float-right" title="Alerts" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="alerts.html" class="btn btn-neutral float-right" title="Alerts" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="getting-data-into-skyline.html" class="btn btn-neutral" title="Getting data into Skyline" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="getting-data-into-skyline.html" class="btn btn-neutral float-left" title="Getting data into Skyline" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -264,11 +284,19 @@ Testing Boundary alerting on skyline_test.alerters.test
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
+        
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -280,36 +308,15 @@ Testing Boundary alerting on skyline_test.alerters.test
   </div>
   
 
-
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'2.0.0',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

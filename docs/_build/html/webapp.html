@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,50 +11,48 @@
   
 
   
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
+
+  
+  
+  
   
 
   
-
-  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-
-  
-  
-    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  
-
-  
-    <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-  
-
-  
-        <link rel="index" title="Index"
-              href="genindex.html"/>
-        <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 2.0.0 documentation" href="index.html"/>
-        <link rel="next" title="Ionosphere" href="ionosphere.html"/>
-        <link rel="prev" title="Panorama" href="panorama.html"/> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Ionosphere" href="ionosphere.html" />
+    <link rel="prev" title="Panorama" href="panorama.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
+   
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
-            <a href="index.html" class="icon icon-home"> Skyline
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
 
           
@@ -82,22 +79,24 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
             
-                <ul class="current">
+              
+            
+            
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
-<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alerts.html">Alerts</a></li>
-<li class="toctree-l1"><a class="reference internal" href="docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
@@ -143,6 +142,7 @@
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
@@ -150,12 +150,10 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#reliability">Reliability</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
-<li class="toctree-l1"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What’s new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a></li>
@@ -164,40 +162,61 @@
             
           
         </div>
+        
       </div>
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="index.html">Skyline</a>
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Skyline</a>
+        
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="index.html">Docs</a> &raquo;</li>
-      
-    <li>Webapp</li>
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Webapp</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
-            <a href="_sources/webapp.txt" rel="nofollow"> View page source</a>
+            
+            <a href="_sources/webapp.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -208,25 +227,26 @@
 <p>The Webapp service is a simple gunicorn/Flask based frontend that provides a web
 UI to:</p>
 <ul class="simple">
-<li>Visualise the latest anomalies that have been triggered.</li>
-<li>Visualise historic anomalies that have been recorded by Panorama.</li>
-<li>An api to query Redis for a metric time series which returns the time series in
-json e.g. <code class="docutils literal"><span class="pre">/api?metric=skyline.analyzer.hostname.total_metrics</span></code></li>
-<li>An api to query Graphite for a metric time series which returns the time series in
-json that takes the following parameters:<ul>
-<li><code class="docutils literal"><span class="pre">graphite_metric</span></code> - metric name</li>
-<li><code class="docutils literal"><span class="pre">from_timestamp</span></code> - unix timestamp</li>
-<li><code class="docutils literal"><span class="pre">until_timestamp</span></code> - unix timestamp</li>
-<li>e.g. <code class="docutils literal"><span class="pre">/api?graphite_metric=skyline.analyzer.hostname.total_metrics&amp;from_timestamp=1370975198&amp;until_timestamp=1403204156</span></code></li>
+<li><p>Visualise the latest anomalies that have been triggered.</p></li>
+<li><p>Visualise historic anomalies that have been recorded by Panorama.</p></li>
+<li><p>An api to query Redis for a metric time series which returns the time series in
+json e.g. <code class="docutils literal notranslate"><span class="pre">/api?metric=skyline.analyzer.hostname.total_metrics</span></code></p></li>
+<li><p>An api to query Graphite for a metric time series which returns the time series in
+json that takes the following parameters:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">graphite_metric</span></code> - metric name</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">from_timestamp</span></code> - unix timestamp</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">until_timestamp</span></code> - unix timestamp</p></li>
+<li><p>e.g. <code class="docutils literal notranslate"><span class="pre">/api?graphite_metric=skyline.analyzer.hostname.total_metrics&amp;from_timestamp=1370975198&amp;until_timestamp=1403204156</span></code></p></li>
 </ul>
 </li>
-<li>Publish the Skyline docs.</li>
-<li>Browse the Redis DB with a port of Marian Steinbach&#8217;s excellent <span class="red">re</span><span class="brow">brow</span>
-<a class="reference external" href="https://github.com/marians/rebrow">https://github.com/marians/rebrow</a></li>
+<li><p>Publish the Skyline docs.</p></li>
+<li><p>Browse the Redis DB with a port of Marian Steinbach’s excellent <span class="red">re</span><span class="brow">brow</span>
+<a class="reference external" href="https://github.com/marians/rebrow">https://github.com/marians/rebrow</a></p></li>
 </ul>
 <div class="section" id="a-basic-overview-of-the-webapp">
 <h2>A basic overview of the Webapp<a class="headerlink" href="#a-basic-overview-of-the-webapp" title="Permalink to this headline">¶</a></h2>
-<div class="figure">
+<div class="figure align-default">
 <img alt="A basic overview of the Webapp" src="_images/skyline.webapp.basic.overview.png" />
 </div>
 </div>
@@ -253,7 +273,7 @@ infrastructure which is public and should therefore really be considered
 production.</p>
 <p>Flask has a Deploying Options sections that covers running Flask apps in
 production environments.  See <a class="reference external" href="http://flask.pocoo.org/docs/0.11/deploying/">http://flask.pocoo.org/docs/0.11/deploying/</a></p>
-<p>In addition to that, considering that the Webapp now has MySQL in the mix, this
+<p>In addition to that, considering that the Webapp has MySQL in the mix, this
 element adds further reason to properly secure the environment.</p>
 <p>There is potential for XSS and SQL injection via the Webapp, ensure TRUSTED
 access only.</p>
@@ -264,22 +284,22 @@ access only.</p>
 <p>Although there are a number of options to run a production grade wsgi frontend,
 the example here will document serving gunicorn via Apache reverse proxy with
 authentication.  Although Apache mod_wsgi may seem like the natural fit here, in
-terms of virtualenv and Python <code class="docutils literal"><span class="pre">make_altinstall</span></code>, gunicorn has much less
+terms of virtualenv and Python <code class="docutils literal notranslate"><span class="pre">make_altinstall</span></code>, gunicorn has much less
 external dependencies.  gunicorn can be easily installed and run in any
 virtualenv, therefore it keeps it within the Skyline Python environment, rather
 than offloading very complex Python and mod_wsgi compiles to the user,
 orchestration and package management.</p>
-<p>Apache is a common enough pattern and gunicorn can be handled within the Skyline
-package and requirements.txt</p>
-<p>See <code class="docutils literal"><span class="pre">etc/skyline.httpd.conf.d.example</span></code> for an example of an Apache conf.d
-configuration file to serve the Webapp via gunicorn and reverse proxy on port
-443 with basic HTTP authentication and restricted IP access.  Note that your
-username and password must match in both the Apache htpasswd and the
-<a class="reference internal" href="skyline.html#settings.WEBAPP_AUTH_USER" title="settings.WEBAPP_AUTH_USER"><code class="xref py py-mod docutils literal"><span class="pre">settings.WEBAPP_AUTH_USER</span></code></a>/<a class="reference internal" href="skyline.html#settings.WEBAPP_AUTH_USER_PASSWORD" title="settings.WEBAPP_AUTH_USER_PASSWORD"><code class="xref py py-mod docutils literal"><span class="pre">settings.WEBAPP_AUTH_USER_PASSWORD</span></code></a>
-contexts as Apache will authenticate the user and forward on the authentication
-details to gunicorn for the Webapp to also authenticate the user.
-Authentication is enabled by default in <code class="docutils literal"><span class="pre">settings.py</span></code>.</p>
-<p>Feel free to use nginx, lighttpd, et al.</p>
+<p>Apache nd ngiinx are common webservers and gunicorn can be handled within the
+Skyline package and requirements.txt</p>
+<p>See <code class="docutils literal notranslate"><span class="pre">etc/skyline.httpd.conf.d.example</span></code> or <code class="docutils literal notranslate"><span class="pre">etc/skyline.nginx.conf.d.example</span></code>
+for examples Apache aand ngnx conf.d configuration files to serve the Webapp via
+gunicorn and reverse proxy on port 443 with basic HTTP authentication and
+restricted IP access.  Note that your username and password must match in both
+the Apache htpasswd and the <a class="reference internal" href="skyline.html#settings.WEBAPP_AUTH_USER" title="settings.WEBAPP_AUTH_USER"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.WEBAPP_AUTH_USER</span></code></a>/
+<a class="reference internal" href="skyline.html#settings.WEBAPP_AUTH_USER_PASSWORD" title="settings.WEBAPP_AUTH_USER_PASSWORD"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.WEBAPP_AUTH_USER_PASSWORD</span></code></a> contexts as Apache/nginx will
+authenticate the user and forward on the authentication details to gunicorn for
+the Webapp to also authenticate the user.  Authentication is enabled by default
+in <code class="docutils literal notranslate"><span class="pre">settings.py</span></code>.</p>
 </div>
 </div>
 <div class="section" id="securing-the-webapp">
@@ -287,7 +307,7 @@ Authentication is enabled by default in <code class="docutils literal"><span cla
 <div class="section" id="firewall-rules">
 <h3>Firewall rules<a class="headerlink" href="#firewall-rules" title="Permalink to this headline">¶</a></h3>
 <p>The Webapp <strong>should</strong> be secured with proper firewall rules that restrict access
-to the <a class="reference internal" href="skyline.html#settings.WEBAPP_IP" title="settings.WEBAPP_IP"><code class="xref py py-mod docutils literal"><span class="pre">settings.WEBAPP_IP</span></code></a> and <a class="reference internal" href="skyline.html#settings.WEBAPP_PORT" title="settings.WEBAPP_PORT"><code class="xref py py-mod docutils literal"><span class="pre">settings.WEBAPP_PORT</span></code></a> (and/or just
+to the <a class="reference internal" href="skyline.html#settings.WEBAPP_IP" title="settings.WEBAPP_IP"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.WEBAPP_IP</span></code></a> and <a class="reference internal" href="skyline.html#settings.WEBAPP_PORT" title="settings.WEBAPP_PORT"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.WEBAPP_PORT</span></code></a> (and/or just
 the reverse proxy port for gunicorn if being used) from trusted IP
 addresses only.</p>
 </div>
@@ -297,7 +317,7 @@ addresses only.</p>
 </div>
 <div class="section" id="ip-restricted-access">
 <h3>IP restricted access<a class="headerlink" href="#ip-restricted-access" title="Permalink to this headline">¶</a></h3>
-<p>The default <a class="reference internal" href="skyline.html#settings.WEBAPP_ALLOWED_IPS" title="settings.WEBAPP_ALLOWED_IPS"><code class="xref py py-mod docutils literal"><span class="pre">settings.WEBAPP_ALLOWED_IPS</span></code></a> only allows from 127.0.0.1, add
+<p>The default <a class="reference internal" href="skyline.html#settings.WEBAPP_ALLOWED_IPS" title="settings.WEBAPP_ALLOWED_IPS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.WEBAPP_ALLOWED_IPS</span></code></a> only allows from 127.0.0.1, add
 your desired allowed IPs.</p>
 </div>
 <div class="section" id="psuedo-basic-http-auth">
@@ -315,10 +335,10 @@ some way, either through error or accident.</p>
 or a production grade HTTP application.</p>
 <div class="section" id="logging">
 <h4>Logging<a class="headerlink" href="#logging" title="Permalink to this headline">¶</a></h4>
-<p>Flask&#8217;s development server is based on werkzeug, whose WSGIRequestHandler is,
+<p>Flask’s development server is based on werkzeug, whose WSGIRequestHandler is,
 in turn, based in the BaseHTTPServer from the standard lib.  This means that
 WSGIRequestHandler overrides the logging methods, log_request, log_error and
-log_message, to use it&#8217;s own logging.Logger.  So there is no access logging in
+log_message, to use it’s own logging.Logger.  So there is no access logging in
 Skyline Webapp log.  It is possible to hack this around a bit, but this means
 application error logging would get shifted from the Webapp log to the access
 log, which is not ideal.</p>
@@ -331,7 +351,7 @@ log, which is not ideal.</p>
 <h3>Basic function<a class="headerlink" href="#basic-function" title="Permalink to this headline">¶</a></h3>
 <p>The Panorama web UI allows you to search the anomalies recorded by Panorama in
 the database.  It currently allows you to search through the anomaly records by
-various filters, which are converted into MySQL <code class="docutils literal"><span class="pre">SELECT</span></code> queries which
+various filters, which are converted into MySQL <code class="docutils literal notranslate"><span class="pre">SELECT</span></code> queries which
 return the details regarding the anomalies found from the search criteria.  The
 Webapp then returns these to the browser and the client side javascript then
 passes the relevant metric details to the Webapp api endpoint to surface the
@@ -358,50 +378,51 @@ line.</p>
 <h3>Time zones<a class="headerlink" href="#time-zones" title="Permalink to this headline">¶</a></h3>
 <p>It must be noted that the Panorama view graphs can be rendered differently
 depending on the browser and server time zone.  The original dygraph renders
-used the javascript <code class="docutils literal"><span class="pre">Date</span></code> function to generate the datetime ticker, etc.  If
+used the javascript <code class="docutils literal notranslate"><span class="pre">Date</span></code> function to generate the datetime ticker, etc.  If
 your Graphite server happens to be in a different time zone to user browser,
 this would display clock skews where the Panorama reported anomaly details do
 not match the graph times displayed.  Webapp in the Panorama view allows you to
 either use the browser time zone or use a fixed time zone so that all rendered
 graphs are the same no matter where is the world they are viewed from.</p>
 <p>By default, the browser time zone setting is used, as per the original Skyline
-UI, you can use <a class="reference internal" href="skyline.html#settings.WEBAPP_USER_TIMEZONE" title="settings.WEBAPP_USER_TIMEZONE"><code class="xref py py-mod docutils literal"><span class="pre">settings.WEBAPP_USER_TIMEZONE</span></code></a> and
-<a class="reference internal" href="skyline.html#settings.WEBAPP_FIXED_TIMEZONE" title="settings.WEBAPP_FIXED_TIMEZONE"><code class="xref py py-mod docutils literal"><span class="pre">settings.WEBAPP_FIXED_TIMEZONE</span></code></a> to modify this behaviour if required.</p>
+UI, you can use <a class="reference internal" href="skyline.html#settings.WEBAPP_USER_TIMEZONE" title="settings.WEBAPP_USER_TIMEZONE"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.WEBAPP_USER_TIMEZONE</span></code></a> and
+<a class="reference internal" href="skyline.html#settings.WEBAPP_FIXED_TIMEZONE" title="settings.WEBAPP_FIXED_TIMEZONE"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.WEBAPP_FIXED_TIMEZONE</span></code></a> to modify this behaviour if required.</p>
 </div>
 </div>
 <div class="section" id="rebrow">
 <h2><span class="red">re</span><span class="brow">brow</span><a class="headerlink" href="#rebrow" title="Permalink to this headline">¶</a></h2>
-<p>Skyline uses a modified port of Marian Steinbach&#8217;s excellent
+<p>Skyline uses a modified port of Marian Steinbach’s excellent
 <span class="red">re</span><span class="brow">brow</span> Flask Redis browser - <a class="reference external" href="https://github.com/marians/rebrow">rebrow</a>.  A modified port was used
 for a number of reasons:</p>
 <ul class="simple">
-<li><span class="red">re</span><span class="brow">brow</span> does not handle msg-pack encoded keys.</li>
-<li>The pubsub functionality was unneeded.</li>
-<li>Serving it in an iframe was bothersome.</li>
-<li>Having an additional dependency, app and service for another Flask app seemed
-to be a bit of overkill.</li>
-<li>Having it native in the Skyline Webapp UI was neater and prettier.</li>
+<li><p><span class="red">re</span><span class="brow">brow</span> does not handle msg-pack encoded keys.</p></li>
+<li><p>The pubsub functionality was unneeded.</p></li>
+<li><p>Serving it in an iframe was bothersome.</p></li>
+<li><p>Having an additional dependency, app and service for another Flask app seemed
+to be a bit of overkill.</p></li>
+<li><p>Having it native in the Skyline Webapp UI was neater and prettier.</p></li>
 </ul>
 <p>Please do clone <a class="reference external" href="https://github.com/marians/rebrow">https://github.com/marians/rebrow</a>, just so Marian gets some
 clones.</p>
 <p>With the addition of a number of Panorama and other app related keys,
 <span class="red">re</span><span class="brow">brow</span> adds a window into Redis, to allow for the verification of
-key creation and providing a view of <code class="docutils literal"><span class="pre">*last_alert.*</span></code> and
-<code class="docutils literal"><span class="pre">panorama.mysql_ids.*</span></code> keys.</p>
+key creation and providing a view of <code class="docutils literal notranslate"><span class="pre">*last_alert.*</span></code> and
+<code class="docutils literal notranslate"><span class="pre">panorama.mysql_ids.*</span></code> keys.</p>
 </div>
 </div>
 
 
            </div>
+           
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="ionosphere.html" class="btn btn-neutral float-right" title="Ionosphere" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="ionosphere.html" class="btn btn-neutral float-right" title="Ionosphere" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="panorama.html" class="btn btn-neutral" title="Panorama" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="panorama.html" class="btn btn-neutral float-left" title="Panorama" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -410,11 +431,19 @@ key creation and providing a view of <code class="docutils literal"><span class=
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
+        
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -426,36 +455,15 @@ key creation and providing a view of <code class="docutils literal"><span class=
   </div>
   
 
-
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'2.0.0',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

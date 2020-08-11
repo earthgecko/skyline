@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,50 +11,48 @@
   
 
   
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
+
+  
+  
+  
   
 
   
-
-  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-
-  
-  
-    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  
-
-  
-    <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-  
-
-  
-        <link rel="index" title="Index"
-              href="genindex.html"/>
-        <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 2.0.0 documentation" href="index.html"/>
-        <link rel="next" title="Monitoring Skyline" href="monitoring-skyline.html"/>
-        <link rel="prev" title="Logging" href="logging.html"/> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Monitoring Skyline" href="monitoring-skyline.html" />
+    <link rel="prev" title="Logging" href="logging.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
+   
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
-            <a href="index.html" class="icon icon-home"> Skyline
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
 
           
@@ -82,22 +79,24 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
             
-                <ul class="current">
+              
+            
+            
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
-<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alerts.html">Alerts</a></li>
-<li class="toctree-l1"><a class="reference internal" href="docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
@@ -114,19 +113,22 @@
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-multiple-skylines.html">Running multiple Skyline instances</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#smaller-deployments">Smaller deployments</a></li>
-<li class="toctree-l1"><a class="reference internal" href="#reliability">Reliability</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Tuning tips</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#smaller-deployments">Smaller deployments</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#reliability">Reliability</a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
-<li class="toctree-l1"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What’s new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a></li>
@@ -135,93 +137,111 @@
             
           
         </div>
+        
       </div>
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="index.html">Skyline</a>
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Skyline</a>
+        
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="index.html">Docs</a> &raquo;</li>
-      
-    <li>Tuning tips</li>
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Tuning tips</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
-            <a href="_sources/tuning-tips.txt" rel="nofollow"> View page source</a>
+            
+            <a href="_sources/tuning-tips.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
   <div class="section" id="tuning-tips">
-<span id="tuning-tips"></span><h1>Tuning tips<a class="headerlink" href="#tuning-tips" title="Permalink to this headline">¶</a></h1>
-<p>Okay, so you&#8217;ve got everything all set up, data is flowing through, and...what?
-You can&#8217;t consume everything on time? Allow me to help:</p>
-<ol class="simple">
-<li>Try increasing <code class="docutils literal"><span class="pre">settings.CHUNK_SIZE</span></code> - this increases the size of a chunk of
-metrics that gets added onto the queue. Bigger chunks == smaller network traffic.</li>
-<li>Try increasing <code class="docutils literal"><span class="pre">settings.WORKER_PROCESSES</span></code> - this will add more workers to
-consume metrics off the queue and insert them into Redis.</li>
-<li>Try decreasing <code class="docutils literal"><span class="pre">settings.ANALYZER_PROCESSES</span></code> - this all runs on one box (for
-now), so share the resources!</li>
-<li>Still can&#8217;t fix the performance? Try reducing your <code class="docutils literal"><span class="pre">settings.FULL_DURATION</span></code>.
-If this is set to be too long, Redis will buckle under the pressure.</li>
-<li>Is your analyzer taking too long? Maybe you need to make your algorithms
-faster, or use fewer algorithms in your ensemble.</li>
-<li>Reduce your metrics! If you&#8217;re using StatsD, it will spit out lots of
+<h1>Tuning tips<a class="headerlink" href="#tuning-tips" title="Permalink to this headline">¶</a></h1>
+<p>Okay, so you’ve got everything all set up, data is flowing through, and…what?
+You can’t consume everything on time? Allow me to help:</p>
+<p>1. Try increasing <a class="reference internal" href="skyline.html#settings.CHUNK_SIZE" title="settings.CHUNK_SIZE"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.CHUNK_SIZE</span></code></a> - this increases the size of a chunk of
+metrics that gets added onto the queue. Bigger chunks == smaller network traffic.</p>
+<p>2. Try increasing <a class="reference internal" href="skyline.html#settings.WORKER_PROCESSES" title="settings.WORKER_PROCESSES"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.WORKER_PROCESSES</span></code></a> - this will add more workers to
+consume metrics off the queue and insert them into Redis.</p>
+<p>3. Try decreasing <a class="reference internal" href="skyline.html#settings.ANALYZER_PROCESSES" title="settings.ANALYZER_PROCESSES"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ANALYZER_PROCESSES</span></code></a> - this all runs on one box (for
+now), so share the resources!</p>
+<p>4. Still can’t fix the performance? Try reducing your <cite>settings.FULL_DURATION</cite>.
+If this is set to be too long, Redis will buckle under the pressure.</p>
+<p>5. Is your analyzer taking too long? Maybe you need to make your algorithms
+faster, or use fewer algorithms in your ensemble.</p>
+<p>6. Reduce your metrics! If you’re using StatsD, it will spit out lots of
 variations for each metric (sum, median, lower, upper, etc). These are largely
-identical, so it might be worth it to put them in <code class="docutils literal"><span class="pre">settings.SKIP_LIST</span></code>.</li>
-<li>Disable Oculus - if you set settings.OCULUS_HOST to &#8216;&#8217;, Skyline will not
-write metrics into the <code class="docutils literal"><span class="pre">mini.</span></code> namespace - this should result in dramatic speed
+identical, so it might be worth it to put them in <cite>settings.SKIP_LIST</cite>.</p>
+<p>7. Disable Oculus - if you set <a class="reference internal" href="skyline.html#settings.OCULUS_HOST" title="settings.OCULUS_HOST"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.OCULUS_HOST</span></code></a> to ‘’, Skyline will not
+write metrics into the <cite>mini.</cite> namespace - this should result in dramatic speed
 improvements.  At Etsy, they had a flow of about 5k metrics coming in every
 second on average (with 250k distinct metrics). They used a 32 core Sandy Bridge
 box, with 64 gb of memory. We experience bursts of up to 70k TPS on Redis. Here
-are their relevant settings:</li>
-</ol>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">CHUNK_SIZE</span><span class="p">:</span> <span class="mi">7000</span>
-<span class="n">WORKER_PROCESSES</span><span class="p">:</span> <span class="mi">2</span>
-<span class="n">ANALYZER_PROCESSES</span><span class="p">:</span> <span class="mi">25</span>
-<span class="n">FULL_DURATION</span><span class="p">:</span> <span class="mi">86400</span>
-</pre></div>
-</div>
-</div>
+are their relevant settings:</p>
+<p><code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">CHUNK_SIZE:</span> <span class="pre">7000</span>
+<span class="pre">WORKER_PROCESSES:</span> <span class="pre">2</span>
+<span class="pre">ANALYZER_PROCESSES:</span> <span class="pre">25</span>
+<span class="pre">FULL_DURATION:</span> <span class="pre">86400</span>
+<span class="pre">`</span></code></p>
 <div class="section" id="smaller-deployments">
-<span id="smaller-deployments"></span><h1>Smaller deployments<a class="headerlink" href="#smaller-deployments" title="Permalink to this headline">¶</a></h1>
+<h2>Smaller deployments<a class="headerlink" href="#smaller-deployments" title="Permalink to this headline">¶</a></h2>
 <p>Skyline runs OK on much less.  It can handle ~45000 metrics per minute on a 4
 vCore, 4GB RAM cloud SSD server where the metric resolution is 1 datapoint per
 60 seconds, it will run loaded, but OK.</p>
-<p>Do take note of the notes in settings.py related to the <code class="docutils literal"><span class="pre">settings.ANALYZER_PROCESSES</span></code>
-and <code class="docutils literal"><span class="pre">settings.ANALYZER_OPTIMUM_RUN_DURATION</span></code> if you are only processing a few
+<p>Do take note of the notes in settings.py related to the <a class="reference internal" href="skyline.html#settings.ANALYZER_PROCESSES" title="settings.ANALYZER_PROCESSES"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ANALYZER_PROCESSES</span></code></a>
+and <a class="reference internal" href="skyline.html#settings.ANALYZER_OPTIMUM_RUN_DURATION" title="settings.ANALYZER_OPTIMUM_RUN_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ANALYZER_OPTIMUM_RUN_DURATION</span></code></a> if you are only processing a few
 1000 metrics with a datapoint every minute then the optimum settings will most
 likely be something similar to:</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="n">ANALYZER_PROCESSES</span> <span class="o">=</span> <span class="mi">1</span>
-<span class="n">ANALYZER_OPTIMUM_RUN_DURATION</span> <span class="o">=</span> <span class="mi">60</span>
-</pre></div>
-</div>
+<p><code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">ANALYZER_PROCESSES</span> <span class="pre">=</span> <span class="pre">1</span>
+<span class="pre">ANALYZER_OPTIMUM_RUN_DURATION</span> <span class="pre">=</span> <span class="pre">60</span>
+<span class="pre">`</span></code></p>
 </div>
 <div class="section" id="reliability">
-<span id="reliability"></span><h1>Reliability<a class="headerlink" href="#reliability" title="Permalink to this headline">¶</a></h1>
+<h2>Reliability<a class="headerlink" href="#reliability" title="Permalink to this headline">¶</a></h2>
 <p>Skyline has been verified running in production against 6.5 million request per
 minute peak internet advertising infrastructure, since 20131016.</p>
 <p>However it should be noted that something should monitor the Skyline processes.
@@ -233,18 +253,20 @@ itself running sanely, however not every possible issue can be mitigated against
 therefore some another external to Python monitoring can help.</p>
 <p>See <a class="reference external" href="monitoring-skyline.html">Monitoring Skyline</a></p>
 </div>
+</div>
 
 
            </div>
+           
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="monitoring-skyline.html" class="btn btn-neutral float-right" title="Monitoring Skyline" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="monitoring-skyline.html" class="btn btn-neutral float-right" title="Monitoring Skyline" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="logging.html" class="btn btn-neutral" title="Logging" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="logging.html" class="btn btn-neutral float-left" title="Logging" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -253,11 +275,19 @@ therefore some another external to Python monitoring can help.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
+        
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -269,36 +299,15 @@ therefore some another external to Python monitoring can help.</p>
   </div>
   
 
-
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'2.0.0',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

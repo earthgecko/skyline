@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,50 +11,48 @@
   
 
   
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
+
+  
+  
+  
   
 
   
-
-  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-
-  
-  
-    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  
-
-  
-    <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-  
-
-  
-        <link rel="index" title="Index"
-              href="genindex.html"/>
-        <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 2.0.0 documentation" href="index.html"/>
-        <link rel="next" title="Boundary" href="boundary.html"/>
-        <link rel="prev" title="Custom algorithms" href="algorithms/custom-algorithms.html"/> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Boundary" href="boundary.html" />
+    <link rel="prev" title="Custom algorithms" href="algorithms/custom-algorithms.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
+   
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
-            <a href="index.html" class="icon icon-home"> Skyline
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
 
           
@@ -82,22 +79,24 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
             
-                <ul class="current">
+              
+            
+            
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
-<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alerts.html">Alerts</a></li>
-<li class="toctree-l1"><a class="reference internal" href="docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
@@ -112,7 +111,7 @@
 <li class="toctree-l2"><a class="reference internal" href="#what-mirage-can-and-cannot-do">What Mirage can and cannot do</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#the-difference-between-the-analyzer-and-mirage-views-of-a-timeseries">The difference between the Analyzer and Mirage views of a timeseries</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#a-real-world-example-with-tenfold-com">A real world example with tenfold.com</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#mirage-normalizes">Mirage &#8220;normalizes&#8221;</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#mirage-smooths">Mirage “smooths”</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="#setting-up-and-enabling-mirage">Setting up and enabling Mirage</a><ul>
@@ -134,6 +133,7 @@
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
@@ -141,12 +141,10 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#reliability">Reliability</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
-<li class="toctree-l1"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What’s new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a></li>
@@ -155,40 +153,61 @@
             
           
         </div>
+        
       </div>
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="index.html">Skyline</a>
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Skyline</a>
+        
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="index.html">Docs</a> &raquo;</li>
-      
-    <li>Mirage</li>
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Mirage</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
-            <a href="_sources/mirage.txt" rel="nofollow"> View page source</a>
+            
+            <a href="_sources/mirage.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -198,34 +217,34 @@
 <h1>Mirage<a class="headerlink" href="#mirage" title="Permalink to this headline">¶</a></h1>
 <p>The Mirage service is responsible for analyzing selected timeseries at custom
 time ranges when a timeseries seasonality does not fit within
-<a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a>.  Mirage allows for testing of real time data
-and algorithms in parallel to Analyzer.  Mirage was inspired by Abe Stanway&#8217;s
+<a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FULL_DURATION</span></code></a>.  Mirage allows for testing of real time data
+and algorithms in parallel to Analyzer.  Mirage was inspired by Abe Stanway’s
 Crucible and the desire to extend the temporal data pools available to Skyline
 in an attempt to handle seasonality better, reduce noise and increase signal,
 specifically on seasonal metrics.</p>
 <div class="section" id="an-overview-of-mirage">
 <h2>An overview of Mirage<a class="headerlink" href="#an-overview-of-mirage" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li>Mirage is fed specific user defined metrics by Analyzer.</li>
-<li>Mirage gets timeseries data for metrics from Graphite.</li>
-<li>Mirage does not have its own <code class="docutils literal"><span class="pre">ALERTS</span></code> settings it uses <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALERTS</span></code></a>
-just like Analyzer does.</li>
-<li>Mirage also sends anomaly details to Panorama, like Analyzer does.</li>
+<li><p>Mirage is fed specific user defined metrics by Analyzer.</p></li>
+<li><p>Mirage gets timeseries data for metrics from Graphite.</p></li>
+<li><p>Mirage does not have its own <code class="docutils literal notranslate"><span class="pre">ALERTS</span></code> settings it uses <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ALERTS</span></code></a>
+just like Analyzer does.</p></li>
+<li><p>Mirage also sends anomaly details to Panorama, like Analyzer does.</p></li>
 </ul>
-<div class="figure">
+<div class="figure align-default">
 <img alt="An overview of Mirage" src="_images/skyline.mirage.overview.png" />
 </div>
 <p><a class="reference external" href="_images/skyline.mirage.overview.png">Fullsize overview image</a> for a clearer picture.</p>
 <div class="section" id="why-mirage">
 <h3>Why Mirage?<a class="headerlink" href="#why-mirage" title="Permalink to this headline">¶</a></h3>
-<p>Analyzer&#8217;s <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a> somewhat limits Analyzer&#8217;s usefulness
+<p>Analyzer’s <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FULL_DURATION</span></code></a> somewhat limits Analyzer’s usefulness
 for metrics that have a seasonality / periodicity that is greater than
-<a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a>.  This means Analyzer is not great in terms of
-&#8220;seeing the bigger picture&#8221; when it comes to metrics that have a weekly pattern
+<a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FULL_DURATION</span></code></a>.  This means Analyzer is not great in terms of
+“seeing the bigger picture” when it comes to metrics that have a weekly pattern
 as well as a daily patterns for example.</p>
-<p>Increasing <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a> to anything above 24 hours (86400) is
+<p>Increasing <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FULL_DURATION</span></code></a> to anything above 24 hours (86400) is
 not necessarily realistic or useful, because the greater the
-<a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a>, the greater memory required for Redis and the
+<a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FULL_DURATION</span></code></a>, the greater memory required for Redis and the
 longer Analyzer will take to run.</p>
 </div>
 </div>
@@ -242,65 +261,65 @@ Sanctuary Buildings energy consumption public <a class="reference external" href
 to demonstrate how Mirage and Analyzer views are different.  The energy
 consumption in an office building is a good example of a multi-seasonal data set.</p>
 <ul class="simple">
-<li>Office hour peaks</li>
-<li>Out of hour troughs</li>
-<li>Weekend troughs</li>
-<li>Holidays</li>
-<li>There could be summer and winter seasonality too</li>
+<li><p>Office hour peaks</p></li>
+<li><p>Out of hour troughs</p></li>
+<li><p>Weekend troughs</p></li>
+<li><p>Holidays</p></li>
+<li><p>There could be summer and winter seasonality too</p></li>
 </ul>
 <p>For now let us just consider the daily and weekly seasonality.</p>
 <div class="section" id="the-difference-between-the-analyzer-and-mirage-views-of-a-timeseries">
 <h3>The difference between the Analyzer and Mirage views of a timeseries<a class="headerlink" href="#the-difference-between-the-analyzer-and-mirage-views-of-a-timeseries" title="Permalink to this headline">¶</a></h3>
 <p>(<a class="reference external" href=".//mirage-1.py">Source code</a>, <a class="reference external" href=".//mirage-1.png">png</a>, <a class="reference external" href=".//mirage-1.hires.png">hires.png</a>, <a class="reference external" href=".//mirage-1.pdf">pdf</a>)</p>
-<div class="figure">
+<div class="figure align-default">
 <img alt="_images/mirage-1.png" src="_images/mirage-1.png" />
 </div>
 <p><a class="reference external" href="_images/mirage-1.png">Fullsize image</a> for a clearer picture.</p>
 <p>As we can see above, on a Saturday morning the energy consumption does not
 increase as it normally does during the week days. Analyzer would probably find
-the metric to be anomalous if <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a> was set to 86400 (24
+the metric to be anomalous if <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FULL_DURATION</span></code></a> was set to 86400 (24
 hours), Saturday morning would seem anomalous.</p>
-<p>However, if the metric&#8217;s alert tuple was set up with a
-<code class="docutils literal"><span class="pre">SECOND_ORDER_RESOLUTION_HOURS</span></code> of 168, Mirage would analyze the data point
-against a week&#8217;s worth of data points and the Saturday and Sunday daytime data
+<p>However, if the metric’s alert tuple was set up with a
+<code class="docutils literal notranslate"><span class="pre">SECOND_ORDER_RESOLUTION_HOURS</span></code> of 168, Mirage would analyze the data point
+against a week’s worth of data points and the Saturday and Sunday daytime data
 points would have less probability of triggering as anomalous.  <em>The above
-image is plotted as if the Mirage</em> <code class="docutils literal"><span class="pre">SECOND_ORDER_RESOLUTION_HOURS</span></code> <em>was set to
+image is plotted as if the Mirage</em> <code class="docutils literal notranslate"><span class="pre">SECOND_ORDER_RESOLUTION_HOURS</span></code> <em>was set to
 172 hours just so that the trailing edges can be seen.</em></p>
 </div>
 <div class="section" id="a-real-world-example-with-tenfold-com">
 <h3>A real world example with tenfold.com<a class="headerlink" href="#a-real-world-example-with-tenfold-com" title="Permalink to this headline">¶</a></h3>
-<table class="docutils field-list" frame="void" rules="none">
-<col class="field-name" />
-<col class="field-body" />
-<tbody valign="top">
-<tr class="field-odd field"><th class="field-name">blak3r2:</th><td class="field-body">Our app logs phone calls for businesses and I want to be able to
+<dl class="field-list simple">
+<dt class="field-odd">blak3r2</dt>
+<dd class="field-odd"><p>Our app logs phone calls for businesses and I want to be able to
 detect when VIP phone systems go down or act funny and begin flooding us with
-events.  Our work load is very noisy from 9-5pm... where 9-5 is different for
-each customer depending on their workload so thresholding and modeling isn&#8217;t
-good.</td>
-</tr>
-<tr class="field-even field"><th class="field-name">earthgecko:</th><td class="field-body">Yes, Mirage is great at user defined seasonality, in your case
+events.  Our work load is very noisy from 9-5pm… where 9-5 is different for
+each customer depending on their workload so thresholding and modeling isn’t
+good.</p>
+</dd>
+<dt class="field-even">earthgecko</dt>
+<dd class="field-even"><p>Yes, Mirage is great at user defined seasonality, in your case
 weekday 9-5 peaks, evening drop offs, early morning and weekend lows - multi
 seasonal, Mirage is the ticket.
 Your best bet would be to try 7days (168) as your SECOND_ORDER_RESOLUTION_HOURS
 value for those app log metrics, however, you may get away with a 3 day
 window, it depends on the metrics really, but it may not be noisy at 3 days
-resolution, even at the weekends.</td>
-</tr>
-</tbody>
-</table>
+resolution, even at the weekends.</p>
+</dd>
+</dl>
 </div>
-<div class="section" id="mirage-normalizes">
-<h3>Mirage &#8220;normalizes&#8221;<a class="headerlink" href="#mirage-normalizes" title="Permalink to this headline">¶</a></h3>
-<p>Mirage is a &#8220;tuning&#8221; tool for seasonal metrics and it is important to understand
-that Mirage is probably using aggregated data (unless your Graphite is not using
-retentions and aggregating) and due to this Mirage will lose some resolution
-resulting in it being less sensitive to anomalies than Analyzer is.</p>
-<p>So Mirage does some &#8220;normalizing&#8221; if your have aggregations in Graphite (e.g
-retentions), however it is analyzing the timeseries at the aggregated resolution
-so it is &#8220;normalised&#8221; as the data point that Analyzer triggered on is ALSO
-aggregated in the timeseries resolution that Mirage is analyzing.
-Intuitively one may think it may miss it in the aggregation then.  This is true
+<div class="section" id="mirage-smooths">
+<h3>Mirage “smooths”<a class="headerlink" href="#mirage-smooths" title="Permalink to this headline">¶</a></h3>
+<p>Mirage is a “tuning” tool for seasonal metrics and it is important to understand
+that Mirage is probably using aggregated/downsampled data (unless your Graphite
+is not using multiple retentions and aggregating) and due to this Mirage can
+lose some resolution if your metrics are set to <cite>aggregationMethod = average</cite> in
+Graphite, resulting in it being less sensitive to anomalies than Analyzer is.</p>
+<p>So Mirage does some “smoothing” if the data is crossing a retention boundary and
+you have aggregations in Graphite.  However it is analyzing the time series at
+the aggregated resolution so it is “smoothed” as the data point that Analyzer
+triggered on is ALSO aggregated in the time series resolution that Mirage is
+analyzing.</p>
+<p>Intuitively one may think it may miss it in the aggregation then.  This is true
 to an extent, but Analyzer will likely trigger multiple times if the metric
 <strong>IS</strong> anomalous, so when Analyzer pushes to Mirage again, each aggregation is
 more likely to trigger as anomalous, <strong>IF</strong> the metric anomalous at the user
@@ -311,30 +330,30 @@ noise, more signal.</p>
 <div class="section" id="setting-up-and-enabling-mirage">
 <h2>Setting up and enabling Mirage<a class="headerlink" href="#setting-up-and-enabling-mirage" title="Permalink to this headline">¶</a></h2>
 <p>By default Mirage is disabled, various Mirage options can be configured in the
-<code class="docutils literal"><span class="pre">settings.py</span></code> file and Analyzer and Mirage can be configured as appropriate
+<code class="docutils literal notranslate"><span class="pre">settings.py</span></code> file and Analyzer and Mirage can be configured as appropriate
 for your environment.</p>
 <p>For all the specific alert configurations see the <a class="reference external" href="alerts.html">Alerts</a> page.</p>
-<p>Mirage requires some directories as per <code class="docutils literal"><span class="pre">settings.py</span></code> defines (these require
+<p>Mirage requires some directories as per <code class="docutils literal notranslate"><span class="pre">settings.py</span></code> defines (these require
 absolute path):</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>mkdir -p <span class="nv">$MIRAGE_CHECK_PATH</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mkdir -p <span class="nv">$MIRAGE_CHECK_PATH</span>
 mkdir -p <span class="nv">$MIRAGE_DATA_FOLDER</span>
 </pre></div>
 </div>
-<p>Configure <code class="docutils literal"><span class="pre">settings.py</span></code> with some <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALERTS</span></code></a> alert tuples that
-have the <code class="docutils literal"><span class="pre">SECOND_ORDER_RESOLUTION_HOURS</span></code> defined. For example below is an
-Analyzer only <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALERTS</span></code></a> tuple that does not have Mirage enabled as
-it has no <code class="docutils literal"><span class="pre">SECOND_ORDER_RESOLUTION_HOURS</span></code> defined:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">ALERTS</span> <span class="o">=</span> <span class="p">(</span>
+<p>Configure <code class="docutils literal notranslate"><span class="pre">settings.py</span></code> with some <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ALERTS</span></code></a> alert tuples that
+have the <code class="docutils literal notranslate"><span class="pre">SECOND_ORDER_RESOLUTION_HOURS</span></code> defined. For example below is an
+Analyzer only <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ALERTS</span></code></a> tuple that does not have Mirage enabled as
+it has no <code class="docutils literal notranslate"><span class="pre">SECOND_ORDER_RESOLUTION_HOURS</span></code> defined:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ALERTS</span> <span class="o">=</span> <span class="p">(</span>
            <span class="p">(</span><span class="s1">&#39;stats_counts.http.rpm.publishers.*&#39;</span><span class="p">,</span> <span class="s1">&#39;smtp&#39;</span><span class="p">,</span> <span class="mi">300</span><span class="p">),</span>  <span class="c1"># --&gt; Analyzer sends to alerter</span>
 <span class="p">)</span>
 </pre></div>
 </div>
 <p>To enable Analyzer to send the metric to Mirage we append the metric alert tuple
-in <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALERTS</span></code></a> with the <code class="docutils literal"><span class="pre">SECOND_ORDER_RESOLUTION_HOURS</span></code> value.
+in <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ALERTS</span></code></a> with the <code class="docutils literal notranslate"><span class="pre">SECOND_ORDER_RESOLUTION_HOURS</span></code> value.
 Below we have used 168 hours to get Mirage to analyze <strong>any</strong> anomalous metric
-in the &#8216;stats_counts.http.rpm.publishers.*&#8217; namespace using using 7 days worth
+in the ‘stats_counts.http.rpm.publishers.*’ namespace using using 7 days worth
 of timeseries data from Graphite:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">ALERTS</span> <span class="o">=</span> <span class="p">(</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ALERTS</span> <span class="o">=</span> <span class="p">(</span>
 <span class="c1">#          (&#39;stats_counts.http.rpm.publishers.*&#39;, &#39;smtp&#39;, 300),  # --&gt; Analyzer sends to alerter</span>
            <span class="p">(</span><span class="s1">&#39;stats_counts.http.rpm.publishers.*&#39;</span><span class="p">,</span> <span class="s1">&#39;smtp&#39;</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="mi">168</span><span class="p">),</span>  <span class="c1"># --&gt; Analyzer sends to Mirage</span>
 <span class="p">)</span>
@@ -343,13 +362,13 @@ of timeseries data from Graphite:</p>
 <div class="section" id="order-matters">
 <h3>Order Matters<a class="headerlink" href="#order-matters" title="Permalink to this headline">¶</a></h3>
 <div class="admonition warning">
-<p class="first admonition-title">Warning</p>
-<p class="last">It is important to note that Mirage enabled metric namespaces must
+<p class="admonition-title">Warning</p>
+<p>It is important to note that Mirage enabled metric namespaces must
 be defined before non Mirage enabled metric namespace tuples as Analyzer uses
 the first alert tuple that matches.</p>
 </div>
 <p>So for example, with some annotation</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">ALERTS</span> <span class="o">=</span> <span class="p">(</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ALERTS</span> <span class="o">=</span> <span class="p">(</span>
            <span class="p">(</span><span class="s1">&#39;skyline&#39;</span><span class="p">,</span> <span class="s1">&#39;smtp&#39;</span><span class="p">,</span> <span class="mi">1800</span><span class="p">),</span>
            <span class="p">(</span><span class="s1">&#39;stats_counts.http.rpm.publishers.seasonal_pub1&#39;</span><span class="p">,</span> <span class="s1">&#39;smtp&#39;</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="mi">168</span><span class="p">),</span>    <span class="c1"># --&gt; To Mirage</span>
            <span class="p">(</span><span class="s1">&#39;stats_counts.http.rpm.publishers.seasonal_pub_freddy&#39;</span><span class="p">,</span> <span class="s1">&#39;smtp&#39;</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="mi">168</span><span class="p">),</span>    <span class="c1"># --&gt; To Mirage</span>
@@ -359,11 +378,11 @@ the first alert tuple that matches.</p>
 </div>
 <p>The above would ensure if Analyzer found seasonal_pub1 or seasonal_pub_freddy
 anomalous, instead of firing an alert as it does for all other
-<code class="docutils literal"><span class="pre">stats_counts.http.rpm.publishers.*</span></code>, because they have 168 defined, Analyzer
+<code class="docutils literal notranslate"><span class="pre">stats_counts.http.rpm.publishers.*</span></code>, because they have 168 defined, Analyzer
 sends the metric to Mirage.</p>
 <p>The below would NOT have the desired effect of analysing the metrics
 seasonal_pub1 and seasonal_pub_freddy with Mirage</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">ALERTS</span> <span class="o">=</span> <span class="p">(</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ALERTS</span> <span class="o">=</span> <span class="p">(</span>
            <span class="p">(</span><span class="s1">&#39;skyline&#39;</span><span class="p">,</span> <span class="s1">&#39;smtp&#39;</span><span class="p">,</span> <span class="mi">1800</span><span class="p">),</span>
            <span class="p">(</span><span class="s1">&#39;stats_counts.http.rpm.publishers.*&#39;</span><span class="p">,</span> <span class="s1">&#39;smtp&#39;</span><span class="p">,</span> <span class="mi">300</span><span class="p">),</span>    <span class="c1"># --&gt; To alerter</span>
            <span class="p">(</span><span class="s1">&#39;stats_counts.http.rpm.publishers.seasonal_pub1&#39;</span><span class="p">,</span> <span class="s1">&#39;smtp&#39;</span><span class="p">,</span> <span class="mi">300</span><span class="p">,</span> <span class="mi">168</span><span class="p">),</span>    <span class="c1"># --&gt; NEVER gets reached</span>
@@ -371,21 +390,21 @@ seasonal_pub1 and seasonal_pub_freddy with Mirage</p>
 <span class="p">)</span>
 </pre></div>
 </div>
-<p>Hopefully it is clear that the first <code class="docutils literal"><span class="pre">stats_counts.http.rpm.publishers.*</span></code>
+<p>Hopefully it is clear that the first <code class="docutils literal notranslate"><span class="pre">stats_counts.http.rpm.publishers.*</span></code>
 alert tuple would route ALL to alerter and seasonal_pub1 and seasonal_pub_freddy
 would never get sent to Mirage to be analyzed.</p>
 </div>
 <div class="section" id="enabling">
 <h3>Enabling<a class="headerlink" href="#enabling" title="Permalink to this headline">¶</a></h3>
-<p>And ensure that <code class="docutils literal"><span class="pre">settings.py</span></code> has Mirage options enabled, specifically the
+<p>And ensure that <code class="docutils literal notranslate"><span class="pre">settings.py</span></code> has Mirage options enabled, specifically the
 basic ones:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">ENABLE_MIRAGE</span> <span class="o">=</span> <span class="bp">True</span>
-<span class="n">ENABLE_FULL_DURATION_ALERTS</span> <span class="o">=</span> <span class="bp">False</span>
-<span class="n">MIRAGE_ENABLE_ALERTS</span> <span class="o">=</span> <span class="bp">True</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ENABLE_MIRAGE</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="n">ENABLE_FULL_DURATION_ALERTS</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="n">MIRAGE_ENABLE_ALERTS</span> <span class="o">=</span> <span class="kc">True</span>
 </pre></div>
 </div>
 <p>Start Mirage and restart Analyzer:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nb">cd</span> skyline/bin
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nb">cd</span> skyline/bin
 ./mirage.d start
 ./analyzer.d restart
 </pre></div>
@@ -398,7 +417,7 @@ desired. Surfacing data from Graphite and analyzing ~1000 data points in a
 timeseries takes less than 1 second and is much less CPU intensive than
 Analyzer in general, but it is probably sufficient to have 30 calls to Graphite
 per minute.  If a large number of metrics went anomalous, even with Mirage
-discarding <a class="reference internal" href="skyline.html#settings.MIRAGE_STALE_SECONDS" title="settings.MIRAGE_STALE_SECONDS"><code class="xref py py-mod docutils literal"><span class="pre">settings.MIRAGE_STALE_SECONDS</span></code></a> checks due to processing limit,
+discarding <a class="reference internal" href="skyline.html#settings.MIRAGE_STALE_SECONDS" title="settings.MIRAGE_STALE_SECONDS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.MIRAGE_STALE_SECONDS</span></code></a> checks due to processing limit,
 signals would still be sent.</p>
 </div>
 </div>
@@ -406,19 +425,19 @@ signals would still be sent.</p>
 <h2>Periodic Checks<a class="headerlink" href="#periodic-checks" title="Permalink to this headline">¶</a></h2>
 <p>Due to the fact that Analyzer feeds Mirage metrics to check when Analyzer finds
 a Mirage metric anomalous, there are situations where a metric may change fairly
-substantially over a period greater than <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a>, for
+substantially over a period greater than <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FULL_DURATION</span></code></a>, for
 example over 36 hours.  In these cases Analyser will not detect these changes as
 anomalous and therefore Mirage will not have a chance to check them.</p>
 <p>Periodic checks can be enabled on Mirage metric namespaces that are declared in
-<a class="reference internal" href="skyline.html#settings.MIRAGE_PERIODIC_CHECK_NAMESPACES" title="settings.MIRAGE_PERIODIC_CHECK_NAMESPACES"><code class="xref py py-mod docutils literal"><span class="pre">settings.MIRAGE_PERIODIC_CHECK_NAMESPACES</span></code></a>.  It is not advisable to
+<a class="reference internal" href="skyline.html#settings.MIRAGE_PERIODIC_CHECK_NAMESPACES" title="settings.MIRAGE_PERIODIC_CHECK_NAMESPACES"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.MIRAGE_PERIODIC_CHECK_NAMESPACES</span></code></a>.  It is not advisable to
 analyse all Mirage metrics periodically as this would probably have a
 significant impact on both Skyline and Graphite.</p>
 <p>Periodic checks should only be run on Mirage key metrics.  Periodic checks suit
 KPI metrics that are have fairly constant rate.  Periodic checks should not be
 implemented on general server and app metrics.</p>
-<p>It is important to note that the <a class="reference internal" href="skyline.html#settings.MIRAGE_PERIODIC_CHECK_NAMESPACES" title="settings.MIRAGE_PERIODIC_CHECK_NAMESPACES"><code class="xref py py-mod docutils literal"><span class="pre">settings.MIRAGE_PERIODIC_CHECK_NAMESPACES</span></code></a>
+<p>It is important to note that the <a class="reference internal" href="skyline.html#settings.MIRAGE_PERIODIC_CHECK_NAMESPACES" title="settings.MIRAGE_PERIODIC_CHECK_NAMESPACES"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.MIRAGE_PERIODIC_CHECK_NAMESPACES</span></code></a>
 will match the exact string and dotted namespace elements as per
-documented in <a class="reference internal" href="skyline.html#settings.SKIP_LIST" title="settings.SKIP_LIST"><code class="xref py py-mod docutils literal"><span class="pre">settings.SKIP_LIST</span></code></a>.</p>
+documented in <a class="reference internal" href="skyline.html#settings.SKIP_LIST" title="settings.SKIP_LIST"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SKIP_LIST</span></code></a>.</p>
 <p>The types of metrics that suit periodic checks are total/global metrics,
 summed metrics rather than individual metrics.  The type of individual metrics
 that suit Mirage periodic checks are metrics like % disk space used on fairly
@@ -426,11 +445,11 @@ consistent servers that are not expected to fluctuate too drastically over a
 period of days, like a DB server volume.</p>
 <p>You definitely do not what to run all your server or app metrics through Mirage
 periodic checks, unless you used some sane configuration in terms of setting a
-reasonable <a class="reference internal" href="skyline.html#settings.MIRAGE_PERIODIC_CHECK_INTERVAL" title="settings.MIRAGE_PERIODIC_CHECK_INTERVAL"><code class="xref py py-mod docutils literal"><span class="pre">settings.MIRAGE_PERIODIC_CHECK_INTERVAL</span></code></a>, you could send all
+reasonable <a class="reference internal" href="skyline.html#settings.MIRAGE_PERIODIC_CHECK_INTERVAL" title="settings.MIRAGE_PERIODIC_CHECK_INTERVAL"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.MIRAGE_PERIODIC_CHECK_INTERVAL</span></code></a>, you could send all
 your metrics through Mirage over say a 4 hour period.</p>
 <p>Say you have 10000 metrics and you want to periodically analyse them all with
 Mirage you could set them all to be analysed over a 6 hour period.</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">MIRAGE_PERIODIC_CHECK</span> <span class="o">=</span> <span class="bp">True</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">MIRAGE_PERIODIC_CHECK</span> <span class="o">=</span> <span class="kc">True</span>
 <span class="n">MIRAGE_PERIODIC_CHECK_NAMESPACES</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;*&#39;</span><span class="p">]</span>
 <span class="n">MIRAGE_PERIODIC_CHECK_INTERVAL</span> <span class="o">=</span> <span class="mi">21600</span>
 </pre></div>
@@ -444,41 +463,42 @@ is not affected by periodic checks.</p>
 <div class="section" id="what-mirage-does">
 <h2>What Mirage does<a class="headerlink" href="#what-mirage-does" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li>If Analyzer finds a metric to be anomalous at <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a>
-and the metric alert tuple has <code class="docutils literal"><span class="pre">SECOND_ORDER_RESOLUTION_HOURS</span></code> and
-<a class="reference internal" href="skyline.html#settings.ENABLE_MIRAGE" title="settings.ENABLE_MIRAGE"><code class="xref py py-mod docutils literal"><span class="pre">settings.ENABLE_MIRAGE</span></code></a> is <code class="docutils literal"><span class="pre">True</span></code>, Analyzer will push the metric
-variables to the Mirage check file.</li>
-<li>Mirage watches for added check files.</li>
-<li>When a check is found, Mirage determines what the configured
-<code class="docutils literal"><span class="pre">SECOND_ORDER_RESOLUTION_HOURS</span></code> is for the metric from the tuple in
-<a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALERTS</span></code></a></li>
-<li>Mirage queries graphite to surface the json data for the metric timeseries at
-<code class="docutils literal"><span class="pre">SECOND_ORDER_RESOLUTION_HOURS</span></code>.</li>
-<li>Mirage then analyses the retrieved metric timeseries against the configured
-<a class="reference internal" href="skyline.html#settings.MIRAGE_ALGORITHMS" title="settings.MIRAGE_ALGORITHMS"><code class="xref py py-mod docutils literal"><span class="pre">settings.MIRAGE_ALGORITHMS</span></code></a>.</li>
-<li>If a metric is an Ionosphere enabled metric, then Mirage does not alert,
+<li><p>If Analyzer finds a metric to be anomalous at <a class="reference internal" href="skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FULL_DURATION</span></code></a>
+and the metric alert tuple has <code class="docutils literal notranslate"><span class="pre">SECOND_ORDER_RESOLUTION_HOURS</span></code> and
+<a class="reference internal" href="skyline.html#settings.ENABLE_MIRAGE" title="settings.ENABLE_MIRAGE"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ENABLE_MIRAGE</span></code></a> is <code class="docutils literal notranslate"><span class="pre">True</span></code>, Analyzer will push the metric
+variables to the Mirage check file.</p></li>
+<li><p>Mirage watches for added check files.</p></li>
+<li><p>When a check is found, Mirage determines what the configured
+<code class="docutils literal notranslate"><span class="pre">SECOND_ORDER_RESOLUTION_HOURS</span></code> is for the metric from the tuple in
+<a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ALERTS</span></code></a></p></li>
+<li><p>Mirage queries graphite to surface the json data for the metric timeseries at
+<code class="docutils literal notranslate"><span class="pre">SECOND_ORDER_RESOLUTION_HOURS</span></code>.</p></li>
+<li><p>Mirage then analyses the retrieved metric timeseries against the configured
+<a class="reference internal" href="skyline.html#settings.MIRAGE_ALGORITHMS" title="settings.MIRAGE_ALGORITHMS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.MIRAGE_ALGORITHMS</span></code></a>.</p></li>
+<li><p>If a metric is an Ionosphere enabled metric, then Mirage does not alert,
 but hands the metric off to Ionosphere by adding an Ionosphere check
-file.</li>
-<li>If the metric is anomalous over <code class="docutils literal"><span class="pre">SECOND_ORDER_RESOLUTION_HOURS</span></code> then alerts
-via the configured alerters for the matching metric <code class="xref py py-mod docutils literal"><span class="pre">settings.ALERT</span></code>
-tuple and sets the metric alert key for <code class="docutils literal"><span class="pre">EXPIRATION_TIME</span></code> seconds.</li>
-<li>Mirage will alert for a Mirage metric that has been returned from Ionosphere
-as anomalous having not matched any known features profile or layers.</li>
+file.</p></li>
+<li><p>If the metric is anomalous over <code class="docutils literal notranslate"><span class="pre">SECOND_ORDER_RESOLUTION_HOURS</span></code> then alerts
+via the configured alerters for the matching metric <code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ALERT</span></code>
+tuple and sets the metric alert key for <code class="docutils literal notranslate"><span class="pre">EXPIRATION_TIME</span></code> seconds.</p></li>
+<li><p>Mirage will alert for a Mirage metric that has been returned from Ionosphere
+as anomalous having not matched any known features profile or layers.</p></li>
 </ul>
 </div>
 </div>
 
 
            </div>
+           
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="boundary.html" class="btn btn-neutral float-right" title="Boundary" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="boundary.html" class="btn btn-neutral float-right" title="Boundary" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="algorithms/custom-algorithms.html" class="btn btn-neutral" title="Custom algorithms" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="algorithms/custom-algorithms.html" class="btn btn-neutral float-left" title="Custom algorithms" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -487,11 +507,19 @@ as anomalous having not matched any known features profile or layers.</li>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
+        
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -503,36 +531,15 @@ as anomalous having not matched any known features profile or layers.</li>
   </div>
   
 
-
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'2.0.0',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

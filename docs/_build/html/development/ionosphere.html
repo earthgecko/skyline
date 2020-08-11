@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,51 +11,48 @@
   
 
   
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/skyline.styles.css" type="text/css" />
+
+  
+  
+  
   
 
   
-
-  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
 
-  
-
-  
-  
-    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  
-
-  
-    <link rel="stylesheet" href="../_static/skyline.styles.css" type="text/css" />
-  
-
-  
-        <link rel="index" title="Index"
-              href="../genindex.html"/>
-        <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Skyline 2.0.0 documentation" href="../index.html"/>
-        <link rel="up" title="Development" href="index.html"/>
-        <link rel="next" title="Development - tsfresh" href="tsfresh.html"/>
-        <link rel="prev" title="Development - Debugging" href="debugging.html"/> 
-
-  
-  <script src="../_static/js/modernizr.min.js"></script>
-
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Development - tsfresh" href="tsfresh.html" />
+    <link rel="prev" title="Development - Debugging" href="debugging.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
+   
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
-            <a href="../index.html" class="icon icon-home"> Skyline
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
 
           
@@ -83,22 +79,24 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
             
-                <ul class="current">
+              
+            
+            
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../alerts.html">Alerts</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../horizon.html">Horizon</a></li>
@@ -115,6 +113,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../vista.html">Vista</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
@@ -122,12 +121,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html#reliability">Reliability</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring Skyline</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../releases.html">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What’s new</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Development</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="building-documentation.html">Building documentation</a></li>
 <li class="toctree-l2"><a class="reference internal" href="dawn.html">Development - dawn</a></li>
@@ -160,42 +157,63 @@
             
           
         </div>
+        
       </div>
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="../index.html">Skyline</a>
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Skyline</a>
+        
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="../index.html">Docs</a> &raquo;</li>
-      
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
           <li><a href="index.html">Development</a> &raquo;</li>
-      
-    <li>Development - Ionosphere</li>
+        
+      <li>Development - Ionosphere</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
-            <a href="../_sources/development/ionosphere.txt" rel="nofollow"> View page source</a>
+            
+            <a href="../_sources/development/ionosphere.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -211,7 +229,7 @@ There are 7 apache.sending a day, not 7000 a minute.</p>
 <p>Or there are peaks of 3 on the metric stats_counts.statsd.bad_lines_seen</p>
 <img alt="../_images/21060819.stats_counts.statsd.bad_lines_seen.png" src="../_images/21060819.stats_counts.statsd.bad_lines_seen.png" />
 <p>This is not anomalous.</p>
-<p>Ionosphere&#8217;s goal is to allow us to train Skyline on what is not anomalous.</p>
+<p>Ionosphere’s goal is to allow us to train Skyline on what is not anomalous.</p>
 </div>
 <div class="section" id="almost-a-year-in-review">
 <h2>Almost a year in review<a class="headerlink" href="#almost-a-year-in-review" title="Permalink to this headline">¶</a></h2>
@@ -219,15 +237,15 @@ There are 7 apache.sending a day, not 7000 a minute.</p>
 been sort after.</p>
 <div class="section" id="ramblings-the-development-of-ionosphere">
 <h3>Ramblings - the development of Ionosphere<a class="headerlink" href="#ramblings-the-development-of-ionosphere" title="Permalink to this headline">¶</a></h3>
-<p>The original idea behind Ionosphere was...</p>
+<p>The original idea behind Ionosphere was…</p>
 <p>Ionosphere is a user feedback/input to Skyline that allows for the creation of
-timeseries specific &#8220;algorithms&#8221;.</p>
+timeseries specific “algorithms”.</p>
 <p>Skyline Mirage (and Analyzer) work well on fairly constant rate, high range
 metrics, however on low rate, low range metrics like machine stats metrics it
 tends to be less effective and these types of timeseries make Mirage chatty
 even when set too very high resolution e.g. 730 hours.</p>
 <p>Ionosphere enables the user to create custom algorithms for specific timeseries.
-While defining all the custom &#8220;rules&#8221; to match different types of timeseries and
+While defining all the custom “rules” to match different types of timeseries and
 metrics, much of the recent efforts in anomaly detection have been dedicated to
 creation of automated, algorithmic and machine learning processes doing
 everything with minimal user input, other than some configurations.</p>
@@ -262,21 +280,21 @@ between 2 timeseries, once again easier said than done.</p>
 and statistics means, it appears that there is a fair bit of stuff in R that
 handles timeseries quite well.</p>
 <ul class="simple">
-<li>bsts: Bayesian Structural Time Series - Time series regression using dynamic
+<li><p>bsts: Bayesian Structural Time Series - Time series regression using dynamic
 linear models fit using MCMC (Google) -
-<a class="reference external" href="https://cran.r-project.org/web/packages/bsts/index.html">https://cran.r-project.org/web/packages/bsts/index.html</a></li>
-<li>The R package PDC provides complexity-based dissimilarity calculation and
+<a class="reference external" href="https://cran.r-project.org/web/packages/bsts/index.html">https://cran.r-project.org/web/packages/bsts/index.html</a></p></li>
+<li><p>The R package PDC provides complexity-based dissimilarity calculation and
 clustering, and also provides p values for a null hypothesis of identical
 underlying generating permutation distributions. The R package TSclust was
 recently updated and provides (among PDC) a number of approaches to time
 series dissimilarities.
-(<a class="reference external" href="https://www.researchgate.net/post/How_can_I_perform_time_series_data_similarity_measures_and_get_a_significance_level_p-value">https://www.researchgate.net/post/How_can_I_perform_time_series_data_similarity_measures_and_get_a_significance_level_p-value</a>)</li>
+(<a class="reference external" href="https://www.researchgate.net/post/How_can_I_perform_time_series_data_similarity_measures_and_get_a_significance_level_p-value">https://www.researchgate.net/post/How_can_I_perform_time_series_data_similarity_measures_and_get_a_significance_level_p-value</a>)</p></li>
 </ul>
-<p>And python maybe RMS - Erol Kalkan · United States Geological Survey, &#8220;Another
+<p>And python maybe RMS - Erol Kalkan · United States Geological Survey, “Another
 approach to compute the differences between two time series is moving window
 root-mean-square. RMS can be run for both series separately. This way, you can
 compare the similarities in energy (gain) level of time series. You may vary the
-window length for best resolution.&#8221; (<a class="reference external" href="https://www.researchgate.net/post/How_can_I_perform_time_series_data_similarity_measures_and_get_a_significance_level_p-value">https://www.researchgate.net/post/How_can_I_perform_time_series_data_similarity_measures_and_get_a_significance_level_p-value</a>)
+window length for best resolution.” (<a class="reference external" href="https://www.researchgate.net/post/How_can_I_perform_time_series_data_similarity_measures_and_get_a_significance_level_p-value">https://www.researchgate.net/post/How_can_I_perform_time_series_data_similarity_measures_and_get_a_significance_level_p-value</a>)
 <a class="reference external" href="http://stackoverflow.com/questions/5613244/root-mean-square-in-numpy-and-complications-of-matrix-and-arrays-of">http://stackoverflow.com/questions/5613244/root-mean-square-in-numpy-and-complications-of-matrix-and-arrays-of</a>-numpy#</p>
 <p>However finding a good similarity measure between time series is a very
 non-trivial task.</p>
@@ -286,18 +304,18 @@ is not wrong. Any which way I think bringing R into the evaluation is going to
 be useful long term. rpy2</p>
 <p>Other:</p>
 <ul class="simple">
-<li>Fast Time Series Evaluation (FTSE) - older algorithm from 2007 but potential -
-<a class="reference external" href="http://dbgroup.eecs.umich.edu/files/sigmod07timeseries.pdf">http://dbgroup.eecs.umich.edu/files/sigmod07timeseries.pdf</a></li>
-<li><a class="reference external" href="https://www.semanticscholar.org/paper/Benchmarking-dynamic-time-warping-on-nearest-Tselas-Papapetrou/69683d13b7dfac64bd6d8cd6654b617361574baf">https://www.semanticscholar.org/paper/Benchmarking-dynamic-time-warping-on-nearest-Tselas-Papapetrou/69683d13b7dfac64bd6d8cd6654b617361574baf</a></li>
+<li><p>Fast Time Series Evaluation (FTSE) - older algorithm from 2007 but potential -
+<a class="reference external" href="http://dbgroup.eecs.umich.edu/files/sigmod07timeseries.pdf">http://dbgroup.eecs.umich.edu/files/sigmod07timeseries.pdf</a></p></li>
+<li><p><a class="reference external" href="https://www.semanticscholar.org/paper/Benchmarking-dynamic-time-warping-on-nearest-Tselas-Papapetrou/69683d13b7dfac64bd6d8cd6654b617361574baf">https://www.semanticscholar.org/paper/Benchmarking-dynamic-time-warping-on-nearest-Tselas-Papapetrou/69683d13b7dfac64bd6d8cd6654b617361574baf</a></p></li>
 </ul>
-<p>Aggregation. Further complicates... a lot I think.</p>
+<p>Aggregation. Further complicates… a lot I think.</p>
 <p>Clustering not the way?</p>
 <ul class="simple">
-<li>Clustering of Time Series Subsequences is Meaningless: Implications for
+<li><p>Clustering of Time Series Subsequences is Meaningless: Implications for
 Previous and Future Research - <a class="reference external" href="http://www.cs.ucr.edu/~eamonn/meaningless.pdf">http://www.cs.ucr.edu/~eamonn/meaningless.pdf</a> -
-covers K-means and STS</li>
-<li><a class="reference external" href="http://amid.fish/anomaly-detection-with-k-means-clustering">http://amid.fish/anomaly-detection-with-k-means-clustering</a></li>
-<li><a class="reference external" href="https://github.com/mrahtz/sanger-machine-learning-workshop">https://github.com/mrahtz/sanger-machine-learning-workshop</a></li>
+covers K-means and STS</p></li>
+<li><p><a class="reference external" href="http://amid.fish/anomaly-detection-with-k-means-clustering">http://amid.fish/anomaly-detection-with-k-means-clustering</a></p></li>
+<li><p><a class="reference external" href="https://github.com/mrahtz/sanger-machine-learning-workshop">https://github.com/mrahtz/sanger-machine-learning-workshop</a></p></li>
 </ul>
 <p>Time clustering algorithm. An idea. We need to give time more dimensionality.
 <a class="reference external" href="http://www.cs.unm.edu/~mueen/FastestSimilaritySearch.html">http://www.cs.unm.edu/~mueen/FastestSimilaritySearch.html</a></p>
@@ -318,9 +336,9 @@ Skyline and lots of paths and methods, etc have been reviewed and unfortunately
 no simple way can be seen of achieving this in any meaningful way in terms of
 Skyline and it original purpose, anomaly detecting in machine metrics timeseries.
 Although it would be nice to update to the current Skyline stack and pipeline to
-use something not from the 1920&#8217;s, it is alas a fork to far at this point.</p>
-<p>And a bit of 1920&#8217;s with a bit of modern key value and some Python, with a dash
-of &#8220;lets try CONSENSUS&#8221;, does not do bad a job.  Considering off the production
+use something not from the 1920’s, it is alas a fork to far at this point.</p>
+<p>And a bit of 1920’s with a bit of modern key value and some Python, with a dash
+of “lets try CONSENSUS”, does not do bad a job.  Considering off the production
 line and into the digital pipeline, with a sprinkling of new ideas.</p>
 <p>However, not all metrics do well with 3sigma either :)
 Machine learning, scikit-learn, tensorflow, NuPIC, TPOT, k-means, et al are not
@@ -340,16 +358,16 @@ So lets give it training data sets.</p>
 extraction.</p>
 <p>Add user input</p>
 <ul class="simple">
-<li>via Panorama tickbox - not anomalous</li>
-<li>via alert with link to Panorama not anomalous</li>
-<li>Calculate things
+<li><p>via Panorama tickbox - not anomalous</p></li>
+<li><p>via alert with link to Panorama not anomalous</p></li>
+<li><p>Calculate things
 - stdDev
 - slope
 - linear regression
 - variability
-- etc - values for the timeseries</li>
-<li>Store the triggered timeseries for X amount of time to allow the user to process the anomaly and timeseries as it was, real timeseries data that was used and review the metric, if no action is taken on the anomaly, prune older than X.</li>
-<li>Begins to provide training data sets or at least calculated metrics as above about anomalies</li>
+- etc - values for the timeseries</p></li>
+<li><p>Store the triggered timeseries for X amount of time to allow the user to process the anomaly and timeseries as it was, real timeseries data that was used and review the metric, if no action is taken on the anomaly, prune older than X.</p></li>
+<li><p>Begins to provide training data sets or at least calculated metrics as above about anomalies</p></li>
 </ul>
 <p>Analyzer says this is anomalous, user can evaluate and say:</p>
 <p>This is not anomalous at X time range.
@@ -360,8 +378,8 @@ This is not anomalous on a Tuesday.</p>
 <h4>Simple Ionosphere<a class="headerlink" href="#simple-ionosphere" title="Permalink to this headline">¶</a></h4>
 <p>Some nice simple ideas, yesterday morning and I think it might be workable.</p>
 <ul class="simple">
-<li>Operator flags as not_anomalous (within a 24 hr period)</li>
-<li>Take saved Redis timeseries and:
+<li><p>Operator flags as not_anomalous (within a 24 hr period)</p></li>
+<li><p>Take saved Redis timeseries and:
 - sum
 - determine mean
 - determine median
@@ -372,17 +390,17 @@ This is not anomalous on a Tuesday.</p>
 - determine range in the 95% percentile
 - determine count in the 95% percentile
 - determine range in the 5% percentile
-- determine count in the 5% percentile</li>
-<li>Save not_anomalous details to Ionosphere table</li>
+- determine count in the 5% percentile</p></li>
+<li><p>Save not_anomalous details to Ionosphere table</p></li>
 </ul>
 <p>The devil may be in the details</p>
 <ul class="simple">
-<li>Match entire namespace, wildcarding, may be difficult and expensive, but may
-not if Redis keyed</li>
-<li>Expire training sets and trained results, how long?</li>
-<li>Ionosphere before Mirage? May be mute point as should work in both, each with
+<li><p>Match entire namespace, wildcarding, may be difficult and expensive, but may
+not if Redis keyed</p></li>
+<li><p>Expire training sets and trained results, how long?</p></li>
+<li><p>Ionosphere before Mirage? May be mute point as should work in both, each with
 their own metrics as alerts will come from the responsible app and therefore
-they can be tagged independently.</li>
+they can be tagged independently.</p></li>
 </ul>
 </div>
 <div class="section" id="workflow">
@@ -390,16 +408,16 @@ they can be tagged independently.</li>
 <p>This works for Analyzer and Mirage, only Analyzer is described here as it has
 the additional task of checking if it is a Mirage metric.</p>
 <ul class="simple">
-<li>Analyzer -&gt; detect anomaly</li>
-<li>Analyzer checks mirage.unique_metrics set, <cite>if mirage_metric == True</cite> send to
-Mirage and skip sending to Ionosphere, continue.</li>
-<li>Analyzer sends to Ionosphere if not a Mirage metric</li>
-<li>Analyzer then checks ionosphere.unique_metrics set, to see if it is an
+<li><p>Analyzer -&gt; detect anomaly</p></li>
+<li><p>Analyzer checks mirage.unique_metrics set, <cite>if mirage_metric == True</cite> send to
+Mirage and skip sending to Ionosphere, continue.</p></li>
+<li><p>Analyzer sends to Ionosphere if not a Mirage metric</p></li>
+<li><p>Analyzer then checks ionosphere.unique_metrics set, to see if it is an
 Ionosphere metric, if True, Analyzer skips alerting and continues. Ionosphere
 will analyze the metric that Analyzer just sent and score it and alert if it
-is anomalous.</li>
-<li>Ionosphere -&gt; calculate a similarity score for the anomalous timeseries based
-on trained values. If less than x similar, alert, else proceed as normal.</li>
+is anomalous.</p></li>
+<li><p>Ionosphere -&gt; calculate a similarity score for the anomalous timeseries based
+on trained values. If less than x similar, alert, else proceed as normal.</p></li>
 </ul>
 <p>Updated by Gary Wilson 18 days ago</p>
 </div>
@@ -413,7 +431,7 @@ on trained values. If less than x similar, alert, else proceed as normal.</li>
 <h4>Task #1718: review.tsfresh - still in progress<a class="headerlink" href="#task-1718-review-tsfresh-still-in-progress" title="Permalink to this headline">¶</a></h4>
 <p>tsfresh possibly does have the potential to fulfill some of the functionality of
 Ionosphere as described above.</p>
-<p>It is not super fast, quite processor intensive, but... lots of features!!!</p>
+<p>It is not super fast, quite processor intensive, but… lots of features!!!</p>
 </div>
 </div>
 </div>
@@ -424,10 +442,10 @@ Ionosphere as described above.</p>
 a year in the waiting and making.</p>
 <p>A special thanks to &#64;MaxBenChrist, &#64;nils-braun and &#64;jneuff over at
 <a class="reference external" href="https://github.com/blue-yonder/tsfresh">https://github.com/blue-yonder/tsfresh</a></p>
-<p>Well it took a year :)  But... it works :)</p>
+<p>Well it took a year :)  But… it works :)</p>
 <ul class="simple">
-<li>Branch #922: ionosphere - created 2015-12-26 11:21 AM</li>
-<li>Task #1658: Patterning Skyline Ionosphere</li>
+<li><p>Branch #922: ionosphere - created 2015-12-26 11:21 AM</p></li>
+<li><p>Task #1658: Patterning Skyline Ionosphere</p></li>
 </ul>
 <div class="section" id="ionosphere-log">
 <h3>ionosphere.log<a class="headerlink" href="#ionosphere-log" title="Permalink to this headline">¶</a></h3>
@@ -452,30 +470,31 @@ merely attempts to make 3sigma based anomaly detection methods better.  That
 said there may be some within the data science arena that may wish to argue
 that a number of things in the Ionosphere learning method would not necessarily
 hold up to some UCR review or Kaggle competition.  Luckily Ionosphere makes no
-bones in this regard as this is not Ionosphere&#8217;s domain space. Ionosphere&#8217;s
+bones in this regard as this is not Ionosphere’s domain space. Ionosphere’s
 domain space is machine and application metrics, with ambitions for bigger
 things.  Skyline and Ionosphere will find a timeseries Rebra (I reckon) :)</p>
 <p>Ionosphere is the culmination of over 24 months of deconstruction and refitting
-of Etsy&#8217;s now much aged Skyline simple Python anomaly detection (complicated
+of Etsy’s now much aged Skyline simple Python anomaly detection (complicated
 stack) application.</p>
 <p>Ionosphere began with a very, very small goal.  To teach Skyline what things
 were not anomalous.  The journey of trying to build something that would do that
-went from confused, impossible, no idea .... to a multi-generation one-step
+went from confused, impossible, no idea …. to a multi-generation one-step
 learning system, like a timeseries Rebra finder.</p>
 </div>
 </div>
 
 
            </div>
+           
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="tsfresh.html" class="btn btn-neutral float-right" title="Development - tsfresh" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="tsfresh.html" class="btn btn-neutral float-right" title="Development - tsfresh" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="debugging.html" class="btn btn-neutral" title="Development - Debugging" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="debugging.html" class="btn btn-neutral float-left" title="Development - Debugging" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -484,11 +503,19 @@ learning system, like a timeseries Rebra finder.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
+        
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -500,36 +527,15 @@ learning system, like a timeseries Rebra finder.</p>
   </div>
   
 
-
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../',
-            VERSION:'2.0.0',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
-        };
-    </script>
-      <script type="text/javascript" src="../_static/jquery.js"></script>
-      <script type="text/javascript" src="../_static/underscore.js"></script>
-      <script type="text/javascript" src="../_static/doctools.js"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,50 +11,48 @@
   
 
   
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
+
+  
+  
+  
   
 
   
-
-  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-
-  
-  
-    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  
-
-  
-    <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-  
-
-  
-        <link rel="index" title="Index"
-              href="genindex.html"/>
-        <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 2.0.0 documentation" href="index.html"/>
-        <link rel="next" title="Webapp" href="webapp.html"/>
-        <link rel="prev" title="Crucible" href="crucible.html"/> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Webapp" href="webapp.html" />
+    <link rel="prev" title="Crucible" href="crucible.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
+   
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
-            <a href="index.html" class="icon icon-home"> Skyline
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
 
           
@@ -82,22 +79,24 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
             
-                <ul class="current">
+              
+            
+            
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
-<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alerts.html">Alerts</a></li>
-<li class="toctree-l1"><a class="reference internal" href="docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
@@ -117,6 +116,7 @@
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
@@ -124,12 +124,10 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#reliability">Reliability</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
-<li class="toctree-l1"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What’s new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a></li>
@@ -138,40 +136,61 @@
             
           
         </div>
+        
       </div>
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="index.html">Skyline</a>
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Skyline</a>
+        
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="index.html">Docs</a> &raquo;</li>
-      
-    <li>Panorama</li>
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Panorama</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
-            <a href="_sources/panorama.txt" rel="nofollow"> View page source</a>
+            
+            <a href="_sources/panorama.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -181,18 +200,18 @@
 <h1>Panorama<a class="headerlink" href="#panorama" title="Permalink to this headline">¶</a></h1>
 <p>The Panorama service is responsible for recording data for each anomaly.</p>
 <p>It is important to remember that the Skyline analysis apps only alert on metrics
-that have alert tuples set.  However if you have <a class="reference internal" href="skyline.html#settings.SYSLOG_ENABLED" title="settings.SYSLOG_ENABLED"><code class="xref py py-mod docutils literal"><span class="pre">settings.SYSLOG_ENABLED</span></code></a>
-set to <code class="docutils literal"><span class="pre">True</span></code> syslog acts as an alerter, just like a SMTP, hipchat or
-pagerduty alerter.  Therefore having this set to <code class="docutils literal"><span class="pre">True</span></code> means that Panorama
+that have alert tuples set.  However if you have <a class="reference internal" href="skyline.html#settings.SYSLOG_ENABLED" title="settings.SYSLOG_ENABLED"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SYSLOG_ENABLED</span></code></a>
+set to <code class="docutils literal notranslate"><span class="pre">True</span></code> syslog acts as an alerter, just like a SMTP, hipchat or
+pagerduty alerter.  Therefore having this set to <code class="docutils literal notranslate"><span class="pre">True</span></code> means that Panorama
 will record samples of <strong>all</strong> metrics that are flagged as anomalous.  Sampling
-at <a class="reference internal" href="skyline.html#settings.PANORAMA_EXPIRY_TIME" title="settings.PANORAMA_EXPIRY_TIME"><code class="xref py py-mod docutils literal"><span class="pre">settings.PANORAMA_EXPIRY_TIME</span></code></a>, the default is 900 seconds.  Although
+at <a class="reference internal" href="skyline.html#settings.PANORAMA_EXPIRY_TIME" title="settings.PANORAMA_EXPIRY_TIME"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.PANORAMA_EXPIRY_TIME</span></code></a>, the default is 900 seconds.  Although
 this may result in a lot of entries in the anomalies DB table, it is useful for
 helping with root cause analysis.</p>
 <p>New records are used to trigger further analysis of the metric population in
 Luminosity to analyse the metric population for cross correlations.  However,
-only metrics with a <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALERTS</span></code></a> tuple trigger Luminosity, but all
+only metrics with a <a class="reference internal" href="skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ALERTS</span></code></a> tuple trigger Luminosity, but all
 metric anomalies are recorded.</p>
-<p>The <a class="reference internal" href="skyline.html#settings.PANORAMA_CHECK_MAX_AGE" title="settings.PANORAMA_CHECK_MAX_AGE"><code class="xref py py-mod docutils literal"><span class="pre">settings.PANORAMA_CHECK_MAX_AGE</span></code></a> ensures that Panorama only processes
+<p>The <a class="reference internal" href="skyline.html#settings.PANORAMA_CHECK_MAX_AGE" title="settings.PANORAMA_CHECK_MAX_AGE"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.PANORAMA_CHECK_MAX_AGE</span></code></a> ensures that Panorama only processes
 checks that are not older than this value.  This mitigates against Panorama
 stampeding against the MySQL database, if either Panorama or MySQL were stopped
 and there are a lot of Panorama check files queued to process.  If this is set
@@ -203,12 +222,12 @@ search and view historic anomalies.</p>
 <h2>Create a MySQL database<a class="headerlink" href="#create-a-mysql-database" title="Permalink to this headline">¶</a></h2>
 <p>You can install and run MySQL on the Skyline server or use any existing MySQL
 server to create the database on.  The Skyline server just has to be able to
-access the database with the user and password you configure in <code class="docutils literal"><span class="pre">settings.py</span></code>
-<a class="reference internal" href="skyline.html#settings.PANORAMA_DBUSER" title="settings.PANORAMA_DBUSER"><code class="xref py py-mod docutils literal"><span class="pre">settings.PANORAMA_DBUSER</span></code></a> and <a class="reference internal" href="skyline.html#settings.PANORAMA_DBUSERPASS" title="settings.PANORAMA_DBUSERPASS"><code class="xref py py-mod docutils literal"><span class="pre">settings.PANORAMA_DBUSERPASS</span></code></a></p>
+access the database with the user and password you configure in <code class="docutils literal notranslate"><span class="pre">settings.py</span></code>
+<a class="reference internal" href="skyline.html#settings.PANORAMA_DBUSER" title="settings.PANORAMA_DBUSER"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.PANORAMA_DBUSER</span></code></a> and <a class="reference internal" href="skyline.html#settings.PANORAMA_DBUSERPASS" title="settings.PANORAMA_DBUSERPASS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.PANORAMA_DBUSERPASS</span></code></a></p>
 <div class="admonition note">
-<p class="first admonition-title">Note</p>
-<p class="last">It is recommended, if possible that MySQL is configured to use a single
-file per InnoDB table with the MySQL config option - <code class="docutils literal"><span class="pre">innodb_file_per_table=1</span></code>
+<p class="admonition-title">Note</p>
+<p>It is recommended, if possible that MySQL is configured to use a single
+file per InnoDB table with the MySQL config option - <code class="docutils literal notranslate"><span class="pre">innodb_file_per_table=1</span></code>
 This is due to the fact that the anomalies and Ionosphere related MySQL tables
 are InnoDB tables and all the other core Skyline DB tables are MyISAM.
 If you are adding the Skyline DB to an existing MySQL database server please
@@ -223,29 +242,29 @@ requirements any time soon.  It appears and it is hoped anyway, time and
 really big data sets may invalidate this in the future, Gaia DR1 MySQL say :)</p>
 </div>
 <div class="admonition warning">
-<p class="first admonition-title">Warning</p>
-<p class="last">It is assumed that the database is not running with an offset and
+<p class="admonition-title">Warning</p>
+<p>It is assumed that the database is not running with an offset and
 the database increments ids by 1.  If you are running an offset please review
 all SQL updates to determine if you need to change anything in the SQL when
 you apply Skyline SQL updates.</p>
 </div>
 <ul class="simple">
-<li>See <code class="docutils literal"><span class="pre">skyline.sql</span></code> in your cloned Skyline repo for the schema creation script
+<li><p>See <code class="docutils literal notranslate"><span class="pre">skyline.sql</span></code> in your cloned Skyline repo for the schema creation script
 and create the skyline database (also create a user with permissions on the
-database, e.g.</li>
+database, e.g.</p></li>
 </ul>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>mysql -u root -p &lt; /opt/skyline/github/skyline/skyline/skyline.sql
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mysql -u root -p &lt; /opt/skyline/github/skyline/skyline/skyline.sql
 mysql -u root -p -e <span class="s2">&quot;GRANT ALL ON skyline.* TO &#39;skyline&#39;@&#39;localhost&#39; IDENTIFIED BY &#39;</span><span class="nv">$YOUR_MYSQL_SKYLINE_PASSWORD</span><span class="s2">&#39; \</span>
 <span class="s2">FLUSH PRIVILEGES;&quot;</span>
 </pre></div>
 </div>
 <ul class="simple">
-<li>Enable Panorama and review the other Panorama settings in <code class="docutils literal"><span class="pre">settings.py</span></code></li>
-<li>Start Panorama (use your appropriate PATH) - or go back to <a class="reference external" href="../html/installation.html">Installation</a> and
+<li><p>Enable Panorama and review the other Panorama settings in <code class="docutils literal notranslate"><span class="pre">settings.py</span></code></p></li>
+<li><p>Start Panorama (use your appropriate PATH) - or go back to <a class="reference external" href="../html/installation.html">Installation</a> and
 continue with the installation steps and Panorama will be started later in the
-installation process.</li>
+installation process.</p></li>
 </ul>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>/opt/skyline/github/skyline/bin/panorama.d start
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>/opt/skyline/github/skyline/bin/panorama.d start
 </pre></div>
 </div>
 </div>
@@ -253,15 +272,16 @@ installation process.</li>
 
 
            </div>
+           
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="webapp.html" class="btn btn-neutral float-right" title="Webapp" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="webapp.html" class="btn btn-neutral float-right" title="Webapp" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="crucible.html" class="btn btn-neutral" title="Crucible" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="crucible.html" class="btn btn-neutral float-left" title="Crucible" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -270,11 +290,19 @@ installation process.</li>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
+        
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -286,36 +314,15 @@ installation process.</li>
   </div>
   
 
-
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'2.0.0',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,51 +11,48 @@
   
 
   
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/skyline.styles.css" type="text/css" />
+
+  
+  
+  
   
 
   
-
-  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
 
-  
-
-  
-  
-    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  
-
-  
-    <link rel="stylesheet" href="../_static/skyline.styles.css" type="text/css" />
-  
-
-  
-        <link rel="index" title="Index"
-              href="../genindex.html"/>
-        <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Skyline 2.0.0 documentation" href="../index.html"/>
-        <link rel="up" title="Development" href="index.html"/>
-        <link rel="next" title="Development - dawn-docker" href="dawn-docker.html"/>
-        <link rel="prev" title="Building documentation" href="building-documentation.html"/> 
-
-  
-  <script src="../_static/js/modernizr.min.js"></script>
-
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Development - dawn-docker" href="dawn-docker.html" />
+    <link rel="prev" title="Building documentation" href="building-documentation.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
+   
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
-            <a href="../index.html" class="icon icon-home"> Skyline
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
 
           
@@ -83,22 +79,24 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
             
-                <ul class="current">
+              
+            
+            
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../alerts.html">Alerts</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../horizon.html">Horizon</a></li>
@@ -115,6 +113,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../vista.html">Vista</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
@@ -122,12 +121,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html#reliability">Reliability</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring Skyline</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../releases.html">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What’s new</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Development</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="building-documentation.html">Building documentation</a></li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Development - dawn</a><ul>
@@ -151,42 +148,63 @@
             
           
         </div>
+        
       </div>
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="../index.html">Skyline</a>
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Skyline</a>
+        
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="../index.html">Docs</a> &raquo;</li>
-      
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
           <li><a href="index.html">Development</a> &raquo;</li>
-      
-    <li>Development - dawn</li>
+        
+      <li>Development - dawn</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
-            <a href="../_sources/development/dawn.txt" rel="nofollow"> View page source</a>
+            
+            <a href="../_sources/development/dawn.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -199,11 +217,11 @@
 <p>The Skyline dawn branch adds a build script for <strong>TESTING</strong> only, it is not
 recommended for production use.</p>
 <div class="admonition warning">
-<p class="first admonition-title">Warning</p>
-<p class="last">When running this test instance there are expected to be errors in
-the logs as there is no real Graphite configured, no <a class="reference internal" href="../skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALERTS</span></code></a>,
+<p class="admonition-title">Warning</p>
+<p>When running this test instance there are expected to be errors in
+the logs as there is no real Graphite configured, no <a class="reference internal" href="../skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ALERTS</span></code></a>,
 no alert email addresses, etc, etc.  In fact there are no real time series
-apart from the <code class="docutils literal"><span class="pre">metrics.horizon.test.udp</span></code> data seeded into Redis, which goes
+apart from the <code class="docutils literal notranslate"><span class="pre">metrics.horizon.test.udp</span></code> data seeded into Redis, which goes
 stale quickly.  The Skyline now and panorama pages are not going to display
 graph data.</p>
 </div>
@@ -213,13 +231,13 @@ iptables/iptables6/ufw.  It should not be used to deploy any other kind of
 environment unless the other components such as Graphite, iptables/iptables6/ufw
 are configured at the same time.  The build script is suitable for:</p>
 <ul class="simple">
-<li>CentOS 6.9 (last build time 23 mins)</li>
-<li>CentOS 7.5 and 7.6 (last build time 23 mins)</li>
-<li>Ubuntu 16.04.4 LTS (last build time 21 mins)</li>
+<li><p>CentOS 6.9 (last build time 23 mins)</p></li>
+<li><p>CentOS 7.5 and 7.6 (last build time 23 mins)</p></li>
+<li><p>Ubuntu 16.04.4 LTS (last build time 21 mins)</p></li>
 </ul>
 <div class="admonition warning">
-<p class="first admonition-title">Warning</p>
-<p class="last">If you are running on CentOS 6 mysql-connector-python needs to be
+<p class="admonition-title">Warning</p>
+<p>If you are running on CentOS 6 mysql-connector-python needs to be
 fixed to 8.0.6 on CentOS 6 as if you use MySQL 5.1 rpm from mainstream, as of
 mysql-connector-python 8.0.11 support for 5.1 was dropped and results in a bad
 handshake error.  Further to this there is a reported vulnerability with
@@ -234,35 +252,35 @@ You have been advised, so now you know.</p>
 script or read from /etc/skyline/skyline.dawn.conf.  The build script does the
 following:</p>
 <ul class="simple">
-<li>Install the build requirements via yum or apt-get</li>
-<li>Install the MySQL/mariadb server via yum or apt-get, configures it for
-<code class="docutils literal"><span class="pre">innodb_file_per_table=1</span></code>,starts it and secures it.</li>
-<li>Downloads, builds, installs, configures and starts Redis</li>
-<li>Installs memcached and its dependencies, configures and starts it</li>
-<li>Creates a skyline system user</li>
-<li>Downloads, builds and deploys the current Skyline Python version (2.7.16) and
-sets up the Skyline Python virtualenv</li>
-<li>Creates the required Skyline directories</li>
-<li>Clones the Skyline repo and checkouts the declared version</li>
-<li>Installs Skyline requirements.txt</li>
-<li>Install Apache and deploys the Skyline reverse proxy vhost config and creates
-the htpasswd resource</li>
-<li>Creates a self-signed SSL certificate for the Skyline reverse proxy vhost</li>
-<li>Deploys the Skyline <code class="docutils literal"><span class="pre">skyline/settings.py</span></code> with the declared variables</li>
-<li>Creates the Skyline MySQL/mariadb database and grants privileges</li>
-<li>Starts the Skyline services</li>
-<li>Seeds Skyline with an anomalous time series data for <code class="docutils literal"><span class="pre">horizon.test.udp</span></code>
-metric and which creates an anomaly to be reviewed in the Skyline webapp UI</li>
-<li>The script creates tmp files in /tmp/skyline.dawn.* file namespace so it can
-be run in an idempotent manner.</li>
+<li><p>Install the build requirements via yum or apt-get</p></li>
+<li><p>Install the MySQL/mariadb server via yum or apt-get, configures it for
+<code class="docutils literal notranslate"><span class="pre">innodb_file_per_table=1</span></code>,starts it and secures it.</p></li>
+<li><p>Downloads, builds, installs, configures and starts Redis</p></li>
+<li><p>Installs memcached and its dependencies, configures and starts it</p></li>
+<li><p>Creates a skyline system user</p></li>
+<li><p>Downloads, builds and deploys the current Skyline Python version (2.7.16) and
+sets up the Skyline Python virtualenv</p></li>
+<li><p>Creates the required Skyline directories</p></li>
+<li><p>Clones the Skyline repo and checkouts the declared version</p></li>
+<li><p>Installs Skyline requirements.txt</p></li>
+<li><p>Install Apache and deploys the Skyline reverse proxy vhost config and creates
+the htpasswd resource</p></li>
+<li><p>Creates a self-signed SSL certificate for the Skyline reverse proxy vhost</p></li>
+<li><p>Deploys the Skyline <code class="docutils literal notranslate"><span class="pre">skyline/settings.py</span></code> with the declared variables</p></li>
+<li><p>Creates the Skyline MySQL/mariadb database and grants privileges</p></li>
+<li><p>Starts the Skyline services</p></li>
+<li><p>Seeds Skyline with an anomalous time series data for <code class="docutils literal notranslate"><span class="pre">horizon.test.udp</span></code>
+metric and which creates an anomaly to be reviewed in the Skyline webapp UI</p></li>
+<li><p>The script creates tmp files in /tmp/skyline.dawn.* file namespace so it can
+be run in an idempotent manner.</p></li>
 </ul>
 <div class="admonition warning">
-<p class="first admonition-title">Warning</p>
-<p class="last">remember there are expected to be errors and no time series, no
+<p class="admonition-title">Warning</p>
+<p>remember there are expected to be errors and no time series, no
 Graphite, no graphs, etc.</p>
 </div>
 <p>Example usage:</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="c1"># Fetch</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Fetch</span>
 wget -O /tmp/skyline.dawn.sh https://raw.githubusercontent.com/earthgecko/skyline/master/utils/dawn/skyline.dawn.sh
 <span class="c1"># Always review scripts before running them</span>
 cat /tmp/skyline.dawn.sh
@@ -306,7 +324,7 @@ chmod <span class="m">0755</span> /tmp/skyline.dawn.sh
 YOUR_SKYLINE_SERVER_FQDN and open the reported URL in your web browser,
 accepting the self signed SSL certificate.</p>
 <p>Check the Skyline logs.</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="c1"># Check the logs</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Check the logs</span>
 tail -n <span class="m">60</span> /var/log/skyline/*.log
 </pre></div>
 </div>
@@ -315,15 +333,16 @@ tail -n <span class="m">60</span> /var/log/skyline/*.log
 
 
            </div>
+           
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="dawn-docker.html" class="btn btn-neutral float-right" title="Development - dawn-docker" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="dawn-docker.html" class="btn btn-neutral float-right" title="Development - dawn-docker" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="building-documentation.html" class="btn btn-neutral" title="Building documentation" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="building-documentation.html" class="btn btn-neutral float-left" title="Building documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -332,11 +351,19 @@ tail -n <span class="m">60</span> /var/log/skyline/*.log
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
+        
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -348,36 +375,15 @@ tail -n <span class="m">60</span> /var/log/skyline/*.log
   </div>
   
 
-
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../',
-            VERSION:'2.0.0',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
-        };
-    </script>
-      <script type="text/javascript" src="../_static/jquery.js"></script>
-      <script type="text/javascript" src="../_static/underscore.js"></script>
-      <script type="text/javascript" src="../_static/doctools.js"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,50 +11,48 @@
   
 
   
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
+
+  
+  
+  
   
 
   
-
-  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script src="_static/jquery.js"></script>
+        <script src="_static/underscore.js"></script>
+        <script src="_static/doctools.js"></script>
+        <script src="_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="_static/js/theme.js"></script>
 
-  
-
-  
-  
-    <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
-  
-
-  
-    <link rel="stylesheet" href="_static/skyline.styles.css" type="text/css" />
-  
-
-  
-        <link rel="index" title="Index"
-              href="genindex.html"/>
-        <link rel="search" title="Search" href="search.html"/>
-    <link rel="top" title="Skyline 2.0.0 documentation" href="index.html"/>
-        <link rel="next" title="Algorithms" href="algorithms/index.html"/>
-        <link rel="prev" title="Analyzer" href="analyzer.html"/> 
-
-  
-  <script src="_static/js/modernizr.min.js"></script>
-
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Algorithms" href="algorithms/index.html" />
+    <link rel="prev" title="Analyzer" href="analyzer.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
+   
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
-            <a href="index.html" class="icon icon-home"> Skyline
+            <a href="index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
 
           
@@ -82,22 +79,24 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
             
-                <ul class="current">
+              
+            
+            
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
-<li class="toctree-l1"><a class="reference internal" href="running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="alerts.html">Alerts</a></li>
-<li class="toctree-l1"><a class="reference internal" href="docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="horizon.html">Horizon</a></li>
@@ -115,7 +114,7 @@
 <li class="toctree-l3"><a class="reference internal" href="#performance-weighting">Performance weighting</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="#settings-run-optimized-workflow"><code class="docutils literal"><span class="pre">settings.RUN_OPTIMIZED_WORKFLOW</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#settings-run-optimized-workflow"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.RUN_OPTIMIZED_WORKFLOW</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#optimizations-results">Optimizations results</a></li>
 </ul>
 </li>
@@ -130,6 +129,7 @@
 <li class="toctree-l1"><a class="reference internal" href="tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="vista.html">Vista</a></li>
 <li class="toctree-l1"><a class="reference internal" href="redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
@@ -137,12 +137,10 @@
 <li class="toctree-l1"><a class="reference internal" href="skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
-<li class="toctree-l1"><a class="reference internal" href="tuning-tips.html#reliability">Reliability</a></li>
 <li class="toctree-l1"><a class="reference internal" href="monitoring-skyline.html">Monitoring Skyline</a></li>
-<li class="toctree-l1"><a class="reference internal" href="debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="releases.html">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="whats-new.html">What’s new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="development/index.html">Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="roadmap.html">Roadmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="skyline.html">skyline package</a></li>
@@ -151,40 +149,61 @@
             
           
         </div>
+        
       </div>
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="index.html">Skyline</a>
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Skyline</a>
+        
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="index.html">Docs</a> &raquo;</li>
-      
-    <li>Analyzer Optimizations</li>
+    
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+        
+      <li>Analyzer Optimizations</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
-            <a href="_sources/analyzer-optimizations.txt" rel="nofollow"> View page source</a>
+            
+            <a href="_sources/analyzer-optimizations.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -208,7 +227,7 @@ constantly high CPU usage and load_avg when running Skyline. As this
 resulted in Analyzer running in say 19 seconds and then immediately
 spawning again and again, etc.</p>
 <p><a class="reference external" href="https://github.com/etsy/skyline/blob/master/src/analyzer/analyzer.py#L242">https://github.com/etsy/skyline/blob/master/src/analyzer/analyzer.py#L242</a></p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># Sleep if it went too fast</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Sleep if it went too fast</span>
 <span class="k">if</span> <span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">now</span> <span class="o">&lt;</span> <span class="mi">5</span><span class="p">:</span>
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;sleeping due to low run time...&#39;</span><span class="p">)</span>
     <span class="n">sleep</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
@@ -217,7 +236,7 @@ spawning again and again, etc.</p>
 <div class="section" id="number-of-analyzer-processors">
 <h2>Number of Analyzer processors<a class="headerlink" href="#number-of-analyzer-processors" title="Permalink to this headline">¶</a></h2>
 <p>A number of optimizations have changed the required number of processors
-to assign to <a class="reference internal" href="skyline.html#settings.ANALYZER_PROCESSES" title="settings.ANALYZER_PROCESSES"><code class="xref py py-mod docutils literal"><span class="pre">settings.ANALYZER_PROCESSES</span></code></a>, quite dramatically in some
+to assign to <a class="reference internal" href="skyline.html#settings.ANALYZER_PROCESSES" title="settings.ANALYZER_PROCESSES"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ANALYZER_PROCESSES</span></code></a>, quite dramatically in some
 cases.  Specifically in cases where the number of metrics being analyzed is not
 in the 10s of 1000s.</p>
 <p>Python multiprocessing is not very efficient if it is not need, in fact
@@ -227,39 +246,39 @@ few 1000 metrics and we have 4 processors assigned to Analyzer and the
 process duration is 19 seconds, in the original Analyzer we would have
 seen 4 CPUs running at 100% constantly (due to the above Sleep if it
 went to fast). Even if we leave to Sleep if went too fast in and we
-change to <a class="reference internal" href="skyline.html#settings.ANALYZER_PROCESSES" title="settings.ANALYZER_PROCESSES"><code class="xref py py-mod docutils literal"><span class="pre">settings.ANALYZER_PROCESSES</span></code></a> to 1, we will find that:</p>
+change to <a class="reference internal" href="skyline.html#settings.ANALYZER_PROCESSES" title="settings.ANALYZER_PROCESSES"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ANALYZER_PROCESSES</span></code></a> to 1, we will find that:</p>
 <ul class="simple">
-<li><ol class="first loweralpha">
-<li>we now see 1 CPU running at 100%</li>
+<li><ol class="loweralpha simple">
+<li><p>we now see 1 CPU running at 100%</p></li>
 </ol>
 </li>
-<li><ol class="first loweralpha" start="2">
-<li>our duration has probably increased to about 27 seconds</li>
+<li><ol class="loweralpha simple" start="2">
+<li><p>our duration has probably increased to about 27 seconds</p></li>
 </ol>
 </li>
-<li><ol class="first loweralpha" start="3">
-<li>we use a little more memory on the single process</li>
+<li><ol class="loweralpha simple" start="3">
+<li><p>we use a little more memory on the single process</p></li>
 </ol>
 </li>
 </ul>
 <p>When we optimize the sleep to match the environment with the
-<a class="reference internal" href="skyline.html#settings.ANALYZER_OPTIMUM_RUN_DURATION" title="settings.ANALYZER_OPTIMUM_RUN_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.ANALYZER_OPTIMUM_RUN_DURATION</span></code></a> of in this case say 60 instead of
+<a class="reference internal" href="skyline.html#settings.ANALYZER_OPTIMUM_RUN_DURATION" title="settings.ANALYZER_OPTIMUM_RUN_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ANALYZER_OPTIMUM_RUN_DURATION</span></code></a> of in this case say 60 instead of
 5, we will find that:</p>
 <ul class="simple">
-<li><ol class="first loweralpha">
-<li>we now see 1 CPU running at a few percent, only spiking up for 27 seconds</li>
+<li><ol class="loweralpha simple">
+<li><p>we now see 1 CPU running at a few percent, only spiking up for 27 seconds</p></li>
 </ol>
 </li>
 </ul>
-<p>When we further optimize and use the <a class="reference internal" href="skyline.html#settings.RUN_OPTIMIZED_WORKFLOW" title="settings.RUN_OPTIMIZED_WORKFLOW"><code class="xref py py-mod docutils literal"><span class="pre">settings.RUN_OPTIMIZED_WORKFLOW</span></code></a> we
+<p>When we further optimize and use the <a class="reference internal" href="skyline.html#settings.RUN_OPTIMIZED_WORKFLOW" title="settings.RUN_OPTIMIZED_WORKFLOW"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.RUN_OPTIMIZED_WORKFLOW</span></code></a> we
 will find that:</p>
 <ul class="simple">
-<li><ol class="first loweralpha">
-<li>we now see 1 CPU running at a few percent, only spiking up for 14 seconds</li>
+<li><ol class="loweralpha simple">
+<li><p>we now see 1 CPU running at a few percent, only spiking up for 14 seconds</p></li>
 </ol>
 </li>
-<li><ol class="first loweralpha" start="2">
-<li>our duration has probably decreased to about 50%</li>
+<li><ol class="loweralpha simple" start="2">
+<li><p>our duration has probably decreased to about 50%</p></li>
 </ol>
 </li>
 </ul>
@@ -268,7 +287,7 @@ will find that:</p>
 <div class="section" id="analyzer-work-rate">
 <h2>Analyzer work rate<a class="headerlink" href="#analyzer-work-rate" title="Permalink to this headline">¶</a></h2>
 <p>The original Analyzer analyzed all timeseries against all algorithms
-which is the maximum possible work. In terms of the <a class="reference internal" href="skyline.html#settings.CONSENSUS" title="settings.CONSENSUS"><code class="xref py py-mod docutils literal"><span class="pre">settings.CONSENSUS</span></code></a>
+which is the maximum possible work. In terms of the <a class="reference internal" href="skyline.html#settings.CONSENSUS" title="settings.CONSENSUS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.CONSENSUS</span></code></a>
 based model, this is not the most efficient work rate.</p>
 </div>
 <div class="section" id="performance-tuning">
@@ -287,44 +306,45 @@ tuning and profiling Skyline they are quite useful. They provide us with
 the ability to optimize the analysis of timeseries data based on 2
 simple criteria:</p>
 <ol class="arabic simple">
-<li>Determine the algorithms that are triggered most frequently</li>
-<li>Determine the computational expense of each algorithm (a development
-addition) that adds <code class="docutils literal"><span class="pre">algorithm_breakdown.*.timing.times_run</span></code> and
-the <code class="docutils literal"><span class="pre">algorithm_breakdown.*.timing.total_time</span></code> metrics to
-skyline.analyzer.  <code class="docutils literal"><span class="pre">hostname</span></code> graphite metric namespaces.</li>
+<li><p>Determine the algorithms that are triggered most frequently</p></li>
+<li><p>Determine the computational expense of each algorithm (a development
+addition) that adds <code class="docutils literal notranslate"><span class="pre">algorithm_breakdown.*.timing.times_run</span></code> and
+the <code class="docutils literal notranslate"><span class="pre">algorithm_breakdown.*.timing.total_time</span></code> metrics to
+skyline.analyzer.  <code class="docutils literal notranslate"><span class="pre">hostname</span></code> graphite metric namespaces.</p></li>
 </ol>
 <p>We can use these data to determine the <em>efficiency</em> of the algorithms
-and when this is applied to the Analyzer <a class="reference internal" href="skyline.html#settings.CONSENSUS" title="settings.CONSENSUS"><code class="xref py py-mod docutils literal"><span class="pre">settings.CONSENSUS</span></code></a> model we can
-optimize <code class="docutils literal"><span class="pre">algorithms.py</span></code> to run in the most efficient manner possible.</p>
+and when this is applied to the Analyzer <a class="reference internal" href="skyline.html#settings.CONSENSUS" title="settings.CONSENSUS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.CONSENSUS</span></code></a> model we can
+optimize <code class="docutils literal notranslate"><span class="pre">algorithms.py</span></code> to run in the most efficient manner possible.</p>
 <p>Originally algorithms.py simply analyzed every timeseries against every
-<code class="docutils literal"><span class="pre">algorithm</span> <span class="pre">in</span> <span class="pre">ALGORITHMS</span></code> and only checked the <a class="reference internal" href="skyline.html#settings.CONSENSUS" title="settings.CONSENSUS"><code class="xref py py-mod docutils literal"><span class="pre">settings.CONSENSUS</span></code></a>
+<code class="docutils literal notranslate"><span class="pre">algorithm</span> <span class="pre">in</span> <span class="pre">ALGORITHMS</span></code> and only checked the <a class="reference internal" href="skyline.html#settings.CONSENSUS" title="settings.CONSENSUS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.CONSENSUS</span></code></a>
 threshold at the end. However a very small but effective optimization is to use
 the above data to run the following optimizations.</p>
 <ul class="simple">
-<li>The most frequently and least expensive <a class="reference internal" href="skyline.html#settings.CONSENSUS" title="settings.CONSENSUS"><code class="xref py py-mod docutils literal"><span class="pre">settings.CONSENSUS</span></code></a> number of
-algorithms and then determine if <a class="reference internal" href="skyline.html#settings.CONSENSUS" title="settings.CONSENSUS"><code class="xref py py-mod docutils literal"><span class="pre">settings.CONSENSUS</span></code></a> can be achieved.
+<li><p>The most frequently and least expensive <a class="reference internal" href="skyline.html#settings.CONSENSUS" title="settings.CONSENSUS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.CONSENSUS</span></code></a> number of
+algorithms and then determine if <a class="reference internal" href="skyline.html#settings.CONSENSUS" title="settings.CONSENSUS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.CONSENSUS</span></code></a> can be achieved.
 Currently there are 9 algorithms that Analyzer uses. However the same
-optimization is valid if more algorithms were added.</li>
-<li>If our <a class="reference internal" href="skyline.html#settings.CONSENSUS" title="settings.CONSENSUS"><code class="xref py py-mod docutils literal"><span class="pre">settings.CONSENSUS</span></code></a> was 6 and Analyzer has not been able to
+optimization is valid if more algorithms were added.</p></li>
+<li><p>If our <a class="reference internal" href="skyline.html#settings.CONSENSUS" title="settings.CONSENSUS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.CONSENSUS</span></code></a> was 6 and Analyzer has not been able to
 trigger any of the most frequently and least expensive 5 algorithms, then
 there is no need to analyze the timeseries against the remaining
 algorithms. This surprisingly reduces the work of Analyzer by ~xx% on average
-(a lot).</li>
-<li>The cost of this optimization is that we lose the original
-<code class="docutils literal"><span class="pre">algorithm_breakdown.*</span></code> metrics which this was evaluated and patterned
+(a lot).</p></li>
+<li><p>The cost of this optimization is that we lose the original
+<code class="docutils literal notranslate"><span class="pre">algorithm_breakdown.*</span></code> metrics which this was evaluated and patterned
 against. However two additional factors somewhat mitigate this but it is
-definitely still skewed. The mitigations being that:<ul>
-<li>When a timeseries is anomalous more than one algorithm triggers
-anyway.</li>
-<li>When an algorithm is triggered, more algorithms are run. Seeing as we
+definitely still skewed. The mitigations being that:</p>
+<ul>
+<li><p>When a timeseries is anomalous more than one algorithm triggers
+anyway.</p></li>
+<li><p>When an algorithm is triggered, more algorithms are run. Seeing as we
 have optimized to have the least frequently triggered algorithms be
 run later in the workflow, it stands to reason that a lot of the
 time, they would not have triggered even if they were run. However it
-is still skewed.</li>
+is still skewed.</p></li>
 </ul>
 </li>
 </ul>
-<p>These optimizations are now the default in <code class="docutils literal"><span class="pre">settings.py</span></code>, however they
+<p>These optimizations are now the default in <code class="docutils literal notranslate"><span class="pre">settings.py</span></code>, however they
 have been implemented with backwards compatibility and for the purpose
 of running Analyzer without optimization of the algorithms to ensure
 that they can be benchmarked again should any further algorithms ever be
@@ -343,7 +363,7 @@ times that the algorithm execution is undertaken in (float).</p>
 <h3>tmpfs vs multiprocessing Value<a class="headerlink" href="#tmpfs-vs-multiprocessing-value" title="Permalink to this headline">¶</a></h3>
 <p>Recording the algorithm counts and timings without using multiprocessing Value
 and associated overhead of locks, etc, etc. /tmp was opted for instead and the
-variable <a class="reference internal" href="skyline.html#settings.SKYLINE_TMP_DIR" title="settings.SKYLINE_TMP_DIR"><code class="xref py py-mod docutils literal"><span class="pre">settings.SKYLINE_TMP_DIR</span></code></a> was added. In most cases /tmp is tmpfs
+variable <a class="reference internal" href="skyline.html#settings.SKYLINE_TMP_DIR" title="settings.SKYLINE_TMP_DIR"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.SKYLINE_TMP_DIR</span></code></a> was added. In most cases /tmp is tmpfs
 which is memory anyway so all the heavy lifting in terms of locking etc is
 offloaded to the OS and modules do not have to incur the additional complexity
 in Python. A simple yet effective win. Same same but different. There may be
@@ -351,35 +371,35 @@ some valid reasons for the use multiprocessing Value or Manager().list()</p>
 </div>
 <div class="section" id="algorithms-ranked-by-triggered-count">
 <h3>Algorithms ranked by triggered count<a class="headerlink" href="#algorithms-ranked-by-triggered-count" title="Permalink to this headline">¶</a></h3>
-<p>Using the <code class="docutils literal"><span class="pre">anomaly_breakdown</span></code> metrics data it shows that on a plethora of
+<p>Using the <code class="docutils literal notranslate"><span class="pre">anomaly_breakdown</span></code> metrics data it shows that on a plethora of
 machine and application related metrics, we can determine the most
 triggered algorithms by rank:</p>
 <ol class="arabic simple">
-<li>stddev_from_average</li>
-<li>mean_subtraction_cumulation</li>
-<li>first_hour_average</li>
-<li>histogram_bins</li>
-<li>least_squares</li>
-<li>grubbs</li>
-<li>stddev_from_moving_average</li>
-<li>median_absolute_deviation</li>
-<li>ks_test</li>
+<li><p>stddev_from_average</p></li>
+<li><p>mean_subtraction_cumulation</p></li>
+<li><p>first_hour_average</p></li>
+<li><p>histogram_bins</p></li>
+<li><p>least_squares</p></li>
+<li><p>grubbs</p></li>
+<li><p>stddev_from_moving_average</p></li>
+<li><p>median_absolute_deviation</p></li>
+<li><p>ks_test</p></li>
 </ol>
 </div>
 <div class="section" id="algorithms-ranked-by-execution-time">
 <h3>Algorithms ranked by execution time<a class="headerlink" href="#algorithms-ranked-by-execution-time" title="Permalink to this headline">¶</a></h3>
-<p>Using the <code class="docutils literal"><span class="pre">algorithm_breakdown</span></code> metrics data we can determine the most
-&#8220;expensive&#8221; algorithms by total time to run:</p>
+<p>Using the <code class="docutils literal notranslate"><span class="pre">algorithm_breakdown</span></code> metrics data we can determine the most
+“expensive” algorithms by total time to run:</p>
 <ol class="arabic simple">
-<li>least_squares (avg: 0.563052576667)</li>
-<li>stddev_from_moving_average (avg: 0.48511087)</li>
-<li>mean_subtraction_cumulation (avg: 0.453279348333)</li>
-<li>median_absolute_deviation (avg: 0.25222528)</li>
-<li>stddev_from_average (avg: 0.173473198333)</li>
-<li>first_hour_average (avg: 0.151071298333)</li>
-<li>grubbs (avg: 0.147807641667)</li>
-<li>histogram_bins (avg: 0.101075738333)</li>
-<li>ks_test (avg: 0.0979568116667)</li>
+<li><p>least_squares (avg: 0.563052576667)</p></li>
+<li><p>stddev_from_moving_average (avg: 0.48511087)</p></li>
+<li><p>mean_subtraction_cumulation (avg: 0.453279348333)</p></li>
+<li><p>median_absolute_deviation (avg: 0.25222528)</p></li>
+<li><p>stddev_from_average (avg: 0.173473198333)</p></li>
+<li><p>first_hour_average (avg: 0.151071298333)</p></li>
+<li><p>grubbs (avg: 0.147807641667)</p></li>
+<li><p>histogram_bins (avg: 0.101075738333)</p></li>
+<li><p>ks_test (avg: 0.0979568116667)</p></li>
 </ol>
 </div>
 <div class="section" id="performance-weighting">
@@ -388,7 +408,7 @@ triggered algorithms by rank:</p>
 algorithms in Analyzer, we can improve the overall performance by
 running the most expensive computational algorithms later in the
 analysis.</p>
-<div class="highlight-default"><div class="highlight"><pre><span></span><span class="o">+-----------------------------+----------------+---------------------+</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">+-----------------------------+----------------+---------------------+</span>
 <span class="o">|</span> <span class="n">Algorithm</span>                   <span class="o">|</span> <span class="n">Triggered</span> <span class="n">rank</span> <span class="o">|</span> <span class="n">Execution</span> <span class="n">time</span> <span class="n">rank</span> <span class="o">|</span>
 <span class="o">+=============================+================+=====================+</span>
 <span class="o">|</span> <span class="n">histogram_bins</span>              <span class="o">|</span> <span class="mi">4</span>              <span class="o">|</span> <span class="mi">8</span>                   <span class="o">|</span>
@@ -414,10 +434,10 @@ analysis.</p>
 </div>
 </div>
 <div class="section" id="settings-run-optimized-workflow">
-<h2><a class="reference internal" href="skyline.html#settings.RUN_OPTIMIZED_WORKFLOW" title="settings.RUN_OPTIMIZED_WORKFLOW"><code class="xref py py-mod docutils literal"><span class="pre">settings.RUN_OPTIMIZED_WORKFLOW</span></code></a><a class="headerlink" href="#settings-run-optimized-workflow" title="Permalink to this headline">¶</a></h2>
+<h2><a class="reference internal" href="skyline.html#settings.RUN_OPTIMIZED_WORKFLOW" title="settings.RUN_OPTIMIZED_WORKFLOW"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.RUN_OPTIMIZED_WORKFLOW</span></code></a><a class="headerlink" href="#settings-run-optimized-workflow" title="Permalink to this headline">¶</a></h2>
 <p>The original version of Analyzer ran all timeseries through all
-<code class="docutils literal"><span class="pre">ALGORITHMS</span></code> like so:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">ensemble</span> <span class="o">=</span> <span class="p">[</span><span class="nb">globals</span><span class="p">()[</span><span class="n">algorithm</span><span class="p">](</span><span class="n">timeseries</span><span class="p">)</span> <span class="k">for</span> <span class="n">algorithm</span> <span class="ow">in</span> <span class="n">ALGORITHMS</span><span class="p">]</span>
+<code class="docutils literal notranslate"><span class="pre">ALGORITHMS</span></code> like so:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ensemble</span> <span class="o">=</span> <span class="p">[</span><span class="nb">globals</span><span class="p">()[</span><span class="n">algorithm</span><span class="p">](</span><span class="n">timeseries</span><span class="p">)</span> <span class="k">for</span> <span class="n">algorithm</span> <span class="ow">in</span> <span class="n">ALGORITHMS</span><span class="p">]</span>
 </pre></div>
 </div>
 <p>After running all the algorithms, it then determined whether the last
@@ -426,22 +446,22 @@ datapoint for timeseries was anomalous.</p>
 matrix to run as efficiently as possible and achieve the same results
 (see caveat below) but up to ~50% quicker and less CPU cycles. This is
 done by iterating through the algorithms in order based on their
-respective matrix rankings and evaluating the whether <a class="reference internal" href="skyline.html#settings.CONSENSUS" title="settings.CONSENSUS"><code class="xref py py-mod docutils literal"><span class="pre">settings.CONSENSUS</span></code></a>
+respective matrix rankings and evaluating the whether <a class="reference internal" href="skyline.html#settings.CONSENSUS" title="settings.CONSENSUS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.CONSENSUS</span></code></a>
 can be achieved or not. The least_squares algorithm, which is the most
-computationally expensive, now only runs if <a class="reference internal" href="skyline.html#settings.CONSENSUS" title="settings.CONSENSUS"><code class="xref py py-mod docutils literal"><span class="pre">settings.CONSENSUS</span></code></a> can be
+computationally expensive, now only runs if <a class="reference internal" href="skyline.html#settings.CONSENSUS" title="settings.CONSENSUS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.CONSENSUS</span></code></a> can be
 achieved.</p>
-<p>The caveat to this is that this skews the <code class="docutils literal"><span class="pre">anomaly_breakdown</span></code> metrics.
-However seeing as the <code class="docutils literal"><span class="pre">anomaly_breakdown</span></code> metrics were not part of the
+<p>The caveat to this is that this skews the <code class="docutils literal notranslate"><span class="pre">anomaly_breakdown</span></code> metrics.
+However seeing as the <code class="docutils literal notranslate"><span class="pre">anomaly_breakdown</span></code> metrics were not part of the
 original Analyzer this is a mute point. That said the performance tuning
 and optimizations were made possible by these data, therefore it remains
 possible to implement the original configuration and also time all
 algorithms (see Development modes if you are interested). A word of
 warning, if you have setup a Skyline implementation after the
-<a class="reference internal" href="skyline.html#settings.RUN_OPTIMIZED_WORKFLOW" title="settings.RUN_OPTIMIZED_WORKFLOW"><code class="xref py py-mod docutils literal"><span class="pre">settings.RUN_OPTIMIZED_WORKFLOW</span></code></a> and you have &gt; 1000 metrics running the
+<a class="reference internal" href="skyline.html#settings.RUN_OPTIMIZED_WORKFLOW" title="settings.RUN_OPTIMIZED_WORKFLOW"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.RUN_OPTIMIZED_WORKFLOW</span></code></a> and you have &gt; 1000 metrics running the
 unoptimized workflow with the original 5 seconds may send the load_avg
 through the roof.</p>
-<p>The original Analyzer <a class="reference internal" href="skyline.html#settings.ALGORITHMS" title="settings.ALGORITHMS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALGORITHMS</span></code></a> setting was:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">ALGORITHMS</span> <span class="o">=</span> <span class="p">[</span>
+<p>The original Analyzer <a class="reference internal" href="skyline.html#settings.ALGORITHMS" title="settings.ALGORITHMS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ALGORITHMS</span></code></a> setting was:</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ALGORITHMS</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">&#39;first_hour_average&#39;</span><span class="p">,</span>
     <span class="s1">&#39;mean_subtraction_cumulation&#39;</span><span class="p">,</span>
     <span class="s1">&#39;stddev_from_average&#39;</span><span class="p">,</span>
@@ -454,9 +474,9 @@ through the roof.</p>
 <span class="p">]</span>
 </pre></div>
 </div>
-<p>The new optimized Analyzer <a class="reference internal" href="skyline.html#settings.ALGORITHMS" title="settings.ALGORITHMS"><code class="xref py py-mod docutils literal"><span class="pre">settings.ALGORITHMS</span></code></a> setting based on the above
+<p>The new optimized Analyzer <a class="reference internal" href="skyline.html#settings.ALGORITHMS" title="settings.ALGORITHMS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ALGORITHMS</span></code></a> setting based on the above
 performance weighing matrix is:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">ALGORITHMS</span> <span class="o">=</span> <span class="p">[</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ALGORITHMS</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">&#39;histogram_bins&#39;</span><span class="p">,</span>
     <span class="s1">&#39;first_hour_average&#39;</span><span class="p">,</span>
     <span class="s1">&#39;stddev_from_average&#39;</span><span class="p">,</span>
@@ -484,22 +504,22 @@ Panorama daemon in addition to what it was running before.</p>
 only a few steps away from Etsy master and those steps were related to Analyzer
 sending a few more Skyline metric namespaces to Graphite, in terms of Analyzer
 and the algorithms logic pre update were identical to Etsy master.</p>
-<div class="figure">
+<div class="figure align-default">
 <img alt="_images/analyzer.skyline1.runtime.png" src="_images/analyzer.skyline1.runtime.png" />
 </div>
-<div class="figure">
+<div class="figure align-default">
 <img alt="_images/analyzer.optimizations.cpu0.png" src="_images/analyzer.optimizations.cpu0.png" />
 </div>
-<div class="figure">
+<div class="figure align-default">
 <img alt="_images/analyzer.optimizations.cpu1.png" src="_images/analyzer.optimizations.cpu1.png" />
 </div>
-<div class="figure">
+<div class="figure align-default">
 <img alt="_images/analyzer.optimizations.cpu2.png" src="_images/analyzer.optimizations.cpu2.png" />
 </div>
-<div class="figure">
+<div class="figure align-default">
 <img alt="_images/analyzer.optimizations.cpu3.png" src="_images/analyzer.optimizations.cpu3.png" />
 </div>
-<div class="figure">
+<div class="figure align-default">
 <img alt="_images/analyzer.optimizations.loadavg.png" src="_images/analyzer.optimizations.loadavg.png" />
 </div>
 </div>
@@ -507,15 +527,16 @@ and the algorithms logic pre update were identical to Etsy master.</p>
 
 
            </div>
+           
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="algorithms/index.html" class="btn btn-neutral float-right" title="Algorithms" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="algorithms/index.html" class="btn btn-neutral float-right" title="Algorithms" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="analyzer.html" class="btn btn-neutral" title="Analyzer" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="analyzer.html" class="btn btn-neutral float-left" title="Analyzer" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -524,11 +545,19 @@ and the algorithms logic pre update were identical to Etsy master.</p>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
+        
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -540,36 +569,15 @@ and the algorithms logic pre update were identical to Etsy master.</p>
   </div>
   
 
-
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'./',
-            VERSION:'2.0.0',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
-        };
-    </script>
-      <script type="text/javascript" src="_static/jquery.js"></script>
-      <script type="text/javascript" src="_static/underscore.js"></script>
-      <script type="text/javascript" src="_static/doctools.js"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

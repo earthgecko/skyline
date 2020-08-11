@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,49 +11,46 @@
   
 
   
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
+
+  
+  
+  
   
 
   
-
-  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+        <script src="../../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
 
-  
-
-  
-  
-    <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
-  
-
-  
-    <link rel="stylesheet" href="../../_static/skyline.styles.css" type="text/css" />
-  
-
-  
-        <link rel="index" title="Index"
-              href="../../genindex.html"/>
-        <link rel="search" title="Search" href="../../search.html"/>
-    <link rel="top" title="Skyline 2.0.0 documentation" href="../../index.html"/>
-        <link rel="up" title="Module code" href="../index.html"/> 
-
-  
-  <script src="../../_static/js/modernizr.min.js"></script>
-
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
+   
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
-            <a href="../../index.html" class="icon icon-home"> Skyline
+            <a href="../../index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
 
           
@@ -81,22 +77,24 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
             
-                <ul>
+              
+            
+            
+              <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../alerts.html">Alerts</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../horizon.html">Horizon</a></li>
@@ -113,6 +111,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../vista.html">Vista</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
@@ -120,12 +119,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../tuning-tips.html#reliability">Reliability</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../monitoring-skyline.html">Monitoring Skyline</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../releases.html">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../whats-new.html">What’s new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../development/index.html">Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../roadmap.html">Roadmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../skyline.html">skyline package</a></li>
@@ -134,50 +131,69 @@
             
           
         </div>
+        
       </div>
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="../../index.html">Skyline</a>
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Skyline</a>
+        
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
+
+
+
+
+
+
+
+
+
+
 
 
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="../../index.html">Docs</a> &raquo;</li>
-      
+    
+      <li><a href="../../index.html" class="icon icon-home"></a> &raquo;</li>
+        
           <li><a href="../index.html">Module code</a> &raquo;</li>
-      
-    <li>analyzer.alerters</li>
+        
+      <li>analyzer.alerters</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
-        
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
   <h1>Source code for analyzer.alerters</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="k">import</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span><span class="p">,</span> <span class="n">print_function</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">hashlib</span>
-<span class="kn">from</span> <span class="nn">smtplib</span> <span class="k">import</span> <span class="n">SMTP</span>
+<span class="kn">from</span> <span class="nn">smtplib</span> <span class="kn">import</span> <span class="n">SMTP</span>
 <span class="kn">import</span> <span class="nn">alerters</span>
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">urllib2</span>
@@ -191,23 +207,23 @@
 <span class="k">try</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">urllib2</span> <span class="k">as</span> <span class="nn">urllib</span>
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">urllib</span> <span class="k">import</span> <span class="n">request</span> <span class="k">as</span> <span class="n">urllib</span>
+    <span class="kn">from</span> <span class="nn">urllib</span> <span class="kn">import</span> <span class="n">request</span> <span class="k">as</span> <span class="n">urllib</span>
 
-<span class="kn">from</span> <span class="nn">ast</span> <span class="k">import</span> <span class="n">literal_eval</span>
-<span class="kn">from</span> <span class="nn">requests.utils</span> <span class="k">import</span> <span class="n">quote</span>
+<span class="kn">from</span> <span class="nn">ast</span> <span class="kn">import</span> <span class="n">literal_eval</span>
+<span class="kn">from</span> <span class="nn">requests.utils</span> <span class="kn">import</span> <span class="n">quote</span>
 
 <span class="c1"># Added for graphs showing Redis data</span>
 <span class="kn">import</span> <span class="nn">traceback</span>
 <span class="c1"># import redis</span>
-<span class="kn">from</span> <span class="nn">msgpack</span> <span class="k">import</span> <span class="n">Unpacker</span>
+<span class="kn">from</span> <span class="nn">msgpack</span> <span class="kn">import</span> <span class="n">Unpacker</span>
 <span class="kn">import</span> <span class="nn">datetime</span> <span class="k">as</span> <span class="nn">dt</span>
 <span class="c1"># @added 20180809 - Bug #2498: Incorrect scale in some graphs</span>
 <span class="c1"># @modified 20181025 - Feature #2618: alert_slack</span>
 <span class="c1"># Added gmtime and strftime</span>
 <span class="c1"># @modified 20191030 - Branch #3262: py3</span>
 <span class="c1"># from time import (time, gmtime, strftime)</span>
-<span class="kn">from</span> <span class="nn">time</span> <span class="k">import</span> <span class="n">gmtime</span><span class="p">,</span> <span class="n">strftime</span><span class="p">,</span> <span class="n">time</span>
-<span class="kn">from</span> <span class="nn">email</span> <span class="k">import</span> <span class="n">charset</span>
+<span class="kn">from</span> <span class="nn">time</span> <span class="kn">import</span> <span class="n">gmtime</span><span class="p">,</span> <span class="n">strftime</span><span class="p">,</span> <span class="n">time</span>
+<span class="kn">from</span> <span class="nn">email</span> <span class="kn">import</span> <span class="n">charset</span>
 
 <span class="c1"># @added 20200116: Feature #3396: http_alerter</span>
 <span class="kn">import</span> <span class="nn">requests</span>
@@ -220,8 +236,8 @@
 <span class="c1"># Handle flake8 E402</span>
 <span class="k">if</span> <span class="kc">True</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-    <span class="kn">from</span> <span class="nn">matplotlib.pylab</span> <span class="k">import</span> <span class="n">rcParams</span>
-    <span class="kn">from</span> <span class="nn">matplotlib.dates</span> <span class="k">import</span> <span class="n">DateFormatter</span>
+    <span class="kn">from</span> <span class="nn">matplotlib.pylab</span> <span class="kn">import</span> <span class="n">rcParams</span>
+    <span class="kn">from</span> <span class="nn">matplotlib.dates</span> <span class="kn">import</span> <span class="n">DateFormatter</span>
     <span class="c1"># @modified 20191030 - Branch #3262: py3</span>
     <span class="c1"># import io</span>
     <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -236,20 +252,20 @@
 
 <span class="n">python_version</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">email.MIMEMultipart</span> <span class="k">import</span> <span class="n">MIMEMultipart</span>
-    <span class="kn">from</span> <span class="nn">email.MIMEText</span> <span class="k">import</span> <span class="n">MIMEText</span>
-    <span class="kn">from</span> <span class="nn">email.MIMEImage</span> <span class="k">import</span> <span class="n">MIMEImage</span>
+    <span class="kn">from</span> <span class="nn">email.MIMEMultipart</span> <span class="kn">import</span> <span class="n">MIMEMultipart</span>
+    <span class="kn">from</span> <span class="nn">email.MIMEText</span> <span class="kn">import</span> <span class="n">MIMEText</span>
+    <span class="kn">from</span> <span class="nn">email.MIMEImage</span> <span class="kn">import</span> <span class="n">MIMEImage</span>
 <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">email.mime.multipart</span> <span class="k">import</span> <span class="n">MIMEMultipart</span>
-    <span class="kn">from</span> <span class="nn">email.mime.text</span> <span class="k">import</span> <span class="n">MIMEText</span>
-    <span class="kn">from</span> <span class="nn">email.mime.image</span> <span class="k">import</span> <span class="n">MIMEImage</span>
+    <span class="kn">from</span> <span class="nn">email.mime.multipart</span> <span class="kn">import</span> <span class="n">MIMEMultipart</span>
+    <span class="kn">from</span> <span class="nn">email.mime.text</span> <span class="kn">import</span> <span class="n">MIMEText</span>
+    <span class="kn">from</span> <span class="nn">email.mime.image</span> <span class="kn">import</span> <span class="n">MIMEImage</span>
 
 <span class="c1"># @modified 20161228 - Feature #1828: ionosphere - mirage Redis data features</span>
 <span class="c1"># Handle flake8 E402</span>
 <span class="k">if</span> <span class="kc">True</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">settings</span>
     <span class="kn">import</span> <span class="nn">skyline_version</span>
-    <span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="k">import</span> <span class="p">(</span>
+    <span class="kn">from</span> <span class="nn">skyline_functions</span> <span class="kn">import</span> <span class="p">(</span>
         <span class="n">write_data_to_file</span><span class="p">,</span> <span class="n">mkdir_p</span><span class="p">,</span>
         <span class="c1"># @added 20170603 - Feature #2034: analyse_derivatives</span>
         <span class="c1"># nonNegativeDerivative, in_list,</span>
@@ -330,7 +346,15 @@
 
     <span class="c1"># @added 20161229 - Feature #1830: Ionosphere alerts</span>
     <span class="c1"># Added Ionosphere variables</span>
-    <span class="n">base_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># @modified 20200728 - Bug #3652: Handle multiple metrics in base_name conversion</span>
+    <span class="c1"># base_name = str(metric[1]).replace(settings.FULL_NAMESPACE, &#39;&#39;, 1)</span>
+    <span class="n">metric_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">metric_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">):</span>
+        <span class="n">base_name</span> <span class="o">=</span> <span class="n">metric_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">base_name</span> <span class="o">=</span> <span class="n">metric_name</span>
+
     <span class="c1"># @modified 20190520 - Branch #3002: docker</span>
     <span class="c1"># wix-playground added a hashlib hexdigest method which has not been</span>
     <span class="c1"># verified so using the originaly method useless the base_name is longer</span>
@@ -368,6 +392,17 @@
             <span class="n">use_default_recipient</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">use_default_recipient</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="c1"># @added 20200610 - Feature #3560: External alert config</span>
+        <span class="c1"># If the alert is for an external alerter set to no_email</span>
+        <span class="k">if</span> <span class="n">use_default_recipient</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">alert</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;external&#39;</span><span class="p">:</span>
+                    <span class="n">recipients</span> <span class="o">=</span> <span class="s1">&#39;no_email&#39;</span>
+                    <span class="n">use_default_recipient</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="k">pass</span>
+
         <span class="k">if</span> <span class="n">use_default_recipient</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">recipients</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">SMTP_OPTS</span><span class="p">[</span><span class="s1">&#39;default_recipient&#39;</span><span class="p">]</span>
@@ -614,7 +649,15 @@
                     <span class="c1">#                      Branch #3262: py3</span>
                     <span class="c1"># request = urllib2.Request(link)</span>
                     <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                        <span class="n">request</span> <span class="o">=</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">Request</span><span class="p">(</span><span class="n">link</span><span class="p">)</span>
+                        <span class="c1"># @modified 20200808 - Task #3608: Update Skyline to Python 3.8.3 and deps</span>
+                        <span class="c1"># Added nosec for bandit [B310:blacklist] Audit url open for</span>
+                        <span class="c1"># permitted schemes. Allowing use of file:/ or custom schemes is</span>
+                        <span class="c1"># often unexpected.</span>
+                        <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;http&#39;</span><span class="p">):</span>
+                            <span class="n">request</span> <span class="o">=</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">Request</span><span class="p">(</span><span class="n">link</span><span class="p">)</span>  <span class="c1"># nosec</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                                <span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: link does not start with http - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">link</span><span class="p">)))</span>
                     <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
                         <span class="n">request</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">link</span><span class="p">)</span>
                 <span class="c1"># @modified 20191021 - Task #3290: Handle urllib2 in py3</span>
@@ -906,7 +949,7 @@
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_smtp - datetimes: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="s1">&#39;FAIL&#39;</span><span class="p">)</span>
 
                 <span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">(</span><span class="n">rotation</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">horizontalalignment</span><span class="o">=</span><span class="s1">&#39;center&#39;</span><span class="p">)</span>
-                <span class="n">xfmt</span> <span class="o">=</span> <span class="n">DateFormatter</span><span class="p">(</span><span class="s1">&#39;%a %H:%M&#39;</span><span class="p">)</span>
+                <span class="n">xfmt</span> <span class="o">=</span> <span class="n">DateFormatter</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%a</span><span class="s1"> %H:%M&#39;</span><span class="p">)</span>
                 <span class="n">plt</span><span class="o">.</span><span class="n">gca</span><span class="p">()</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">xfmt</span><span class="p">)</span>
 
                 <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">xfmt</span><span class="p">)</span>
@@ -1223,6 +1266,19 @@
         <span class="k">if</span> <span class="n">DOCKER_FAKE_EMAIL_ALERTS</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alert_smtp - DOCKER_FAKE_EMAIL_ALERTS is set to </span><span class="si">%s</span><span class="s1">, not executing SMTP command&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">DOCKER_FAKE_EMAIL_ALERTS</span><span class="p">))</span>
             <span class="n">send_email_alert</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="c1"># @added 20200610 - Feature #3560: External alert config</span>
+        <span class="c1">#                   Feature #3406: Allow for no_email SMTP_OPTS</span>
+        <span class="c1"># If the alert is for an external alerter set to no_email</span>
+        <span class="n">no_email</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">sender</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;no_email&#39;</span><span class="p">:</span>
+            <span class="n">send_email_alert</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">no_email</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">primary_recipient</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;no_email&#39;</span><span class="p">:</span>
+            <span class="n">send_email_alert</span> <span class="o">=</span> <span class="kc">False</span>
+            <span class="n">no_email</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">no_email</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alert_smtp - no_email is set, not executing SMTP command&#39;</span><span class="p">)</span>
 
         <span class="c1"># @modified 20190517 - Branch #3002: docker</span>
         <span class="c1"># Wrap the smtp block based on whether to actually send mail or not.</span>
@@ -1546,11 +1602,33 @@
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alert_slack - bot_user_oauth_access_token is not configured, not sending alert&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">False</span>
 
-    <span class="kn">from</span> <span class="nn">slackclient</span> <span class="k">import</span> <span class="n">SlackClient</span>
+    <span class="c1"># @modified 20200701 - Task #3612: Upgrade to slack v2</span>
+    <span class="c1">#                      Task #3608: Update Skyline to Python 3.8.3 and deps</span>
+    <span class="c1">#                      Task #3556: Update deps</span>
+    <span class="c1"># slackclient v2 has a version function, &lt; v2 does not</span>
+    <span class="c1"># from slackclient import SlackClient</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">slack</span> <span class="kn">import</span> <span class="n">version</span> <span class="k">as</span> <span class="n">slackVersion</span>
+        <span class="n">slack_version</span> <span class="o">=</span> <span class="n">slackVersion</span><span class="o">.</span><span class="n">__version__</span>
+    <span class="k">except</span><span class="p">:</span>
+        <span class="n">slack_version</span> <span class="o">=</span> <span class="s1">&#39;1.3&#39;</span>
+    <span class="k">if</span> <span class="n">slack_version</span> <span class="o">==</span> <span class="s1">&#39;1.3&#39;</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">slackclient</span> <span class="kn">import</span> <span class="n">SlackClient</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">slack</span> <span class="kn">import</span> <span class="n">WebClient</span>
+
     <span class="kn">import</span> <span class="nn">simplejson</span> <span class="k">as</span> <span class="nn">json</span>
 
     <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;alert_slack - anomalous metric :: alert: </span><span class="si">%s</span><span class="s1">, metric: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">alert</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">)))</span>
-    <span class="n">base_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1"># @modified 20200728 - Bug #3652: Handle multiple metrics in base_name conversion</span>
+    <span class="c1"># base_name = str(metric[1]).replace(settings.FULL_NAMESPACE, &#39;&#39;, 1)</span>
+    <span class="n">metric_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">metric_name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">):</span>
+        <span class="n">base_name</span> <span class="o">=</span> <span class="n">metric_name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">settings</span><span class="o">.</span><span class="n">FULL_NAMESPACE</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">base_name</span> <span class="o">=</span> <span class="n">metric_name</span>
+
     <span class="c1"># @modified 20190520 - Branch #3002: docker</span>
     <span class="c1"># wix-playground added a hashlib hexdigest method which has not been</span>
     <span class="c1"># verified so using the original method useless the base_name is longer</span>
@@ -1730,7 +1808,15 @@
                 <span class="c1">#                      Branch #3262: py3</span>
                 <span class="c1"># request = urllib2.Request(link, headers=graphite_custom_headers)</span>
                 <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                    <span class="n">request</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">Request</span><span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">graphite_custom_headers</span><span class="p">)</span>
+                    <span class="c1"># @modified 20200808 - Task #3608: Update Skyline to Python 3.8.3 and deps</span>
+                    <span class="c1"># Added nosec for bandit [B310:blacklist] Audit url open for</span>
+                    <span class="c1"># permitted schemes. Allowing use of file:/ or custom schemes is</span>
+                    <span class="c1"># often unexpected.</span>
+                    <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;http&#39;</span><span class="p">):</span>
+                        <span class="n">request</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">Request</span><span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">graphite_custom_headers</span><span class="p">)</span>  <span class="c1"># nosec</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                            <span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: link does not start with http - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">link</span><span class="p">)))</span>
                 <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
                     <span class="n">request</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">graphite_custom_headers</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
@@ -1738,7 +1824,15 @@
                 <span class="c1">#                      Branch #3262: py3</span>
                 <span class="c1"># request = urllib2.Request(link)</span>
                 <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                    <span class="n">request</span> <span class="o">=</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">Request</span><span class="p">(</span><span class="n">link</span><span class="p">)</span>
+                    <span class="c1"># @modified 20200808 - Task #3608: Update Skyline to Python 3.8.3 and deps</span>
+                    <span class="c1"># Added nosec for bandit [B310:blacklist] Audit url open for</span>
+                    <span class="c1"># permitted schemes. Allowing use of file:/ or custom schemes is</span>
+                    <span class="c1"># often unexpected.</span>
+                    <span class="k">if</span> <span class="n">link</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;http&#39;</span><span class="p">):</span>
+                        <span class="n">request</span> <span class="o">=</span> <span class="n">urllib2</span><span class="o">.</span><span class="n">Request</span><span class="p">(</span><span class="n">link</span><span class="p">)</span>  <span class="c1"># nosec</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span>
+                            <span class="s1">&#39;error :: </span><span class="si">%s</span><span class="s1"> :: link does not start with http - </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">link</span><span class="p">)))</span>
                 <span class="k">if</span> <span class="n">python_version</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
                     <span class="n">request</span> <span class="o">=</span> <span class="n">urllib</span><span class="o">.</span><span class="n">request</span><span class="p">(</span><span class="n">link</span><span class="p">)</span>
             <span class="c1"># @modified 20191021 - Task #3290: Handle urllib2 in py3</span>
@@ -1807,10 +1901,17 @@
         <span class="n">icon_emoji</span> <span class="o">=</span> <span class="s1">&#39;:chart_with_upwards_trend:&#39;</span>
 
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">sc</span> <span class="o">=</span> <span class="n">SlackClient</span><span class="p">(</span><span class="n">bot_user_oauth_access_token</span><span class="p">)</span>
+        <span class="c1"># @modified 20200701 - Task #3612: Upgrade to slack v2</span>
+        <span class="c1">#                      Task #3608: Update Skyline to Python 3.8.3 and deps</span>
+        <span class="c1">#                      Task #3556: Update deps</span>
+        <span class="c1"># sc = SlackClient(bot_user_oauth_access_token)</span>
+        <span class="k">if</span> <span class="n">slack_version</span> <span class="o">==</span> <span class="s1">&#39;1.3&#39;</span><span class="p">:</span>
+            <span class="n">sc</span> <span class="o">=</span> <span class="n">SlackClient</span><span class="p">(</span><span class="n">bot_user_oauth_access_token</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sc</span> <span class="o">=</span> <span class="n">WebClient</span><span class="p">(</span><span class="n">bot_user_oauth_access_token</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
     <span class="k">except</span><span class="p">:</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_slack - could not initiate SlackClient&#39;</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_slack - could not initiate slack.RTMClient&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="kc">False</span>
 
     <span class="c1"># @added 20191011 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings</span>
@@ -1886,9 +1987,17 @@
             <span class="c1"># or color text, so we have jump through all the API hoops to end up</span>
             <span class="c1"># having to upload an image with a very basic message.</span>
             <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">image_file</span><span class="p">):</span>
-                <span class="n">slack_file_upload</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">api_call</span><span class="p">(</span>
-                    <span class="s1">&#39;files.upload&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span> <span class="n">channels</span><span class="o">=</span><span class="n">channel</span><span class="p">,</span>
-                    <span class="n">initial_comment</span><span class="o">=</span><span class="n">initial_comment</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">image_file</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">))</span>
+                <span class="c1"># @modified 20200701 - Task #3612: Upgrade to slack v2</span>
+                <span class="c1">#                      Task #3608: Update Skyline to Python 3.8.3 and deps</span>
+                <span class="c1">#                      Task #3556: Update deps</span>
+                <span class="k">if</span> <span class="n">slack_version</span> <span class="o">==</span> <span class="s1">&#39;1.3&#39;</span><span class="p">:</span>
+                    <span class="n">slack_file_upload</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">api_call</span><span class="p">(</span>
+                        <span class="s1">&#39;files.upload&#39;</span><span class="p">,</span> <span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span> <span class="n">channels</span><span class="o">=</span><span class="n">channel</span><span class="p">,</span>
+                        <span class="n">initial_comment</span><span class="o">=</span><span class="n">initial_comment</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">image_file</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">slack_file_upload</span> <span class="o">=</span> <span class="n">sc</span><span class="o">.</span><span class="n">files_upload</span><span class="p">(</span>
+                        <span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span> <span class="n">channels</span><span class="o">=</span><span class="n">channel</span><span class="p">,</span>
+                        <span class="n">initial_comment</span><span class="o">=</span><span class="n">initial_comment</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">image_file</span><span class="p">,</span> <span class="s1">&#39;rb&#39;</span><span class="p">))</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">slack_file_upload</span><span class="p">[</span><span class="s1">&#39;ok&#39;</span><span class="p">]:</span>
                     <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="s1">&#39;error :: alert_slack - failed to send slack message&#39;</span><span class="p">)</span>
                 <span class="c1"># @added 20181205 - Branch #2646: slack</span>
@@ -2124,6 +2233,11 @@
         <span class="c1"># Test for mirage second_order_resolution_hours tuple</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">full_duration</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">alert</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span> <span class="o">*</span> <span class="mi">3600</span>
+            <span class="c1"># @modified 20200610 - Feature #3560: External alert config</span>
+            <span class="c1"># Wrapped in if so that if alert[3] 0 is</span>
+            <span class="c1"># also handled in the all_alerts list</span>
+            <span class="k">if</span> <span class="n">full_duration</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">full_duration</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span>
         <span class="k">except</span><span class="p">:</span>
             <span class="n">full_duration</span> <span class="o">=</span> <span class="n">settings</span><span class="o">.</span><span class="n">FULL_DURATION</span>
 
@@ -2134,9 +2248,27 @@
             <span class="n">metric_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
             <span class="n">timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
             <span class="n">timestamp_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span>
-            <span class="n">value_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+            <span class="c1"># @modified 20200611 - Feature #3578: Test alerts</span>
+            <span class="c1"># Allow a str as well to display TEST</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">value_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">value_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
             <span class="n">full_duration_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">full_duration</span><span class="p">))</span>
             <span class="n">expiry_str</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">alert</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+
+            <span class="c1"># @added 20200624 - Feature #3560: External alert config</span>
+            <span class="c1"># Add the external alerter id to the metric_alert_dict</span>
+            <span class="n">external_alerter_id</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">alert</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;external&#39;</span><span class="p">:</span>
+                    <span class="c1"># @modified 20200624 - Feature #3560: External alert config</span>
+                    <span class="c1"># Set the alert key to the external alerter id</span>
+                    <span class="c1"># external_alerter_alerter = alert[4][&#39;alerter&#39;]</span>
+                    <span class="n">external_alerter_id</span> <span class="o">=</span> <span class="n">alert</span><span class="p">[</span><span class="mi">4</span><span class="p">][</span><span class="s1">&#39;id&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;external-&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+            <span class="k">except</span><span class="p">:</span>
+                <span class="n">external_alerter_id</span> <span class="o">=</span> <span class="kc">None</span>
+
             <span class="n">metric_alert_dict</span> <span class="o">=</span> <span class="p">{</span>
                 <span class="s2">&quot;metric&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">metric</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
                 <span class="s2">&quot;timestamp&quot;</span><span class="p">:</span> <span class="n">timestamp_str</span><span class="p">,</span>
@@ -2144,7 +2276,8 @@
                 <span class="s2">&quot;full_duration&quot;</span><span class="p">:</span> <span class="n">full_duration_str</span><span class="p">,</span>
                 <span class="s2">&quot;expiry&quot;</span><span class="p">:</span> <span class="n">expiry_str</span><span class="p">,</span>
                 <span class="s2">&quot;source&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">source</span><span class="p">),</span>
-                <span class="s2">&quot;token&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">alerter_token</span><span class="p">)</span>
+                <span class="s2">&quot;token&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">alerter_token</span><span class="p">),</span>
+                <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">external_alerter_id</span><span class="p">)</span>
             <span class="p">}</span>
             <span class="c1"># @modified 20200302: Feature #3396: http_alerter</span>
             <span class="c1"># Add the token as an independent entity from the alert</span>
@@ -2332,16 +2465,16 @@
 <span class="sd">    tuples.</span>
 
 <span class="sd">    :param alert:</span>
-<span class="sd">        The alert tuple specified in settings.py.\n</span>
-<span class="sd">        alert[0]: The matched substring of the anomalous metric\n</span>
-<span class="sd">        alert[1]: the name of the strategy being used to alert\n</span>
-<span class="sd">        alert[2]: The timeout of the alert that was triggered\n</span>
-<span class="sd">        alert[3]: The second order resolution hours [optional for Mirage]\n</span>
-<span class="sd">    :param meric:</span>
-<span class="sd">        The metric tuple.\n</span>
-<span class="sd">        metric[0]: the anomalous value\n</span>
-<span class="sd">        metric[1]: The full name of the anomalous metric\n</span>
-<span class="sd">        metric[2]: anomaly timestamp\n</span>
+<span class="sd">        The alert tuple specified in settings.py e.g. (&#39;stats.*&#39;, &#39;smtp&#39;, 3600, 168)\n</span>
+<span class="sd">        alert[0]: The matched substring of the anomalous metric (str)\n</span>
+<span class="sd">        alert[1]: the name of the strategy being used to alert (str)\n</span>
+<span class="sd">        alert[2]: The timeout of the alert that was triggered (int)\n</span>
+<span class="sd">        alert[3]: The second order resolution hours [optional for Mirage] (int)\n</span>
+<span class="sd">    :param metric:</span>
+<span class="sd">        The metric tuple e.g. (2.345, &#39;server-1.cpu.user&#39;, 1462172400)\n</span>
+<span class="sd">        metric[0]: the anomalous value (float)\n</span>
+<span class="sd">        metric[1]: The base_name of the anomalous metric (str)\n</span>
+<span class="sd">        metric[2]: anomaly timestamp (float or int)\n</span>
 <span class="sd">    :param context: app name</span>
 <span class="sd">    :type context: str</span>
 
@@ -2363,6 +2496,7 @@
 </pre></div>
 
            </div>
+           
           </div>
           <footer>
   
@@ -2371,11 +2505,19 @@
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
+        
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -2387,36 +2529,15 @@
   </div>
   
 
-
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../../',
-            VERSION:'2.0.0',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
-        };
-    </script>
-      <script type="text/javascript" src="../../_static/jquery.js"></script>
-      <script type="text/javascript" src="../../_static/underscore.js"></script>
-      <script type="text/javascript" src="../../_static/doctools.js"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="../../_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,51 +11,48 @@
   
 
   
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/skyline.styles.css" type="text/css" />
+
+  
+  
+  
   
 
   
-
-  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
 
-  
-
-  
-  
-    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  
-
-  
-    <link rel="stylesheet" href="../_static/skyline.styles.css" type="text/css" />
-  
-
-  
-        <link rel="index" title="Index"
-              href="../genindex.html"/>
-        <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Skyline 2.0.0 documentation" href="../index.html"/>
-        <link rel="up" title="Release Notes" href="../releases.html"/>
-        <link rel="next" title="1.2.12" href="1_2_12.html"/>
-        <link rel="prev" title="1.2.14" href="1_2_14.html"/> 
-
-  
-  <script src="../_static/js/modernizr.min.js"></script>
-
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="1.2.12" href="1_2_12.html" />
+    <link rel="prev" title="1.2.14" href="1_2_14.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
+   
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
-            <a href="../index.html" class="icon icon-home"> Skyline
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
 
           
@@ -83,22 +79,24 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
             
-                <ul class="current">
+              
+            
+            
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../alerts.html">Alerts</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../horizon.html">Horizon</a></li>
@@ -115,6 +113,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../vista.html">Vista</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
@@ -122,10 +121,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html#reliability">Reliability</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring Skyline</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="../releases.html">Release Notes</a><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="1_3_1.html">1.3.1</a></li>
 <li class="toctree-l2"><a class="reference internal" href="1_3_0.html">1.3.0</a></li>
@@ -178,7 +175,7 @@
 <li class="toctree-l2"><a class="reference internal" href="1_0_0.html">1.0.0 - the crucible branch</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What’s new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../development/index.html">Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../roadmap.html">Roadmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../skyline.html">skyline package</a></li>
@@ -187,42 +184,63 @@
             
           
         </div>
+        
       </div>
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="../index.html">Skyline</a>
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Skyline</a>
+        
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="../index.html">Docs</a> &raquo;</li>
-      
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
           <li><a href="../releases.html">Release Notes</a> &raquo;</li>
-      
-    <li>1.2.13</li>
+        
+      <li>1.2.13</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
-            <a href="../_sources/releases/1_2_13.txt" rel="nofollow"> View page source</a>
+            
+            <a href="../_sources/releases/1_2_13.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -235,77 +253,77 @@
 <h2>Incorporates v1.2.12 and v1.2.13<a class="headerlink" href="#incorporates-v1-2-12-and-v1-2-13" title="Permalink to this headline">¶</a></h2>
 <p>These release notes describe how to update from v1.2.11 (and v1.2.12) to v1.2.13.
 Although v1.2.12 was released, it was a pre-release therefore in terms of the
-&#8220;How to update&#8221; section, the documentation is written to update from v1.2.11.
+“How to update” section, the documentation is written to update from v1.2.11.
 If you did update or installed v1.2.12 then please take note of the specific
-notes in the &#8220;How to update&#8221; section below.</p>
+notes in the “How to update” section below.</p>
 </div>
 <div class="section" id="new-functionality">
 <h2>New functionality<a class="headerlink" href="#new-functionality" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li>Adds the new Ionosphere echo functionality related to improving the matching
+<li><p>Adds the new Ionosphere echo functionality related to improving the matching
 of Mirage based features profiles by between 30-50% depending on the metric.
 See <a class="reference external" href="https://earthgecko-skyline.readthedocs.io/en/stable/ionosphere_echo.html">https://earthgecko-skyline.readthedocs.io/en/stable/ionosphere_echo.html</a>
-(v1.2.12) (2484, 2904)</li>
-<li>Add Mirage periodic checks for key metrics declared in
+(v1.2.12) (2484, 2904)</p></li>
+<li><p>Add Mirage periodic checks for key metrics declared in
 MIRAGE_PERIODIC_CHECK_NAMESPACES so that Mirage is analysing each metric
 more frequently and not only reliant on Analyzer at FULL_DURATION so that
 substantial changes that over a period somewhat longer than FULL_DURATION are
-detected by Mirage (2882).</li>
-<li>Added an ANALYZER_ENABLED setting to allow to disable Analyzer analysis if
+detected by Mirage (2882).</p></li>
+<li><p>Added an ANALYZER_ENABLED setting to allow to disable Analyzer analysis if
 desired multiple Skyline instances are implemented, allows for hot standby
-(2916).</li>
+(2916).</p></li>
 </ul>
 </div>
 <div class="section" id="fixes-introduced-in-pre-release-v1-2-12">
 <h2>Fixes introduced in pre-release v1.2.12<a class="headerlink" href="#fixes-introduced-in-pre-release-v1-2-12" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li>Adds the ability for Skyline Boundary to handle very short time series.</li>
-<li>Updated tsfresh-0.4.0.py2.data.json.features.transposed.csv with new longer
-decimal values introduced by numpy==1.15.1 pandas==0.24.3</li>
+<li><p>Adds the ability for Skyline Boundary to handle very short time series.</p></li>
+<li><p>Updated tsfresh-0.4.0.py2.data.json.features.transposed.csv with new longer
+decimal values introduced by numpy==1.15.1 pandas==0.24.3</p></li>
 </ul>
 </div>
 <div class="section" id="fixes-introduced-in-release-v1-2-13">
 <h2>Fixes introduced in release v1.2.13<a class="headerlink" href="#fixes-introduced-in-release-v1-2-13" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li>Do not run an Ionosphere and echo checks on a metrics when a lot of
+<li><p>Do not run an Ionosphere and echo checks on a metrics when a lot of
 checks are being done.  Manage the Ionosphere load and increased
 runtime in general that Ionosphere echo has introduced, especially
 when Ionosphere is issued lots of checks, if lots of metrics suddenly
-become anomalous, using the ionosphere_busy parameter. (2904, 2484)</li>
-<li>If there are more than 4 Ionosphere metric check files, alternate between
+become anomalous, using the ionosphere_busy parameter. (2904, 2484)</p></li>
+<li><p>If there are more than 4 Ionosphere metric check files, alternate between
 normal Ionosphere Mirage features profile checks and Ionosphere echo features
-profile checks. (2904, 2484)</li>
-<li>Rate limit the creation of ionosphere_echo FULL_DURATION features profiles
+profile checks. (2904, 2484)</p></li>
+<li><p>Rate limit the creation of ionosphere_echo FULL_DURATION features profiles
 this only effects managing the creation of lots of features profiles if
 Ionosphere echo is enabled on a Skyline instance with lots of existing
 features profiles for Mirage metrics.  Only create 5 FULL_DURATION
 features profiles from the latest Mirage based features profiles, which
-takes around 10 seconds.  (2904, 2484)</li>
-<li>Do not postpone Ionosphere Mirage alerts if there Mirage checks to be done
-alert first (2904)</li>
+takes around 10 seconds.  (2904, 2484)</p></li>
+<li><p>Do not postpone Ionosphere Mirage alerts if there Mirage checks to be done
+alert first (2904)</p></li>
 </ul>
 </div>
 <div class="section" id="update-notes">
 <h2>Update notes<a class="headerlink" href="#update-notes" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li>You can only upgrade to v1.2.13 from v1.2.11 and v1.2.12</li>
-<li>There are changes to the DB (if you are not running v1.2.12)</li>
-<li>There are some changes to settings.py</li>
+<li><p>You can only upgrade to v1.2.13 from v1.2.11 and v1.2.12</p></li>
+<li><p>There are changes to the DB (if you are not running v1.2.12)</p></li>
+<li><p>There are some changes to settings.py</p></li>
 </ul>
 </div>
 <div class="section" id="how-to-update-from-v1-2-11-and-v1-2-12">
 <h2>How to update from v1.2.11 (and v1.2.12)<a class="headerlink" href="#how-to-update-from-v1-2-11-and-v1-2-12" title="Permalink to this headline">¶</a></h2>
 <ul class="simple">
-<li>Download the new release tag or clone/update to get it to a temp location,
-ready to be deployed.</li>
-<li>Diff your current running version skyline/settings.py with the new version of
+<li><p>Download the new release tag or clone/update to get it to a temp location,
+ready to be deployed.</p></li>
+<li><p>Diff your current running version skyline/settings.py with the new version of
 skyline/settings.py and create a new settings.py in the temp location
 appropriate for Skyline v1.2.13 and your set up with the new v1.2.12
 <a href="#id2"><span class="problematic" id="id3">IONOSPHERE_ECHO_</span></a> settings (if updating from v1.2.11) and the new
 ANALYZER_ENABLED and <a href="#id4"><span class="problematic" id="id5">MIRAGE_PERIODIC_</span></a> settings from v1.2.13 ready to be
-deployed.  The new settings to be added for v1.2.13 are:</li>
+deployed.  The new settings to be added for v1.2.13 are:</p></li>
 </ul>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">ANALYZER_ENABLED</span> <span class="o">=</span> <span class="bp">True</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">ANALYZER_ENABLED</span> <span class="o">=</span> <span class="kc">True</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">:var ANALYZER_ENABLED: This enables analysis via Analyzer.  For ADVANCED</span>
 <span class="sd">    configurations only.</span>
@@ -317,7 +335,7 @@ deployed.  The new settings to be added for v1.2.13 are:</li>
 <span class="sd">:vartype ANALYZER_ENABLED: boolean</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="n">MIRAGE_PERIODIC_CHECK</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="n">MIRAGE_PERIODIC_CHECK</span> <span class="o">=</span> <span class="kc">True</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">:var MIRAGE_PERIODIC_CHECK: This enables Mirage to periodically check metrics</span>
 <span class="sd">    matching the namespaces in :mod:`settings.MIRAGE_PERIODIC_CHECK_NAMESPACES`</span>
@@ -352,17 +370,17 @@ deployed.  The new settings to be added for v1.2.13 are:</li>
 </pre></div>
 </div>
 <ul class="simple">
-<li>The new settings to be added for v1.2.12, if you are updating from v1.2.11
-are:</li>
+<li><p>The new settings to be added for v1.2.12, if you are updating from v1.2.11
+are:</p></li>
 </ul>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">IONOSPHERE_MAX_RUNTIME</span> <span class="o">=</span> <span class="mi">120</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">IONOSPHERE_MAX_RUNTIME</span> <span class="o">=</span> <span class="mi">120</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">:var IONOSPHERE_MAX_RUNTIME: The maximum number of seconds an Ionosphere check</span>
 <span class="sd">    should run for.</span>
 <span class="sd">:vartype IONOSPHERE_MAX_RUNTIME: int</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="n">IONOSPHERE_ECHO_ENABLED</span> <span class="o">=</span> <span class="bp">True</span>
+<span class="n">IONOSPHERE_ECHO_ENABLED</span> <span class="o">=</span> <span class="kc">True</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">:var IONOSPHERE_ECHO_ENABLED: This enables Ionosphere to create and test</span>
 <span class="sd">    features profiles for Mirage metrics but at settings.FULL_DURATION as well.</span>
@@ -409,15 +427,15 @@ are:</li>
 </pre></div>
 </div>
 <ul class="simple">
-<li>Stop Skyline Ionosphere and Panorama services.</li>
-<li>Backup your Skyline database.</li>
-<li>Apply the SQL update to your Skyline database as per described below, change
-the below variables as appropriate to your set up.</li>
-<li>Stop all the Skyline services and ensure any service controls such as monit,
+<li><p>Stop Skyline Ionosphere and Panorama services.</p></li>
+<li><p>Backup your Skyline database.</p></li>
+<li><p>Apply the SQL update to your Skyline database as per described below, change
+the below variables as appropriate to your set up.</p></li>
+<li><p>Stop all the Skyline services and ensure any service controls such as monit,
 supervisor or systemd do not start them again, (change as appropriate for
-your set up)</li>
+your set up)</p></li>
 </ul>
-<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nv">NEW_SKYLINE_VERSION</span><span class="o">=</span><span class="s2">&quot;v1.2.13&quot;</span>    <span class="c1"># Your new Skyline version</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">NEW_SKYLINE_VERSION</span><span class="o">=</span><span class="s2">&quot;v1.2.13&quot;</span>    <span class="c1"># Your new Skyline version</span>
 <span class="nv">OLD_SKYLINE_VERSION</span><span class="o">=</span><span class="s2">&quot;v1.2.11&quot;</span>    <span class="c1"># Your old Skyline version</span>
 <span class="c1"># OR</span>
 <span class="c1"># OLD_SKYLINE_VERSION=&quot;v1.2.12&quot;    # If you upgraded to v1.2.12</span>
@@ -475,18 +493,18 @@ mysql -u<span class="nv">$MYSQL_USER</span> -p <span class="nv">$MYSQL_DB</span>
 </pre></div>
 </div>
 <ul class="simple">
-<li>Move your current Skyline directory to a backup directory and move the new
+<li><p>Move your current Skyline directory to a backup directory and move the new
 Skyline v1.2.13 with your new settings.py from the temp location to your
-working Skyline directory, (change your paths as appropriate) e.g.</li>
+working Skyline directory, (change your paths as appropriate) e.g.</p></li>
 </ul>
-<div class="highlight-bash"><div class="highlight"><pre><span></span>mv <span class="s2">&quot;</span><span class="nv">$CURRENT_SKYLINE_PATH</span><span class="s2">&quot;</span> <span class="s2">&quot;</span><span class="si">${</span><span class="nv">CURRENT_SKYLINE_PATH</span><span class="si">}</span><span class="s2">.</span><span class="si">${</span><span class="nv">OLD_SKYLINE_VERSION</span><span class="si">}</span><span class="s2">&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>mv <span class="s2">&quot;</span><span class="nv">$CURRENT_SKYLINE_PATH</span><span class="s2">&quot;</span> <span class="s2">&quot;</span><span class="si">${</span><span class="nv">CURRENT_SKYLINE_PATH</span><span class="si">}</span><span class="s2">.</span><span class="si">${</span><span class="nv">OLD_SKYLINE_VERSION</span><span class="si">}</span><span class="s2">&quot;</span>
 mv <span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_PATH</span><span class="s2">&quot;</span> <span class="s2">&quot;</span><span class="nv">$CURRENT_SKYLINE_PATH</span><span class="s2">&quot;</span>
 </pre></div>
 </div>
 <ul class="simple">
-<li>Start the all Skyline services (change as appropriate for your set up) e.g.</li>
+<li><p>Start the all Skyline services (change as appropriate for your set up) e.g.</p></li>
 </ul>
-<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="c1"># Start all other Skyline services</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># Start all other Skyline services</span>
 <span class="nv">SKYLINE_SERVICES</span><span class="o">=</span><span class="s2">&quot;panorama</span>
 <span class="s2">luminosity</span>
 <span class="s2">horizon</span>
@@ -503,9 +521,9 @@ mv <span class="s2">&quot;</span><span class="nv">$NEW_SKYLINE_PATH</span><span 
 </pre></div>
 </div>
 <ul class="simple">
-<li>Check the logs</li>
+<li><p>Check the logs</p></li>
 </ul>
-<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="c1"># How are they running</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1"># How are they running</span>
 tail -n <span class="m">20</span> /var/log/skyline/*.log
 
 <span class="c1"># Any errors - each app</span>
@@ -524,15 +542,16 @@ find /var/log/skyline -type f -name <span class="s2">&quot;*.log&quot;</span> <s
 
 
            </div>
+           
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="1_2_12.html" class="btn btn-neutral float-right" title="1.2.12" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="1_2_12.html" class="btn btn-neutral float-right" title="1.2.12" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="1_2_14.html" class="btn btn-neutral" title="1.2.14" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="1_2_14.html" class="btn btn-neutral float-left" title="1.2.14" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -541,11 +560,19 @@ find /var/log/skyline -type f -name <span class="s2">&quot;*.log&quot;</span> <s
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
+        
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -557,36 +584,15 @@ find /var/log/skyline -type f -name <span class="s2">&quot;*.log&quot;</span> <s
   </div>
   
 
-
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../',
-            VERSION:'2.0.0',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
-        };
-    </script>
-      <script type="text/javascript" src="../_static/jquery.js"></script>
-      <script type="text/javascript" src="../_static/underscore.js"></script>
-      <script type="text/javascript" src="../_static/doctools.js"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

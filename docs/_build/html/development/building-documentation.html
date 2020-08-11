@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,51 +11,48 @@
   
 
   
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/skyline.styles.css" type="text/css" />
+
+  
+  
+  
   
 
   
-
-  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
 
-  
-
-  
-  
-    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  
-
-  
-    <link rel="stylesheet" href="../_static/skyline.styles.css" type="text/css" />
-  
-
-  
-        <link rel="index" title="Index"
-              href="../genindex.html"/>
-        <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Skyline 2.0.0 documentation" href="../index.html"/>
-        <link rel="up" title="Development" href="index.html"/>
-        <link rel="next" title="Development - dawn" href="dawn.html"/>
-        <link rel="prev" title="Development" href="index.html"/> 
-
-  
-  <script src="../_static/js/modernizr.min.js"></script>
-
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Development - dawn" href="dawn.html" />
+    <link rel="prev" title="Development" href="index.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
+   
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
-            <a href="../index.html" class="icon icon-home"> Skyline
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
 
           
@@ -83,22 +79,24 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
             
-                <ul class="current">
+              
+            
+            
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../alerts.html">Alerts</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../horizon.html">Horizon</a></li>
@@ -115,6 +113,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../vista.html">Vista</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
@@ -122,18 +121,17 @@
 <li class="toctree-l1"><a class="reference internal" href="../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html#reliability">Reliability</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring Skyline</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../releases.html">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What’s new</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Development</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Building documentation</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#part-of-the-build">Part of the build</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#install-docs-requirements-txt">Install docs-requirements.txt</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#your-python-interpretor">Your Python interpretor</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#rst-and-md-wtf">.rst and .md wtf?</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#bandit">bandit</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#build">Build</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#auto-generating-rst-files">Auto generating .rst files</a></li>
 <li class="toctree-l3"><a class="reference internal" href="#building-workflow-diagrams-with-uml">Building workflow diagrams with UML</a></li>
@@ -157,42 +155,63 @@
             
           
         </div>
+        
       </div>
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="../index.html">Skyline</a>
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Skyline</a>
+        
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="../index.html">Docs</a> &raquo;</li>
-      
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
           <li><a href="index.html">Development</a> &raquo;</li>
-      
-    <li>Building documentation</li>
+        
+      <li>Building documentation</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
-            <a href="../_sources/development/building-documentation.txt" rel="nofollow"> View page source</a>
+            
+            <a href="../_sources/development/building-documentation.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -217,15 +236,15 @@ let us know :)</p>
 <p>The below documentation script not only builds the documentation, it also auto
 generates some documentation and it also auto generates some Python code when
 updates are required, such as the compilation of the tsfresh_features.py</p>
-<p>For now...</p>
+<p>For now…</p>
 </div>
 <div class="section" id="install-docs-requirements-txt">
 <h2>Install docs-requirements.txt<a class="headerlink" href="#install-docs-requirements-txt" title="Permalink to this headline">¶</a></h2>
 <p>In your Python virtualenv first pip install the required modules in
 docs-requirements.txt (as per documented <a class="reference external" href="running-in-python-virtualenv.html">Running in Python virtualenv</a>)</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="o">=</span><span class="s2">&quot;2.7&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="o">=</span><span class="s2">&quot;3.8&quot;</span>
 <span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="o">=</span><span class="s2">&quot;/opt/python_virtualenv&quot;</span>
-<span class="nv">PROJECT</span><span class="o">=</span><span class="s2">&quot;skyline-py2716&quot;</span>
+<span class="nv">PROJECT</span><span class="o">=</span><span class="s2">&quot;skyline-py383&quot;</span>
 
 <span class="nb">cd</span> <span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/projects/</span><span class="si">${</span><span class="nv">PROJECT</span><span class="si">}</span><span class="s2">&quot;</span>
 <span class="nb">source</span> bin/activate
@@ -242,7 +261,7 @@ deactivate
 virtualenv in the documented manner.  If you are not you may need to change the
 following to your python interpretor site-packages path by setting
 python_site_packages_path in docs/conf.py, e.g.</p>
-<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="c1">#    sys.path.insert(0, os.path.abspath(&#39;/opt/python_virtualenv/projects/skyline-py2716/lib/python2.7/site-packages&#39;))</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="c1">#    sys.path.insert(0, os.path.abspath(&#39;/opt/python_virtualenv/projects/skyline-py2716/lib/python2.7/site-packages&#39;))</span>
     sys.path.insert<span class="o">(</span><span class="m">0</span>, os.path.abspath<span class="o">(</span>python_site_packages_path<span class="o">))</span>
 </pre></div>
 </div>
@@ -254,11 +273,21 @@ thanks to the awesome of Sphinx.  The original Skyline documentation was written
 in .md for github.  The documentation is being ported over to .rst to allow for
 the full functionality of Sphinx documentation.</p>
 </div>
+<div class="section" id="bandit">
+<h2>bandit<a class="headerlink" href="#bandit" title="Permalink to this headline">¶</a></h2>
+<p>The below build script tests the code with bandit (<a class="reference external" href="https://github.com/PyCQA/bandit">https://github.com/PyCQA/bandit</a>).
+A number of places in the code are flagged with <cite># nosec</cite> to skip bandit checks
+all with valid reasons.  The build below also <cite>–skip B110,B112</cite> to exclude
+checks relating to except, pass patterns.  The except, pass patterns in the
+code are not flagged with <cite># nosec</cite>.  Except, pass is used a lot as certain
+functions in Skyline could potentially log millions of lines.  The except, pass
+conditions are used where appropriate.</p>
+</div>
 <div class="section" id="build">
 <h2>Build<a class="headerlink" href="#build" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-bash"><div class="highlight"><pre><span></span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="o">=</span><span class="s2">&quot;2.7&quot;</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span class="nv">PYTHON_MAJOR_VERSION</span><span class="o">=</span><span class="s2">&quot;3.8&quot;</span>
 <span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="o">=</span><span class="s2">&quot;/opt/python_virtualenv&quot;</span>
-<span class="nv">PROJECT</span><span class="o">=</span><span class="s2">&quot;skyline-py2716&quot;</span>
+<span class="nv">PROJECT</span><span class="o">=</span><span class="s2">&quot;skyline-py383&quot;</span>
 
 <span class="nb">cd</span> <span class="s2">&quot;</span><span class="si">${</span><span class="nv">PYTHON_VIRTUALENV_DIR</span><span class="si">}</span><span class="s2">/projects/</span><span class="si">${</span><span class="nv">PROJECT</span><span class="si">}</span><span class="s2">&quot;</span>
 <span class="nb">source</span> bin/activate
@@ -311,7 +340,12 @@ the full functionality of Sphinx documentation.</p>
 
   <span class="c1"># @added 20170913 - Task #2160: Test skyline with bandit</span>
   <span class="c1"># For static analysis - https://github.com/openstack/bandit</span>
-  bandit -r <span class="s2">&quot;</span><span class="nv">$APPDIR</span><span class="s2">&quot;</span> -x <span class="s2">&quot;</span><span class="si">${</span><span class="nv">APPDIR</span><span class="si">}</span><span class="s2">/skyline/settings.py&quot;</span>
+  <span class="c1"># @modified 20200808 - Task #3608: Update Skyline to Python 3.8.3 and deps</span>
+  <span class="c1"># Skip bandit except, pass checks</span>
+  <span class="c1"># [B110:try_except_pass] Try, Except, Pass detected.</span>
+  <span class="c1"># [B112:try_except_continue] Try, Except, Continue detected.</span>
+  <span class="c1"># bandit -r &quot;$APPDIR&quot; -x &quot;${APPDIR}/skyline/settings.py&quot;</span>
+  bandit -r <span class="s2">&quot;</span><span class="nv">$APPDIR</span><span class="s2">&quot;</span> -x <span class="s2">&quot;</span><span class="si">${</span><span class="nv">APPDIR</span><span class="si">}</span><span class="s2">/skyline/settings.py&quot;</span> --skip B110,B112
 
   <span class="nb">cd</span> <span class="s2">&quot;</span><span class="nv">$APPDIR</span><span class="s2">/docs&quot;</span>
   <span class="nb">echo</span> <span class="s2">&quot;Building Skyline documentation - in </span><span class="nv">$APPDIR</span><span class="s2">/docs&quot;</span>
@@ -342,7 +376,7 @@ the full functionality of Sphinx documentation.</p>
 
 <span class="c1"># Usage: build_docs &lt;app_dir&gt;</span>
 <span class="c1"># e.g.</span>
-<span class="c1"># cd /opt/python_virtualenv/projects/skyline-ionosphere-py2716/</span>
+<span class="c1"># cd /opt/python_virtualenv/projects/skyline-py383/</span>
 <span class="c1"># build_docs /home/gary/sandbox/of/github/earthgecko/skyline/ionosphere/skyline</span>
 </pre></div>
 </div>
@@ -367,7 +401,7 @@ without having to create and edit SVGs.</p>
 <a class="reference external" href="http://plantuml.com/plantuml/png/ZLFBJWCn3BpdAwozmmTKLQLo0IIGW0ekY4EwwrAhUQoSNLO5yU-upQEx2A6U4eyzCqwSTDGPXDLkRyWX1BAjeGrX0uFdtSRuGIbTTvvXsLXo53hMXsW-XvlUQWUBXLAryNq3NmhWrMB7L8Stq07INdqhvNo3K5spRhVKOQLKoi750Z8Aiyo0pXSqSv-meL3bw7w_UhmhqTOpVNedST4ItOHEPMyYg79IwexAqweZfDIhDiWTSZnE3hAhTjhiFv4hbNSmlxmiSiiCjhqneaeM0p9XW0rxcomAK_h8-iBLpbj9H2ZxhNtl6itxIkNTnEygW__v5UOPVfPOlsCrwJ5YmcZxi4qqtmS8g8ENkZBpL7XeS3JV-uZ-tM6PUEAUqM8hA6khnqqsVd12pQaHLGRxaD3YSLxrwThEgo_fN7zyhrBCM7jk4kTmSd8nbqyqu5gtRQNYUXhm68Y44N3wA-N2n7FwOMVnvkJr_lh8mazICtWX7E3v5Zv8mvhz8EFv0G00">Simplified Skyline workflow with PlantUML server</a></p>
 <img alt="http://www.plantuml.com/plantuml/png/PL5DRzim3BthLn3fELRI0aKNk3usBT01su9j6B0BRR6sO5ao93g1KUo_Zt7Y8DrEqllW8qMnPKUGlmNFK0KNukFD_VsdXwUdOjUEkJxonGVLcBlLxLtXhAUp33-fnBw79PIOR0LXJt5lwQ0KLXmY_0e3v3ay3nrwA0gbV304Yst4lh5CYvduHiQc2_eyxhw-Nj1XQh60TmNGOzLYBQGFXmLW0ZclwI_eGyGE9sq6ruP8PJoNdguYIWRaMGRJ4B01jXqbYfOI6EHZ-PmqsQRfn2PSXsu4GupMfNzjynl_3uGtsSovMgfEStoOeAKngJzAJUiJ_hG24Nx8Rk7x2-mjmh5AKfMAjcvOGWDJX5qOOaNGCFTfetLjkHdAh0gT9epSr5IrGQTsF7wYvaYaz-jidQsMfJnZQOCFgMyeaZQXIheSh3FMrqj17Nb65aVMSET--orvYiXae1odVjAkT-XvwDpKS0P_0G00" src="http://www.plantuml.com/plantuml/png/PL5DRzim3BthLn3fELRI0aKNk3usBT01su9j6B0BRR6sO5ao93g1KUo_Zt7Y8DrEqllW8qMnPKUGlmNFK0KNukFD_VsdXwUdOjUEkJxonGVLcBlLxLtXhAUp33-fnBw79PIOR0LXJt5lwQ0KLXmY_0e3v3ay3nrwA0gbV304Yst4lh5CYvduHiQc2_eyxhw-Nj1XQh60TmNGOzLYBQGFXmLW0ZclwI_eGyGE9sq6ruP8PJoNdguYIWRaMGRJ4B01jXqbYfOI6EHZ-PmqsQRfn2PSXsu4GupMfNzjynl_3uGtsSovMgfEStoOeAKngJzAJUiJ_hG24Nx8Rk7x2-mjmh5AKfMAjcvOGWDJX5qOOaNGCFTfetLjkHdAh0gT9epSr5IrGQTsF7wYvaYaz-jidQsMfJnZQOCFgMyeaZQXIheSh3FMrqj17Nb65aVMSET--orvYiXae1odVjAkT-XvwDpKS0P_0G00" />
 <p>The UML source to the above image is:</p>
-<div class="highlight-text"><div class="highlight"><pre><span></span>@startuml
+<div class="highlight-text notranslate"><div class="highlight"><pre><span></span>@startuml
 title &lt;font color=#6698FF&gt;Sky&lt;/font&gt;&lt;font color=#dd3023&gt;line&lt;/font&gt; Webapp - basic overview
 
 actor You &lt;&lt; Human &gt;&gt;
@@ -399,15 +433,16 @@ right footer \nSource https://github.com/earthgecko/skyline/tree/v1.1.0-beta-ion
 
 
            </div>
+           
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="dawn.html" class="btn btn-neutral float-right" title="Development - dawn" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="dawn.html" class="btn btn-neutral float-right" title="Development - dawn" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="index.html" class="btn btn-neutral" title="Development" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="index.html" class="btn btn-neutral float-left" title="Development" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -416,11 +451,19 @@ right footer \nSource https://github.com/earthgecko/skyline/tree/v1.1.0-beta-ion
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
+        
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -432,36 +475,15 @@ right footer \nSource https://github.com/earthgecko/skyline/tree/v1.1.0-beta-ion
   </div>
   
 
-
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../',
-            VERSION:'2.0.0',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
-        };
-    </script>
-      <script type="text/javascript" src="../_static/jquery.js"></script>
-      <script type="text/javascript" src="../_static/underscore.js"></script>
-      <script type="text/javascript" src="../_static/doctools.js"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

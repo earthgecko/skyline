@@ -1,8 +1,7 @@
 
 
 <!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<html class="writer-html5" lang="en" >
 <head>
   <meta charset="utf-8">
   
@@ -12,51 +11,48 @@
   
 
   
+  <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../_static/skyline.styles.css" type="text/css" />
+
+  
+  
+  
   
 
   
-
-  
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
   
     
+      <script type="text/javascript" id="documentation_options" data-url_root="../" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+        <script src="../_static/language_data.js"></script>
+    
+    <script type="text/javascript" src="../_static/js/theme.js"></script>
 
-  
-
-  
-  
-    <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
-  
-
-  
-    <link rel="stylesheet" href="../_static/skyline.styles.css" type="text/css" />
-  
-
-  
-        <link rel="index" title="Index"
-              href="../genindex.html"/>
-        <link rel="search" title="Search" href="../search.html"/>
-    <link rel="top" title="Skyline 2.0.0 documentation" href="../index.html"/>
-        <link rel="up" title="Algorithms" href="index.html"/>
-        <link rel="next" title="Mirage" href="../mirage.html"/>
-        <link rel="prev" title="Algorithms" href="index.html"/> 
-
-  
-  <script src="../_static/js/modernizr.min.js"></script>
-
+    
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Mirage" href="../mirage.html" />
+    <link rel="prev" title="Algorithms" href="index.html" /> 
 </head>
 
-<body class="wy-body-for-nav" role="document">
+<body class="wy-body-for-nav">
 
+   
   <div class="wy-grid-for-nav">
-
     
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
-        <div class="wy-side-nav-search">
+        <div class="wy-side-nav-search" >
           
 
           
-            <a href="../index.html" class="icon icon-home"> Skyline
+            <a href="../index.html" class="icon icon-home" alt="Documentation Home"> Skyline
           
 
           
@@ -83,22 +79,24 @@
           
         </div>
 
+        
         <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
           
             
             
-                <ul class="current">
+              
+            
+            
+              <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../overview.html">Overview</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../requirements.html">Requirements</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../getting-started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv.html">Running Skyline in a Python virtualenv</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../running-in-python-virtualenv-py2.html">Running Skyline in a Python 2.7 virtualenv</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../upgrading/index.html">Upgrading</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../getting-data-into-skyline.html">Getting data into Skyline</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../alert-testing.html">Alert testing</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../alerts.html">Alerts</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../docker.html">docker - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../slack.html">slack</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../monotonic-metrics.html">Strictly increasing monotonicity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../horizon.html">Horizon</a></li>
@@ -106,12 +104,13 @@
 <li class="toctree-l1"><a class="reference internal" href="../analyzer-optimizations.html">Analyzer Optimizations</a></li>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">Algorithms</a><ul class="current">
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Custom algorithms</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="#settings-custom-algorithms"><code class="docutils literal"><span class="pre">settings.CUSTOM_ALGORITHMS</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#settings-custom-algorithms"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.CUSTOM_ALGORITHMS</span></code></a></li>
 <li class="toctree-l3"><a class="reference internal" href="#the-custom-algorithm-file">The custom algorithm file</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="#anomalyscore"><code class="docutils literal"><span class="pre">anomalyScore</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#anomalyscore"><code class="docutils literal notranslate"><span class="pre">anomalyScore</span></code></a></li>
 <li class="toctree-l4"><a class="reference internal" href="#custom-algorithm-requirements">Custom algorithm requirements</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#error-handling">Error handling</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#example-custom-algorithms">Example custom algorithms</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#running-a-mirage-only-custom-algorithm-on-a-metric-all-the-time">Running a Mirage only custom algorithm on a metric all the time</a></li>
 <li class="toctree-l4"><a class="reference internal" href="#some-things-to-consider">Some things to consider</a></li>
 </ul>
 </li>
@@ -129,6 +128,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../tsfresh.html">tsfresh</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../luminosity.html">Luminosity</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../flux.html">Flux</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../upload-data-to-flux.html">upload_data to Flux - EXPERIMENTAL</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../vista.html">Vista</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../redis-integration.html">Redis integration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../rebrow.html"><span class="red">re</span><span class="brow">brow</span></a></li>
@@ -136,12 +136,10 @@
 <li class="toctree-l1"><a class="reference internal" href="../skyline-and-friends.html">Skyline and friends</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../logging.html">Logging</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html">Tuning tips</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html#smaller-deployments">Smaller deployments</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../tuning-tips.html#reliability">Reliability</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../monitoring-skyline.html">Monitoring Skyline</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../debian-and-vagrant-installation-tips.html">Debian and Vagrant Installation Tips</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../deprecated-docs/index.html">Deprecated docs</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../releases.html">Release Notes</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What&#8217;s new</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../whats-new.html">What’s new</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../development/index.html">Development</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../roadmap.html">Roadmap</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../skyline.html">skyline package</a></li>
@@ -150,42 +148,63 @@
             
           
         </div>
+        
       </div>
     </nav>
 
     <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
 
       
-      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
-        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-        <a href="../index.html">Skyline</a>
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Skyline</a>
+        
       </nav>
 
 
-      
       <div class="wy-nav-content">
+        
         <div class="rst-content">
+        
           
 
- 
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 <div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-    <li><a href="../index.html">Docs</a> &raquo;</li>
-      
+    
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+        
           <li><a href="index.html">Algorithms</a> &raquo;</li>
-      
-    <li>Custom algorithms</li>
+        
+      <li>Custom algorithms</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
         
-          
-            <a href="../_sources/algorithms/custom-algorithms.txt" rel="nofollow"> View page source</a>
+            
+            <a href="../_sources/algorithms/custom-algorithms.rst.txt" rel="nofollow"> View page source</a>
           
         
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
@@ -204,14 +223,14 @@ algorithms.  This will save you time if you do it properly from the beginning.</
 and soon crucible, they are not yet consumed in boundary and probably will not
 unless there is a good use case for them to be added.</p>
 <p>To implement a custom algorithm, you need to define it in
-<a class="reference internal" href="../skyline.html#settings.CUSTOM_ALGORITHMS" title="settings.CUSTOM_ALGORITHMS"><code class="xref py py-mod docutils literal"><span class="pre">settings.CUSTOM_ALGORITHMS</span></code></a> and add the Python source custom algorithm
+<a class="reference internal" href="../skyline.html#settings.CUSTOM_ALGORITHMS" title="settings.CUSTOM_ALGORITHMS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.CUSTOM_ALGORITHMS</span></code></a> and add the Python source custom algorithm
 file.</p>
 <div class="admonition warning">
-<p class="first admonition-title">Warning</p>
-<p class="last"><strong>A note on speed</strong>, bear in mind that any custom algorithms added
+<p class="admonition-title">Warning</p>
+<p><strong>A note on speed</strong>, bear in mind that any custom algorithms added
 have to run <strong>FAST</strong>, otherwise analysis stops being real time and the
 Skyline apps will terminate their own spawned processes if they run too long.
-Consider that Skyline&#8217;s 3 sigma algorithms take on average 0.0023 seconds to
+Consider that Skyline’s 3 sigma algorithms take on average 0.0023 seconds to
 run and all 9 are run on a metric in about 0.0207 seconds.  Adding any
 algorithms that run substantially slower is <strong>not</strong> recommended, even if it is
 on a small set of metrics.  If you break Skyline with your own custom
@@ -221,11 +240,11 @@ algorithms, be that on your head.</p>
 the user to disable the running of 3 sigma algorithms on namespaces if they so
 desire, more on this below.</p>
 <div class="section" id="settings-custom-algorithms">
-<h2><a class="reference internal" href="../skyline.html#settings.CUSTOM_ALGORITHMS" title="settings.CUSTOM_ALGORITHMS"><code class="xref py py-mod docutils literal"><span class="pre">settings.CUSTOM_ALGORITHMS</span></code></a><a class="headerlink" href="#settings-custom-algorithms" title="Permalink to this headline">¶</a></h2>
-<p>Custom algorithms are defined in the <a class="reference internal" href="../skyline.html#settings.CUSTOM_ALGORITHMS" title="settings.CUSTOM_ALGORITHMS"><code class="xref py py-mod docutils literal"><span class="pre">settings.CUSTOM_ALGORITHMS</span></code></a>
+<h2><a class="reference internal" href="../skyline.html#settings.CUSTOM_ALGORITHMS" title="settings.CUSTOM_ALGORITHMS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.CUSTOM_ALGORITHMS</span></code></a><a class="headerlink" href="#settings-custom-algorithms" title="Permalink to this headline">¶</a></h2>
+<p>Custom algorithms are defined in the <a class="reference internal" href="../skyline.html#settings.CUSTOM_ALGORITHMS" title="settings.CUSTOM_ALGORITHMS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.CUSTOM_ALGORITHMS</span></code></a>
 dictionary.  The format and key values of the dictionary are shown in the
 following <strong>example</strong>:</p>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">CUSTOM_ALGORITHMS</span> <span class="o">=</span> <span class="p">{</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">CUSTOM_ALGORITHMS</span> <span class="o">=</span> <span class="p">{</span>
     <span class="s1">&#39;abs_stddev_from_median&#39;</span><span class="p">:</span> <span class="p">{</span>
         <span class="s1">&#39;namespaces&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;telegraf.cpu-total.cpu.usage_system&#39;</span><span class="p">],</span>
         <span class="s1">&#39;algorithm_source&#39;</span><span class="p">:</span> <span class="s1">&#39;/opt/skyline/github/skyline/skyline/custom_algorithms/abs_stddev_from_median.py&#39;</span><span class="p">,</span>
@@ -233,9 +252,9 @@ following <strong>example</strong>:</p>
         <span class="s1">&#39;max_execution_time&#39;</span><span class="p">:</span> <span class="mf">0.09</span><span class="p">,</span>
         <span class="s1">&#39;consensus&#39;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span>
         <span class="s1">&#39;algorithms_allowed_in_consensus&#39;</span><span class="p">:</span> <span class="p">[],</span>
-        <span class="s1">&#39;run_3sigma_algorithms&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+        <span class="s1">&#39;run_3sigma_algorithms&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="s1">&#39;use_with&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;analyzer&#39;</span><span class="p">,</span> <span class="s1">&#39;analyzer_batch&#39;</span><span class="p">,</span> <span class="s1">&#39;mirage&#39;</span><span class="p">,</span> <span class="s1">&#39;crucible&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;debug_logging&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+        <span class="s1">&#39;debug_logging&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">},</span>
     <span class="s1">&#39;last_same_hours&#39;</span><span class="p">:</span> <span class="p">{</span>
         <span class="s1">&#39;namespaces&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;telegraf.cpu-total.cpu.usage_user&#39;</span><span class="p">],</span>
@@ -244,15 +263,15 @@ following <strong>example</strong>:</p>
         <span class="c1"># enable debug_logging in the algorithm itself</span>
         <span class="s1">&#39;algorithm_parameters&#39;</span><span class="p">:</span> <span class="p">{</span>
           <span class="s1">&#39;sample_period&#39;</span><span class="p">:</span> <span class="mi">604800</span><span class="p">,</span>
-          <span class="s1">&#39;debug_logging&#39;</span><span class="p">:</span> <span class="bp">True</span>
+          <span class="s1">&#39;debug_logging&#39;</span><span class="p">:</span> <span class="kc">True</span>
         <span class="p">},</span>
         <span class="s1">&#39;max_execution_time&#39;</span><span class="p">:</span> <span class="mf">0.3</span><span class="p">,</span>
         <span class="s1">&#39;consensus&#39;</span><span class="p">:</span> <span class="mi">6</span><span class="p">,</span>
         <span class="s1">&#39;algorithms_allowed_in_consensus&#39;</span><span class="p">:</span> <span class="p">[],</span>
-        <span class="s1">&#39;run_3sigma_algorithms&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+        <span class="s1">&#39;run_3sigma_algorithms&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
         <span class="c1"># This does not run on analyzer as it is weekly data</span>
         <span class="s1">&#39;use_with&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;mirage&#39;</span><span class="p">,</span> <span class="s1">&#39;crucible&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;debug_logging&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+        <span class="s1">&#39;debug_logging&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">},</span>
     <span class="s1">&#39;detect_significant_change&#39;</span><span class="p">:</span> <span class="p">{</span>
         <span class="s1">&#39;namespaces&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;swell.buoy.*.Hm0&#39;</span><span class="p">],</span>
@@ -262,9 +281,9 @@ following <strong>example</strong>:</p>
         <span class="s1">&#39;max_execution_time&#39;</span><span class="p">:</span> <span class="mf">0.002</span><span class="p">,</span>
         <span class="s1">&#39;consensus&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
         <span class="s1">&#39;algorithms_allowed_in_consensus&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;detect_significant_change&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;run_3sigma_algorithms&#39;</span><span class="p">:</span> <span class="bp">False</span><span class="p">,</span>
+        <span class="s1">&#39;run_3sigma_algorithms&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
         <span class="s1">&#39;use_with&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;analyzer&#39;</span><span class="p">,</span> <span class="s1">&#39;crucible&#39;</span><span class="p">],</span>
-        <span class="s1">&#39;debug_logging&#39;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+        <span class="s1">&#39;debug_logging&#39;</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">},</span>
 <span class="p">}</span>
 </pre></div>
@@ -273,59 +292,59 @@ following <strong>example</strong>:</p>
 defined.  Each custom algorithm defined is required to adhere to the following
 requirements.</p>
 <ul class="simple">
-<li><strong>algorithm_name</strong>: firstly and importantly, name of algorithm must be simple,
+<li><p><strong>algorithm_name</strong>: firstly and importantly, name of algorithm must be simple,
 unbroken, alphanumeric string.  It <strong>must</strong> also be the name of the main
-algorithm function, this is because it is loaded by <code class="docutils literal"><span class="pre">importlib</span></code> and the
-name in the dictionary is used to load the custom algorithm at runtime.</li>
-<li><code class="docutils literal"><span class="pre">namespaces</span></code>: this is a list of the namespaces you want to run the custom
+algorithm function, this is because it is loaded by <code class="docutils literal notranslate"><span class="pre">importlib</span></code> and the
+name in the dictionary is used to load the custom algorithm at runtime.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">namespaces</span></code>: this is a list of the namespaces you want to run the custom
 algorithm against.  These can be absolute metric names, substrings or dotted
-elements of a namespace or a regex of a namespace.</li>
-<li><code class="docutils literal"><span class="pre">algorithm_source</span></code>: the full path to the custom algorithm Python file, the
+elements of a namespace or a regex of a namespace.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">algorithm_source</span></code>: the full path to the custom algorithm Python file, the
 file can be deployed to any directory it does not need to be in the same path
 as the Skyline code, just ensure the user running the Skyline process has read
-permissions on the path and file itself.</li>
-<li><code class="docutils literal"><span class="pre">algorithm_parameters</span></code> - this is a dictionary of any parameters/arguments
+permissions on the path and file itself.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">algorithm_parameters</span></code> - this is a dictionary of any parameters/arguments
 that you want to pass to your algorithm.  In your custom algorithm you will
 need to interpolate your parameters/arguments (key/value) from this
-dictionary. If none are required simply use an empty dict <cite>{}</cite>.</li>
-<li><code class="docutils literal"><span class="pre">max_execution_time</span></code> - a float and read the warning about speed above.</li>
-<li><code class="docutils literal"><span class="pre">consensus</span></code> - this allows you to add your algorithm to the <code class="docutils literal"><span class="pre">CONSENSUS</span></code> or
-override <code class="docutils literal"><span class="pre">CONSENSUS</span></code> by setting this to 1.  If you are running
-<code class="docutils literal"><span class="pre">CONSENSUS</span> <span class="pre">=</span> <span class="pre">6</span></code> and wanted to just add your custom algorithm as an addition
-to the normal 3 sigma algorithms, you would just pass <code class="docutils literal"><span class="pre">'consensus':</span> <span class="pre">6</span></code> or
-<code class="docutils literal"><span class="pre">'consensus':</span> <span class="pre">7</span></code> depending on what you want.  The only other option currently
-is to <strong>override</strong> the <code class="docutils literal"><span class="pre">CONSENSUS</span></code>, if you want an anomaly triggered every
-time your custom algorithm triggers, regardless of 3 sigma <code class="docutils literal"><span class="pre">CONSENSUS</span></code> then
-set <code class="docutils literal"><span class="pre">'consensus':</span> <span class="pre">1</span></code></li>
-<li><code class="docutils literal"><span class="pre">algorithms_allowed_in_consensus</span></code>: must be passed but is not implemented yet
+dictionary. If none are required simply use an empty dict <cite>{}</cite>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">max_execution_time</span></code> - a float and read the warning about speed above.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">consensus</span></code> - this allows you to add your algorithm to the <code class="docutils literal notranslate"><span class="pre">CONSENSUS</span></code> or
+override <code class="docutils literal notranslate"><span class="pre">CONSENSUS</span></code> by setting this to 1.  If you are running
+<code class="docutils literal notranslate"><span class="pre">CONSENSUS</span> <span class="pre">=</span> <span class="pre">6</span></code> and wanted to just add your custom algorithm as an addition
+to the normal 3 sigma algorithms, you would just pass <code class="docutils literal notranslate"><span class="pre">'consensus':</span> <span class="pre">6</span></code> or
+<code class="docutils literal notranslate"><span class="pre">'consensus':</span> <span class="pre">7</span></code> depending on what you want.  The only other option currently
+is to <strong>override</strong> the <code class="docutils literal notranslate"><span class="pre">CONSENSUS</span></code>, if you want an anomaly triggered every
+time your custom algorithm triggers, regardless of 3 sigma <code class="docutils literal notranslate"><span class="pre">CONSENSUS</span></code> then
+set <code class="docutils literal notranslate"><span class="pre">'consensus':</span> <span class="pre">1</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">algorithms_allowed_in_consensus</span></code>: must be passed but is not implemented yet
 but this is a list of algorithms that must have triggered for consensus to be
 achieved. If an empty list is passed <cite>[]</cite> this will be ignored and normal
-<code class="docutils literal"><span class="pre">CONSENSUS</span></code> will be used.</li>
-<li><code class="docutils literal"><span class="pre">run_3sigma_algorithms</span></code>: a boolean stating whether to run the normal 3 sigma
-algorithms, this is optional and defaults to <code class="docutils literal"><span class="pre">True</span></code> if it is not passed
+<code class="docutils literal notranslate"><span class="pre">CONSENSUS</span></code> will be used.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">run_3sigma_algorithms</span></code>: a boolean stating whether to run the normal 3 sigma
+algorithms, this is optional and defaults to <code class="docutils literal notranslate"><span class="pre">True</span></code> if it is not passed
 in the dictionary.  If any custom algorithm is run that has this set to
-<code class="docutils literal"><span class="pre">False</span></code> no 3 sigma algorithms will be run regardless of what any other
-custom algorithms are set to.</li>
-<li><code class="docutils literal"><span class="pre">use_with</span></code> - a list of the Skyline apps that should apply the custom
+<code class="docutils literal notranslate"><span class="pre">False</span></code> no 3 sigma algorithms will be run regardless of what any other
+custom algorithms are set to.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">use_with</span></code> - a list of the Skyline apps that should apply the custom
 algorithm.  All the apps can be declared but they will only apply the custom
 algorithm <strong>if</strong> they actually handle the metric.  Simply declaring them in
 the list does not mean that the app will just automatically run them all the
 time.  If the app does not handle the metric, it being declared makes no
 difference, therefore if you are unsure, it is safe to list them all.
 Altough do <strong>note</strong> that if your custom algorithm needs more data than
-<a class="reference internal" href="../skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a> then do not specify <code class="docutils literal"><span class="pre">'analyzer',</span> <span class="pre">'analyzer_batch'</span></code>
-as apps to run the custom algorithm with.</li>
-<li><code class="docutils literal"><span class="pre">debug_logging</span></code>: a boolean to enable debug_logging, which wraps the custom
+<a class="reference internal" href="../skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FULL_DURATION</span></code></a> then do not specify <code class="docutils literal notranslate"><span class="pre">'analyzer',</span> <span class="pre">'analyzer_batch'</span></code>
+as apps to run the custom algorithm with.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">debug_logging</span></code>: a boolean to enable debug_logging, which wraps the custom
 algorithm run in a bit of additional logging, regarding timings, etc this is
 useful for development and testing.  In general use and production this should
-always be set to <code class="docutils literal"><span class="pre">False</span></code>.</li>
+always be set to <code class="docutils literal notranslate"><span class="pre">False</span></code>.</p></li>
 </ul>
-<p>It is also possible to set <a class="reference internal" href="../skyline.html#settings.DEBUG_CUSTOM_ALGORITHMS" title="settings.DEBUG_CUSTOM_ALGORITHMS"><code class="xref py py-mod docutils literal"><span class="pre">settings.DEBUG_CUSTOM_ALGORITHMS</span></code></a> to <code class="docutils literal"><span class="pre">True</span></code>
+<p>It is also possible to set <a class="reference internal" href="../skyline.html#settings.DEBUG_CUSTOM_ALGORITHMS" title="settings.DEBUG_CUSTOM_ALGORITHMS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.DEBUG_CUSTOM_ALGORITHMS</span></code></a> to <code class="docutils literal notranslate"><span class="pre">True</span></code>
 and this enables debug logging on all custom algorithms, regardless of what
-their <code class="docutils literal"><span class="pre">debug_logging</span></code> is set to.  However if this is set to <code class="docutils literal"><span class="pre">False</span></code> debug
+their <code class="docutils literal notranslate"><span class="pre">debug_logging</span></code> is set to.  However if this is set to <code class="docutils literal notranslate"><span class="pre">False</span></code> debug
 logging can still be implemented on each custom_algorithm individually using
-<code class="docutils literal"><span class="pre">'debug_logging':</span> <span class="pre">True,</span></code> in the algorithm item in
-<a class="reference internal" href="../skyline.html#settings.CUSTOM_ALGORITHMS" title="settings.CUSTOM_ALGORITHMS"><code class="xref py py-mod docutils literal"><span class="pre">settings.CUSTOM_ALGORITHMS</span></code></a>.</p>
+<code class="docutils literal notranslate"><span class="pre">'debug_logging':</span> <span class="pre">True,</span></code> in the algorithm item in
+<a class="reference internal" href="../skyline.html#settings.CUSTOM_ALGORITHMS" title="settings.CUSTOM_ALGORITHMS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.CUSTOM_ALGORITHMS</span></code></a>.</p>
 </div>
 <div class="section" id="the-custom-algorithm-file">
 <h2>The custom algorithm file<a class="headerlink" href="#the-custom-algorithm-file" title="Permalink to this headline">¶</a></h2>
@@ -335,71 +354,79 @@ and be run by Skyline.</p>
 <p>Below the requirements are outlined, please read them and you can refer to a
 couple of example custom algorithm files in the skyline/custom_algorithms
 directory of the repo.  <a class="reference external" href="https://github.com/earthgecko/skyline/tree/master/skyline/custom_algorithms">https://github.com/earthgecko/skyline/tree/master/skyline/custom_algorithms</a></p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>Do remember if the algorithm has requirements that are not declared
+in Skyline’s requirements.txt file, ensure that you install the algorithm’s
+requirements in the Skyline virtualenv.</p>
+</div>
 <div class="section" id="anomalyscore">
-<h3><code class="docutils literal"><span class="pre">anomalyScore</span></code><a class="headerlink" href="#anomalyscore" title="Permalink to this headline">¶</a></h3>
+<h3><code class="docutils literal notranslate"><span class="pre">anomalyScore</span></code><a class="headerlink" href="#anomalyscore" title="Permalink to this headline">¶</a></h3>
 <p>Unlike the core Skyline algorithms, custom algorithms introduces the requirement
-for the algorithm to also return a <code class="docutils literal"><span class="pre">anomalyScore</span></code>.  The concept of the
-<code class="docutils literal"><span class="pre">anomalyScore</span></code> is used in many anomaly detection algorithms and methods and it
+for the algorithm to also return a <code class="docutils literal notranslate"><span class="pre">anomalyScore</span></code>.  The concept of the
+<code class="docutils literal notranslate"><span class="pre">anomalyScore</span></code> is used in many anomaly detection algorithms and methods and it
 is useful in many cases for algorithm testing.</p>
 </div>
 <div class="section" id="custom-algorithm-requirements">
 <h3>Custom algorithm requirements<a class="headerlink" href="#custom-algorithm-requirements" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>Must be written in Python</li>
-<li>Must import all modules and classes it requires.</li>
-<li>The algorithm must have four parameters, e.g.</li>
+<li><p>Must be written in Python</p></li>
+<li><p>Must import all modules and classes it requires.</p></li>
+<li><p>The algorithm must have four parameters, e.g.</p></li>
 </ul>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">last_same_hours_weekly</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">,</span> <span class="n">algorithm_parameters</span><span class="p">):</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="k">def</span> <span class="nf">last_same_hours_weekly</span><span class="p">(</span><span class="n">current_skyline_app</span><span class="p">,</span> <span class="n">parent_pid</span><span class="p">,</span> <span class="n">timeseries</span><span class="p">,</span> <span class="n">algorithm_parameters</span><span class="p">):</span>
 </pre></div>
 </div>
 <ul class="simple">
-<li>The four parameters are:<ul>
-<li><code class="docutils literal"><span class="pre">current_skyline_app</span></code> - this will be passed to the custom algorithm by
+<li><p>The four parameters are:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">current_skyline_app</span></code> - this will be passed to the custom algorithm by
 Skyline to identify which Skyline app is executing the algorithm, this is
 <strong>required</strong> for error handling and logging.  You do not have to worry about
-handling the <code class="docutils literal"><span class="pre">current_skyline_app</span></code> argument in your algorithm, your
-algorithm must just accept it as the first argument.</li>
-<li><code class="docutils literal"><span class="pre">parent_pid</span></code> - this will be passed to the custom algorithm by
+handling the <code class="docutils literal notranslate"><span class="pre">current_skyline_app</span></code> argument in your algorithm, your
+algorithm must just accept it as the first argument.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">parent_pid</span></code> - this will be passed to the custom algorithm by
 Skyline to identify which pid has executed the algorithm, this is
 <strong>required</strong> for error handling and logging.  You do not have to worry about
-handling the <code class="docutils literal"><span class="pre">parent_pid</span></code> argument in your algorithm, your algorithm must
-just accept it as the second argument.</li>
-<li><code class="docutils literal"><span class="pre">timeseries</span></code> - the algorithm must accept a time series as a list e.g.
-<code class="docutils literal"><span class="pre">[[1578916800.0,</span> <span class="pre">29.0],</span> <span class="pre">[1578920400.0,</span> <span class="pre">55.0],</span> <span class="pre">...</span> <span class="pre">[1580353200.0,</span> <span class="pre">55.0]]</span></code></li>
-<li><code class="docutils literal"><span class="pre">algorithm_parameters</span></code> - this is a dictionary of any of parameters that
-the algorithm requires.</li>
+handling the <code class="docutils literal notranslate"><span class="pre">parent_pid</span></code> argument in your algorithm, your algorithm must
+just accept it as the second argument.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">timeseries</span></code> - the algorithm must accept a time series as a list e.g.
+<code class="docutils literal notranslate"><span class="pre">[[1578916800.0,</span> <span class="pre">29.0],</span> <span class="pre">[1578920400.0,</span> <span class="pre">55.0],</span> <span class="pre">...</span> <span class="pre">[1580353200.0,</span> <span class="pre">55.0]]</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">algorithm_parameters</span></code> - this is a dictionary of any of parameters that
+the algorithm requires.</p></li>
 </ul>
 </li>
-<li>Your algorithm should be a simple single function, see the example algorithms
+<li><p>Your algorithm should be a simple single function, see the example algorithms
 for guidance.  It is possible that a multi classed algorithm could work, but
 your mileage may vary.  This method is only tested with the algorithm being a
-simple function.</li>
-<li>The custom algorithm must return a boolean to state whether the data point is
-anomalous <strong>and</strong> a <code class="docutils literal"><span class="pre">anomalyScore</span></code>, e.g.</li>
+simple function.</p></li>
+<li><p>The custom algorithm must return a boolean to state whether the data point is
+anomalous <strong>and</strong> a <code class="docutils literal notranslate"><span class="pre">anomalyScore</span></code>, e.g.</p></li>
 </ul>
-<div class="highlight-python"><div class="highlight"><pre><span></span><span class="c1"># return (anomalous, anomalyScore)</span>
-    <span class="k">return</span> <span class="p">(</span><span class="bp">True</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
-<span class="k">return</span> <span class="p">(</span><span class="bp">False</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">)</span>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># return (anomalous, anomalyScore)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+<span class="k">return</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="mf">0.2</span><span class="p">)</span>
 </pre></div>
 </div>
 <ul class="simple">
-<li>The returned boolean must be one of the following three choices:<ul>
-<li><code class="docutils literal"><span class="pre">True</span></code> - the data point <strong>is</strong> anomalous</li>
-<li><code class="docutils literal"><span class="pre">False</span></code> - the data point <strong>is not</strong> anomalous</li>
-<li><code class="docutils literal"><span class="pre">None</span></code> - returned when the algorithm could not determine <code class="docutils literal"><span class="pre">True</span></code> or
-<code class="docutils literal"><span class="pre">False</span></code>, an error occurred or there was no data, etc.</li>
+<li><p>The returned boolean must be one of the following three choices:</p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">True</span></code> - the data point <strong>is</strong> anomalous</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">False</span></code> - the data point <strong>is not</strong> anomalous</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">None</span></code> - returned when the algorithm could not determine <code class="docutils literal notranslate"><span class="pre">True</span></code> or
+<code class="docutils literal notranslate"><span class="pre">False</span></code>, an error occurred or there was no data, etc.</p></li>
 </ul>
 </li>
-<li>The returned <code class="docutils literal"><span class="pre">anomalyScore</span></code> must be a <strong>float</strong> between 0.0 and 1.0, 0.0
+<li><p>The returned <code class="docutils literal notranslate"><span class="pre">anomalyScore</span></code> must be a <strong>float</strong> between 0.0 and 1.0, 0.0
 being not anomalous and 1.0 being a certain anomaly.  You can pass
-<cite>(False, 0.7)</cite>,  you just have to normalise your <code class="docutils literal"><span class="pre">anomalyScore</span></code> between 0.0
-and 1.0.  The <code class="docutils literal"><span class="pre">anomalyScore</span></code> is currently only for testing it is not used in
+<cite>(False, 0.7)</cite>,  you just have to normalise your <code class="docutils literal notranslate"><span class="pre">anomalyScore</span></code> between 0.0
+and 1.0.  The <code class="docutils literal notranslate"><span class="pre">anomalyScore</span></code> is currently only for testing it is not used in
 any way but it  <strong>must</strong> be returned.  The anomalous classification is
-currently <strong>only</strong> determined from the boolean and the <code class="docutils literal"><span class="pre">anomalyScore</span></code> is
+currently <strong>only</strong> determined from the boolean and the <code class="docutils literal notranslate"><span class="pre">anomalyScore</span></code> is
 currently not used in any way other than for testing.  If your algorithm does
-not calculate an anomaly score, when your algorithm returns <code class="docutils literal"><span class="pre">False</span></code> just
-return it with a 0.0 and when your algorithm returns <code class="docutils literal"><span class="pre">True</span></code> just return it
-with 1.0</li>
+not calculate an anomaly score, when your algorithm returns <code class="docutils literal notranslate"><span class="pre">False</span></code> just
+return it with a 0.0 and when your algorithm returns <code class="docutils literal notranslate"><span class="pre">True</span></code> just return it
+with 1.0</p></li>
 </ul>
 </div>
 <div class="section" id="error-handling">
@@ -410,14 +437,14 @@ your own logging in a custom algorithm, before you do, consider using the method
 described in the example algorithms, because the algorithms iterate over 1000s
 of time series every minute, logging all errors that are encountered in the
 developing or running of an algorithm is not practical (due to simply I/O) or
-desired.  To accommodate error logging from algorithms, Skyline&#8217;s error handling
+desired.  To accommodate error logging from algorithms, Skyline’s error handling
 method writes out any errors to a single file per algorithm during the analysis
 phase, overwriting the file with each error.  The errors files are handled in
 the /tmp directory which is normal memory based tmpfs resources so no disk I/O
 is encountered.  Once analysis is complete, the parent process checks for any
 algorithm error files and logs any errors found to the main application log
 once.  As shown in the example below.</p>
-<div class="highlight-none"><div class="highlight"><pre><span></span>2020-06-07 05:47:40 :: 12856 :: error :: spin_process with pid 12870 has reported an error with the abs_stddev_from_median algorithm
+<div class="highlight-none notranslate"><div class="highlight"><pre><span></span>2020-06-07 05:47:40 :: 12856 :: error :: spin_process with pid 12870 has reported an error with the abs_stddev_from_median algorithm
 2020-06-07 05:47:40 :: 12856 :: Traceback (most recent call last):
   File &quot;/opt/skyline/github/skyline/skyline/custom_algorithms/abs_stddev_from_median.py&quot;, line 46, in abs_stddev_from_median
     make_an_error = median * UNDEFINED_VARIABLE
@@ -434,29 +461,42 @@ structure of your custom algorithm on.</p>
 <div class="section" id="abs-stddev-from-median">
 <h4>abs_stddev_from_median<a class="headerlink" href="#abs-stddev-from-median" title="Permalink to this headline">¶</a></h4>
 <p>This is the simplest custom algorithm structure, it does not have any
-<code class="docutils literal"><span class="pre">algorithm_parameters</span></code> and has no debug logging.</p>
+<code class="docutils literal notranslate"><span class="pre">algorithm_parameters</span></code> and has no debug logging.</p>
 <p><a class="reference external" href="https://github.com/earthgecko/skyline/tree/master/skyline/custom_algorithms/abs_stddev_from_median.py">https://github.com/earthgecko/skyline/tree/master/skyline/custom_algorithms/abs_stddev_from_median.py</a></p>
 </div>
 <div class="section" id="last-same-hours">
 <h4>last_same_hours<a class="headerlink" href="#last-same-hours" title="Permalink to this headline">¶</a></h4>
 <p>This is an example of a more complex custom algorithm structure, that uses
-<code class="docutils literal"><span class="pre">algorithm_parameters</span></code> and can even debug log to the Skyline app log if
-<code class="docutils literal"><span class="pre">debug_logging</span></code> is passed and enabled via the <code class="docutils literal"><span class="pre">algorithm_parameters</span></code>.</p>
+<code class="docutils literal notranslate"><span class="pre">algorithm_parameters</span></code> and can even debug log to the Skyline app log if
+<code class="docutils literal notranslate"><span class="pre">debug_logging</span></code> is passed and enabled via the <code class="docutils literal notranslate"><span class="pre">algorithm_parameters</span></code>.</p>
 <p><a class="reference external" href="https://github.com/earthgecko/skyline/tree/master/skyline/custom_algorithms/last_same_hours.py">https://github.com/earthgecko/skyline/tree/master/skyline/custom_algorithms/last_same_hours.py</a></p>
 </div>
+</div>
+<div class="section" id="running-a-mirage-only-custom-algorithm-on-a-metric-all-the-time">
+<h3>Running a Mirage only custom algorithm on a metric all the time<a class="headerlink" href="#running-a-mirage-only-custom-algorithm-on-a-metric-all-the-time" title="Permalink to this headline">¶</a></h3>
+<p>Normally for Analyzer to push a metric to Mirage, Analyzer would have to trigger
+on it as anomalous.  However if you wish to run a custom algorithm on a metric
+that requires <code class="docutils literal notranslate"><span class="pre">SECOND_ORDER_RESOLUTION_HOURS</span></code> of data to run against as the
+<a class="reference internal" href="../skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FULL_DURATION</span></code></a> data is not sufficient for the custom algorithm,
+perhaps due to seasonality, then you need to declare the metric in
+<a class="reference internal" href="../skyline.html#settings.MIRAGE_ALWAYS_METRICS" title="settings.MIRAGE_ALWAYS_METRICS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.MIRAGE_ALWAYS_METRICS</span></code></a>.  This will cause Analyzer to add the
+metric to Mirage on every run.  Note that the metric needs to be defined as a
+mirage enabled metric in the normal way, ensuring it matches a smtp alert
+defined in <a class="reference internal" href="../skyline.html#settings.ALERTS" title="settings.ALERTS"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.ALERTS</span></code></a> with a <code class="docutils literal notranslate"><span class="pre">SECOND_ORDER_RESOLUTION_HOURS</span></code>
+declared.</p>
 </div>
 <div class="section" id="some-things-to-consider">
 <h3>Some things to consider<a class="headerlink" href="#some-things-to-consider" title="Permalink to this headline">¶</a></h3>
 <ul class="simple">
-<li>Think about what Skyline apps you want your algorithm to run in.  If you are
-wanting to use data &gt; <a class="reference internal" href="../skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal"><span class="pre">settings.FULL_DURATION</span></code></a> then ensure you only
-specify <code class="docutils literal"><span class="pre">'use_with':</span> <span class="pre">['mirage',</span> <span class="pre">'crucible'],</span></code>.</li>
-<li>Thoroughly test your algorithm with <code class="docutils literal"><span class="pre">debug_logging</span></code></li>
-<li>Purposefully break your algorithm during testing to test and see how the error
-handling is working.</li>
-<li>Any custom algorithms applied to analyzer must be <strong>FAST</strong>.  Custom algorithms
+<li><p>Think about what Skyline apps you want your algorithm to run in.  If you are
+wanting to use data &gt; <a class="reference internal" href="../skyline.html#settings.FULL_DURATION" title="settings.FULL_DURATION"><code class="xref py py-mod docutils literal notranslate"><span class="pre">settings.FULL_DURATION</span></code></a> then ensure you only
+specify <code class="docutils literal notranslate"><span class="pre">'use_with':</span> <span class="pre">['mirage',</span> <span class="pre">'crucible'],</span></code>.</p></li>
+<li><p>Thoroughly test your algorithm with <code class="docutils literal notranslate"><span class="pre">debug_logging</span></code></p></li>
+<li><p>Purposefully break your algorithm during testing to test and see how the error
+handling is working.</p></li>
+<li><p>Any custom algorithms applied to analyzer must be <strong>FAST</strong>.  Custom algorithms
 that are only applied to mirage and analyzer_batch can take a bit longer to
-run, but they will delay analysis the longer their execution time.</li>
+run, but they will delay analysis the longer their execution time.</p></li>
 </ul>
 </div>
 </div>
@@ -464,15 +504,16 @@ run, but they will delay analysis the longer their execution time.</li>
 
 
            </div>
+           
           </div>
           <footer>
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="../mirage.html" class="btn btn-neutral float-right" title="Mirage" accesskey="n">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="../mirage.html" class="btn btn-neutral float-right" title="Mirage" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
-        <a href="index.html" class="btn btn-neutral" title="Algorithms" accesskey="p"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+        <a href="index.html" class="btn btn-neutral float-left" title="Algorithms" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
       
     </div>
   
@@ -481,11 +522,19 @@ run, but they will delay analysis the longer their execution time.</li>
 
   <div role="contentinfo">
     <p>
-        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson.
+        
+        &copy; Copyright 2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson
 
     </p>
   </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+    
+    
+    
+    Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    
+    <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a>
+    
+    provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
 
@@ -497,36 +546,15 @@ run, but they will delay analysis the longer their execution time.</li>
   </div>
   
 
-
-  
-
-    <script type="text/javascript">
-        var DOCUMENTATION_OPTIONS = {
-            URL_ROOT:'../',
-            VERSION:'2.0.0',
-            COLLAPSE_INDEX:false,
-            FILE_SUFFIX:'.html',
-            HAS_SOURCE:  true
-        };
-    </script>
-      <script type="text/javascript" src="../_static/jquery.js"></script>
-      <script type="text/javascript" src="../_static/underscore.js"></script>
-      <script type="text/javascript" src="../_static/doctools.js"></script>
-
-  
-
-  
-  
-    <script type="text/javascript" src="../_static/js/theme.js"></script>
-  
-
-  
-  
   <script type="text/javascript">
       jQuery(function () {
-          SphinxRtdTheme.StickyNav.enable();
+          SphinxRtdTheme.Navigation.enable(true);
       });
   </script>
+
+  
+  
+    
    
 
 </body>

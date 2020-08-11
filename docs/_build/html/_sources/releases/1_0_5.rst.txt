@@ -1,0 +1,48 @@
+===========================
+1.0.5 - the crucible branch
+===========================
+
+Fixes two Analyzer memory leaks and improves overview memory footprint a bit.
+
+Changes include:
+
+- Issue #21 Memory leak in Analyzer - self.mirage_metrics.append(metric) and
+  plt.savefig memory leaks were fixed. Removed unused but appended mirage list.
+  Moved trigger_alert to a multiprocessing process when the alert is smtp. This
+  is used by smtp alerters so that matplotlib objects are cleared down and the
+  alerter cannot create a memory leak in this manner as plt.savefig keeps the
+  object in memory until the process terminates.  Seeing as data is being
+  surfaced and processed in the alert_smtp context, multiprocessing the alert
+  creation and handling prevents any memory leaks in the parent. This fixes
+  Issue #21 Memory leak in Analyzer - https://github.com/earthgecko/skyline/issues/21
+  internal ref #1558: Memory leak in Analyzer
+- In agent del the algorithm test objects to free the memory
+- Applied in both Analyzer and Mirage
+- Some pyflakes linting done
+- Reintroduced the original alert substring matching AFTER wildcard matching, to
+  allow more flexibility
+- In Analyzer streamlined the Mirage metrics a bit
+- Added some settings vaidation in the agents
+- Issue #22 - Analyzer also alerting on Mirage metrics now
+  This fixes #22 by introducing a mirage.metrics Redis key namespace for any
+  Mirage metric.  This acts as a dynamic SKIP_LIST for Analyzer so to speak and
+  allows for wildcard and substring matching and prevents Analyzer alerting on
+  Mirage metrics.
+- Added determine_array_median - readded the method to determine_median of an
+  array which was changed to a timeseries from an array in
+  https://github.com/earthgecko/skyline/commit/9dcf8ffbf6da0820ec5d2f93d3d7079abed3f5a7
+  errorneously as it was assumed to not be being used however it was being used
+  by algorithm timings
+- Some pyflakes linting done with unused imports and unused variables
+- Added validation of settings with validate_settings.py, although this does not
+  cover all settings, it tests the critical ones per app that have no except
+  handling - in the agent.py
+- Some pyflakes linting done with unused imports and unused variables
+- Added del of test objects to reduced memory to all agents that test algorithms
+- Added validate_settings to webapp
+- Added default recipient which acts as a catchall for alert tuples that do not
+  have a matching namespace defined in recipients in SMTP_OPTS and
+  BOUNDARY_SMTP_OPTS
+- Added analyzer_debug to crucible branch, the analyzer_debug app which has a
+  number of memory debugging tools and options that can be turned on and off, etc
+- Bumped version to 1.0.5
