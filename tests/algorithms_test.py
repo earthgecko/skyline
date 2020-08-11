@@ -22,13 +22,17 @@ class TestAlgorithms(unittest.TestCase):
     """
 
     def _addSkip(self, test, tail_avg, reason):
-        print reason
+        # @modified 20200808 - Bug #3666: Failing algorithm_tests on Python 3.8.3
+        # print reason
+        print(reason)
 
     def data(self, ts):
         """
         Mostly ones (1), with a final value of 1000
         """
-        timeseries = map(list, zip(map(float, range(int(ts) - 86400, int(ts) + 1)), [1] * 86401))
+        # @modified 20200808 - Bug #3666: Failing algorithm_tests on Python 3.8.3
+        # timeseries = map(list, zip(map(float, range(int(ts) - 86400, int(ts) + 1)), [1] * 86401))
+        timeseries = list(map(list, zip(map(float, range(int(ts) - 86400, int(ts) + 1)), [1] * 86401)))
         timeseries[-1][1] = 1000
         timeseries[-2][1] = 1
         timeseries[-3][1] = 1
@@ -89,7 +93,9 @@ class TestAlgorithms(unittest.TestCase):
         result, ensemble, datapoint, negatives_found, algorithms_run = algorithms.run_selected_algorithm(timeseries, 'test.metric', airgapped_metrics, airgapped_metrics_filled, run_negatives_present, check_for_airgaps_only)
 
         self.assertTrue(result)
-        self.assertTrue(len(filter(None, ensemble)) >= settings.CONSENSUS)
+        # @modified 20200808 - Bug #3666: Failing algorithm_tests on Python 3.8.3
+        # self.assertTrue(len(filter(None, ensemble)) >= settings.CONSENSUS)
+        self.assertTrue(len(list(filter(None, ensemble))) >= settings.CONSENSUS)
         self.assertEqual(datapoint, 1000)
 
     @unittest.skip('Fails inexplicable in certain environments.')
