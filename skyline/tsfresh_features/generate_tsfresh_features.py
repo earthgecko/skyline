@@ -18,9 +18,9 @@ Run the script with for example:
 
 .. code-block:: bash
 
-    PYTHON_MAJOR_VERSION="2.7"
+    PYTHON_MAJOR_VERSION="3.8"
     PYTHON_VIRTUALENV_DIR="/opt/python_virtualenv"
-    PROJECT="skyline-py2712"
+    PROJECT="skyline-py383"
 
     cd "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}"
     source bin/activate
@@ -57,6 +57,8 @@ import skyline_version
 from tsfresh_feature_names import TSFRESH_FEATURES
 
 skyline_version = skyline_version.__absolute_version__
+# @added 20200808 - Bug #3666: Failing algorithm_tests on Python 3.8.3
+python_version = int(sys.version_info[0])
 
 if __name__ == '__main__':
 
@@ -74,7 +76,13 @@ if __name__ == '__main__':
     with open(anomaly_json, 'r') as f:
         timeseries_json = json.loads(f.read())
 
-    timeseries_str = str(timeseries_json).replace('{u\'results\': ', '').replace('}', '')
+    # @modified 20200808 - Bug #3666: Failing algorithm_tests on Python 3.8.3
+    # timeseries_str = str(timeseries_json).replace('{u\'results\': ', '').replace('}', '')
+    if python_version == 2:
+        timeseries_str = str(timeseries_json).replace('{u\'results\': ', '').replace('}', '')
+    if python_version == 3:
+        timeseries_str = str(timeseries_json).replace('{\'results\': ', '').replace('}', '')
+
     full_timeseries = literal_eval(timeseries_str)
     timeseries = full_timeseries[:60]
 
@@ -132,7 +140,9 @@ if __name__ == '__main__':
 
     feature_names = []
     count_id = 0
-    with open(t_fname_out, 'rb') as fr:
+    # @modified 20200808 - Bug #3666: Failing algorithm_tests on Python 3.8.3
+    # with open(t_fname_out, 'rb') as fr:
+    with open(t_fname_out, 'rt') as fr:
         reader = csv.reader(fr, delimiter=',')
         for i, line in enumerate(reader):
             if str(line[0]) != '':
