@@ -20,6 +20,9 @@ from threading import Thread
 from multiprocessing import Process
 import re
 from shutil import rmtree
+# @added 20200813 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
+from shutil import move as shutil_move
+
 # import csv
 from ast import literal_eval
 from datetime import datetime
@@ -184,6 +187,16 @@ try:
     BATCH_PROCESSING_NAMESPACES = list(settings.BATCH_PROCESSING_NAMESPACES)
 except:
     BATCH_PROCESSING_NAMESPACES = []
+
+# @added 20200813 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
+try:
+    IONOSPHERE_HISTORICAL_DATA_FOLDER = settings.IONOSPHERE_HISTORICAL_DATA_FOLDER
+except:
+    IONOSPHERE_HISTORICAL_DATA_FOLDER = '/opt/skyline/ionosphere/historical_data'
+try:
+    IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR = settings.IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
+except:
+    IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR = []
 
 skyline_app_graphite_namespace = 'skyline.%s%s' % (skyline_app, SERVER_METRIC_PATH)
 
@@ -387,6 +400,50 @@ class Ionosphere(Thread):
                         # Still manage ionosphere.training_data
                         if IONOSPHERE_MANAGE_PURGE:
                             if (time_now - os.path.getmtime(folder_path)) > older_than:
+
+                                # @added 20200813 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
+                                if IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR:
+                                    for rpath, rfolders, rfiles in os.walk(folder_path):
+                                        for rfolder in rfolders[:]:
+                                            current_folder = os.path.join(rpath, rfolder)
+                                            for rrpath, rrfolders, rrfiles in os.walk(current_folder):
+                                                move_files = False
+                                                training_files_dirs = []
+                                                if len(rrfiles) > 0:
+                                                    for rfile in rrfiles:
+                                                        for include_namespace in IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR:
+                                                            if include_namespace in rfile:
+                                                                move_files = True
+                                                    if move_files:
+                                                        training_files_dirs.append(rrpath)
+                                                if training_files_dirs:
+                                                    try:
+                                                        dest_path = rrpath.replace(dir_path, IONOSPHERE_HISTORICAL_DATA_FOLDER)
+                                                        if not os.path.exists(dest_path):
+                                                            mkdir_p(dest_path)
+                                                        # training_files = os.listdir(rrpath)
+                                                        training_files = []
+                                                        for training_files_dir in training_files_dirs:
+                                                            training_files = os.listdir(training_files_dir)
+                                                            for f in training_files:
+                                                                src_file = '%s/%s' % (training_files_dir, f)
+                                                                dest_file = '%s/%s' % (dest_path, f)
+                                                                shutil_move(src_file, dest_file)
+                                                        files_moved = True
+                                                    except:
+                                                        logger.error(traceback.format_exc())
+                                                        logger.error('error :: failed to move files from %s to %s' % (current_folder, IONOSPHERE_HISTORICAL_DATA_FOLDER))
+                                                        files_moved = False
+                                                    if files_moved:
+                                                        historical_folder = current_folder.replace(dir_path, IONOSPHERE_HISTORICAL_DATA_FOLDER)
+                                                        # historical_training_data_list.append(historical_folder)
+                                                        try:
+                                                            rmtree(rrpath)
+                                                            logger.info('removed - %s as files were moved to %s' % (rrpath, dest_path))
+                                                        except:
+                                                            logger.error(traceback.format_exc())
+                                                            logger.error('error :: failed to rmtree %s' % rrpath)
+
                                 try:
                                     rmtree(folder_path)
                                     logger.info('removed - %s' % folder_path)
@@ -413,6 +470,11 @@ class Ionosphere(Thread):
         # Still manage ionosphere.training_data
         if IONOSPHERE_MANAGE_PURGE:
             logger.info('cleaned old training data')
+
+        # @added 20200813 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
+        # Declare training_data_instances even if no training_data_list exists
+        # as it can be appended to by the historical training data
+        training_data_instances = []
 
         # @added 20200409 - Feature #3472: ionosphere.training_data Redis set
         #                   Feature #3474: webapp api - training_data
@@ -492,6 +554,82 @@ class Ionosphere(Thread):
                     except:
                         logger.error(traceback.format_exc())
                         logger.error('error :: failed to evaluate training_dir - %s' % str(training_data_dir))
+
+            # @added 20200813 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
+            # If the IONOSPHERE_HISTORICAL_DATA_FOLDER dir exist iterate it and
+            # and historical training data to the list.
+            if os.path.exists(IONOSPHERE_HISTORICAL_DATA_FOLDER) and IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR:
+                historical_training_data_added = 0
+                if training_data_instances:
+                    training_data_count = len(training_data_instances)
+                    logger.info('There are %s training_data instances before iterating histroical training data' % (str(training_data_count)))
+                current_time = int(time())
+                last_logged = current_time - last_log_time
+                if last_logged > 29:
+                    logger.info('still creating training_data Redis set')
+                    last_log_time = current_time
+                    try:
+                        self.redis_conn.setex(skyline_app, 120, current_time)
+                        logger.info('updated Redis key for %s up' % skyline_app)
+                    except:
+                        logger.error('error :: failed to update Redis key for %s up' % skyline_app)
+                for path, folders, files in os.walk(IONOSPHERE_HISTORICAL_DATA_FOLDER):
+                    try:
+                        add_folder = False
+                        metric = None
+                        timestamp = None
+                        historical_metric_data = False
+                        if files:
+                            for historical_metric_namespace in IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR:
+                                if historical_metric_data:
+                                    continue
+                                for ifile in files:
+                                    if historical_metric_namespace in ifile:
+                                        historical_metric_data = True
+                                        break
+                        if historical_metric_data:
+                            add_folder = False
+                            metric = None
+                            timestamp = None
+                            if '/learn/' in path:
+                                metric_file = None
+                                metric_file_path = None
+                                continue
+                            for ifile in files:
+                                if ifile.endswith('.png'):
+                                    add_folder = True
+                                if ifile.endswith('.txt'):
+                                    if ifile.endswith('.fp.details.txt'):
+                                        continue
+                                    if ifile.endswith('.fp.created.txt'):
+                                        continue
+                                    else:
+                                        metric_file = ifile
+                                        metric_file_path = path
+                            if add_folder:
+                                if metric_file and metric_file_path:
+                                    metric = metric_file.replace('.txt', '', 1)
+                                    path_elements = metric_file_path.split(os.sep)
+                                    for element in path_elements:
+                                        if re.match('\d{10}', element):
+                                            timestamp = int(element)
+                                if metric and timestamp:
+                                    resolution_seconds = settings.FULL_DURATION
+                                    for ifile in files:
+                                        if ifile.endswith('.png') and 'mirage' in ifile and 'graphite' in ifile:
+                                            try:
+                                                ifile_resolution_elements = ifile.replace('.png', '', 1).split('.')
+                                                ifile_resolution_str = ifile_resolution_elements[-1]
+                                                ifile_resolution = int(ifile_resolution_str.replace('h', '', 1))
+                                                resolution_seconds = ifile_resolution * 3600
+                                            except:
+                                                pass
+                                    training_data_instances.append([metric, timestamp, resolution_seconds])
+                                    historical_training_data_added += 1
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to evaluate training_dir - %s' % str(training_data_dir))
+                logger.info('added %s historical training data instances' % (str(historical_training_data_added)))
 
             if training_data_instances:
                 training_data_count = len(training_data_instances)

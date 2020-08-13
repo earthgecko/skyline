@@ -19,11 +19,24 @@ from tsfresh import __version__ as tsfresh_version
 import settings
 import skyline_version
 from skyline_functions import write_data_to_file
+# @added 20200813 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
+from skyline_functions import historical_data_dir_exists
+
 # TSFRESH_VERSION below was only added to a single log output as it was unused
 # however it may be used in one of the tests in some way, I shall have to search
 from tsfresh_feature_names import TSFRESH_FEATURES, TSFRESH_VERSION
 
 skyline_version = skyline_version.__absolute_version__
+
+# @added 20200813 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
+try:
+    IONOSPHERE_HISTORICAL_DATA_FOLDER = settings.IONOSPHERE_HISTORICAL_DATA_FOLDER
+except:
+    IONOSPHERE_HISTORICAL_DATA_FOLDER = '/opt/skyline/ionosphere/historical_data'
+try:
+    IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR = settings.IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
+except:
+    IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR = []
 
 
 def feature_name_id(current_skyline_app, feature_name):
@@ -109,6 +122,28 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
     if context == 'training_data' or context == 'ionosphere':
         metric_data_dir = '%s/%s/%s' % (
             settings.IONOSPHERE_DATA_FOLDER, timestamp, timeseries_dir)
+
+        # @added 20200813 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
+        if context == 'training_data':
+            metric_data_dir_does_not_exist = False
+            if not os.path.exists(metric_data_dir):
+                metric_data_dir_does_not_exist = True
+            if IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR and metric_data_dir_does_not_exist:
+                try:
+                    historical_data, metric_data_dir = historical_data_dir_exists(current_skyline_app, metric_data_dir)
+                    if historical_data:
+                        current_logger.info('create_features_profile :: using historical training data - %s' % metric_data_dir)
+                except:
+                    trace = traceback.format_exc()
+                    current_logger.error(trace)
+                    fail_msg = 'error :: create_features_profile :: failed to determine whether this is historical training data'
+                    current_logger.error('%s' % fail_msg)
+                    if context == 'training_data':
+                        # Raise to webbapp I believe to provide traceback to user in UI
+                        raise
+                    else:
+                        return False, False, False, fail_msg, trace
+
     if context == 'features_profiles':
         metric_data_dir = '%s/%s/%s' % (
             settings.IONOSPHERE_PROFILES_FOLDER, timeseries_dir, timestamp)
