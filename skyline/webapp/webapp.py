@@ -101,7 +101,9 @@ if True:
         #                   Branch #3262: py3
         # Added a single functions to deal with Redis connection and the
         # charset='utf-8', decode_responses=True arguments required in py3
-        get_redis_conn, get_redis_conn_decoded)
+        get_redis_conn, get_redis_conn_decoded,
+        # @added 20200813 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
+        historical_data_dir_exists,)
 
     from backend import (
         panorama_request, get_list,
@@ -306,6 +308,16 @@ try:
     IONOSPHERE_GRAPHITE_NOW_GRAPHS_OVERRIDE = settings.IONOSPHERE_GRAPHITE_NOW_GRAPHS_OVERRIDE
 except:
     IONOSPHERE_GRAPHITE_NOW_GRAPHS_OVERRIDE = False
+
+# @added 20200813 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
+try:
+    IONOSPHERE_HISTORICAL_DATA_FOLDER = settings.IONOSPHERE_HISTORICAL_DATA_FOLDER
+except:
+    IONOSPHERE_HISTORICAL_DATA_FOLDER = '/opt/skyline/ionosphere/historical_data'
+try:
+    IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR = settings.IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
+except:
+    IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR = []
 
 
 @app.before_request
@@ -3421,9 +3433,34 @@ def ionosphere():
                             now = time.time()
                             purged_timestamp = int(now) - int(settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR)
                             if int(value) < purged_timestamp:
-                                logger.info('%s=%s timestamp it to old to have training data' % (key, str(value)))
-                                resp = json.dumps(
-                                    {'results': 'Error: timestamp too old no training data exists, training data has been purged'})
+                                # @added 20200813 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
+                                historical_training_data_exists = False
+                                if IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR:
+                                    check_for_historical_training_data = False
+                                    base_name = request.args.get(str('metric'), None)
+                                    for historical_metric_namespace in IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR:
+                                        if historical_metric_namespace in base_name:
+                                            check_for_historical_training_data = True
+                                            break
+                                    if check_for_historical_training_data:
+                                        logger.info('checking for historical training data for %s - %s' % (base_name, ionosphere_data_dir))
+                                        try:
+                                            historical_data, ionosphere_data_dir = historical_data_dir_exists('webapp', ionosphere_data_dir)
+                                            if historical_data:
+                                                logger.info('using historical training data - %s' % ionosphere_data_dir)
+                                                historical_training_data_exists = True
+                                                valid_timestamp = True
+                                            else:
+                                                logger.info('no historical training data found for %s' % ionosphere_data_dir)
+                                        except:
+                                            trace = traceback.format_exc()
+                                            logger.error(trace)
+                                            fail_msg = 'error :: ionosphere_metric_data :: failed to determine whether this is historical training data'
+                                            logger.error('%s' % fail_msg)
+                                if not historical_training_data_exists:
+                                    logger.info('%s=%s timestamp it to old to have training data' % (key, str(value)))
+                                    resp = json.dumps(
+                                        {'results': 'Error: timestamp too old no training data exists, training data has been purged'})
                             else:
                                 logger.error('%s=%s no timestamp training data dir found - %s' % (key, str(value), ionosphere_data_dir))
                                 # @added 20180713 - Branch #2270: luminosity
@@ -3583,7 +3620,28 @@ def ionosphere():
                                 settings.IONOSPHERE_DATA_FOLDER,
                                 requested_timestamp, timeseries_dir)
 
+                        historical_training_data_exists = False
                         if not isdir(ionosphere_data_dir):
+
+                            # @added 20200813 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
+                            historical_training_data_exists = False
+                            if IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR:
+                                logger.info('checking for historical training data for %s' % ionosphere_data_dir)
+                                try:
+                                    historical_data, ionosphere_data_dir = historical_data_dir_exists('webapp', ionosphere_data_dir)
+                                    if historical_data:
+                                        logger.info('using historical training data - %s' % ionosphere_data_dir)
+                                        historical_training_data_exists = True
+                                        valid_timestamp = True
+                                    else:
+                                        logger.info('no historical training data found for %s' % ionosphere_data_dir)
+                                except:
+                                    trace = traceback.format_exc()
+                                    logger.error(trace)
+                                    fail_msg = 'error :: ionosphere_metric_data :: failed to determine whether this is historical training data'
+                                    logger.error('%s' % fail_msg)
+
+                        if not historical_training_data_exists:
                             logger.info(
                                 '%s=%s no timestamp metric training data dir found - %s' %
                                 (key, str(value), ionosphere_data_dir))
@@ -4604,6 +4662,16 @@ def ionosphere():
             if IONOSPHERE_GRAPHITE_NOW_GRAPHS_OVERRIDE:
                 graphite_now_graphs_title = 'THEN'
 
+            # @added 20200813 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
+            historical_training_data = False
+            if mpaths:
+                try:
+                    if IONOSPHERE_HISTORICAL_DATA_FOLDER in mpaths[0][1]:
+                        historical_training_data = True
+                except:
+                    logger.info(traceback.format_exc())
+                    logger.error('error :: Webapp could not determine if this is historical training data')
+
             return render_template(
                 'ionosphere.html', timestamp=requested_timestamp,
                 for_metric=base_name, metric_vars=m_vars, metric_files=mpaths,
@@ -4690,6 +4758,8 @@ def ionosphere():
                 graphite_now_graphs_title=graphite_now_graphs_title,
                 # @added 20200808 - Feature #3568: Ionosphere - report anomalies in training period
                 labelled_anomalies=labelled_anomalies,
+                # @added 20200813 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
+                historical_training_data=historical_training_data,
                 version=skyline_version, duration=(time.time() - start),
                 print_debug=debug_on), 200
         except:

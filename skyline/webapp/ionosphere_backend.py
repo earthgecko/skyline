@@ -37,6 +37,9 @@ import skyline_version
 #    RepresentsInt, mkdir_p, write_data_to_file, get_graphite_metric)
 from skyline_functions import (mkdir_p, get_graphite_metric, write_data_to_file)
 
+# @added 20200813 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
+from skyline_functions import historical_data_dir_exists
+
 # from tsfresh_feature_names import TSFRESH_FEATURES
 
 from database import (
@@ -118,6 +121,16 @@ try:
     IONOSPHERE_GRAPHITE_NOW_GRAPHS_OVERRIDE = settings.IONOSPHERE_GRAPHITE_NOW_GRAPHS_OVERRIDE
 except:
     IONOSPHERE_GRAPHITE_NOW_GRAPHS_OVERRIDE = False
+
+# @added 20200813 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
+try:
+    IONOSPHERE_HISTORICAL_DATA_FOLDER = settings.IONOSPHERE_HISTORICAL_DATA_FOLDER
+except:
+    IONOSPHERE_HISTORICAL_DATA_FOLDER = '/opt/skyline/ionosphere/historical_data'
+try:
+    IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR = settings.IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
+except:
+    IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR = []
 
 
 def ionosphere_get_metrics_dir(requested_timestamp, context):
@@ -282,6 +295,55 @@ def ionosphere_data(requested_timestamp, data_for_metric, context):
                             timestamp = int(path.split(root)[1])
                         timestamps.append(timestamp)
 
+    # @added 20200813 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
+    # If the IONOSPHERE_HISTORICAL_DATA_FOLDER dir exist iterate it and
+    # and historical training data to the list.
+    if IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR and context == 'training_data':
+        check_for_historical_training_data = False
+        for historical_metric_namespace in IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR:
+            if historical_metric_namespace in base_name:
+                check_for_historical_training_data = True
+        historical_data_path_exists = False
+        if check_for_historical_training_data:
+            if path.exists(IONOSPHERE_HISTORICAL_DATA_FOLDER):
+                historical_data_path_exists = True
+        if check_for_historical_training_data and historical_data_path_exists:
+            for root, dirs, files in walk(IONOSPHERE_HISTORICAL_DATA_FOLDER):
+                for file in files:
+                    if file.endswith('.json'):
+                        data_file = True
+                        if re.search(exclude_redis_json, file):
+                            data_file = False
+                        if re.search('mirage.redis.json', file):
+                            data_file = False
+                        if re.search('\\d{10}', root) and data_file:
+                            metric_name = file.replace('.json', '')
+                            if data_for_metric != 'all':
+                                add_metric = False
+                                if metric_name == base_name:
+                                    add_metric = True
+                                if requested_timestamp:
+                                    if re.search(requested_timestamp, file):
+                                        add_metric = True
+                                    else:
+                                        add_metric = False
+                                if add_metric:
+                                    metric_paths.append([metric_name, root])
+                                    metrics.append(metric_name)
+                                    if context == 'training_data':
+                                        timestamp = int(root.split('/')[5])
+                                    if context == 'features_profiles':
+                                        timestamp = int(path.split(root)[1])
+                                    timestamps.append(timestamp)
+                            else:
+                                metric_paths.append([metric_name, root])
+                                metrics.append(metric_name)
+                                if context == 'training_data':
+                                    timestamp = int(root.split('/')[5])
+                                if context == 'features_profiles':
+                                    timestamp = int(path.split(root)[1])
+                                timestamps.append(timestamp)
+
     set_unique_metrics = set(metrics)
     unique_metrics = list(set_unique_metrics)
     unique_metrics.sort()
@@ -443,10 +505,35 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
     metric_paths = []
     images = []
     timeseries_dir = base_name.replace('.', '/')
+
     if context == 'training_data':
         metric_data_dir = '%s/%s/%s' % (
             settings.IONOSPHERE_DATA_FOLDER, str(requested_timestamp),
             timeseries_dir)
+
+        # @added 20200813 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
+        metric_data_dir_does_not_exist = False
+        if not path.exists(metric_data_dir):
+            metric_data_dir_does_not_exist = True
+        if IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR and metric_data_dir_does_not_exist:
+            logger.info('ionosphere_metric_data :: checking for historical training data for %s' % metric_data_dir)
+            try:
+                historical_data, metric_data_dir = historical_data_dir_exists('webapp', metric_data_dir)
+                if historical_data:
+                    logger.info('ionosphere_metric_data :: using historical training data - %s' % metric_data_dir)
+                else:
+                    logger.info('ionosphere_metric_data :: no historical training data found for %s' % metric_data_dir)
+            except:
+                trace = traceback.format_exc()
+                logger.error(trace)
+                fail_msg = 'error :: ionosphere_metric_data :: failed to determine whether this is historical training data'
+                logger.error('%s' % fail_msg)
+                if context == 'training_data':
+                    # Raise to webbapp I believe to provide traceback to user in UI
+                    raise
+                else:
+                    return False, False, False, fail_msg, trace
+
     if context == 'features_profiles':
         metric_data_dir = '%s/%s/%s' % (
             settings.IONOSPHERE_PROFILES_FOLDER, timeseries_dir,

@@ -32,6 +32,9 @@ import settings
 import skyline_version
 
 from skyline_functions import RepresentsInt, mkdir_p, write_data_to_file
+# @added 20200813 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
+from skyline_functions import historical_data_dir_exists
+
 from tsfresh_feature_names import TSFRESH_FEATURES
 
 from database import (
@@ -57,6 +60,16 @@ except:
     full_duration_seconds = 86400
 
 full_duration_in_hours = full_duration_seconds / 60 / 60
+
+# @added 20200813 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
+try:
+    IONOSPHERE_HISTORICAL_DATA_FOLDER = settings.IONOSPHERE_HISTORICAL_DATA_FOLDER
+except:
+    IONOSPHERE_HISTORICAL_DATA_FOLDER = '/opt/skyline/ionosphere/historical_data'
+try:
+    IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR = settings.IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
+except:
+    IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR = []
 
 # @created 20170114 - Feature #1854: Ionosphere learn
 # This function was moved in its entirety from webapp/ionosphere_backend.py
@@ -440,6 +453,24 @@ def create_features_profile(current_skyline_app, requested_timestamp, data_for_m
         metric_training_data_dir = '%s/%s/%s' % (
             settings.IONOSPHERE_DATA_FOLDER, str(requested_timestamp),
             metric_timeseries_dir)
+
+        # @added 20200813 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
+        if IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR and context == 'training_data':
+            try:
+                historical_data, metric_training_data_dir = historical_data_dir_exists(current_skyline_app, metric_training_data_dir)
+                if historical_data:
+                    current_logger.info('create_features_profile :: using historical training data - %s' % metric_training_data_dir)
+            except:
+                trace = traceback.format_exc()
+                current_logger.error(trace)
+                fail_msg = 'error :: create_features_profile :: failed to determine whether this is historical training data'
+                current_logger.error('%s' % fail_msg)
+                if context == 'training_data':
+                    # Raise to webbapp I believe to provide traceback to user in UI
+                    raise
+                else:
+                    return False, False, False, fail_msg, trace
+
     if context == 'features_profiles':
         metric_training_data_dir = '%s/%s/%s' % (
             settings.IONOSPHERE_PROFILES_FOLDER, metric_timeseries_dir,

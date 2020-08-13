@@ -236,6 +236,10 @@ Also note:
 # Allow the operator to save a training_data set -->
     {% if saved_metric_td == False %}
     <h4><span class="logo"><span class="sky">Training ::</span> <span class="re">data :: </span>{{ for_metric }} - {{ human_date }}</h4>
+<!-- # @added 20200813 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR -->
+      {% if historical_training_data == True %}
+    <center><h4><span class="logo"><span class="sky"></span> <span class="re">This is HISTORICAL training data</span></span></h4></center>
+      {% endif %}
     {% else %}
     <h4><span class="logo"><span class="re">SAVED - </span><span class="sky">Training ::</span> <span class="re">data :: </span>{{ for_metric }} - {{ human_date }}</h4>
     {% endif %}

@@ -61,6 +61,16 @@ try:
 except:
     IONOSPHERE_GRAPHITE_NOW_GRAPHS_OVERRIDE = False
 
+# @added 20200813 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
+try:
+    IONOSPHERE_HISTORICAL_DATA_FOLDER = settings.IONOSPHERE_HISTORICAL_DATA_FOLDER
+except:
+    IONOSPHERE_HISTORICAL_DATA_FOLDER = '/opt/skyline/ionosphere/historical_data'
+try:
+    IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR = settings.IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
+except:
+    IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR = []
+
 config = {'user': settings.PANORAMA_DBUSER,
           'password': settings.PANORAMA_DBUSERPASS,
           'host': settings.PANORAMA_DBHOST,
@@ -2151,3 +2161,47 @@ def sort_timeseries(timeseries):
         del timeseries
 
     return sorted_timeseries
+
+
+# @added 20200813 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
+def historical_data_dir_exists(current_skyline_app, ionosphere_data_dir):
+    """
+    This function is used to determine if an ionosphere data dir exists and if
+    it does return the path.
+    """
+    current_skyline_app_logger = str(current_skyline_app) + 'Log'
+    current_logger = logging.getLogger(current_skyline_app_logger)
+
+    historical_data_path_exists = False
+    if os.path.exists(ionosphere_data_dir):
+        current_logger.info('%s :: historical_data_dir_exists :: ionosphere_data_dir exists - %s' % (
+            current_skyline_app, ionosphere_data_dir))
+        return (historical_data_path_exists, ionosphere_data_dir)
+    else:
+        current_logger.info('%s :: historical_data_dir_exists :: ionosphere_data_dir does not exist - %s' % (
+            current_skyline_app, ionosphere_data_dir))
+
+    # @added 20200813 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
+    try:
+        IONOSPHERE_HISTORICAL_DATA_FOLDER = settings.IONOSPHERE_HISTORICAL_DATA_FOLDER
+    except:
+        IONOSPHERE_HISTORICAL_DATA_FOLDER = '/opt/skyline/ionosphere/historical_data'
+    try:
+        IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR = settings.IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
+    except:
+        IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR = []
+
+    if IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR:
+        current_logger.info('%s :: historical_data_dir_exists :: checking for any IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR namespaces match in %s' % (
+            current_skyline_app, ionosphere_data_dir))
+        historical_data_dir = ionosphere_data_dir.replace(settings.IONOSPHERE_DATA_FOLDER, IONOSPHERE_HISTORICAL_DATA_FOLDER)
+        if os.path.exists(historical_data_dir):
+            historical_data_path_exists = True
+            current_logger.info('%s :: historical_data_dir_exists :: historical_data_dir exists - %s' % (
+                current_skyline_app, historical_data_dir))
+        else:
+            current_logger.info('%s :: historical_data_dir_exists :: historical_data_dir does not exist - %s' % (
+                current_skyline_app, historical_data_dir))
+        if historical_data_path_exists:
+            ionosphere_data_dir = historical_data_dir
+    return (historical_data_path_exists, ionosphere_data_dir)

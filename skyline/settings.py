@@ -2105,8 +2105,22 @@ ENABLE_IONOSPHERE_DEBUG = False
 IONOSPHERE_DATA_FOLDER = '/opt/skyline/ionosphere/data'
 """
 :var IONOSPHERE_DATA_FOLDER: This is the path for the Ionosphere data folder
-    where anomaly data for timeseries will be stored - absolute path
+    where anomaly data for timeseries and training will be stored - absolute path
 :vartype IONOSPHERE_DATA_FOLDER: str
+"""
+
+IONOSPHERE_HISTORICAL_DATA_FOLDER = '/opt/skyline/ionosphere/historical_data'
+"""
+:var IONOSPHERE_HISTORICAL_DATA_FOLDER: The absolute path for the Ionosphere
+    historical data folder where anomaly data for timeseries and training will
+    moved to when it reaches it purge age as defined for the namespace in
+    :mod:`settings.IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR`. Unless you
+    are feeding in and analysing historical data, this can generally be ignored
+    and is an advanced setting.  Note if you do use this and
+    :mod:`settings.IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR` be advised
+    that there is NO purge of this directory, it must be done MANUALLY when
+    you have completed your historical analysis and training.
+:vartype IONOSPHERE_HISTORICAL_DATA_FOLDER: str
 """
 
 IONOSPHERE_PROFILES_FOLDER = '/opt/skyline/ionosphere/features_profiles'
@@ -2136,8 +2150,20 @@ IONOSPHERE_CHECK_MAX_AGE = 300
 IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR = 86400
 """
 :var IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR: Ionosphere will keep timeseries
-    data files for this long, for the operator to review.
+    data files for this long, for the operator to review and train on.
 :vartype IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR: int
+"""
+
+IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR = []
+"""
+:var IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR: After :mod:`settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR`
+    has elapsed Ionosphere will move training data for metric namespaces declared
+    in this list to the :mod:`settings.ONOSPHERE_HISTORICAL_DATA_FOLDER`. The
+    metric namespaces defined here are only matched on a simple substring match,
+    NOT on elements and/or a regex.  If the substring is in the metric name
+    it will be moved.  Unless you are feeding in and analysed historical data,
+    this can generally be ignored and is an advanced setting.
+:vartype IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR: list
 """
 
 IONOSPHERE_MANAGE_PURGE = True

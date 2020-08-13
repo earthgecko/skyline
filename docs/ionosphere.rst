@@ -871,6 +871,20 @@ MySQL configuration
 There could be a lot of tables. **DEFINITELY** implement ``innodb_file_per_table``
 in MySQL.
 
+IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
+----------------------------------------------
+
+Enabling :mod:`settings.IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR` allows
+you to not remove training data when it is :mod:`settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR`
+seconds old.  Instead for any training data for metrics that match a namespace
+substring declared in the :mod:`settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR`
+list will be moved to :mod:`settings.IONOSPHERE_HISTORICAL_DATA_FOLDER`
+This is an advance feature and not for general purpose, please read the
+documentation in the docstrings for more info, see:
+:mod:`settings.IONOSPHERE_HISTORICAL_DATA_FOLDER` and
+:mod:`settings.IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR`
+
+
 Ionosphere - autobuild features_profiles dir
 --------------------------------------------
 

@@ -80,7 +80,9 @@ class IonosphereAgent():
             sleep(100)
 
             # Clean up old timeseries data files and folders
-            self.purge_old_data_dirs(settings.IONOSPHERE_DATA_FOLDER, settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR)
+            # @modified 20200813 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
+            # Do not clean up and purge data on start up
+            # self.purge_old_data_dirs(settings.IONOSPHERE_DATA_FOLDER, settings.IONOSPHERE_KEEP_TRAINING_TIMESERIES_FOR)
 
 
 if __name__ == "__main__":
