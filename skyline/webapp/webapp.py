@@ -3620,7 +3620,11 @@ def ionosphere():
                                 settings.IONOSPHERE_DATA_FOLDER,
                                 requested_timestamp, timeseries_dir)
 
+                        # @added 20200813 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
                         historical_training_data_exists = False
+                        # @added 20200814 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
+                        training_data_dir_found = False
+
                         if not isdir(ionosphere_data_dir):
 
                             # @added 20200813 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
@@ -3633,6 +3637,8 @@ def ionosphere():
                                         logger.info('using historical training data - %s' % ionosphere_data_dir)
                                         historical_training_data_exists = True
                                         valid_timestamp = True
+                                        # @added 20200814 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
+                                        training_data_dir_found = True
                                     else:
                                         logger.info('no historical training data found for %s' % ionosphere_data_dir)
                                 except:
@@ -3640,8 +3646,13 @@ def ionosphere():
                                     logger.error(trace)
                                     fail_msg = 'error :: ionosphere_metric_data :: failed to determine whether this is historical training data'
                                     logger.error('%s' % fail_msg)
+                        else:
+                            # @added 20200814 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
+                            training_data_dir_found = True
 
-                        if not historical_training_data_exists:
+                        # @added 20200814 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
+                        # if not historical_training_data_exists:
+                        if not training_data_dir_found:
                             logger.info(
                                 '%s=%s no timestamp metric training data dir found - %s' %
                                 (key, str(value), ionosphere_data_dir))
