@@ -194,6 +194,33 @@ def ionosphere_get_metrics_dir(requested_timestamp, context):
                         timestamp = int(path.split(root)[1])
                     timestamps.append(timestamp)
 
+    # @added 20200814 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
+    # Return historical metrics as well if enabled
+    if IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR and context == 'training_data':
+        for root, dirs, files in walk(IONOSPHERE_HISTORICAL_DATA_FOLDER):
+            for file in files:
+                if file.endswith('.json'):
+                    data_file = True
+                    if re.search(exclude_redis_json, file):
+                        data_file = False
+                    if re.search('mirage.redis.json', file):
+                        data_file = False
+                    if re.search(requested_timestamp, root) and data_file:
+                        metric_name = file.replace('.json', '')
+                        for historical_metric_namespace in IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR:
+                            if historical_metric_namespace in metric_name:
+                                add_metric = True
+                    else:
+                        add_metric = False
+                    if add_metric:
+                        metric_paths.append([metric_name, root])
+                        metrics.append(metric_name)
+                        if context == 'training_data':
+                            timestamp = int(root.split('/')[5])
+                        if context == 'features_profiles':
+                            timestamp = int(path.split(root)[1])
+                        timestamps.append(timestamp)
+
     set_unique_metrics = set(metrics)
     unique_metrics = list(set_unique_metrics)
     unique_metrics.sort()
@@ -303,6 +330,13 @@ def ionosphere_data(requested_timestamp, data_for_metric, context):
         for historical_metric_namespace in IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR:
             if historical_metric_namespace in base_name:
                 check_for_historical_training_data = True
+
+        # @added 20200814 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
+        # Return historical metrics if this is an 'all' request to list_by date
+        # or metric (if no training data exists for the metric)
+        if base_name in 'all':
+            check_for_historical_training_data = True
+
         historical_data_path_exists = False
         if check_for_historical_training_data:
             if path.exists(IONOSPHERE_HISTORICAL_DATA_FOLDER):

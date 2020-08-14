@@ -373,6 +373,10 @@ def check_auth(username, password):
     """This function is called to check if a username /
     password combination is valid.
     """
+    # @added 20200814 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
+    # Log full request
+    logger.info('request :: %s' % (request.url))
+
     if settings.WEBAPP_AUTH_ENABLED:
         return username == settings.WEBAPP_AUTH_USER and password == settings.WEBAPP_AUTH_USER_PASSWORD
     else:
@@ -3438,7 +3442,23 @@ def ionosphere():
                                 if IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR:
                                     check_for_historical_training_data = False
                                     base_name = request.args.get(str('metric'), None)
+                                    # @added 20200814 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
+                                    # Handle when a request is submitted to list
+                                    # the training data for a timestamp, not for
+                                    # a metric, e.g. ionosphere?timestamp_td=1597061559&requested_timestamp=1597061559
+                                    if not base_name:
+                                        if 'timestamp_td' in request.args:
+                                            if 'requested_timestamp' in request.args:
+                                                check_for_historical_training_data = True
+
                                     for historical_metric_namespace in IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR:
+                                        # @added 20200814 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
+                                        # Handle when a request is submitted to list
+                                        # the training data for a timestamp, so if
+                                        # base_name is not set skip this check
+                                        if not base_name:
+                                            break
+
                                         if historical_metric_namespace in base_name:
                                             check_for_historical_training_data = True
                                             break
