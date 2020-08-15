@@ -804,6 +804,24 @@ def alert_slack(datapoint, metric_name, expiration_time, metric_trigger, algorit
         logger.error('error :: alert_slack - could not initiate SlackClient')
         return False
 
+    # @added 20200815 - Bug #3676: Boundary slack alert errors
+    #                   Task #3608: Update Skyline to Python 3.8.3 and deps
+    #                   Task #3612: Upgrade to slack v2
+    # Strange only Boundary slack messages are erroring on a tuple or part
+    # thereof, mirage_alerters using the same method are fine???
+    # The server responded with: {'ok': False, 'error': 'invalid_channel', 'channel': "('#skyline'"}
+    # This fix handles converting tuple items into list items where the channel
+    # is a tuple.
+    channels_list = []
+    for channel in channels:
+        if type(channel) == tuple:
+            for ichannel in channel:
+                channels_list.append(str(ichannel))
+        else:
+            channels_list.append(str(channel))
+    if channels_list:
+        channels = channels_list
+
     for channel in channels:
         initial_comment = slack_title + ' :: <' + link + '|graphite image link>\nFor anomaly at ' + slack_time_string
         try:
