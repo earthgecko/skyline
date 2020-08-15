@@ -421,7 +421,6 @@ class Ionosphere(Thread):
                                                         dest_path = rrpath.replace(dir_path, IONOSPHERE_HISTORICAL_DATA_FOLDER)
                                                         if not os.path.exists(dest_path):
                                                             mkdir_p(dest_path)
-                                                        # training_files = os.listdir(rrpath)
                                                         training_files = []
                                                         for training_files_dir in training_files_dirs:
                                                             training_files = os.listdir(training_files_dir)
@@ -435,8 +434,6 @@ class Ionosphere(Thread):
                                                         logger.error('error :: failed to move files from %s to %s' % (current_folder, IONOSPHERE_HISTORICAL_DATA_FOLDER))
                                                         files_moved = False
                                                     if files_moved:
-                                                        historical_folder = current_folder.replace(dir_path, IONOSPHERE_HISTORICAL_DATA_FOLDER)
-                                                        # historical_training_data_list.append(historical_folder)
                                                         try:
                                                             rmtree(rrpath)
                                                             logger.info('removed - %s as files were moved to %s' % (rrpath, dest_path))
@@ -512,9 +509,15 @@ class Ionosphere(Thread):
                             add_folder = False
                             metric = None
                             timestamp = None
+                            # @added 20200815 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
+                            # Declared these first for all
+                            metric_file = None
+                            metric_file_path = None
+
                             if '/learn/' in path:
-                                metric_file = None
-                                metric_file_path = None
+                                # @modified 20200815 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
+                                # metric_file = None
+                                # metric_file_path = None
                                 continue
                             for ifile in files:
                                 if ifile.endswith('.png'):
