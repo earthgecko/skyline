@@ -132,11 +132,16 @@ class Roomba(Thread):
                 for metric in unique_metrics:
                     if metric not in full_namespace_batch_metrics:
                         non_batch_unique_metrics.append(metric)
-                del full_namespace_batch_metrics
+                # @modified 20200815 - Feature #3650: ROOMBA_DO_NOT_PROCESS_BATCH_METRICS
+                # del after log
+                # UnboundLocalError: local variable 'full_namespace_batch_metrics' referenced before assignment
+                # del full_namespace_batch_metrics
                 if non_batch_unique_metrics:
                     logger.info('roomba :: batch_processing :: removing %s batch metrics from unique_metrics' % str(len(full_namespace_batch_metrics)))
                     unique_metrics = non_batch_unique_metrics
                 del non_batch_unique_metrics
+                # @added 20200815 - Feature #3650: ROOMBA_DO_NOT_PROCESS_BATCH_METRICS
+                del full_namespace_batch_metrics
 
         keys_per_processor = int(ceil(float(len(unique_metrics)) / float(settings.ROOMBA_PROCESSES)))
         if i == settings.ROOMBA_PROCESSES:
