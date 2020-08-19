@@ -1253,11 +1253,36 @@ ROOMBA_DO_NOT_PROCESS_BATCH_METRICS = False
 """
 :var ROOMBA_DO_NOT_PROCESS_BATCH_METRICS: Whether Horizon roomba should
     euthanize batch processing metrics.
-:vartype ROOMBA_TIMEOUT: boolean
+:vartype ROOMBA_DO_NOT_PROCESS_BATCH_METRICS: boolean
 
 This should be left as False unless you are backfilling batch metrics and do not
 want roomba removing data points before analyzer_batch has analyzed them.  If
 this is set to True, analyzer_batch euthanizes batch metrics.
+"""
+
+ROOMBA_BATCH_METRICS_CUSTOM_DURATIONS = []
+"""
+:var ROOMBA_BATCH_METRICS_CUSTOM_DURATIONS: A list of list of namespaces and
+    and custom durations for batch metrics.  Advanced feature for development
+    and testing.
+:vartype ROOMBA_BATCH_METRICS_CUSTOM_DURATIONS: tuple
+
+This allows for testing metrics via  analyzer_batch with a different
+FULL_DURATION.  It is only applied if
+:mod:`settings.ROOMBA_DO_NOT_PROCESS_BATCH_METRICS` is set to True.  It allows
+for a metric to be feed to Skyline with historical data that is not aligned with
+the 1 data point per 60 seconds paradigm and a greater duration than
+:mod:`settings.FULL_DURATION`, 1 data point per 10 mins for example, allowing
+analyzer_batch to fake Mirage analysed for historical data.  analyzer_batch
+roomba will use this setting for the euthanize older than value if the metric
+name is in a metric namespace found in a list.
+
+- **Tuple example**::
+
+    ROOMBA_BATCH_METRICS_CUSTOM_DURATIONS = [
+        ['test.app6.requests.10minutely', 604800],
+    ]
+
 """
 
 MAX_RESOLUTION = 1000
@@ -2907,4 +2932,42 @@ VISTA_GRAPHITE_BATCH_SIZE = 20
     from a Graphite host in a single request, if the metrics being requested are
     being requested with the same from parameter (timestamp).
 :vartype VISTA_GRAPHITE_BATCH_SIZE: int
+"""
+
+"""
+SNAB settings
+"""
+
+SNAB_DATA_DIR = '/opt/skyline/SNAB'
+"""
+:var SNAB_DATA_DIR: The directory where SNAB writes data files.
+:vartype SNAB_DATA_DIR: str
+"""
+
+SNAB_anomalyScore = {}
+"""
+:var SNAB_anomalyScore: Each analysis app or all apps can record an anomalyScore
+    for each analysis.  This is an advanced feature for testing and development
+    purposes.
+:vartype SNAB_anomalyScore: dict
+
+- **Examples**::
+
+    SNAB_anomalyScore = {}
+
+    SNAB_anomalyScore = {
+        'all': ['telegraf.test-server1'],
+        'analyzer': ['telegraf.test-server1'],
+        'analyzer_batch': ['telegraf.test-server1', 'test_batch_metrics.'],
+        'mirage': ['telegraf.test-server1', 'test_batch_metrics.'],
+        'SNAB': ['\.'],
+    }
+
+    SNAB_anomalyScore = {
+        'all': [],
+        'analyzer': ['telegraf.test-server1'],
+        'analyzer_batch': ['telegraf.test-server1', 'test_batch_metrics.'],
+        'mirage': ['telegraf.test-server1', 'test_batch_metrics.'],
+    }
+
 """

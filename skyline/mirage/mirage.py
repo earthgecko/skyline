@@ -2571,7 +2571,6 @@ class Mirage(Thread):
                         if LOCAL_DEBUG:
                             logger.error('error :: failed to add %s to mirage.metrics_expiration_times set' % str(mirage_alert_expiration_data))
 
-
             # Reset counters
             # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
             # Use Redis sets instead of Manager().list()
