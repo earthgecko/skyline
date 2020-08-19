@@ -189,6 +189,10 @@ class Worker(Process):
         last_send_to_graphite = time()
         queue_sizes = []
 
+        # @added 20200815 - Feature #3680: horizon.worker.datapoints_sent_to_redis
+        datapoints_sent_to_redis = 0
+        last_datapoints_to_redis = int(time())
+
         # python-2.x and python3.x handle while 1 and while True differently
         # while 1:
         running = True
@@ -253,6 +257,8 @@ class Worker(Process):
                     # pipe.sadd(full_uniques, key)
                     try:
                         pipe.append(str(key), packb(metric[1]))
+                        # @added 20200815 - Feature #3680: horizon.worker.datapoints_sent_to_redis
+                        datapoints_sent_to_redis += 1
                     except Exception as e:
                         logger.error('%s :: error on pipe.append: %s' % (skyline_app, str(e)))
                     try:
@@ -318,3 +324,12 @@ class Worker(Process):
                     # reset queue_sizes and last_sent_graphite
                     queue_sizes = []
                     last_send_to_graphite = time()
+
+                # @added 20200815 - Feature #3680: horizon.worker.datapoints_sent_to_redis
+                last_datapoints_count_to_redis = now - last_datapoints_to_redis
+                if last_datapoints_count_to_redis >= 60:
+                    logger.info('%s :: datapoints_sent_to_redis in last 60 seconds - %s' % (skyline_app, str(datapoints_sent_to_redis)))
+                    send_metric_name = '%s.datapoints_sent_to_redis' % skyline_app_graphite_namespace
+                    send_graphite_metric(skyline_app, send_metric_name, datapoints_sent_to_redis)
+                    datapoints_sent_to_redis = 0
+                    last_datapoints_to_redis = int(time())
