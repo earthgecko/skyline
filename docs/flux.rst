@@ -28,8 +28,11 @@ Redis key, flux discards the data.
 POST request
 ------------
 
-The POST endpoint is `/flux/metric_data_post` and this accepts JSON data.
-Here is an example of the data it requires and an example POST request.
+The POST endpoint is `/flux/metric_data_post` and this accepts JSON data.  The
+json can have data for a single metric or for multiple metrics in a single POST.
+
+Here is an example of the data a sinlge metric POST requires and an example POST
+request.
 
 .. code-block:: json
 
@@ -43,6 +46,34 @@ Here is an example of the data it requires and an example POST request.
 .. code-block:: bash
 
   curl -vvv -u username:password -d '{"metric":"vista.nodes.skyline-1.cpu.user","timestamp":"1478021700","value":"1.0","key":"YOURown32charSkylineAPIkeySecret"}' -H "Content-Type: application/json" -X POST https://skyline.example.org/flux/metric_data_post
+
+Here is an example of the data a multiple metrics POST requires and an example
+POST request for multiple metrics:
+
+.. warning:: When submitting mulitple metrics in a POST, if any one element of
+  any metric is not valid the entire POST will be rejected.
+
+.. code-block:: json
+
+  {
+  	"key": "YOURown32charSkylineAPIkeySecret"
+    "metrics": [
+      {
+      	"metric": "vista.nodes.skyline-1.cpu.user",
+      	"timestamp": "1478021700",
+      	"value": "1.0",
+      },
+      {
+      	"metric": "vista.nodes.skyline-1.cpu.system",
+      	"timestamp": "1478021700",
+      	"value": "0.2",
+      }
+    ]
+  }
+
+.. code-block:: bash
+
+  curl -vvv -u username:password -d '{"key":"YOURown32charSkylineAPIkeySecret","metrics":[{"metric":"vista.nodes.skyline-1.cpu.user","timestamp":"1478021700","value":"1.0"},{"metric":"vista.nodes.skyline-1.cpu.system","timestamp":"1478021700","value":"0.2"}]}' -H "Content-Type: application/json" -X POST https://skyline.example.org/flux/metric_data_post
 
 GET request
 -----------

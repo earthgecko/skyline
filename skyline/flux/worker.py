@@ -193,6 +193,10 @@ class Worker(Process):
                     # Best effort de-duplicate the data
                     valid_data = True
 
+                    # @added 20200818 - Feature #3694: flux - POST multiple metrics
+                    # Handle Redis and literal_eval separately
+                    redis_last_metric_data = None
+
                     # @modified 20200206 - Feature #3444: Allow flux to backfill
                     # Only check flux.last key if this is not backfill
                     if not backfill:
@@ -203,14 +207,25 @@ class Worker(Process):
                             #                      Branch #3262: py3
                             # redis_last_metric_data = self.redis_conn.get(cache_key)
                             redis_last_metric_data = self.redis_conn_decoded.get(cache_key)
-                            last_metric_data = literal_eval(redis_last_metric_data)
-                            last_metric_timestamp = int(last_metric_data[0])
-                            if LOCAL_DEBUG:
-                                logger.info('worker :: debug :: last_metric_timestamp for %s from %s is %s' % (metric, str(cache_key), str(last_metric_timestamp)))
                         except:
                             logger.error(traceback.format_exc())
                             logger.error('error :: worker :: failed to determine last_metric_timestamp from Redis key %s' % str(cache_key))
-                            last_metric_timestamp = False
+                            redis_last_metric_data = None
+
+                        # @modified 20200818 - Feature #3694: flux - POST multiple metrics
+                        # Handle Redis and literal_eval separately, only
+                        # literal_eval if Redis had data for the key
+                        if redis_last_metric_data:
+                            try:
+                                last_metric_data = literal_eval(redis_last_metric_data)
+                                last_metric_timestamp = int(last_metric_data[0])
+                                if LOCAL_DEBUG:
+                                    logger.info('worker :: debug :: last_metric_timestamp for %s from %s is %s' % (metric, str(cache_key), str(last_metric_timestamp)))
+                            except:
+                                logger.error(traceback.format_exc())
+                                logger.error('error :: worker :: failed to determine last_metric_timestamp from Redis key %s' % str(cache_key))
+                                last_metric_timestamp = False
+
                         if last_metric_timestamp:
                             if timestamp <= last_metric_timestamp:
                                 valid_data = False

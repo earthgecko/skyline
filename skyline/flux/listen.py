@@ -17,6 +17,26 @@ if True:
     import settings
     import flux
 
+# @added 20200818 - Feature #3694: flux - POST multiple metrics
+# Added validation of FLUX_API_KEYS
+valid_keys = []
+try:
+    FLUX_SELF_API_KEY = settings.FLUX_SELF_API_KEY
+    valid_keys.append(FLUX_SELF_API_KEY)
+except:
+    pass
+FLUX_API_KEYS = {}
+try:
+    FLUX_API_KEYS = settings.FLUX_API_KEYS
+except:
+    pass
+if FLUX_API_KEYS:
+    for flux_api_key in FLUX_API_KEYS:
+        try:
+            valid_keys.append(str(flux_api_key))
+        except:
+            pass
+
 # @modified 20191129 - Branch #3262: py3
 # Consolidate flux logging
 # logger = set_up_logging('listen')
@@ -26,6 +46,11 @@ LOCAL_DEBUG = False
 
 
 def validate_key(caller, apikey):
+
+    # @added 20200818 - Feature #3694: flux - POST multiple metrics
+    # Added metric_namespace_prefix which is declared via the FLUX_API_KEYS
+    metric_namespace_prefix = None
+
     try:
         isAlNum = False
         isAlNum = apikey.isalnum()
@@ -37,18 +62,39 @@ def validate_key(caller, apikey):
             else:
                 logger.error('error :: %s :: invalid api key length of %s - %s' % (
                     caller, str(keyLength), str(apikey)))
+        # @added 20200818 - Feature #3694: flux - POST multiple metrics
+        # Added validation of FLUX_API_KEYS
+        if valid_keys:
+            if apikey not in valid_keys:
+                logger.error('error :: %s :: invalid api key %s - not known' % (
+                    caller, str(keyLength), str(apikey)))
+                keyValid = False
+            if keyValid:
+                try:
+                    metric_namespace_prefix = settings.FLUX_API_KEYS[apikey]
+                except:
+                    metric_namespace_prefix = None
+                    pass
+
         if not keyValid:
             logger.error('error :: %s :: invalid api key - %s' % (
                 caller, str(apikey)))
             # resp.status = falcon.HTTP_400
-            return False
+            # @modified 20200818 - Feature #3694: flux - POST multiple metrics
+            # Added metric_namespace_prefix
+            return False, metric_namespace_prefix
     except:
         logger.error(traceback.format_exc())
         logger.error('error :: %s :: failed to validate api key - %s' % (
             caller, str(apikey)))
         # resp.status = falcon.HTTP_400
-        return False
-    return True
+        # @modified 20200818 - Feature #3694: flux - POST multiple metrics
+        # Added metric_namespace_prefix
+        return False, metric_namespace_prefix
+
+    # @modified 20200818 - Feature #3694: flux - POST multiple metrics
+    # Added metric_namespace_prefix
+    return True, metric_namespace_prefix
 
 
 def validate_timestamp(caller, timestamp):
@@ -174,10 +220,16 @@ class MetricData(object):
                 resp.status = falcon.HTTP_400
                 return
 
+            # @modified 20200818 - Feature #3694: flux - POST multiple metrics
+            # Added metric_namespace_prefix
+            metric_namespace_prefix = None
+
             try:
                 if str(request_param_key) == 'key':
                     key = str(request_param_value)
-                    keyValid = validate_key('listen :: MetricData GET', key)
+                    # @modified 20200818 - Feature #3694: flux - POST multiple metrics
+                    # Added metric_namespace_prefix
+                    keyValid, metric_namespace_prefix = validate_key('listen :: MetricData GET', key)
                     if not keyValid:
                         logger.error('error :: listen :: invalid key in GET request arguments - %s - %s' % (
                             str(request_param_value), str(req.query_string)))
@@ -260,6 +312,11 @@ class MetricData(object):
         if not timestamp:
             timestamp = int(time())
 
+        # @modified 20200818 - Feature #3694: flux - POST multiple metrics
+        # Added metric_namespace_prefix which is declared via the FLUX_API_KEYS
+        if metric_namespace_prefix:
+            metric = '%s.%s' % (str(metric_namespace_prefix), metric)
+
         # metric to add to queue
         # @modified 20200206 - Feature #3444: Allow flux to backfill
         # Added backfill
@@ -336,12 +393,12 @@ class MetricDataPost(object):
             logger.error('error :: listen :: invalid post data')
 
         if LOCAL_DEBUG:
-            logger.info('listen :: request arguments and POST data - %s - %s' % (
+            logger.debug('debug :: listen :: request arguments and POST data - %s - %s' % (
                 str(req.query_string), str(postData)))
 
         if not postData:
             if LOCAL_DEBUG:
-                logger.info('listen :: no POST data recieved')
+                logger.debug('debug :: listen :: no POST data recieved')
             resp.status = falcon.HTTP_400
             return
 
@@ -375,14 +432,21 @@ class MetricDataPost(object):
                 resp.status = falcon.HTTP_400
                 return
 
+        # @added 20200818 - Feature #3694: flux - POST multiple metrics
+        metric_namespace_prefix = None
+
         try:
             key = str(postData['key'])
-            keyValid = validate_key('listen :: MetricDataPOST POST', key)
+            # @modified 20200818 - Feature #3694: flux - POST multiple metrics
+            # Added metric_namespace_prefix
+            keyValid, metric_namespace_prefix = validate_key('listen :: MetricDataPOST POST', key)
             if not keyValid:
                 logger.error('error :: listen :: invalid key in POST data - %s - %s' % (
                     key, str(postData)))
                 resp.status = falcon.HTTP_400
                 return
+            if LOCAL_DEBUG:
+                logger.debug('debug :: listen :: valid key, metric_namespace_prefix set to %s' % str(metric_namespace_prefix))
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: listen :: could not validate the key from POST data - %s' % (
@@ -390,94 +454,204 @@ class MetricDataPost(object):
             resp.status = falcon.HTTP_400
             return
 
+        # @added 20200818 - Feature #3694: flux - POST multiple metrics
+        # Determine if the POST data is for a single metric or multiple metrics
+        metrics = {}
         try:
-            metric = str(postData['metric'])
+            metrics = postData['metrics']
             if LOCAL_DEBUG:
-                logger.info('listen :: metric from postData set to %s' % metric)
-        except:
-            logger.error('error :: listen :: no valid metric in request POST data - returned 400 - %s' % (
+                logger.debug('debug :: listen :: metrics is set in the POST data - %s' % str(metrics))
+                for item in metrics:
+                    logger.debug('debug :: listen :: metrics item - %s' % str(item))
+                    logger.debug('debug :: listen :: metrics item - metric - %s' % str(item['metric']))
+        except KeyError:
+            metrics = {}
+            pass
+        except Exception:
+            logger.error('error :: listen :: metrics was passed in the request POST data but an error was encountered - returned 400 - %s' % (
                 str(postData)))
             resp.status = falcon.HTTP_400
             return
-
-        # @added 20200206 - Feature #3444: Allow flux to backfill
-        try:
-            fill = str(postData['fill'])
-            if fill == 'true':
-                backfill = True
-        except:
-            backfill = False
-
-        try:
-            timestamp_present = str(postData['timestamp'])
-        except:
-            timestamp_present = False
-        if timestamp_present:
-            try:
-                # @modified 20200206 - Feature #3444: Allow flux to backfill
-                # Only valid_timestamp is this is not a backfill request
-                if not backfill:
-                    valid_timestamp = validate_timestamp('listen :: MetricDataPOST POST', str(postData['timestamp']))
-                else:
-                    valid_timestamp = True
-                if valid_timestamp:
-                    timestamp = int(postData['timestamp'])
-                else:
+        if metrics:
+            for metric_data in metrics:
+                # Add metric to add to queue
+                metric = None
+                timestamp = None
+                value = None
+                valid_value = None
+                backfill = False
+                try:
+                    metric = str(metric_data['metric'])
+                    if LOCAL_DEBUG:
+                        logger.debug('debug :: listen :: metric from postData set to %s' % metric)
+                except:
+                    logger.error('error :: listen :: no valid metric in the request POST metrics data - returned 400 - %s' % (
+                        str(postData)))
                     resp.status = falcon.HTTP_400
                     return
-            except:
-                logger.error('error :: listen :: invalid timestamp value in POST data - %s' % (
-                    str(postData)))
-                resp.status = falcon.HTTP_400
-                return
+                try:
+                    fill = str(metric_data['fill'])
+                    if fill == 'true':
+                        backfill = True
+                except:
+                    backfill = False
+                try:
+                    timestamp_present = str(metric_data['timestamp'])
+                except:
+                    timestamp_present = False
+                if timestamp_present:
+                    try:
+                        if not backfill:
+                            valid_timestamp = validate_timestamp('listen :: MetricDataPOST POST multiple metrics', str(timestamp_present))
+                        else:
+                            valid_timestamp = True
+                        if valid_timestamp:
+                            timestamp = int(timestamp_present)
+                        else:
+                            resp.status = falcon.HTTP_400
+                            return
+                    except:
+                        logger.error('error :: listen :: invalid timestamp value found in POST data - %s' % (
+                            str(postData)))
+                        resp.status = falcon.HTTP_400
+                        return
+                try:
+                    value_present = str(metric_data['value'])
+                except:
+                    value_present = False
+                if value_present:
+                    try:
+                        value = float(metric_data['value'])
+                        # valid_value is used as in terms of Python if value evalatuion
+                        # if value was 0.0 (or 0) they evaluate as False
+                        valid_value = True
+                    except:
+                        logger.error('error :: listen :: invalid value from POST data - %s' % (
+                            str(postData)))
+                        resp.status = falcon.HTTP_400
+                        return
+                if not metric:
+                    logger.error('error :: listen :: no metric in the POST data - %s - returning 400' % (
+                        str(postData)))
+                    resp.status = falcon.HTTP_400
+                    return
+                if not valid_value:
+                    logger.error('error :: listen :: no valid value in the POST data - %s - returning 400' % (
+                        str(postData)))
+                    resp.status = falcon.HTTP_400
+                    return
+                if not timestamp:
+                    timestamp = int(time())
 
-        try:
-            value_present = str(postData['value'])
-        except:
-            value_present = False
-        if value_present:
+                # Added metric_namespace_prefix which is declared via the FLUX_API_KEYS
+                if metric_namespace_prefix:
+                    metric = '%s.%s' % (str(metric_namespace_prefix), metric)
+
+                # Queue the metric
+                try:
+                    metric_data = [metric, value, timestamp, backfill]
+                    flux.httpMetricDataQueue.put(metric_data, block=False)
+                    logger.info('listen :: POST mulitple metric data added to flux.httpMetricDataQueue - %s' % str(metric_data))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: listen :: adding POST metric_data to the flux.httpMetricDataQueue queue - %s' % str(metric_data))
+                    resp.status = falcon.HTTP_500
+                    return
+
+        if not metrics:
             try:
-                value = float(postData['value'])
-                # valid_value is used as in terms of Python if value evalatuion
-                # if value was 0.0 (or 0) they evaluate as False
-                valid_value = True
+                metric = str(postData['metric'])
+                if LOCAL_DEBUG:
+                    logger.debug('debug :: listen :: metric from postData set to %s' % metric)
             except:
-                logger.error('error :: listen :: invalid value from POST data - %s' % (
+                logger.error('error :: listen :: no valid metric in request POST data - returned 400 - %s' % (
                     str(postData)))
                 resp.status = falcon.HTTP_400
                 return
 
-        if not key:
-            logger.error('error :: listen :: no key in the POST data - %s - returning 400' % (
-                str(postData)))
-            resp.status = falcon.HTTP_400
-            return
-        if not metric:
-            logger.error('error :: listen :: no metric in the POST data - %s - returning 400' % (
-                str(postData)))
-            resp.status = falcon.HTTP_400
-            return
-        if not valid_value:
-            logger.error('error :: listen :: no valid value in the POST data - %s - returning 400' % (
-                str(postData)))
-            resp.status = falcon.HTTP_400
-            return
+            # @added 20200206 - Feature #3444: Allow flux to backfill
+            try:
+                fill = str(postData['fill'])
+                if fill == 'true':
+                    backfill = True
+            except:
+                backfill = False
 
-        if not timestamp:
-            timestamp = int(time())
+            try:
+                timestamp_present = str(postData['timestamp'])
+            except:
+                timestamp_present = False
+            if timestamp_present:
+                try:
+                    # @modified 20200206 - Feature #3444: Allow flux to backfill
+                    # Only valid_timestamp is this is not a backfill request
+                    if not backfill:
+                        valid_timestamp = validate_timestamp('listen :: MetricDataPOST POST', str(postData['timestamp']))
+                    else:
+                        valid_timestamp = True
+                    if valid_timestamp:
+                        timestamp = int(postData['timestamp'])
+                    else:
+                        resp.status = falcon.HTTP_400
+                        return
+                except:
+                    logger.error('error :: listen :: invalid timestamp value in POST data - %s' % (
+                        str(postData)))
+                    resp.status = falcon.HTTP_400
+                    return
 
-        # Queue the metric
-        try:
-            # @modified 20200206 - Feature #3444: Allow flux to backfill
-            # Added backfill
-            metric_data = [metric, value, timestamp, backfill]
-            flux.httpMetricDataQueue.put(metric_data, block=False)
-            logger.info('listen :: POST data added to flux.httpMetricDataQueue - %s' % str(metric_data))
-        except:
-            logger.error(traceback.format_exc())
-            logger.error('error :: listen :: adding POST metric_data to the flux.httpMetricDataQueue queue - %s' % str(metric_data))
-            resp.status = falcon.HTTP_500
-            return
+            try:
+                value_present = str(postData['value'])
+            except:
+                value_present = False
+            if value_present:
+                try:
+                    value = float(postData['value'])
+                    # valid_value is used as in terms of Python if value evalatuion
+                    # if value was 0.0 (or 0) they evaluate as False
+                    valid_value = True
+                except:
+                    logger.error('error :: listen :: invalid value from POST data - %s' % (
+                        str(postData)))
+                    resp.status = falcon.HTTP_400
+                    return
+
+            if not key:
+                logger.error('error :: listen :: no key in the POST data - %s - returning 400' % (
+                    str(postData)))
+                resp.status = falcon.HTTP_400
+                return
+            if not metric:
+                logger.error('error :: listen :: no metric in the POST data - %s - returning 400' % (
+                    str(postData)))
+                resp.status = falcon.HTTP_400
+                return
+            if not valid_value:
+                logger.error('error :: listen :: no valid value in the POST data - %s - returning 400' % (
+                    str(postData)))
+                resp.status = falcon.HTTP_400
+                return
+
+            if not timestamp:
+                timestamp = int(time())
+
+            # @added 20200818 - Feature #3694: flux - POST multiple metrics
+            # Added metric_namespace_prefix which is declared via the FLUX_API_KEYS
+            if metric_namespace_prefix:
+                metric = '%s.%s' % (str(metric_namespace_prefix), metric)
+
+            # Queue the metric
+            try:
+                # @modified 20200206 - Feature #3444: Allow flux to backfill
+                # Added backfill
+                metric_data = [metric, value, timestamp, backfill]
+                flux.httpMetricDataQueue.put(metric_data, block=False)
+                logger.info('listen :: POST data added to flux.httpMetricDataQueue - %s' % str(metric_data))
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: listen :: adding POST metric_data to the flux.httpMetricDataQueue queue - %s' % str(metric_data))
+                resp.status = falcon.HTTP_500
+                return
 
         if LOCAL_DEBUG:
             try:

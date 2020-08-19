@@ -2700,6 +2700,27 @@ FLUX_SELF_API_KEY = 'YOURown32charSkylineAPIkeySecret'
 :vartype FLUX_SELF_API_KEY: str
 """
 
+FLUX_API_KEYS = {}
+"""
+:var FLUX_API_KEYS: The flux /flux/metric_data and /flux/metric_data_post
+    endpoints are controllered via API keys.  Each API key can additionally
+    specific a metric namespace prefix to prefix all metric names submitted with
+    the key with the defined namespace prefix.
+    Each API key must be a 32 character alphanumeric string [a-Z][0-9]
+    The trailing dot of the namespace prefix must not be specified it will be
+    automatically added as the separator between the namespace prefix and the
+    metric name.
+:vartype FLUX_API_KEYS: dict
+
+- **Example**::
+
+    FLUX_API_KEYS = {
+        'ZlJXpBL6QVuZg5KL4Vwrccvl8Bl3bBjC': None,
+        'KYRsv508FJpVg7pr11vnZTbeu11UvUqR': 'warehouse-1'
+    }
+
+"""
+
 FLUX_BACKLOG = 254
 """
 :var FLUX_BACKLOG: The maximum number of pending connections.  This refers to
