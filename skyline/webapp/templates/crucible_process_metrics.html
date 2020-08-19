@@ -153,6 +153,18 @@ function validate_to_process_submission()
                 <option value="true">true</option>
               </select> Whether to send Skyline <code>CONSENSUS</code> anomalies to Panorama, defaults to <code>false</code> as you probably want to validate first</td>
   		      </tr>
+<!--        # @added 20200817 - Feature #3682: SNAB - webapp - crucible_process - run_algorithms
+            # Allow the user to pass algorithms to run -->
+  		      <tr>
+              <td>run_algorithms</td>
+  		        <td><input type="text" name="run_algorithms" value="true" /> a list of comma separated algorithms to run e.g, the default when set to true<br>
+<code>histogram_bins,first_hour_average,stddev_from_average,grubbs,ks_test,mean_subtraction_cumulation,median_absolute_deviation,stddev_from_moving_average,least_squares</code><br>
+or <code>detect_drop_off_cliff</code> or <code>ks_test,detect_drop_off_cliff</code>, etc</td>
+  		      </tr>
+        algorithms = settings.ALGORITHMS
+        if run_algorithms:
+            algorithms = run_algorithms
+
   		    </tbody>
   		  </table>
         <br>

@@ -660,6 +660,23 @@ def run_algorithms(
             logger.error('error :: %s' % (traceback.format_exc()))
             logger.error('error :: falied to create sorted_anomalies on %s' % str(timeseries_file))
 
+    # @added 20200817 - Feature #3682: SNAB - webapp - crucible_process - run_algorithms
+    # Allow the user to pass run_algorithms to run
+    use_consensus = 6
+    try:
+        try:
+            from settings import CONSENSUS as use_consensus
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: falied to set uSE_CONSENSUS')
+            use_consensus = 6
+        if len(check_algorithms) <= use_consensus:
+            use_consensus = len(check_algorithms)
+            logger.info('check_algorithms passed with the number of algorithms less than CONSENSUS, use_consensus set to %s' % (str(use_consensus)))
+    except:
+        logger.error(traceback.format_exc())
+        logger.error('error :: falied to set CONSENSUS')
+
     # @added 20190611 - Feature #3106: crucible - skyline.consensus.anomalies.png
     # Plot Skyline anomalies where CONSENSUS achieved and create file resources
     # skyline.anomalies_score.txt and skyline.anomalies.csv
@@ -692,7 +709,9 @@ def run_algorithms(
                     #                      Feature #1448: Crucible web UI
                     # Added last_anomaly_timestamp to apply alert_interval against and
                     # alert_interval_discarded_anomalies.  If the alert interval is passed
-                    if consensus >= CONSENSUS:
+                    # @modified 20200817 - Feature #3682: SNAB - webapp - crucible_process - run_algorithms
+                    # if consensus >= CONSENSUS:
+                    if consensus >= use_consensus:
                         current_anomaly_timestamp = int(ts)
                         if alert_interval and last_anomaly_timestamp:
                             time_between_anomalies = current_anomaly_timestamp - last_anomaly_timestamp
@@ -716,7 +735,9 @@ def run_algorithms(
                     # anomalies_score.append([ts, value, consensus, algorithms_triggered])
                     if append_anomaly:
                         anomalies_score.append([ts, value, consensus, algorithms_triggered])
-                        if consensus >= CONSENSUS:
+                        # @modified 20200817 - Feature #3682: SNAB - webapp - crucible_process - run_algorithms
+                        # if consensus >= CONSENSUS:
+                        if consensus >= use_consensus:
                             last_anomaly_timestamp = int(ts)
             except:
                 logger.error(traceback.format_exc())
@@ -743,7 +764,9 @@ def run_algorithms(
                 sliced = timeseries[:index]
                 for i in anomalies_score:
                     if sliced[-1][0] == i[0]:
-                        if i[2] >= CONSENSUS:
+                        # @modified 20200817 - Feature #3682: SNAB - webapp - crucible_process - run_algorithms
+                        # if i[2] >= CONSENSUS:
+                        if i[2] >= use_consensus:
                             anomaly = True
                 # Point out the datapoint if it is anomalous according to
                 # Skyline CONSENSUS
