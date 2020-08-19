@@ -1914,6 +1914,10 @@ def crucible():
     # @added 20200607 - Feature #3630: webapp - crucible_process_training_data
     training_data_json = None
 
+    # @added 20200817 - Feature #3682: SNAB - webapp - crucible_process - run_algorithms
+    # Allow the user to pass algorithms to run -->
+    run_algorithms = settings.ALGORITHMS
+
     if request_args_len:
         if 'process_metrics' in request.args:
             process_metrics_request = request.args.get(str('process_metrics'), None)
@@ -2063,7 +2067,28 @@ def crucible():
 
         # @added 20200607 - Feature #3630: webapp - crucible_process_training_data
         if 'training_data_json' in request.args:
+
             training_data_json = request.args.get(str('training_data_json'), None)
+        # @added 20200817 - Feature #3682: SNAB - webapp - crucible_process - run_algorithms
+        # Allow the user to pass run_algorithms to run
+        if 'run_algorithms' in request.args:
+            known_algorithms = ['detect_drop_off_cliff']
+            for s_algorithm in settings.ALGORITHMS:
+                known_algorithms.append(s_algorithm)
+            run_algorithms_str = request.args.get(str('run_algorithms'), settings.ALGORITHMS)
+            run_algorithms = []
+            if run_algorithms_str == 'true':
+                run_algorithms = settings.ALGORITHMS
+            if not run_algorithms:
+                run_algorithms_list = run_algorithms_str.split(',')
+                logger.info('crucible_process_metrics - run_algorithms passed, generated run_algorithms_list - %s' % str(run_algorithms_list))
+                if run_algorithms_list:
+                    run_algorithms = []
+                    for r_algorithm in run_algorithms_list:
+                        if r_algorithm in known_algorithms:
+                            run_algorithms.append(r_algorithm)
+                        else:
+                            logger.error('error :: crucible_process_metrics - run_algorithms passed, with invalid algorithm - %s, excluding' % str(r_algorithm))
 
         do_process_metrics = False
         if from_timestamp and until_timestamp:
@@ -2093,7 +2118,9 @@ def crucible():
                 # Added pad_timeseries
                 # @added 20200607 - Feature #3630: webapp - crucible_process_training_data
                 # Added training_data_json
-                crucible_job_id, metrics_submitted_to_process, message, trace = submit_crucible_job(from_timestamp, until_timestamp, metrics_list, namespaces_list, source, alert_interval, user_id, user, add_to_panorama, pad_timeseries, training_data_json)
+                # @modified 20200817 - Feature #3682: SNAB - webapp - crucible_process - run_algorithms
+                # Allow the user to pass run_algorithms to run
+                crucible_job_id, metrics_submitted_to_process, message, trace = submit_crucible_job(from_timestamp, until_timestamp, metrics_list, namespaces_list, source, alert_interval, user_id, user, add_to_panorama, pad_timeseries, training_data_json, run_algorithms)
                 logger.info('crucible_process_metrics - submit_crucible_job returned (%s, %s, %s, %s)' % (
                     str(crucible_job_id), str(metrics_submitted_to_process),
                     str(message), str(trace)))

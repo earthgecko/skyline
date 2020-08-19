@@ -66,10 +66,12 @@ def engine_disposal(engine):
 # @added 20200607 - Feature #3630: webapp - crucible_process_training_data
 # Added training_data_json
 # def submit_crucible_job(from_timestamp, until_timestamp, metrics_list, namespaces_list, source, alert_interval, user_id, user, add_to_panorama, pad_timeseries, training_data_json):
+# @added 20200817 - Feature #3682: SNAB - webapp - crucible_process - run_algorithms
+# Added run_algorithms
 def submit_crucible_job(
         from_timestamp, until_timestamp, metrics_list, namespaces_list, source,
         alert_interval, user_id, user, add_to_panorama, pad_timeseries,
-        training_data_json):
+        training_data_json, run_algorithms):
     """
     Get a list of all the metrics passed and generate Crucible check files for
     each
@@ -88,6 +90,7 @@ def submit_crucible_job(
     :param pad_timeseries: the amount of data to pad the time series with
     :param training_data_json: the full path to the training_data json file if
         source is training_data
+    :param run_algorithms: list of algorithms to run
     :type from_timestamp: int
     :type until_timestamp: int
     :type metrics_list: list
@@ -99,6 +102,7 @@ def submit_crucible_job(
     :type add_to_panorama: boolean
     :type pad_timeseries: str
     :type training_data_json: str
+    :type run_algorithms: list
     :return: tuple of lists
     :rtype:  (list, list, list, list)
 
@@ -260,6 +264,12 @@ def submit_crucible_job(
                 logger.error(traceback.format_exc())
                 logger.error('error :: failed to construct graphite_override_uri_parameters with pad_timeseries_with %s' % str(pad_timeseries_with))
 
+        # @added 20200817 - Feature #3682: SNAB - webapp - crucible_process - run_algorithms
+        # Allow the user to pass algorithms to run
+        algorithms = settings.ALGORITHMS
+        if run_algorithms:
+            algorithms = run_algorithms
+
         # @modified 20200421 - Feature #3500: webapp - crucible_process_metrics
         #                      Feature #1448: Crucible web UI
         # Added add_to_panorama
@@ -281,7 +291,9 @@ def submit_crucible_job(
                                 'add_to_panorama = %s\n' \
                                 'training_data_json = %s\n' \
             % (base_name, str(datapoint), str(from_timestamp),
-               str(until_timestamp), str(settings.ALGORITHMS),
+               # @modified 20200817 - Feature #3682: SNAB - webapp - crucible_process - run_algorithms
+               # str(until_timestamp), str(settings.ALGORITHMS),
+               str(until_timestamp), str(algorithms),
                triggered_algorithms, crucible_anomaly_dir, str(graphite_metric),
                skyline_app, str(added_at), str(graphite_override_uri_parameters),
                str(alert_interval), str(add_to_panorama), str(training_data_json))
@@ -569,6 +581,9 @@ drwxr-xr-x. 439 skyline skyline  53248 Mar 30 08:56 ..
                         for timestamp, value, anomaly_score, triggered_algorithms in skyline_anomalies:
                             skyline_anomalies_int_ts.append([int(timestamp), value, anomaly_score, triggered_algorithms])
                             if anomaly_score >= settings.CONSENSUS:
+                                skyline_consensus_anomalies.append([int(timestamp), value, anomaly_score, triggered_algorithms])
+                            # @added 20200817 - Feature #3682: SNAB - webapp - crucible_process - run_algorithms
+                            if 'detect_drop_off_cliff' in triggered_algorithms:
                                 skyline_consensus_anomalies.append([int(timestamp), value, anomaly_score, triggered_algorithms])
                     if skyline_anomalies_int_ts:
                         skyline_anomalies = skyline_anomalies_int_ts
