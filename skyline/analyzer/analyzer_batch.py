@@ -117,6 +117,26 @@ if ROOMBA_DO_NOT_PROCESS_BATCH_METRICS:
         eliminated_in_python3 = True
     from redis import WatchError
     from msgpack import packb
+# @added 20200817 - Feature #3684: ROOMBA_BATCH_METRICS_CUSTOM_DURATIONS
+#                   Feature #3650: ROOMBA_DO_NOT_PROCESS_BATCH_METRICS
+#                   Feature #3480: batch_processing
+# Allow for custom durations on namespaces
+ROOMBA_BATCH_METRICS_CUSTOM_DURATIONS = []
+if ROOMBA_DO_NOT_PROCESS_BATCH_METRICS:
+    try:
+        from settings import ROOMBA_BATCH_METRICS_CUSTOM_DURATIONS
+    except:
+        ROOMBA_BATCH_METRICS_CUSTOM_DURATIONS = False
+
+# @added 20200815 - Feature #3678:  SNAB - anomalyScore
+try:
+    SNAB_DATA_DIR = settings.SNAB_DATA_DIR
+except:
+    SNAB_DATA_DIR = '/opt/skyline/SNAB'
+try:
+    SNAB_anomalyScore = settings.SNAB_anomalyScore
+except:
+    SNAB_anomalyScore = {}
 
 skyline_app_graphite_namespace = 'skyline.%s%s' % (skyline_app, SERVER_METRIC_PATH)
 
@@ -209,6 +229,7 @@ class AnalyzerBatch(Thread):
             base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
         else:
             base_name = metric_name
+
         # Check the last_timestamp metric Redis key
         last_metric_timestamp_key = 'last_timestamp.%s' % base_name
         redis_key_set = None
@@ -226,6 +247,9 @@ class AnalyzerBatch(Thread):
                     last_metric_timestamp_key, str(last_redis_timestamp),
                     str(last_analyzed_timestamp)))
 
+        if LOCAL_DEBUG:
+            logger.debug('debug :: getting Redis time series data for %s' % (base_name))
+
         raw_series = None
         # @modified 20200728 - Feature #3480: batch_processing
         #                      Feature #3486: analyzer_batch
@@ -235,7 +259,7 @@ class AnalyzerBatch(Thread):
             try:
                 raw_series = self.redis_conn.get(metric_name)
             except:
-                logger.info(traceback.format_exc())
+                logger.error(traceback.format_exc())
                 logger.error('error :: failed to get %s from Redis' % metric_name)
                 raw_series = None
 
@@ -307,6 +331,9 @@ class AnalyzerBatch(Thread):
         except:
             pass
 
+        if LOCAL_DEBUG:
+            logger.debug('debug :: got Redis time series data for %s' % (base_name))
+
         # @added 20200727 - Feature #3650: ROOMBA_DO_NOT_PROCESS_BATCH_METRICS
         #                   Feature #3480: batch_processing
         #                   Feature #3486: analyzer_batch
@@ -314,9 +341,29 @@ class AnalyzerBatch(Thread):
         # via analyzer_batch
         roombaed = False
         if ROOMBA_DO_NOT_PROCESS_BATCH_METRICS:
+            if LOCAL_DEBUG:
+                logger.debug('debug :: checking if roomba needs to be run on %s' % (base_name))
             now = int(time())
             duration = settings.FULL_DURATION + settings.ROOMBA_GRACE_TIME
             key = metric_name
+            # @added 20200817 - Feature #3684: ROOMBA_BATCH_METRICS_CUSTOM_DURATIONS
+            #                   Feature #3650: ROOMBA_DO_NOT_PROCESS_BATCH_METRICS
+            #                   Feature #3480: batch_processing
+            # Allow for custom durations on namespaces, this is for testing to
+            # allow the Redis key to have data at a different resolution than
+            # FULL_DURATION, which allows for feeding a metric at 1 data point
+            # per 10 mins (ala fake Mirage)
+            try:
+                if ROOMBA_BATCH_METRICS_CUSTOM_DURATIONS:
+                    for metric_namespace, custom_full_duration in ROOMBA_BATCH_METRICS_CUSTOM_DURATIONS:
+                        if metric_namespace in base_name:
+                            duration = custom_full_duration + settings.ROOMBA_GRACE_TIME
+                            logger.info('batch_processing :: %s found in ROOMBA_BATCH_METRICS_CUSTOM_DURATIONS, duration for roomba set to %s' % (
+                                base_name, str(duration)))
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: analyzer_batch :: failed to remove batch metric item - %s - from Redis set - %s' % (str(data), redis_set))
+
             namespace_unique_metrics = '%sunique_metrics' % str(settings.FULL_NAMESPACE)
             euthanized = 0
             trimmed_keys = 0
@@ -408,7 +455,7 @@ class AnalyzerBatch(Thread):
             try:
                 raw_series = self.redis_conn.get(metric_name)
             except:
-                logger.info(traceback.format_exc())
+                logger.error(traceback.format_exc())
                 logger.error('error :: failed to get %s from Redis' % metric_name)
                 raw_series = None
             if not raw_series:
@@ -639,12 +686,12 @@ class AnalyzerBatch(Thread):
                 try:
                     self.redis_conn.sadd('derivative_metrics', metric_name)
                 except:
-                    logger.info(traceback.format_exc())
+                    logger.error(traceback.format_exc())
                     logger.error('error :: failed to add metric to Redis derivative_metrics set')
                 try:
                     self.redis_conn.sadd('new_derivative_metrics', metric_name)
                 except:
-                    logger.info(traceback.format_exc())
+                    logger.error(traceback.format_exc())
                     logger.error('error :: failed to add metric to Redis new_derivative_metrics set')
                 try:
                     last_expire_set = int(time())
@@ -656,21 +703,58 @@ class AnalyzerBatch(Thread):
                 try:
                     self.redis_conn.sadd('non_derivative_metrics', metric_name)
                 except:
-                    logger.info(traceback.format_exc())
+                    logger.error(traceback.format_exc())
                     logger.error('error :: failed to add metric to Redis non_derivative_metrics set')
                 try:
                     self.redis_conn.sadd('new_non_derivative_metrics', metric_name)
                 except:
-                    logger.info(traceback.format_exc())
+                    logger.error(traceback.format_exc())
                     logger.error('error :: failed to add metric to Redis new_non_derivative_metrics set')
 
         not_anomalos_count = 0
+
+        # @added 20200815 - Feature #3678:  SNAB - anomalyScore
+        record_anomalyScore = False
+        if SNAB_anomalyScore:
+            SNAB_metrics = []
+            try:
+                SNAB_all_metrics = SNAB_anomalyScore['all']
+                if SNAB_all_metrics:
+                    for SNAB_metric in SNAB_all_metrics:
+                        SNAB_metrics.append(SNAB_metric)
+            except:
+                SNAB_all_metrics = []
+            try:
+                SNAB_app_metrics = SNAB_anomalyScore[skyline_app]
+                if SNAB_app_metrics:
+                    for SNAB_metric in SNAB_app_metrics:
+                        SNAB_metrics.append(SNAB_metric)
+            except:
+                SNAB_app_metrics = []
+            if SNAB_metrics:
+                for SNAB_metric_namespace in list(set(SNAB_metrics)):
+                    if SNAB_metric_namespace in base_name:
+                        record_anomalyScore = True
+                        break
+        test_anomaly = False
+        test_anomaly_at = None
+        try:
+            test_anomaly_key = 'analyzer_batch.test.%s' % base_name
+            try:
+                test_anomaly = self.redis_conn.get(test_anomaly_key)
+                test_anomaly_at = int(test_anomaly)
+                logger.info('test_anomaly - testing anomly on %s at %s' % (metric_name, str(test_anomaly_at)))
+            except:
+                test_anomaly = None
+        except:
+            test_anomaly = False
 
         # Distill timeseries strings into lists
         for i, batch_timestamp in enumerate(timestamps_to_analyse):
             self.check_if_parent_is_alive()
 
             batch_timeseries = []
+
             for timestamp, value in timeseries:
                 if int(timestamp) <= batch_timestamp:
                     batch_timeseries.append([timestamp, value])
@@ -696,12 +780,12 @@ class AnalyzerBatch(Thread):
                 # will multiply the timestamp data point by 15, this should
                 # trigger an anomaly.  Ensure you use a metric which will
                 # trigger, a load related metric is usually adequate.
-                test_anomaly = False
+                # test_anomaly = False
                 test_anomaly_at = None
                 test_anomaly_batch_timeseries = []
                 if test_anomaly:
                     test_anomaly_at = None
-                    test_anomaly_key = 'analyzer_batch.test.%s' % metric_name
+                    test_anomaly_key = 'analyzer_batch.test.%s' % base_name
                     try:
                         test_anomaly_at = self.redis_conn.get(test_anomaly_key)
                     except:
@@ -710,7 +794,7 @@ class AnalyzerBatch(Thread):
                         if int(test_anomaly_at) == int(batch_timeseries[-1][0]):
                             for timestamp, value in batch_timeseries:
                                 if int(timestamp) == int(test_anomaly_at):
-                                    anomaly_value = value * 10
+                                    anomaly_value = value * 100
                                     logger.info('test_anomaly - replacing value %s with anomaly_value of %s at %s in %s timeseries' % (
                                         str(value), str(anomaly_value),
                                         str(test_anomaly_at), metric_name))
@@ -724,7 +808,7 @@ class AnalyzerBatch(Thread):
                                     self.redis_conn.delete(test_anomaly_key)
                                     logger.info('test_anomaly - deleted test_anomaly Redis key - %s' % str(test_anomaly_key))
                                 except:
-                                    logger.info(traceback.format_exc())
+                                    logger.error(traceback.format_exc())
                                     logger.error('error :: failed to delete test_anomaly Redis key - %s' % str(test_anomaly_key))
 
                 # @modified 20200423 - Feature #3504: Handle airgaps in batch metrics
@@ -739,12 +823,51 @@ class AnalyzerBatch(Thread):
                 # anomalous, ensemble, datapoint = run_selected_batch_algorithm(batch_timeseries, metric_name)
                 # @modified 20200607 - Feature #3566: custom_algorithms
                 # Added algorithms_run
-
-                anomalous, ensemble, datapoint, negatives_found, algorithms_run = run_selected_batch_algorithm(batch_timeseries, metric_name, run_negatives_present)
+                # @modified 20200815 - Feature #3678: SNAB - anomalyScore
+                # Added the number_of_algorithms to calculate anomalyScore from
+                anomalous, ensemble, datapoint, negatives_found, algorithms_run, number_of_algorithms = run_selected_batch_algorithm(batch_timeseries, metric_name, run_negatives_present)
 
                 if test_anomaly_batch_timeseries:
                     logger.info('test_anomaly - analyzed %s data with anomaly value in it and anomalous = %s' % (
                         metric_name, str(anomalous)))
+
+                # @added 20200815 - Feature #3678: SNAB - anomalyScore
+                if record_anomalyScore:
+                    anomalyScore_file = '%s/%s/%s/skyline.SNAB.%s.anomalyScore.csv' % (
+                        SNAB_DATA_DIR, skyline_app, base_name, base_name)
+                    # Get the anomaly breakdown - who returned True?
+                    triggered_algorithms = []
+                    run_debug = False
+                    if ensemble.count(True) and algorithms_run:
+                        run_debug = True
+                    if (int(batch_timestamp) % 20000) == 0:
+                        run_debug = True
+                    if run_debug:
+                        logger.debug('debug :: ensemble to calculate anomalyScore - %s' % str(ensemble))
+                        logger.debug('debug :: algorithms_run to calculate anomalyScore - %s' % str(algorithms_run))
+                    for index, value in enumerate(ensemble):
+                        if value:
+                            algorithm = algorithms_run[index]
+                            triggered_algorithms.append(algorithm)
+                    if run_debug:
+                        logger.debug('debug :: triggered_algorithms to calculate anomalyScore - %s' % str(triggered_algorithms))
+                    anomalyScore = 0.0
+                    try:
+                        if len(triggered_algorithms) > 0 and number_of_algorithms > 0:
+                            if len(triggered_algorithms) > settings.CONSENSUS:
+                                anomalyScore = 1.0
+                            else:
+                                anomalyScore = len(triggered_algorithms) / settings.CONSENSUS
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to calculate anomalyScore')
+                    if not os.path.isfile(anomalyScore_file):
+                        data = 'timestamp,value,anomalyScore,triggered_algorithms\n'
+                        write_data_to_file(skyline_app, anomalyScore_file, 'w', data)
+                    data = '%s,%s,%s,%s\n' % (str(int(batch_timestamp)), str(datapoint), str(anomalyScore), str(triggered_algorithms))
+                    write_data_to_file(skyline_app, anomalyScore_file, 'a', data)
+                    if run_debug:
+                        logger.debug('%s,%s,%s,%s' % (str(int(batch_timestamp)), str(datapoint), str(anomalyScore), str(triggered_algorithms)))
 
                 # Update the last_timestamp metric Redis key
                 last_metric_timestamp_key = 'last_timestamp.%s' % base_name
@@ -783,7 +906,7 @@ class AnalyzerBatch(Thread):
                             data = str([metric_name, batch_timestamp, datapoint, last_negative_timestamp, last_negative_value, settings.FULL_DURATION, remove_after_timestamp])
                             self.redis_conn.sadd(redis_set, data)
                         except:
-                            logger.info(traceback.format_exc())
+                            logger.error(traceback.format_exc())
                             logger.error('error :: failed to add data to Redis set %s' % (
                                 str(redis_set)))
 
@@ -947,7 +1070,7 @@ class AnalyzerBatch(Thread):
                                         logger.info('%s added Ionosphere Mirage %sh Redis data timeseries json file :: %s' % (
                                             skyline_app, str(int(full_duration_in_hours)), ionosphere_json_file))
                                     except:
-                                        logger.info(traceback.format_exc())
+                                        logger.error(traceback.format_exc())
                                         logger.error('error :: failed to add %s Ionosphere Mirage Redis data timeseries json file - %s' % (skyline_app, ionosphere_json_file))
 
                     # @modified 20170108 - Feature #1830: Ionosphere alerts
@@ -974,7 +1097,7 @@ class AnalyzerBatch(Thread):
                             # Moved to Redis key block below
                             # self.sent_to_ionosphere.append(base_name)
                         except:
-                            logger.info(traceback.format_exc())
+                            logger.error(traceback.format_exc())
                             logger.error('error :: failed to send_anomalous_metric_to to ionosphere')
 
                         # @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage
@@ -983,7 +1106,7 @@ class AnalyzerBatch(Thread):
                         try:
                             self.redis_conn.sadd(redis_set, data)
                         except:
-                            logger.info(traceback.format_exc())
+                            logger.error(traceback.format_exc())
                             logger.error('error :: failed to add %s to Redis set %s' % (
                                 str(data), str(redis_set)))
 
@@ -1019,7 +1142,7 @@ class AnalyzerBatch(Thread):
                                 # are either bytes, strings or numbers. Use str
                                 str(ionosphere_training_data_key_data))
                         except:
-                            logger.info(traceback.format_exc())
+                            logger.error(traceback.format_exc())
                             logger.error('error :: failed to set Redis key %s' % ionosphere_training_data_key)
                         try:
                             del ionosphere_training_data_key_data
@@ -1074,7 +1197,7 @@ class AnalyzerBatch(Thread):
                             # Moved to Redis set block below
                             # self.sent_to_panorama.append(base_name)
                         except:
-                            logger.info(traceback.format_exc())
+                            logger.error(traceback.format_exc())
                             logger.error('error :: failed to add panorama anomaly file :: %s' % (panorama_anomaly_file))
                         try:
                             del panorama_anomaly_data
@@ -1086,7 +1209,7 @@ class AnalyzerBatch(Thread):
                         try:
                             self.redis_conn.sadd(redis_set, data)
                         except:
-                            logger.info(traceback.format_exc())
+                            logger.error(traceback.format_exc())
                             logger.error('error :: failed to add %s to Redis set %s' % (
                                 str(data), str(redis_set)))
                     else:
@@ -1356,8 +1479,8 @@ class AnalyzerBatch(Thread):
             try:
                 mkdir_p(settings.SKYLINE_TMP_DIR)
             except:
+                logger.error(traceback.format_exc())
                 logger.error('error :: failed to create %s' % settings.SKYLINE_TMP_DIR)
-                logger.info(traceback.format_exc())
 
         while 1:
             now = time()
@@ -1365,26 +1488,26 @@ class AnalyzerBatch(Thread):
             try:
                 self.redis_conn.ping()
             except:
+                logger.error(traceback.format_exc())
                 logger.error('error :: Analyzer cannot connect to redis at socket path %s' % settings.REDIS_SOCKET_PATH)
-                logger.info(traceback.format_exc())
                 sleep(10)
                 try:
                     self.redis_conn = get_redis_conn(skyline_app)
                 except:
-                    logger.info(traceback.format_exc())
+                    logger.error(traceback.format_exc())
                     # logger.error('error :: Analyzer cannot connect to redis at socket path %s' % settings.REDIS_SOCKET_PATH)
                     logger.error('error :: Analyzer cannot connect to get_redis_conn')
                 continue
             try:
                 self.redis_conn_decoded.ping()
             except:
+                logger.error(traceback.format_exc())
                 logger.error('error :: Analyzer batch cannot connect to redis at socket path %s' % settings.REDIS_SOCKET_PATH)
-                logger.info(traceback.format_exc())
                 sleep(10)
                 try:
                     self.redis_conn_decoded = get_redis_conn_decoded(skyline_app)
                 except:
-                    logger.info(traceback.format_exc())
+                    logger.error(traceback.format_exc())
                     # logger.error('error :: Analyzer cannot connect to redis at socket path %s' % settings.REDIS_SOCKET_PATH)
                     logger.error('error :: Analyzer batch cannot connect to get_redis_conn')
                 continue
@@ -1398,8 +1521,8 @@ class AnalyzerBatch(Thread):
                 try:
                     self.redis_conn.setex(skyline_app, 120, int(now))
                 except:
+                    logger.error(traceback.format_exc())
                     logger.error('error :: Analyzer batch could not update the Redis %s key' % skyline_app)
-                    logger.info(traceback.format_exc())
 
                 # Discover metrics to analyze
                 analyzer_batch_work = None

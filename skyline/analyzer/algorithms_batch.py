@@ -47,6 +47,21 @@ if CUSTOM_ALGORITHMS:
     except:
         run_custom_algorithm_on_timeseries = None
 
+# @added 20200817 - Feature #3684: ROOMBA_BATCH_METRICS_CUSTOM_DURATIONS
+#                   Feature #3650: ROOMBA_DO_NOT_PROCESS_BATCH_METRICS
+#                   Feature #3480: batch_processing
+# Allow for custom durations on namespaces
+ROOMBA_BATCH_METRICS_CUSTOM_DURATIONS = None
+try:
+    from settings import ROOMBA_DO_NOT_PROCESS_BATCH_METRICS
+except:
+    ROOMBA_DO_NOT_PROCESS_BATCH_METRICS = False
+if ROOMBA_DO_NOT_PROCESS_BATCH_METRICS:
+    try:
+        from settings import ROOMBA_BATCH_METRICS_CUSTOM_DURATIONS
+    except:
+        ROOMBA_BATCH_METRICS_CUSTOM_DURATIONS = None
+
 skyline_app = 'analyzer_batch'
 skyline_app_logger = '%sLog' % skyline_app
 logger = logging.getLogger(skyline_app_logger)
@@ -72,7 +87,9 @@ To add an algorithm, define it here, and add its name to settings.ALGORITHMS.
 """
 
 
-def tail_avg(timeseries):
+# @modified 20200817 - Feature #3684: ROOMBA_BATCH_METRICS_CUSTOM_DURATIONS
+# Added use_full_duration to all algorithms
+def tail_avg(timeseries, use_full_duration):
     """
     This is a utility function used to calculate the average of the last three
     datapoints in the series as a measure, instead of just the last datapoint.
@@ -86,7 +103,7 @@ def tail_avg(timeseries):
         return timeseries[-1][1]
 
 
-def median_absolute_deviation(timeseries):
+def median_absolute_deviation(timeseries, use_full_duration):
     """
     A timeseries is anomalous if the deviation of its latest datapoint with
     respect to the median is X times larger than the median of deviations.
@@ -136,7 +153,7 @@ def median_absolute_deviation(timeseries):
     return False
 
 
-def grubbs(timeseries):
+def grubbs(timeseries, use_full_duration):
     """
     A timeseries is anomalous if the Z score is greater than the Grubb's score.
     """
@@ -176,15 +193,18 @@ def grubbs(timeseries):
         return None
 
 
-def first_hour_average(timeseries):
+def first_hour_average(timeseries, use_full_duration):
     """
-    Calcuate the simple average over one hour, FULL_DURATION seconds ago.
+    Calcuate the simple average over one hour, use_full_duration seconds ago.
     A timeseries is anomalous if the average of the last three datapoints
     are outside of three standard deviations of this value.
     """
 
     try:
-        last_hour_threshold = time() - (FULL_DURATION - 3600)
+        # @modified 20200817 - Feature #3684: ROOMBA_BATCH_METRICS_CUSTOM_DURATIONS
+        # Use use_full_duration
+        # last_hour_threshold = time() - (FULL_DURATION - 3600)
+        last_hour_threshold = time() - (use_full_duration - 3600)
         series = pandas.Series([x[1] for x in timeseries if x[0] < last_hour_threshold])
         mean = (series).mean()
         stdDev = (series).std()
@@ -198,7 +218,7 @@ def first_hour_average(timeseries):
         return None
 
 
-def stddev_from_average(timeseries):
+def stddev_from_average(timeseries, use_full_duration):
     """
     A timeseries is anomalous if the absolute value of the average of the latest
     three datapoint minus the moving average is greater than three standard
@@ -220,7 +240,7 @@ def stddev_from_average(timeseries):
         return None
 
 
-def stddev_from_moving_average(timeseries):
+def stddev_from_moving_average(timeseries, use_full_duration):
     """
     A timeseries is anomalous if the absolute value of the average of the latest
     three datapoint minus the moving average is greater than three standard
@@ -248,7 +268,7 @@ def stddev_from_moving_average(timeseries):
         return None
 
 
-def mean_subtraction_cumulation(timeseries):
+def mean_subtraction_cumulation(timeseries, use_full_duration):
     """
     A timeseries is anomalous if the value of the next datapoint in the
     series is farther than three standard deviations out in cumulative terms
@@ -277,7 +297,7 @@ def mean_subtraction_cumulation(timeseries):
         return None
 
 
-def least_squares(timeseries):
+def least_squares(timeseries, use_full_duration):
     """
     A timeseries is anomalous if the average of the last three datapoints
     on a projected least squares model is greater than three sigma.
@@ -346,7 +366,7 @@ def least_squares(timeseries):
         return None
 
 
-def histogram_bins(timeseries):
+def histogram_bins(timeseries, use_full_duration):
     """
     A timeseries is anomalous if the average of the last three datapoints falls
     into a histogram bin with less than 20 other datapoints (you'll need to tweak
@@ -379,7 +399,7 @@ def histogram_bins(timeseries):
         return None
 
 
-def ks_test(timeseries):
+def ks_test(timeseries, use_full_duration):
     """
     A timeseries is anomalous if 2 sample Kolmogorov-Smirnov test indicates
     that data distribution for last 10 minutes is different from last hour.
@@ -468,7 +488,7 @@ def record_algorithm_error(algorithm_name, traceback_format_exc_string):
         return False
 
 
-def determine_median(timeseries):
+def determine_median(timeseries, use_full_duration):
     """
     Determine the median of the values in the timeseries
     """
@@ -507,7 +527,7 @@ def determine_array_median(array):
 
 
 # @added 20200425 - Feature #3508: ionosphere.untrainable_metrics
-def negatives_present(timeseries):
+def negatives_present(timeseries, use_full_duration):
     """
     Determine if there are negative number present in a time series
     """
@@ -542,16 +562,22 @@ def run_selected_batch_algorithm(timeseries, metric_name, run_negatives_present)
 
     try:
         from settings import BATCH_PROCESSING_STALE_PERIOD
-        STALE_PERIOD = int(BATCH_PROCESSING_STALE_PERIOD)
+        # @modified 20200816 - Feature #3678:  SNAB - anomalyScore
+        # Renamed to avoid confusion
+        # STALE_PERIOD = int(BATCH_PROCESSING_STALE_PERIOD)
+        BATCH_PROCESSING_STALE_PERIOD = int(BATCH_PROCESSING_STALE_PERIOD)
     except:
-        STALE_PERIOD = 86400
+        BATCH_PROCESSING_STALE_PERIOD = 86400
 
     # Get rid of short series
     if len(timeseries) < MIN_TOLERABLE_LENGTH:
         raise TooShort()
 
     # Get rid of stale series
-    if time() - timeseries[-1][0] > STALE_PERIOD:
+    # @modified 20200816 - Feature #3678:  SNAB - anomalyScore
+    # Renamed to avoid confusion
+    # if time() - timeseries[-1][0] > BATCH_PROCESSING_STALE_PERIOD:
+    if time() - timeseries[-1][0] > BATCH_PROCESSING_STALE_PERIOD:
         raise Stale()
 
     # Get rid of boring series
@@ -580,8 +606,13 @@ def run_selected_batch_algorithm(timeseries, metric_name, run_negatives_present)
     run_3sigma_algorithms = True
     run_3sigma_algorithms_overridden_by = []
     custom_algorithm = None
-    if CUSTOM_ALGORITHMS:
+    # @modified 20200817 - Bug #3652: Handle multiple metrics in base_name conversion
+    # base_name = metric_name.replace(FULL_NAMESPACE, '', 1)
+    if metric_name.startswith(FULL_NAMESPACE):
         base_name = metric_name.replace(FULL_NAMESPACE, '', 1)
+    else:
+        base_name = metric_name
+    if CUSTOM_ALGORITHMS:
         custom_algorithms_to_run = {}
         try:
             custom_algorithms_to_run = get_custom_algorithms_to_run(skyline_app, base_name, CUSTOM_ALGORITHMS, DEBUG_CUSTOM_ALGORITHMS)
@@ -716,6 +747,18 @@ def run_selected_batch_algorithm(timeseries, metric_name, run_negatives_present)
     # Added negatives_found
     negatives_found = False
 
+    # @added 20200817 - Feature #3684: ROOMBA_BATCH_METRICS_CUSTOM_DURATIONS
+    #                   Feature #3650: ROOMBA_DO_NOT_PROCESS_BATCH_METRICS
+    #                   Feature #3480: batch_processing
+    #                   Feature #3678:  SNAB - anomalyScore
+    # Allow for custom durations on namespaces
+    use_full_duration = int(FULL_DURATION) + 0
+    if ROOMBA_BATCH_METRICS_CUSTOM_DURATIONS:
+        for metric_namespace, custom_full_duration in ROOMBA_BATCH_METRICS_CUSTOM_DURATIONS:
+            if metric_namespace in base_name:
+                use_full_duration = custom_full_duration
+    detect_drop_off_cliff_trigger = False
+
     for algorithm in ALGORITHMS:
         # @modified 20200607 - Feature #3566: custom_algorithms
         # Added run_3sigma_algorithms to allow only single or multiple custom
@@ -733,7 +776,13 @@ def run_selected_batch_algorithm(timeseries, metric_name, run_negatives_present)
             if send_algorithm_run_metrics:
                 start = timer()
             try:
-                algorithm_result = [globals()[test_algorithm](timeseries) for test_algorithm in run_algorithm]
+                # @added 20200817 - Feature #3684: ROOMBA_BATCH_METRICS_CUSTOM_DURATIONS
+                #                   Feature #3650: ROOMBA_DO_NOT_PROCESS_BATCH_METRICS
+                #                   Feature #3480: batch_processing
+                #                   Feature #3678:  SNAB - anomalyScore
+                # Allow for custom durations on namespaces
+                # algorithm_result = [globals()[test_algorithm](timeseries) for test_algorithm in run_algorithm]
+                algorithm_result = [globals()[test_algorithm](timeseries, use_full_duration) for test_algorithm in run_algorithm]
             except:
                 # logger.error('%s failed' % (algorithm))
                 algorithm_result = [None]
@@ -803,7 +852,13 @@ def run_selected_batch_algorithm(timeseries, metric_name, run_negatives_present)
             # is no need to check unless it is related to an anomaly
             if run_negatives_present:
                 try:
-                    negatives_found = negatives_present(timeseries)
+                    # @added 20200817 - Feature #3684: ROOMBA_BATCH_METRICS_CUSTOM_DURATIONS
+                    #                   Feature #3650: ROOMBA_DO_NOT_PROCESS_BATCH_METRICS
+                    #                   Feature #3480: batch_processing
+                    #                   Feature #3678:  SNAB - anomalyScore
+                    # Allow for custom durations on namespaces
+                    # negatives_found = negatives_present(timeseries)
+                    negatives_found = negatives_present(timeseries, use_full_duration)
                 except:
                     logger.error('Algorithm error: negatives_present :: %s' % traceback.format_exc())
                     negatives_found = False
@@ -813,17 +868,27 @@ def run_selected_batch_algorithm(timeseries, metric_name, run_negatives_present)
             # @modified 20200607 - Feature #3566: custom_algorithms
             # Added algorithms_run
             # return True, ensemble, timeseries[-1][1], negatives_found
-            return True, ensemble, timeseries[-1][1], negatives_found, algorithms_run
+            # @modified 20200815 - Feature #3678: SNAB - anomalyScore
+            # Added the number_of_algorithms to calculate anomalyScore from
+            # return True, ensemble, timeseries[-1][1], negatives_found, algorithms_run
+            return True, ensemble, timeseries[-1][1], negatives_found, algorithms_run, number_of_algorithms
 
         # @modified 20200425 - Feature #3508: ionosphere.untrainable_metrics
         # return False, ensemble, timeseries[-1][1]
         # @modified 20200607 - Feature #3566: custom_algorithms
         # Added algorithms_run
-        return False, ensemble, timeseries[-1][1], negatives_found, algorithms_run
+        # @modified 20200815 - Feature #3678: SNAB - anomalyScore
+        # Added the number_of_algorithms to calculate anomalyScore from
+        # return False, ensemble, timeseries[-1][1], negatives_found, algorithms_run
+        return False, ensemble, timeseries[-1][1], negatives_found, algorithms_run, number_of_algorithms
     except:
         logger.error('Algorithm error: %s' % traceback.format_exc())
         # @modified 20200425 - Feature #3508: ionosphere.untrainable_metrics
         # return False, [], 1
         # @modified 20200607 - Feature #3566: custom_algorithms
         # Added algorithms_run
-        return False, [], 1, negatives_found, algorithms_run
+        # return False, ensemble, timeseries[-1][1], negatives_found, algorithms_run
+        # @modified 20200815 - Feature #3678: SNAB - anomalyScore
+        # Added the number_of_algorithms to calculate anomalyScore from
+        # return False, [], 1, negatives_found, algorithms_run
+        return False, [], 1, negatives_found, algorithms_run, 0
