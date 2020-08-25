@@ -92,7 +92,9 @@ if True:
         # @added 20200116: Feature #3396: http_alerter
         get_redis_conn_decoded,
         # @added 20200507 - Feature #3532: Sort all time series
-        sort_timeseries)
+        sort_timeseries,
+        # @added 20200825 - Feature #3704: Add alert to anomalies
+        add_panorama_alert)
 
 skyline_app = 'analyzer'
 skyline_app_logger = '%sLog' % skyline_app
@@ -1119,6 +1121,14 @@ def alert_smtp(alert, metric, context):
                 'alert_smtp - send_email_alert was set to %s message was not sent to primary_recipient :: %s, cc_recipients :: %s' % (
                     str(send_email_alert), str(primary_recipient), str(cc_recipients)))
 
+    # @added 20200825 - Feature #3704: Add alert to anomalies
+    if settings.PANORAMA_ENABLED:
+        added_panorama_alert_event = add_panorama_alert(skyline_app, int(metric[2]), base_name)
+        if not added_panorama_alert_event:
+            logger.error(
+                'error :: failed to add Panorama alert event - panorama.alert.%s.%s' % (
+                    str(metric[2]), base_name))
+
     if LOCAL_DEBUG:
         logger.info('debug :: alert_smtp - Memory usage after email: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 
@@ -1203,6 +1213,14 @@ def alert_pagerduty(alert, metric, context):
         # @modified 20191008 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
         # pager.trigger_incident(settings.PAGERDUTY_OPTS['key'], '%s alert - %s - %s' % (context, str(metric[0]), metric[1]))
         pager.trigger_incident(settings.PAGERDUTY_OPTS['key'], '%s - %s alert - %s - %s' % (main_alert_title, alert_context, str(metric[0]), metric[1]))
+
+        # @added 20200825 - Feature #3704: Add alert to anomalies
+        if settings.PANORAMA_ENABLED:
+            added_panorama_alert_event = add_panorama_alert(skyline_app, int(metric[2]), metric[1])
+            if not added_panorama_alert_event:
+                logger.error(
+                    'error :: failed to add Panorama alert event - panorama.alert.%s.%s' % (
+                        str(metric[2]), metric[1]))
     else:
         return
 
@@ -1999,6 +2017,15 @@ def alert_slack(alert, metric, context):
                         'error :: failed to add Panorama slack_thread_ts Redis key - %s - %s' %
                         (cache_key, str(cache_key_value)))
 
+        # @added 20200825 - Feature #3704: Add alert to anomalies
+        if settings.PANORAMA_ENABLED:
+            metric_timestamp = int(metric[2])
+            added_panorama_alert_event = add_panorama_alert(skyline_app, metric_timestamp, base_name)
+            if not added_panorama_alert_event:
+                logger.error(
+                    'error :: failed to add Panorama alert event - panorama.alert.%s.%s' % (
+                        str(metric_timestamp), base_name))
+
 
 # @added 20200116: Feature #3396: http_alerter
 def alert_http(alert, metric, context):
@@ -2196,6 +2223,15 @@ def alert_http(alert, metric, context):
                         del REDIS_HTTP_ALERTER_CONN
                     except:
                         pass
+
+                    # @added 20200825 - Feature #3704: Add alert to anomalies
+                    if settings.PANORAMA_ENABLED:
+                        added_panorama_alert_event = add_panorama_alert(skyline_app, timestamp, metric_name)
+                        if not added_panorama_alert_event:
+                            logger.error(
+                                'error :: failed to add Panorama alert event - panorama.alert.%s.%s' % (
+                                    str(timestamp), metric_name))
+
                     return
                 else:
                     logger.error('error :: alert_http :: %s %s responded with status code %s and reason %s' % (

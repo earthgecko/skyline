@@ -1872,205 +1872,205 @@ class Mirage(Thread):
                         logger.info('%s :: stopping spin_process - %s' % (skyline_app, str(p.is_alive())))
                         p.join()
 
-            # @added 20200607 - Feature #3508: ionosphere.untrainable_metrics
-            # Check to non 3sigma algorithm errors too
-            if LOCAL_DEBUG:
-                logger.debug('debug :: adding negatives_present to check_algorithm_errors')
-            check_algorithm_errors = ['negatives_present']
-            for algorithm in list(settings.MIRAGE_ALGORITHMS):
-                if LOCAL_DEBUG or DEBUG_CUSTOM_ALGORITHMS:
-                    logger.debug('debug :: adding %s to check_algorithm_errors' % (algorithm))
-                check_algorithm_errors.append(algorithm)
-            # @added 20200607 - Feature #3566: custom_algorithms
-            if CUSTOM_ALGORITHMS:
-                for custom_algorithm in settings.CUSTOM_ALGORITHMS:
+                # @added 20200607 - Feature #3508: ionosphere.untrainable_metrics
+                # Check to non 3sigma algorithm errors too
+                if LOCAL_DEBUG:
+                    logger.debug('debug :: adding negatives_present to check_algorithm_errors')
+                check_algorithm_errors = ['negatives_present']
+                for algorithm in list(settings.MIRAGE_ALGORITHMS):
                     if LOCAL_DEBUG or DEBUG_CUSTOM_ALGORITHMS:
-                        logger.debug('debug :: adding custom_algorithm %s to check_algorithm_errors' % (custom_algorithm))
-                    check_algorithm_errors.append(custom_algorithm)
+                        logger.debug('debug :: adding %s to check_algorithm_errors' % (algorithm))
+                    check_algorithm_errors.append(algorithm)
+                # @added 20200607 - Feature #3566: custom_algorithms
+                if CUSTOM_ALGORITHMS:
+                    for custom_algorithm in settings.CUSTOM_ALGORITHMS:
+                        if LOCAL_DEBUG or DEBUG_CUSTOM_ALGORITHMS:
+                            logger.debug('debug :: adding custom_algorithm %s to check_algorithm_errors' % (custom_algorithm))
+                        check_algorithm_errors.append(custom_algorithm)
 
-            if LOCAL_DEBUG or DEBUG_CUSTOM_ALGORITHMS:
-                logger.debug('debug :: checking for algorithm error files')
-
-            for completed_pid in spawned_pids:
-                logger.info('spin_process with pid %s completed' % (str(completed_pid)))
-                # @modified 20200607 - Feature #3566: custom_algorithms
-                #                      Feature #3508: ionosphere.untrainable_metrics
-                # Check to non 3sigma algorithm errors too and wrapped in try
-                try:
-                    # for algorithm in settings.MIRAGE_ALGORITHMS:
-                    for algorithm in check_algorithm_errors:
-                        algorithm_error_file = '%s/%s.%s.%s.algorithm.error' % (
-                            settings.SKYLINE_TMP_DIR, skyline_app,
-                            str(completed_pid), algorithm)
-                        if os.path.isfile(algorithm_error_file):
-                            logger.info(
-                                'error :: spin_process with pid %s has reported an error with the %s algorithm' % (
-                                    str(completed_pid), algorithm))
-                            try:
-                                with open(algorithm_error_file, 'r') as f:
-                                    error_string = f.read()
-                                logger.error('%s' % str(error_string))
-                            except:
-                                logger.error('error :: failed to read %s error file' % algorithm)
-                            try:
-                                os.remove(algorithm_error_file)
-                            except OSError:
-                                pass
-                except:
-                    logger.error(traceback.format_exc())
-                    logger.error('error :: failed to check algorithm errors')
                 if LOCAL_DEBUG or DEBUG_CUSTOM_ALGORITHMS:
-                    logger.debug('debug :: checked for algorithm error files')
+                    logger.debug('debug :: checking for algorithm error files')
 
-                # Grab data from the queue and populate dictionaries
-                exceptions = dict()
-                anomaly_breakdown = dict()
-                while 1:
+                for completed_pid in spawned_pids:
+                    logger.info('spin_process with pid %s completed' % (str(completed_pid)))
+                    # @modified 20200607 - Feature #3566: custom_algorithms
+                    #                      Feature #3508: ionosphere.untrainable_metrics
+                    # Check to non 3sigma algorithm errors too and wrapped in try
                     try:
-                        key, value = self.mirage_anomaly_breakdown_q.get_nowait()
-                        if key not in anomaly_breakdown.keys():
-                            anomaly_breakdown[key] = value
-                        else:
-                            anomaly_breakdown[key] += value
-                    except Empty:
-                        # @added 20191113 - Branch #3262: py3
-                        # Log
-                        logger.info('anomaly_breakdown.keys are empty')
-                        break
+                        # for algorithm in settings.MIRAGE_ALGORITHMS:
+                        for algorithm in check_algorithm_errors:
+                            algorithm_error_file = '%s/%s.%s.%s.algorithm.error' % (
+                                settings.SKYLINE_TMP_DIR, skyline_app,
+                                str(completed_pid), algorithm)
+                            if os.path.isfile(algorithm_error_file):
+                                logger.info(
+                                    'error :: spin_process with pid %s has reported an error with the %s algorithm' % (
+                                        str(completed_pid), algorithm))
+                                try:
+                                    with open(algorithm_error_file, 'r') as f:
+                                        error_string = f.read()
+                                    logger.error('%s' % str(error_string))
+                                except:
+                                    logger.error('error :: failed to read %s error file' % algorithm)
+                                try:
+                                    os.remove(algorithm_error_file)
+                                except OSError:
+                                    pass
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to check algorithm errors')
+                    if LOCAL_DEBUG or DEBUG_CUSTOM_ALGORITHMS:
+                        logger.debug('debug :: checked for algorithm error files')
 
-                while 1:
+                    # Grab data from the queue and populate dictionaries
+                    exceptions = dict()
+                    anomaly_breakdown = dict()
+                    while 1:
+                        try:
+                            key, value = self.mirage_anomaly_breakdown_q.get_nowait()
+                            if key not in anomaly_breakdown.keys():
+                                anomaly_breakdown[key] = value
+                            else:
+                                anomaly_breakdown[key] += value
+                        except Empty:
+                            # @added 20191113 - Branch #3262: py3
+                            # Log
+                            logger.info('anomaly_breakdown.keys are empty')
+                            break
+
+                    while 1:
+                        try:
+                            key, value = self.mirage_exceptions_q.get_nowait()
+                            if key not in exceptions.keys():
+                                exceptions[key] = value
+                            else:
+                                exceptions[key] += value
+                        except Empty:
+                            # @added 20191113 - Branch #3262: py3
+                            # Log
+                            logger.info('exceptions.keys are empty')
+                            break
+
+                    # @added 20191021 - Bug #3288: Always send anomaly_breakdown and exception metrics
+                    #                   Branch #3262: py3
+                    exceptions_metrics = ['Boring', 'Stale', 'TooShort', 'Other']
+                    for i_exception in exceptions_metrics:
+                        if i_exception not in exceptions.keys():
+                            exceptions[i_exception] = 0
+                    # @modified 20200607 - Feature #3566: custom_algorithms
+                    # for i_anomaly_breakdown in settings.MIRAGE_ALGORITHMS:
+                    for i_anomaly_breakdown in check_algorithm_errors:
+                        if i_anomaly_breakdown not in anomaly_breakdown.keys():
+                            anomaly_breakdown[i_anomaly_breakdown] = 0
+
+                    # @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                    # Use Redis set and not self.metric_variables
+                    metric_variables = []
+                    # @modified 20191022 - Bug #3266: py3 Redis binary objects not strings
+                    #                      Branch #3262: py3
+                    # literal_metric_variables = list(self.redis_conn.smembers('mirage.metric_variables'))
+                    literal_metric_variables = list(self.redis_conn_decoded.smembers('mirage.metric_variables'))
+                    for item_list_string in literal_metric_variables:
+                        list_item = literal_eval(item_list_string)
+                        metric_variables.append(list_item)
+
+                    # @added 20191113 - Branch #3262: py3
+                    # Set default values
+                    metric_name = None
+                    metric_value = None
+                    hours_to_resolve = 0
+
+                    # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                    # for metric_variable in self.metric_variables:
+                    for metric_variable in metric_variables:
+                        if metric_variable[0] == 'metric_name':
+                            metric_name = metric_variable[1]
+                        if metric_variable[0] == 'metric_value':
+                            metric_value = metric_variable[1]
+                        if metric_variable[0] == 'hours_to_resolve':
+                            hours_to_resolve = metric_variable[1]
+                        # if metric_variable[0] == 'metric_timestamp':
+                        #     metric_timestamp = metric_variable[1]
+
+                    logger.info('analysis done - %s' % str(metric_name))
+
+                    # Send alerts
+                    # Calculate hours second order resolution to seconds
+                    # @modified 20191113 - Branch #3262: py3
+                    # Only if set
+                    if hours_to_resolve:
+                        logger.info('analyzed at %s hours resolution' % hours_to_resolve)
+                        second_order_resolution_seconds = int(hours_to_resolve) * 3600
+                        logger.info('analyzed at %s seconds resolution' % str(second_order_resolution_seconds))
+
+                    # Remove metric check file
+                    metric_check_file = 'None'
                     try:
-                        key, value = self.mirage_exceptions_q.get_nowait()
-                        if key not in exceptions.keys():
-                            exceptions[key] = value
-                        else:
-                            exceptions[key] += value
-                    except Empty:
-                        # @added 20191113 - Branch #3262: py3
-                        # Log
-                        logger.info('exceptions.keys are empty')
-                        break
-
-                # @added 20191021 - Bug #3288: Always send anomaly_breakdown and exception metrics
-                #                   Branch #3262: py3
-                exceptions_metrics = ['Boring', 'Stale', 'TooShort', 'Other']
-                for i_exception in exceptions_metrics:
-                    if i_exception not in exceptions.keys():
-                        exceptions[i_exception] = 0
-                # @modified 20200607 - Feature #3566: custom_algorithms
-                # for i_anomaly_breakdown in settings.MIRAGE_ALGORITHMS:
-                for i_anomaly_breakdown in check_algorithm_errors:
-                    if i_anomaly_breakdown not in anomaly_breakdown.keys():
-                        anomaly_breakdown[i_anomaly_breakdown] = 0
-
-                # @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage
-                # Use Redis set and not self.metric_variables
-                metric_variables = []
-                # @modified 20191022 - Bug #3266: py3 Redis binary objects not strings
-                #                      Branch #3262: py3
-                # literal_metric_variables = list(self.redis_conn.smembers('mirage.metric_variables'))
-                literal_metric_variables = list(self.redis_conn_decoded.smembers('mirage.metric_variables'))
-                for item_list_string in literal_metric_variables:
-                    list_item = literal_eval(item_list_string)
-                    metric_variables.append(list_item)
-
-                # @added 20191113 - Branch #3262: py3
-                # Set default values
-                metric_name = None
-                metric_value = None
-                hours_to_resolve = 0
-
-                # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
-                # for metric_variable in self.metric_variables:
-                for metric_variable in metric_variables:
-                    if metric_variable[0] == 'metric_name':
-                        metric_name = metric_variable[1]
-                    if metric_variable[0] == 'metric_value':
-                        metric_value = metric_variable[1]
-                    if metric_variable[0] == 'hours_to_resolve':
-                        hours_to_resolve = metric_variable[1]
-                    # if metric_variable[0] == 'metric_timestamp':
-                    #     metric_timestamp = metric_variable[1]
-
-                logger.info('analysis done - %s' % str(metric_name))
-
-                # Send alerts
-                # Calculate hours second order resolution to seconds
-                # @modified 20191113 - Branch #3262: py3
-                # Only if set
-                if hours_to_resolve:
-                    logger.info('analyzed at %s hours resolution' % hours_to_resolve)
-                    second_order_resolution_seconds = int(hours_to_resolve) * 3600
-                    logger.info('analyzed at %s seconds resolution' % str(second_order_resolution_seconds))
-
-                # Remove metric check file
-                metric_check_file = 'None'
-                try:
-                    metric_check_file = '%s/%s' % (settings.MIRAGE_CHECK_PATH, processing_check_file)
-                    if LOCAL_DEBUG:
-                        logger.debug('debug :: interpolated metric_check_file to %s' % metric_check_file)
-                except:
-                    logger.error('error :: failed to interpolate metric_check_file')
-
-                if os.path.isfile(metric_check_file):
-                    try:
-                        os.remove(metric_check_file)
-                        logger.info('removed check file - %s' % metric_check_file)
-                    except OSError:
+                        metric_check_file = '%s/%s' % (settings.MIRAGE_CHECK_PATH, processing_check_file)
                         if LOCAL_DEBUG:
+                            logger.debug('debug :: interpolated metric_check_file to %s' % metric_check_file)
+                    except:
+                        logger.error('error :: failed to interpolate metric_check_file')
+
+                    if os.path.isfile(metric_check_file):
+                        try:
+                            os.remove(metric_check_file)
+                            logger.info('removed check file - %s' % metric_check_file)
+                        except OSError:
+                            if LOCAL_DEBUG:
+                                logger.error(traceback.format_exc())
+                                logger.error('error :: failed to remove metric_check_file - %s' % metric_check_file)
+                            pass
+                        except:
                             logger.error(traceback.format_exc())
                             logger.error('error :: failed to remove metric_check_file - %s' % metric_check_file)
-                        pass
-                    except:
-                        logger.error(traceback.format_exc())
-                        logger.error('error :: failed to remove metric_check_file - %s' % metric_check_file)
-                else:
-                    if LOCAL_DEBUG:
-                        logger.debug('debug :: no metric_check_file to remove OK - %s' % metric_check_file)
+                    else:
+                        if LOCAL_DEBUG:
+                            logger.debug('debug :: no metric_check_file to remove OK - %s' % metric_check_file)
 
-                # Remove the metric directory
-                # @modified 20191113 - Branch #3262: py3
-                # Convert None to str
-                # timeseries_dir = metric_name.replace('.', '/')
-                metric_data_dir = 'None'
-                try:
-                    metric_name_str = str(metric_name)
-                    timeseries_dir = metric_name_str.replace('.', '/')
-                    metric_data_dir = '%s/%s' % (settings.MIRAGE_CHECK_PATH, timeseries_dir)
-                    if LOCAL_DEBUG:
-                        logger.debug('debug :: metric_data_dir interpolated to %s' % str(metric_data_dir))
-                except:
-                    logger.error(traceback.format_exc())
-                    logger.error('error :: failed to interpolate metric_data_dir')
+                    # Remove the metric directory
+                    # @modified 20191113 - Branch #3262: py3
+                    # Convert None to str
+                    # timeseries_dir = metric_name.replace('.', '/')
                     metric_data_dir = 'None'
-
-                if os.path.exists(metric_data_dir):
                     try:
-                        rmtree(metric_data_dir)
-                        logger.info('removed - %s' % metric_data_dir)
-                    except:
-                        logger.error('error :: failed to rmtree %s' % metric_data_dir)
-                else:
-                    if LOCAL_DEBUG:
-                        logger.debug('debug :: metric_data_dir does not exist - %s' % str(metric_data_dir))
-
-                ionosphere_unique_metrics = []
-                if settings.MIRAGE_ENABLE_ALERTS:
-                    # @added 20161228 - Feature #1830: Ionosphere alerts
-                    #                   Branch #922: Ionosphere
-                    # Bringing Ionosphere online - do alert on Ionosphere metrics
-                    try:
-                        # @modified 20191022 - Bug #3266: py3 Redis binary objects not strings
-                        #                      Branch #3262: py3
-                        # ionosphere_unique_metrics = list(self.redis_conn.smembers('ionosphere.unique_metrics'))
-                        ionosphere_unique_metrics = list(self.redis_conn_decoded.smembers('ionosphere.unique_metrics'))
+                        metric_name_str = str(metric_name)
+                        timeseries_dir = metric_name_str.replace('.', '/')
+                        metric_data_dir = '%s/%s' % (settings.MIRAGE_CHECK_PATH, timeseries_dir)
+                        if LOCAL_DEBUG:
+                            logger.debug('debug :: metric_data_dir interpolated to %s' % str(metric_data_dir))
                     except:
                         logger.error(traceback.format_exc())
-                        logger.error('error :: failed to get ionosphere.unique_metrics from Redis')
-                        ionosphere_unique_metrics = []
-                else:
-                    if LOCAL_DEBUG:
-                        logger.debug('debug :: settings.MIRAGE_ENABLE_ALERTS is not True')
+                        logger.error('error :: failed to interpolate metric_data_dir')
+                        metric_data_dir = 'None'
+
+                    if os.path.exists(metric_data_dir):
+                        try:
+                            rmtree(metric_data_dir)
+                            logger.info('removed - %s' % metric_data_dir)
+                        except:
+                            logger.error('error :: failed to rmtree %s' % metric_data_dir)
+                    else:
+                        if LOCAL_DEBUG:
+                            logger.debug('debug :: metric_data_dir does not exist - %s' % str(metric_data_dir))
+
+                    ionosphere_unique_metrics = []
+                    if settings.MIRAGE_ENABLE_ALERTS:
+                        # @added 20161228 - Feature #1830: Ionosphere alerts
+                        #                   Branch #922: Ionosphere
+                        # Bringing Ionosphere online - do alert on Ionosphere metrics
+                        try:
+                            # @modified 20191022 - Bug #3266: py3 Redis binary objects not strings
+                            #                      Branch #3262: py3
+                            # ionosphere_unique_metrics = list(self.redis_conn.smembers('ionosphere.unique_metrics'))
+                            ionosphere_unique_metrics = list(self.redis_conn_decoded.smembers('ionosphere.unique_metrics'))
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: failed to get ionosphere.unique_metrics from Redis')
+                            ionosphere_unique_metrics = []
+                    else:
+                        if LOCAL_DEBUG:
+                            logger.debug('debug :: settings.MIRAGE_ENABLE_ALERTS is not True')
 
             # @added 20161228 - Feature #1830: Ionosphere alerts
             #                   Branch #922: Ionosphere

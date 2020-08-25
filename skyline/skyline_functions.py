@@ -2205,3 +2205,49 @@ def historical_data_dir_exists(current_skyline_app, ionosphere_data_dir):
         if historical_data_path_exists:
             ionosphere_data_dir = historical_data_dir
     return (historical_data_path_exists, ionosphere_data_dir)
+
+
+# @added 20200825 - Feature #3704: Add alert to anomalies
+def add_panorama_alert(current_skyline_app, metric_timestamp, base_name):
+    """
+    Send an event to Panorama to update an anomaly as alerted on.
+
+    :param current_skyline_app: the Skyline app that is calling the function
+    :type current_skyline_app: str
+    :param anomaly_timestamp: The anomaly timestamp
+    :type base_name: int
+    :param base_name: The metric base_name
+    :type base_name: str
+    :return: boolean
+    :rtype: boolean
+
+    """
+
+    current_skyline_app_logger = str(current_skyline_app) + 'Log'
+    current_logger = logging.getLogger(current_skyline_app_logger)
+
+    REDIS_CONN = None
+    try:
+        REDIS_CONN = get_redis_conn(current_skyline_app)
+    except:
+        current_logger.error('error :: add_panorama_alert - get_redis_conn failed')
+
+    cache_key = 'panorama.alert.%s.%s' % (str(metric_timestamp), base_name)
+    cache_key_value = [base_name, metric_timestamp, int(time())]
+    if REDIS_CONN:
+        try:
+            REDIS_CONN.setex(cache_key, 86400, str(cache_key_value))
+            current_logger.info(
+                'added Panorama alert Redis key - %s - %s' %
+                (cache_key, str(cache_key_value)))
+            return True
+        except:
+            current_logger.error(traceback.format_exc())
+            current_logger.error(
+                'error :: failed to add Panorama alert Redis key - %s - %s' %
+                (cache_key, str(cache_key_value)))
+    else:
+        current_logger.error(
+            'error :: failed to add Panorama alert Redis key - %s - %s, no REDIS_CONN' %
+            (cache_key, str(cache_key_value)))
+    return False
