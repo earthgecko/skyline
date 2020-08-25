@@ -117,6 +117,8 @@ CREATE TABLE IF NOT EXISTS `anomalies` (
 */
   `label` VARCHAR(255) DEFAULT NULL COMMENT 'a label for the anomaly',
   `user_id` INT DEFAULT 0 COMMENT 'the user id that created the label',
+/* # @added 20200825 - Feature #3704: Add alert to anomalies */
+  `alert` INT(11) DEFAULT NULL COMMENT 'if an alert was sent for the anomaly the timestamp it was sent',
   PRIMARY KEY (id),
 /*
 # Why index anomaly_timestamp and created_timestamp?  Because this is thinking
@@ -133,6 +135,9 @@ CREATE TABLE IF NOT EXISTS `anomalies` (
                      Branch #3262: py3
 # For better query performance */
 CREATE INDEX anomaly_timestamp ON anomalies (anomaly_timestamp);
+
+/* # @added 20200825 - Feature #3704: Add alert to anomalies */
+CREATE INDEX alert ON anomalies (alert);
 
 /*
 CREATE TABLE IF NOT EXISTS `skyline`.`ionosphere` (

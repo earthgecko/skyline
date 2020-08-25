@@ -67,7 +67,9 @@ if True:
         #                      Branch #3262: py3
         get_graphite_port, get_graphite_render_uri, get_graphite_custom_headers,
         # @added 20200122: Feature #3396: http_alerter
-        get_redis_conn)
+        get_redis_conn,
+        # @added 20200825 - Feature #3704: Add alert to anomalies
+        add_panorama_alert)
 
 skyline_app = 'boundary'
 skyline_app_logger = '%sLog' % skyline_app
@@ -382,6 +384,13 @@ def alert_smtp(datapoint, metric_name, expiration_time, metric_trigger, algorith
                 'error :: alert_smtp - could not send email to primary_recipient :: %s, cc_recipients :: %s' %
                 (str(primary_recipient), str(cc_recipients)))
         s.quit()
+        # @added 20200825 - Feature #3704: Add alert to anomalies
+        if settings.PANORAMA_ENABLED:
+            added_panorama_alert_event = add_panorama_alert(skyline_app, int(metric_timestamp), metric_name)
+            if not added_panorama_alert_event:
+                logger.error(
+                    'error :: failed to add Panorama alert event - panorama.alert.%s.%s' % (
+                        str(metric_timestamp), metric_name))
 
 
 def alert_pagerduty(datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp):
@@ -389,6 +398,13 @@ def alert_pagerduty(datapoint, metric_name, expiration_time, metric_trigger, alg
         import pygerduty
         pager = pygerduty.PagerDuty(settings.BOUNDARY_PAGERDUTY_OPTS['subdomain'], settings.BOUNDARY_PAGERDUTY_OPTS['auth_token'])
         pager.trigger_incident(settings.BOUNDARY_PAGERDUTY_OPTS['key'], 'Anomalous metric: %s (value: %s) - %s' % (metric_name, datapoint, algorithm))
+        # @added 20200825 - Feature #3704: Add alert to anomalies
+        if settings.PANORAMA_ENABLED:
+            added_panorama_alert_event = add_panorama_alert(skyline_app, int(metric_timestamp), metric_name)
+            if not added_panorama_alert_event:
+                logger.error(
+                    'error :: failed to add Panorama alert event - panorama.alert.%s.%s' % (
+                        str(metric_timestamp), metric_name))
     else:
         return False
 
@@ -863,6 +879,13 @@ def alert_slack(datapoint, metric_name, expiration_time, metric_trigger, algorit
             logger.info(traceback.format_exc())
             logger.error('error :: alert_slack - could not upload file')
             return False
+        # @added 20200825 - Feature #3704: Add alert to anomalies
+        if settings.PANORAMA_ENABLED:
+            added_panorama_alert_event = add_panorama_alert(skyline_app, int(metric_timestamp), metric_name)
+            if not added_panorama_alert_event:
+                logger.error(
+                    'error :: failed to add Panorama alert event - panorama.alert.%s.%s' % (
+                        str(metric_timestamp), metric_name))
 
 
 # @added 20200122: Feature #3396: http_alerter
@@ -1025,6 +1048,14 @@ def alert_http(alerter, datapoint, metric_name, expiration_time, metric_trigger,
                         del REDIS_HTTP_ALERTER_CONN
                     except:
                         pass
+
+                    # @added 20200825 - Feature #3704: Add alert to anomalies
+                    if settings.PANORAMA_ENABLED:
+                        added_panorama_alert_event = add_panorama_alert(skyline_app, int(metric_timestamp), metric_name)
+                        if not added_panorama_alert_event:
+                            logger.error(
+                                'error :: failed to add Panorama alert event - panorama.alert.%s.%s' % (
+                                    str(metric_timestamp), metric_name))
                     return
                 else:
                     logger.error('error :: alert_http :: %s %s responded with status code %s and reason %s' % (

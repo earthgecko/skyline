@@ -689,6 +689,132 @@ class Panorama(Thread):
                 logger.error('error :: update_anomaly_end_timestamp :: could not dispose engine')
         return updated_anomaly_record
 
+    # @added 20200825 - Feature #3704: Add alert to anomalies
+    def update_alert_ts(self, i, base_name, metric_timestamp, alerted_at):
+        """
+        Update an anomaly record with the alert_ts.
+
+        :param i: python process id
+        :param base_name: base name
+        :param metric_timestamp: the anomaly timestamp
+        :param alerted_at: the alert timestamp
+
+        :return: returns True
+
+        """
+
+        def get_an_engine():
+            try:
+                engine, log_msg, trace = get_engine(skyline_app)
+                return engine, log_msg, trace
+            except:
+                logger.error(traceback.format_exc())
+                log_msg = 'error :: update_alert_ts :: failed to get MySQL engine in update_alert_ts'
+                logger.error('error :: update_alert_ts :: failed to get MySQL engine in update_alert_ts')
+                return None, log_msg, trace
+
+        def engine_disposal(engine):
+            if engine:
+                try:
+                    engine.dispose()
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: update_alert_ts :: calling engine.dispose()')
+            return
+
+        child_process_pid = os.getpid()
+        logger.info('update_alert_ts :: child_process_pid %s, processing %s, %s, %s' % (
+            str(child_process_pid), base_name, str(metric_timestamp),
+            str(alerted_at)))
+        try:
+            engine, log_msg, trace = get_an_engine()
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: update_alert_ts :: could not get a MySQL engine to update slack_thread_ts in anomalies for %s' % (base_name))
+        if not engine:
+            logger.error('error :: update_alert_ts :: engine not obtained to update slack_thread_ts in anomalies for %s' % (base_name))
+            return False
+        try:
+            metrics_table, log_msg, trace = metrics_table_meta(skyline_app, engine)
+            logger.info(log_msg)
+            logger.info('update_alert_ts :: metrics_table OK')
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: update_alert_ts :: failed to get metrics_table meta for %s' % base_name)
+        metric_id = None
+        try:
+            connection = engine.connect()
+            stmt = select([metrics_table]).where(metrics_table.c.metric == base_name)
+            result = connection.execute(stmt)
+            for row in result:
+                metric_id = int(row['id'])
+            connection.close()
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: update_alert_ts :: could not determine metric id from metrics table')
+        logger.info('update_alert_ts :: metric id determined as %s' % str(metric_id))
+        if metric_id:
+            try:
+                anomalies_table, log_msg, trace = anomalies_table_meta(skyline_app, engine)
+                logger.info(log_msg)
+                logger.info('update_alert_ts :: anomalies_table OK')
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: update_alert_ts :: failed to get anomalies_table meta for %s' % base_name)
+        anomaly_id = None
+        try:
+            connection = engine.connect()
+            stmt = select([anomalies_table]).\
+                where(anomalies_table.c.metric_id == metric_id).\
+                where(anomalies_table.c.anomaly_timestamp == metric_timestamp)
+            result = connection.execute(stmt)
+            for row in result:
+                anomaly_id = int(row['id'])
+            connection.close()
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: update_alert_ts :: could not determine anomaly id from anomaly table')
+        logger.info('update_alert_ts :: anomaly id determined as %s' % str(anomaly_id))
+        anomaly_record_updated = False
+        if anomaly_id:
+            try:
+                connection = engine.connect()
+                connection.execute(
+                    anomalies_table.update(
+                        anomalies_table.c.id == anomaly_id).
+                    values(alert=alerted_at))
+                connection.close()
+                logger.info('update_alert_ts :: updated alert for anomaly id %s' % str(anomaly_id))
+                anomaly_record_updated = True
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: update_alert_ts :: could not update alert for anomaly id %s' % str(anomaly_id))
+        if engine:
+            try:
+                engine_disposal(engine)
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: update_alert_ts :: could not dispose engine')
+        cache_key = 'panorama.alert.%s.%s' % (str(metric_timestamp), base_name)
+        delete_cache_key = False
+        if anomaly_record_updated:
+            delete_cache_key = True
+        if not anomaly_record_updated:
+            # Allow for 120 seconds for an anomaly to be added
+            now = time()
+            anomaly_age = int(now) - int(metric_timestamp)
+            if anomaly_age > 120:
+                delete_cache_key = True
+        if delete_cache_key:
+            logger.info('update_alert_ts :: deleting cache_key %s' % cache_key)
+            try:
+                self.redis_conn.delete(cache_key)
+                logger.info('update_alert_ts :: cache_key %s deleted' % cache_key)
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: update_alert_ts :: failed to delete cache_key %s' % cache_key)
+        return
+
     def spin_process(self, i, metric_check_file):
         """
         Assign a metric anomaly to process.
@@ -1881,6 +2007,81 @@ class Panorama(Thread):
                                 for p in pids:
                                     p.terminate()
 
+                # @added 20200825 - Feature #3704: Add alert to anomalies
+                # Check if any Redis keys exist with anomaly alerts to update
+                # the alert field on any anomaly records
+                alert_updates = None
+                try:
+                    alert_updates = list(self.redis_conn_decoded.scan_iter(match='panorama.alert.*'))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to scan panorama.alert.* from Redis')
+                    alert_updates = []
+                if not alert_updates:
+                    logger.info('no panorama.alert Redis keys to process, OK')
+                if alert_updates:
+                    for cache_key in alert_updates:
+                        base_name = None
+                        metric_timestamp = None
+                        try:
+                            update_on = self.redis_conn_decoded.get(cache_key)
+                            # cache_key_value = [base_name, metric_timestamp, alerted_at_timestamp]
+                            update_for = literal_eval(update_on)
+                            base_name = str(update_for[0])
+                            metric_timestamp = int(float(update_for[1]))
+                            alerted_at = int(update_for[2])
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: failed to get details from cache_key %s' % cache_key)
+                        update_db_record = False
+                        if base_name and metric_timestamp and alerted_at:
+                            update_db_record = True
+                        else:
+                            logger.info('Could not determine base_name, metric_timestamp or alerted_at from cache_key %s, deleting' % cache_key)
+                            try:
+                                self.redis_conn.delete(cache_key)
+                            except:
+                                logger.error(traceback.format_exc())
+                                logger.error('error :: failed to delete cache_key %s' % cache_key)
+                        if update_db_record:
+                            # Spawn update_alert_ts process
+                            pids = []
+                            spawned_pids = []
+                            pid_count = 0
+                            now = time()
+                            for i in range(1, 2):
+                                try:
+                                    p = Process(target=self.update_alert_ts, args=(i, base_name, metric_timestamp, alerted_at))
+                                    pids.append(p)
+                                    pid_count += 1
+                                    logger.info('starting update_alert_ts')
+                                    p.start()
+                                    spawned_pids.append(p.pid)
+                                except:
+                                    logger.info(traceback.format_exc())
+                                    logger.error('error :: failed to start update_alert_ts')
+                                    continue
+                            p_starts = time()
+                            while time() - p_starts <= 10:
+                                if any(p.is_alive() for p in pids):
+                                    # Just to avoid hogging the CPU
+                                    sleep(.1)
+                                else:
+                                    # All the processes are done, break now.
+                                    time_to_run = time() - p_starts
+                                    logger.info(
+                                        '%s :: update_alert_ts completed in %.2f seconds' % (
+                                            skyline_app, time_to_run))
+                                    break
+                            else:
+                                # We only enter this if we didn't 'break' above.
+                                logger.info('%s :: timed out, killing all update_alert_ts processes' % (skyline_app))
+                                for p in pids:
+                                    p.terminate()
+
+
+
+##############
             metric_var_files_sorted = sorted(metric_var_files)
             metric_check_file = '%s/%s' % (settings.PANORAMA_CHECK_PATH, str(metric_var_files_sorted[0]))
 
