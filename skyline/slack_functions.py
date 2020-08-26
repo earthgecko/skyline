@@ -50,6 +50,9 @@ def slack_post_message(current_skyline_app, channel, thread_ts, message):
     current_skyline_app_logger = str(current_skyline_app) + 'Log'
     current_logger = logging.getLogger(current_skyline_app_logger)
 
+    # @added 20200826 - Bug #3710: Gracefully handle slack failures
+    slack_post = {'ok': False}
+
     try:
         # @modified 20200701 - Task #3612: Upgrade to slack v2
         #                      Task #3608: Update Skyline to Python 3.8.3 and deps
@@ -62,13 +65,16 @@ def slack_post_message(current_skyline_app, channel, thread_ts, message):
         current_logger.error(traceback.format_exc())
         current_logger.error(
             'error :: slack_post_message :: falied to connect slack')
-        return False
+        # @modified 20200826 - Bug #3710: Gracefully handle slack failures
+        # return False
+        return slack_post
 
     if thread_ts:
         if thread_ts == 'None':
             thread_ts = None
 
-    slack_post = None
+    # slack_post = None
+
     # In terms of the generated Slack URLS for threads the
     # timestamps have no dots e.g.:
     # https://<an_org>.slack.com/archives/<a_channel>/p1543994173000700
@@ -99,7 +105,9 @@ def slack_post_message(current_skyline_app, channel, thread_ts, message):
             current_logger.error(
                 'error :: slack_post_to_thread :: falied to post message to thread %s - %s' % (
                     thread_ts, message))
-            return False
+            # @modified 20200826 - Bug #3710: Gracefully handle slack failures
+            # return False
+            return slack_post
     else:
         try:
             # @modified 20200701 - Task #3612: Upgrade to slack v2
@@ -121,7 +129,9 @@ def slack_post_message(current_skyline_app, channel, thread_ts, message):
             current_logger.error(
                 'error :: slack_post_message :: falied to post message to thread %s - %s' % (
                     thread_ts, message))
-            return False
+            # @modified 20200826 - Bug #3710: Gracefully handle slack failures
+            # return False
+            return slack_post
 
     if slack_post['ok']:
         current_logger.info(
@@ -137,7 +147,9 @@ def slack_post_message(current_skyline_app, channel, thread_ts, message):
             current_logger.error(str(slack_post))
         except:
             current_logger.error('error :: slack_post_message :: no slack response dict found')
-        return False
+        # @modified 20200826 - Bug #3710: Gracefully handle slack failures
+        # return False
+        return slack_post
 
     return slack_post
 
@@ -162,6 +174,9 @@ def slack_post_reaction(current_skyline_app, channel, thread_ts, emoji):
     current_skyline_app_logger = str(current_skyline_app) + 'Log'
     current_logger = logging.getLogger(current_skyline_app_logger)
 
+    # @added 20200826 - Bug #3710: Gracefully handle slack failures
+    slack_response = {'ok': False}
+
     try:
         # @modified 20200701 - Task #3612: Upgrade to slack v2
         #                      Task #3608: Update Skyline to Python 3.8.3 and deps
@@ -175,9 +190,12 @@ def slack_post_reaction(current_skyline_app, channel, thread_ts, emoji):
         current_logger.error(traceback.format_exc())
         current_logger.error(
             'error :: slack_post_message :: falied to connect slack')
-        return False
+        # @modified 20200826 - Bug #3710: Gracefully handle slack failures
+        # return False
+        return slack_response
 
-    slack_response = None
+    # slack_response = None
+
     try:
         # @modified 20200701 - Task #3612: Upgrade to slack v2
         #                      Task #3608: Update Skyline to Python 3.8.3 and deps
@@ -200,7 +218,9 @@ def slack_post_reaction(current_skyline_app, channel, thread_ts, emoji):
         current_logger.error(
             'error :: slack_post_reaction :: falied to post reaction to thread %s - %s' % (
                 thread_ts, emoji))
-        return False
+        # @modified 20200826 - Bug #3710: Gracefully handle slack failures
+        # return False
+        return slack_response
     if not slack_response['ok']:
         if str(slack_response['error']) == 'already_reacted':
             current_logger.info(
@@ -216,6 +236,8 @@ def slack_post_reaction(current_skyline_app, channel, thread_ts, emoji):
                 current_logger.error(str(slack_response))
             except:
                 current_logger.error('error :: slack_post_reaction :: no slack response dict found')
-            return False
+            # @modified 20200826 - Bug #3710: Gracefully handle slack failures
+            # return False
+            return slack_response
 
     return slack_response
