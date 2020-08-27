@@ -221,6 +221,12 @@ try:
 except:
     HTTP_ALERTERS_ENABLED = False
 
+# @added 20200827 - Feature #3708: FLUX_ZERO_FILL_NAMESPACES
+try:
+    FLUX_ZERO_FILL_NAMESPACES = settings.FLUX_ZERO_FILL_NAMESPACES
+except:
+    FLUX_ZERO_FILL_NAMESPACES = []
+
 # @added 20190522 - Feature #2580: illuminance
 # Disabled for now as in concept phase.  This would work better if
 # the illuminance_datapoint was determined from the time series
@@ -2983,7 +2989,7 @@ class Analyzer(Thread):
                                     # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
                                     # if base_name not in self.smtp_alerter_metrics:
                                     #     self.smtp_alerter_metrics.append(base_name)
-#                                    if base_name not in smtp_alerter_metrics:
+                                    # if base_name not in smtp_alerter_metrics:
                                     redis_set = 'analyzer.smtp_alerter_metrics'
                                     data = str(base_name)
                                     try:
@@ -3109,6 +3115,82 @@ class Analyzer(Thread):
                 self.redis_conn.delete('analyzer.smtp_alerter_metrics.old')
             except:
                 pass
+
+            # @added 20200827 - Feature #3708: FLUX_ZERO_FILL_NAMESPACES
+            # Analyzer determines what metrics flux should 0 fill by creating
+            # the flux.zero_fill_metrics Redis set, which flux references.  This
+            # is done in Analyzer because it manages metric Redis sets as it
+            # always runs.  It is only managed in Analyzer every 5 mins.
+            if FLUX_ZERO_FILL_NAMESPACES:
+                manage_flux_zero_fill_namespaces = False
+                flux_zero_fill_metrics = []
+                # Only manage every 5 mins
+                manage_flux_zero_fill_namespaces_redis_key = 'analyzer.manage_flux_zero_fill_namespaces'
+                try:
+                    manage_flux_zero_fill_namespaces = self.redis_conn.get(manage_flux_zero_fill_namespaces_redis_key)
+                except Exception as e:
+                    if LOCAL_DEBUG:
+                        logger.error('error :: could not query Redis for analyzer.manage_mirage_unique_metrics key: %s' % str(e))
+                if not manage_flux_zero_fill_namespaces:
+                    logger.info('managing FLUX_ZERO_FILL_NAMESPACES Redis sets')
+                    try:
+                        self.redis_conn.delete('analyzer.flux_zero_fill_metrics')
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to delete analyzer.flux_zero_fill_metrics Redis set')
+                    for i_base_name in unique_base_names:
+                        flux_zero_fill_metric = False
+                        pattern_match, metric_matched_by = matched_or_regexed_in_list('analyzer', i_base_name, FLUX_ZERO_FILL_NAMESPACES)
+                        if pattern_match:
+                            flux_zero_fill_metric = True
+                        if flux_zero_fill_metric:
+                            flux_zero_fill_metrics.append(i_base_name)
+                    if flux_zero_fill_metrics:
+                        logger.info('popuating analyzer.flux_zero_fill_metrics Redis set with %s metrics' % str(len(flux_zero_fill_metrics)))
+                        try:
+                            self.redis_conn.sadd('analyzer.flux_zero_fill_metrics', *set(flux_zero_fill_metrics))
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: failed to add multiple members to the analyzer.flux_zero_fill_metrics Redis set')
+                    try:
+                        key_timestamp = int(time())
+                        self.redis_conn.setex(manage_flux_zero_fill_namespaces_redis_key, 300, key_timestamp)
+                    except:
+                        logger.error('error :: failed to set key :: manage_flux_zero_fill_namespaces_redis_key' % manage_flux_zero_fill_namespaces_redis_key)
+                    logger.info('checking if any metrics need to be removed from analyzer.flux_zero_fill_metrics')
+                    flux_zero_fill_metrics_to_remove = []
+                    flux_zero_fill_metrics_list = []
+                    try:
+                        flux_zero_fill_metrics_list = list(self.redis_conn_decoded.smembers('analyzer.flux_zero_fill_metrics'))
+                    except:
+                        logger.info(traceback.format_exc())
+                        logger.error('error :: failed to generate a list from analyzer.flux_zero_fill_metrics Redis set')
+                    for flux_zero_fill_base_name in flux_zero_fill_metrics_list:
+                        if flux_zero_fill_base_name not in unique_base_names:
+                            flux_zero_fill_metrics_to_remove.append(flux_zero_fill_base_name)
+                    if flux_zero_fill_metrics_to_remove:
+                        try:
+                            logger.info('removing %s metrics from smtp_alerter_metrics' % str(len(flux_zero_fill_metrics_to_remove)))
+                            self.redis_conn.srem('analyzer.flux_zero_fill_metrics', *set(flux_zero_fill_metrics_to_remove))
+                            # Reload the new set
+                            try:
+                                flux_zero_fill_metrics_list = list(self.redis_conn_decoded.smembers('analyzer.flux_zero_fill_metrics'))
+                            except:
+                                logger.info(traceback.format_exc())
+                                logger.error('error :: failed to generate a list from analyzer.flux_zero_fill_metrics Redis set after removals')
+                        except:
+                            logger.info(traceback.format_exc())
+                            logger.error('error :: failed to add multiple members to the analyzer.flux_zero_fill_metrics Redis set')
+                    else:
+                        logger.info('no metrics need to remove from analyzer.flux_zero_fill_metrics')
+                    if flux_zero_fill_metrics_list:
+                        # Replace the existing flux.zero_fill_metrics Redis set
+                        try:
+                            self.redis_conn.sunionstore('flux.zero_fill_metrics', 'analyzer.flux_zero_fill_metrics')
+                            logger.info('replaced flux.zero_fill_metrics Redis set with the newly created analyzer.flux_zero_fill_metrics set')
+                        except:
+                            logger.info(traceback.format_exc())
+                            logger.error('error :: failed to sunionstore flux.zero_fill_metrics from analyzer.flux_zero_fill_metrics Redis sets')
 
             # Using count files rather that multiprocessing.Value to enable metrics for
             # metrics for algorithm run times, etc

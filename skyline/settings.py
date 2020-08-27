@@ -2811,6 +2811,27 @@ FLUX_UPLOADS_KEYS = {}
 
 """
 
+FLUX_ZERO_FILL_NAMESPACES = []
+"""
+:var FLUX_ZERO_FILL_NAMESPACES: For each namespace or namespace elements
+    declared in this list, flux will send 0 if no data is recieved for a
+    metric in the namespace in the last 60 seconds.  This enables Skyline to
+    fill sparsely populated metrics with 0 where appropriate, continous data
+    time series are better for analysing, especially in terms of features
+    profiles.  The namespaces declared here can be absolute metric names,
+    elements or a regex of the namespace.
+:vartype FLUX_ZERO_FILL_NAMESPACES: list
+
+- **Example**::
+
+    FLUX_ZERO_FILL_NAMESPACES = [
+        'nginx.errors',
+        'external_sites.www_example_com.avg_pageload',
+        'sites.avg_pageload',
+    ]
+
+"""
+
 
 FLUX_SEND_TO_STATSD = False
 """
