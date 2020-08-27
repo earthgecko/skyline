@@ -43,6 +43,12 @@ try:
 except:
     SERVER_METRIC_PATH = ''
 
+# @added 20200827 - Feature #3708: FLUX_ZERO_FILL_NAMESPACES
+try:
+    FLUX_ZERO_FILL_NAMESPACES = settings.FLUX_ZERO_FILL_NAMESPACES
+except:
+    FLUX_ZERO_FILL_NAMESPACES = []
+
 parent_skyline_app = 'flux'
 
 # @added 20191010 - Feature #3250: Allow Skyline to send metrics to another Carbon host
@@ -119,6 +125,10 @@ class Worker(Process):
 
         last_sent_to_graphite = int(time())
         metrics_sent_to_graphite = 0
+
+        # @added 20200827 - Feature #3708: FLUX_ZERO_FILL_NAMESPACES
+        last_zero_fill_to_graphite = 0
+        metrics_sent = []
 
         # Populate API keys and tokens in memcache
         # python-2.x and python3.x handle while 1 and while True differently
@@ -240,6 +250,8 @@ class Worker(Process):
                             submittedToGraphite = True
                             logger.info('worker :: sent %s, %s, %s to Graphite' % (str(metric), str(value), str(timestamp)))
                             metrics_sent_to_graphite += 1
+                            # @added 20200827 - Feature #3708: FLUX_ZERO_FILL_NAMESPACES
+                            metrics_sent.append(metric)
                         except:
                             logger.error(traceback.format_exc())
                             logger.error('error :: worker :: failed to send metric data to Graphite for %s' % str(metric))
@@ -278,8 +290,40 @@ class Worker(Process):
                 if settings.FLUX_SEND_TO_STATSD:
                     statsd_conn.incr(metric, value, timestamp)
                     logger.info('worker sent %s, %s, %s to statsd' % (metric, str(value), str(timestamp)))
+                    # @added 20200827 - Feature #3708: FLUX_ZERO_FILL_NAMESPACES
+                    metrics_sent.append(metric)
 
             time_now = int(time())
+
+            # @added 20200827 - Feature #3708: FLUX_ZERO_FILL_NAMESPACES
+            # Send 0 for any metric in the flux.zero_fill_metrics Redis set that
+            # has not submitted data in the last 60 seconds.  The flux.last
+            # Redis key is not updated for these sent 0 values so if the source
+            # sends data for a timestamp in the period later (due to a lag, etc),
+            # it will be valid and sent to Graphite.
+            if FLUX_ZERO_FILL_NAMESPACES:
+                if not last_zero_fill_to_graphite:
+                    last_zero_fill_to_graphite = time_now - 60
+                if (time_now - last_sent_to_graphite) >= 60:
+                    try:
+                        flux_zero_fill_metrics = list(self.redis_conn_decoded.smembers('flux.zero_fill_metrics'))
+                    except:
+                        logger.info(traceback.format_exc())
+                        logger.error('error :: failed to generate a list from flux.zero_fill_metrics Redis set')
+                    for flux_zero_fill_metric in flux_zero_fill_metrics:
+                        if flux_zero_fill_metric not in metrics_sent:
+                            try:
+                                graphyte.send(flux_zero_fill_metric, 0.0, time_now)
+                                logger.info('worker :: zero fill - sent %s, %s, %s to Graphite' % (str(flux_zero_fill_metric), str(0.0), str(time_now)))
+                                metrics_sent_to_graphite += 1
+                                metrics_sent.append(metric)
+                            except:
+                                logger.error(traceback.format_exc())
+                                logger.error('error :: worker :: zero fill - failed to send metric data to Graphite for %s' % str(flux_zero_fill_metric))
+                                metric = None
+                    last_zero_fill_to_graphite = time_now
+                    metrics_sent = []
+
             if (time_now - last_sent_to_graphite) >= 60:
                 logger.info('worker :: metrics_sent_to_graphite in last 60 seconds - %s' % str(metrics_sent_to_graphite))
                 skyline_metric = '%s.metrics_sent_to_graphite' % skyline_app_graphite_namespace
