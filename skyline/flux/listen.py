@@ -128,8 +128,12 @@ def validate_timestamp(caller, timestamp):
         if timestamp < tooOld:
             timestampInvalidReason = 'timestamp is too old'
             timestampValid = False
-        if timestamp > now:
-            timestampInvalidReason = 'timestamp is in the future'
+        # @modified 20200828 - Task #3718: Allow flux to handle timestamp in the same minute period
+        # if timestamp > now:
+        if timestamp > (now + 60):
+            # @modified 20200828 - Task #3718: Allow flux to handle timestamp in the same minute period
+            # timestampInvalidReason = 'timestamp is in the future'
+            timestampInvalidReason = 'timestamp is more than 1 minute in the future'
             timestampValid = False
         if not timestampValid:
             logger.error('error :: %s :: timestamp in request data is not a valid timestamp - %s - %s' % (
