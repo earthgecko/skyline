@@ -713,7 +713,10 @@ def ionosphere_learn(timestamp):
                 for row in result:
                     try:
                         recent_fp_id = int(row['id'])
-                        exisitng_recent_fps.append(recent_fp_id)
+                        # @modified 202000902 - Bug #3382: Prevent ionosphere.learn loop edge cases
+                        # Only limit learnt profiles, not user generated ones.
+                        if int(row['generation']) > 0:
+                            exisitng_recent_fps.append(recent_fp_id)
                     except:
                         logger.error(traceback.format_exc())
                         logger.error('error :: learn :: failed to determine exisitng_recent_fps from DB response for work check')
@@ -724,12 +727,15 @@ def ionosphere_learn(timestamp):
                 if learn_parent_id in exisitng_recent_fps:
                     logger.info('info :: learn :: completed work check - the learn_parent_id %s is a recent features profile, not learning from this fp' % (
                         str(learn_parent_id)))
-                logger.info('info :: learn :: removing learn work item to prevent learning loop (#3382) - %s' % (str(learn_metric_list)))
-                remove_work_list_from_redis_set(learn_metric_list)
-                learn_engine_disposal(engine)
-                continue
+                    logger.info('info :: learn :: removing learn work item to prevent learning loop (#3382) - %s' % (str(learn_metric_list)))
+                    remove_work_list_from_redis_set(learn_metric_list)
+                    learn_engine_disposal(engine)
+                    continue
+                else:
+                    logger.info('info :: learn :: completed work check - the learn_parent_id fp %s is not in exisitng_recent_fps continuing' % (
+                        str(learn_parent_id)))
             else:
-                logger.info('info :: learn :: completed work check - the learn_parent_id fp %s in not recent continuing' % (
+                logger.info('info :: learn :: completed work check - the learn_parent_id fp %s is not in exisitng_recent_fps continuing' % (
                     str(learn_parent_id)))
 
         # First learn checks if the metric_training_data_dir exists, if it does not
