@@ -1931,9 +1931,10 @@ class Mirage(Thread):
                 # @modified 20200903 - Task #3730: Validate Mirage running multiple processes
                 # processing_check_file = metric_var_files_sorted[0]
                 # logger.info('processing %s' % processing_check_file)
-                MIRAGE_PROCESSES - 1
-                processing_check_file = metric_var_files_sorted[0:]
-                logger.info('processing %s' % processing_check_file)
+                for i in range(1, MIRAGE_PROCESSES + 1):
+                    up_to = i - 1
+                    processing_check_file = metric_var_files_sorted[up_to]
+                    logger.info('processing %s' % processing_check_file)
 
                 # @modified 20161224 - send mirage metrics to graphite
                 # run_timestamp = int(now)
