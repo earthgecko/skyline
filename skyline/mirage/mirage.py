@@ -637,8 +637,36 @@ class Mirage(Thread):
             return
 
         metric_var_files_sorted = sorted(metric_var_files)
+
+        # @added 20200903 - Task #3730: Validate Mirage running multiple processes
+        # Ensure the process locks the check
+        metric_check_filename = None
+        for i_metric_check_file in metric_var_files_sorted:
+            check_assigned = False
+            cache_key = 'mirage.check.lock.%s' % str(i_metric_check_file)
+            try:
+                check_assigned = self.redis_conn.get(cache_key)
+                if not check_assigned:
+                    try:
+                        self.redis_conn.setex(cache_key, 120, int(time()))
+                        metric_check_filename = str(i_metric_check_file)
+                        logger.info('assigned self check file and set Redis key - %s' % (cache_key))
+                        self.redis_conn.sadd('mirage.checks.done', metric_check_filename)
+                        break
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to set Redis key - %s' % cache_key)
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to check if Redis key exists - %s' % cache_key)
+        if not metric_check_filename:
+            logger.info('no check to assign to process, nothing to do')
+            return
+
         metric_check_file = '%s/%s' % (
-            settings.MIRAGE_CHECK_PATH, str(metric_var_files_sorted[0]))
+            # @modified 20200903 - Task #3730: Validate Mirage running multiple processes
+            # settings.MIRAGE_CHECK_PATH, str(metric_var_files_sorted[0]))
+            settings.MIRAGE_CHECK_PATH, metric_check_filename)
 
         check_file_name = os.path.basename(str(metric_check_file))
         check_file_timestamp = check_file_name.split('.', 1)[0]
@@ -660,7 +688,7 @@ class Mirage(Thread):
             # metric_vars = load_metric_vars(skyline_app, str(metric_check_file))
             metric_vars_array = self.mirage_load_metric_vars(str(metric_check_file))
         except:
-            logger.info(traceback.format_exc())
+            logger.error(traceback.format_exc())
             logger.error('error :: failed to load metric variables from check file - %s' % (metric_check_file))
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return
@@ -679,7 +707,10 @@ class Mirage(Thread):
 
         # @added 20200106 - Branch #3262: py3
         #                   Task #3034: Reduce multiprocessing Manager list usage
-        redis_set_to_delete = 'mirage.metric_variables'
+        # @modified 20200903 - Task #3730: Validate Mirage running multiple processes
+        # redis_set_to_delete = 'mirage.metric_variables'
+        redis_metric_variables_set = 'mirage.%s.metric_variables' % str(i)
+        redis_set_to_delete = redis_metric_variables_set
         try:
             self.redis_conn.delete(redis_set_to_delete)
             logger.info('deleted Redis set - %s' % redis_set_to_delete)
@@ -694,10 +725,13 @@ class Mirage(Thread):
             metric_name = ['metric_name', metric]
             # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
             # self.metric_variables.append(metric_name)
+            # @modified 20200903 - Task #3730: Validate Mirage running multiple processes
             redis_set = 'mirage.metric_variables'
             data = str(metric_name)
             try:
-                self.redis_conn.sadd(redis_set, data)
+                # @modified 20200903 - Task #3730: Validate Mirage running multiple processes
+                # self.redis_conn.sadd(redis_set, data)
+                self.redis_conn.sadd(redis_metric_variables_set, data)
             except:
                 logger.info(traceback.format_exc())
                 logger.error('error :: failed to add %s to Redis set %s' % (
@@ -728,7 +762,9 @@ class Mirage(Thread):
             redis_set = 'mirage.metric_variables'
             data = str(metric_value)
             try:
-                self.redis_conn.sadd(redis_set, data)
+                # @modified 20200903 - Task #3730: Validate Mirage running multiple processes
+                # self.redis_conn.sadd(redis_set, data)
+                self.redis_conn.sadd(redis_metric_variables_set, data)
             except:
                 logger.info(traceback.format_exc())
                 logger.error('error :: failed to add %s to Redis set %s' % (
@@ -761,7 +797,9 @@ class Mirage(Thread):
             redis_set = 'mirage.metric_variables'
             data = str(hours_to_resolve_list)
             try:
-                self.redis_conn.sadd(redis_set, data)
+                # @modified 20200903 - Task #3730: Validate Mirage running multiple processes
+                # self.redis_conn.sadd(redis_set, data)
+                self.redis_conn.sadd(redis_metric_variables_set, data)
             except:
                 logger.info(traceback.format_exc())
                 logger.error('error :: failed to add %s to Redis set %s' % (
@@ -789,7 +827,9 @@ class Mirage(Thread):
             redis_set = 'mirage.metric_variables'
             data = str(metric_timestamp_list)
             try:
-                self.redis_conn.sadd(redis_set, data)
+                # @modified 20200903 - Task #3730: Validate Mirage running multiple processes
+                # self.redis_conn.sadd(redis_set, data)
+                self.redis_conn.sadd(redis_metric_variables_set, data)
             except:
                 logger.info(traceback.format_exc())
                 logger.error('error :: failed to add %s to Redis set %s' % (
@@ -867,6 +907,15 @@ class Mirage(Thread):
                     logger.info('removed data dir - %s' % metric_data_dir)
                 except:
                     logger.error('error :: failed to rmtree - %s' % metric_data_dir)
+
+            # @added 20200903 - Task #3730: Validate Mirage running multiple processes
+            redis_set = 'mirage.stale_check_discarded'
+            try:
+                self.redis_conn.sadd(redis_set, str(metric))
+            except:
+                logger.info(traceback.format_exc())
+                logger.error('error :: failed to add %s to Redis set %s' % (
+                    str(metric), str(redis_set)))
             return
 
         # Calculate hours second order resolution to seconds
@@ -1077,7 +1126,9 @@ class Mirage(Thread):
 
             logger.info('anomaly detected  :: %s with %s' % (metric, str(value)))
             # It runs so fast, this allows us to process 30 anomalies/min
-            sleep(2)
+            # @modified 20200903 - Task #3730: Validate Mirage running multiple processes
+            # Removed limit
+            # sleep(2)
 
             # Get the anomaly breakdown - who returned True?
             triggered_algorithms = []
@@ -1574,6 +1625,9 @@ class Mirage(Thread):
         if LOCAL_DEBUG:
             logger.info('debug :: Memory usage in run at start: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 
+        # @added 20200903 - Task #3730: Validate Mirage running multiple processes
+        last_sent_to_graphite = int(time())
+
         while 1:
             now = time()
 
@@ -1775,12 +1829,26 @@ class Mirage(Thread):
                         # @modified 20200604 - Mirage - populate_redis
                         # Do not sleep if there are metrics to populate in Redis
                         if populate_redis_with_metrics_count == 0:
+                            # @added 20200903 - Task #3730: Validate Mirage running multiple processes
+                            sleep_for = 10
+                            next_send_to_graphite = last_sent_to_graphite + 60
+                            seconds_to_next_send_to_graphite = next_send_to_graphite - int(time())
+                            if seconds_to_next_send_to_graphite < 10:
+                                if seconds_to_next_send_to_graphite > 1:
+                                    sleep_for = seconds_to_next_send_to_graphite
+                                else:
+                                    break
+
                             logger.info('sleeping no metrics...')
-                            sleep(10)
+                            # @modified 20200903 - Task #3730: Validate Mirage running multiple processes
+                            # sleep(10)
+                            sleep(sleep_for)
                         else:
                             logger.info('no checks or alerts, continuing to process populate_redis metrics')
-                else:
-                    sleep(1)
+                # @modified 20200903 - Task #3730: Validate Mirage running multiple processes
+                # Removed sleep, no delay
+                # else:
+                #    sleep(1)
 
                 # Clean up old files
                 now_timestamp = time()
@@ -1791,8 +1859,16 @@ class Mirage(Thread):
                         c = t.st_ctime
                         # delete file if older than a week
                         if c < stale_age:
-                                os.remove(settings.MIRAGE_CHECK_PATH + "/" + current_file)
-                                logger.info('removed stale check - %s' % (current_file))
+                            os.remove(settings.MIRAGE_CHECK_PATH + "/" + current_file)
+                            logger.info('removed stale check - %s' % (current_file))
+                            # @added 20200903 - Task #3730: Validate Mirage running multiple processes
+                            redis_set = 'mirage.stale_check_discarded'
+                            try:
+                                self.redis_conn.sadd(redis_set, str(current_file))
+                            except:
+                                logger.info(traceback.format_exc())
+                                logger.error('error :: failed to add %s to Redis set %s' % (
+                                    str(current_file), str(redis_set)))
 
                 # Discover metric to analyze
                 metric_var_files = ''
@@ -1805,14 +1881,21 @@ class Mirage(Thread):
                 if len(metric_var_files) > 0:
                     break
 
+            process_metric_check_files = False
+
             # @modified 20161228 - Feature #1830: Ionosphere alerts
             # Only spawn process if this is not an Ionosphere alert
             if not ionosphere_alerts_returned:
                 metric_var_files_sorted = sorted(metric_var_files)
                 # metric_check_file = settings.MIRAGE_CHECK_PATH + "/" + metric_var_files_sorted[0]
+                if metric_var_files_sorted:
+                    process_metric_check_files = True
 
-                processing_check_file = metric_var_files_sorted[0]
-                logger.info('processing %s' % processing_check_file)
+            if process_metric_check_files:
+
+                # @added 20200903 - Task #3730: Validate Mirage running multiple processes
+                check_files_to_process = len(metric_var_files_sorted)
+                logger.info('%s checks to process' % str(check_files_to_process))
 
                 # Remove any existing algorithm.error files from any previous runs
                 # that did not cleanup for any reason
@@ -1832,7 +1915,26 @@ class Mirage(Thread):
                 pids = []
                 spawned_pids = []
                 pid_count = 0
-                MIRAGE_PROCESSES = 1
+
+                # @modified 20200903 - Task #3730: Validate Mirage running multiple processes
+                # MIRAGE_PROCESSES = 1
+                if len(metric_var_files) > 1:
+                    try:
+                        MIRAGE_PROCESSES = int(settings.MIRAGE_PROCESSES)
+                        if len(metric_var_files) < MIRAGE_PROCESSES:
+                            MIRAGE_PROCESSES = len(metric_var_files)
+                    except:
+                        MIRAGE_PROCESSES = 1
+                else:
+                    MIRAGE_PROCESSES = 1
+
+                # @modified 20200903 - Task #3730: Validate Mirage running multiple processes
+                # processing_check_file = metric_var_files_sorted[0]
+                # logger.info('processing %s' % processing_check_file)
+                MIRAGE_PROCESSES - 1
+                processing_check_file = metric_var_files_sorted[0:]
+                logger.info('processing %s' % processing_check_file)
+
                 # @modified 20161224 - send mirage metrics to graphite
                 # run_timestamp = int(now)
                 run_timestamp = int(time())
@@ -1842,7 +1944,9 @@ class Mirage(Thread):
                     pid_count += 1
                     logger.info('starting %s of %s spin_process/es' % (str(pid_count), str(MIRAGE_PROCESSES)))
                     p.start()
-                    spawned_pids.append(p.pid)
+                    # @modified 20200903 - Task #3730: Validate Mirage running multiple processes
+                    # spawned_pids.append(p.pid)
+                    spawned_pids.append([p.pid, i])
 
                 # Send wait signal to zombie processes
                 # for p in pids:
@@ -1891,7 +1995,9 @@ class Mirage(Thread):
                 if LOCAL_DEBUG or DEBUG_CUSTOM_ALGORITHMS:
                     logger.debug('debug :: checking for algorithm error files')
 
-                for completed_pid in spawned_pids:
+                # @modified 20200903 - Task #3730: Validate Mirage running multiple processes
+                # for completed_pid in spawned_pids:
+                for completed_pid, mirage_process in spawned_pids:
                     logger.info('spin_process with pid %s completed' % (str(completed_pid)))
                     # @modified 20200607 - Feature #3566: custom_algorithms
                     #                      Feature #3508: ionosphere.untrainable_metrics
@@ -1965,14 +2071,28 @@ class Mirage(Thread):
 
                     # @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage
                     # Use Redis set and not self.metric_variables
+
                     metric_variables = []
                     # @modified 20191022 - Bug #3266: py3 Redis binary objects not strings
                     #                      Branch #3262: py3
                     # literal_metric_variables = list(self.redis_conn.smembers('mirage.metric_variables'))
-                    literal_metric_variables = list(self.redis_conn_decoded.smembers('mirage.metric_variables'))
+                    # @modified 20200903 - Task #3730: Validate Mirage running multiple processes
+                    # Handle per process
+                    # literal_metric_variables = list(self.redis_conn_decoded.smembers('mirage.metric_variables'))
+                    metric_variable_redis_set = 'mirage.%s.metric_variables' % str(mirage_process)
+                    literal_metric_variables = list(self.redis_conn_decoded.smembers(metric_variable_redis_set))
                     for item_list_string in literal_metric_variables:
                         list_item = literal_eval(item_list_string)
                         metric_variables.append(list_item)
+
+                    # @added 20200903 - Task #3730: Validate Mirage running multiple processes
+                    # Handle per process
+                    try:
+                        self.redis_conn.delete(metric_variable_redis_set)
+                        logger.info('deleted Redis set - %s' % metric_variable_redis_set)
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to delete Redis set - %s' % metric_variable_redis_set)
 
                     # @added 20191113 - Branch #3262: py3
                     # Set default values
@@ -2054,23 +2174,23 @@ class Mirage(Thread):
                         if LOCAL_DEBUG:
                             logger.debug('debug :: metric_data_dir does not exist - %s' % str(metric_data_dir))
 
-                    ionosphere_unique_metrics = []
-                    if settings.MIRAGE_ENABLE_ALERTS:
-                        # @added 20161228 - Feature #1830: Ionosphere alerts
-                        #                   Branch #922: Ionosphere
-                        # Bringing Ionosphere online - do alert on Ionosphere metrics
-                        try:
-                            # @modified 20191022 - Bug #3266: py3 Redis binary objects not strings
-                            #                      Branch #3262: py3
-                            # ionosphere_unique_metrics = list(self.redis_conn.smembers('ionosphere.unique_metrics'))
-                            ionosphere_unique_metrics = list(self.redis_conn_decoded.smembers('ionosphere.unique_metrics'))
-                        except:
-                            logger.error(traceback.format_exc())
-                            logger.error('error :: failed to get ionosphere.unique_metrics from Redis')
-                            ionosphere_unique_metrics = []
-                    else:
-                        if LOCAL_DEBUG:
-                            logger.debug('debug :: settings.MIRAGE_ENABLE_ALERTS is not True')
+                ionosphere_unique_metrics = []
+                if settings.MIRAGE_ENABLE_ALERTS:
+                    # @added 20161228 - Feature #1830: Ionosphere alerts
+                    #                   Branch #922: Ionosphere
+                    # Bringing Ionosphere online - do alert on Ionosphere metrics
+                    try:
+                        # @modified 20191022 - Bug #3266: py3 Redis binary objects not strings
+                        #                      Branch #3262: py3
+                        # ionosphere_unique_metrics = list(self.redis_conn.smembers('ionosphere.unique_metrics'))
+                        ionosphere_unique_metrics = list(self.redis_conn_decoded.smembers('ionosphere.unique_metrics'))
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to get ionosphere.unique_metrics from Redis')
+                        ionosphere_unique_metrics = []
+                else:
+                    if LOCAL_DEBUG:
+                        logger.debug('debug :: settings.MIRAGE_ENABLE_ALERTS is not True')
 
             # @added 20161228 - Feature #1830: Ionosphere alerts
             #                   Branch #922: Ionosphere
@@ -2477,54 +2597,12 @@ class Mirage(Thread):
                 logger.info('anomaly breakdown  :: %s' % str(anomaly_breakdown))
 
             # Log to Graphite
-            run_time = time() - run_timestamp
-            logger.info('seconds to run    :: %.2f' % run_time)
-            graphite_run_time = '%.2f' % run_time
-            send_metric_name = skyline_app_graphite_namespace + '.run_time'
-            send_graphite_metric(skyline_app, send_metric_name, graphite_run_time)
-
-            if settings.ENABLE_CRUCIBLE and settings.MIRAGE_CRUCIBLE_ENABLED:
-                try:
-                    # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
-                    # sent_to_crucible = str(len(self.sent_to_crucible))#
-                    # @modified 20191022 - Bug #3266: py3 Redis binary objects not strings
-                    #                      Branch #3262: py3
-                    # sent_to_crucible = str(len(list(self.redis_conn.smembers('mirage.sent_to_crucible'))))
-                    sent_to_crucible = str(len(list(self.redis_conn_decoded.smembers('mirage.sent_to_crucible'))))
-                except:
-                    sent_to_crucible = '0'
-                logger.info('sent_to_crucible   :: %s' % sent_to_crucible)
-                send_metric_name = '%s.sent_to_crucible' % skyline_app_graphite_namespace
-                send_graphite_metric(skyline_app, send_metric_name, sent_to_crucible)
-
-            if settings.PANORAMA_ENABLED:
-                try:
-                    # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
-                    # sent_to_panorama = str(len(self.sent_to_panorama))
-                    # @modified 20191022 - Bug #3266: py3 Redis binary objects not strings
-                    #                      Branch #3262: py3
-                    # sent_to_panorama = str(len(list(self.redis_conn.smembers('mirage.sent_to_panorama'))))
-                    sent_to_panorama = str(len(list(self.redis_conn_decoded.smembers('mirage.sent_to_panorama'))))
-                except:
-                    sent_to_panorama = '0'
-                logger.info('sent_to_panorama   :: %s' % sent_to_panorama)
-                send_metric_name = '%s.sent_to_panorama' % skyline_app_graphite_namespace
-                send_graphite_metric(skyline_app, send_metric_name, sent_to_panorama)
-
-            if settings.IONOSPHERE_ENABLED:
-                try:
-                    # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
-                    # sent_to_ionosphere = str(len(self.sent_to_ionosphere))
-                    # @modified 20191022 - Bug #3266: py3 Redis binary objects not strings
-                    #                      Branch #3262: py3
-                    # sent_to_ionosphere = str(len(list(self.redis_conn.smembers('mirage.sent_to_ionosphere'))))
-                    sent_to_ionosphere = str(len(list(self.redis_conn_decoded.smembers('mirage.sent_to_ionosphere'))))
-                except Exception as e:
-                    logger.error('error :: could not determine sent_to_ionosphere: %s' % e)
-                    sent_to_ionosphere = '0'
-                logger.info('sent_to_ionosphere :: %s' % sent_to_ionosphere)
-                send_metric_name = '%s.sent_to_ionosphere' % skyline_app_graphite_namespace
-                send_graphite_metric(skyline_app, send_metric_name, sent_to_ionosphere)
+            if process_metric_check_files:
+                run_time = time() - run_timestamp
+                logger.info('seconds to run    :: %.2f' % run_time)
+                graphite_run_time = '%.2f' % run_time
+                send_metric_name = skyline_app_graphite_namespace + '.run_time'
+                send_graphite_metric(skyline_app, send_metric_name, graphite_run_time)
 
             # @added 20200805 - Task #3662: Change mirage.last_check keys to timestamp value
             #                   Feature #3486: analyzer_batch
@@ -2591,9 +2669,11 @@ class Mirage(Thread):
                 'mirage.anomalous_metrics',
                 'mirage.not_anomalous_metrics',
                 'mirage.metric_variables',
-                'mirage.sent_to_crucible',
-                'mirage.sent_to_panorama',
-                'mirage.sent_to_ionosphere',
+                # @modified 20200903 - Task #3730: Validate Mirage running multiple processes
+                # Handle once per minute
+                # 'mirage.sent_to_crucible',
+                # 'mirage.sent_to_panorama',
+                # 'mirage.sent_to_ionosphere',
             ]
             for i_redis_set in delete_redis_sets:
                 redis_set_to_delete = i_redis_set
@@ -2637,6 +2717,97 @@ class Mirage(Thread):
 
             if LOCAL_DEBUG:
                 logger.info('debug :: Memory usage end of run: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+
+            # @added 20200903 - Task #3730: Validate Mirage running multiple processes
+            # Send checks.stale_discarded and checks.pending metrics
+            if int(time()) >= (last_sent_to_graphite + 60):
+                stale_check_discarded = []
+                try:
+                    stale_check_discarded = list(self.redis_conn_decoded.smembers('mirage.stale_check_discarded'))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to get mirage.stale_check_discarded set from Redis')
+                    stale_check_discarded = []
+                stale_check_discarded_count = len(stale_check_discarded)
+                logger.info('checks.stale_discarded   :: %s' % str(stale_check_discarded_count))
+                send_metric_name = '%s.checks.stale_discarded' % skyline_app_graphite_namespace
+                send_graphite_metric(skyline_app, send_metric_name, str(stale_check_discarded_count))
+                checks_pending = [f_pending for f_pending in listdir(settings.MIRAGE_CHECK_PATH) if isfile(join(settings.MIRAGE_CHECK_PATH, f_pending))]
+                checks_pending_count = len(checks_pending)
+                logger.info('checks.pending   :: %s' % str(checks_pending_count))
+                send_metric_name = '%s.checks.pending' % skyline_app_graphite_namespace
+                send_graphite_metric(skyline_app, send_metric_name, str(checks_pending_count))
+                checks_done = []
+                try:
+                    checks_done = list(self.redis_conn_decoded.smembers('mirage.checks.done'))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to get mirage.checks.done set from Redis')
+                    checks_done = []
+                checks_done_count = len(checks_done)
+                logger.info('checks.done   :: %s' % str(checks_done_count))
+                send_metric_name = '%s.checks.done' % skyline_app_graphite_namespace
+                send_graphite_metric(skyline_app, send_metric_name, str(checks_done_count))
+                # @modified 20200903 - Task #3730: Validate Mirage running multiple processes
+                # Only send panorama, ionosphere and crucible metrics once a minute
+                if settings.ENABLE_CRUCIBLE and settings.MIRAGE_CRUCIBLE_ENABLED:
+                    try:
+                        # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                        # sent_to_crucible = str(len(self.sent_to_crucible))#
+                        # @modified 20191022 - Bug #3266: py3 Redis binary objects not strings
+                        #                      Branch #3262: py3
+                        # sent_to_crucible = str(len(list(self.redis_conn.smembers('mirage.sent_to_crucible'))))
+                        sent_to_crucible = str(len(list(self.redis_conn_decoded.smembers('mirage.sent_to_crucible'))))
+                    except:
+                        sent_to_crucible = '0'
+                    logger.info('sent_to_crucible   :: %s' % sent_to_crucible)
+                    send_metric_name = '%s.sent_to_crucible' % skyline_app_graphite_namespace
+                    send_graphite_metric(skyline_app, send_metric_name, sent_to_crucible)
+
+                if settings.PANORAMA_ENABLED:
+                    try:
+                        # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                        # sent_to_panorama = str(len(self.sent_to_panorama))
+                        # @modified 20191022 - Bug #3266: py3 Redis binary objects not strings
+                        #                      Branch #3262: py3
+                        # sent_to_panorama = str(len(list(self.redis_conn.smembers('mirage.sent_to_panorama'))))
+                        sent_to_panorama = str(len(list(self.redis_conn_decoded.smembers('mirage.sent_to_panorama'))))
+                    except:
+                        sent_to_panorama = '0'
+                    logger.info('sent_to_panorama   :: %s' % sent_to_panorama)
+                    send_metric_name = '%s.sent_to_panorama' % skyline_app_graphite_namespace
+                    send_graphite_metric(skyline_app, send_metric_name, sent_to_panorama)
+
+                if settings.IONOSPHERE_ENABLED:
+                    try:
+                        # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                        # sent_to_ionosphere = str(len(self.sent_to_ionosphere))
+                        # @modified 20191022 - Bug #3266: py3 Redis binary objects not strings
+                        #                      Branch #3262: py3
+                        # sent_to_ionosphere = str(len(list(self.redis_conn.smembers('mirage.sent_to_ionosphere'))))
+                        sent_to_ionosphere = str(len(list(self.redis_conn_decoded.smembers('mirage.sent_to_ionosphere'))))
+                    except Exception as e:
+                        logger.error('error :: could not determine sent_to_ionosphere: %s' % e)
+                        sent_to_ionosphere = '0'
+                    logger.info('sent_to_ionosphere :: %s' % sent_to_ionosphere)
+                    send_metric_name = '%s.sent_to_ionosphere' % skyline_app_graphite_namespace
+                    send_graphite_metric(skyline_app, send_metric_name, sent_to_ionosphere)
+                last_sent_to_graphite = int(time())
+                delete_redis_sets = [
+                    'mirage.sent_to_crucible',
+                    'mirage.sent_to_panorama',
+                    'mirage.sent_to_ionosphere',
+                    'mirage.stale_check_discarded',
+                    'mirage.checks.done'
+                ]
+                for i_redis_set in delete_redis_sets:
+                    redis_set_to_delete = i_redis_set
+                    try:
+                        self.redis_conn.delete(redis_set_to_delete)
+                        logger.info('deleted Redis set - %s' % redis_set_to_delete)
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to delete Redis set - %s' % redis_set_to_delete)
 
             # Sleep if it went too fast
             if time() - now < 1:
