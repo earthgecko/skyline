@@ -2037,6 +2037,61 @@ class Analyzer(Thread):
                                         logger.info(traceback.format_exc())
                                         logger.error('error :: failed to add %s Ionosphere Mirage Redis data timeseries json file - %s' % (skyline_app, ionosphere_json_file))
 
+                                # @added 20200904 - Task #3730: Validate Mirage running multiple processes
+                                # Add mirage check files immediately if possible
+                                # rather than waiting to add all in the alerting
+                                # phase.  This is done to reduce the time it
+                                # takes to get through the analysis pipeline.
+                                use_hours_to_resolve = None
+                                mirage_metric_cache_key = 'mirage.metrics.%s' % base_name
+                                try:
+                                    raw_hours_to_resolve = self.redis_conn.get(mirage_metric_cache_key)
+                                    use_hours_to_resolve = int(raw_hours_to_resolve)
+                                except:
+                                    logger.info('mirage check will not be added here (will be added in run alert check) as no mirage.metrics Redis key found to determine hours_to_resolve - %s' % str(mirage_metric_cache_key))
+                                    use_hours_to_resolve = None
+                                anomaly_check_file = None
+                                # Only add if the hours to resolve are known
+                                # from an existing mirage.metrics Redis key, if
+                                # the hours_to_resolve are not known then the
+                                # check will be added in the original and normal
+                                # run alert check.
+                                if use_hours_to_resolve:
+                                    try:
+                                        anomaly_check_file = '%s/%s.%s.txt' % (settings.MIRAGE_CHECK_PATH, str(metric_timestamp), sane_metricname)
+                                    except:
+                                        anomaly_check_file = None
+                                mirage_anomaly_check_file_created = False
+                                if anomaly_check_file:
+                                    try:
+                                        with open(anomaly_check_file, 'w') as fh:
+                                            # metric_name, anomalous datapoint, hours to resolve, timestamp
+                                            fh.write('metric = "%s"\nvalue = "%s"\nhours_to_resolve = "%s"\nmetric_timestamp = "%s"\n' % (metric[1], metric[0], str(use_hours_to_resolve), str(metric[2])))
+                                        mirage_anomaly_check_file_created = True
+                                    except:
+                                        logger.error(traceback.format_exc())
+                                        logger.error('error :: failed to write anomaly_check_file')
+                                if mirage_anomaly_check_file_created:
+                                    if python_version == 2:
+                                        os.chmod(anomaly_check_file, 0o644)
+                                    if python_version == 3:
+                                        os.chmod(anomaly_check_file, mode=0o644)
+                                    logger.info('added mirage check :: %s,%s,%s' % (metric[1], metric[0], use_hours_to_resolve))
+                                    try:
+                                        redis_set = 'analyzer.sent_to_mirage'
+                                        data = str(metric[1])
+                                        try:
+                                            self.redis_conn.sadd(redis_set, data)
+                                        except:
+                                            logger.error(traceback.format_exc())
+                                            logger.error('error :: failed to add %s to Redis set %s' % (
+                                                str(data), str(redis_set)))
+                                    except:
+                                        logger.error(traceback.format_exc())
+                                        logger.error(
+                                            'error :: failed add %s to analyzer.sent_to_mirage Redis set' %
+                                            metric[1])
+
                     # @modified 20170108 - Feature #1830: Ionosphere alerts
                     # Only send smtp_alerter_metrics to Ionosphere
                     # if send_to_ionosphere:
@@ -2789,6 +2844,11 @@ class Analyzer(Thread):
                                 pass
                             if alert[1] != 'smtp':
                                 continue
+
+                            # @added 20200904 - Task #3730: Validate Mirage running multiple processes
+                            # Set default as None
+                            SECOND_ORDER_RESOLUTION_FULL_DURATION = None
+
                             if not mirage_metric:
                                 number_of_alerts_checked += 1
                                 # ALERT_MATCH_PATTERN = alert[0]
@@ -2835,6 +2895,22 @@ class Analyzer(Thread):
                                 except:
                                     if LOCAL_DEBUG:
                                         logger.error('error :: failed to add %s to mirage.unique_metrics set' % metric)
+
+                                # @added 20200904 - Task #3730: Validate Mirage running multiple processes
+                                # Also always add the mirage.metrics Redis key for the
+                                # metric which contains its hours_to_resolve so
+                                # that the spin_process can add the mirage check
+                                # files immediately, rather than waiting to add
+                                # the mirage checks all in the alerting phase.
+                                # This is done to reduce the time it takes to
+                                # get through the analysis pipeline.
+                                if SECOND_ORDER_RESOLUTION_FULL_DURATION:
+                                    mirage_metric_redis_key = 'mirage.metrics.%s' % base_name
+                                    try:
+                                        self.redis_conn.setex(mirage_metric_redis_key, int(alert[2]), SECOND_ORDER_RESOLUTION_FULL_DURATION)
+                                    except:
+                                        logger.error('error :: failed to set key :: %s' % mirage_metric_redis_key)
+
                                 try:
                                     key_timestamp = int(time())
                                     self.redis_conn.setex('analyzer.manage_mirage_unique_metrics', 300, key_timestamp)
@@ -3223,8 +3299,13 @@ class Analyzer(Thread):
                 for f in os.listdir(settings.SKYLINE_TMP_DIR):
                     if re.search(pattern, f):
                         try:
-                            os.remove(os.path.join(settings.SKYLINE_TMP_DIR, f))
-                            logger.info('cleaning up old error file - %s' % (str(f)))
+                            # @modified 20200904 - Feature #3486: analyzer_batch
+                            #                      Feature #3480: batch_processing
+                            #                      Task #3730: Validate Mirage running multiple processes
+                            # Do not operate on analyzer_batch files
+                            if 'analyzer_batch' not in f:
+                                os.remove(os.path.join(settings.SKYLINE_TMP_DIR, f))
+                                logger.info('cleaning up old error file - %s' % (str(f)))
                         except OSError:
                             pass
             except:
@@ -3720,7 +3801,11 @@ class Analyzer(Thread):
                                 # as a dynamic SKIP_LIST for Analyzer
                                 mirage_metric_cache_key = 'mirage.metrics.%s' % metric[1]
                                 try:
-                                    self.redis_conn.setex(mirage_metric_cache_key, alert[2], packb(metric[0]))
+                                    # @modified 20200904 - Task #3730: Validate Mirage running multiple processes
+                                    # Use the resolution instead of the value,
+                                    # the packb value is not used anyway
+                                    # self.redis_conn.setex(mirage_metric_cache_key, alert[2], packb(metric[0]))
+                                    self.redis_conn.setex(mirage_metric_cache_key, alert[2], SECOND_ORDER_RESOLUTION_FULL_DURATION)
                                 except:
                                     logger.error(traceback.format_exc())
                                     logger.error('error :: failed to add mirage.metrics Redis key - %s' % str(mirage_metric_cache_key))
@@ -3736,8 +3821,43 @@ class Analyzer(Thread):
                                     logger.error(traceback.format_exc())
                                     logger.error('error :: failed to determine anomaly_check_file')
 
+                                # @added 20200904 - Task #3730: Validate Mirage running multiple processes
+                                spin_process_sent_to_mirage = False
+
                                 if anomaly_check_file:
                                     anomaly_check_file_created = False
+                                    # @added 20200904 - Task #3730: Validate Mirage running multiple processes
+                                    # Only add the mirage check files if it was
+                                    # added by the spin_process
+                                    sent_to_mirage = []
+                                    try:
+                                        sent_to_mirage = list(self.redis_conn_decoded.smembers('analyzer.sent_to_mirage'))
+                                    except:
+                                        sent_to_mirage = []
+                                    if metric[1] in sent_to_mirage:
+                                        spin_process_sent_to_mirage = True
+
+                                # @added 20200904 - Task #3730: Validate Mirage running multiple processes
+                                # Only add the metric check file if it was not
+                                # added immediately in the spin_process
+                                if spin_process_sent_to_mirage:
+                                    logger.info('spin_process already added mirage check for %s' % (metric[1]))
+                                else:
+                                    try:
+                                        redis_set = 'analyzer.sent_to_mirage'
+                                        data = str(metric[1])
+                                        try:
+                                            self.redis_conn.sadd(redis_set, data)
+                                        except:
+                                            logger.error(traceback.format_exc())
+                                            logger.error('error :: failed to add %s to Redis set %s' % (
+                                                str(data), str(redis_set)))
+                                    except:
+                                        logger.error(traceback.format_exc())
+                                        logger.error(
+                                            'error :: failed add %s to analyzer.sent_to_mirage Redis set' %
+                                            metric[1])
+
                                     try:
                                         # @added 20190410 - Feature #2882: Mirage - periodic_check
                                         # Allow for even non Mirage metrics to have
@@ -3777,30 +3897,7 @@ class Analyzer(Thread):
                                             logger.info(
                                                 'debug :: Memory usage in run after chmod mirage check file: %s (kb)' %
                                                 resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
-
-                                logger.info('added mirage check :: %s,%s,%s' % (metric[1], metric[0], alert[3]))
-                                try:
-                                    # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
-                                    #                      Task #3032: Debug number of Python processes and memory use
-                                    #                      Branch #3002: docker
-                                    # Replace Manager.list instances with Redis sets
-                                    # self.sent_to_mirage.append(metric[1])
-                                    redis_set = 'analyzer.sent_to_mirage'
-                                    data = str(metric[1])
-                                    try:
-                                        self.redis_conn.sadd(redis_set, data)
-                                    except:
-                                        logger.info(traceback.format_exc())
-                                        logger.error('error :: failed to add %s to Redis set %s' % (
-                                            str(data), str(redis_set)))
-                                except:
-                                    logger.info(traceback.format_exc())
-                                    # logger.error(
-                                    #     'error :: failed add to self.sent_to_mirage.append with %s' %
-                                    #     metric[1])
-                                    logger.error(
-                                        'error :: failed add %s to analyzer.sent_to_mirage Redis set' %
-                                        metric[1])
+                                        logger.info('added mirage check :: %s,%s,%s' % (metric[1], metric[0], alert[3]))
 
                                 # Alert for analyzer if enabled
                                 # This sends an Analyzer ALERT for every check that

@@ -1469,6 +1469,16 @@ PANORAMA_INSERT_METRICS_IMMEDIATELY = False
 Mirage settings
 """
 
+MIRAGE_PROCESSES = 1
+"""
+:var MIRAGE_PROCESSES: This is the number of processes that the Skyline Mirage
+    will spawn to process checks.  If you find the mirage checks.pending metric
+    and checks.stale_discarded are above 0 too often, increase this accordingly.
+    Adding additional processes can increase CPU and load on both Skyline and
+    Graphite.
+:vartype MIRAGE_PROCESSES: int
+"""
+
 MIRAGE_DATA_FOLDER = '/opt/skyline/mirage/data'
 """
 :var MIRAGE_DATA_FOLDER: This is the path for the Mirage data folder where
