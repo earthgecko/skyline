@@ -178,7 +178,9 @@ def grubbs(timeseries, use_full_duration):
             return False
 
         mean = np.mean(series)
-        tail_average = tail_avg(timeseries)
+        # @modified 20200904 - Feature #3684: ROOMBA_BATCH_METRICS_CUSTOM_DURATIONS
+        # Added use_full_duration
+        tail_average = tail_avg(timeseries, use_full_duration)
         z_score = (tail_average - mean) / stdDev
         len_series = len(series)
         threshold = scipy.stats.t.isf(.05 / (2 * len_series), len_series - 2)
@@ -208,7 +210,9 @@ def first_hour_average(timeseries, use_full_duration):
         series = pandas.Series([x[1] for x in timeseries if x[0] < last_hour_threshold])
         mean = (series).mean()
         stdDev = (series).std()
-        t = tail_avg(timeseries)
+        # @modified 20200904 - Feature #3684: ROOMBA_BATCH_METRICS_CUSTOM_DURATIONS
+        # Added use_full_duration
+        t = tail_avg(timeseries, use_full_duration)
 
         return abs(t - mean) > 3 * stdDev
     except:
@@ -230,7 +234,9 @@ def stddev_from_average(timeseries, use_full_duration):
         series = pandas.Series([x[1] for x in timeseries])
         mean = series.mean()
         stdDev = series.std()
-        t = tail_avg(timeseries)
+        # @modified 20200904 - Feature #3684: ROOMBA_BATCH_METRICS_CUSTOM_DURATIONS
+        # Added use_full_duration
+        t = tail_avg(timeseries, use_full_duration)
 
         return abs(t - mean) > 3 * stdDev
     except:
@@ -378,7 +384,9 @@ def histogram_bins(timeseries, use_full_duration):
 
     try:
         series = scipy.array([x[1] for x in timeseries])
-        t = tail_avg(timeseries)
+        # @modified 20200904 - Feature #3684: ROOMBA_BATCH_METRICS_CUSTOM_DURATIONS
+        # Added use_full_duration
+        t = tail_avg(timeseries, use_full_duration)
         h = np.histogram(series, bins=15)
         bins = h[1]
         for index, bin_size in enumerate(h[0]):

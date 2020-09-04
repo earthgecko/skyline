@@ -1581,6 +1581,36 @@ class AnalyzerBatch(Thread):
             if not metric_name:
                 break
 
+            # @added 20200904 - Feature #3486: analyzer_batch
+            #                   Feature #3480: batch_processing
+            #                   Task #3730: Validate Mirage running multiple processes
+            # Remove any existing algorithm.error and timing files from any
+            # previous runs
+            pattern = '%s.*.algorithm.error' % skyline_app
+            try:
+                for f in os.listdir(settings.SKYLINE_TMP_DIR):
+                    if re.search(pattern, f):
+                        try:
+                            os.remove(os.path.join(settings.SKYLINE_TMP_DIR, f))
+                            logger.info('cleaning up old error file - %s' % (str(f)))
+                        except OSError:
+                            pass
+            except:
+                logger.error('error :: failed to cleanup algorithm.error files')
+                logger.info(traceback.format_exc())
+            pattern = '%s.*.algorithm.timings' % skyline_app
+            try:
+                for f in os.listdir(settings.SKYLINE_TMP_DIR):
+                    if re.search(pattern, f):
+                        try:
+                            os.remove(os.path.join(settings.SKYLINE_TMP_DIR, f))
+                            logger.info('cleaning up old timings file - %s' % (str(f)))
+                        except OSError:
+                            pass
+            except:
+                logger.error('error :: failed to cleanup algorithm.timing files')
+                logger.info(traceback.format_exc())
+
             logger.info('processing - %s' % str(batch_processing_metric))
 
             # Spawn processes
@@ -1645,6 +1675,36 @@ class AnalyzerBatch(Thread):
                         exceptions[key] += value
                 except Empty:
                     break
+
+            # @added 20200904 - Feature #3486: analyzer_batch
+            #                   Feature #3480: batch_processing
+            #                   Task #3730: Validate Mirage running multiple processes
+            # Report any algorithm errors
+            pattern = '%s.*.algorithm.error' % skyline_app
+            try:
+                for f in os.listdir(settings.SKYLINE_TMP_DIR):
+                    if re.search(pattern, f):
+                        try:
+                            algorithm_error_file = os.path.join(settings.SKYLINE_TMP_DIR, f)
+                            if os.path.isfile(algorithm_error_file):
+                                logger.error('error :: error reported in %s' % (
+                                    algorithm_error_file))
+                                try:
+                                    with open(algorithm_error_file, 'r') as f:
+                                        error_string = f.read()
+                                    logger.error('%s' % str(error_string))
+                                except:
+                                    logger.error('error :: failed to read error file - %s' % algorithm_error_file)
+                                try:
+                                    os.remove(algorithm_error_file)
+                                except OSError:
+                                    pass
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: failed to check algorithm errors')
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to check algorithm errors')
 
             # @added 20191021 - Bug #3288: Always send anomaly_breakdown and exception metrics
             #                   Branch #3262: py3
