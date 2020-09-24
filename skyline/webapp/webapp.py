@@ -736,28 +736,16 @@ def api():
             fail_msg = 'error :: Webapp error with get_correlations'
             logger.error(fail_msg)
             return internal_error(fail_msg, trace)
-        always_return_end_timestamp = False
-        if not anomaly_end_timestamp and not always_return_end_timestamp:
-            anomaly_dict = {
-                'id': anomaly_id,
-                'metric': anomaly_data[1],
-                'timestamp': anomaly_data[3],
-                'value': anomaly_data[2],
-                'cross correlations': correlationsDict,
-                'possible related anomaly ids': anomaliesDict,
-                'possible related match ids': matchesDict,
-            }
-        if anomaly_end_timestamp or always_return_end_timestamp:
-            anomaly_dict = {
-                'id': anomaly_id,
-                'metric': anomaly_data[1],
-                'timestamp': anomaly_data[3],
-                'value': anomaly_data[2],
-                'end_timestamp': anomaly_end_timestamp,
-                'cross correlations': correlationsDict,
-                'possible related anomaly ids': anomaliesDict,
-                'possible related match ids': matchesDict,
-            }
+        anomaly_dict = {
+            'id': anomaly_id,
+            'metric': anomaly_data[1],
+            'timestamp': anomaly_data[3],
+            'value': anomaly_data[2],
+            'end_timestamp': anomaly_end_timestamp,
+            'cross correlations': correlationsDict,
+            'possible related anomaly ids': anomaliesDict,
+            'possible related match ids': matchesDict,
+        }
 
         data_dict = {"status": {}, "data": {"anomaly": anomaly_dict}}
         logger.info('/api?anomaly request returning data - %s' % (
