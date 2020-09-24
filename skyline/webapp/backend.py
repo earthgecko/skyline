@@ -597,3 +597,55 @@ def luminosity_remote_data(anomaly_timestamp):
     logger.info('luminosity_remote_data :: %s valid metric time series data preprocessed for the remote request' % str(len(luminosity_data)))
 
     return luminosity_data, success, message
+
+
+# @added 20200908 - Feature #3740: webapp - anomaly API endpoint
+def panorama_anomaly_details(anomaly_id):
+    """
+    Gets the details for an anomaly from the database.
+    """
+
+    logger.info('panorama_anomaly_details - getting details for anomaly id %s' % str(anomaly_id))
+
+    metric_id = 0
+    # Added nosec to exclude from bandit tests
+    query = 'select metric_id from anomalies WHERE id=\'%s\'' % str(anomaly_id)  # nosec
+    try:
+        result = mysql_select(skyline_app, query)
+        metric_id = int(result[0][0])
+    except:
+        logger.error(traceback.format_exc())
+        logger.error('error :: panorama_anomaly_details - failed to get metric_id from db')
+        return False
+    if metric_id > 0:
+        logger.info('panorama_anomaly_details - getting metric for metric_id - %s' % str(metric_id))
+        # Added nosec to exclude from bandit tests
+        query = 'select metric from metrics WHERE id=\'%s\'' % str(metric_id)  # nosec
+        try:
+            result = mysql_select(skyline_app, query)
+            metric = str(result[0][0])
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: panorama_anomaly_details - failed to get metric from db')
+            return False
+    query = 'select id, metric_id, anomalous_datapoint, anomaly_timestamp, full_duration, created_timestamp, anomaly_end_timestamp from anomalies WHERE id=\'%s\'' % str(anomaly_id)  # nosec
+    logger.info('panorama_anomaly_details - running query - %s' % str(query))
+    try:
+        rows = mysql_select(skyline_app, query)
+    except:
+        logger.error(traceback.format_exc())
+        logger.error('error :: panorama_anomaly_details - failed to get anomaly details from db')
+        return False
+    anomaly_data = None
+    for row in rows:
+        anomalous_datapoint = float(row[2])
+        anomaly_timestamp = int(row[3])
+        full_duration = int(row[4])
+        created_timestamp = str(row[5])
+        try:
+            anomaly_end_timestamp = int(row[6])
+        except:
+            anomaly_end_timestamp = None
+        anomaly_data = [int(anomaly_id), str(metric), anomalous_datapoint, anomaly_timestamp, full_duration, created_timestamp, anomaly_end_timestamp]
+        break
+    return anomaly_data
