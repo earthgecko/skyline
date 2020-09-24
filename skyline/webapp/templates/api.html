@@ -158,6 +158,92 @@ Or if no metrics of no metrics are set to alert <code>{"data":{"metrics":[]},"st
 		    </tbody>
 		  </table>
 
+	  <h4><span class="logo"><span class="sky">API method ::</span> <span class="re">/api?anomaly</span></span></h4>
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Name</th>
+  		        <th>Description</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+  		        <td>Description:</td>
+  		        <td>Returns the information about an anomaly as a json object, with cross_correlations, possible_related_matches and possible_related_anomalies<br>
+                  If the anomaly is in progress the end_timestamp value returned will be null e.g. <code>"end_timestamp": null,</code>
+              </td>
+  		      </tr>
+  		      <tr>
+  		        <td>Endpoint:</td>
+  		        <td>/api?anomaly</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Method:</td>
+  		        <td>GET</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Parameters:</td>
+  		        <td>anomaly=[true | boolean | <font color=red>required</font>]</br>
+                  id=[anomaly id | int | <font color=red>required</font>]</br>
+              </td>
+  		      </tr>
+  		      <tr>
+  		        <td>Request examples:</td>
+		          <td><code>/api?anomaly=true&id=12345</code><br>
+              </td>
+  		      </tr>
+  		      <tr>
+  		        <td>Responses:</td>
+  		        <td>200 with json response<br>
+<code>{
+  "data": {
+    "anomaly": {
+      "cross correlations": {
+        "server-12345.cpu-total.cpu.usage_iowait": {
+          "coefficient": 0.94491,
+          "shifted": 0,
+          "shifted_coefficient": 0.94491
+        },
+        "server-12345.cpu-total.cpu.usage_irq": {
+          "coefficient": 0.99733,
+          "shifted": 0,
+          "shifted_coefficient": 0.99733
+        },
+        ...
+      },
+      "end_timestamp": 1599558120,
+      "id": "12345",
+      "metric": "server-12345.cpu-total.cpu.usage_user",
+      "possible related anomaly ids": {
+        "12344": {
+          "metric": "server-12345.cpu-total.cpu.usage_irq",
+          "timestamp": 1599558060
+        },
+        ...
+        ...
+      },
+      "possible related match ids": {
+        "169524": {
+          "fp id": 8815,
+          "layer id": "None",
+          "matched by": "features profile - minmax - echo",
+          "metric": "server-12345.cpu-total.cpu.usage_system",
+          "timestamp": 1599558060
+        },
+        ...
+        ...
+      },
+      "timestamp": 1599558120,
+      "value": 62
+    }
+  },
+  "status": {}
+}</code><br>
+              </td>
+  		      </tr>
+		    </tbody>
+		  </table>
+
 	  <h4><span class="logo"><span class="sky">API method ::</span> <span class="re">/api?derivative_metrics</span></span></h4>
   		  <table class="table table-hover">
   		    <thead>

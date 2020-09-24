@@ -4900,7 +4900,10 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
             # @modified 20190601 - Feature #3084: Ionosphere - validated matches
             # Added validated
             # matches.append([metric_human_date, match_id, matched_by, fp_id, layer_id, metric, uri_to_matched_page])
-            matches.append([metric_human_date, match_id, matched_by, fp_id, layer_id, metric, uri_to_matched_page, validated])
+            # @added 20200908 - Feature #3740: webapp - anomaly API endpoint
+            # Added metric_timestamp
+            # matches.append([metric_human_date, match_id, matched_by, fp_id, layer_id, metric, uri_to_matched_page, validated])
+            matches.append([metric_human_date, match_id, matched_by, fp_id, layer_id, metric, uri_to_matched_page, validated, metric_timestamp])
 
     if get_layers_matched:
         # layers matches
@@ -4956,7 +4959,10 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
             # @modified 20190601 - Feature #3084: Ionosphere - validated matches
             # Added validated
             # matches.append([metric_human_date, match_id, matched_by, fp_id, layer_id, metric, uri_to_matched_page])
-            matches.append([metric_human_date, match_id, matched_by, fp_id, layer_id, metric, uri_to_matched_page, validated])
+            # @added 20200908 - Feature #3740: webapp - anomaly API endpoint
+            # Added anomaly_timestamp
+            # matches.append([metric_human_date, match_id, matched_by, fp_id, layer_id, metric, uri_to_matched_page, validated])
+            matches.append([metric_human_date, match_id, matched_by, fp_id, layer_id, metric, uri_to_matched_page, validated, anomaly_timestamp])
 
     sorted_matches = sorted(matches, key=lambda x: x[0])
     matches = sorted_matches
@@ -4976,7 +4982,10 @@ def get_fp_matches(metric, metric_like, get_fp_id, get_layer_id, from_timestamp,
         # [[1505560867, 39793, 'features_profile', 782, 'None', 'stats.skyline-dev-3-40g-gra1.vda.ioInProgress', 'ionosphere?fp_matched=true...'],
         # @modified 20180921 - Feature #2558: Ionosphere - fluid approximation - approximately_close on layers
         # matches = [['None', 'None', 'no matches were found', 'None', 'None', 'no matches were found', 'None']]
-        matches = [['None', 'None', 'no matches were found', 'None', 'None', 'no matches were found', 'None', 'None']]
+        # @added 20200908 - Feature #3740: webapp - anomaly API endpoint
+        # Added anomaly_timestamp
+        # matches = [['None', 'None', 'no matches were found', 'None', 'None', 'no matches were found', 'None', 'None']]
+        matches = [['None', 'None', 'no matches were found', 'None', 'None', 'no matches were found', 'None', 'None', 'None']]
 
     return matches, fail_msg, trace
 

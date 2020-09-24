@@ -108,7 +108,9 @@ if True:
     from backend import (
         panorama_request, get_list,
         # @added 20180720 - Feature #2464: luminosity_remote_data
-        luminosity_remote_data)
+        luminosity_remote_data,
+        # @added 20200908 - Feature #3740: webapp - anomaly API endpoint
+        panorama_anomaly_details)
     from ionosphere_backend import (
         ionosphere_data, ionosphere_metric_data,
         # @modified 20170114 - Feature #1854: Ionosphere learn
@@ -630,6 +632,137 @@ def version():
 # they are used.
 # def data():
 def api():
+
+    # @added 20200908 - Feature #3740: webapp - anomaly API endpoint
+    if 'anomaly' in request.args:
+        logger.info('/api?anomaly')
+        if 'id' in request.args:
+            anomaly_id = request.args.get('id', None)
+        if not anomaly_id:
+            logger.error('error :: /api?anomaly no id parameter sent')
+            return 'Bad Request', 400
+        logger.info('/api?anomaly request with id - %s' % (
+            str(anomaly_id)))
+
+        anomaly_data = []
+        try:
+            # anomaly_data = [int(anomaly_id), str(metric), anomalous_datapoint, anomaly_timestamp, full_duration, created_timestamp, anomaly_end_timestamp]
+            anomaly_data = panorama_anomaly_details(anomaly_id)
+        except:
+            trace = traceback.format_exc()
+            fail_msg = 'error :: Webapp error with panorama_anomaly_details'
+            logger.error(fail_msg)
+            return internal_error(fail_msg, trace)
+
+        anomaliesDict = {}
+        matchesDict = {}
+        if anomaly_data:
+            metric = anomaly_data[1]
+            anomaly_timestamp = int(anomaly_data[3])
+            requested_timestamp = anomaly_timestamp
+            try:
+                anomaly_end_timestamp = int(anomaly_data[6])
+            except:
+                anomaly_end_timestamp = None
+            related = []
+            try:
+                related, labelled_anomalies, fail_msg, trace = get_related(skyline_app, anomaly_id, anomaly_timestamp)
+            except:
+                trace = traceback.format_exc()
+                fail_msg = 'error :: Webapp error with get_related'
+                logger.error(fail_msg)
+                return internal_error(fail_msg, trace)
+            for related_anomaly_id, related_metric_id, related_metric_name, related_anomaly_timestamp, related_full_duration in related:
+                metric_dict = {
+                    'metric': related_metric_name,
+                    'timestamp': int(related_anomaly_timestamp),
+                }
+                anomaliesDict[related_anomaly_id] = metric_dict
+            related_matches = []
+            related_metric = 'get_related_matches'
+            related_metric_like = 'all'
+            related_fp_id = None
+            related_layer_id = None
+            minus_two_minutes = int(requested_timestamp) - 120
+            plus_two_minutes = int(requested_timestamp) + 120
+            related_limited_by = None
+            related_ordered_by = 'DESC'
+            try:
+                related_matches, fail_msg, trace = get_fp_matches(related_metric, related_metric_like, related_fp_id, related_layer_id, minus_two_minutes, plus_two_minutes, related_limited_by, related_ordered_by)
+            except:
+                trace = traceback.format_exc()
+                fail_msg = 'error :: Webapp error with get_fp_matches for related_matches'
+                logger.error(fail_msg)
+                return internal_error(fail_msg, trace)
+            if len(related_matches) == 1:
+                # @modified 20200908 - Feature #3740: webapp - anomaly API endpoint
+                # Added match_anomaly_timestamp
+                for related_human_date, related_match_id, related_matched_by, related_fp_id, related_layer_id, related_metric, related_uri_to_matched_page, related_validated, match_anomaly_timestamp in related_matches:
+                    if related_matched_by == 'no matches were found':
+                        related_matches = []
+            if related_matches:
+                logger.info('%s possible related matches found' % (str(len(related_matches))))
+                # @modified 20200908 - Feature #3740: webapp - anomaly API endpoint
+                # Added match_anomaly_timestamp
+                for related_human_date, related_match_id, related_matched_by, related_fp_id, related_layer_id, related_metric, related_uri_to_matched_page, related_validated, match_anomaly_timestamp in related_matches:
+                    metric_dict = {
+                        'metric': related_metric,
+                        'timestamp': match_anomaly_timestamp,
+                        'matched by': related_matched_by,
+                        'fp id': related_fp_id,
+                        'layer id': related_layer_id
+                    }
+                    matchesDict[related_match_id] = metric_dict
+
+        try:
+            correlations, fail_msg, trace = get_correlations(skyline_app, anomaly_id)
+        except:
+            trace = traceback.format_exc()
+            fail_msg = 'error :: Webapp error with get_correlations'
+            logger.error(fail_msg)
+            return internal_error(fail_msg, trace)
+        correlationsDict = {}
+        try:
+            for correlation in correlations:
+                    metric = correlation[0]
+                    metric_dict = {
+                        'coefficient': float(correlation[1]),
+                        'shifted': float(correlation[2]),
+                        'shifted_coefficient': float(correlation[3])
+                    }
+                    correlationsDict[metric] = metric_dict
+        except:
+            trace = traceback.format_exc()
+            fail_msg = 'error :: Webapp error with get_correlations'
+            logger.error(fail_msg)
+            return internal_error(fail_msg, trace)
+        always_return_end_timestamp = False
+        if not anomaly_end_timestamp and not always_return_end_timestamp:
+            anomaly_dict = {
+                'id': anomaly_id,
+                'metric': anomaly_data[1],
+                'timestamp': anomaly_data[3],
+                'value': anomaly_data[2],
+                'cross correlations': correlationsDict,
+                'possible related anomaly ids': anomaliesDict,
+                'possible related match ids': matchesDict,
+            }
+        if anomaly_end_timestamp or always_return_end_timestamp:
+            anomaly_dict = {
+                'id': anomaly_id,
+                'metric': anomaly_data[1],
+                'timestamp': anomaly_data[3],
+                'value': anomaly_data[2],
+                'end_timestamp': anomaly_end_timestamp,
+                'cross correlations': correlationsDict,
+                'possible related anomaly ids': anomaliesDict,
+                'possible related match ids': matchesDict,
+            }
+
+        data_dict = {"status": {}, "data": {"anomaly": anomaly_dict}}
+        logger.info('/api?anomaly request returning data - %s' % (
+            str(data_dict)))
+        return jsonify(data_dict), 200
 
     # @added 20200611 - Feature #3578: Test alerts
     if 'test_alert' in request.args:
@@ -4652,7 +4785,9 @@ def ionosphere():
                     logger.error(fail_msg)
                     return internal_error(fail_msg, trace)
                 if len(related_matches) == 1:
-                    for related_human_date, related_match_id, related_matched_by, related_fp_id, related_layer_id, related_metric, related_uri_to_matched_page, related_validated in related_matches:
+                    # @modified 20200908 - Feature #3740: webapp - anomaly API endpoint
+                    # Added match_anomaly_timestamp
+                    for related_human_date, related_match_id, related_matched_by, related_fp_id, related_layer_id, related_metric, related_uri_to_matched_page, related_validated, match_anomaly_timestamp in related_matches:
                         if related_matched_by == 'no matches were found':
                             related_matches = []
                 if related_matches:
