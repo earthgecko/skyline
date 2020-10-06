@@ -46,6 +46,11 @@ from time import gmtime, strftime
 # @added 20200825 - Feature #3704: Add alert to anomalies
 from time import time
 
+# @added 20200929 - Task #3748: POC SNAB
+#                   Branch #3068: SNAB
+# To wait for anomaly_id
+from time import sleep
+
 from email import charset
 
 # @modified 20160820 - Issue #23 Test dependency updates
@@ -106,6 +111,13 @@ if True:
         sort_timeseries,
         # @added 20200825 - Feature #3704: Add alert to anomalies
         add_panorama_alert)
+
+# @added 20200929 - Task #3748: POC SNAB
+#                   Branch #3068: SNAB
+try:
+    SNAB_ENABLED = settings.SNAB_ENABLED
+except:
+    SNAB_ENABLED = False
 
 skyline_app = 'mirage'
 skyline_app_logger = '%sLog' % skyline_app
@@ -349,6 +361,20 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
         #     context, str(int(second_order_resolution_in_hours)), str(metric[0]))
         unencoded_graph_title = '%s %s - ALERT at %s hours - derivative graph - %s' % (
             main_alert_title, alert_context, str(int(second_order_resolution_in_hours)), str(metric[0]))
+
+    # @added 20200907 - Feature #3734: waterfall alerts
+    # Add waterfall alert to title
+    waterfall_alert_check_string = '%s.%s' % (str(metric[2]), base_name)
+    redis_waterfall_alert_key = 'mirage.waterfall.alert.%s' % waterfall_alert_check_string
+    waterfall_alert = False
+    try:
+        waterfall_alert = REDIS_ALERTER_CONN.get(redis_waterfall_alert_key)
+    except:
+        logger.info(traceback.format_exc())
+        logger.error('error :: failed to add Redis key - %s for waterfall alert' % (
+            redis_waterfall_alert_key))
+    if waterfall_alert:
+        unencoded_graph_title = unencoded_graph_title.replace('ALERT', 'WATERFALL ALERT')
 
     if settings.ENABLE_DEBUG or LOCAL_DEBUG:
         logger.info('debug :: alert_smtp - unencoded_graph_title: %s' % unencoded_graph_title)
@@ -977,7 +1003,12 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
             # @modified 20191002 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
             # Use main_alert_title and alert_context
             # msg['Subject'] = '[Skyline alert] - %s ALERT - %s' % (context, metric[1])
-            msg['Subject'] = '[%s alert] - %s ALERT - %s' % (main_alert_title, alert_context, metric[1])
+            # @modified 20200907 - Feature #3734: waterfall alerts
+            # Add waterfall alert to subject
+            if waterfall_alert:
+                msg['Subject'] = '[%s alert] - %s WATERFALL ALERT - %s' % (main_alert_title, alert_context, metric[1])
+            else:
+                msg['Subject'] = '[%s alert] - %s ALERT - %s' % (main_alert_title, alert_context, metric[1])
 
             msg['From'] = sender
             # @modified 20180524 - Task #2384: Change alerters to cc other recipients
@@ -1388,6 +1419,21 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context):
             main_alert_title, alert_context, str(metric[1]), str(int(second_order_resolution_in_hours)),
             str(metric[0]))
 
+    # @added 20200907 - Feature #3734: waterfall alerts
+    # Add waterfall alert to title
+    waterfall_alert_check_string = '%s.%s' % (str(int(metric[2])), base_name)
+    redis_waterfall_alert_key = 'mirage.waterfall.alert.%s' % waterfall_alert_check_string
+    waterfall_alert = False
+    try:
+        waterfall_alert = REDIS_ALERTER_CONN.get(redis_waterfall_alert_key)
+    except:
+        logger.info(traceback.format_exc())
+        logger.error('error :: failed to add Redis key - %s for waterfall alert' % (
+            redis_waterfall_alert_key))
+    if waterfall_alert:
+        unencoded_graph_title = unencoded_graph_title.replace('ALERT', 'WATERFALL ALERT')
+        slack_title = slack_title.replace('ALERT', 'WATERFALL ALERT')
+
     graph_title_string = quote(unencoded_graph_title, safe='')
     graph_title = '&title=%s' % graph_title_string
     until_timestamp = int(metric[2])
@@ -1597,6 +1643,48 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context):
         else:
             # initial_comment = slack_title + ' :: <' + link  + '|graphite image link>'
             initial_comment = slack_title + ' :: <' + link + '|graphite image link>\nFor anomaly at ' + slack_time_string
+
+        # @added 20200929 - Task #3748: POC SNAB
+        #                   Branch #3068: SNAB
+        # Determine the anomaly and snab ids so that the tP, fP, tN, fN links
+        # can be applied.
+        snab_check_metric = None
+        snab_id = None
+        anomaly_id = None
+        try:
+            snab_details = alert[4]
+            if snab_details[0] == 'snab_details':
+                snab_check_metric = True
+                snab_id = snab_details[1]
+                anomaly_id = snab_details[2]
+                anomalyScore = snab_details[3]
+        except:
+            snab_check_metric = False
+        if not snab_check_metric:
+            try:
+                snab_details = alert[5]
+                if snab_details[0] == 'snab_details':
+                    snab_check_metric = True
+                    snab_id = snab_details[1]
+                    anomaly_id = snab_details[2]
+                    anomalyScore = snab_details[3]
+            except:
+                snab_check_metric = False
+        if SNAB_ENABLED and snab_check_metric:
+            if not anomaly_id or not snab_id:
+                snab_comment = initial_comment + '\nThe anomaly id was not determined to generate snab results links'
+                initial_comment = snab_comment
+            if anomaly_id and snab_id:
+                snab_link = '%s/api?snab=true&snab_id=%s&anomaly_id=%s' % (
+                    settings.SKYLINE_URL, str(snab_id), str(anomaly_id))
+                tP_link = '%s&result=tP' % snab_link
+                fP_link = '%s&result=fP' % snab_link
+                tN_link = '%s&result=tN' % snab_link
+                fN_link = '%s&result=fN' % snab_link
+                unsure_link = '%s&result=unsure' % snab_link
+                null_link = '%s&result=NULL' % snab_link
+                snab_slack_comment = initial_comment + '\nanomalyScore: ' + str(anomalyScore) + '\n<' + tP_link + '|tP - true positive>   ::  <' + fP_link + '|fP - false positive>  ::  <' + null_link + '|NULL - reset to NULL>\n<' + tN_link + '|tN - true negative>  ::  <' + fN_link + '|fN - false negative>  :: <' + unsure_link + '|unsure>'
+                initial_comment = snab_slack_comment
 
         add_to_panorama = True
         try:
@@ -2066,6 +2154,9 @@ def trigger_alert(alert, metric, second_order_resolution_seconds, context):
         alert[1]: the name of the strategy being used to alert (str)\n
         alert[2]: The timeout of the alert that was triggered (int)\n
         alert[3]: The second order resolution hours [optional for Mirage] (int)\n
+        alert[4]: The type [optional for http_alerter only] (dict)\n
+                  The snab_details [optional for SNAB and slack only] (list)\n
+        alert[5]: The snab_details [optional for SNAB and slack only] (list)\n
     :param metric:
         The metric tuple e.g. (2.345, 'server-1.cpu.user', 1462172400)\n
         metric[0]: the anomalous value (float)\n

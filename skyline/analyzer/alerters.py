@@ -334,6 +334,20 @@ def alert_smtp(alert, metric, context):
             main_alert_title, alert_context, str(int(full_duration_in_hours)),
             str(metric[0]))
 
+    # @added 20200907 - Feature #3734: waterfall alerts
+    # Add waterfall alert to title
+    waterfall_alert_check_string = '%s.%s' % (str(metric[2]), base_name)
+    redis_waterfall_alert_key = 'analyzer.waterfall.alert.%s' % waterfall_alert_check_string
+    waterfall_alert = False
+    try:
+        waterfall_alert = REDIS_ALERTER_CONN.get(redis_waterfall_alert_key)
+    except:
+        logger.info(traceback.format_exc())
+        logger.error('error :: failed to add Redis key - %s for waterfall alert' % (
+            redis_waterfall_alert_key))
+    if waterfall_alert:
+        unencoded_graph_title = unencoded_graph_title.replace('ALERT', 'WATERFALL%20ALERT')
+
     if settings.ENABLE_DEBUG or LOCAL_DEBUG:
         logger.info('debug :: alert_smtp - unencoded_graph_title: %s' % unencoded_graph_title)
     graph_title_string = quote(unencoded_graph_title, safe='')
@@ -990,7 +1004,13 @@ def alert_smtp(alert, metric, context):
             # @modified 20191002 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
             # Use main_alert_title and alert_context
             # msg['Subject'] = '[Skyline alert] - %s ALERT - %s' % (context, metric[1])
-            msg['Subject'] = '[%s alert] - %s ALERT - %s' % (main_alert_title, alert_context, metric[1])
+
+            # @modified 20200907 - Feature #3734: waterfall alerts
+            # Add waterfall alert to subject
+            if waterfall_alert:
+                msg['Subject'] = '[%s alert] - %s WATERFALL ALERT - %s' % (main_alert_title, alert_context, metric[1])
+            else:
+                msg['Subject'] = '[%s alert] - %s ALERT - %s' % (main_alert_title, alert_context, metric[1])
 
             msg['From'] = sender
             # @modified 20180524 - Task #2384: Change alerters to cc other recipients
@@ -1551,6 +1571,21 @@ def alert_slack(alert, metric, context):
         slack_title = '*%s %s - ALERT* on %s at %s hours - %s' % (
             main_alert_title, alert_context, str(metric[1]),
             str(int(full_duration_in_hours)), str(metric[0]))
+
+    # @added 20200907 - Feature #3734: waterfall alerts
+    # Add waterfall alert to title
+    waterfall_alert_check_string = '%s.%s' % (str(metric[2]), base_name)
+    redis_waterfall_alert_key = 'analyzer.waterfall.alert.%s' % waterfall_alert_check_string
+    waterfall_alert = False
+    try:
+        waterfall_alert = REDIS_ALERTER_CONN.get(redis_waterfall_alert_key)
+    except:
+        logger.info(traceback.format_exc())
+        logger.error('error :: failed to add Redis key - %s for waterfall alert' % (
+            redis_waterfall_alert_key))
+    if waterfall_alert:
+        unencoded_graph_title = unencoded_graph_title.replace('ALERT', 'WATERFALL%20ALERT')
+        slack_title = slack_title.replace('ALERT', 'WATERFALL ALERT')
 
     graph_title_string = quote(unencoded_graph_title, safe='')
     graph_title = '&title=%s' % graph_title_string

@@ -252,6 +252,7 @@ def send_graphite_metric(current_skyline_app, metric, value):
             endpoint = '%s:%d' % (skyline_metrics_carbon_host, skyline_metrics_carbon_port)
             current_skyline_app_logger = str(current_skyline_app) + 'Log'
             current_logger = logging.getLogger(current_skyline_app_logger)
+            current_logger.error(traceback.format_exc())
             current_logger.error(
                 'error :: cannot connect to Graphite at %s' % endpoint)
             return False
@@ -1011,7 +1012,11 @@ def filesafe_metricname(metricname):
 def send_anomalous_metric_to(
     current_skyline_app, send_to_app, timeseries_dir, metric_timestamp,
         base_name, datapoint, from_timestamp, triggered_algorithms, timeseries,
-        full_duration, parent_id):
+        # @added 20201001 - Task #3748: POC SNAB
+        # Added algorithms_run required to determine the anomalyScore
+        # so this needs to be sent to Ionosphere so Ionosphere
+        # can send it back on an alert
+        full_duration, parent_id, algorithms_run=[]):
     """
     Assign a metric and timeseries to Crucible or Ionosphere.
     """
@@ -1098,6 +1103,10 @@ def send_anomalous_metric_to(
     # Changed added_by parameter from current_skyline_app to added_by_context
     # @modified 20170127 - Feature #1886: Ionosphere learn - child like parent with evolutionary maturity
     # Added ionosphere_parent_id, always zero from Analyzer and Mirage
+    # @added 20201001 - Task #3748: POC SNAB
+    # Added algorithms_run required to determine the anomalyScore
+    # so this needs to be sent to Ionosphere so Ionosphere
+    # can send it back on an alert
     anomaly_data = 'metric = \'%s\'\n' \
                    'value = \'%s\'\n' \
                    'from_timestamp = \'%s\'\n' \
@@ -1111,10 +1120,16 @@ def send_anomalous_metric_to(
                    'added_at = \'%s\'\n' \
                    'full_duration = \'%s\'\n' \
                    'ionosphere_parent_id = \'%s\'\n' \
+                   'algorithms_run = %s\n' \
         % (str(base_name), str(datapoint), str(from_timestamp),
             str(metric_timestamp), str(settings.ALGORITHMS),
             str(triggered_algorithms), anomaly_dir, added_by_context,
-            str(now_timestamp), str(int(full_duration)), str(parent_id))
+            str(now_timestamp), str(int(full_duration)), str(parent_id),
+            # @added 20201001 - Task #3748: POC SNAB
+            # Added algorithms_run required to determine the anomalyScore
+            # so this needs to be sent to Ionosphere so Ionosphere
+            # can send it back on an alert
+            algorithms_run)
 
     # @modified 20170116 - Feature #1854: Ionosphere learn
     # In the Ionosphere context there is no requirement to create a timeseries
@@ -2251,3 +2266,71 @@ def add_panorama_alert(current_skyline_app, metric_timestamp, base_name):
             'error :: failed to add Panorama alert Redis key - %s - %s, no REDIS_CONN' %
             (cache_key, str(cache_key_value)))
     return False
+
+
+# @added 20200912 - Branch #3068: SNAB
+#                   Info #3742: matrixprofile
+#                   Task #3744: POC matrixprofile
+#                   Info #2726: pytsmp
+#                   Info #1792: Shapelet extraction
+def update_item_in_redis_set(current_skyline_app, redis_set, original_item, updated_item, log=False):
+    """
+    Update a list, dict or str item in a Redis set.
+
+    :param current_skyline_app: the Skyline app calling the function
+    :param redis_set: the Redis set to operate on
+    :param original_item: the original set item, this must be the object in the
+        set if it is a list use the list, if it is a dict use the dict, only
+        use a str if the item is a string.
+    :param updated_item: the updated set item, the list, dict or str
+    :param log: whether to write the update details to log
+    :type current_skyline_app: str
+    :type redis_set: str
+    :type original_item: object (list, dict or a str)
+    :type updated_item: object (list, dict or a str)
+    :type log: boolean
+    :return: boolean
+    :rtype: boolean
+
+    """
+
+    return_value = True
+
+    try:
+        current_skyline_app_logger = str(current_skyline_app) + 'Log'
+        current_logger = logging.getLogger(current_skyline_app_logger)
+    except:
+        current_logger.error(traceback.format_exc())
+        current_logger.error('error :: update_item_in_redis_set - failed to set up log')
+        return_value = False
+
+    REDIS_CONN = None
+    try:
+        REDIS_CONN = get_redis_conn(current_skyline_app)
+    except:
+        current_logger.error('error :: update_item_in_redis_set - get_redis_conn failed')
+        return_value = False
+
+    if REDIS_CONN:
+        try:
+            REDIS_CONN.srem(redis_set, str(original_item))
+            if log:
+                current_logger.info('removed item from Redis set %s - %s' % (
+                    redis_set, str(original_item)))
+        except:
+            current_logger.error(traceback.format_exc())
+            current_logger.error('error :: failed to remove item from Redis set %s' % (
+                redis_set))
+            return_value = False
+        try:
+            REDIS_CONN.sadd(redis_set, str(updated_item))
+            if log:
+                current_logger.info('added updated check_details item to Redis set %s - %s' % (
+                    redis_set, str(updated_item)))
+        except:
+            current_logger.error(traceback.format_exc())
+            current_logger.error('error :: failed to remove item from Redis set %s' % (
+                redis_set))
+            return_value = False
+
+    return return_value

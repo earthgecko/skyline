@@ -204,6 +204,16 @@ if file_uploads_enabled:
     except:
         flux_upload_keys = {}
 
+# @added 20200929 - Task #3748: POC SNAB
+#                   Branch #3068: SNAB
+try:
+    SNAB_ENABLED = settings.SNAB_ENABLED
+except:
+    SNAB_ENABLED = False
+if SNAB_ENABLED:
+    from snab_backend import update_snab_result
+else:
+    update_snab_result = None
 
 skyline_version = skyline_version.__absolute_version__
 
@@ -633,11 +643,107 @@ def version():
 # def data():
 def api():
 
+    # @added 20200929 - Task #3748: POC SNAB
+    #                   Branch #3068: SNAB
+    if 'snab' in request.args:
+        logger.info('/api?snab request')
+        if not SNAB_ENABLED:
+            logger.info('/api?snab not handled and snab is not enabled')
+            return 'Bad Request', 400
+        snab_id = None
+        if 'snab_id' in request.args:
+            try:
+                snab_id = int(request.args.get('snab_id', None))
+                logger.info('/api?snab request with snab_id - %s' % str(snab_id))
+            except:
+                logger.error('error :: /api?snab request with invalid snab_id - %s' % str(request.args.get('anomaly_id', None)))
+                snab_id = False
+        if not snab_id:
+            logger.error('error :: /api?snab no valid snab_id parameter sent')
+            return 'Bad Request', 400
+        anomaly_id = None
+        if 'anomaly_id' in request.args:
+            try:
+                anomaly_id = int(request.args.get('anomaly_id', None))
+                logger.info('/api?snab request with anomaly_id - %s' % str(anomaly_id))
+            except:
+                logger.error('error :: /api?snab request with invalid anomaly_id - %s' % str(request.args.get('anomaly_id', None)))
+                anomaly_id = False
+        if not anomaly_id:
+            logger.error('error :: /api?snab no anomaly_id parameter sent')
+            return 'Bad Request', 400
+        logger.info('/api?snab request with anomaly_id - %s' % (
+            str(anomaly_id)))
+        result = None
+        snab_results = ['tP', 'fP', 'tN', 'fN', 'unsure']
+        if 'result' in request.args:
+            snab_result = request.args.get('result', None)
+            if snab_result not in snab_results:
+                logger.error('error :: /api?snab invalid result value sent - %s' % str(snab_result))
+                return 'Bad Request', 400
+            else:
+                result = snab_result
+        if not result:
+            logger.error('error :: /api?snab no result value was sent')
+            return 'Bad Request', 400
+        base_name = None
+        anomaly_timestamp = None
+        snab_result_updated = None
+        snab_dict = {}
+        try:
+            # @modified 20201004 - Task #3748: POC SNAB
+            #                      Branch #3068: SNAB
+            # Allow results to be changed
+            # snab_result_updated, base_name, anomaly_timestamp = update_snab_result(snab_id, anomaly_id, result)
+            snab_result_updated, base_name, anomaly_timestamp, existing_result = update_snab_result(snab_id, anomaly_id, result)
+            snab_dict = {
+                'snab_id': snab_id,
+                'anomaly_id': anomaly_id,
+                'metric': base_name,
+                'anomaly_timestamp': anomaly_timestamp,
+                'result': result,
+                'updated': snab_result_updated,
+            }
+        except:
+            trace = traceback.format_exc()
+            fail_msg = 'error :: Webapp error with update_snab_result'
+            logger.error(fail_msg)
+            return internal_error(fail_msg, trace)
+
+        if base_name and anomaly_timestamp:
+            # Using the snab_id instead of base_name, a bit of hack but works
+            slack_updated = webapp_update_slack_thread(snab_id, int(anomaly_timestamp), result, 'snab_result')
+            logger.info('slack_updated for snab evaluation - %s, with result %s' % (
+                str(slack_updated), str(result)))
+
+        # @added 20201004 - Task #3748: POC SNAB
+        #                   Branch #3068: SNAB
+        # Allow results to be changed
+        if existing_result:
+            slack_notified_of_change = webapp_update_slack_thread(snab_id, int(anomaly_timestamp), [existing_result, result], 'snab_result_changed')
+            logger.info('slack_updated for snab evaluation - %s, with result %s' % (
+                str(slack_updated), str(result)))
+
+        data_dict = {"status": {}, "data": {"snab_updated": snab_dict}}
+        if snab_result_updated and snab_dict:
+            logger.info('/api?snab request returning 200 with json data - %s' % (
+                str(data_dict)))
+            return jsonify(data_dict), 200
+        else:
+            logger.info('/api?snab request returning 500 with json data - %s' % (
+                str(data_dict)))
+            return jsonify(data_dict), 500
+
     # @added 20200908 - Feature #3740: webapp - anomaly API endpoint
     if 'anomaly' in request.args:
         logger.info('/api?anomaly')
+        anomaly_id = None
         if 'id' in request.args:
-            anomaly_id = request.args.get('id', None)
+            try:
+                anomaly_id = int(request.args.get('id', None))
+            except:
+                logger.error('error :: /api?anomaly id parameter sent is not an int')
+                anomaly_id = False
         if not anomaly_id:
             logger.error('error :: /api?anomaly no id parameter sent')
             return 'Bad Request', 400

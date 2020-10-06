@@ -52,6 +52,9 @@ from database import (
     ionosphere_layers_matched_table_meta,
     # @added 20190502 - Branch #2646: slack
     anomalies_table_meta,
+    # @added 20200929 - Task #3748: POC SNAB
+    #                   Branch #3068: SNAB
+    snab_table_meta,
 )
 # @added 20190502 - Branch #2646: slack
 from slack_functions import slack_post_message, slack_post_reaction
@@ -5609,6 +5612,28 @@ def webapp_update_slack_thread(base_name, metric_timestamp, value, message_conte
     if message_context == 'validated':
         message_context_known = True
         validated_count = value
+
+    # @added 20200929 - Task #3748: POC SNAB
+    #                   Branch #3068: SNAB
+    if message_context == 'snab_result':
+        log_message = 'updating slack that snab result has been submitted'
+        message_context_known = True
+        snab_result = value
+
+    # @added 20201004 - Task #3748: POC SNAB
+    #                   Branch #3068: SNAB
+    # Allow results to be changed
+    if message_context == 'snab_result_changed':
+        log_message = 'updating slack that the snab result has been changed'
+        message_context_known = True
+        try:
+            snab_result_changed_from = value[0]
+            snab_result_changed_to = value[1]
+        except:
+            fail_msg = 'error :: webapp_update_slack_thread :: snab_result_changed could not determine the original and changed to values from - %s' % str(value)
+            logger.error('%s' % fail_msg)
+            raise  # to webapp to return in the UI
+
     if not message_context_known:
         fail_msg = 'error :: webapp_update_slack_thread :: unknown message context - %s' % str(message_context)
         logger.error('%s' % fail_msg)
@@ -5706,72 +5731,150 @@ def webapp_update_slack_thread(base_name, metric_timestamp, value, message_conte
         logger.error(fail_msg)
         raise
 
-    try:
-        ionosphere_matched_table, log_msg, trace = ionosphere_matched_table_meta(skyline_app, engine)
-        logger.info(log_msg)
-        logger.info('ionosphere_matched_table OK')
-    except:
-        logger.error(traceback.format_exc())
-        logger.error('error :: webapp_update_slack_thread :: failed to get ionosphere_checked_table meta for %s' % base_name)
-        # @added 20170806 - Bug #2130: MySQL - Aborted_clients
-        # Added missing disposal
-        if engine:
-            engine_disposal(engine)
-        raise  # to webapp to return in the UI
-
-    try:
-        metrics_table, log_msg, trace = metrics_table_meta(skyline_app, engine)
-        logger.info(log_msg)
-        logger.info('metrics_table OK')
-    except:
-        logger.error(traceback.format_exc())
-        logger.error('error :: webapp_update_slack_thread :: failed to get metrics_table meta for %s' % base_name)
-        raise  # to webapp to return in the UI
-    metric_id = None
-    try:
-        connection = engine.connect()
-        stmt = select([metrics_table]).where(metrics_table.c.metric == base_name)
-        result = connection.execute(stmt)
-        for row in result:
-            metric_id = int(row['id'])
-        connection.close()
-    except:
-        logger.error(traceback.format_exc())
-        logger.error('error :: webapp_update_slack_thread :: could not determine metric id from metrics table')
-        raise  # to webapp to return in the UI
-    logger.info('metric id determined as %s' % str(metric_id))
-    if metric_id:
+    if message_context != 'snab_result' and message_context != 'snab_result_changed':
         try:
-            anomalies_table, log_msg, trace = anomalies_table_meta(skyline_app, engine)
+            ionosphere_matched_table, log_msg, trace = ionosphere_matched_table_meta(skyline_app, engine)
             logger.info(log_msg)
-            logger.info('anomalies_table OK')
+            logger.info('ionosphere_matched_table OK')
         except:
             logger.error(traceback.format_exc())
-            logger.error('error :: webapp_update_slack_thread :: failed to get anomalies_table meta for %s' % base_name)
+            logger.error('error :: webapp_update_slack_thread :: failed to get ionosphere_checked_table meta for %s' % base_name)
+            # @added 20170806 - Bug #2130: MySQL - Aborted_clients
+            # Added missing disposal
+            if engine:
+                engine_disposal(engine)
             raise  # to webapp to return in the UI
-    anomaly_id = None
-    slack_thread_ts = 0
-    try:
-        connection = engine.connect()
-        stmt = select([anomalies_table]).\
-            where(anomalies_table.c.metric_id == metric_id).\
-            where(anomalies_table.c.anomaly_timestamp == int(use_anomaly_timestamp))
-        result = connection.execute(stmt)
-        for row in result:
-            anomaly_id = row['id']
-            slack_thread_ts = row['slack_thread_ts']
-            break
-        connection.close()
-        logger.info('determined anomaly id %s for metric id %s at anomaly_timestamp %s with slack_thread_ts %s' % (
-            str(anomaly_id), str(metric_id),
-            str(use_anomaly_timestamp), str(slack_thread_ts)))
-    except:
-        trace = traceback.format_exc()
-        logger.error(trace)
-        fail_msg = 'error :: webapp_update_slack_thread :: could not determine id or slack_thread_ts of the anomaly from DB for metric id %s at anomaly_timestamp %s' % (
-            str(metric_id), str(use_anomaly_timestamp))
-        logger.error('%s' % fail_msg)
-        raise  # to webapp to return in the UI
+
+        try:
+            metrics_table, log_msg, trace = metrics_table_meta(skyline_app, engine)
+            logger.info(log_msg)
+            logger.info('metrics_table OK')
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: webapp_update_slack_thread :: failed to get metrics_table meta for %s' % base_name)
+            if engine:
+                engine_disposal(engine)
+            raise  # to webapp to return in the UI
+        metric_id = None
+        try:
+            connection = engine.connect()
+            stmt = select([metrics_table]).where(metrics_table.c.metric == base_name)
+            result = connection.execute(stmt)
+            for row in result:
+                metric_id = int(row['id'])
+            connection.close()
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: webapp_update_slack_thread :: could not determine metric id from metrics table')
+            if engine:
+                engine_disposal(engine)
+            raise  # to webapp to return in the UI
+        logger.info('metric id determined as %s' % str(metric_id))
+        if metric_id:
+            try:
+                anomalies_table, log_msg, trace = anomalies_table_meta(skyline_app, engine)
+                logger.info(log_msg)
+                logger.info('anomalies_table OK')
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: webapp_update_slack_thread :: failed to get anomalies_table meta for %s' % base_name)
+                if engine:
+                    engine_disposal(engine)
+                raise  # to webapp to return in the UI
+        anomaly_id = None
+        slack_thread_ts = 0
+        try:
+            connection = engine.connect()
+            stmt = select([anomalies_table]).\
+                where(anomalies_table.c.metric_id == metric_id).\
+                where(anomalies_table.c.anomaly_timestamp == int(use_anomaly_timestamp))
+            result = connection.execute(stmt)
+            for row in result:
+                anomaly_id = row['id']
+                slack_thread_ts = row['slack_thread_ts']
+                break
+            connection.close()
+            logger.info('determined anomaly id %s for metric id %s at anomaly_timestamp %s with slack_thread_ts %s' % (
+                str(anomaly_id), str(metric_id),
+                str(use_anomaly_timestamp), str(slack_thread_ts)))
+        except:
+            trace = traceback.format_exc()
+            logger.error(trace)
+            fail_msg = 'error :: webapp_update_slack_thread :: could not determine id or slack_thread_ts of the anomaly from DB for metric id %s at anomaly_timestamp %s' % (
+                str(metric_id), str(use_anomaly_timestamp))
+            logger.error('%s' % fail_msg)
+            if engine:
+                engine_disposal(engine)
+            raise  # to webapp to return in the UI
+
+    if message_context == 'snab_result' or message_context == 'snab_result_changed':
+        try:
+            snab_table, log_msg, trace = snab_table_meta(skyline_app, engine)
+            logger.info(log_msg)
+            logger.info('snab_table OK')
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: webapp_update_slack_thread :: failed to get snab_table meta')
+            if engine:
+                engine_disposal(engine)
+            raise  # to webapp to return in the UI
+        slack_thread_ts = 0
+        # The hacky bit
+        snab_id = base_name
+        try:
+            connection = engine.connect()
+            stmt = select([snab_table]).\
+                where(snab_table.c.id == snab_id)
+            result = connection.execute(stmt)
+            for row in result:
+                slack_thread_ts = row['slack_thread_ts']
+                anomaly_id = row['anomaly_id']
+                break
+            connection.close()
+            logger.info('determined slack_thread_ts %s for snab id %s' % (
+                str(slack_thread_ts), str(snab_id)))
+        except:
+            trace = traceback.format_exc()
+            logger.error(trace)
+            fail_msg = 'error :: webapp_update_slack_thread :: could not slack_thread_ts for snab id %s' % (
+                str(snab_id))
+            logger.error('%s' % fail_msg)
+            if engine:
+                engine_disposal(engine)
+            raise  # to webapp to return in the UI
+        if slack_thread_ts:
+            if int(slack_thread_ts) == 0:
+                slack_thread_ts = None
+        if not slack_thread_ts and anomaly_id:
+            try:
+                anomalies_table, log_msg, trace = anomalies_table_meta(skyline_app, engine)
+                logger.info(log_msg)
+                logger.info('anomalies_table OK')
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: webapp_update_slack_thread :: failed to get anomalies_table meta for %s' % base_name)
+                if engine:
+                    engine_disposal(engine)
+                raise  # to webapp to return in the UI
+            try:
+                connection = engine.connect()
+                stmt = select([anomalies_table]).\
+                    where(anomalies_table.c.id == anomaly_id)
+                result = connection.execute(stmt)
+                for row in result:
+                    slack_thread_ts = row['slack_thread_ts']
+                    break
+                connection.close()
+                logger.info('determined slack_thread_ts %s for anomaly_id %s' % (
+                    str(slack_thread_ts), str(anomaly_id)))
+            except:
+                trace = traceback.format_exc()
+                logger.error(trace)
+                fail_msg = 'error :: webapp_update_slack_thread :: could not determine slack_thread_ts'
+                logger.error('%s' % fail_msg)
+                if engine:
+                    engine_disposal(engine)
+                raise  # to webapp to return in the UI
 
     if float(slack_thread_ts) == 0:
         # There is no known slack_thread_ts value so there is no thread to posted
@@ -5789,6 +5892,21 @@ def webapp_update_slack_thread(base_name, metric_timestamp, value, message_conte
             label = label_arg[:255]
         message = '*TRAINED layers* - with label - %s, layers were created on features profile id %s for %s - %s' % (
             str(label), str(fp_id), base_name, ionosphere_link)
+
+    # @added 20200929 - Task #3748: POC SNAB
+    #                   Branch #3068: SNAB
+    if message_context == 'snab_result':
+        message = '*SNAB* - user *EVALUATED* as - %s' % (
+            str(snab_result))
+
+    # @added 20201004 - Task #3748: POC SNAB
+    #                   Branch #3068: SNAB
+    # Allow results to be changed
+    if message_context == 'snab_result_changed':
+        message = 'Skyline *SNAB* - the result for snab id %s with anomaly id %s was changed from %s to %s' % (
+            str(snab_id), str(anomaly_id), str(snab_result_changed_from),
+            str(snab_result_changed_to))
+        slack_thread_ts = None
 
     slack_response = {'ok': False}
     try:
@@ -5814,6 +5932,16 @@ def webapp_update_slack_thread(base_name, metric_timestamp, value, message_conte
         reaction_emoji = settings.SLACK_OPTS['message_on_training_data_viewed_reaction_emoji']
     except:
         reaction_emoji = 'eyes'
+
+    # @added 20200929 - Task #3748: POC SNAB
+    #                   Branch #3068: SNAB
+    if message_context == 'snab_result':
+        if snab_result == 'tP' or snab_result == 'tN' or snab_result == 'NULL':
+            reaction_emoji = 'heavy_check_mark'
+        elif snab_result == 'unsure':
+            reaction_emoji = 'question'
+        else:
+            reaction_emoji = 'x'
 
     slack_response = {'ok': False}
     try:
