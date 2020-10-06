@@ -175,7 +175,11 @@ class Crucible(Thread):
         int_keys = [
             'from_timestamp', 'metric_timestamp', 'added_at', 'full_duration',
             'ionosphere_parent_id', 'alert_interval']
-        array_keys = ['triggered_algorithms', 'algorithms']
+        # @added 20201001 - Task #3748: POC SNAB
+        # Added algorithms_run required to determine the anomalyScore
+        # so this needs to be sent to Ionosphere so Ionosphere
+        # can send it back on an alert, but the same file gets sent to Crucible so...
+        array_keys = ['triggered_algorithms', 'algorithms', 'algorithms_run']
         boolean_keys = ['graphite_metric', 'run_crucible_tests', 'add_to_panorama']
 
         metric_vars_array = []

@@ -931,7 +931,11 @@ class Ionosphere(Thread):
         int_keys = [
             'from_timestamp', 'metric_timestamp', 'added_at', 'full_duration',
             'ionosphere_parent_id']
-        array_keys = ['algorithms', 'triggered_algorithms']
+        # @added 20201001 - Task #3748: POC SNAB
+        # Added algorithms_run required to determine the anomalyScore
+        # so this needs to be sent to Ionosphere so Ionosphere
+        # can send it back on an alert.
+        array_keys = ['triggered_algorithms', 'algorithms', 'algorithms_run']
         boolean_keys = ['graphite_metric', 'run_crucible_tests']
 
         metric_vars_array = []
@@ -1141,6 +1145,55 @@ class Ionosphere(Thread):
                 except:
                     logger.error(traceback.format_exc())
                     logger.error('error :: calling engine.dispose()')
+            return
+
+        # @added 20200904 - Feature #3734: waterfall alerts
+        # Remove the metric from the waterfall_alerts Redis set
+        # [metric, timestamp, value, added_to_waterfall_timestamp]
+        # waterfall_data = [metric[1], metric[2], metric[0], added_to_waterfall_timestamp]
+        def remove_waterfall_alert(added_by, metric_timestamp, base_name):
+            redis_waterfall_alert_set = '%s.waterfall_alerts.sent_to_ionosphere' % added_by
+            literal_waterfall_alerts = []
+            try:
+                literal_waterfall_alerts = list(self.redis_conn_decoded.smembers(redis_waterfall_alert_set))
+            except:
+                literal_waterfall_alerts = []
+            waterfall_alerts = []
+            for literal_waterfall_alert in literal_waterfall_alerts:
+                waterfall_alert = literal_eval(literal_waterfall_alert)
+                waterfall_alerts.append(waterfall_alert)
+            for waterfall_alert in waterfall_alerts:
+                if waterfall_alert[0] == base_name:
+                    if int(waterfall_alert[1]) == int(metric_timestamp):
+                        try:
+                            self.redis_conn.srem(redis_waterfall_alert_set, str(waterfall_alert))
+                            logger.info('removed waterfall alert item from Redis set %s - %s' % (
+                                redis_waterfall_alert_set, str(waterfall_alert)))
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: failed to remove waterfall alert item for %s at %s from Redis set %s' % (
+                                base_name, str(metric_timestamp), redis_waterfall_alert_set))
+            return
+
+        # @added 20200908 - Feature #3734: waterfall alerts
+        # Added a common return_to_sender_to_alert function
+        # @added 20201001 - Task #3748: POC SNAB
+        # Added algorithms_run required to determine the anomalyScore
+        # so this needs to be sent to Ionosphere so Ionosphere
+        # can send it back on an alert.
+        def return_to_sender_to_alert(added_by, metric_timestamp, base_name, anomalous_value, triggered_algorithms, full_duration, algorithms_run):
+            cache_key = 'ionosphere.%s.alert.%s.%s' % (added_by, metric_timestamp, base_name)
+            cache_key_value = [float(anomalous_value), base_name, int(metric_timestamp), triggered_algorithms, full_duration, algorithms_run]
+            try:
+                self.redis_conn.setex(cache_key, 300, str(cache_key_value))
+                logger.info('added Redis alert key - %s - %s' % (
+                    cache_key, str(cache_key_value)))
+            except:
+                logger.error(traceback.format_exc())
+                logger.error(
+                    'error :: failed to add Redis key - %s - [%s, \'%s\', %s, %s, %s]' %
+                    (cache_key, str(anomalous_value), base_name, str(int(metric_timestamp)),
+                        str(triggered_algorithms), str(full_duration), str(algorithms_run)))
             return
 
         child_process_pid = os.getpid()
@@ -1388,6 +1441,23 @@ class Ionosphere(Thread):
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return
 
+        # @added 20201001 - Task #3748: POC SNAB
+        # Added algorithms_run required to determine the anomalyScore
+        # so this needs to be sent to Ionosphere so Ionosphere
+        # can send it back on an alert.
+        try:
+            key = 'algorithms_run'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            algorithms_run = value_list[0]
+            if settings.ENABLE_IONOSPHERE_DEBUG:
+                logger.info('debug :: metric variable - algorithms_run - %s' % str(algorithms_run))
+        except:
+            logger.error('error :: failed to read algorithms_run variable from check file setting to all - %s' % (metric_check_file))
+            if added_by == 'mirage':
+                algorithms_run = settings.MIRAGE_ALGORITHMS
+            else:
+                algorithms_run = settings.ALGORITHMS
+
         # @added 20170117 - Feature #1854: Ionosphere learn - generations
         if str(added_by) == 'ionosphere_learn':
             logger.info('debug :: metric variable - added_by - %s' % added_by)
@@ -1404,6 +1474,12 @@ class Ionosphere(Thread):
             logger.info('a check cache key exists and the check was not added by ionosphere_learn - %s' % (ionosphere_check_cache_key))
             logger.info('to prevent multiple iterations over this check removing %s' % (
                 str(metric_check_file)))
+
+            # @added 20200908 - Feature #3734: waterfall alerts
+            # Remove waterfall alert item
+            if added_by != 'ionosphere_learn':
+                remove_waterfall_alert(added_by, metric_timestamp, base_name)
+
             self.remove_metric_check_file(str(metric_check_file))
             return
 
@@ -1471,6 +1547,7 @@ class Ionosphere(Thread):
         # @modified 20170116 - Feature #1854: Ionosphere learn
         # Do not check the cache key or anomaly age if added by ionosphere_learn
         if added_by != 'ionosphere_learn':
+
             # @added 20170101 - Feature #1830: Ionosphere alerts
             # Remove check file if an alert key exists
             cache_key = 'ionosphere.%s.alert.%s.%s' % (added_by, metric_timestamp, base_name)
@@ -1480,9 +1557,13 @@ class Ionosphere(Thread):
             except Exception as e:
                 logger.error('error :: could not query Redis for cache_key: %s' % e)
             if not last_alert:
-                logger.info('debug :: no alert cache key - %s' % cache_key)
+                logger.info('no alert cache key - %s' % cache_key)
             else:
-                logger.info('debug :: removing check - alert cache key exists - %s' % cache_key)
+                logger.info('removing check - alert cache key exists - %s' % cache_key)
+                # @added 20200908 - Feature #3734: waterfall alerts
+                # Remove any waterfall_alert items
+                remove_waterfall_alert(added_by, metric_timestamp, base_name)
+
                 self.remove_metric_check_file(str(metric_check_file))
                 return
 
@@ -1734,6 +1815,18 @@ class Ionosphere(Thread):
             logger.info('training data ts json available - %s' % (anomaly_json))
         else:
             logger.error('error :: training data ts json was not found - %s' % (anomaly_json))
+
+            # @added 20200908 - Feature #3734: waterfall alerts
+            # Return to sender to alert
+            if added_by != 'ionosphere_learn':
+                remove_waterfall_alert(added_by, metric_timestamp, base_name)
+                logger.info('sending %s back to %s to alert' % (base_name, added_by))
+                # @added 20201001 - Task #3748: POC SNAB
+                # Added algorithms_run required to determine the anomalyScore
+                # so this needs to be sent to Ionosphere so Ionosphere
+                # can send it back on an alert.
+                return_to_sender_to_alert(added_by, metric_timestamp, base_name, anomalous_value, triggered_algorithms, full_duration, algorithms_run)
+
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             if engine:
                 engine_disposal(engine)
@@ -1968,6 +2061,14 @@ class Ionosphere(Thread):
 
             if len(fp_ids) == 0:
                 logger.info('there are no fp ids that match full duration for %s' % base_name)
+                # @added 20200908 - Feature #3734: waterfall alerts
+                # If any layers are found but any fps for analysis have been
+                # discarded because of echo rate limiting or they do not match
+                # the fulll duration, still check any enabed layers
+                if fp_layers_count:
+                    logger.info('there are %s fp layers for %s' % (str(fp_layers_count), base_name))
+                    fp_ids_found = True
+
             else:
                 fp_ids_found = True
 
@@ -1986,19 +2087,29 @@ class Ionosphere(Thread):
                     # any layers the metric has will be disabled as well
                     if added_by != 'ionosphere_learn':
                         logger.info('%s has been willy nillied, all its features profiles have been disabled, but it is still flagged as ionosphere_enabled' % (base_name))
-                        logger.info('sending %s back to %s to alert' % (base_name))
-                        cache_key = 'ionosphere.%s.alert.%s.%s' % (added_by, metric_timestamp, base_name)
-                        cache_key_value = [float(anomalous_value), base_name, int(metric_timestamp), triggered_algorithms, full_duration]
-                        try:
-                            self.redis_conn.setex(cache_key, 300, str(cache_key_value))
-                            logger.info('added Redis alert key - %s - %s' % (
-                                cache_key, str(cache_key_value)))
-                        except:
-                            logger.error(traceback.format_exc())
-                            logger.error(
-                                'error :: failed to add Redis key - %s - [%s, \'%s\', %s, %s, %s]' %
-                                (cache_key, str(anomalous_value), base_name, str(int(metric_timestamp)),
-                                    str(triggered_algorithms), str(full_duration)))
+                        logger.info('sending %s back to %s to alert' % (base_name, added_by))
+                        # @modified 20200908 - Feature #3734: waterfall alerts
+                        # Use common return_to_sender_to_alert function
+                        # cache_key = 'ionosphere.%s.alert.%s.%s' % (added_by, metric_timestamp, base_name)
+                        # cache_key_value = [float(anomalous_value), base_name, int(metric_timestamp), triggered_algorithms, full_duration]
+                        # try:
+                        #     self.redis_conn.setex(cache_key, 300, str(cache_key_value))
+                        #     logger.info('added Redis alert key - %s - %s' % (
+                        #         cache_key, str(cache_key_value)))
+                        # except:
+                        #     logger.error(traceback.format_exc())
+                        #     logger.error(
+                        #         'error :: failed to add Redis key - %s - [%s, \'%s\', %s, %s, %s]' %
+                        #         (cache_key, str(anomalous_value), base_name, str(int(metric_timestamp)),
+                        #             str(triggered_algorithms), str(full_duration)))
+                        remove_waterfall_alert(added_by, metric_timestamp, base_name)
+
+                        # @modified 20201001 - Task #3748: POC SNAB
+                        # Added algorithms_run required to determine the anomalyScore
+                        # so this needs to be sent to Ionosphere so Ionosphere
+                        # can send it back on an alert.
+                        return_to_sender_to_alert(added_by, metric_timestamp, base_name, anomalous_value, triggered_algorithms, full_duration, algorithms_run)
+
                         # Update DB as to the fact that the metric is an ionosphere
                         # metric, all its fps have been disabled, it has been willy
                         # nillied
@@ -2022,6 +2133,18 @@ class Ionosphere(Thread):
                     fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
                 else:
                     self.remove_metric_check_file(str(metric_check_file))
+                    # @added 20200908 - Feature #3734: waterfall alerts
+                    # Return to sender to alert
+                    if added_by != 'ionosphere_learn':
+                        remove_waterfall_alert(added_by, metric_timestamp, base_name)
+                        logger.info('sending %s back to %s to alert' % (base_name, added_by))
+                        # @added 20200930 - Feature #3734: waterfall alerts
+                        # Send to Panorama as Mirage and Analyzer will not.
+                        # @modified 20201001 - Task #3748: POC SNAB
+                        # Added algorithms_run required to determine the anomalyScore
+                        # so this needs to be sent to Ionosphere so Ionosphere
+                        # can send it back on an alert.
+                        return_to_sender_to_alert(added_by, metric_timestamp, base_name, anomalous_value, triggered_algorithms, full_duration, algorithms_run)
                 if engine:
                     engine_disposal(engine)
                 return
@@ -2063,6 +2186,17 @@ class Ionosphere(Thread):
                 if graphite_file_count == 0:
                     logger.info('not calculating features no anomaly Graphite alert resources created in %s' % (metric_training_data_dir))
                     self.remove_metric_check_file(str(metric_check_file))
+                    # @added 20200908 - Feature #3734: waterfall alerts
+                    # Return to sender to alert
+                    if added_by != 'ionosphere_learn':
+                        remove_waterfall_alert(added_by, metric_timestamp, base_name)
+                        logger.info('sending %s back to %s to alert' % (base_name, added_by))
+                        # @modified 20201001 - Task #3748: POC SNAB
+                        # Added algorithms_run required to determine the anomalyScore
+                        # so this needs to be sent to Ionosphere so Ionosphere
+                        # can send it back on an alert.
+                        return_to_sender_to_alert(added_by, metric_timestamp, base_name, anomalous_value, triggered_algorithms, full_duration, algorithms_run)
+
                     if engine:
                         engine_disposal(engine)
                     return
@@ -2096,6 +2230,10 @@ class Ionosphere(Thread):
 
             if training_metric:
                 logger.info('training metric done')
+
+                # @added 20200908 -
+                remove_waterfall_alert(added_by, metric_timestamp, base_name)
+
                 self.remove_metric_check_file(str(metric_check_file))
                 # TODO: make ionosphere more useful, compare any other
                 # available training_metric profiles here and match, not in the
@@ -3497,6 +3635,12 @@ class Ionosphere(Thread):
                 logger.info('no layers algorithm check required')
             # Ionosphere layers DONE
 
+            # @added 20200904 - Feature #3734: waterfall alerts
+            # Remove the metric from the waterfall_alerts Redis set
+            # [metric, timestamp, value, added_to_waterfall_timestamp]
+            # waterfall_data = [metric[1], metric[2], metric[0], added_to_waterfall_timestamp]
+            remove_waterfall_alert(added_by, metric_timestamp, base_name)
+
             if not not_anomalous:
                 logger.info('anomalous - no feature profiles were matched - %s' % base_name)
 
@@ -3584,28 +3728,40 @@ class Ionosphere(Thread):
                 # @modified 20170116 - Feature #1854: Ionosphere learn
                 # Only do the cache_key if not ionosphere_learn
                 if added_by != 'ionosphere_learn':
-                    cache_key = 'ionosphere.%s.alert.%s.%s' % (added_by, metric_timestamp, base_name)
+
+                    # @added 20200908 - Feature #3734: waterfall alerts
+                    # Remove any waterfall_alert items
+                    remove_waterfall_alert(added_by, metric_timestamp, base_name)
+
+                    # @modified 20200908 - Feature #3734: waterfall alerts
+                    # Use common return_to_sender_to_alert function
+                    # cache_key = 'ionosphere.%s.alert.%s.%s' % (added_by, metric_timestamp, base_name)
                     # added 20190412 - Task #2824: Test redis-py upgrade
                     #                  Task #2926: Update dependencies
                     # Added cache_key_value
-                    cache_key_value = [float(anomalous_value), base_name, int(metric_timestamp), triggered_algorithms, full_duration]
+                    # cache_key_value = [float(anomalous_value), base_name, int(metric_timestamp), triggered_algorithms, full_duration]
+                    # try:
+                    #     self.redis_conn.setex(
+                    #         cache_key, 300,
+                    #         # modified 20190412 - Task #2824: Test redis-py upgrade
+                    #         #                     Task #2926: Update dependencies
+                    #         # [float(anomalous_value), base_name, int(metric_timestamp), triggered_algorithms, full_duration])
+                    #         str(cache_key_value))
+                    #     logger.info(
+                    #         'add Redis alert key - %s - %s' %
+                    #         (cache_key, str(cache_key_value)))
+                    # except:
+                    #     logger.error(traceback.format_exc())
+                    #     logger.error(
+                    #         'error :: failed to add Redis key - %s - [%s, \'%s\', %s, %s, %s]' %
+                    #         (cache_key, str(anomalous_value), base_name, str(int(metric_timestamp)),
+                    #             str(triggered_algorithms), str(full_duration)))
 
-                    try:
-                        self.redis_conn.setex(
-                            cache_key, 300,
-                            # modified 20190412 - Task #2824: Test redis-py upgrade
-                            #                     Task #2926: Update dependencies
-                            # [float(anomalous_value), base_name, int(metric_timestamp), triggered_algorithms, full_duration])
-                            str(cache_key_value))
-                        logger.info(
-                            'add Redis alert key - %s - %s' %
-                            (cache_key, str(cache_key_value)))
-                    except:
-                        logger.error(traceback.format_exc())
-                        logger.error(
-                            'error :: failed to add Redis key - %s - [%s, \'%s\', %s, %s, %s]' %
-                            (cache_key, str(anomalous_value), base_name, str(int(metric_timestamp)),
-                                str(triggered_algorithms), str(full_duration)))
+                    # @modified 20201001 - Task #3748: POC SNAB
+                    # Added algorithms_run required to determine the anomalyScore
+                    # so this needs to be sent to Ionosphere so Ionosphere
+                    # can send it back on an alert.
+                    return_to_sender_to_alert(added_by, metric_timestamp, base_name, anomalous_value, triggered_algorithms, full_duration, algorithms_run)
 
                 # @added 20170116 - Feature #1854: Ionosphere learn
                 # Added an ionosphere_learn job for the timeseries that did not
@@ -4280,6 +4436,56 @@ class Ionosphere(Thread):
                             if remove_feedback_metric_check:
                                 metric_check_file = '%s/%s' % (settings.IONOSPHERE_CHECK_PATH, i_metric_check_file)
                                 self.remove_metric_check_file(str(metric_check_file))
+
+                                # @added 20200907 - Feature #3734: waterfall alerts
+                                # Remove the metric from the waterfall_alerts Redis set
+                                # [metric, timestamp, value, added_to_waterfall_timestamp]
+                                # waterfall_data = [metric[1], metric[2], metric[0], added_to_waterfall_timestamp]
+                                redis_set = 'analyzer.waterfall_alerts.sent_to_ionosphere'
+                                metric_check_file_timestamp = i_metric_check_file.split('.', -1)[0]
+                                literal_waterfall_alerts = []
+                                try:
+                                    literal_waterfall_alerts = list(self.redis_conn_decoded.smembers(redis_set))
+                                except:
+                                    literal_waterfall_alerts = []
+                                waterfall_alerts = []
+                                for literal_waterfall_alert in literal_waterfall_alerts:
+                                    waterfall_alert = literal_eval(literal_waterfall_alert)
+                                    waterfall_alerts.append(waterfall_alert)
+                                for waterfall_alert in waterfall_alerts:
+                                    if waterfall_alert[0] == base_name:
+                                        if int(waterfall_alert[1]) == int(metric_check_file_timestamp):
+                                            try:
+                                                self.redis_conn.srem(redis_set, str(waterfall_alert))
+                                                logger.info('removed feedback metric waterfall alert item from Redis set %s - %s' % (
+                                                    redis_set, str(waterfall_alert)))
+                                            except:
+                                                logger.error(traceback.format_exc())
+                                                logger.error('error :: failed to remove feedback metric waterfall alert item for %s from Redis set %s' % (
+                                                    base_name, redis_set))
+
+                                redis_set = 'mirage.waterfall_alerts.sent_to_ionosphere'
+                                literal_waterfall_alerts = []
+                                try:
+                                    literal_waterfall_alerts = list(self.redis_conn_decoded.smembers(redis_set))
+                                except:
+                                    literal_waterfall_alerts = []
+                                waterfall_alerts = []
+                                for literal_waterfall_alert in literal_waterfall_alerts:
+                                    waterfall_alert = literal_eval(literal_waterfall_alert)
+                                    waterfall_alerts.append(waterfall_alert)
+                                for waterfall_alert in waterfall_alerts:
+                                    if waterfall_alert[0] == base_name:
+                                        if int(waterfall_alert[1]) == int(metric_check_file_timestamp):
+                                            try:
+                                                self.redis_conn.srem(redis_set, str(waterfall_alert))
+                                                logger.info('removed feedback metric waterfall alert item from Redis set %s - %s' % (
+                                                    redis_set, str(waterfall_alert)))
+                                            except:
+                                                logger.error(traceback.format_exc())
+                                                logger.error('error :: failed to remove feedback metric waterfall alert item for %s from Redis set %s' % (
+                                                    base_name, redis_set))
+
                     # Determine metric_var_files after possible feedback metric removals
                     metric_var_files = False
                     try:

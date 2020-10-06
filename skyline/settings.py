@@ -723,6 +723,17 @@ CUSTOM_ALGORITHMS = {}
             'use_with': ['analyzer', 'crucible'],
             'debug_logging': True,
         },
+        'matrixprofile': {
+            'namespaces': ['*'],
+            'algorithm_source': '/opt/skyline/github/skyline/skyline/custom_algorithms/skyline_matrixprofile.py',
+            'algorithm_parameters': {},
+            'max_execution_time': 30.0,
+            'consensus': 1,
+            'algorithms_allowed_in_consensus': ['matrixprofile'],
+            'run_3sigma_algorithms': False,
+            'use_with': ['snab'],
+            'debug_logging': False,
+        },
     }
 
 - Each dictionary item needs to be named the same as the algorithm to be run
@@ -1452,6 +1463,9 @@ PANORAMA_CHECK_INTERVAL = 20
     anomalie1s to add to the database.  This allows you to configure Panorama to
     insert anomalies into the database every second if you so wish to, however
     in most cases every 20 seconds is sufficient.
+    However, NOTE, if SNAB_ENABLE is True this is automatically overridden to
+    the value of 1 as snab needs anomaly ids available asap.  This can increase
+    disk I/O until such as time as Panorama changes from check files to Redis.
 :vartype PANORAMA_CHECK_INTERVAL: int
 """
 
@@ -2639,6 +2653,13 @@ LUMINOSITY_RELATED_TIME_PERIOD = 240
 :vartype LUMINOSITY_RELATED_TIME_PERIOD: int
 """
 
+LUMINOSITY_CORRELATE_ALL = True
+"""
+:var LUMINOSITY_CORRELATE_ALL: By default all metrics will be correlated with
+    the entire metric population.
+:vartype LUMINOSITY_CORRELATE_NAMESPACES_ONLY: list
+"""
+
 LUMINOSITY_CORRELATE_NAMESPACES_ONLY = []
 """
 :var LUMINOSITY_CORRELATE_NAMESPACES_ONLY: A list of namespaces that metrics in
@@ -2647,10 +2668,60 @@ LUMINOSITY_CORRELATE_NAMESPACES_ONLY = []
     namespaces are declared in the list, all metrics will be evaluated as to
     whether they are in the list.  Metrics in the list will only be correlated
     with metrics in the same namespace and excluded from correlations within
-    ANY other namespace.
-:vartype LUMINOSITY_RELATED_TIME_PERIOD: list
+    ANY other namespace, unless defined in the below
+    mod:`settings.LUMINOSITY_CORRELATION_MAPS` method.
+:vartype LUMINOSITY_CORRELATE_NAMESPACES_ONLY: list
+
+- **Dictionary example**::
+
+    LUMINOSITY_CORRELATE_NAMESPACES_ONLY = [
+        'aws.euw1',
+        'aws.use1',
+        'gcp.us-east4',
+    }
+
+In the above example, metrics with the ``aws.euw1`` namespace would only be
+correlated against other ``aws.euw1`` metrics, likewise for ``aws.use1`` and
+``gcp.us-east4``.  This also means that if there were other metric namespaces
+like ``gcp.southamerica-east1`` and ``gcp.asia-east1`` they would not be
+correlated with any of the above example namespaces.
 """
 
+LUMINOSITY_CORRELATION_MAPS = {}
+"""
+:var LUMINOSITY_CORRELATION_MAPS: A dictionary of lists of metrics
+    which should be correlated.  These lists hold absolute metric names, to
+    correlate using namespaces use the above
+    mod:`settings.LUMINOSITY_CORRELATE_NAMESPACES_ONLY` method.  Although both
+    methods can be run simultaneosly, this method allows for only correlating
+    specific groups of metrics.  It be used to on its own only correlate certain
+    metrics if nothing is defined in
+    mod:`settings.LUMINOSITY_CORRELATE_NAMESPACES_ONLY`.  Or it can also be used
+    in conjunction with mod:`settings.LUMINOSITY_CORRELATE_NAMESPACES_ONLY` to
+    also correlate metrics in different namespaces.  For example say you
+    defined `aws.euw1` and `aws.use1` as seperate namespaces in
+    mod:`settings.LUMINOSITY_CORRELATE_NAMESPACES_ONLY` but you also want to
+    correlate some specific group/s of metrics that occur in both `aws.euw1` and
+    `aws.use1`, you could define those here.
+:vartype LUMINOSITY_CORRELATION_MAPS: dictionary
+
+- **Dictionary example**::
+
+    LUMINOSITY_CORRELATION_MAPS = {
+        'aws.webservers.nginx': [
+            'aws.euw1.webserver-1.nginx.apm.mainsite.avg_request_timing',
+            'aws.euw1.webserver-2.nginx.apm.mainsite.avg_request_timing',
+            'aws.use1.webserver-6.nginx.apm.mainsite.avg_request_timing',
+            'aws.use1.webserver-8.nginx.apm.mainsite.avg_request_timing',
+        ]
+    }
+
+Note that if both methods are enabled, correlations will be done on a common
+result of both methods, meaning that a metric will be evaluated against both
+methods and the resulting list of metrics that it should be correlated against
+will be used.
+
+"""
 
 """
 Docker settings
@@ -2990,6 +3061,12 @@ VISTA_GRAPHITE_BATCH_SIZE = 20
 SNAB settings
 """
 
+SNAB_ENABLED = False
+"""
+:var SNAB_ENABLED: Whether SNAB is enabled or nor,
+:vartype SNAB_ENABLED: str
+"""
+
 SNAB_DATA_DIR = '/opt/skyline/SNAB'
 """
 :var SNAB_DATA_DIR: The directory where SNAB writes data files.
@@ -3020,6 +3097,33 @@ SNAB_anomalyScore = {}
         'analyzer': ['telegraf.test-server1'],
         'analyzer_batch': ['telegraf.test-server1', 'test_batch_metrics.'],
         'mirage': ['telegraf.test-server1', 'test_batch_metrics.'],
+    }
+
+"""
+
+SNAB_checks = {}
+"""
+:var SNAB_checks: This is an advanced feature.  A dictionary that defines the
+    any SNAB checks for apps (mirage only) in terms of what namespaces should
+    be submitted to snab to be checked by which algortihm/s.
+    EXPERIMENTAL.
+:vartype SNAB_checks: dict
+
+- **Example**::
+
+    SNAB_CHECKS = {
+        'mirage': {
+            'testing': {
+                'skyline_matrixprofile': {
+                    'namespaces': ['telegraf'],
+                    'algorithm_source': '/opt/skyline/github/skyline/skyline/custom_algorithms/skyline_matrixprofile.py',
+                    'algorithm_parameters': {'windows': 5, 'k_discords': 20},
+                    'max_execution_time': 10.0,
+                    'debug_logging': True,
+                    'alert_slack_channel': '#skyline'
+                }
+            }
+        },
     }
 
 """

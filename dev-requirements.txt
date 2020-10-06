@@ -595,3 +595,6 @@ pandas_log==0.1.6; python_version >= '3.2'
 
 # @added 20200604 - Feature #3566: custom_algorithms
 timeout-decorator==0.4.1
+
+# @added 20200908 - Task #3744: POC matrixprofile
+matrixprofile==1.1.4

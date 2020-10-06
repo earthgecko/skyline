@@ -227,6 +227,19 @@ try:
 except:
     FLUX_ZERO_FILL_NAMESPACES = []
 
+# @added 20200916 - Branch #3068: SNAB
+#                   Task #3744: POC matrixprofile
+#                   Info #1792: Shapelet extraction
+try:
+    SNAB_ENABLED = settings.SNAB_ENABLED
+except:
+    # SNAB_ENABLED = False
+    SNAB_ENABLED = True
+try:
+    SNAB_CHECKS = settings.SNAB_CHECKS.copy()
+except:
+    SNAB_CHECKS = {}
+
 # @added 20190522 - Feature #2580: illuminance
 # Disabled for now as in concept phase.  This would work better if
 # the illuminance_datapoint was determined from the time series
@@ -1719,6 +1732,23 @@ class Analyzer(Thread):
                         str(metric_name), str(anomalous), str(ensemble),
                         str(algorithms_run)))
 
+                # @added 20200908 - Feature #3734: waterfall alerts
+                from_timestamp = int(timeseries[1][0])
+                triggered_algorithms_for_waterfall_alert = []
+                for index, value in enumerate(ensemble):
+                    if value:
+                        algorithm = algorithms_run[index]
+                        triggered_algorithms_for_waterfall_alert.append(algorithm)
+                waterfall_panorama_data_added_at = int(time())
+                waterfall_panorama_data_source = 'graphite'
+                waterfall_panorama_data = [
+                    base_name, datapoint, int(from_timestamp),
+                    int(timeseries[-1][0]), algorithms_run,
+                    triggered_algorithms_for_waterfall_alert, skyline_app,
+                    waterfall_panorama_data_source, this_host,
+                    waterfall_panorama_data_added_at
+                ]
+
                 # @added 20200214 - Bug #3448: Repeated airgapped_metrics
                 #                   Feature #3400: Identify air gaps in the metric data
                 # If the metric Redis key was updated with new data added during
@@ -1810,6 +1840,24 @@ class Analyzer(Thread):
                         logger.error('error :: failed to add %s to Redis set %s' % (
                             str(data), str(redis_set)))
                     anomalous = True
+
+                # @added 20200916 - Branch #3068: SNAB
+                #                   Task #3744: POC matrixprofile
+                #                   Info #1792: Shapelet extraction
+                snab_only_check = False
+                if SNAB_ENABLED:
+                    snab_recheck_key = 'snab.recheck.%s' % base_name
+                    snab_recheck_key_exists = False
+                    try:
+                        snab_recheck_key_exists = self.redis_conn_decoded.get(snab_recheck_key)
+                    except:
+                        pass
+                    if snab_recheck_key_exists:
+                        snab_only_check = True
+                        logger.info('snab.recheck Redis key exists from %s - %s' % (
+                            str(snab_recheck_key_exists), snab_recheck_key))
+                        anomalous = True
+                        logger.info('set anomalous to True - snab_only_check %s' % str(snab_only_check))
 
                 # @added 20200607 - Feature #3566: custom_algorithms
                 # If a metric is specified in MIRAGE_ALWAYS_METRICS add it to the
@@ -1924,7 +1972,10 @@ class Analyzer(Thread):
                                 str(data), str(redis_set)))
 
                     # If Crucible or Panorama are enabled determine details
-                    determine_anomaly_details = False
+                    # @modified 20200904 - Feature #3734: waterfall alerts
+                    # Always determine_anomaly_details
+                    # determine_anomaly_details = False
+                    determine_anomaly_details = True
                     if settings.ENABLE_CRUCIBLE and settings.ANALYZER_CRUCIBLE_ENABLED:
                         determine_anomaly_details = True
                     if settings.PANORAMA_ENABLED:
@@ -1965,6 +2016,13 @@ class Analyzer(Thread):
                         # analyzer_metric = False
                         ionosphere_metric = True
                         send_to_ionosphere = True
+                        # @added 20200916 - Branch #3068: SNAB
+                        #                   Task #3744: POC matrixprofile
+                        #                   Info #1792: Shapelet extraction
+                        if snab_only_check:
+                            ionosphere_metric = False
+                            send_to_ionosphere = False
+                            logger.info('not sending snab_only_check to ionosphere for %s at %s' % (metric_name, str(metric_timestamp)))
 
                     if metric_name in mirage_unique_metrics:
                         analyzer_metric = False
@@ -2003,8 +2061,36 @@ class Analyzer(Thread):
                                 send_to_ionosphere = False
                                 if ionosphere_metric:
                                     logger.info('not sending to Ionosphere - alert key exists - %s' % (base_name))
+                            # @added 20200916 - Branch #3068: SNAB
+                            #                   Task #3744: POC matrixprofile
+                            #                   Info #1792: Shapelet extraction
+                            if snab_only_check:
+                                send_to_ionosphere = False
                         else:
+                            # @added 20200904 - Task #3730: Validate Mirage running multiple processes
+                            # Added check to see if a Mirage check has already
+                            # been done for the timestamp
+                            mirage_check_not_done = True
+
                             if mirage_metric:
+
+                                # @added 20200904 - Task #3730: Validate Mirage running multiple processes
+                                # Only add the metric check file if it the check
+                                # was not already submitted in a past run
+                                mirage_check_sent = False
+                                mirage_check_sent_key = 'analyzer.mirage_check_sent.%s.%s' % (
+                                    str(int(metric[2])), str(metric[1]))
+                                try:
+                                    mirage_check_sent = self.redis_conn_decoded.get(mirage_check_sent_key)
+                                except Exception as e:
+                                    logger.error('error :: could not query Redis for cache_key: %s' % e)
+                                if mirage_check_sent:
+                                    logger.info('a mirage check for %s at %s was already sent at %s, Redis key exists - %s' % (
+                                        metric[1], str(metric[2]),
+                                        str(mirage_check_sent), str(mirage_check_sent_key)))
+                                    mirage_check_not_done = False
+
+                            if mirage_metric and mirage_check_not_done:
                                 logger.info('not sending to Ionosphere - Mirage metric - %s' % (base_name))
                                 send_to_ionosphere = False
                                 # @added 20170306 - Feature #1960: ionosphere_layers
@@ -2066,7 +2152,11 @@ class Analyzer(Thread):
                                     try:
                                         with open(anomaly_check_file, 'w') as fh:
                                             # metric_name, anomalous datapoint, hours to resolve, timestamp
-                                            fh.write('metric = "%s"\nvalue = "%s"\nhours_to_resolve = "%s"\nmetric_timestamp = "%s"\n' % (metric[1], metric[0], str(use_hours_to_resolve), str(metric[2])))
+                                            # @modified 20200916 - Branch #3068: SNAB
+                                            #                      Task #3744: POC matrixprofile
+                                            # metric_name, anomalous datapoint, hours to resolve, timestamp, snab_only
+                                            # fh.write('metric = "%s"\nvalue = "%s"\nhours_to_resolve = "%s"\nmetric_timestamp = "%s"\n' % (metric[1], metric[0], str(use_hours_to_resolve), str(metric[2])))
+                                            fh.write('metric = "%s"\nvalue = "%s"\nhours_to_resolve = "%s"\nmetric_timestamp = "%s"\nsnab_only_check = "%s"\n' % (metric[1], metric[0], str(use_hours_to_resolve), str(metric[2]), str(snab_only_check)))
                                         mirage_anomaly_check_file_created = True
                                     except:
                                         logger.error(traceback.format_exc())
@@ -2092,6 +2182,37 @@ class Analyzer(Thread):
                                             'error :: failed add %s to analyzer.sent_to_mirage Redis set' %
                                             metric[1])
 
+                                    # @added 20200904 - Feature #3734: waterfall alerts
+                                    added_to_waterfall_timestamp = int(time())
+                                    # [metric, timestamp, value, added_to_waterfall_timestamp]
+                                    waterfall_data = [metric[1], metric[2], metric[0], added_to_waterfall_timestamp, waterfall_panorama_data]
+                                    redis_set = 'analyzer.waterfall_alerts.sent_to_mirage'
+
+                                    # @modified 20200916 - Branch #3068: SNAB
+                                    #                      Task #3744: POC matrixprofile
+                                    # Only add to waterfall_alerts if it is not
+                                    # a snab_only_check
+                                    if not snab_only_check:
+                                        try:
+                                            self.redis_conn.sadd(redis_set, str(waterfall_data))
+                                            logger.info('added to Redis set %s - %s' % (redis_set, str(waterfall_data)))
+                                        except:
+                                            logger.error(traceback.format_exc())
+                                            logger.error('error :: failed to add %s to Redis set %s' % (
+                                                str(waterfall_data), str(redis_set)))
+
+                                    # @added 20200904 - Task #3730: Validate Mirage running multiple processes
+                                    # Add a Redis key for the metric and timestamp
+                                    # so that it does not get added multiple
+                                    # times on consecutive runs if the metric
+                                    # does not change
+                                    mirage_check_sent_key = 'analyzer.mirage_check_sent.%s.%s' % (
+                                        str(int(metric[2])), str(metric[1]))
+                                    try:
+                                        self.redis_conn.setex(mirage_check_sent_key, 300, added_to_waterfall_timestamp)
+                                    except Exception as e:
+                                        logger.error('error :: could not query Redis for cache_key: %s' % e)
+
                     # @modified 20170108 - Feature #1830: Ionosphere alerts
                     # Only send smtp_alerter_metrics to Ionosphere
                     # if send_to_ionosphere:
@@ -2111,7 +2232,12 @@ class Analyzer(Thread):
                                 metric_timestamp, base_name, str(datapoint),
                                 from_timestamp, triggered_algorithms,
                                 timeseries, str(settings.FULL_DURATION),
-                                str(ionosphere_parent_id))
+                                str(ionosphere_parent_id),
+                                # @added 20201001 - Task #3748: POC SNAB
+                                # Added algorithms_run required to determine the anomalyScore
+                                # so this needs to be sent to Ionosphere so Ionosphere
+                                # can send it back on an alert
+                                algorithms_run)
                             # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
                             # Moved to Redis key block below
                             # self.sent_to_ionosphere.append(base_name)
@@ -2144,6 +2270,21 @@ class Analyzer(Thread):
                             logger.info(traceback.format_exc())
                             logger.error('error :: failed to add %s to Redis set %s' % (
                                 str(data), str(redis_set)))
+
+                        # @added 20200904 - Feature #3734: waterfall alerts
+                        # Only add if the metric is ionosphere_enabled
+                        if ionosphere_metric:
+                            added_to_waterfall_timestamp = int(time())
+                            # [metric, timestamp, value, added_to_waterfall_timestamp]
+                            waterfall_data = [metric[1], metric[2], metric[0], added_to_waterfall_timestamp, waterfall_panorama_data]
+                            redis_set = 'analyzer.waterfall_alerts.sent_to_ionosphere'
+                            try:
+                                self.redis_conn.sadd(redis_set, str(waterfall_data))
+                                logger.info('added to Redis set %s - %s' % (redis_set, str(waterfall_data)))
+                            except:
+                                logger.error(traceback.format_exc())
+                                logger.error('error :: failed to add %s to Redis set %s' % (
+                                    str(waterfall_data), str(redis_set)))
 
                         # @added 20170403 - Feature #1994: Ionosphere training_dir keys
                         #                   Feature #2000: Ionosphere - validated
@@ -2184,7 +2325,12 @@ class Analyzer(Thread):
                         analyzer_metric = False
 
                     # Only send Analyzer metrics
-                    if analyzer_metric and settings.PANORAMA_ENABLED:
+                    # @modified 20200916 - Branch #3068: SNAB
+                    #                      Task #3744: POC matrixprofile
+                    # Only add to waterfall_alerts if it is not
+                    # a snab_only_check
+                    # if analyzer_metric and settings.PANORAMA_ENABLED:
+                    if analyzer_metric and settings.PANORAMA_ENABLED and not snab_only_check:
                         if not os.path.exists(settings.PANORAMA_CHECK_PATH):
                             mkdir_p(settings.PANORAMA_CHECK_PATH)
 
@@ -2252,7 +2398,12 @@ class Analyzer(Thread):
 
                     # If Crucible is enabled - save timeseries and create a
                     # Crucible check
-                    if settings.ENABLE_CRUCIBLE and settings.ANALYZER_CRUCIBLE_ENABLED:
+                    # @modified 20200916 - Branch #3068: SNAB
+                    #                      Task #3744: POC matrixprofile
+                    # Only add to waterfall_alerts if it is not
+                    # a snab_only_check
+                    # if settings.ENABLE_CRUCIBLE and settings.ANALYZER_CRUCIBLE_ENABLED:
+                    if settings.ENABLE_CRUCIBLE and settings.ANALYZER_CRUCIBLE_ENABLED and not snab_only_check:
                         crucible_anomaly_dir = str(settings.CRUCIBLE_DATA_FOLDER) + '/' + timeseries_dir + '/' + metric_timestamp
                         if not os.path.exists(crucible_anomaly_dir):
                             mkdir_p(crucible_anomaly_dir)
@@ -3577,7 +3728,17 @@ class Analyzer(Thread):
                         base_name = str(send_alert_for[1])
                         metric_timestamp = int(float(send_alert_for[2]))
                         triggered_algorithms = send_alert_for[3]
-                        anomalous_metric = [value, base_name, metric_timestamp]
+                        # @added 20201001 - Task #3748: POC SNAB
+                        # Added algorithms_run required to determine the
+                        # anomalyScore for snab
+                        algorithms_run = send_alert_for[5]
+
+                        # @added 20201001 - Task #3748: POC SNAB
+                        # Added triggered_algorithms and algorithms_run required
+                        # to determine the anomalyScore for snab
+                        # anomalous_metric = [value, base_name, metric_timestamp]
+                        anomalous_metric = [value, base_name, metric_timestamp, triggered_algorithms, algorithms_run]
+
                         # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
                         # self.all_anomalous_metrics.append(anomalous_metric)
                         redis_set = 'analyzer.all_anomalous_metrics'
@@ -3604,6 +3765,133 @@ class Analyzer(Thread):
                     except:
                         logger.error(traceback.format_exc())
                         logger.error('error :: failed to add an Ionosphere anomalous_metric for %s' % cache_key)
+
+            # @added 20200907 - Feature #3734: waterfall alerts
+            # Add alert for expired waterfall_alert items
+            # [metric, timestamp, value, added_to_waterfall_timestamp]
+            # waterfall_data = [metric[1], metric[2], metric[0], added_to_waterfall_timestamp]
+            waterfall_alert_check_timestamp = int(time())
+            waterfall_alerts_to_alert_on = []
+            # A list to add a metric,timestamp string to in order to override
+            # the mirage_metric or ionosphere_metric in the alerting block
+            alerting_waterfall_alerts = []
+            waterfall_redis_sets = [
+                'analyzer.waterfall_alerts.sent_to_ionosphere',
+                'analyzer.waterfall_alerts.sent_to_mirage'
+            ]
+            for waterfall_redis_set in waterfall_redis_sets:
+                redis_set = waterfall_redis_set
+                literal_waterfall_alerts = []
+                try:
+                    literal_waterfall_alerts = list(self.redis_conn_decoded.smembers(redis_set))
+                except:
+                    literal_waterfall_alerts = []
+                waterfall_alerts = []
+                logger.info('checking for expired checks in %s waterfall alerts in Redis set %s' % (
+                    str(len(literal_waterfall_alerts)), redis_set))
+                for literal_waterfall_alert in literal_waterfall_alerts:
+                    waterfall_alert = literal_eval(literal_waterfall_alert)
+                    waterfall_alerts.append(waterfall_alert)
+                for waterfall_alert in waterfall_alerts:
+                    if waterfall_alert_check_timestamp >= (int(waterfall_alert[3]) + 300):
+                        try:
+                            self.redis_conn.srem(redis_set, str(waterfall_alert))
+                            logger.info('removed waterfall alert item to alert on from Redis set %s - %s' % (
+                                redis_set, str(waterfall_alert)))
+                            waterfall_alerts_to_alert_on.append(waterfall_alert)
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: failed to remove feedback metric waterfall alert item for %s from Redis set %s' % (
+                                base_name, redis_set))
+            for waterfall_alert in waterfall_alerts_to_alert_on:
+                try:
+                    value = float(waterfall_alert[2])
+                    base_name = str(waterfall_alert[0])
+                    metric_timestamp = int(waterfall_alert[1])
+                    anomalous_metric = [value, base_name, metric_timestamp]
+                    redis_set = 'analyzer.all_anomalous_metrics'
+                    data = str(anomalous_metric)
+                    waterfall_alert_check_string = '%s.%s' % (str(metric_timestamp), base_name)
+                    try:
+                        self.redis_conn.sadd(redis_set, data)
+                        alerting_waterfall_alerts.append(waterfall_alert_check_string)
+                    except:
+                        logger.info(traceback.format_exc())
+                        logger.error('error :: failed to add %s to Redis set %s for waterfall alert to alert on' % (
+                            str(data), str(redis_set)))
+                    logger.info('waterfall alerting on %s' % base_name)
+                    redis_waterfall_alert_key = 'analyzer.waterfall.alert.%s' % waterfall_alert_check_string
+                    try:
+                        self.redis_conn.setex(redis_waterfall_alert_key, 300, waterfall_alert_check_timestamp)
+                    except:
+                        logger.info(traceback.format_exc())
+                        logger.error('error :: failed to add Redis key - %s for waterfall alert' % (
+                            redis_waterfall_alert_key))
+
+                    # @added 20201001 - Feature #3734: waterfall alerts
+                    #                   Task #3748: POC SNAB
+                    #                   Branch #3068: SNAB
+                    # Added Panorama anomaly details for waterfall alerts
+                    # Note:
+                    # The values are enclosed is single quoted intentionally
+                    # as the imp.load_source used results in a shift in the
+                    # decimal position when double quoted, e.g.
+                    # value = "5622.0" gets imported as
+                    # 2016-03-02 12:53:26 :: 28569 :: metric variable - value - 562.2
+                    # single quoting results in the desired,
+                    # 2016-03-02 13:16:17 :: 1515 :: metric variable - value - 5622.0
+                    logger.info('adding panorama anomaly file for waterfall alert on %s' % base_name)
+                    panorama_data = None
+                    try:
+                        panorama_data = waterfall_alert[4]
+                        from_timestamp = str(int(panorama_data[2]))
+                        int_metric_timestamp = int(panorama_data[3])
+                        algorithms_run = panorama_data[4]
+                        triggered_algorithms = panorama_data[5]
+                        source = panorama_data[7]
+                        added_at = str(int(time()))
+                        panaroma_anomaly_data = 'metric = \'%s\'\n' \
+                                                'value = \'%s\'\n' \
+                                                'from_timestamp = \'%s\'\n' \
+                                                'metric_timestamp = \'%s\'\n' \
+                                                'algorithms = %s\n' \
+                                                'triggered_algorithms = %s\n' \
+                                                'app = \'%s\'\n' \
+                                                'source = \'%s\'\n' \
+                                                'added_by = \'%s\'\n' \
+                                                'added_at = \'%s\'\n' \
+                            % (base_name, str(value), from_timestamp,
+                               str(int_metric_timestamp), str(algorithms_run),
+                               triggered_algorithms, skyline_app, source,
+                               this_host, added_at)
+                        logger.info('panorama anomaly data for waterfall alert - %s' % str(panorama_data))
+                        # Create an anomaly file with details about the anomaly
+                        sane_metricname = filesafe_metricname(str(base_name))
+                        panaroma_anomaly_file = '%s/%s.%s.txt' % (
+                            settings.PANORAMA_CHECK_PATH, added_at, sane_metricname)
+                        try:
+                            write_data_to_file(
+                                skyline_app, panaroma_anomaly_file, 'w',
+                                panaroma_anomaly_data)
+                            logger.info('added panorama anomaly file for waterfall alert :: %s' % (panaroma_anomaly_file))
+                        except:
+                            logger.error('error :: failed to add panorama anomaly file :: %s' % (panaroma_anomaly_file))
+                            logger.error(traceback.format_exc())
+                        redis_set = 'mirage.sent_to_panorama'
+                        data = str(base_name)
+                        try:
+                            self.redis_conn.sadd(redis_set, data)
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: failed to add %s to Redis set %s' % (
+                                str(data), str(redis_set)))
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to add panorama anomaly data file for waterfall alert')
+
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to add waterfall alert to alert on to analyzer.all_anomalous_metrics')
 
             # @added 20200412 - Feature #3486: analyzer_batch
             #                   Feature #3480: batch_processing
@@ -3781,6 +4069,15 @@ class Analyzer(Thread):
                                     if LOCAL_DEBUG:
                                         logger.debug('debug :: not Mirage metric - %s' % metric[1])
 
+                            # @added 20200907 - Feature #3734: waterfall alerts
+                            waterfall_alert_check_string = '%s.%s' % (str(int(metric[2])), metric[1])
+                            if waterfall_alert_check_string in alerting_waterfall_alerts:
+                                mirage_metric = False
+                                analyzer_metric = True
+                                logger.info(
+                                    'waterfall alerting for mirage metric check - %s at %s' %
+                                    (metric[1], int(metric[2])))
+
                             if mirage_metric:
                                 # Write anomalous metric to test at second
                                 # order resolution by Mirage to the check
@@ -3822,6 +4119,11 @@ class Analyzer(Thread):
                                     logger.error('error :: failed to determine anomaly_check_file')
 
                                 # @added 20200904 - Task #3730: Validate Mirage running multiple processes
+                                # Deduplicate checks sent to Mirage. At times
+                                # analyzer will send the same metric and
+                                # timestamp to Mirage on consequtive runs as the
+                                # metric may not have updated
+                                send_check_to_mirage = True
                                 spin_process_sent_to_mirage = False
 
                                 if anomaly_check_file:
@@ -3842,7 +4144,24 @@ class Analyzer(Thread):
                                 # added immediately in the spin_process
                                 if spin_process_sent_to_mirage:
                                     logger.info('spin_process already added mirage check for %s' % (metric[1]))
-                                else:
+                                    send_check_to_mirage = False
+                                # Only add the metric check file if it the check
+                                # was not already submitted in a past run
+                                if send_check_to_mirage:
+                                    mirage_check_sent = False
+                                    mirage_check_sent_key = 'analyzer.mirage_check_sent.%s.%s' % (
+                                        str(int(metric[2])), str(metric[1]))
+                                    try:
+                                        mirage_check_sent = self.redis_conn_decoded.get(mirage_check_sent_key)
+                                    except Exception as e:
+                                        logger.error('error :: could not query Redis for cache_key: %s' % e)
+                                    if mirage_check_sent:
+                                        logger.info('a mirage check for %s at %s was already sent at %s, Redis key exists - %s' % (
+                                            metric[1], str(metric[2]),
+                                            str(mirage_check_sent), str(mirage_check_sent_key)))
+                                        send_check_to_mirage = False
+
+                                if send_check_to_mirage:
                                     try:
                                         redis_set = 'analyzer.sent_to_mirage'
                                         data = str(metric[1])
@@ -3898,6 +4217,31 @@ class Analyzer(Thread):
                                                 'debug :: Memory usage in run after chmod mirage check file: %s (kb)' %
                                                 resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
                                         logger.info('added mirage check :: %s,%s,%s' % (metric[1], metric[0], alert[3]))
+
+                                        # @added 20200904 - Feature #3734: waterfall alerts
+#                                        added_to_waterfall_timestamp = int(time())
+#                                        # [metric, timestamp, value, added_to_waterfall_timestamp]
+#                                        waterfall_data = [metric[1], metric[2], metric[0], added_to_waterfall_timestamp]
+#                                        redis_set = 'analyzer.waterfall_alerts.sent_to_mirage'
+#                                        try:
+#                                            self.redis_conn.sadd(redis_set, str(waterfall_data))
+#                                            logger.info('added to Redis set %s - %s' % (redis_set, str(waterfall_data)))
+#                                        except:
+#                                            logger.error(traceback.format_exc())
+#                                            logger.error('error :: failed to add %s to Redis set %s' % (
+#                                                str(waterfall_data), str(redis_set)))
+
+                                        # @added 20200904 - Task #3730: Validate Mirage running multiple processes
+                                        # Add a Redis key for the metric and timestamp
+                                        # so that it does not get added multiple
+                                        # times on consecutive runs if the metric
+                                        # does not change
+                                        mirage_check_sent_key = 'analyzer.mirage_check_sent.%s.%s' % (
+                                            str(int(metric[2])), str(metric[1]))
+                                        try:
+                                            self.redis_conn.setex(mirage_check_sent_key, 300, added_to_waterfall_timestamp)
+                                        except Exception as e:
+                                            logger.error('error :: could not query Redis for cache_key: %s' % e)
 
                                 # Alert for analyzer if enabled
                                 # This sends an Analyzer ALERT for every check that
@@ -3958,8 +4302,15 @@ class Analyzer(Thread):
                                         logger.info('alerting as in ionosphere_alerts - Ionosphere metric - %s' % str(metric[1]))
                                         context = 'Ionosphere'
                                     else:
-                                        logger.info('not alerting - Ionosphere metric - %s' % str(metric[1]))
-                                        continue
+                                        # @added 20200907 - Feature #3734: waterfall alerts
+                                        waterfall_alert_check_string = '%s.%s' % (str(int(metric[2])), metric[1])
+                                        if waterfall_alert_check_string not in alerting_waterfall_alerts:
+                                            logger.info('not alerting - Ionosphere metric - %s' % str(metric[1]))
+                                            continue
+                                        else:
+                                            logger.info(
+                                                'waterfall alerting for ionosphere metric check - %s at %s' %
+                                                (metric[1], int(metric[2])))
                                 else:
                                     logger.error('error :: Ionosphere not report up')
                                     logger.info('taking over alerting from Ionosphere if alert is matched on - %s' % str(metric[1]))
@@ -3967,12 +4318,15 @@ class Analyzer(Thread):
                                 if LOCAL_DEBUG:
                                     logger.debug('debug :: metric_name not in ionosphere_unique_metrics - %s' % str(metric_name))
 
-                            # @added 20161231 - Feature #1830: Ionosphere alerts
-                            #                   Analyzer also alerting on Mirage metrics now #22
-                            # Do not alert on Mirage metrics
-                            if metric_name in mirage_unique_metrics:
-                                logger.info('not alerting - skipping Mirage metric - %s' % str(metric[1]))
-                                continue
+                            # @added 20200907 - Feature #3734: waterfall alerts
+                            waterfall_alert_check_string = '%s.%s' % (str(int(metric[2])), metric[1])
+                            if waterfall_alert_check_string not in alerting_waterfall_alerts:
+                                # @added 20161231 - Feature #1830: Ionosphere alerts
+                                #                   Analyzer also alerting on Mirage metrics now #22
+                                # Do not alert on Mirage metrics
+                                if metric_name in mirage_unique_metrics:
+                                    logger.info('not alerting - skipping Mirage metric - %s' % str(metric[1]))
+                                    continue
 
                             if analyzer_metric:
                                 if LOCAL_DEBUG:
@@ -3989,6 +4343,14 @@ class Analyzer(Thread):
                                             logger.debug('debug :: metric_name analyzer_metric mirage_metric_key - %s' % str(mirage_metric_key))
                                     except Exception as e:
                                         logger.error('error :: could not query Redis for mirage_metric_cache_key: %s' % e)
+
+                                    # @added 20200907 - Feature #3734: waterfall alerts
+                                    waterfall_alert_check_string = '%s.%s' % (str(int(metric[2])), metric[1])
+                                    if waterfall_alert_check_string in alerting_waterfall_alerts:
+                                        mirage_metric_key = False
+                                        logger.info(
+                                            'waterfall alerting for mirage metric check overriding mirage_metric_key alerting for - %s at %s' %
+                                            (metric[1], int(metric[2])))
 
                                 if mirage_metric_key:
                                     if LOCAL_DEBUG:
@@ -4045,23 +4407,27 @@ class Analyzer(Thread):
                                         logger.info('so alert resources will not be created for this ionosphere_alerts Ionosphere metric - %s' % str(metric[1]))
                                     continue
 
-                                # @added 20180914 - Bug #2594: Analyzer Ionosphere alert on Analyzer data point
-                                # Due to ionosphere_alerts being added to the
-                                # self.all_anomalous_metrics after Analyzer metrics
-                                # here we need to ensure that we only alert on the
-                                # last item for the metric in the list so that the
-                                # alert is not sent out with any current
-                                # anomaly data from the current Analyzer run, but
-                                # with the data from the ionosphere_alerts item.
-                                if context == 'Ionosphere':
-                                    for check_metric in ionosphere_anomalous_metrics:
-                                        if metric[1] == check_metric[1]:
-                                            if metric[2] != check_metric[2]:
-                                                # If the timestamps do not match
-                                                # then it is the list item from
-                                                # the Analyzer anomaly, not the
-                                                # Ionosphere list item
-                                                continue
+                                # @added 20200907 - Feature #3734: waterfall alerts
+                                waterfall_alert_check_string = '%s.%s' % (str(int(metric[2])), metric[1])
+                                if waterfall_alert_check_string not in alerting_waterfall_alerts:
+
+                                    # @added 20180914 - Bug #2594: Analyzer Ionosphere alert on Analyzer data point
+                                    # Due to ionosphere_alerts being added to the
+                                    # self.all_anomalous_metrics after Analyzer metrics
+                                    # here we need to ensure that we only alert on the
+                                    # last item for the metric in the list so that the
+                                    # alert is not sent out with any current
+                                    # anomaly data from the current Analyzer run, but
+                                    # with the data from the ionosphere_alerts item.
+                                    if context == 'Ionosphere':
+                                        for check_metric in ionosphere_anomalous_metrics:
+                                            if metric[1] == check_metric[1]:
+                                                if metric[2] != check_metric[2]:
+                                                    # If the timestamps do not match
+                                                    # then it is the list item from
+                                                    # the Analyzer anomaly, not the
+                                                    # Ionosphere list item
+                                                    continue
 
                                 try:
                                     # @modified 20191021 - Bug #3266: py3 Redis binary objects not strings

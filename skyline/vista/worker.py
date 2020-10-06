@@ -175,6 +175,12 @@ class Worker(Process):
                 sleep(5)
 
             for str_metric_data in metrics_data:
+
+                # @added 20200903 - Feature #3728: metric - vista.fetcher.metrics.json set count
+                time_now = int(time())
+                if (time_now - last_sent_to_graphite) >= 60:
+                    break
+
                 delete_set_record = False
                 remote_host_type = None
                 try:
@@ -508,6 +514,31 @@ class Worker(Process):
                     send_graphite_metric(parent_skyline_app, send_metric_name, str(metrics_sent_to_flux))
                     last_sent_to_graphite = int(time())
                     metrics_sent_to_flux = 0
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: worker :: failed to send_graphite_metric %s with %s' % (
+                        send_metric_name, str(metrics_sent_to_flux)))
+
+                # @added 20200903 - Feature #3728: metric - vista.fetcher.metrics.json set count
+                # This metric should mostly always be 0, if it starts to
+                # increment, vista needs to be stopped, the Redis set deleted
+                # and vista needs to be restarted.  Unfortunately this edge case
+                # cannot be automatically fixed as when it present the
+                # delete_set_record was already implemented and logging but the
+                # records were not deleted.  This edge case has only been seen
+                # once on one instance.
+                redis_set = 'vista.fetcher.metrics.json'
+                metrics_data_list = []
+                try:
+                    metrics_data_list = list(self.redis_conn_decoded.smembers(redis_set))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: worker :: retrieving Redis set %s data' % str(redis_set))
+                logger.info('worker :: vista.fetcher.metrics.json Redis set count - %s' % str(len(metrics_data_list)))
+                send_metric_name = '%s.vista.fetcher.metrics.json' % skyline_app_graphite_namespace
+                try:
+                    send_graphite_metric(parent_skyline_app, send_metric_name, str(len(metrics_data_list)))
+                    last_sent_to_graphite = int(time())
                 except:
                     logger.error(traceback.format_exc())
                     logger.error('error :: worker :: failed to send_graphite_metric %s with %s' % (

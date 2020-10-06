@@ -217,3 +217,23 @@ def luminosity_table_meta(current_skyline_app, engine):
         fail_msg = 'error :: failed to reflect the luminosity table meta'
         current_logger.error('%s' % fail_msg)
         return False, fail_msg, trace
+
+
+# @added 20200928 - Task #3748: POC SNAB
+#                   Branch #3068: SNAB
+def snab_table_meta(current_skyline_app, engine):
+
+    current_skyline_app_logger = current_skyline_app + 'Log'
+    current_logger = logging.getLogger(current_skyline_app_logger)
+
+    # Create the snab table MetaData
+    try:
+        snab_meta = MetaData()
+        snab_table = Table('snab', snab_meta, autoload=True, autoload_with=engine)
+        return snab_table, 'snab_table meta reflected OK', 'none'
+    except:
+        trace = traceback.format_exc()
+        current_logger.error('%s' % trace)
+        fail_msg = 'error :: failed to reflect the snab table meta'
+        current_logger.error('%s' % fail_msg)
+        return False, fail_msg, trace

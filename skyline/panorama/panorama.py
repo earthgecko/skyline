@@ -47,7 +47,11 @@ from skyline_functions import (
 from ionosphere_functions import get_ionosphere_learn_details
 
 # @added 20190502 - Branch #2646: slack
-from database import get_engine, metrics_table_meta, anomalies_table_meta
+from database import (
+    get_engine, metrics_table_meta, anomalies_table_meta,
+    # @added 20200928 - Task #3748: POC SNAB
+    #                   Branch #3068: SNAB
+    snab_table_meta)
 
 skyline_app = 'panorama'
 skyline_app_logger = '%sLog' % skyline_app
@@ -124,6 +128,16 @@ try:
     BATCH_PROCESSING_NAMESPACES = list(settings.BATCH_PROCESSING_NAMESPACES)
 except:
     BATCH_PROCESSING_NAMESPACES = []
+
+# @added 20200929 - Task #3748: POC SNAB
+#                   Branch #3068: SNAB
+# If SNAB is enabled override PANORAMA_CHECK_INTERVAL
+try:
+    SNAB_ENABLED = settings.SNAB_ENABLED
+except:
+    SNAB_ENABLED = False
+if SNAB_ENABLED:
+    PANORAMA_CHECK_INTERVAL = 1
 
 # Database configuration
 config = {'user': settings.PANORAMA_DBUSER,
@@ -486,7 +500,11 @@ class Panorama(Thread):
 
         return metric_vars_array
 
-    def update_slack_thread_ts(self, i, base_name, metric_timestamp, slack_thread_ts):
+    # @modified 20200929 - Task #3748: POC SNAB
+    #                      Branch #3068: SNAB
+    # Handle snab as well
+    # def update_slack_thread_ts(self, i, base_name, metric_timestamp, slack_thread_ts):
+    def update_slack_thread_ts(self, i, base_name, metric_timestamp, slack_thread_ts, snab_id):
         """
         Update an anomaly record with the slack_thread_ts.
 
@@ -517,79 +535,138 @@ class Panorama(Thread):
             return
 
         child_process_pid = os.getpid()
-        logger.info('update_slack_thread_ts :: child_process_pid %s, processing %s, %s, %s' % (
-            str(child_process_pid), base_name, str(metric_timestamp),
-            str(slack_thread_ts)))
+
+        if base_name:
+            logger.info('update_slack_thread_ts :: child_process_pid %s, processing %s, %s, %s' % (
+                str(child_process_pid), base_name, str(metric_timestamp),
+                str(slack_thread_ts)))
+        if snab_id:
+            logger.info('update_slack_thread_ts :: child_process_pid %s, processing snab id - %s, slack_thread_ts - %s' % (
+                str(child_process_pid), str(snab_id),
+                str(slack_thread_ts)))
+
         try:
             engine, log_msg, trace = get_an_engine()
         except:
             logger.error(traceback.format_exc())
-            logger.error('error :: update_slack_thread_ts :: could not get a MySQL engine to update slack_thread_ts in anomalies for %s' % (base_name))
+            if base_name:
+                logger.error('error :: update_slack_thread_ts :: could not get a MySQL engine to update slack_thread_ts in anomalies for %s' % (base_name))
+            if snab_id:
+                logger.error('error :: update_slack_thread_ts :: could not get a MySQL engine to update slack_thread_ts in snab for %s' % str(snab_id))
         if not engine:
-            logger.error('error :: update_slack_thread_ts :: engine not obtained to update slack_thread_ts in anomalies for %s' % (base_name))
+            if base_name:
+                logger.error('error :: update_slack_thread_ts :: engine not obtained to update slack_thread_ts in anomalies for %s' % (base_name))
+            if snab_id:
+                logger.error('error :: update_slack_thread_ts :: engine not obtained to update slack_thread_ts in snab for %s' % str(snab_id))
             return False
-        try:
-            metrics_table, log_msg, trace = metrics_table_meta(skyline_app, engine)
-            logger.info(log_msg)
-            logger.info('update_slack_thread_ts :: metrics_table OK')
-        except:
-            logger.error(traceback.format_exc())
-            logger.error('error :: update_slack_thread_ts :: failed to get metrics_table meta for %s' % base_name)
-        metric_id = None
-        try:
-            connection = engine.connect()
-            stmt = select([metrics_table]).where(metrics_table.c.metric == base_name)
-            result = connection.execute(stmt)
-            for row in result:
-                metric_id = int(row['id'])
-            connection.close()
-        except:
-            logger.error(traceback.format_exc())
-            logger.error('error :: update_slack_thread_ts :: could not determine metric id from metrics table')
-        logger.info('update_slack_thread_ts :: metric id determined as %s' % str(metric_id))
-        if metric_id:
+
+        if base_name:
             try:
-                anomalies_table, log_msg, trace = anomalies_table_meta(skyline_app, engine)
+                metrics_table, log_msg, trace = metrics_table_meta(skyline_app, engine)
                 logger.info(log_msg)
-                logger.info('update_slack_thread_ts :: anomalies_table OK')
+                logger.info('update_slack_thread_ts :: metrics_table OK')
             except:
                 logger.error(traceback.format_exc())
-                logger.error('error :: update_slack_thread_ts :: failed to get anomalies_table meta for %s' % base_name)
-        anomaly_id = None
-        try:
-            connection = engine.connect()
-            stmt = select([anomalies_table]).\
-                where(anomalies_table.c.metric_id == metric_id).\
-                where(anomalies_table.c.anomaly_timestamp == metric_timestamp)
-            result = connection.execute(stmt)
-            for row in result:
-                anomaly_id = int(row['id'])
-            connection.close()
-        except:
-            logger.error(traceback.format_exc())
-            logger.error('error :: update_slack_thread_ts :: could not determine anomaly id from anomaly table')
-        logger.info('update_slack_thread_ts :: anomaly id determined as %s' % str(anomaly_id))
-        anomaly_record_updated = False
-        if anomaly_id:
+                logger.error('error :: update_slack_thread_ts :: failed to get metrics_table meta for %s' % base_name)
+            metric_id = None
             try:
                 connection = engine.connect()
-                connection.execute(
-                    anomalies_table.update(
-                        anomalies_table.c.id == anomaly_id).
-                    values(slack_thread_ts=slack_thread_ts))
+                stmt = select([metrics_table]).where(metrics_table.c.metric == base_name)
+                result = connection.execute(stmt)
+                for row in result:
+                    metric_id = int(row['id'])
                 connection.close()
-                logger.info('update_slack_thread_ts :: updated slack_thread_ts for anomaly id %s' % str(anomaly_id))
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: update_slack_thread_ts :: could not determine metric id from metrics table')
+            logger.info('update_slack_thread_ts :: metric id determined as %s' % str(metric_id))
+            if metric_id:
+                try:
+                    anomalies_table, log_msg, trace = anomalies_table_meta(skyline_app, engine)
+                    logger.info(log_msg)
+                    logger.info('update_slack_thread_ts :: anomalies_table OK')
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: update_slack_thread_ts :: failed to get anomalies_table meta for %s' % base_name)
+            anomaly_id = None
+            try:
+                connection = engine.connect()
+                stmt = select([anomalies_table]).\
+                    where(anomalies_table.c.metric_id == metric_id).\
+                    where(anomalies_table.c.anomaly_timestamp == metric_timestamp)
+                result = connection.execute(stmt)
+                for row in result:
+                    anomaly_id = int(row['id'])
+                connection.close()
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: update_slack_thread_ts :: could not determine anomaly id from anomaly table')
+            logger.info('update_slack_thread_ts :: anomaly id determined as %s' % str(anomaly_id))
+            anomaly_record_updated = False
+            if anomaly_id:
+                try:
+                    connection = engine.connect()
+                    connection.execute(
+                        anomalies_table.update(
+                            anomalies_table.c.id == anomaly_id).
+                        values(slack_thread_ts=slack_thread_ts))
+                    connection.close()
+                    logger.info('update_slack_thread_ts :: updated slack_thread_ts for anomaly id %s' % str(anomaly_id))
+                    anomaly_record_updated = True
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: update_slack_thread_ts :: could not update slack_thread_ts for anomaly id %s' % str(anomaly_id))
+                # @added 20201002 - Task #3748: POC SNAB
+                #                   Branch #3068: SNAB
+                # Add a Redis key for snab to also update the original anomaly
+                # id slack_thread_ts
+                if anomaly_record_updated and SNAB_ENABLED:
+                    anomaly_id_slack_thread_ts_redis_key = 'panorama.anomaly.id.%s.slack_thread_ts' % (str(anomaly_id))
+                    try:
+                        self.redis_conn.setex(anomaly_id_slack_thread_ts_redis_key, 3600, str(slack_thread_ts))
+                        logger.info('update_slack_thread_ts :: created Redis key %s for snab with slack_thread_ts %s' % (
+                            anomaly_id_slack_thread_ts_redis_key, str(slack_thread_ts)))
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: update_slack_thread_ts :: failed to create Redis key - %s' % (
+                            anomaly_id_slack_thread_ts_redis_key))
+
+        # @added 20200929 - Task #3748: POC SNAB
+        #                   Branch #3068: SNAB
+        # Handle snab as well
+        if snab_id:
+            try:
+                snab_table, log_msg, trace = snab_table_meta(skyline_app, engine)
+                logger.info(log_msg)
+                logger.info('update_slack_thread_ts :: snab_table OK')
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: update_slack_thread_ts :: failed to get snab_table meta for %s' % str(snab_id))
+            try:
+                connection = engine.connect()
+                stmt = snab_table.update().\
+                    values(slack_thread_ts=slack_thread_ts).\
+                    where(snab_table.c.id == int(snab_id))
+                connection.execute(stmt)
+                connection.close()
+                logger.info('update_slack_thread_ts :: updated slack_thread_ts for snab id %s' % str(snab_id))
                 anomaly_record_updated = True
             except:
                 logger.error(traceback.format_exc())
-                logger.error('error :: update_slack_thread_ts :: could not update slack_thread_ts for anomaly id %s' % str(anomaly_id))
+                logger.error('error :: update_slack_thread_ts :: could not update slack_thread_ts for snab id %s' % str(snab_id))
+
         if engine:
             try:
                 engine_disposal(engine)
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: update_slack_thread_ts :: could not dispose engine')
-        cache_key = 'panorama.slack_thread_ts.%s.%s' % (str(metric_timestamp), base_name)
+
+        if base_name:
+            cache_key = 'panorama.slack_thread_ts.%s.%s' % (str(metric_timestamp), base_name)
+        if snab_id:
+            cache_key = 'panorama.snab.slack_thread_ts.%s.%s' % (str(metric_timestamp), str(snab_id))
+
         delete_cache_key = False
         if anomaly_record_updated:
             delete_cache_key = True
@@ -813,6 +890,315 @@ class Panorama(Thread):
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: update_alert_ts :: failed to delete cache_key %s' % cache_key)
+        return
+
+    # @added 20200928 - Task #3748: POC SNAB
+    #                   Branch #3068: SNAB
+    # Determine id of something thing
+    def determine_db_id(self, table, key, value):
+        """
+        Get the id of something from the database and create a new entry if it
+        does not exist
+
+        :param table: table name
+        :param key: key name
+        :param value: value name
+        :type table: str
+        :type key: str
+        :type value: str
+        :return: int or boolean
+
+        """
+
+        determined_id = None
+        query = 'select id FROM %s WHERE %s=\'%s\'' % (table, key, value)  # nosec
+        results = None
+        try:
+            results = self.mysql_select(query)
+        except:
+            logger.error('error :: failed to determine results from - %s' % (query))
+
+        determined_id = 0
+        if results:
+            try:
+                determined_id = int(results[0][0])
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: determined_id is not an int')
+                determined_id = 0
+
+        if determined_id > 0:
+            return int(determined_id)
+
+        # @added 20170115 - Feature #1854: Ionosphere learn - generations
+        # Added determination of the learn related variables
+        # learn_full_duration_days, learn_valid_ts_older_than,
+        # max_generations and max_percent_diff_from_origin value to the
+        # insert statement if the table is the metrics table.
+        if table == 'metrics' and key == 'metric':
+            # Set defaults
+            learn_full_duration_days = int(settings.IONOSPHERE_LEARN_DEFAULT_FULL_DURATION_DAYS)
+            valid_learning_duration = int(settings.IONOSPHERE_LEARN_DEFAULT_VALID_TIMESERIES_OLDER_THAN_SECONDS)
+            max_generations = int(settings.IONOSPHERE_LEARN_DEFAULT_MAX_GENERATIONS)
+            max_percent_diff_from_origin = float(settings.IONOSPHERE_LEARN_DEFAULT_MAX_PERCENT_DIFF_FROM_ORIGIN)
+            try:
+                use_full_duration, valid_learning_duration, use_full_duration_days, max_generations, max_percent_diff_from_origin = get_ionosphere_learn_details(skyline_app, value)
+                learn_full_duration_days = use_full_duration_days
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to get_ionosphere_learn_details for %s' % value)
+
+            logger.info('metric learn details determined for %s' % value)
+            logger.info('learn_full_duration_days     :: %s days' % (str(learn_full_duration_days)))
+            logger.info('valid_learning_duration      :: %s seconds' % (str(valid_learning_duration)))
+            logger.info('max_generations              :: %s' % (str(max_generations)))
+            logger.info('max_percent_diff_from_origin :: %s' % (str(max_percent_diff_from_origin)))
+
+        # INSERT because no known id
+        if table == 'metrics' and key == 'metric':
+            insert_query_string = '%s (%s, learn_full_duration_days, learn_valid_ts_older_than, max_generations, max_percent_diff_from_origin) VALUES (\'%s\', %s, %s, %s, %s)' % (
+                table, key, value, str(learn_full_duration_days),
+                str(valid_learning_duration), str(max_generations),
+                str(max_percent_diff_from_origin))
+            insert_query = 'insert into %s' % insert_query_string  # nosec
+        else:
+            insert_query = 'insert into %s (%s) VALUES (\'%s\')' % (table, key, value)  # nosec
+
+        logger.info('inserting %s into %s table' % (value, table))
+        try:
+            results = self.mysql_insert(insert_query)
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: failed to determine the id of %s from the insert' % (value))
+            raise
+
+        determined_id = 0
+        if results:
+            determined_id = int(results)
+        else:
+            logger.error('error :: results not set')
+            raise
+
+        if determined_id > 0:
+            return determined_id
+
+        logger.error('error :: failed to determine the inserted id for %s' % value)
+        return False
+
+    # @added 20200928 - Task #3748: POC SNAB
+    #                   Branch #3068: SNAB
+    def update_snab(self, i, snab_panorama_items):
+        """
+        Update snab anomaly records.
+
+        :param i: python process id
+        :return: returns True
+
+        """
+
+        def get_an_engine():
+            try:
+                engine, log_msg, trace = get_engine(skyline_app)
+                return engine, log_msg, trace
+            except:
+                logger.error(traceback.format_exc())
+                log_msg = 'error :: update_alert_ts :: failed to get MySQL engine in update_alert_ts'
+                logger.error('error :: update_alert_ts :: failed to get MySQL engine in update_alert_ts')
+                return None, log_msg, trace
+
+        def engine_disposal(engine):
+            if engine:
+                try:
+                    engine.dispose()
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: update_alert_ts :: calling engine.dispose()')
+            return
+
+        child_process_pid = os.getpid()
+        logger.info('update_snab :: child_process_pid %s' % str(child_process_pid))
+
+        redis_set = 'snab.panorama'
+        try:
+            snab_panorama_items = self.redis_conn_decoded.smembers(redis_set)
+        except:
+            logger.info(traceback.format_exc())
+            logger.error('error :: failed to get data from %s Redis set' % redis_set)
+            snab_panorama_items = []
+        if not snab_panorama_items:
+            return False
+
+        try:
+            engine, log_msg, trace = get_an_engine()
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: update_snab :: could not get a MySQL engine to update snab table')
+        if not engine:
+            logger.error('error :: update_snab :: engine not obtained to update snab table')
+            return False
+        try:
+            metrics_table, log_msg, trace = metrics_table_meta(skyline_app, engine)
+            logger.info(log_msg)
+            logger.info('update_snab :: metrics_table OK')
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: update_snab :: failed to get metrics_table meta')
+            if engine:
+                engine_disposal(engine)
+            return False
+        try:
+            anomalies_table, log_msg, trace = anomalies_table_meta(skyline_app, engine)
+            logger.info(log_msg)
+            logger.info('update_snab :: anomalies_table OK')
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: update_snab :: failed to get anomalies_table meta')
+            if engine:
+                engine_disposal(engine)
+            return False
+        try:
+            snab_table, log_msg, trace = snab_table_meta(skyline_app, engine)
+            logger.info(log_msg)
+            logger.info('update_snab :: snab_table OK')
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: update_snab :: failed to get snab_table meta')
+            if engine:
+                engine_disposal(engine)
+            return False
+
+        for item in snab_panorama_items:
+            remove_item = False
+            base_name = None
+            try:
+                snab_item = literal_eval(item)
+                base_name = snab_item['metric']
+                metric_timestamp = snab_item['timestamp']
+                try:
+                    analysis_run_time = snab_item['analysis_run_time']
+                except:
+                    analysis_run_time = 0.0
+                source_app = snab_item['source']
+                algorithm_group = snab_item['algorithm_group']
+                algorithm = snab_item['algorithm']
+                added_at = snab_item['added_at']
+                # @added 20201001 - Task #3748: POC SNAB
+                # Added anomalyScore
+                anomalyScore = snab_item['anomalyScore']
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to evaluate data from item %s from Redis set %s' % (
+                    str(item), redis_set))
+            metric_id = None
+            if base_name:
+                try:
+                    connection = engine.connect()
+                    stmt = select([metrics_table]).where(metrics_table.c.metric == base_name)
+                    result = connection.execute(stmt)
+                    for row in result:
+                        metric_id = int(row['id'])
+                    connection.close()
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: update_snab :: could not determine metric id from metrics table')
+                logger.info('update_snab :: metric id determined as %s' % str(metric_id))
+            anomaly_id = None
+            if metric_id:
+                try:
+                    connection = engine.connect()
+                    stmt = select([anomalies_table]).\
+                        where(anomalies_table.c.metric_id == metric_id).\
+                        where(anomalies_table.c.anomaly_timestamp == metric_timestamp)
+                    result = connection.execute(stmt)
+                    for row in result:
+                        anomaly_id = int(row['id'])
+                    connection.close()
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: update_snab :: could not determine anomaly id from anomaly table')
+            logger.info('update_snab :: anomaly id determined as %s' % str(anomaly_id))
+            if anomaly_id:
+                app_id = None
+                try:
+                    app_id = self.determine_db_id('apps', 'app', source_app)
+                except:
+                    logger.error('error :: update_snab :: failed to determine app_id for - %s' % (source_app))
+                    app_id = None
+                algorithm_group_id = None
+                try:
+                    algorithm_group_id = self.determine_db_id('algorithm_groups', 'algorithm_group', algorithm_group)
+                except:
+                    logger.error('error :: update_snab :: failed to determine algorithm_group_id for - %s' % (algorithm_group))
+                    algorithm_group = 0
+                algorithm_id = None
+                if algorithm:
+                    try:
+                        algorithm_id = self.determine_db_id('algorithms', 'algorithm', algorithm)
+                    except:
+                        logger.error('error :: update_snab :: failed to determine algorithm_group_id for - %s' % (algorithm_group))
+                        algorithm_id = None
+                new_snab_id = None
+                try:
+                    connection = engine.connect()
+                    if algorithm_id:
+                        ins = snab_table.insert().values(
+                            anomaly_id=anomaly_id,
+                            # @added 20201001 - Task #3748: POC SNAB
+                            # Added anomalyScore
+                            anomalyScore=anomalyScore,
+                            app_id=int(app_id),
+                            algorithm_group_id=int(algorithm_group_id),
+                            algorithm_id=int(algorithm_id),
+                            runtime=float(analysis_run_time),
+                            snab_timestamp=int(added_at))
+                    else:
+                        ins = snab_table.insert().values(
+                            anomaly_id=anomaly_id,
+                            # @added 20201001 - Task #3748: POC SNAB
+                            # Added anomalyScore
+                            anomalyScore=anomalyScore,
+                            app_id=int(app_id),
+                            algorithm_group_id=int(algorithm_group_id),
+                            runtime=float(analysis_run_time),
+                            snab_timestamp=int(added_at))
+                    result = connection.execute(ins)
+                    connection.close()
+                    new_snab_id = result.inserted_primary_key[0]
+                    logger.info('update_snab :: new snab id: %s' % str(new_snab_id))
+                    remove_item = True
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error(
+                        'error :: update_snab :: could not update snab for %s with with timestamp %s' % (
+                            str(base_name), str(metric_timestamp)))
+                if new_snab_id:
+                    snab_id_redis_key = 'snab.id.%s.%s.%s.%s' % (algorithm_group, str(metric_timestamp), base_name, str(added_at))
+                    try:
+                        self.redis_conn.setex(snab_id_redis_key, 3600, int(new_snab_id))
+                        logger.info('update_snab :: created Redis key %s for snab id %s' % (
+                            snab_id_redis_key, str(new_snab_id)))
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: update_snab :: failed to create Redis key - %s' % (
+                            snab_id_redis_key))
+
+            if not anomaly_id:
+                if (int(time()) - 600) > added_at:
+                    logger.error(
+                        'error :: update_snab :: removing snab.panorama item as no anomaly id can be determined after 600 seconds - %s' % (
+                            str(snab_item)))
+                    remove_item = True
+            if remove_item:
+                try:
+                    self.redis_conn.srem(redis_set, str(item))
+                    logger.info('update_snab :: removed item from Redis set %s - %s' % (
+                        redis_set, str(item)))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: update_snab :: failed to remove item from Redis set %s - %s' % (
+                        redis_set, str(item)))
+        if engine:
+            engine_disposal(engine)
         return
 
     def spin_process(self, i, metric_check_file):
@@ -1518,6 +1904,7 @@ class Panorama(Thread):
         if settings.ENABLE_PANORAMA_DEBUG:
             logger.info('debug :: anomaly insert - %s' % str(query))
 
+        anomaly_id = None
         try:
             anomaly_id = self.mysql_insert(query)
             logger.info('anomaly id - %d - created for %s at %s' % (
@@ -1527,6 +1914,19 @@ class Panorama(Thread):
                 metric, metric_timestamp))
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return False
+
+        # @added 20200929 - Task #3748: POC SNAB
+        #                   Branch #3068: SNAB
+        # If snab is enabled add a Redis key with the anomaly_id
+        if anomaly_id:
+            anomaly_id_redis_key = 'panorama.anomaly_id.%s.%s' % (str(int(metric_timestamp)), metric)
+            try:
+                self.redis_conn.setex(anomaly_id_redis_key, 86400, int(anomaly_id))
+                logger.info('set Redis anomaly_key - %s' % (anomaly_id_redis_key))
+            except Exception as e:
+                logger.error(
+                    'error :: could not set anomaly_id_redis_key - %s - %s' % (
+                        anomaly_id_redis_key, e))
 
         # Set anomaly record cache key
         # @modified 20200420 - Feature #3500: webapp - crucible_process_metrics
@@ -1919,6 +2319,59 @@ class Panorama(Thread):
                                 logger.error(traceback.format_exc())
                                 logger.error('error :: failed to remove %s for Redis set %s' % (str(list_data), redis_set))
 
+                # @added 20200928 - Task #3748: POC SNAB
+                #                   Branch #3068: SNAB
+                redis_set = 'snab.panorama'
+                snab_panorama_items = []
+                if SNAB_ENABLED:
+                    try:
+                        snab_panorama_items = self.redis_conn_decoded.smembers(redis_set)
+                    except:
+                        logger.info(traceback.format_exc())
+                        logger.error('error :: failed to get data from %s Redis set' % redis_set)
+                        snab_panorama_items = []
+                if snab_panorama_items:
+                    # Update SQL
+                    # Spawn update_snab process
+                    pids = []
+                    spawned_pids = []
+                    pid_count = 0
+                    now = time()
+                    for i in range(1, 2):
+                        try:
+                            p = Process(target=self.update_snab, args=(i, snab_panorama_items))
+                            pids.append(p)
+                            pid_count += 1
+                            logger.info('starting update_snab')
+                            p.start()
+                            spawned_pids.append(p.pid)
+                        except:
+                            logger.info(traceback.format_exc())
+                            logger.error('error :: to start update_snab')
+                            continue
+                    p_starts = time()
+                    del snab_panorama_items
+                    # If the Skyline MySQL database is on a remote host
+                    # 2 seconds here is sometimes not sufficient so
+                    # increased to 10
+                    while time() - p_starts <= 10:
+                        if any(p.is_alive() for p in pids):
+                            # Just to avoid hogging the CPU
+                            sleep(.1)
+                        else:
+                            # All the processes are done, break now.
+                            time_to_run = time() - p_starts
+                            logger.info(
+                                '%s :: update_snab completed in %.2f seconds' % (
+                                    skyline_app, time_to_run))
+                            remove_item = True
+                            break
+                    else:
+                        # We only enter this if we didn't 'break' above.
+                        logger.info('%s :: timed out, killing all update_snab processes' % (skyline_app))
+                        for p in pids:
+                            p.terminate()
+
                 # @added 20190501 - Branch #2646: slack
                 # Check if any Redis keys exist with a slack_thread_ts to update
                 # any anomaly records
@@ -1937,48 +2390,104 @@ class Panorama(Thread):
                         logger.error('error :: failed to scan panorama.slack_thread_ts.* from Redis')
                         slack_thread_ts_updates = []
 
+                    # @added 20200929 - Task #3748: POC SNAB
+                    #                   Branch #3068: SNAB
+                    # Handle snab slack threads as well
+                    snab_slack_thread_ts_updates = []
+                    if SNAB_ENABLED:
+                        try:
+                            snab_slack_thread_ts_updates = list(self.redis_conn_decoded.scan_iter(match='panorama.snab.slack_thread_ts.*'))
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: failed to scan panorama.snab.slack_thread_ts.* from Redis')
+                            snab_slack_thread_ts_updates = []
+                        if snab_slack_thread_ts_updates:
+                            for snab_slack_thread_ts_update in snab_slack_thread_ts_updates:
+                                slack_thread_ts_updates.append(snab_slack_thread_ts_update)
+
                     if not slack_thread_ts_updates:
                         logger.info('no panorama.slack_thread_ts Redis keys to process, OK')
 
                 if slack_thread_ts_updates:
                     for cache_key in slack_thread_ts_updates:
+
+                        # @added 20200929 - Task #3748: POC SNAB
+                        #                   Branch #3068: SNAB
+                        update_table = 'anomalies'
+                        snab_id = None
+                        if 'panorama.snab.slack_thread_ts' in cache_key:
+                            update_table = 'snab'
+
                         base_name = None
                         metric_timestamp = None
-                        try:
-                            # @modified 20191106 - Bug #3266: py3 Redis binary objects not strings
-                            #                      Branch #3262: py3
-                            # update_on = self.redis_conn.get(cache_key)
-                            update_on = self.redis_conn_decoded.get(cache_key)
-                            # cache_key_value = [base_name, metric_timestamp, slack_thread_ts]
-                            update_for = literal_eval(update_on)
-                            base_name = str(update_for[0])
-                            metric_timestamp = int(float(update_for[1]))
-                            slack_thread_ts = float(update_for[2])
-                        except:
-                            logger.error(traceback.format_exc())
-                            logger.error('error :: failed to get details from cache_key %s' % cache_key)
-                        update_db_record = False
-                        if base_name and metric_timestamp:
-                            update_db_record = True
-                        else:
-                            logger.info('Could not determine base_name and metric_timestamp from cache_key %s, deleting' % cache_key)
+
+                        if update_table == 'anomalies':
                             try:
-                                self.redis_conn.delete(cache_key)
+                                # @modified 20191106 - Bug #3266: py3 Redis binary objects not strings
+                                #                      Branch #3262: py3
+                                # update_on = self.redis_conn.get(cache_key)
+                                update_on = self.redis_conn_decoded.get(cache_key)
+                                # cache_key_value = [base_name, metric_timestamp, slack_thread_ts]
+                                update_for = literal_eval(update_on)
+                                base_name = str(update_for[0])
+                                metric_timestamp = int(float(update_for[1]))
+                                slack_thread_ts = float(update_for[2])
                             except:
                                 logger.error(traceback.format_exc())
-                                logger.error('error :: failed to delete cache_key %s' % cache_key)
+                                logger.error('error :: failed to get details from cache_key %s' % cache_key)
+                            update_db_record = False
+                            if base_name and metric_timestamp:
+                                update_db_record = True
+                            else:
+                                logger.info('Could not determine base_name and metric_timestamp from cache_key %s, deleting' % cache_key)
+                                try:
+                                    self.redis_conn.delete(cache_key)
+                                except:
+                                    logger.error(traceback.format_exc())
+                                    logger.error('error :: failed to delete cache_key %s' % cache_key)
+
+                        # @added 20200929 - Task #3748: POC SNAB
+                        #                   Branch #3068: SNAB
+                        if update_table == 'snab':
+                            cache_key_elements = cache_key.split('.')
+                            if cache_key_elements[4] == 'None':
+                                try:
+                                    self.redis_conn.delete(cache_key)
+                                except:
+                                    logger.error(traceback.format_exc())
+                                    logger.error('error :: failed to delete cache_key %s' % cache_key)
+                            else:
+                                try:
+                                    slack_thread_ts = self.redis_conn_decoded.get(cache_key)
+                                except:
+                                    logger.error(traceback.format_exc())
+                                    logger.error('error :: failed to read cache_key %s' % cache_key)
+                                try:
+                                    metric_timestamp = int(cache_key_elements[3])
+                                    snab_id = int(cache_key_elements[4])
+                                except:
+                                    logger.error(traceback.format_exc())
+                                    logger.error('error :: failed to determine metric_timestamp from cache_key element - %s' % str(cache_key))
+                                if slack_thread_ts and metric_timestamp:
+                                    update_db_record = True
+
                         if update_db_record:
                             # Spawn update_slack_thread_ts process
+                            process_data = [base_name, metric_timestamp, slack_thread_ts, snab_id]
                             pids = []
                             spawned_pids = []
                             pid_count = 0
                             now = time()
                             for i in range(1, 2):
                                 try:
-                                    p = Process(target=self.update_slack_thread_ts, args=(i, base_name, metric_timestamp, slack_thread_ts))
+                                    # @modified 20200929 - Task #3748: POC SNAB
+                                    #                      Branch #3068: SNAB
+                                    # Handle snab as well
+                                    # p = Process(target=self.update_slack_thread_ts, args=(i, base_name, metric_timestamp, slack_thread_ts))
+                                    p = Process(target=self.update_slack_thread_ts, args=(i, base_name, metric_timestamp, slack_thread_ts, snab_id))
                                     pids.append(p)
                                     pid_count += 1
-                                    logger.info('starting update_slack_thread_ts')
+                                    logger.info('starting update_slack_thread_ts - %s' % process_data)
                                     p.start()
                                     spawned_pids.append(p.pid)
                                 except:
@@ -2079,9 +2588,6 @@ class Panorama(Thread):
                                 for p in pids:
                                     p.terminate()
 
-
-
-##############
             metric_var_files_sorted = sorted(metric_var_files)
             metric_check_file = '%s/%s' % (settings.PANORAMA_CHECK_PATH, str(metric_var_files_sorted[0]))
 
