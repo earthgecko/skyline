@@ -44,3 +44,5 @@ CREATE TABLE IF NOT EXISTS `algorithm_groups` (
   INDEX `algorithm_group_id` (`id`,`algorithm_group`)) ENGINE=InnoDB;
 INSERT INTO `algorithm_groups` (algorithm_group) VALUES ('three-sigma');
 INSERT INTO `algorithm_groups` (algorithm_group) VALUES ('matrixprofile');
+
+INSERT INTO `sql_versions` (version) VALUES ('2.1.0');
