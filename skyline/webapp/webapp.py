@@ -675,7 +675,7 @@ def api():
         logger.info('/api?snab request with anomaly_id - %s' % (
             str(anomaly_id)))
         result = None
-        snab_results = ['tP', 'fP', 'tN', 'fN', 'unsure']
+        snab_results = ['tP', 'fP', 'tN', 'fN', 'unsure', 'NULL']
         if 'result' in request.args:
             snab_result = request.args.get('result', None)
             if snab_result not in snab_results:
