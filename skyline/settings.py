@@ -2848,6 +2848,14 @@ FLUX_CARBON_PICKLE_PORT = 2004
 :vartype FLUX_CARBON_PICKLE_PORT: int
 """
 
+FLUX_GRAPHITE_WHISPER_PATH = '/opt/graphite/storage/whisper'
+"""
+:var FLUX_GRAPHITE_WHISPER_PATH: This is the absolute path on your GRAPHITE server, it is
+    required by flux to determine that a metric name and the path does not
+    exceed the maximum maximum path of length of 4096 characters.
+:vartype FLUX_GRAPHITE_WHISPER_PATH: str
+"""
+
 FLUX_PROCESS_UPLOADS = False
 """
 :var FLUX_PROCESS_UPLOADS: Whether flux is enabled to process uploaded data
