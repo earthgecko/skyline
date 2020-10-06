@@ -4225,17 +4225,17 @@ class Analyzer(Thread):
                                         logger.info('added mirage check :: %s,%s,%s' % (metric[1], metric[0], alert[3]))
 
                                         # @added 20200904 - Feature #3734: waterfall alerts
-#                                        added_to_waterfall_timestamp = int(time())
-#                                        # [metric, timestamp, value, added_to_waterfall_timestamp]
-#                                        waterfall_data = [metric[1], metric[2], metric[0], added_to_waterfall_timestamp]
-#                                        redis_set = 'analyzer.waterfall_alerts.sent_to_mirage'
-#                                        try:
-#                                            self.redis_conn.sadd(redis_set, str(waterfall_data))
-#                                            logger.info('added to Redis set %s - %s' % (redis_set, str(waterfall_data)))
-#                                        except:
-#                                            logger.error(traceback.format_exc())
-#                                            logger.error('error :: failed to add %s to Redis set %s' % (
-#                                                str(waterfall_data), str(redis_set)))
+                                        # added_to_waterfall_timestamp = int(time())
+                                        # # [metric, timestamp, value, added_to_waterfall_timestamp]
+                                        # waterfall_data = [metric[1], metric[2], metric[0], added_to_waterfall_timestamp]
+                                        # redis_set = 'analyzer.waterfall_alerts.sent_to_mirage'
+                                        # try:
+                                        #     self.redis_conn.sadd(redis_set, str(waterfall_data))
+                                        #     logger.info('added to Redis set %s - %s' % (redis_set, str(waterfall_data)))
+                                        # except:
+                                        #     logger.error(traceback.format_exc())
+                                        #     logger.error('error :: failed to add %s to Redis set %s' % (
+                                        #         str(waterfall_data), str(redis_set)))
 
                                         # @added 20200904 - Task #3730: Validate Mirage running multiple processes
                                         # Add a Redis key for the metric and timestamp
@@ -4245,7 +4245,10 @@ class Analyzer(Thread):
                                         mirage_check_sent_key = 'analyzer.mirage_check_sent.%s.%s' % (
                                             str(int(metric[2])), str(metric[1]))
                                         try:
-                                            self.redis_conn.setex(mirage_check_sent_key, 300, added_to_waterfall_timestamp)
+                                            # @modified 20201006 - Feature #3734: waterfall alerts
+                                            # No longer using added_to_waterfall_timestamp
+                                            # self.redis_conn.setex(mirage_check_sent_key, 300, added_to_waterfall_timestamp)
+                                            self.redis_conn.setex(mirage_check_sent_key, 300, int(metric[2]))
                                         except Exception as e:
                                             logger.error('error :: could not query Redis for cache_key: %s' % e)
 
