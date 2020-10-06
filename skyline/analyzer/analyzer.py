@@ -3080,7 +3080,13 @@ class Analyzer(Thread):
                                 # batch metric in the alerting and Ionosphere contexts
                                 mirage_alert_expiration_data = [base_name, int(alert[2])]
                                 try:
-                                    self.redis_conn.sadd('mirage.metrics_expiration_times', str(mirage_alert_expiration_data))
+                                    # @modified 20201006 - Bug #3766: Refresh mirage.metrics_expiration_times for batch processing
+                                    #                      Task #3662: Change mirage.last_check keys to timestamp value
+                                    #                      Feature #3486: analyzer_batch
+                                    #                      Feature #3480: batch_processing
+                                    # Use a different set to refresh the set
+                                    # self.redis_conn.sadd('mirage.metrics_expiration_times', str(mirage_alert_expiration_data))
+                                    self.redis_conn.sadd('analyzer.mirage.metrics_expiration_times', str(mirage_alert_expiration_data))
                                     if LOCAL_DEBUG:
                                         logger.info('debug :: added %s to mirage.metrics_expiration_times' % str(mirage_alert_expiration_data))
                                 except:
@@ -5740,6 +5746,23 @@ class Analyzer(Thread):
                 self.redis_conn.delete('mirage.periodic_check.metrics.old')
             except:
                 pass
+
+            # @added 20201006 - Bug #3766: Refresh mirage.metrics_expiration_times for batch processing
+            #                   Task #3662: Change mirage.last_check keys to timestamp value
+            #                   Feature #3486: analyzer_batch
+            #                   Feature #3480: batch_processing
+            # Use a different set to refresh the set
+            analyzer_mirage_metrics_expiration_times_set = None
+            try:
+                analyzer_mirage_metrics_expiration_times_set = self.redis_conn_decoded.smembers('analyzer.mirage.metrics_expiration_times')
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to get Redis set - analyzer.mirage.metrics_expiration_times')
+            if analyzer_mirage_metrics_expiration_times_set:
+                try:
+                    self.redis_conn.rename('analyzer.mirage.metrics_expiration_times', 'mirage.metrics_expiration_times')
+                except:
+                    pass
 
             # Sleep if it went too fast
             # if time() - now < 5:
