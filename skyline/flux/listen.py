@@ -5,6 +5,7 @@ import json
 import traceback
 from multiprocessing import Queue
 from logger import set_up_logging
+import string
 
 import falcon
 
@@ -37,12 +38,26 @@ if FLUX_API_KEYS:
         except:
             pass
 
+# @added 20201006 - Feature #3764: flux validate metric name
+try:
+    FLUX_GRAPHITE_WHISPER_PATH = settings.FLUX_GRAPHITE_WHISPER_PATH
+except:
+    FLUX_GRAPHITE_WHISPER_PATH = '/opt/graphite/storage/whisper'
+
 # @modified 20191129 - Branch #3262: py3
 # Consolidate flux logging
 # logger = set_up_logging('listen')
 logger = set_up_logging(None)
 
 LOCAL_DEBUG = False
+
+ALLOWED_CHARS = ['+', '-', '%', '.', '_', '/']
+for char in string.ascii_lowercase:
+    ALLOWED_CHARS.append(char)
+for char in string.ascii_uppercase:
+    ALLOWED_CHARS.append(char)
+for char in string.digits:
+    ALLOWED_CHARS.append(char)
 
 
 def validate_key(caller, apikey):
@@ -142,6 +157,34 @@ def validate_timestamp(caller, timestamp):
     except:
         logger.error('error :: %s :: validating timestamp argument value - %s' % (
             caller, str(timestamp)))
+        return False
+    return True
+
+
+# @added 20201006 - Feature #3764: flux validate metric name
+def validate_metric_name(caller, metric):
+    for char in metric:
+        if char not in ALLOWED_CHARS:
+            logger.error('error :: %s :: invalid char in metric - %s' % (
+                caller, str(metric)))
+            return False
+    # Check for prohibited chars
+    # prohibitedTagChars = ';!^='
+    # for char in metric:
+    #     if char in prohibitedTagChars:
+    #         return False
+
+    # Linux has a maximum filename length of 255 characters for most filesystems
+    # and a maximum path of 4096 characters.
+    if (len(metric) + 4) > 255:   # +4 for .wsp
+        logger.error('error :: %s :: metric longer than 255 chars - %s' % (
+            caller, str(metric)))
+        return False
+    metric_dir = metric.replace('.', '/')
+    full_whisper_path = '%s/%s.wsp' % (FLUX_GRAPHITE_WHISPER_PATH, metric_dir)
+    if len(full_whisper_path) > 4096:
+        logger.error('error :: %s :: metric path longer than 4096 chars - %s' % (
+            caller, str(full_whisper_path)))
         return False
     return True
 
@@ -267,6 +310,11 @@ class MetricData(object):
 
             if str(request_param_key) == 'metric':
                 metric = str(request_param_value)
+                # @added 20201006 - Feature #3764: flux validate metric name
+                valid_metric_name = validate_metric_name('listen :: MetricData GET', str(request_param_key))
+                if not valid_metric_name:
+                    resp.status = falcon.HTTP_400
+                    return
 
             if str(request_param_key) == 'value':
                 try:
@@ -486,6 +534,13 @@ class MetricDataPost(object):
                 backfill = False
                 try:
                     metric = str(metric_data['metric'])
+
+                    # @added 20201006 - Feature #3764: flux validate metric name
+                    valid_metric_name = validate_metric_name('listen :: MetricDataPOST POST multiple metrics', str(metric))
+                    if not valid_metric_name:
+                        resp.status = falcon.HTTP_400
+                        return
+
                     if LOCAL_DEBUG:
                         logger.debug('debug :: listen :: metric from postData set to %s' % metric)
                 except:
@@ -565,6 +620,13 @@ class MetricDataPost(object):
         if not metrics:
             try:
                 metric = str(postData['metric'])
+
+                # @added 20201006 - Feature #3764: flux validate metric name
+                valid_metric_name = validate_metric_name('listen :: MetricDataPOST POST', str(metric))
+                if not valid_metric_name:
+                    resp.status = falcon.HTTP_400
+                    return
+
                 if LOCAL_DEBUG:
                     logger.debug('debug :: listen :: metric from postData set to %s' % metric)
             except:
