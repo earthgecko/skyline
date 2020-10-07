@@ -2972,6 +2972,29 @@ class Analyzer(Thread):
                     number_of_alerts_checked = 0
                     mirage_metrics_added = []
 
+                    # @added 20201007 - Bug #3766: Refresh mirage.metrics_expiration_times for batch processing
+                    #                   Task #3662: Change mirage.last_check keys to timestamp value
+                    #                   Feature #3486: analyzer_batch
+                    #                   Feature #3480: batch_processing
+                    # Determine what metrics are in the new
+                    # analyzer.mirage.metrics_expiration_times Redis set
+                    analyzer_mirage_metrics_expiration_times_list = []
+                    try:
+                        analyzer_mirage_metrics_expiration_times_list = list(self.redis_conn.smembers('analyzer.mirage.metrics_expiration_times'))
+                        logger.info('%s items in Redis set analyzer.mirage.metrics_expiration_times' % str(len(analyzer_mirage_metrics_expiration_times_list)))
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to get Redis set analyzer.mirage.metrics_expiration_times')
+                    mirage_metrics_expiration_times_known = []
+                    if analyzer_mirage_metrics_expiration_times_list:
+                        try:
+                            for item in analyzer_mirage_metrics_expiration_times_list:
+                                metric_expiration = literal_eval(item)
+                                mirage_metrics_expiration_times_known.append(str(metric_expiration[0]))
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: failed to determine metrics in analyzer.mirage.metrics_expiration_times')
+
                     # @modified 20200610 - Feature #3560: External alert config
                     # Use the all_alerts list which includes external alert configs
                     # for alert in settings.ALERTS:
@@ -2981,13 +3004,37 @@ class Analyzer(Thread):
                     #     for metric in unique_metrics:
                     for metric in unique_metrics:
                         mirage_metric = False
+
+                        # @added 20201007 - Bug #3766: Refresh mirage.metrics_expiration_times for batch processing
+                        #                   Task #3662: Change mirage.last_check keys to timestamp value
+                        #                   Feature #3486: analyzer_batch
+                        #                   Feature #3480: batch_processing
+                        # Determine what metrics are in the new
+                        # analyzer.mirage.metrics_expiration_times Redis set
+                        add_to_metric_expiration_times_set = False
+                        smtp_expiration = None
+
                         if metric in mirage_unique_metrics:
-                            continue
+                            if metric.startswith(settings.FULL_NAMESPACE):
+                                base_name = metric.replace(settings.FULL_NAMESPACE, '', 1)
+                            else:
+                                base_name = metric
+                            if base_name not in mirage_metrics_expiration_times_known:
+                                add_to_metric_expiration_times_set = True
+
+                            # @modified 20201007 - Bug #3766: Refresh mirage.metrics_expiration_times for batch processing
+                            # continue
+                            if not add_to_metric_expiration_times_set:
+                                continue
+
                         for alert in all_alerts:
                             # @added 20200723 - Feature #3560: External alert config
                             # Speed this up
                             if mirage_metric:
-                                continue
+                                # @modified 20201007 - Bug #3766: Refresh mirage.metrics_expiration_times for batch processing
+                                # continue
+                                if not add_to_metric_expiration_times_set:
+                                    continue
                             try:
                                 if alert[4]['type'] == 'external':
                                     continue
@@ -3033,6 +3080,10 @@ class Analyzer(Thread):
                                             mirage_metric = True
                                     except:
                                         mirage_metric = False
+                                # @added 20201007 - Bug #3766: Refresh mirage.metrics_expiration_times for batch processing
+                                if mirage_metric:
+                                    smtp_expiration = alert[2]
+
                         if mirage_metric:
                             # if metric not in mirage_unique_metrics:
                             if metric not in mirage_metrics_added:
@@ -3067,31 +3118,32 @@ class Analyzer(Thread):
                                     self.redis_conn.setex('analyzer.manage_mirage_unique_metrics', 300, key_timestamp)
                                 except:
                                     logger.error('error :: failed to set key :: analyzer.manage_mirage_unique_metrics')
-                                # @added 20200805 - Task #3662: Change mirage.last_check keys to timestamp value
-                                #                   Feature #3486: analyzer_batch
-                                #                   Feature #3480: batch_processing
-                                # Add the mirage metric and its EXPIRATION_TIME to
-                                # the mirage.metrics_expiration_times so that Mirage
-                                # can determine the metric EXPIRATION_TIME without
-                                # having to create and iterate the all_alerts
-                                # object in the Mirage analysis phase so that the
-                                # reported anomaly timestamp can be used to determine
-                                # whether the EXPIRATION_TIME should be applied to a
-                                # batch metric in the alerting and Ionosphere contexts
-                                mirage_alert_expiration_data = [base_name, int(alert[2])]
-                                try:
-                                    # @modified 20201006 - Bug #3766: Refresh mirage.metrics_expiration_times for batch processing
-                                    #                      Task #3662: Change mirage.last_check keys to timestamp value
-                                    #                      Feature #3486: analyzer_batch
-                                    #                      Feature #3480: batch_processing
-                                    # Use a different set to refresh the set
-                                    # self.redis_conn.sadd('mirage.metrics_expiration_times', str(mirage_alert_expiration_data))
-                                    self.redis_conn.sadd('analyzer.mirage.metrics_expiration_times', str(mirage_alert_expiration_data))
-                                    if LOCAL_DEBUG:
-                                        logger.info('debug :: added %s to mirage.metrics_expiration_times' % str(mirage_alert_expiration_data))
-                                except:
-                                    if LOCAL_DEBUG:
-                                        logger.error('error :: failed to add %s to mirage.metrics_expiration_times set' % str(mirage_alert_expiration_data))
+                            # @added 20200805 - Task #3662: Change mirage.last_check keys to timestamp value
+                            #                   Feature #3486: analyzer_batch
+                            #                   Feature #3480: batch_processing
+                            # Add the mirage metric and its EXPIRATION_TIME to
+                            # the mirage.metrics_expiration_times so that Mirage
+                            # can determine the metric EXPIRATION_TIME without
+                            # having to create and iterate the all_alerts
+                            # object in the Mirage analysis phase so that the
+                            # reported anomaly timestamp can be used to determine
+                            # whether the EXPIRATION_TIME should be applied to a
+                            # batch metric in the alerting and Ionosphere contexts
+                            # mirage_alert_expiration_data = [base_name, int(alert[2])]
+                            mirage_alert_expiration_data = [base_name, int(smtp_expiration)]
+                            try:
+                                # @modified 20201006 - Bug #3766: Refresh mirage.metrics_expiration_times for batch processing
+                                #                      Task #3662: Change mirage.last_check keys to timestamp value
+                                #                      Feature #3486: analyzer_batch
+                                #                      Feature #3480: batch_processing
+                                # Use a different set to refresh the set
+                                # self.redis_conn.sadd('mirage.metrics_expiration_times', str(mirage_alert_expiration_data))
+                                self.redis_conn.sadd('analyzer.mirage.metrics_expiration_times', str(mirage_alert_expiration_data))
+                                if LOCAL_DEBUG:
+                                    logger.info('debug :: added %s to analyzer.mirage.metrics_expiration_times' % str(mirage_alert_expiration_data))
+                            except:
+                                if LOCAL_DEBUG:
+                                    logger.error('error :: failed to add %s to analyzer.mirage.metrics_expiration_times set' % str(mirage_alert_expiration_data))
 
                     # @added 20200723 - Feature #3560: External alert config
                     # Add debug count
@@ -5757,15 +5809,28 @@ class Analyzer(Thread):
             # Use a different set to refresh the set
             analyzer_mirage_metrics_expiration_times_set = None
             try:
-                analyzer_mirage_metrics_expiration_times_set = self.redis_conn_decoded.smembers('analyzer.mirage.metrics_expiration_times')
+                analyzer_mirage_metrics_expiration_times_set = list(self.redis_conn_decoded.smembers('analyzer.mirage.metrics_expiration_times'))
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: failed to get Redis set - analyzer.mirage.metrics_expiration_times')
-            if analyzer_mirage_metrics_expiration_times_set:
+            if len(analyzer_mirage_metrics_expiration_times_set) > 0:
                 try:
                     self.redis_conn.rename('analyzer.mirage.metrics_expiration_times', 'mirage.metrics_expiration_times')
+                    logger.info('renamed Redis set analyzer.mirage.metrics_expiration_times to mirage.metrics_expiration_times')
                 except:
-                    pass
+                    # pass
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to renamed Redis set analyzer.mirage.metrics_expiration_times to mirage.metrics_expiration_times')
+                try:
+                    self.redis_conn.sunionstore('aet.analyzer.mirage.metrics_expiration_times', 'mirage.metrics_expiration_times')
+                    logger.info('copied Redis set mirage.metrics_expiration_times to aet.analyzer.mirage.metrics_expiration_times with %s items' % str(len(analyzer_mirage_metrics_expiration_times_set)))
+                except:
+                    # pass
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to copy Redis set analyzer.mirage.metrics_expiration_times to aet.analyzer.mirage.metrics_expiration_times')
+
+            else:
+                logger.info('Redis set analyzer.mirage.metrics_expiration_times has no entries, nothing to update')
 
             # Sleep if it went too fast
             # if time() - now < 5:
