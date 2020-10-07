@@ -244,6 +244,50 @@ Or if no metrics of no metrics are set to alert <code>{"data":{"metrics":[]},"st
 		    </tbody>
 		  </table>
 
+	  <h4><span class="logo"><span class="sky">API method ::</span> <span class="re">/api?batch_processing_metrics</span></span></h4>
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Name</th>
+  		        <th>Description</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+  		        <td>Description:</td>
+  		        <td>Returns a list of all batch processing metrics as a json object.</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Endpoint:</td>
+  		        <td><a target='_blank' href="/api?batch_processing_metrics">/api?batch_processing_metrics</a></td>
+  		      </tr>
+  		      <tr>
+  		        <td>Method:</td>
+  		        <td>GET</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Request example:</td>
+		          <td><code>/api?batch_processing_metrics</code></td>
+  		      </tr>
+  		      <tr>
+  		        <td>Responses:</td>
+  		        <td>200 - json response, example
+                  <code>
+{
+  "data": {
+    "metrics": [
+      "vista.demo_robustperception_io.prometheus.node_memory_MemAvailable_bytes",
+      "vista.demo_robustperception_io.prometheus.node_disk_io_time_weighted_seconds_total"
+    ]
+  },
+  "status": {}
+}</code><br>
+Or if no batch processing metrics are present <code>{"data":{"metrics":[]},"status":{}}</code><br>
+              </td>
+  		      </tr>
+		    </tbody>
+		  </table>
+
 	  <h4><span class="logo"><span class="sky">API method ::</span> <span class="re">/api?derivative_metrics</span></span></h4>
   		  <table class="table table-hover">
   		    <thead>

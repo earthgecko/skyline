@@ -643,6 +643,20 @@ def version():
 # def data():
 def api():
 
+    # @added 20201007 - Feature #3770: webapp - batch_processing metrics API endoint
+    if 'batch_processing_metrics' in request.args:
+        logger.info('/api?batch_processing_metrics request')
+        batch_processing_metrics = []
+        try:
+            batch_processing_metrics = list(REDIS_CONN.smembers('aet.analyzer.batch_processing_metrics'))
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: Webapp could not get the aet.analyzer.batch_processing_metrics list from Redis')
+            return 'Internal Server Error', 500
+        logger.info('/api?batch_processing_metrics responding with %s metrics' % str(len(batch_processing_metrics)))
+        data_dict = {"status": {}, "data": {"metrics": batch_processing_metrics}}
+        return jsonify(data_dict), 200
+
     # @added 20200929 - Task #3748: POC SNAB
     #                   Branch #3068: SNAB
     if 'snab' in request.args:
