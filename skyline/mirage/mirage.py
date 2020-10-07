@@ -1378,7 +1378,23 @@ class Mirage(Thread):
                 base_name = metric
             # metric_timestamp = int(timeseries[-1][0])
             metric_timestamp = int_metric_timestamp
-            anomalous_metric = [datapoint, base_name, metric_timestamp]
+
+            # Get the anomaly breakdown - who returned True?
+            triggered_algorithms = []
+            for index, value in enumerate(ensemble):
+                if value:
+                    # @modified 20200607 - Feature #3566: custom_algorithms
+                    # algorithm = settings.MIRAGE_ALGORITHMS[index]
+                    algorithm = algorithms_run[index]
+
+                    anomaly_breakdown[algorithm] += 1
+                    triggered_algorithms.append(algorithm)
+
+            # @modified 20201007 - Feature #3772: Add the anomaly_id to the http_alerter json
+            #                      Branch #3068: SNAB
+            # Added second_order_resolution_seconds, triggered_algorithms and algorithms_run
+            # anomalous_metric = [datapoint, base_name, metric_timestamp]
+            anomalous_metric = [datapoint, base_name, metric_timestamp, second_order_resolution_seconds, triggered_algorithms, algorithms_run]
 
             # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
             # self.anomalous_metrics.append(anomalous_metric)
@@ -1408,17 +1424,6 @@ class Mirage(Thread):
             # @modified 20200903 - Task #3730: Validate Mirage running multiple processes
             # Removed limit
             # sleep(2)
-
-            # Get the anomaly breakdown - who returned True?
-            triggered_algorithms = []
-            for index, value in enumerate(ensemble):
-                if value:
-                    # @modified 20200607 - Feature #3566: custom_algorithms
-                    # algorithm = settings.MIRAGE_ALGORITHMS[index]
-                    algorithm = algorithms_run[index]
-
-                    anomaly_breakdown[algorithm] += 1
-                    triggered_algorithms.append(algorithm)
 
             # @added 20170206 - Bug #1904: Handle non filesystem friendly metric names in check files
             sane_metricname = filesafe_metricname(str(base_name))
@@ -2579,7 +2584,13 @@ class Mirage(Thread):
                         algorithms_run = send_alert_for[5]
 
                         second_order_resolution_seconds = int(send_alert_for[4])
-                        anomalous_metric = [value, base_name, metric_timestamp, second_order_resolution_seconds]
+
+                        # @modified 20201007 - Feature #3772: Add the anomaly_id to the http_alerter json
+                        #                      Branch #3068: SNAB
+                        # Added triggered_algorithms and algorithms_run
+                        # anomalous_metric = [value, base_name, metric_timestamp, second_order_resolution_seconds]
+                        anomalous_metric = [value, base_name, metric_timestamp, second_order_resolution_seconds, triggered_algorithms, algorithms_run]
+
                         # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
                         # self.anomalous_metrics.append(anomalous_metric)
                         redis_set = 'mirage.anomalous_metrics'
@@ -3043,10 +3054,24 @@ class Mirage(Thread):
                                                             logger.error('error :: failed to check if %s is a snab_check_metric' % base_name)
                                         if snab_check_metric:
                                             algorithm_group = 'three-sigma'
+
+                                            # @added 20201007 - Feature #3772: Add the anomaly_id to the http_alerter json
+                                            #                   Branch #3068: SNAB
+                                            # Added second_order_resolution_seconds, triggered_algorithms and algorithms_run
+                                            try:
+                                                triggered_algorithms = metric[4]
+                                                algorithms_run = metric[5]
+                                            except:
+                                                triggered_algorithms = []
+                                                algorithms_run = []
+
                                             # @added 20201001 - Task #3748: POC SNAB
                                             # Added anomalyScore
                                             try:
-                                                anomalyScore = len(triggered_algorithms) / len(algorithms_run)
+                                                if triggered_algorithms and algorithms_run:
+                                                    anomalyScore = len(triggered_algorithms) / len(algorithms_run)
+                                                else:
+                                                    anomalyScore = 1.0
                                             except:
                                                 logger.error(traceback.format_exc())
                                                 logger.error('error :: failed to determine anomalyScore for %s' % base_name)
@@ -3057,7 +3082,9 @@ class Mirage(Thread):
                                             analysis_run_time = 0
                                             redis_key = 'mirage.analysis_run_time.%s.%s' % (base_name, str(metric[2]))
                                             try:
-                                                analysis_run_time = float(self.redis_conn_decoded.get(redis_key))
+                                                analysis_run_time_data = self.redis_conn_decoded.get(redis_key)
+                                                if analysis_run_time_data:
+                                                    analysis_run_time = float(analysis_run_time_data)
                                             except:
                                                 logger.error(traceback.format_exc())
                                                 logger.error('error :: failed to determine analysis_run_time from Redis key - %s' % (
@@ -3091,6 +3118,25 @@ class Mirage(Thread):
                                 # trigger_alert(alert, metric, second_order_resolution_seconds, context)
                                 try:
                                     if alert[1] != 'smtp':
+
+                                        # @added 20201007 - Feature #3772: Add the anomaly_id to the http_alerter json
+                                        if 'http_alerter' in alert[1]:
+                                            anomaly_id = None
+                                            anomaly_id_redis_key = 'panorama.anomaly_id.%s.%s' % (
+                                                str(int(metric[2])), base_name)
+                                            try_get_anomaly_id_redis_key_count = 0
+                                            while try_get_anomaly_id_redis_key_count < 20:
+                                                try_get_anomaly_id_redis_key_count += 1
+                                                try:
+                                                    anomaly_id = int(self.redis_conn_decoded.get(anomaly_id_redis_key))
+                                                    break
+                                                except:
+                                                    sleep(1)
+                                            if not anomaly_id:
+                                                logger.error('error :: failed to determine anomaly_id from Redis key - %s' % anomaly_id_redis_key)
+                                            else:
+                                                logger.info('determined anomaly_id as %s, appending to alert' % str(anomaly_id))
+                                            alert.append(['anomaly_id', anomaly_id])
 
                                         # @added 20200929 - Task #3748: POC SNAB
                                         #                   Branch #3068: SNAB

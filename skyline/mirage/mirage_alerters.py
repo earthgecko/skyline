@@ -1980,6 +1980,28 @@ def alert_http(alert, metric, second_order_resolution_seconds, context):
             except:
                 external_alerter_id = None
 
+            # @added 20201007 - Feature #3772: Add the anomaly_id to the http_alerter json
+            anomaly_id = None
+            anomalyScore = 1.0
+            try:
+                anomaly_id_details = alert[4]
+                if anomaly_id_details[0] == 'anomaly_id':
+                    anomaly_id = anomaly_id_details[1]
+                    anomalyScore = 1.0
+            except:
+                anomaly_id = None
+            if not anomaly_id:
+                try:
+                    anomaly_id_details = alert[5]
+                    if anomaly_id_details[0] == 'anomaly_id':
+                        anomaly_id = anomaly_id_details[1]
+                        anomalyScore = 1.0
+                except:
+                    anomaly_id = None
+                if not anomaly_id:
+                    logger.error('error :: alert_http :: failed to determine anomaly_id from alert[4] or alert[5]')
+
+            # @modified 20201007 - Feature #3772: Add the anomaly_id to the http_alerter json
             metric_alert_dict = {
                 "metric": str(metric[1]),
                 "timestamp": timestamp_str,
@@ -1988,7 +2010,9 @@ def alert_http(alert, metric, second_order_resolution_seconds, context):
                 "expiry": expiry_str,
                 "source": str(source),
                 "token": str(alerter_token),
-                "id": str(external_alerter_id)
+                "id": str(external_alerter_id),
+                "anomaly_id": str(anomaly_id),
+                "anomalyScore": str(anomalyScore),
             }
             # @modified 20200302: Feature #3396: http_alerter
             # Add the token as an independent entity from the alert
@@ -2157,6 +2181,7 @@ def trigger_alert(alert, metric, second_order_resolution_seconds, context):
         alert[4]: The type [optional for http_alerter only] (dict)\n
                   The snab_details [optional for SNAB and slack only] (list)\n
         alert[5]: The snab_details [optional for SNAB and slack only] (list)\n
+                  The anomaly_id [optional for http_alerter only] (list)\n
     :param metric:
         The metric tuple e.g. (2.345, 'server-1.cpu.user', 1462172400)\n
         metric[0]: the anomalous value (float)\n
