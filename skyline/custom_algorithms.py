@@ -249,8 +249,14 @@ def run_custom_algorithm_on_timeseries(current_skyline_app, parent_pid, base_nam
     except StopIteration:
         if not current_logger:
             current_logger = get_log(current_skyline_app)
-        current_logger.error(
-            'error :: %s :: pid %s, terminated evaluation of time series after max_execution_time %s was reached (timeout) with custom algorithm - %s - loaded from algorithm_source file - %s' % (
+        # @modified 20201007 - Branch #3068: SNAB
+        #                      Task #3744: POC matrixprofile
+        #                      Feature #3566: custom_algorithms
+        # This should not be recorded as an error, it is simply a warning
+        # current_logger.error(
+        #     'error :: %s :: pid %s, terminated evaluation of time series after max_execution_time %s was reached (timeout) with custom algorithm - %s - loaded from algorithm_source file - %s' % (
+        current_logger.warn(
+            'warning :: %s :: pid %s, terminated evaluation of time series after max_execution_time %s was reached (timeout) with custom algorithm - %s - loaded from algorithm_source file - %s' % (
                 func_name, str(myPid), str(max_execution_time),
                 custom_algorithm, str(algorithm_source)))
         return (None, None)
