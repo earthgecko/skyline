@@ -1227,7 +1227,10 @@ class AnalyzerBatch(Thread):
                         send_back_to_analyzer = True
                     if send_back_to_analyzer:
                         cache_key = '%s.alert.%s.%s' % (skyline_app, metric_timestamp, base_name)
-                        cache_key_value = [float(datapoint), base_name, int(metric_timestamp), triggered_algorithms]
+                        # @modified 20201008 - Feature #3772: Add the anomaly_id to the http_alerter json
+                        #                      Branch #3068: SNAB
+                        # Added algorithms_run
+                        cache_key_value = [float(datapoint), base_name, int(metric_timestamp), triggered_algorithms, algorithms_run]
                         try:
                             self.redis_conn.setex(
                                 cache_key, 300,
@@ -1238,10 +1241,11 @@ class AnalyzerBatch(Thread):
                         except:
                             logger.error(traceback.format_exc())
                             logger.error(
-                                'error :: failed to add Redis key - %s - [%s, \'%s\', %s, %s, %s]' %
+                                'error :: failed to add Redis key - %s - [%s, \'%s\', %s, %s, %s, %s]' %
                                 (cache_key, str(datapoint), base_name,
                                     str(int(metric_timestamp)),
-                                    str(triggered_algorithms)))
+                                    str(triggered_algorithms),
+                                    str(algorithms_run)))
 
             # It could have been deleted by the Roomba
             except TypeError:
