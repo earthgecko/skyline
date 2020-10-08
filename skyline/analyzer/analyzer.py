@@ -240,6 +240,13 @@ try:
 except:
     SNAB_CHECKS = {}
 
+# @added 20201007 - Feature #3774: SNAB_LOAD_TEST_ANALYZER
+# The number of metrics to load test Analyzer with
+try:
+    SNAB_LOAD_TEST_ANALYZER = int(settings.SNAB_LOAD_TEST_ANALYZER)
+except:
+    SNAB_LOAD_TEST_ANALYZER = 0
+
 # @added 20190522 - Feature #2580: illuminance
 # Disabled for now as in concept phase.  This would work better if
 # the illuminance_datapoint was determined from the time series
@@ -418,6 +425,24 @@ class Analyzer(Thread):
             logger.info(traceback.format_exc())
             logger.info('nothing to do, no unique_metrics')
             return
+
+        # @added 20201007 - Feature #3774: SNAB_LOAD_TEST_ANALYZER
+        # The number of metrics to load test Analyzer with, testing is only done
+        # after the normal analysis run.
+        if SNAB_LOAD_TEST_ANALYZER:
+            logger.info('SNAB_LOAD_TEST_ANALYZER will run after normal analysis')
+            default_snab_analyzer_load_test_start = int(time())
+            snab_load_test_start_redis_key = 'snab.analyzer_load_test.start'
+            try:
+                snab_analyzer_load_test_start = self.redis_conn_decoded.get(snab_load_test_start_redis_key)
+            except Exception as e:
+                logger.error('error :: could not get Redis snab.analyzer_load_test.start key: %s' % e)
+            if snab_analyzer_load_test_start:
+                try:
+                    snab_analyzer_load_test_start_time = int(snab_analyzer_load_test_start)
+                except:
+                    snab_analyzer_load_test_start_time = default_snab_analyzer_load_test_start
+            snab_analyzer_load_test_unique_metrics = list(unique_metrics)
 
         # Discover assigned metrics
         keys_per_processor = int(ceil(float(len(unique_metrics)) / float(settings.ANALYZER_PROCESSES)))
@@ -2184,8 +2209,8 @@ class Analyzer(Thread):
 
                                     # @added 20200904 - Feature #3734: waterfall alerts
                                     added_to_waterfall_timestamp = int(time())
-                                    # [metric, timestamp, value, added_to_waterfall_timestamp]
-                                    waterfall_data = [metric[1], metric[2], metric[0], added_to_waterfall_timestamp, waterfall_panorama_data]
+                                    # [metric, timestamp, value, added_to_waterfall_timestamp, waterfall_panorama_data]
+                                    waterfall_data = [metric[1], int(metric[2]), metric[0], added_to_waterfall_timestamp, waterfall_panorama_data]
                                     redis_set = 'analyzer.waterfall_alerts.sent_to_mirage'
 
                                     # @modified 20200916 - Branch #3068: SNAB
@@ -2625,6 +2650,70 @@ class Analyzer(Thread):
 
         if LOCAL_DEBUG:
             logger.info('debug :: Memory usage spin_process end: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+
+        # @added 20201007 - Feature #3774: SNAB_LOAD_TEST_ANALYZER
+        # This is not full analysis as the metrics are not checked if they are
+        # mirage metrics, airgaps, flux.filled, etc, etc.  They are simply
+        # run through the algorithms, it is a rough estimate.
+        if SNAB_LOAD_TEST_ANALYZER:
+            load_test_process_with = SNAB_LOAD_TEST_ANALYZER / settings.ANALYZER_PROCESSES
+            current_unique_metrics_count = len(snab_analyzer_load_test_unique_metrics)
+            logger.info('SNAB_LOAD_TEST_ANALYZER set to test %s metrics' % str(SNAB_LOAD_TEST_ANALYZER))
+            snab_load_tests_to_do = 0
+            if current_unique_metrics_count < SNAB_LOAD_TEST_ANALYZER:
+                snab_load_tests_to_do = int(load_test_process_with - current_unique_metrics_count)
+                logger.info('SNAB_LOAD_TEST_ANALYZER - %s unique metrics were analyzed, %s snab.analyzer_load_test metrics to be done on this process' % (
+                    str(current_unique_metrics_count), str(snab_load_tests_to_do)))
+            snab_load_test_anomalous = 0
+            snab_load_test_not_anomalous = 0
+            if snab_load_tests_to_do:
+                start_snab_analyzer_load_test = time()
+                snab_load_tests_done = 0
+                metric_airgaps = []
+                metric_airgaps_filled = []
+                run_negatives_present = True
+                while snab_load_tests_done < snab_load_tests_to_do:
+                    load_test_time = int(time())
+                    if load_test_time > (snab_analyzer_load_test_start_time + (settings.MAX_ANALYZER_PROCESS_RUNTIME - 5)):
+                        logger.info('SNAB_LOAD_TEST_ANALYZER - load test approaching MAX_ANALYZER_PROCESS_RUNTIME, stopping after analysing %s load test metrics' % (
+                            str(snab_load_tests_done)))
+                        break
+                    # Distill timeseries strings into lists
+                    for i, metric_name in enumerate(assigned_metrics):
+                        self.check_if_parent_is_alive()
+                        load_test_time = int(time())
+                        if load_test_time > (snab_analyzer_load_test_start_time + (settings.MAX_ANALYZER_PROCESS_RUNTIME - 5)):
+                            logger.info('SNAB_LOAD_TEST_ANALYZER - load test approaching MAX_ANALYZER_PROCESS_RUNTIME, stopping after analysing %s load test metrics' % (
+                                str(snab_load_tests_done)))
+                            break
+                        if snab_load_tests_done >= snab_load_tests_to_do:
+                            break
+                        try:
+                            raw_series = raw_assigned[i]
+                            unpacker = Unpacker(use_list=False)
+                            unpacker.feed(raw_series)
+                            timeseries = list(unpacker)
+                        except:
+                            timeseries = []
+                        anomalous = None
+                        try:
+                            anomalous, ensemble, datapoint, negatives_found, algorithms_run = run_selected_algorithm(timeseries, metric_name, metric_airgaps, metric_airgaps_filled, run_negatives_present, check_for_airgaps_only)
+                            del metric_airgaps
+                            del metric_airgaps_filled
+                        except:
+                            pass
+                        if anomalous:
+                            snab_load_test_anomalous += 1
+                        else:
+                            snab_load_test_not_anomalous += 1
+                        snab_load_tests_done += 1
+                    logger.info('SNAB_LOAD_TEST_ANALYZER - load testing completed on %s load test metrics' % (
+                        str(snab_load_tests_done)))
+                snab_load_test_runtime = time() - start_snab_analyzer_load_test
+                logger.info('SNAB_LOAD_TEST_ANALYZER - results load test metrics - anomalous: %s, not_anomalous: %s' % (
+                    str(snab_load_test_anomalous), str(snab_load_test_not_anomalous)))
+                logger.info('SNAB_LOAD_TEST_ANALYZER - load testing completed on %s load test metrics in %.2f seconds' % (
+                    str(snab_load_tests_done), snab_load_test_runtime))
 
         spin_end = time() - spin_start
         logger.info('spin_process took %.2f seconds' % spin_end)
@@ -3542,6 +3631,22 @@ class Analyzer(Thread):
                 self.redis_conn.rename('analyzer.new.mirage_always_metrics', 'analyzer.mirage_always_metrics')
             except:
                 pass
+
+            # @added 20201007 - Feature #3774: SNAB_LOAD_TEST_ANALYZER
+            # The number of metrics to load test Analyzer with
+            if SNAB_LOAD_TEST_ANALYZER:
+                current_unique_metrics_count = len(unique_metrics)
+                logger.info('SNAB_LOAD_TEST_ANALYZER set to test %s metrics' % str(SNAB_LOAD_TEST_ANALYZER))
+                if current_unique_metrics_count < SNAB_LOAD_TEST_ANALYZER:
+                    snab_load_test_metrics_to_add = SNAB_LOAD_TEST_ANALYZER - current_unique_metrics_count
+                    logger.info('SNAB_LOAD_TEST_ANALYZER - there are currently %s unique metrics, %s snab.analyzer_load_test metrics will be added' % (
+                        str(current_unique_metrics_count), str(snab_load_test_metrics_to_add)))
+                snab_load_test_start_redis_key = 'snab.analyzer_load_test.start'
+                try:
+                    self.redis_conn.setex(
+                        snab_load_test_start_redis_key, settings.MAX_ANALYZER_PROCESS_RUNTIME, int(time()))
+                except Exception as e:
+                    logger.error('error :: could not set Redis snab.analyzer_load_test.start key: %s' % e)
 
             # Spawn processes
             pids = []

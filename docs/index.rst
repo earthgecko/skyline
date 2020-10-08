@@ -39,6 +39,7 @@ Contents:
   flux
   upload-data-to-flux
   vista
+  SNAB
   redis-integration
   rebrow
   running-multiple-skylines
