@@ -2710,8 +2710,21 @@ class Mirage(Thread):
                     value = float(waterfall_alert[2])
                     base_name = str(waterfall_alert[0])
                     metric_timestamp = int(waterfall_alert[1])
-                    anomalous_metric = [value, base_name, metric_timestamp]
-                    mirage_anomalous_metrics.append([value, base_name, metric_timestamp])
+
+                    # @added 20201008 - Feature #3734: waterfall alerts
+                    #                   Branch #3068: SNAB
+                    # Added triggered_algorithms and algorithms_run
+                    algorithms_run = waterfall_alert[4][4]
+                    triggered_algorithms = waterfall_alert[4][5]
+
+                    # @modified 20201008 - Feature #3734: waterfall alerts
+                    #                      Branch #3068: SNAB
+                    # Added triggered_algorithms and algorithms_run
+                    # anomalous_metric = [value, base_name, metric_timestamp]
+                    # mirage_anomalous_metrics.append([value, base_name, metric_timestamp])
+                    anomalous_metric = [value, base_name, metric_timestamp, triggered_algorithms, algorithms_run]
+                    mirage_anomalous_metrics.append(anomalous_metric)
+
                     waterfall_alert_check_string = '%s.%s' % (str(metric_timestamp), base_name)
                     alerting_waterfall_alerts.append(waterfall_alert_check_string)
                     logger.info('waterfall alerting on %s' % base_name)
@@ -3145,6 +3158,8 @@ class Mirage(Thread):
                                 try:
                                     if alert[1] != 'smtp':
 
+                                        new_alert = None
+
                                         # @added 20201007 - Feature #3772: Add the anomaly_id to the http_alerter json
                                         if 'http_alerter' in alert[1]:
                                             anomaly_id = None
@@ -3162,7 +3177,9 @@ class Mirage(Thread):
                                                 logger.error('error :: failed to determine anomaly_id from Redis key - %s' % anomaly_id_redis_key)
                                             else:
                                                 logger.info('determined anomaly_id as %s, appending to alert' % str(anomaly_id))
-                                            alert.append(['anomaly_id', anomaly_id])
+                                            # Do not modify the alert list object, create a new one
+                                            new_alert = list(alert)
+                                            new_alert.append(['anomaly_id', anomaly_id])
 
                                         # @added 20200929 - Task #3748: POC SNAB
                                         #                   Branch #3068: SNAB
@@ -3199,13 +3216,26 @@ class Mirage(Thread):
                                                     if not snab_id:
                                                         logger.error('error :: failed to determine snab_id from Redis key - %s' % snab_id_redis_key)
                                                 snab_details = ['snab_details', snab_id, anomaly_id, anomalyScore]
-                                                alert.append(snab_details)
+                                                # Do not modify the alert list object, create a new one
+                                                new_alert = list(alert)
+                                                new_alert.append(snab_details)
 
-                                        logger.info('trigger_alert :: alert: %s, metric: %s, second_order_resolution_seconds: %s, context: %s' % (
-                                            str(alert), str(metric),
-                                            str(second_order_resolution_seconds),
-                                            str(alert_context)))
-                                        trigger_alert(alert, metric, second_order_resolution_seconds, alert_context)
+                                        # @modified 20201008 - Feature #3772: Add the anomaly_id to the http_alerter json
+                                        #                      Feature #3734: waterfall alerts
+                                        #                      Branch #3068: SNAB
+                                        # Use the appropriate alert context
+                                        if new_alert:
+                                            logger.info('trigger_alert :: alert: %s, metric: %s, second_order_resolution_seconds: %s, context: %s' % (
+                                                str(new_alert), str(metric),
+                                                str(second_order_resolution_seconds),
+                                                str(alert_context)))
+                                            trigger_alert(new_alert, metric, second_order_resolution_seconds, alert_context)
+                                        else:
+                                            logger.info('trigger_alert :: alert: %s, metric: %s, second_order_resolution_seconds: %s, context: %s' % (
+                                                str(alert), str(metric),
+                                                str(second_order_resolution_seconds),
+                                                str(alert_context)))
+                                            trigger_alert(alert, metric, second_order_resolution_seconds, alert_context)
                                     else:
                                         logger.info('smtp_trigger_alert :: alert: %s, metric: %s, second_order_resolution_seconds: %s, context: %s' % (
                                             str(alert), str(metric),

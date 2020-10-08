@@ -1954,17 +1954,6 @@ class Analyzer(Thread):
                         base_name = metric_name
 
                     metric_timestamp = timeseries[-1][0]
-                    metric = [datapoint, base_name, metric_timestamp]
-                    # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
-                    # self.anomalous_metrics.append(metric)
-                    redis_set = 'analyzer.anomalous_metrics'
-                    data = str(metric)
-                    try:
-                        self.redis_conn.sadd(redis_set, data)
-                    except:
-                        logger.info(traceback.format_exc())
-                        logger.error('error :: failed to add %s to Redis set %s' % (
-                            str(data), str(redis_set)))
 
                     # Get the anomaly breakdown - who returned True?
                     triggered_algorithms = []
@@ -1976,6 +1965,23 @@ class Analyzer(Thread):
 
                             anomaly_breakdown[algorithm] += 1
                             triggered_algorithms.append(algorithm)
+
+                    # @modified 20201008 - Feature #3734: waterfall alerts
+                    #                      Branch #3068: SNAB
+                    # Added triggered_algorithms and algorithms_run
+                    # metric = [datapoint, base_name, metric_timestamp]
+                    metric = [datapoint, base_name, metric_timestamp, triggered_algorithms, algorithms_run]
+
+                    # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                    # self.anomalous_metrics.append(metric)
+                    redis_set = 'analyzer.anomalous_metrics'
+                    data = str(metric)
+                    try:
+                        self.redis_conn.sadd(redis_set, data)
+                    except:
+                        logger.info(traceback.format_exc())
+                        logger.error('error :: failed to add %s to Redis set %s' % (
+                            str(data), str(redis_set)))
 
                     # @added 20170206 - Bug #1904: Handle non filesystem friendly metric names in check files
                     sane_metricname = filesafe_metricname(str(base_name))
@@ -3961,17 +3967,54 @@ class Analyzer(Thread):
                             self.redis_conn.srem(redis_set, str(waterfall_alert))
                             logger.info('removed waterfall alert item to alert on from Redis set %s - %s' % (
                                 redis_set, str(waterfall_alert)))
-                            waterfall_alerts_to_alert_on.append(waterfall_alert)
                         except:
                             logger.error(traceback.format_exc())
-                            logger.error('error :: failed to remove feedback metric waterfall alert item for %s from Redis set %s' % (
+                            logger.error('error :: failed to remove expired waterfall alert item for %s from Redis set %s' % (
                                 base_name, redis_set))
+
+                        # @added 20201008 - Feature #3734: waterfall alerts
+                        #                   Branch #3068: SNAB
+                        #                   Bug #3776: waterfall_alert - no analyzer triggered_algorithms in waterfall_panorama_data on MIRAGE_ALWAYS_METRICS
+                        append_waterfall_alert = True
+                        try:
+                            append_waterfall_alert = True
+                            if waterfall_alert[0] in MIRAGE_ALWAYS_METRICS:
+                                # If triggered_algorithms is less than CONSENSUS
+                                # do not alert
+                                if len(waterfall_alert[4][5]) > settings.CONSENSUS:
+                                    append_waterfall_alert = False
+                                    logger.info('not waterfall alerting for MIRAGE_ALWAYS_METRICS metric that has no  item to alert on from Redis set %s - %s' % (
+                                        redis_set, str(waterfall_alert)))
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: failed to determine if waterfall alert metric is a MIRAGE_ALWAYS_METRICS metric with less than CONSENSUS triggered_algorithms' % (
+                                base_name, redis_set))
+
+                        # @modified 20201008 - Feature #3734: waterfall alerts
+                        #                      Branch #3068: SNAB
+                        #                      Bug #3776: waterfall_alert - no analyzer triggered_algorithms in waterfall_panorama_data on MIRAGE_ALWAYS_METRICS
+                        # Only alert if it is not a MIRAGE_ALWAYS_METRICS
+                        # check
+                        if append_waterfall_alert:
+                            waterfall_alerts_to_alert_on.append(waterfall_alert)
+
             for waterfall_alert in waterfall_alerts_to_alert_on:
                 try:
                     value = float(waterfall_alert[2])
                     base_name = str(waterfall_alert[0])
                     metric_timestamp = int(waterfall_alert[1])
-                    anomalous_metric = [value, base_name, metric_timestamp]
+                    # @added 20201008 - Feature #3734: waterfall alerts
+                    #                   Branch #3068: SNAB
+                    # Added triggered_algorithms and algorithms_run
+                    algorithms_run = waterfall_alert[4][4]
+                    triggered_algorithms = waterfall_alert[4][5]
+
+                    # @modified 20201008 - Feature #3734: waterfall alerts
+                    #                      Branch #3068: SNAB
+                    # Added triggered_algorithms and algorithms_run
+                    # anomalous_metric = [value, base_name, metric_timestamp]
+                    anomalous_metric = [value, base_name, metric_timestamp, triggered_algorithms, algorithms_run]
+
                     redis_set = 'analyzer.all_anomalous_metrics'
                     data = str(anomalous_metric)
                     waterfall_alert_check_string = '%s.%s' % (str(metric_timestamp), base_name)
@@ -4085,7 +4128,16 @@ class Analyzer(Thread):
                             base_name = str(send_alert_for[1])
                             metric_timestamp = int(float(send_alert_for[2]))
                             triggered_algorithms = send_alert_for[3]
-                            anomalous_metric = [value, base_name, metric_timestamp]
+                            # @added 20201008 - Feature #3734: waterfall alerts
+                            #                   Branch #3068: SNAB
+                            # Added algorithms_run
+                            algorithms_run = send_alert_for[4]
+
+                            # @modified 20201008 - Feature #3734: waterfall alerts
+                            #                      Branch #3068: SNAB
+                            # Added triggered_algorithms and algorithms_run
+                            # anomalous_metric = [value, base_name, metric_timestamp]
+                            anomalous_metric = [value, base_name, metric_timestamp, triggered_algorithms, algorithms_run]
                             redis_set = 'analyzer.all_anomalous_metrics'
                             data = str(anomalous_metric)
                             try:
@@ -4647,9 +4699,42 @@ class Analyzer(Thread):
                                         resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
                                 try:
                                     if alert[1] != 'smtp':
-                                        trigger_alert(alert, metric, context)
-                                        logger.info('trigger_alert :: alert: %s, metric: %s, context: %s' % (
-                                            str(alert), str(metric), str(context)))
+
+                                        # @added 20201008 - Feature #3772: Add the anomaly_id to the http_alerter json
+                                        #                   Feature #3734: waterfall alerts
+                                        #                   Branch #3068: SNAB
+                                        new_alert = None
+                                        if 'http_alerter' in alert[1]:
+                                            anomaly_id = None
+                                            anomaly_id_redis_key = 'panorama.anomaly_id.%s.%s' % (
+                                                str(int(metric[2])), metric[1])
+                                            try_get_anomaly_id_redis_key_count = 0
+                                            while try_get_anomaly_id_redis_key_count < 20:
+                                                try_get_anomaly_id_redis_key_count += 1
+                                                try:
+                                                    anomaly_id = int(self.redis_conn_decoded.get(anomaly_id_redis_key))
+                                                    break
+                                                except:
+                                                    sleep(1)
+                                            if not anomaly_id:
+                                                logger.error('error :: failed to determine anomaly_id from Redis key - %s' % anomaly_id_redis_key)
+                                            else:
+                                                logger.info('determined anomaly_id as %s, appending to alert' % str(anomaly_id))
+                                            # Do not modify the alert list object, create a new one
+                                            new_alert = list(alert)
+                                            new_alert.append(['anomaly_id', anomaly_id])
+
+                                        # @modified 20201008 - Feature #3772: Add the anomaly_id to the http_alerter json
+                                        #                      Feature #3734: waterfall alerts
+                                        #                      Branch #3068: SNAB
+                                        if new_alert:
+                                            trigger_alert(new_alert, metric, context)
+                                            logger.info('trigger_alert :: alert: %s, metric: %s, context: %s' % (
+                                                str(new_alert), str(metric), str(context)))
+                                        else:
+                                            trigger_alert(alert, metric, context)
+                                            logger.info('trigger_alert :: alert: %s, metric: %s, context: %s' % (
+                                                str(alert), str(metric), str(context)))
                                     else:
                                         smtp_trigger_alert(alert, metric, context)
                                         logger.info('smtp_trigger_alert :: alert: %s, metric: %s, context: %s' % (

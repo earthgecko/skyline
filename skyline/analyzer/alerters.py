@@ -115,6 +115,10 @@ alert: the tuple specified in your settings:\n
     alert[0]: The matched substring of the anomalous metric\n
     alert[1]: the name of the strategy being used to alert\n
     alert[2]: The timeout of the alert that was triggered\n
+        alert[4]: The type [optional for http_alerter only] (dict)\n
+                  The snab_details [optional for SNAB and slack only] (list)\n
+        alert[5]: The snab_details [optional for SNAB and slack only] (list)\n
+                  The anomaly_id [optional for http_alerter only] (list)\n
 metric: information about the anomaly itself\n
     metric[0]: the anomalous value\n
     metric[1]: The full name of the anomalous metric\n
@@ -2139,6 +2143,33 @@ def alert_http(alert, metric, context):
             except:
                 external_alerter_id = None
 
+            # @added 20201008 - Feature #3772: Add the anomaly_id to the http_alerter json
+            #                   Feature #3734: waterfall alerts
+            #                   Branch #3068: SNAB
+            anomaly_id = None
+            anomalyScore = 1.0
+            try:
+                anomaly_id_details = alert[4]
+                if anomaly_id_details[0] == 'anomaly_id':
+                    anomaly_id = anomaly_id_details[1]
+                    anomalyScore = 1.0
+            except:
+                anomaly_id = None
+            if not anomaly_id:
+                try:
+                    anomaly_id_details = alert[5]
+                    if anomaly_id_details[0] == 'anomaly_id':
+                        anomaly_id = anomaly_id_details[1]
+                        anomalyScore = 1.0
+                except:
+                    anomaly_id = None
+                if not anomaly_id:
+                    logger.error('error :: alert_http :: failed to determine anomaly_id from alert[4] or alert[5]')
+
+            # @modified 20201008 - Feature #3772: Add the anomaly_id to the http_alerter json
+            #                      Feature #3734: waterfall alerts
+            #                      Branch #3068: SNAB
+            # Added anomaly_id and anomalyScore
             metric_alert_dict = {
                 "metric": str(metric[1]),
                 "timestamp": timestamp_str,
@@ -2147,7 +2178,9 @@ def alert_http(alert, metric, context):
                 "expiry": expiry_str,
                 "source": str(source),
                 "token": str(alerter_token),
-                "id": str(external_alerter_id)
+                "id": str(external_alerter_id),
+                "anomaly_id": str(anomaly_id),
+                "anomalyScore": str(anomalyScore),
             }
             # @modified 20200302: Feature #3396: http_alerter
             # Add the token as an independent entity from the alert
@@ -2348,7 +2381,10 @@ def trigger_alert(alert, metric, context):
         alert[0]: The matched substring of the anomalous metric (str)\n
         alert[1]: the name of the strategy being used to alert (str)\n
         alert[2]: The timeout of the alert that was triggered (int)\n
-        alert[3]: The second order resolution hours [optional for Mirage] (int)\n
+        alert[3]: The type [optional for http_alerter only] (dict)\n
+                  The snab_details [optional for SNAB and slack only] (list)\n
+        alert[4]: The snab_details [optional for SNAB and slack only] (list)\n
+                  The anomaly_id [optional for http_alerter only] (list)\n
     :param metric:
         The metric tuple e.g. (2.345, 'server-1.cpu.user', 1462172400)\n
         metric[0]: the anomalous value (float)\n
