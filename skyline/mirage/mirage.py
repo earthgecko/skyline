@@ -1317,7 +1317,7 @@ class Mirage(Thread):
         # @added 20200904 - Feature #3734: waterfall alerts
         # Remove the metric from the waterfall_alerts Redis set
         # [metric, timestamp, value, added_to_waterfall_timestamp]
-        # waterfall_data = [metric[1], metric[2], metric[0], added_to_waterfall_timestamp]
+        # waterfall_data = [metric[1], metric[2], metric[0], added_to_waterfall_timestamp. waterfall_panorama_data]
         redis_set = 'analyzer.waterfall_alerts.sent_to_mirage'
         literal_analyzer_waterfall_alerts = []
         try:
@@ -1352,7 +1352,7 @@ class Mirage(Thread):
             # @added 20200904 - Feature #3734: waterfall alerts
             # Remove the metric from the waterfall_alerts Redis set
             # [metric, timestamp, value, added_to_waterfall_timestamp]
-            # waterfall_data = [metric[1], metric[2], metric[0], added_to_waterfall_timestamp]
+            # waterfall_data = [metric[1], metric[2], metric[0], added_to_waterfall_timestamp, waterfall_panorama_data]
             redis_set = 'analyzer.waterfall_alerts.sent_to_mirage'
             for waterfall_alert in analyzer_waterfall_alerts:
                 if waterfall_alert[0] == base_name:
@@ -1629,7 +1629,7 @@ class Mirage(Thread):
                 # @added 20200904 - Feature #3734: waterfall alerts
                 # Remove the metric from the waterfall_alerts Redis set
                 # [metric, timestamp, value, added_to_waterfall_timestamp]
-                # waterfall_data = [metric[1], metric[2], metric[0], added_to_waterfall_timestamp]
+                # waterfall_data = [metric[1], metric[2], metric[0], added_to_waterfall_timestamp, waterfall_panorama_data]
                 redis_set = 'analyzer.waterfall_alerts.sent_to_mirage'
                 for waterfall_alert in analyzer_waterfall_alerts:
                     if waterfall_alert[0] == base_name:
@@ -1773,7 +1773,7 @@ class Mirage(Thread):
                 # @added 20200904 - Feature #3734: waterfall alerts
                 # Remove the metric from the waterfall_alerts Redis set
                 # [metric, timestamp, value, added_to_waterfall_timestamp]
-                # waterfall_data = [metric[1], metric[2], metric[0], added_to_waterfall_timestamp]
+                # waterfall_data = [metric[1], metric[2], metric[0], added_to_waterfall_timestamp, waterfall_panorama_data]
                 # Do not remove if this is only for training_data creation
                 if redis_metric_name in ionosphere_unique_metrics:
                     redis_set = 'analyzer.waterfall_alerts.sent_to_mirage'
@@ -1808,8 +1808,34 @@ class Mirage(Thread):
                     # Only add if this is an ionosphere_enabled metric_check_file
                     if redis_metric_name in ionosphere_unique_metrics:
                         if mirage_waterfall_data:
-                            # [metric, timestamp, value, added_to_waterfall_timestamp]
+                            # waterfall_data = [metric[1], metric[2], metric[0], added_to_waterfall_timestamp, waterfall_panorama_data]
                             waterfall_data = mirage_waterfall_data
+
+                            # @added 20201008 - Bug #3776: waterfall_alert - no analyzer triggered_algorithms in waterfall_panorama_data on MIRAGE_ALWAYS_METRICS
+                            # When a MIRAGE_ALWAYS_METRICS on metric is sent
+                            # through to Mirage from Analyzer the sometimes has
+                            # no algorithms that triggered_algorithms as the
+                            # metric is sent every run, this can be expected.
+                            # However if the Mirage three-sigma check does
+                            # trigger algorithms they need to be added here so
+                            # that when metric and event are sent to Panorama
+                            # the triggered_algorithms is populated
+                            if base_name in MIRAGE_ALWAYS_METRICS:
+                                from_timestamp = str(int(timeseries[1][0]))
+                                waterfall_panorama_data = [
+                                    base_name, datapoint, int(timeseries[1][0]),
+                                    int(timeseries[-1][0]), algorithms_run,
+                                    triggered_algorithms, skyline_app,
+                                    skyline_app, this_host,
+                                    waterfall_alert[4][9]
+                                ]
+                                # Use the original added_to_waterfall_timestamp
+                                added_to_waterfall_timestamp = waterfall_data[3]
+                                waterfall_data = [
+                                    base_name, datapoint, int(timeseries[-1][0]),
+                                    added_to_waterfall_timestamp, waterfall_panorama_data
+                                ]
+
                             redis_set = 'mirage.waterfall_alerts.sent_to_ionosphere'
                             try:
                                 self.redis_conn.sadd(redis_set, str(waterfall_data))
@@ -2646,7 +2672,7 @@ class Mirage(Thread):
             # @added 20200907 - Feature #3734: waterfall alerts
             # Add alert for expired waterfall_alert items
             # [metric, timestamp, value, added_to_waterfall_timestamp]
-            # waterfall_data = [metric[1], metric[2], metric[0], added_to_waterfall_timestamp]
+            # waterfall_data = [metric[1], metric[2], metric[0], added_to_waterfall_timestamp, waterfall_panorama_data]
             waterfall_alert_check_timestamp = int(time())
             waterfall_alerts_to_alert_on = []
             # A list to add a metric,timestamp string to in order to override
@@ -3283,13 +3309,13 @@ class Mirage(Thread):
 
                                 # Remove the metric from the waterfall_alerts Redis set
                                 # [metric, timestamp, value, added_to_waterfall_timestamp]
-                                # waterfall_data = [metric[1], metric[2], metric[0], added_to_waterfall_timestamp]
+                                # waterfall_data = [metric[1], metric[2], metric[0], added_to_waterfall_timestamp, waterfall_panorama_data]
                                 redis_set = 'mirage.waterfall_alerts.sent_to_ionosphere'
 
                                 # @added 20200905 - Feature #3734: waterfall alerts
                                 # Remove the metric from the waterfall_alerts Redis set
                                 # [metric, timestamp, value, added_to_waterfall_timestamp]
-                                # waterfall_data = [metric[1], metric[2], metric[0], added_to_waterfall_timestamp]
+                                # waterfall_data = [metric[1], metric[2], metric[0], added_to_waterfall_timestamp, waterfall_panorama_data]
                                 redis_set = 'mirage.waterfall_alerts.sent_to_ionosphere'
                                 literal_waterfall_alerts = []
                                 try:
