@@ -89,7 +89,7 @@ def last_same_hours(current_skyline_app, parent_pid, timeseries, algorithm_param
     if debug_logging:
         try:
             current_logger = get_log(current_skyline_app)
-            current_logger.debug('debug :: %s :: debug_logging enabled with algorithm_parameters -%s' % (
+            current_logger.debug('debug :: %s :: debug_logging enabled with algorithm_parameters - %s' % (
                 algorithm_name, str(algorithm_parameters)))
         except:
             # This except pattern MUST be used in ALL custom algortihms to
