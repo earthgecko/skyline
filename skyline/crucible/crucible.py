@@ -64,7 +64,10 @@ import settings
 from skyline_functions import (
     fail_check, mkdir_p, write_data_to_file, filesafe_metricname,
     # @added 20200506 - Feature #3532: Sort all time series
-    sort_timeseries)
+    sort_timeseries,
+    # @added 20201009 - Feature #3780: skyline_functions - sanitise_graphite_url
+    #                   Bug #3778: Handle single encoded forward slash requests to Graphite
+    sanitise_graphite_url)
 
 from crucible_algorithms import run_algorithms
 
@@ -905,6 +908,12 @@ class Crucible(Thread):
                         use_timeout = int(connect_timeout)
                     if settings.ENABLE_CRUCIBLE_DEBUG:
                         logger.info('use_timeout - %s' % (str(use_timeout)))
+
+                    # @added 20201009 - Feature #3780: skyline_functions - sanitise_graphite_url
+                    #                   Bug #3778: Handle single encoded forward slash requests to Graphite
+                    sanitised = False
+                    sanitised, url = sanitise_graphite_url(skyline_app, url)
+
                     try:
                         r = requests.get(url, timeout=use_timeout)
                         js = r.json()

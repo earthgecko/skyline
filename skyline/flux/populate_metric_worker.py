@@ -47,7 +47,10 @@ if True:
         get_redis_conn,
         # @added 20191128 - Bug #3266: py3 Redis binary objects not strings
         #                   Branch #3262: py3
-        get_redis_conn_decoded)
+        get_redis_conn_decoded,
+        # @added 20201009 - Feature #3780: skyline_functions - sanitise_graphite_url
+        #                   Bug #3778: Handle single encoded forward slash requests to Graphite
+        sanitise_graphite_url)
 
 # @modified 20191129 - Branch #3262: py3
 # Consolidate flux logging
@@ -310,6 +313,12 @@ class PopulateMetricWorker(Process):
                                 settings.GRAPHITE_RENDER_URI, graphite_from, metric)
                         logger.info('populate_metric_worker :: using Graphite URL - %s' % (
                             url))
+
+                        # @added 20201009 - Feature #3780: skyline_functions - sanitise_graphite_url
+                        #                   Bug #3778: Handle single encoded forward slash requests to Graphite
+                        sanitised = False
+                        sanitised, url = sanitise_graphite_url(skyline_app, url)
+
                         r = requests.get(url)
                         if r.status_code == 200:
                             js = []
@@ -423,6 +432,11 @@ class PopulateMetricWorker(Process):
                     except:
                         logger.info(traceback.format_exc())
                         logger.error('error :: populate_metric_worker :: failed to rewrite URL')
+
+                # @added 20201009 - Feature #3780: skyline_functions - sanitise_graphite_url
+                #                   Bug #3778: Handle single encoded forward slash requests to Graphite
+                sanitised = False
+                sanitised, fetch_url = sanitise_graphite_url(skyline_app, fetch_url)
 
                 success = False
                 try:

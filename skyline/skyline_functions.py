@@ -881,6 +881,11 @@ def get_graphite_metric(
         #     image_data = None
         #     current_logger.error('error :: url bad - %s' % (image_url))
 
+        # @added 20201009 - Feature #3780: skyline_functions - sanitise_graphite_url
+        #                   Bug #3778: Handle single encoded forward slash requests to Graphite
+        sanitised = False
+        sanitised, image_url = sanitise_graphite_url(current_skyline_app, image_url)
+
         # @added 20191025 - Task #3290: Handle urllib2 in py3
         #                   Branch #3262: py3
         # Use urlretrieve
@@ -933,6 +938,11 @@ def get_graphite_metric(
             use_timeout = int(connect_timeout)
         if settings.ENABLE_DEBUG:
             current_logger.info('use_timeout - %s' % (str(use_timeout)))
+
+        # @added 20201009 - Feature #3780: skyline_functions - sanitise_graphite_url
+        #                   Bug #3778: Handle single encoded forward slash requests to Graphite
+        sanitised = False
+        sanitised, url = sanitise_graphite_url(current_skyline_app, url)
 
         graphite_json_fetched = False
         try:
@@ -2334,3 +2344,41 @@ def update_item_in_redis_set(current_skyline_app, redis_set, original_item, upda
             return_value = False
 
     return return_value
+
+
+# @added 20201009 - Feature #3780: skyline_functions - sanitise_graphite_url
+#                   Bug #3778: Handle single encoded forward slash requests to Graphite
+def sanitise_graphite_url(current_skyline_app, graphite_url):
+    """
+    Transform any targets in the URL that need modifications like double encoded
+    forward slash and return whether the URL was sanitised and the url.
+
+    :param current_skyline_app: the Skyline app calling the function
+    :param graphite_url: the URL
+    :type current_skyline_app: str
+    :type graphite_url: str
+    :return: sanitised, url
+    :rtype: tuple
+
+    """
+
+    return_value = graphite_url
+    sanitised = False
+    current_logger = None
+
+    if '.%2F' in graphite_url:
+        try:
+            return_value = graphite_url.replace('.%2F', '.%252F')
+            sanitised = True
+            try:
+                current_skyline_app_logger = str(current_skyline_app) + 'Log'
+                current_logger = logging.getLogger(current_skyline_app_logger)
+            except:
+                pass
+            if current_logger:
+                current_logger.info('sanitise_graphite_url - transformed %s to %s' % (
+                    graphite_url, str(return_value)))
+        except:
+            pass
+
+    return sanitised, return_value
