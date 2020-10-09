@@ -30,7 +30,10 @@ if True:
         send_graphite_metric, filesafe_metricname,
         # @added 20191111 - Bug #3266: py3 Redis binary objects not strings
         #                   Branch #3262: py3
-        get_redis_conn, get_redis_conn_decoded)
+        get_redis_conn, get_redis_conn_decoded,
+        # @added 20201009 - Feature #3780: skyline_functions - sanitise_graphite_url
+        #                   Bug #3778: Handle single encoded forward slash requests to Graphite
+        sanitise_graphite_url)
 
 parent_skyline_app = 'vista'
 child_skyline_app = 'fetcher'
@@ -189,6 +192,12 @@ class Fetcher(Thread):
         batch_responses = []
         start_batch_fetches = int(time())
         for batch_number, remote_host, from_timestamp_str, url in graphite_batches:
+
+            # @added 20201009 - Feature #3780: skyline_functions - sanitise_graphite_url
+            #                   Bug #3778: Handle single encoded forward slash requests to Graphite
+            sanitised = False
+            sanitised, url = sanitise_graphite_url(skyline_app, url)
+
             try:
                 batch_response = requests.get(url)
                 batch_js = batch_response.json()
@@ -225,6 +234,11 @@ class Fetcher(Thread):
                 except:
                     logger.error(traceback.format_exc())
                     logger.error('error :: fetcher :: failed to detemine if %s was in batch_responses' % str(remote_target))
+
+            # @added 20201009 - Feature #3780: skyline_functions - sanitise_graphite_url
+            #                   Bug #3778: Handle single encoded forward slash requests to Graphite
+            sanitised = False
+            sanitised, url = sanitise_graphite_url(skyline_app, url)
 
             # @modified 20191127 - Feature #3338: Vista - batch Graphite requests
             # Wrapped in if not success

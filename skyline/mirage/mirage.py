@@ -51,7 +51,10 @@ from skyline_functions import (
     #                   Branch #3262: py3
     # Added a single functions to deal with Redis connection and the
     # charset='utf-8', decode_responses=True arguments required in py3
-    get_redis_conn, get_redis_conn_decoded)
+    get_redis_conn, get_redis_conn_decoded,
+    # @added 20201009 - Feature #3780: skyline_functions - sanitise_graphite_url
+    #                   Bug #3778: Handle single encoded forward slash requests to Graphite
+    sanitise_graphite_url)
 
 # @added 20200425 - Feature #3512: matched_or_regexed_in_list function
 #                   Feature #3508: ionosphere.untrainable_metrics
@@ -293,6 +296,12 @@ class Mirage(Thread):
                     settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
                     settings.GRAPHITE_RENDER_URI, graphite_from, graphite_until,
                     metric_name)
+
+            # @added 20201009 - Feature #3780: skyline_functions - sanitise_graphite_url
+            #                   Bug #3778: Handle single encoded forward slash requests to Graphite
+            sanitised = False
+            sanitised, url = sanitise_graphite_url(skyline_app, url)
+
             r = requests.get(url)
             js = r.json()
             datapoints = js[0]['datapoints']
@@ -313,6 +322,11 @@ class Mirage(Thread):
 
         parsed = urlparse.urlparse(url)
         target = urlparse.parse_qs(parsed.query)['target'][0]
+
+        # @added 20201009 - Feature #3780: skyline_functions - sanitise_graphite_url
+        #                   Bug #3778: Handle single encoded forward slash requests to Graphite
+        if sanitised:
+            target = metric_name
 
         metric_data_folder = str(settings.MIRAGE_DATA_FOLDER) + "/" + target
         mkdir_p(metric_data_folder)
@@ -1831,8 +1845,10 @@ class Mirage(Thread):
                                 ]
                                 # Use the original added_to_waterfall_timestamp
                                 added_to_waterfall_timestamp = waterfall_data[3]
+                                # @modified 20201009 - Bug #3776: waterfall_alert - no analyzer triggered_algorithms in waterfall_panorama_data on MIRAGE_ALWAYS_METRICS
+                                # corrected datapoint, timestamp order
                                 waterfall_data = [
-                                    base_name, datapoint, int(timeseries[-1][0]),
+                                    base_name, int(timeseries[-1][0]), datapoint,
                                     added_to_waterfall_timestamp, waterfall_panorama_data
                                 ]
 

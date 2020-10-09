@@ -3981,7 +3981,10 @@ class Analyzer(Thread):
                             if waterfall_alert[0] in MIRAGE_ALWAYS_METRICS:
                                 # If triggered_algorithms is less than CONSENSUS
                                 # do not alert
-                                if len(waterfall_alert[4][5]) > settings.CONSENSUS:
+                                # @modified 20201009 - Bug #3776: waterfall_alert - no analyzer triggered_algorithms in waterfall_panorama_data on MIRAGE_ALWAYS_METRICS
+                                # Correct the operator
+                                # if len(waterfall_alert[4][5]) > settings.CONSENSUS:
+                                if len(waterfall_alert[4][5]) < settings.CONSENSUS:
                                     append_waterfall_alert = False
                                     logger.info('not waterfall alerting for MIRAGE_ALWAYS_METRICS metric that has no  item to alert on from Redis set %s - %s' % (
                                         redis_set, str(waterfall_alert)))
