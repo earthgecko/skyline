@@ -2383,7 +2383,7 @@ def sanitise_graphite_url(current_skyline_app, graphite_url):
 
     if '+' in url:
         try:
-            url = graphite_url.replace('+', '%2B')
+            url = url.replace('+', '%2B')
             sanitised = True
             try:
                 current_skyline_app_logger = str(current_skyline_app) + 'Log'
