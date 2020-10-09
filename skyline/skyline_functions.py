@@ -2362,13 +2362,13 @@ def sanitise_graphite_url(current_skyline_app, graphite_url):
 
     """
 
-    return_value = graphite_url
+    url = graphite_url
     sanitised = False
     current_logger = None
 
-    if '.%2F' in graphite_url:
+    if '.%2F' in url:
         try:
-            return_value = graphite_url.replace('.%2F', '.%252F')
+            url = url.replace('.%2F', '.%252F')
             sanitised = True
             try:
                 current_skyline_app_logger = str(current_skyline_app) + 'Log'
@@ -2377,8 +2377,23 @@ def sanitise_graphite_url(current_skyline_app, graphite_url):
                 pass
             if current_logger:
                 current_logger.info('sanitise_graphite_url - transformed %s to %s' % (
-                    graphite_url, str(return_value)))
+                    graphite_url, str(url)))
         except:
             pass
 
-    return sanitised, return_value
+    if '+' in url:
+        try:
+            url = graphite_url.replace('+', '%2B')
+            sanitised = True
+            try:
+                current_skyline_app_logger = str(current_skyline_app) + 'Log'
+                current_logger = logging.getLogger(current_skyline_app_logger)
+            except:
+                pass
+            if current_logger:
+                current_logger.info('sanitise_graphite_url - transformed %s to %s' % (
+                    graphite_url, str(url)))
+        except:
+            pass
+
+    return sanitised, url
