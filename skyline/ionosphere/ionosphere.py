@@ -2389,6 +2389,13 @@ class Ionosphere(Thread):
             try:
                 if fps_db_object:
                     for row in fps_db_object:
+
+                        # @added 20201009 - Bug #3782: Exclude disabled echo features profile
+                        if row['enabled'] != 1:
+                            continue
+                        if row['deleted'] == 1:
+                            continue
+
                         if int(row['full_duration']) == int(settings.FULL_DURATION):
                             fp_ids.append(int(row['id']))
                             echo_fp_ids.append(int(row['id']))
