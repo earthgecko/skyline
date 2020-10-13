@@ -2197,6 +2197,13 @@ def alert_http(alert, metric, context):
                 str(alerter_name), str(alert), str(metric)))
             return
 
+        # @added 20201012 - Feature #3772: Add the anomaly_id to the http_alerter json
+        # If this is an external alerter and there is no anomaly id, log an
+        # error and do not send
+        if external_alerter_id and not anomaly_id:
+            logger.error('error :: alert_http :: failed to determine anomaly_id not sending alert')
+            return
+
         in_resend_queue = False
         redis_set = '%s.http_alerter.queue' % str(source)
         resend_queue = None
