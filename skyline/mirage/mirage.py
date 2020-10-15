@@ -54,7 +54,9 @@ from skyline_functions import (
     get_redis_conn, get_redis_conn_decoded,
     # @added 20201009 - Feature #3780: skyline_functions - sanitise_graphite_url
     #                   Bug #3778: Handle single encoded forward slash requests to Graphite
-    sanitise_graphite_url)
+    sanitise_graphite_url,
+    # @added 20201013 - Feature #3780: skyline_functions - sanitise_graphite_url
+    encode_graphite_metric_name)
 
 # @added 20200425 - Feature #3512: matched_or_regexed_in_list function
 #                   Feature #3508: ionosphere.untrainable_metrics
@@ -271,6 +273,9 @@ class Mirage(Thread):
         metric_namespace = metric_name.replace('(', '\(')
         metric_name = metric_namespace.replace(')', '\)')
 
+        # @added 20201013 - Feature #3780: skyline_functions - sanitise_graphite_url
+        encoded_graphite_metric_name = encode_graphite_metric_name(skyline_app, metric_name)
+
         try:
             # We use absolute time so that if there is a lag in mirage the correct
             # timeseries data is still surfaced relevant to the anomalous datapoint
@@ -285,7 +290,9 @@ class Mirage(Thread):
                 url = '%s://%s:%s/%s/?from=%s&until=%s&target=%s&format=json' % (
                     settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
                     str(settings.GRAPHITE_PORT), settings.GRAPHITE_RENDER_URI,
-                    graphite_from, graphite_until, metric_name)
+                    # @modified 20201013 - Feature #3780: skyline_functions - sanitise_graphite_url
+                    # graphite_from, graphite_until, metric_name)
+                    graphite_from, graphite_until, encoded_graphite_metric_name)
             else:
                 # @modified 20190520 - Branch #3002: docker
                 # Use GRAPHITE_RENDER_URI
@@ -295,12 +302,9 @@ class Mirage(Thread):
                 url = '%s://%s/%s/?from=%s&until=%s&target=%s&format=json' % (
                     settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
                     settings.GRAPHITE_RENDER_URI, graphite_from, graphite_until,
-                    metric_name)
-
-            # @added 20201009 - Feature #3780: skyline_functions - sanitise_graphite_url
-            #                   Bug #3778: Handle single encoded forward slash requests to Graphite
-            sanitised = False
-            sanitised, url = sanitise_graphite_url(skyline_app, url)
+                    # @modified 20201013 - Feature #3780: skyline_functions - sanitise_graphite_url
+                    # metric_name)
+                    encoded_graphite_metric_name)
 
             r = requests.get(url)
             js = r.json()
@@ -322,11 +326,6 @@ class Mirage(Thread):
 
         parsed = urlparse.urlparse(url)
         target = urlparse.parse_qs(parsed.query)['target'][0]
-
-        # @added 20201009 - Feature #3780: skyline_functions - sanitise_graphite_url
-        #                   Bug #3778: Handle single encoded forward slash requests to Graphite
-        if sanitised:
-            target = metric_name
 
         metric_data_folder = str(settings.MIRAGE_DATA_FOLDER) + "/" + target
         mkdir_p(metric_data_folder)

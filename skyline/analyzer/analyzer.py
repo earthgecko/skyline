@@ -25,6 +25,9 @@ import os.path
 import resource
 from ast import literal_eval
 
+# @added 20201014 - Feature #3734: waterfall alerts
+from shutil import rmtree
+
 import settings
 from skyline_functions import (
     send_graphite_metric, write_data_to_file, send_anomalous_metric_to, mkdir_p,
@@ -3075,7 +3078,8 @@ class Analyzer(Thread):
                     # analyzer.mirage.metrics_expiration_times Redis set
                     analyzer_mirage_metrics_expiration_times_list = []
                     try:
-                        analyzer_mirage_metrics_expiration_times_list = list(self.redis_conn.smembers('analyzer.mirage.metrics_expiration_times'))
+                        # analyzer_mirage_metrics_expiration_times_list = list(self.redis_conn.smembers('analyzer.mirage.metrics_expiration_times'))
+                        analyzer_mirage_metrics_expiration_times_list = list(self.redis_conn_decoded.smembers('analyzer.mirage.metrics_expiration_times'))
                         logger.info('%s items in Redis set analyzer.mirage.metrics_expiration_times' % str(len(analyzer_mirage_metrics_expiration_times_list)))
                     except:
                         logger.error(traceback.format_exc())
@@ -4182,6 +4186,11 @@ class Analyzer(Thread):
                 logger.error(traceback.format_exc())
                 logger.error('error :: failed to query Redis set analyzer.all_anomalous_metrics')
 
+            # @added 20201014 - Feature #3734: waterfall alerts
+            # Remove ionosphere training data as all the
+            # resources required are not available for training
+            remove_ionosphere_training_data_for = []
+
             # Send alerts
             if settings.ENABLE_ALERTS:
                 try:
@@ -4194,6 +4203,10 @@ class Analyzer(Thread):
                         # Moved to above so only called once
                         # all_anomalous_metrics = list(self.redis_conn_decoded.smembers('analyzer.all_anomalous_metrics'))
                         for metric_list_string in all_anomalous_metrics:
+
+                            # @added 20201014 - Feature #3734: waterfall alerts
+                            second_order_resolution_seconds = 0
+
                             metric = literal_eval(metric_list_string)
                             if LOCAL_DEBUG:
                                 logger.info('debug :: metric in all_anomalous_metrics - %s' % (
@@ -4280,6 +4293,13 @@ class Analyzer(Thread):
                                                 str(SECOND_ORDER_RESOLUTION_FULL_DURATION),
                                                 str(matched_by)))
                                         context = 'Mirage'
+                                    # @added 20201014 - Feature #3734: waterfall alerts
+                                    # Only gets set on the first stmp alerter in
+                                    # order to determine what ionosphere.training_data
+                                    # item to remove on waterfall alerts
+                                    if not second_order_resolution_seconds:
+                                        second_order_resolution_seconds = int(SECOND_ORDER_RESOLUTION_FULL_DURATION * 3600)
+
                                 except:
                                     logger.error(traceback.format_exc())
                                     logger.error('error :: failed to determine if metric is a Mirage metric')
@@ -4753,11 +4773,44 @@ class Analyzer(Thread):
                                     logger.error(
                                         'error :: failed to trigger_alert :: %s %s via %s' %
                                         (metric[1], metric[0], alert[1]))
+
+                                # @added 20201014 - Feature #3734: waterfall alerts
+                                # Remove ionosphere training data as all the
+                                # resources required are not available for training
+                                if waterfall_alert_check_string in alerting_waterfall_alerts:
+                                    if second_order_resolution_seconds:
+                                        wf_metric = metric[1]
+                                        wf_metric_timeseries_dir = wf_metric.replace('.', '/')
+                                        wf_metric_training_dir = '%s/%s/%s' % (
+                                            settings.IONOSPHERE_DATA_FOLDER, str(int(metric[2])),
+                                            str(wf_metric_timeseries_dir))
+                                        data = [metric[1], int(metric[2]), second_order_resolution_seconds]
+                                        remove_ionosphere_training_data_for.append([data, wf_metric_training_dir])
                 except:
                     logger.error(traceback.format_exc())
                     logger.error('error :: failed in check to alert step')
 
             logger.info('alerts checked')
+
+            # @added 20201014 - Feature #3734: waterfall alerts
+            # Remove ionosphere training data as all the
+            # resources required are not available for training
+            for metric_to_remove in remove_ionosphere_training_data_for:
+                data = metric_to_remove[0]
+                wf_metric_training_dir = metric_to_remove[1]
+                if os.path.exists(wf_metric_training_dir):
+                    try:
+                        rmtree(wf_metric_training_dir)
+                        logger.info('removed ionosphere training dir for waterfall alert metric - %s' % wf_metric_training_dir)
+                    except:
+                        logger.error('error :: failed to rmtree for waterfall alert metric - %s' % wf_metric_training_dir)
+                try:
+                    self.redis_conn.srem('ionosphere.training_data', str(data))
+                    logger.info('removed ionosphere.training_data Redis set item as this is an analyzer waterfall alert and no training data is available - %s' % (
+                        str(data)))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to remove item from Redis ionosphere.training_data set - %s' % (str(data)))
 
             # @added 20200611 - Feature #3578: Test alerts
             # @modified 20200625 - Feature #3578: Test alerts

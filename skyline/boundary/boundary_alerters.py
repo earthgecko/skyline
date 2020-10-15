@@ -69,7 +69,9 @@ if True:
         # @added 20200122: Feature #3396: http_alerter
         get_redis_conn,
         # @added 20200825 - Feature #3704: Add alert to anomalies
-        add_panorama_alert)
+        add_panorama_alert,
+        # @added 20201013 - Feature #3780: skyline_functions - sanitise_graphite_url
+        encode_graphite_metric_name)
 
 skyline_app = 'boundary'
 skyline_app_logger = '%sLog' % skyline_app
@@ -243,11 +245,21 @@ def alert_smtp(datapoint, metric_name, expiration_time, metric_trigger, algorith
     logger.info('graphite_until - %s' % str(graphite_until))
     # @modified 20191022 - Task #3294: py3 - handle system parameter in Graphite cactiStyle
     # graphite_target = 'target=cactiStyle(%s)'
-    graphite_target = 'target=cactiStyle(%s,%%27si%%27)' % metric_name
+
+    # @added 20201013 - Feature #3780: skyline_functions - sanitise_graphite_url
+    encoded_graphite_metric_name = encode_graphite_metric_name(skyline_app, metric_name)
+
+    # @modified 20201013 - Feature #3780: skyline_functions - sanitise_graphite_url
+    # graphite_target = 'target=cactiStyle(%s,%%27si%%27)' % metric_name
+    graphite_target = 'target=cactiStyle(%s,%%27si%%27)' % encoded_graphite_metric_name
+
     if known_derivative_metric:
         # @modified 20191022 - Task #3294: py3 - handle system parameter in Graphite cactiStyle
         # graphite_target = 'target=cactiStyle(nonNegativeDerivative(%s))'
-        graphite_target = 'target=cactiStyle(nonNegativeDerivative(%s),%%27si%%27)' % metric_name
+        # @modified 20201013 - Feature #3780: skyline_functions - sanitise_graphite_url
+        # graphite_target = 'target=cactiStyle(nonNegativeDerivative(%s),%%27si%%27)' % metric_name
+        graphite_target = 'target=cactiStyle(nonNegativeDerivative(%s),%%27si%%27)' % encoded_graphite_metric_name
+
     # @modified 20190520 - Branch #3002: docker
     # Use GRAPHITE_RENDER_URI
     # link = '%s://%s:%s/render/?from=%s&until=%s&%s%s%s&colorList=%s' % (
@@ -637,6 +649,9 @@ def alert_slack(datapoint, metric_name, expiration_time, metric_trigger, algorit
     graphite_render_uri = get_graphite_render_uri(skyline_app)
     graphite_custom_headers = get_graphite_custom_headers(skyline_app)
 
+    # @added 20201013 - Feature #3780: skyline_functions - sanitise_graphite_url
+    encoded_graphite_metric_name = encode_graphite_metric_name(skyline_app, metric_name)
+
     if settings.GRAPHITE_PORT != '':
         if known_derivative_metric:
             # @modified 20190520 - Branch #3002: docker
@@ -651,7 +666,9 @@ def alert_slack(datapoint, metric_name, expiration_time, metric_trigger, algorit
                 settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
                 settings.GRAPHITE_PORT, settings.GRAPHITE_RENDER_URI,
                 str(graphite_from), str(graphite_until),
-                metric, settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+                # @modified 20201013 - Feature #3780: skyline_functions - sanitise_graphite_url
+                # metric, settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+                encoded_graphite_metric_name, settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
         else:
             # @modified 20190520 - Branch #3002: docker
             # Use GRAPHITE_RENDER_URI
@@ -664,7 +681,9 @@ def alert_slack(datapoint, metric_name, expiration_time, metric_trigger, algorit
             link = '%s://%s:%s/%s/?from=%s&until=%s&target=cactiStyle(%s,%%27si%%27)%s%s&colorList=orange' % (
                 settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
                 settings.GRAPHITE_PORT, settings.GRAPHITE_RENDER_URI,
-                str(graphite_from), str(graphite_until), metric,
+                # str(graphite_from), str(graphite_until), metric,
+                # @modified 20201013 - Feature #3780: skyline_functions - sanitise_graphite_url
+                str(graphite_from), str(graphite_until), encoded_graphite_metric_name,
                 settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
     else:
         if known_derivative_metric:
@@ -679,7 +698,9 @@ def alert_slack(datapoint, metric_name, expiration_time, metric_trigger, algorit
             link = '%s://%s/%s/?from=%s&until=%s&target=cactiStyle(nonNegativeDerivative(%s),%%27si%%27)%s%s&colorList=orange' % (
                 settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
                 settings.GRAPHITE_RENDER_URI, str(graphite_from),
-                str(graphite_until), metric, settings.GRAPHITE_GRAPH_SETTINGS,
+                # @modified 20201013 - Feature #3780: skyline_functions - sanitise_graphite_url
+                # str(graphite_until), metric, settings.GRAPHITE_GRAPH_SETTINGS,
+                str(graphite_until), encoded_graphite_metric_name, settings.GRAPHITE_GRAPH_SETTINGS,
                 graph_title)
         else:
             # @modified 20190520 - Branch #3002: docker
@@ -693,7 +714,9 @@ def alert_slack(datapoint, metric_name, expiration_time, metric_trigger, algorit
             link = '%s://%s/%s/?from=%s&until=%s&target=cactiStyle(%s,%%27si%%27)%s%s&colorList=orange' % (
                 settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
                 settings.GRAPHITE_RENDER_URI, str(graphite_from),
-                str(graphite_until), metric, settings.GRAPHITE_GRAPH_SETTINGS,
+                # @modified 20201013 - Feature #3780: skyline_functions - sanitise_graphite_url
+                # str(graphite_until), metric, settings.GRAPHITE_GRAPH_SETTINGS,
+                str(graphite_until), encoded_graphite_metric_name, settings.GRAPHITE_GRAPH_SETTINGS,
                 graph_title)
 
     # slack does not allow embedded images, nor will it fetch links behind
