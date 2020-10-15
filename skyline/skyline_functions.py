@@ -28,6 +28,9 @@ import requests
 # charset='utf-8', decode_responses=True arguments required in py3
 from redis import StrictRedis
 
+# @added 20201012 - Feature #3780: skyline_functions - sanitise_graphite_url
+import urllib.parse
+
 import settings
 
 try:
@@ -2362,13 +2365,13 @@ def sanitise_graphite_url(current_skyline_app, graphite_url):
 
     """
 
-    url = graphite_url
+    sanitised_url = graphite_url
     sanitised = False
     current_logger = None
 
-    if '.%2F' in url:
+    if '.%2F' in sanitised_url:
         try:
-            url = url.replace('.%2F', '.%252F')
+            sanitised_url = graphite_url.replace('.%2F', '.%252F')
             sanitised = True
             try:
                 current_skyline_app_logger = str(current_skyline_app) + 'Log'
@@ -2377,13 +2380,14 @@ def sanitise_graphite_url(current_skyline_app, graphite_url):
                 pass
             if current_logger:
                 current_logger.info('sanitise_graphite_url - transformed %s to %s' % (
-                    graphite_url, str(url)))
+                    graphite_url, str(graphite_url)))
         except:
             pass
 
-    if '+' in url:
+    if '+' in graphite_url:
         try:
-            url = url.replace('+', '%2B')
+            new_sanitised_url = sanitised_url.replace('+', '%2B')
+            sanitised_url = new_sanitised_url
             sanitised = True
             try:
                 current_skyline_app_logger = str(current_skyline_app) + 'Log'
@@ -2392,8 +2396,76 @@ def sanitise_graphite_url(current_skyline_app, graphite_url):
                 pass
             if current_logger:
                 current_logger.info('sanitise_graphite_url - transformed %s to %s' % (
-                    graphite_url, str(url)))
+                    graphite_url, str(sanitised_url)))
         except:
             pass
 
-    return sanitised, url
+    return sanitised, sanitised_url
+
+
+# @added 20201012 - Feature #3780: skyline_functions - sanitise_graphite_url
+def encode_graphite_metric_name(current_skyline_app, metric):
+    """
+    Transform a metric name into a Graphite compliant encoded url name
+
+    :param current_skyline_app: the Skyline app calling the function
+    :param metric: the base_name
+    :type current_skyline_app: str
+    :type metric: str
+    :return: encoded_graphite_metric_name
+    :rtype: str
+
+    """
+
+    encoded_graphite_metric_name = metric
+    current_logger = None
+
+    # import urllib.parse
+    # encoded_graphite_metric_name = urllib.parse.quote(encoded_graphite_metric_name)
+
+    # Double encode forward slash
+    if '.%2F' in encoded_graphite_metric_name:
+        try:
+            encoded_graphite_metric_name = encoded_graphite_metric_name.replace('.%2F', '.%252F')
+            try:
+                current_skyline_app_logger = str(current_skyline_app) + 'Log'
+                current_logger = logging.getLogger(current_skyline_app_logger)
+            except:
+                pass
+            if current_logger:
+                current_logger.info('encode_graphite_metric_name - transformed %s to %s' % (
+                    metric, str(encoded_graphite_metric_name)))
+        except:
+            pass
+
+    # Encode +
+    if '+' in encoded_graphite_metric_name:
+        try:
+            encoded_graphite_metric_name = encoded_graphite_metric_name.replace('+', '%2B')
+            try:
+                current_skyline_app_logger = str(current_skyline_app) + 'Log'
+                current_logger = logging.getLogger(current_skyline_app_logger)
+            except:
+                pass
+            if current_logger:
+                current_logger.info('encode_graphite_metric_name - transformed %s to %s' % (
+                    metric, str(encoded_graphite_metric_name)))
+        except:
+            pass
+
+    # Double encode colons
+    if '%3A' in encoded_graphite_metric_name:
+        try:
+            encoded_graphite_metric_name = encoded_graphite_metric_name.replace('%3A', '%253A')
+            try:
+                current_skyline_app_logger = str(current_skyline_app) + 'Log'
+                current_logger = logging.getLogger(current_skyline_app_logger)
+            except:
+                pass
+            if current_logger:
+                current_logger.info('encode_graphite_metric_name - transformed %s to %s' % (
+                    metric, str(encoded_graphite_metric_name)))
+        except:
+            pass
+
+    return encoded_graphite_metric_name

@@ -94,7 +94,9 @@ if True:
         # @added 20200507 - Feature #3532: Sort all time series
         sort_timeseries,
         # @added 20200825 - Feature #3704: Add alert to anomalies
-        add_panorama_alert)
+        add_panorama_alert,
+        # @added 20201013 - Feature #3780: skyline_functions - sanitise_graphite_url
+        encode_graphite_metric_name)
 
 skyline_app = 'analyzer'
 skyline_app_logger = '%sLog' % skyline_app
@@ -382,6 +384,9 @@ def alert_smtp(alert, metric, context):
     graphite_until = dt.datetime.fromtimestamp(int(until_timestamp)).strftime('%H:%M_%Y%m%d')
     logger.info('graphite_until - %s' % str(graphite_until))
 
+    # @added 20201013 - Feature #3780: skyline_functions - sanitise_graphite_url
+    encoded_graphite_metric_name = encode_graphite_metric_name(skyline_app, base_name)
+
     # @modified 20180809 - Bug #2498: Incorrect scale in some graphs
     # link = '%s://%s:%s/render/?from=-%shours&target=cactiStyle(%s)%s%s&colorList=orange' % (
     #     settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
@@ -398,7 +403,9 @@ def alert_smtp(alert, metric, context):
     link = '%s://%s:%s/%s?from=%s&until=%s&target=cactiStyle(%s,%%27si%%27)%s%s&colorList=orange' % (
         settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, graphite_port,
         graphite_render_uri, str(graphite_from), str(graphite_until),
-        metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+        # @modified 20201013 - Feature #3780: skyline_functions - sanitise_graphite_url
+        # metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+        encoded_graphite_metric_name, settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
 
     # @added 20170603 - Feature #2034: analyse_derivatives
     if known_derivative_metric:
@@ -418,7 +425,9 @@ def alert_smtp(alert, metric, context):
         link = '%s://%s:%s/%s?from=%s&until=%s&target=cactiStyle(nonNegativeDerivative(%s),%%27si%%27)%s%s&colorList=orange' % (
             settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, graphite_port,
             graphite_render_uri, str(graphite_from),
-            str(graphite_until), metric[1], settings.GRAPHITE_GRAPH_SETTINGS,
+            # @modified 20201013 - Feature #3780: skyline_functions - sanitise_graphite_url
+            # str(graphite_until), metric[1], settings.GRAPHITE_GRAPH_SETTINGS,
+            str(graphite_until), encoded_graphite_metric_name, settings.GRAPHITE_GRAPH_SETTINGS,
             graph_title)
 
     content_id = metric[1]
@@ -957,6 +966,16 @@ def alert_smtp(alert, metric, context):
                 more_body += '<font color="black">To use this timeseries to train %s that this is not anomalous manage this training data at:<br>' % main_alert_title
 
             more_body += '<a href="%s">%s</a></font>' % (ionosphere_link, ionosphere_link)
+
+            # @added 20201014 - Feature #3734: waterfall alerts
+            # Remove ionosphere training data as all the
+            # resources required are not available for training
+            if waterfall_alert:
+                if main_alert_title == 'Skyline':
+                    more_body = '<h3><font color="#dd3023">Ionosphere :: </font><font color="#6698FF">no training data for Analyzer waterfall alert</font><font color="black"></font></h3>'
+                else:
+                    more_body = '<h3>%s :: <font color="#6698FF">no training data for waterfall alert</font><font color="black"></font></h3>' % main_alert_title
+
         if redis_image_data:
             more_body += '<font color="black">min: %s  | max: %s   | mean: %s <br>' % (
                 str(array_amin), str(array_amax), str(mean))
@@ -1613,6 +1632,9 @@ def alert_slack(alert, metric, context):
     graphite_render_uri = get_graphite_render_uri(skyline_app)
     graphite_custom_headers = get_graphite_custom_headers(skyline_app)
 
+    # @added 20201013 - Feature #3780: skyline_functions - sanitise_graphite_url
+    encoded_graphite_metric_name = encode_graphite_metric_name(skyline_app, base_name)
+
     if known_derivative_metric:
 
         # @modified 20191106 - Task #3294: py3 - handle system parameter in Graphite cactiStyle
@@ -1621,7 +1643,9 @@ def alert_slack(alert, metric, context):
             settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
             graphite_port, graphite_render_uri, str(
                 graphite_from), str(graphite_until),
-            metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+            # @modified 20201013 - Feature #3780: skyline_functions - sanitise_graphite_url
+            # metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+            encoded_graphite_metric_name, settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
     else:
         # @modified 20191106 - Task #3294: py3 - handle system parameter in Graphite cactiStyle
         # link = '%s://%s:%s/%s?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=orange' % (
@@ -1629,7 +1653,9 @@ def alert_slack(alert, metric, context):
             settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
             graphite_port, graphite_render_uri, str(
                 graphite_from), str(graphite_until),
-            metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+            # @modified 20201013 - Feature #3780: skyline_functions - sanitise_graphite_url
+            # metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+            encoded_graphite_metric_name, settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
 
     # slack does not allow embedded images, nor will it fetch links behind
     # authentication so Skyline uploads a png graphite image with the message
@@ -1833,6 +1859,15 @@ def alert_slack(alert, metric, context):
                 initial_comment = slack_title + ' :: <' + link + '|graphite image link>\n*Ionosphere training dir* :: <' + ionosphere_link + '|training data link> :: for anomaly at ' + slack_time_string
             else:
                 initial_comment = slack_title + ' :: <' + link + '|graphite image link>\n*Training dir* :: <' + ionosphere_link + '|training data link> :: for anomaly at ' + slack_time_string
+            # @added 20201014 - Feature #3734: waterfall alerts
+            # Remove ionosphere training data as all the
+            # resources required are not available for training
+            if waterfall_alert:
+                if main_alert_title == 'Skyline':
+                    initial_comment = slack_title + ' :: <' + link + '|graphite image link>\nNo training data is available for Analyzer waterfall alerts :: for anomaly at ' + slack_time_string
+                else:
+                    initial_comment = slack_title + ' :: <' + link + '|graphite image link>\nNo training data is available for waterfall alerts :: for anomaly at ' + slack_time_string
+
         else:
             # initial_comment = slack_title + ' :: <' + link  + '|graphite image link>'
             initial_comment = slack_title + ' :: <' + link + '|graphite image link>\nFor anomaly at ' + slack_time_string

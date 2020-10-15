@@ -110,7 +110,9 @@ if True:
         # @added 20200507 - Feature #3532: Sort all time series
         sort_timeseries,
         # @added 20200825 - Feature #3704: Add alert to anomalies
-        add_panorama_alert)
+        add_panorama_alert,
+        # @added 20201013 - Feature #3780: skyline_functions - sanitise_graphite_url
+        encode_graphite_metric_name)
 
 # @added 20200929 - Task #3748: POC SNAB
 #                   Branch #3068: SNAB
@@ -413,6 +415,9 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
     graphite_until = dt.datetime.fromtimestamp(int(until_timestamp)).strftime('%H:%M_%Y%m%d')
     logger.info('graphite_until - %s' % str(graphite_until))
 
+    # @added 20201013 - Feature #3780: skyline_functions - sanitise_graphite_url
+    encoded_graphite_metric_name = encode_graphite_metric_name(skyline_app, base_name)
+
     # @modified 20180809 - Bug #2498: Incorrect scale in some graphs
     # link = '%s://%s:%s/render/?from=-%shours&target=cactiStyle(%s)%s%s&colorList=orange' % (
     #     settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
@@ -423,7 +428,9 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
     link = '%s://%s:%s/%s?from=%s&until=%s&target=cactiStyle(%s,%%27si%%27)%s%s&colorList=orange' % (
         settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, graphite_port,
         graphite_render_uri, str(graphite_from), str(graphite_until),
-        metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+        # @modified 20201013 - Feature #3780: skyline_functions - sanitise_graphite_url
+        # metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+        encoded_graphite_metric_name, settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
 
     # @added 20170603 - Feature #2034: analyse_derivatives
     if known_derivative_metric:
@@ -437,7 +444,9 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
         link = '%s://%s:%s/%s?from=%s&until=%s&target=cactiStyle(nonNegativeDerivative(%s),%%27si%%27)%s%s&colorList=orange' % (
             settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST, graphite_port,
             graphite_render_uri, str(graphite_from),
-            str(graphite_until), metric[1], settings.GRAPHITE_GRAPH_SETTINGS,
+            # @modified 20201013 - Feature #3780: skyline_functions - sanitise_graphite_url
+            # str(graphite_until), metric[1], settings.GRAPHITE_GRAPH_SETTINGS,
+            str(graphite_until), encoded_graphite_metric_name, settings.GRAPHITE_GRAPH_SETTINGS,
             graph_title)
 
     content_id = metric[1]
@@ -1459,6 +1468,9 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context):
         logger.info('using graphite_custom_headers :: %s' % (
             str(graphite_custom_headers)))
 
+    # @added 20201013 - Feature #3780: skyline_functions - sanitise_graphite_url
+    encoded_graphite_metric_name = encode_graphite_metric_name(skyline_app, base_name)
+
     if known_derivative_metric:
 
         # @modified 20191106 - Task #3294: py3 - handle system parameter in Graphite cactiStyle
@@ -1467,7 +1479,9 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context):
             settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
             graphite_port, graphite_render_uri, str(
                 graphite_from), str(graphite_until),
-            metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+            # @modified 20201013 - Feature #3780: skyline_functions - sanitise_graphite_url
+            # metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+            encoded_graphite_metric_name, settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
     else:
         # @modified 20191106 - Task #3294: py3 - handle system parameter in Graphite cactiStyle
         # link = '%s://%s:%s/%s?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=orange' % (
@@ -1475,7 +1489,9 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context):
             settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
             graphite_port, graphite_render_uri, str(
                 graphite_from), str(graphite_until),
-            metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+            # @modified 20201013 - Feature #3780: skyline_functions - sanitise_graphite_url
+            # metric[1], settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
+            encoded_graphite_metric_name, settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
 
     # slack does not allow embedded images, nor will it fetch links behind
     # authentication so Skyline uploads a png graphite image with the message
