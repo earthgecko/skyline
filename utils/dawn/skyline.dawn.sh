@@ -13,6 +13,7 @@
 # @modified 20191016 - Branch #3262: py3
 # @modified 20200703 - Task #3608: Update Skyline to Python 3.8.3 and deps
 #                      Branch #3262: py3
+# @modified 20201016 - Branch #3068: SNAB
 # @modified
 # @license
 # @source https://github.com/earthgecko/skyline/utils/dawn/skyline.dawn.sh
@@ -50,7 +51,7 @@ WEBAPP_AUTH_USER_PASSWORD="$(echo {$HOSTNAME}_skyline)"    # The password you wa
 MYSQL_ROOT_PASSWORD="set_the-root-mysql-user-password"     # The MySQL root user password
 MYSQL_SKYLINE_PASSWORD="set_the-skyline-user-db-password"  # The Skyline DB user password
 REDIS_PASSWORD="set_really_long_LONG-Redis-password"       # The Redis password
-SKYLINE_RELEASE="v2.0.0"                                   # The Skyline release to deploy
+SKYLINE_RELEASE="v2.0.1"                                   # The Skyline release to deploy
 # @added 20191016 - Branch #3262: py3
 INSTALL_GRAPHITE=0                                         # Install Graphite 0 = no, 1 = yes (CentOS 6 only)
 
@@ -84,6 +85,11 @@ fi
 #REDIS_VERSION="redis-3.2.12"
 # @modified 20200703 - Task #3608: Update Skyline to Python 3.8.3 and deps
 #REDIS_VERSION="redis-4.0.14"
+# @modified 20201016 - Branch #3068: SNAB
+#REDIS_VERSION="redis-5.0.8"
+#REDIS_VERSION="redis-6.0.8"
+# Reverted to 5.0.8 as 6 requires different service files which need to be
+# done
 REDIS_VERSION="redis-5.0.8"
 
 # @modified 20190412 - Task #2926: Update dependencies
@@ -92,7 +98,9 @@ REDIS_VERSION="redis-5.0.8"
 # @modified 20200703 - Task #3608: Update Skyline to Python 3.8.3 and deps
 #PYTHON_VERSION="3.7.6"
 #PYTHON_MAJOR_VERSION="3.7"
-PYTHON_VERSION="3.8.3"
+# @modified 20201016 - Branch #3068: SNAB
+#PYTHON_VERSION="3.8.3"
+PYTHON_VERSION="3.8.6"
 PYTHON_MAJOR_VERSION="3.8"
 
 PYTHON_VIRTUALENV_DIR="/opt/python_virtualenv"
@@ -100,9 +108,11 @@ PYTHON_VIRTUALENV_DIR="/opt/python_virtualenv"
 #PROJECT="skyline-py2714"
 # @modified 20200703 - Task #3608: Update Skyline to Python 3.8.3 and deps
 #PROJECT="skyline-py376"
-PROJECT="skyline-py383"
+PROJECT="skyline-py386"
 #VIRTUALENV_VERSION="15.2.0"
-VIRTUALENV_VERSION="16.7.9"
+# @modified 20201016 - Branch #3068: SNAB
+#VIRTUALENV_VERSION="16.7.9"
+VIRTUALENV_VERSION="16.7.10"
 
 # @modified 20200703 - Task #3608: Update Skyline to Python 3.8.3 and deps
 #OPENSSL_VERSION="1.1.1d"
@@ -609,7 +619,9 @@ if [ ! -f "${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}/bin/python${PYTHO
 
 # @modified 20200703 - Task #3608: Update Skyline to Python 3.8.3 and deps
   if [ "$OS_MAJOR_VERSION" == "8" ]; then
-    pip3 install --user virtualenv
+    # @modified 20201016 - Branch #3068: SNAB
+    # pip3 install --user virtualenv
+    pip3 install virtualenv
   else
     pip install virtualenv==${VIRTUALENV_VERSION}
   fi
@@ -977,7 +989,9 @@ if [ ! -f /opt/skyline/github/skyline/skyline/settings.py.original ]; then
     | sed -e 's/MEMCACHE_ENABLED = .*/MEMCACHE_ENABLED = True/g' \
     | sed -e "s/PANORAMA_DBUSER = .*/PANORAMA_DBUSER = 'skyline'/g" \
     | sed -e "s/HORIZON_IP = .*/HORIZON_IP = '127.0.0.1'/g" \
-    | sed -e "s/PANORAMA_DBUSERPASS = .*/PANORAMA_DBUSERPASS = '$MYSQL_SKYLINE_PASSWORD'/g" > /opt/skyline/github/skyline/skyline/settings.py
+    | sed -e "s/PANORAMA_DBUSERPASS = .*/PANORAMA_DBUSERPASS = '$MYSQL_SKYLINE_PASSWORD'/g" \
+    | sed -e "s/CARBON_PORT = .*/CARBON_PORT = 2014/g" \
+    | sed -e "s/VERIFY_SSL = .*/VERIFY_SSL = False/g" > /opt/skyline/github/skyline/skyline/settings.py
   if [ $? -ne 0 ]; then
     echo "error :: failed to populate the variables in /opt/skyline/github/skyline/skyline/settings.py"
     exit 1
@@ -1073,20 +1087,12 @@ else
   systemctl restart apache2
 fi
 
-echo "Seeding Skyline with data"
-sleep 2
-cd "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}" || exit 1
-source bin/activate
-bin/python${PYTHON_MAJOR_VERSION} /opt/skyline/github/skyline/utils/seed_data.py
-deactivate
-cd /tmp || exit
-
 # @added 20191016 - Branch #3262: py3
 # Allow to install Graphite on CentOS 6 for now, allows for an end to end
 # testing environment
 DO_GRAPHITE_INSTALL=0
 if [ "$OS" == "CentOS" ]; then
-  if [ "$OS_MAJOR_VERSION" == "6" ]; then
+  if [[ "$OS_MAJOR_VERSION" == "6" || "$OS_MAJOR_VERSION" == "8" ]]; then
     if [ -z "$INSTALL_GRAPHITE" ]; then
       echo "Not installing Graphite"
     else
@@ -1109,6 +1115,10 @@ if [ $DO_GRAPHITE_INSTALL -eq 1 ]; then
                      memcached \
                      libffi-devel
     fi
+    if [ $CENTOS_8 -eq 1 ]; then
+      yum -y install nginx cairo cairo-devel openssl-devel bzip2-devel \
+        sqlite-devel memcached libffi-devel
+    fi
     if [ "$OS" == "Ubuntu" ]; then
       if [ "$OS_MAJOR_VERSION" == "16.04" ]; then
         sudo apt -y install python-dev python-pip libcairo2-dev libffi-dev build-essential nginx
@@ -1120,6 +1130,12 @@ if [ $DO_GRAPHITE_INSTALL -eq 1 ]; then
       echo "Setting up the Graphite virtualenv"
       sleep 1
       cd /opt || exit 1
+
+      # @added 20201016 - Branch #3068: SNAB
+      # As per https://github.com/graphite-project/graphite-web/issues/2566
+      pip${PYTHON_MAJOR_VERSION} uninstall -y virtualenv
+      pip${PYTHON_MAJOR_VERSION} install virtualenv==16.7.10
+
       virtualenv --python="${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}/bin/python${PYTHON_MAJOR_VERSION}" graphite
     else
       echo "Skipping, setting up the Graphite virtualenv, already done."
@@ -1131,9 +1147,13 @@ if [ $DO_GRAPHITE_INSTALL -eq 1 ]; then
     source bin/activate
 
     export PYTHONPATH="/opt/graphite/lib/:/opt/graphite/webapp/"
-    bin/"pip${PYTHON_MAJOR_VERSION}" install --no-binary=:all: https://github.com/graphite-project/whisper/tarball/master
-    bin/"pip${PYTHON_MAJOR_VERSION}" install --no-binary=:all: https://github.com/graphite-project/carbon/tarball/master
-    bin/"pip${PYTHON_MAJOR_VERSION}" install --no-binary=:all: https://github.com/graphite-project/graphite-web/tarball/master
+#    bin/"pip${PYTHON_MAJOR_VERSION}" install --no-binary=:all: https://github.com/graphite-project/whisper/tarball/master
+#    bin/"pip${PYTHON_MAJOR_VERSION}" install --no-binary=:all: https://github.com/graphite-project/carbon/tarball/master
+#    bin/"pip${PYTHON_MAJOR_VERSION}" install --no-binary=:all: https://github.com/graphite-project/graphite-web/tarball/master
+    bin/"pip${PYTHON_MAJOR_VERSION}" install --no-binary=:all: https://github.com/graphite-project/whisper/archive/1.1.7.tar.gz
+    bin/"pip${PYTHON_MAJOR_VERSION}" install --no-binary=:all: https://github.com/graphite-project/carbon/archive/1.1.7.tar.gz
+    bin/"pip${PYTHON_MAJOR_VERSION}" install --no-binary=:all: https://github.com/graphite-project/graphite-web/archive/1.1.7.tar.gz
+
     bin/"pip${PYTHON_MAJOR_VERSION}" install gunicorn
 
     sed "s/#SECRET_KEY.*/SECRET_KEY = '$(date +%s | sha256sum | base64 | head -c 64)'/g" \
@@ -1142,12 +1162,30 @@ if [ $DO_GRAPHITE_INSTALL -eq 1 ]; then
     GRAPHITE_ROOT="/opt/graphite"
     PYTHONPATH=$GRAPHITE_ROOT/webapp "/opt/graphite/lib/python${PYTHON_MAJOR_VERSION}/site-packages/django/bin/django-admin.py" migrate --settings=graphite.settings --run-syncdb
 
+    # @added 20201016 - Branch #3068: SNAB
+    # As per https://github.com/graphite-project/graphite-web/issues/2566
+    deactivate
+    cd
+    pip${PYTHON_MAJOR_VERSION} uninstall -y virtualenv
+    pip${PYTHON_MAJOR_VERSION} virtualenv
+
     if [ "$OS" == "CentOS" ]; then
-      if [ $CENTOS_6 -eq 1 ]; then
-        sudo chown nginx:nginx /opt/graphite/storage/graphite.db
-        rm -f /etc/nginx/conf.d/default.conf
-        NGINX_GRAPHITE_CONFIG="/etc/nginx/conf.d/graphite.conf"
-      fi
+      sudo chown nginx:nginx /opt/graphite/storage/graphite.db
+      rm -f /etc/nginx/conf.d/default.conf
+      NGINX_GRAPHITE_CONFIG="/etc/nginx/conf.d/graphite.conf"
+      cp /etc/nginx/nginx.conf /etc/nginx/nginx.conf.bak
+      cat /etc/nginx/nginx.conf | while read line
+      do
+        ADD=$(echo $line | grep -c server)
+        if [ $ADD -eq 0 ]; then
+          echo $line >> /etc/nginx/nginx.conf.new
+        else
+          break
+        fi
+      done
+      echo "}" >> /etc/nginx/nginx.conf.new
+      cat /etc/nginx/nginx.conf.new > /etc/nginx/nginx.conf
+
     fi
     if [ "$OS" == "Ubuntu" ]; then
       if [ "$OS_MAJOR_VERSION" == "16.04" ]; then
@@ -1167,7 +1205,7 @@ server {
     server_name $YOUR_SKYLINE_SERVER_FQDN;
 
     allow $YOUR_OTHER_IP_ADDRESS/32;
-    allow $USE_IP/32;
+    allow $YOUR_SERVER_IP_ADDRESS/32;
     deny all;
     root /opt/graphite/webapp;
 
@@ -1201,10 +1239,11 @@ server {
 }" > "$NGINX_GRAPHITE_CONFIG"
 
     if [ "$OS" == "CentOS" ]; then
+      # SELinux prevents nginx from initiating outbound connections
+      setsebool -P httpd_can_network_connect 1
+      chcon -Rt httpd_sys_content_t /opt/graphite/webapp/
+      semanage port -a -t http_port_t  -p tcp 8888
       if [ $CENTOS_6 -eq 1 ]; then
-        # SELinux prevents nginx from initiating outbound connections
-        setsebool -P httpd_can_network_connect 1
-        chcon -Rt httpd_sys_content_t /opt/graphite/webapp/
         /etc/init.d/nginx start
         chkconfig nginx on
       fi
@@ -1237,9 +1276,9 @@ server {
         PYTHONPATH=/opt/graphite/webapp /opt/graphite/bin/gunicorn wsgi --workers=4 --bind=127.0.0.1:8080 --log-file=/var/log/gunicorn.log --preload --pythonpath=/opt/graphite/webapp/graphite &
       fi
     fi
-    if [ "$OS" == "Ubuntu" ]; then
+    if [[ "$OS" == "Ubuntu" || "$OS" == "CentOS" ]]; then
 #      if [ "$OS_MAJOR_VERSION" == "16.04" ]; then
-      if [[ "$OS_MAJOR_VERSION" == "16.04" || "$OS_MAJOR_VERSION" == "18.04" ]]; then
+      if [[ "$OS_MAJOR_VERSION" == "16.04" || "$OS_MAJOR_VERSION" == "18.04" || $CENTOS_8 -eq 1 ]]; then
         echo "[Unit]
 Description=carbon-cache instance %i (Graphite)
 
@@ -1310,7 +1349,7 @@ WantedBy = multi-user.target" > /etc/systemd/system/graphite.service
   fi
   SKYLINE_SERVER_FQDN_IN_HOSTS=$(cat /etc/hosts | grep -c "$YOUR_SKYLINE_SERVER_FQDN")
   if [ $SKYLINE_SERVER_FQDN_IN_HOSTS -eq 0 ]; then
-    echo "$USE_IP $YOUR_SKYLINE_SERVER_FQDN" >> /etc/hosts
+    echo "$YOUR_SERVER_IP_ADDRESS $YOUR_SKYLINE_SERVER_FQDN" >> /etc/hosts
   fi
 
   echo "Restarting Skyline services"
@@ -1343,6 +1382,14 @@ WantedBy = multi-user.target" > /etc/systemd/system/graphite.service
   ps aux | grep -v grep | grep skyline
   deactivate
 fi
+
+echo "Seeding Skyline with data"
+sleep 2
+cd "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}" || exit 1
+source bin/activate
+bin/python${PYTHON_MAJOR_VERSION} /opt/skyline/github/skyline/utils/seed_data.py
+deactivate
+cd /tmp || exit
 
 echo "Skyline is deployed and running"
 echo "Please visit https://$YOUR_SKYLINE_SERVER_FQDN"
