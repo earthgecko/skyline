@@ -63,7 +63,10 @@ class Worker(Process):
     The worker processes chunks from the queue and appends
     the latest datapoints to their respective timesteps in Redis.
     """
-    def __init__(self, queue, parent_pid, skip_mini, canary=False):
+    # @modified 20201017 - Feature #3788: snab_flux_load_test
+    #                      Feature #3680: horizon.worker.datapoints_sent_to_redis
+    # Added worker_number
+    def __init__(self, queue, parent_pid, skip_mini, worker_number, canary=False):
         super(Worker, self).__init__()
         # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
         if settings.REDIS_PASSWORD:
@@ -79,6 +82,10 @@ class Worker(Process):
         self.daemon = True
         self.canary = canary
         self.skip_mini = skip_mini
+        # @added 20201017 - Feature #3788: snab_flux_load_test
+        #                   Feature #3680: horizon.worker.datapoints_sent_to_redis
+        # Added worker_number
+        self.worker_number = worker_number
 
     def check_if_parent_is_alive(self):
         """
@@ -149,12 +156,16 @@ class Worker(Process):
         """
         # Log management to prevent overwriting
         # Allow the bin/<skyline_app>.d to manage the log
-        if os.path.isfile(skyline_app_logwait):
-            try:
-                os_remove(skyline_app_logwait)
-            except OSError:
-                logger.error('error - failed to remove %s, continuing' % skyline_app_logwait)
-                pass
+        # @modified 20201017 - Feature #3788: snab_flux_load_test
+        #                      Feature #3680: horizon.worker.datapoints_sent_to_redis
+        # Only do log management with the canary worker
+        if self.canary:
+            if os.path.isfile(skyline_app_logwait):
+                try:
+                    os_remove(skyline_app_logwait)
+                except OSError:
+                    logger.error('error - failed to remove %s, continuing' % skyline_app_logwait)
+                    pass
 
         now = time()
         log_wait_for = now + 5
@@ -165,19 +176,22 @@ class Worker(Process):
             else:
                 now = log_wait_for + 1
 
-        logger.info('starting %s run' % skyline_app)
-        if os.path.isfile(skyline_app_loglock):
-            logger.error('error - bin/%s.d log management seems to have failed, continuing' % skyline_app)
-            try:
-                os_remove(skyline_app_loglock)
-                logger.info('log lock file removed')
-            except OSError:
-                logger.error('error - failed to remove %s, continuing' % skyline_app_loglock)
-                pass
-        else:
-            logger.info('bin/%s.d log management done' % skyline_app)
+        logger.info('starting %s worker number %s run' % (skyline_app, self.worker_number))
+        # @modified 20201017 - Feature #3788: snab_flux_load_test
+        #                      Feature #3680: horizon.worker.datapoints_sent_to_redis
+        if self.canary:
+            if os.path.isfile(skyline_app_loglock):
+                logger.error('error - bin/%s.d log management seems to have failed, continuing' % skyline_app)
+                try:
+                    os_remove(skyline_app_loglock)
+                    logger.info('log lock file removed')
+                except OSError:
+                    logger.error('error - failed to remove %s, continuing' % skyline_app_loglock)
+                    pass
+            else:
+                logger.info('bin/%s.d log management done' % skyline_app)
 
-        logger.info('%s :: started worker' % skyline_app)
+        logger.info('%s :: started worker %s' % (skyline_app, str(self.worker_number)))
 
         FULL_NAMESPACE = settings.FULL_NAMESPACE
         MINI_NAMESPACE = settings.MINI_NAMESPACE
@@ -325,11 +339,19 @@ class Worker(Process):
                     queue_sizes = []
                     last_send_to_graphite = time()
 
-                # @added 20200815 - Feature #3680: horizon.worker.datapoints_sent_to_redis
-                last_datapoints_count_to_redis = now - last_datapoints_to_redis
-                if last_datapoints_count_to_redis >= 60:
-                    logger.info('%s :: datapoints_sent_to_redis in last 60 seconds - %s' % (skyline_app, str(datapoints_sent_to_redis)))
-                    send_metric_name = '%s.datapoints_sent_to_redis' % skyline_app_graphite_namespace
-                    send_graphite_metric(skyline_app, send_metric_name, datapoints_sent_to_redis)
-                    datapoints_sent_to_redis = 0
-                    last_datapoints_to_redis = int(time())
+            # @added 20200815 - Feature #3680: horizon.worker.datapoints_sent_to_redis
+            # @modified 20201017 - Feature #3788: snab_flux_load_test
+            #                      Feature #3680: horizon.worker.datapoints_sent_to_redis
+            # Send for each worker
+            last_datapoints_count_to_redis = now - last_datapoints_to_redis
+            if last_datapoints_count_to_redis >= 60:
+                logger.info('%s :: datapoints_sent_to_redis in last 60 seconds - %s' % (skyline_app, str(datapoints_sent_to_redis)))
+                if self.canary:
+                    send_metric_name = '%s.datapoints_sent_to_redis' % (
+                        skyline_app_graphite_namespace)
+                else:
+                    send_metric_name = '%s.datapoints_sent_to_redis_%s' % (
+                        skyline_app_graphite_namespace, str(self.worker_number))
+                send_graphite_metric(skyline_app, send_metric_name, datapoints_sent_to_redis)
+                datapoints_sent_to_redis = 0
+                last_datapoints_to_redis = int(time())

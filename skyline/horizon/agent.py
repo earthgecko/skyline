@@ -72,11 +72,14 @@ class Horizon():
         # Start the workers
         for i in range(settings.WORKER_PROCESSES):
             if i == 0:
-                logger.info('%s :: starting Worker - canary' % skyline_app)
-                Worker(listen_queue, pid, skip_mini, canary=True).start()
+                # @modified 20201017 - Feature #3788: snab_flux_load_test
+                #                      Feature #3680: horizon.worker.datapoints_sent_to_redis
+                # Added worker_number
+                logger.info('%s :: starting Worker - canary, worker number %s' % (skyline_app, str(i)))
+                Worker(listen_queue, pid, skip_mini, worker_number=i, canary=True).start()
             else:
-                logger.info('%s :: starting Worker' % skyline_app)
-                Worker(listen_queue, pid, skip_mini).start()
+                logger.info('%s :: starting Worker, worker number %s' % (skyline_app, str(i)))
+                Worker(listen_queue, pid, skip_mini, worker_number=i, canary=False).start()
 
         # Start the listeners
         logger.info('%s :: starting Listen - pickle' % skyline_app)
