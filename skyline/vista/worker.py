@@ -45,6 +45,12 @@ try:
 except:
     SERVER_METRIC_PATH = ''
 
+# @added 20201020 - Feature #3796: FLUX_CHECK_LAST_TIMESTAMP
+try:
+    FLUX_CHECK_LAST_TIMESTAMP = settings.FLUX_CHECK_LAST_TIMESTAMP
+except:
+    FLUX_CHECK_LAST_TIMESTAMP = True
+
 skyline_app_graphite_namespace = 'skyline.%s%s.worker' % (parent_skyline_app, SERVER_METRIC_PATH)
 
 python_version = int(version_info[0])
@@ -505,6 +511,19 @@ class Worker(Process):
                             logger.error(traceback.format_exc())
                             logger.error('error :: worker :: failed to add %s to Redis set %s' % (
                                 remote_target, redis_set))
+                        # @added 20201020 - Feature #3796: FLUX_CHECK_LAST_TIMESTAMP
+                        # Add internal transformed metric name to a Redis for
+                        # flux to consume and determine if the flux.last Redis
+                        # keys are to be set for a vista metrics even if flux
+                        # FLUX_CHECK_LAST_TIMESTAMP is False, flux still uses
+                        # flux.last Redis keys for vista.metrics
+                        redis_set = 'vista.metrics'
+                        try:
+                            self.redis_conn.sadd(redis_set, str(metric))
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: worker :: failed to add %s to Redis set %s' % (
+                                metric, redis_set))
 
             time_now = int(time())
             if (time_now - last_sent_to_graphite) >= 60:
