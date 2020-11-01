@@ -34,7 +34,8 @@ from settings import (
     FULL_NAMESPACE,
 )
 
-from algorithm_exceptions import TooShort, Stale, Boring
+# modified 20201020 - Feature #3792: algorithm_exceptions - EmptyTimeseries
+from algorithm_exceptions import TooShort, Stale, Boring, EmptyTimeseries
 
 if ENABLE_SECOND_ORDER:
     from redis import StrictRedis
@@ -993,6 +994,17 @@ def run_selected_algorithm(timeseries, metric_name, airgapped_metrics, airgapped
                         redis_conn.sadd('mirage.populate_redis', str(base_name))
                     except:
                         redis_conn = None
+                # added 20201020 - Feature #3792: algorithm_exceptions - EmptyTimeseries
+                # raise EmptyTimeseries so that analyzer can remove metrics from the
+                # unique_metrics Redis set for performance reasons so they are not
+                # iterated on every run
+                else:
+                    if len(timeseries) == 0:
+                        raise EmptyTimeseries()
+            # added 20201020 - Feature #3792: algorithm_exceptions - EmptyTimeseries
+            else:
+                if len(timeseries) == 0:
+                    raise EmptyTimeseries()
 
             raise TooShort()
 
