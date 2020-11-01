@@ -80,6 +80,96 @@ However, you are not limited to 3-sigma based algorithms if you do not
 want to use them - as long as you return a boolean, you can add any sort
 of algorithm you like to run on time series and vote.
 
+A break from traditions
+=======================
+
+As Skyline develops, the addition of non three-sigma algorithms and methodologies
+is inevitable.  Further Skyline was designed to analyse all metrics via the
+three-sigma algorithms, however there are instances where this is not
+necessarily paramount and at times undesirable.  Therefore a number of
+alternative methods and related configurations have been introduced to allow the
+operator to analyse high and low priority metrics differently.
+
+High and low priority metrics
+-----------------------------
+
+This supports the old monitoring mantra of "do not alert on everything, only
+alert on the important things".
+
+- High priority metrics: metrics that belong to a ``smtp`` alert setting are
+  classified as high priority metrics (even if the ``smtp`` alerter is set to
+  ``'no_email'``).
+- Low priority metrics: metrics that do not belong to a ``smtp`` alert setting.
+
+High priority metrics always get routed through all the analysis stages.
+The amount of analysis done on low priority metrics is configurable.
+
+With the default settings all low priority metrics are analysed through all the
+analysis stages just like high priority metrics.  If you are not handling 1000s
+and 1000s of metrics, this default should be fine.
+
+In installations with large metric populations the full analysis of all low
+priority metrics **all** the time is not necessarily desirable as it means that
+Skyline needs a lot more CPU time to analyses all the metrics.
+
+The point of analysing low priority metrics is too also record anomalies on
+these metrics that are not alerted on, for the purpose of being able to related
+anomalies on high priority metrics with anomalies on low priority metrics.
+Although you do not want to be alerted on these, having them referenced in
+high priority metric training pages and in the anomalous events timeline can be
+useful for root cause analysis.  However if there amount of time being taken to
+analyse *all* the metrics is resulting in lagging, Skyline can be configured to
+reduce the amount of analysis on low priority metrics to gain time to focus on
+getting through all the high priority metrics.
+
+This can be achieved using MAD or disabling analysis of low priority metrics.
+
+The analysis of low priority metrics can be turned off by setting
+:mod:`settings.ANALYZER_ANALYZE_LOW_PRIORITY_METRICS` to ``False``.
+
+Do note that low priority metrics will still always be cross-correlated against
+in Luminosity even if the analysis of low priority is disabled, therefore this
+useful root cause analysis information is not lost.  The total disabling of low
+priority metrics just results in there never being any anomalies recorded on
+low priority metrics.
+
+There is an :mod:`settings.ANALYZER_DYNAMICALLY_ANALYZE_LOW_PRIORITY_METRICS`
+mode which will attempt to dynamically analyse as many low priority metrics as
+possible in the available time, looping through the metrics on a best effort
+basis to analyse low priority metrics as frequently as possible without causing
+lag on the analysis of high priority metrics.
+
+ANALYZER_MAD_LOW_PRIORITY_METRICS
+---------------------------------
+
+In order to reduce the required amount of analysis done by Analyzer to identify
+potential anomalous metrics, the use of the mean absolute deviation (MAD)
+algorithm can be used to determine whether to analyse the metric with the
+three-sigma algorithms or not.  This use of MAD is only implemented against low
+priority metrics.  Low priority metrics being metrics that do not belong to a
+:mod:`settings.ALERTS` ``smtp`` alert setting.  Metrics that belong to a ``smtp``
+alert setting are classified as high priority metrics and are always analysed
+with the three-sigma algorithms.
+
+MAD is a bit faster than running all the three-sigma algorithms, therefore in
+installations with large metric populations, running MAD on low priority metrics
+results in a **marginal** performance gain in terms of overall compute time.  In
+large low priority metric populations the implementation of MAD results in
+approximately 30% of the low priority metrics not being checked with the
+three-sigma algorithms because MAD does not trigger on them and therefore they
+are not submitted to the func:`analyzer.run_selected_algorithms` function.
+
+The use of MAD is not ideally suited to all variations in time series and could
+potentially result in false negatives where you would want the metric to be
+analysed with three-sigma.  However given that this is intended to be used in
+large metric populations on low priority metrics only, occurrences of a few
+false negatives is not significantly important.
+
+The performance benefit is **only** achieved if the number of data points used
+to compute MAD for is very low, less than 16, ideally 10.  Configuring
+:mod:`settings.ANALYZER_MAD_LOW_PRIORITY_METRICS` to any value higher than this
+results in a performance **loss** in terms of overall compute time.
+
 Using custom algorithms
 =======================
 
@@ -100,7 +190,7 @@ This is still of course possible, however it is not greatly useful if you do
 not want your algorithm to be tied into the Skyline `CONSENSUS` methodology or
 maintain the core algorithms files yourself.  Therefore the easier and preferred
 method is to use the :mod:`settings.CUSTOM_ALGORITHMS` functionality, which
-always you to load any Python source algorithm file you want and define the
+allows you to load any Python source algorithm file you want and define the
 algorithm in terms of `CONSENSUS` and what namespaces to run it against.
 
 See `Custom algorithms <algorithms/custom-algorithms.html>`__
@@ -119,6 +209,10 @@ seconds long
 
 **Boring**: The time series has been the same value for the past
 :mod:`settings.MAX_TOLERABLE_BOREDOM` seconds
+
+**EmptyTimeseries**: The time series has no data and is removed from the
+:mod:`settings.FULL_NAMESPACE`unique_metrics Redis set and no longer submitted
+for analysis.
 
 **Other**: There's probably an error in the code, if you've been making
 changes or we have.

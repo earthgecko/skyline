@@ -15,15 +15,98 @@ serve the /flux endpoint and proxy requests to flux.
 It is preferable to use the POST Flux endpoint to submit metrics so that the
 Skyline flux API key can be encrypted via SSL in the POST data.
 
+Flux is **not** an aggregator
+-----------------------------
+
+One data point per metric per Graphite retention time period.
+
+Flux is **not** an aggregator.  A metric sent to flux should only have a single
+data point submitted per time period.  Flux should not be used like statsd,
+meaning that if a metric retention in Graphite 1 data point per 60 seconds then
+only 1 data point should be submitted.  If multiple data points are submitted
+for a period for the same metric, flux will submit them all **but** Graphite
+will only record the last submitted value as the value for the period.  This is
+just how Graphite works.
+
+For example if you sent the following 3 data points to flux for a metric:
+
+.. code-block:: json
+
+  {
+  	"metric": "test.multiple_timestamps_per_period.3",
+  	"timestamp": "1478021701",
+  	"value": "3.0",
+  	"key": "YOURown32charSkylineAPIkeySecret"
+  }
+
+  {
+  	"metric": "test.multiple_timestamps_per_period.3",
+  	"timestamp": "1478021715",
+  	"value": "6.0",
+  	"key": "YOURown32charSkylineAPIkeySecret"
+  }
+
+  {
+  	"metric": "test.multiple_timestamps_per_period.3",
+  	"timestamp": "1478021745",
+  	"value": "1.0",
+  	"key": "YOURown32charSkylineAPIkeySecret"
+  }
+
+Graphite would store the last submitted value for the period, e.g:
+
+.. code-block:: json
+
+  [
+    {
+      "target": "test.multiple_timestamps_per_period.3",
+      "tags": {"name": "test.multiple_timestamps_per_period.3"},
+      "datapoints": [[1.0, 147802170]]
+    }
+  ]
+
+
 De-duplication
 --------------
 
-Flux de-duplicates metric data that it receives by maintaining a Redis key for
-each metric that is submitted.  When the flux worker successfully submits a data
-point and timestamp for a metric to Graphite, flux updates the
+Flux can de-duplicates metric data that it receives by maintaining a Redis key
+for each metric that is submitted.  When the flux worker successfully submits a
+data point and timestamp for a metric to Graphite, flux updates the
 `flux.last.<metric>` Redis key with the data point timestamp.  If a data point
 is submitted to flux with a timestamp <= to the timestamp value in the metric
-Redis key, flux discards the data.
+Redis key, flux discards the data.  However this comes with a computational cost
+of Redis keys having to be maintained for each metric, if you have lots of
+metrics coming into flux, it is better to ensure that your application/s are
+submitting to flux correctly and set :mod:`settings.FLUX_CHECK_LAST_TIMESTAMP`
+to ``False``.  Considering that if your application does resubmit data, as long
+as the data is the same data as previously sent, it will be sent to Graphite and
+Graphite will just update the value to the same value that was already stored
+(as described above).
+
+Vista and :mod:`settings.FLUX_CHECK_LAST_TIMESTAMP`
+---------------------------------------------------
+
+Do note that `flux.last.<metric>` Redis keys are still used in Vista even if
+:mod:`settings.FLUX_CHECK_LAST_TIMESTAMP` is set to ``False``. Vista uses the
+same key namespace to handle data fetched from remote hosts even if it is
+disabled and Flux will still use the keys for all vista.metrics even if it is
+disabled.
+
+Allowed characters in metric names
+----------------------------------
+
+As below.
+
+.. code-block:: python
+
+  ALLOWED_CHARS = ['+', '-', '%', '.', '_', '/', '=']
+  for char in string.ascii_lowercase:
+      ALLOWED_CHARS.append(char)
+  for char in string.ascii_uppercase:
+      ALLOWED_CHARS.append(char)
+  for char in string.digits:
+      ALLOWED_CHARS.append(char)
+
 
 POST request
 ------------
