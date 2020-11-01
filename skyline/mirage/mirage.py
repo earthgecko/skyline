@@ -184,6 +184,19 @@ except:
 #                   Task #3744: POC matrixprofile
 mirage_snab_only_checks_redis_set = 'mirage.snab_only_checks'
 
+# @added 20201026 - Task #3800: Handle feedback metrics in Mirage and waterfall alerts
+# Handle feedback metrics in a similar style to Ionosphere
+try:
+    SKYLINE_FEEDBACK_NAMESPACES = list(settings.SKYLINE_FEEDBACK_NAMESPACES)
+except:
+    # Let us take a guess
+    try:
+        graphite_host = str(settings.GRAPHITE_HOST)
+        graphite_hostname = graphite_host.split('.', -1)[0]
+        SKYLINE_FEEDBACK_NAMESPACES = [settings.SERVER_METRICS_NAME, graphite_hostname]
+    except:
+        SKYLINE_FEEDBACK_NAMESPACES = [this_host]
+
 skyline_app_graphite_namespace = 'skyline.%s%s' % (skyline_app, SERVER_METRIC_PATH)
 failed_checks_dir = '%s_failed' % settings.MIRAGE_CHECK_PATH
 # @added 20191107 - Branch #3262: py3
@@ -1432,7 +1445,7 @@ class Mirage(Thread):
                     logger.error('error :: failed to add snab analysis_run_time Redis key - %s' % (
                         redis_key))
 
-            logger.info('anomaly detected  :: %s with %s' % (metric, str(value)))
+            logger.info('anomaly detected  :: %s with %s' % (metric, str(datapoint)))
             # It runs so fast, this allows us to process 30 anomalies/min
             # @modified 20200903 - Task #3730: Validate Mirage running multiple processes
             # Removed limit
@@ -2255,6 +2268,131 @@ class Mirage(Thread):
                                 logger.error('error :: failed to add %s to Redis set %s' % (
                                     str(current_file), str(redis_set)))
 
+                # @added 20201026 - Task #3800: Handle feedback metrics in Mirage and waterfall alerts
+                # Handle feedback metrics in a similar style to Ionosphere
+                # Do not run checks if namespace has matched multiple times in
+                # the last 10 minutes.
+                if len(metric_var_files) > 3:
+                    analyzer_waterfall_alerts = []
+                    feedback_metric_loop_error_logged = False
+                    for current_file in listdir(settings.MIRAGE_CHECK_PATH):
+                        feedback_metric = False
+                        remove_feedback_metric_check = False
+                        remove_alerted_on_metric_check = False
+                        try:
+                            current_file_no_extension = current_file.replace('.txt', '')
+                            current_file_no_extension_elements = current_file_no_extension.split('.')
+                            base_name = '.'.join(current_file_no_extension_elements[1:])
+                            metric_timestamp = int(current_file_no_extension_elements[0])
+                        except:
+                            pass
+                        try:
+                            metric_namespace_elements = base_name.split('.')
+                            for to_skip in SKYLINE_FEEDBACK_NAMESPACES:
+                                if to_skip in base_name:
+                                    feedback_metric = True
+                                    break
+                                to_skip_namespace_elements = to_skip.split('.')
+                                elements_matched = set(metric_namespace_elements) & set(to_skip_namespace_elements)
+                                if len(elements_matched) == len(to_skip_namespace_elements):
+                                    feedback_metric = True
+                                    break
+                            feedback_cache_key_exists = False
+                            feedback_cache_key = 'mirage.feedback_metric.checked.%s' % (base_name)
+                            feedback_metric_process_time = int(time())
+                            if feedback_metric:
+                                try:
+                                    feedback_cache_key_exists = self.redis_conn_decoded.get(feedback_cache_key)
+                                except:
+                                    logger.info(traceback.format_exc())
+                                    logger.error('error :: failed to get %s key from Redis' % (
+                                        str(feedback_cache_key)))
+                                if feedback_cache_key_exists:
+                                    feedback_metric_last_processed_seconds_ago = feedback_metric_process_time - int(feedback_cache_key_exists)
+                                    logger.info('feedback metric identified as last processed %s seconds ago via Redis key %s' % (
+                                        str(feedback_metric_last_processed_seconds_ago), feedback_cache_key))
+                                    remove_feedback_metric_check = True
+                                if len(metric_var_files) > 10 and not feedback_cache_key_exists:
+                                    logger.info('Mirage is busy removing feedback metric check')
+                                    remove_feedback_metric_check = True
+                                else:
+                                    logger.info('feedback metric identified as not processed in last 600 seconds adding Redis key with 600 TTL and processing - %s' % feedback_cache_key)
+                                    try:
+                                        self.redis_conn.setex(feedback_cache_key, 600, feedback_metric_process_time)
+                                    except:
+                                        logger.error(traceback.format_exc())
+                                        logger.error('error :: failed to add %s key to Redis' % (
+                                            str(feedback_cache_key)))
+                        except:
+                            if not feedback_metric_loop_error_logged:
+                                logger.error(traceback.format_exc())
+                                logger.error('error :: failed to check feedback and alerted on metrics')
+                                feedback_metric_loop_error_logged = True
+                        # Remove checks that have been alerted on by Mirage or
+                        # via an Analyzer waterfall alert
+                        if len(metric_var_files) > 10 and not remove_feedback_metric_check:
+                            cache_key = 'mirage.last_alert.smtp.%s' % (base_name)
+                            alerted_on = False
+                            try:
+                                alerted_on = self.redis_conn_decoded.get(cache_key)
+                            except Exception as e:
+                                logger.error('error :: could not query Redis for cache_key: %s' % str(e))
+                            if not alerted_on:
+                                # Check for Analyzer alert key from waterfall alert
+                                cache_key = 'last_alert.smtp.%s' % (base_name)
+                                try:
+                                    alerted_on = self.redis_conn_decoded.get(cache_key)
+                                except Exception as e:
+                                    logger.error('error :: could not query Redis for cache_key: %s' % str(e))
+                            if alerted_on:
+                                remove_alerted_on_metric_check = True
+                                # Unless is it older than PANORAMA_EXPIRY_TIME
+                                try:
+                                    alerted_on_at = int(alerted_on)
+                                    alerted_on_seconds_ago = int(time()) - alerted_on_at
+                                    if alerted_on_seconds_ago >= settings.PANORAMA_EXPIRY_TIME:
+                                        remove_alerted_on_metric_check = False
+                                except:
+                                    remove_alerted_on_metric_check = True
+                                    pass
+                        if remove_feedback_metric_check or remove_alerted_on_metric_check:
+                            if remove_feedback_metric_check:
+                                log_str = 'feedback metric'
+                            if remove_alerted_on_metric_check:
+                                log_str = 'alerted on metric'
+                            logger.info('removing %s %s check file and from analyzer.waterfall_alerts.sent_to_mirage Redis set' % (
+                                log_str, base_name))
+                            try:
+                                os.remove(settings.MIRAGE_CHECK_PATH + "/" + current_file)
+                            except:
+                                logger.error('error :: failed to remove %s %s check file - %s' % (
+                                    log_str, base_name, current_file))
+                            # Remove the metric from the waterfall_alerts Redis set
+                            # waterfall_data = [metric[1], metric[2], metric[0], added_to_waterfall_timestamp. waterfall_panorama_data]
+                            if not analyzer_waterfall_alerts:
+                                redis_set = 'analyzer.waterfall_alerts.sent_to_mirage'
+                                literal_analyzer_waterfall_alerts = []
+                                try:
+                                    literal_analyzer_waterfall_alerts = list(self.redis_conn_decoded.smembers(redis_set))
+                                except:
+                                    literal_analyzer_waterfall_alerts = []
+                                analyzer_waterfall_alerts = []
+                                for literal_waterfall_alert in literal_analyzer_waterfall_alerts:
+                                    waterfall_alert = literal_eval(literal_waterfall_alert)
+                                    analyzer_waterfall_alerts.append(waterfall_alert)
+                            for waterfall_alert in analyzer_waterfall_alerts:
+                                if waterfall_alert[0] == base_name:
+                                    if int(waterfall_alert[1]) == metric_timestamp:
+                                        try:
+                                            self.redis_conn.srem(redis_set, str(waterfall_alert))
+                                            logger.info('removed waterfall alert item for %s from Redis set %s - %s' % (
+                                                log_str, redis_set, str(waterfall_alert)))
+                                            break
+                                        except:
+                                            logger.error(traceback.format_exc())
+                                            logger.error('error :: failed to remove waterfall alert item for % %s at %s from Redis set %s' % (
+                                                log_str, base_name, str(metric_timestamp), redis_set))
+
                 # Discover metric to analyze
                 metric_var_files = ''
                 # @added 20161228 - Feature #1830: Ionosphere alerts
@@ -2850,6 +2988,8 @@ class Mirage(Thread):
                 logger.error('error :: all_alerts is not set, so creating from settings.ALERTS')
                 all_alerts = list(settings.ALERTS)
 
+            not_ionosphere_metrics = []
+
             # @modified 20200610 - Feature #3560: External alert config
             # for alert in settings.ALERTS:
             for alert in all_alerts:
@@ -2916,9 +3056,10 @@ class Mirage(Thread):
                             not_an_ionosphere_metric_check_done = metric_name
                         else:
                             if not ionosphere_alerts_returned:
-                                logger.info('not an Ionosphere metric checking whether to alert - %s' % str(metric[1]))
-                                not_an_ionosphere_metric_check_done = metric_name
-
+                                if metric_name not in not_ionosphere_metrics:
+                                    logger.info('not an Ionosphere metric checking whether to alert - %s' % str(metric[1]))
+                                    not_an_ionosphere_metric_check_done = metric_name
+                                    not_ionosphere_metrics.append(metric_name)
                     # ALERT_MATCH_PATTERN = alert[0]
                     # METRIC_PATTERN = metric[1]
                     # @modified 20200622 - Task #3586: Change all alert pattern checks to matched_or_regexed_in_list
