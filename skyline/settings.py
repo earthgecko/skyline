@@ -673,6 +673,43 @@ CONSENSUS = 6
 :vartype CONSENSUS: int
 """
 
+ANALYZER_ANALYZE_LOW_PRIORITY_METRICS = True
+"""
+:var ANALYZER_ANALYZE_LOW_PRIORITY_METRICS: By default all low priority metrics
+    are analysed normally like high priority metrics.  For any type of analysis
+    to be run against low priority metrics this must be set to True.  Setting
+    this value to False disables ALL analysis of low priority metrics, they are
+    simply skipped (except in Luminosity correlations).  To configure low
+    priority metrics with any of the below LOW_PRIORITY_METRICS settings, this
+    value must be set to True.  See
+    https://earthgecko-skyline.readthedocs.io/en/latest/analyzer.html#high-and-low-priority-metrics
+:vartype ANALYZER_ANALYZE_LOW_PRIORITY_METRICS: boolean
+"""
+
+ANALYZER_DYNAMICALLY_ANALYZE_LOW_PRIORITY_METRICS = False
+"""
+:var ANALYZER_DYNAMICALLY_ANALYZE_LOW_PRIORITY_METRICS: ADVANCED FEATURE. This
+    mode will attempt to dynamically analyse as many low priority metrics as
+    possible in the available time, looping through the metrics on a best effort
+    basis to analyse low priority metrics as frequently as possible without
+    causing lag on the analysis of high priority metrics.
+:vartype ANALYZER_DYNAMICALLY_ANALYZE_LOW_PRIORITY_METRICS: boolean
+"""
+
+ANALYZER_MAD_LOW_PRIORITY_METRICS = 0
+"""
+:var ANALYZER_MAD_LOW_PRIORITY_METRICS: ADVANCED FEATURE. This is the number of
+    data points on which to calculate MAD against to determine if a low priority
+    metric should be analysed via the three-sigma algorithms.  The default value
+    of 0 disables this feature.  If set, this should not be greater than 15 at
+    the most as it will result in a performance loss, see
+    https://earthgecko-skyline.readthedocs.io/en/latest/analyzer.html#ANALYZER_MAD_LOW_PRIORITY_METRICS
+    Note if ANALYZER_DYNAMICALLY_ANALYZE_LOW_PRIORITY_METRICS is set to True,
+    ANALYZER_MAD_LOW_PRIORITY_METRICS will be automatically set to 10 if it is
+    set to 0 here.
+:vartype ANALYZER_MAD_LOW_PRIORITY_METRICS: int
+"""
+
 CUSTOM_ALGORITHMS = {}
 """
 :var CUSTOM_ALGORITHMS: Custom algorithms to run.  An empty dict {} disables
@@ -1827,7 +1864,6 @@ BOUNDARY_ALERTER_OPTS = {
     'alerter_expiration_time': {
         'smtp': 60,
         'pagerduty': 1800,
-        'hipchat': 1800,
         'slack': 1800,
         # 'http_alerter_external_endpoint': 1,
     },
@@ -1836,7 +1872,6 @@ BOUNDARY_ALERTER_OPTS = {
     'alerter_limit': {
         'smtp': 100,
         'pagerduty': 15,
-        'hipchat': 30,
         'slack': 30,
         # 'http_alerter_external_endpoint': 10000,
     },
@@ -2772,6 +2807,15 @@ FLUX_WORKERS = 1
 :vartype FLUX_WORKERS: int
 """
 
+FLUX_VERBOSE_LOGGING = True
+"""
+:var FLUX_VERBOSE_LOGGING: If set to True flux will log the data recieved in
+    requests and the data sent to Graphite.  It is sent to True by default as it
+    was the default before this option was added.  If flux is going to ingest
+    1000s of metrics consider setting this to False.
+:vartype FLUX_VERBOSE_LOGGING: boolean
+"""
+
 FLUX_SELF_API_KEY = 'YOURown32charSkylineAPIkeySecret'
 """
 :var FLUX_SELF_API_KEY: this is a 32 alphanumeric string that is used to
@@ -2818,6 +2862,30 @@ FLUX_MAX_AGE = 3600
     This can vary depending on retentions in question and this method may be
     altered in a future release.
 :vartype FLUX_MAX_AGE: int
+"""
+
+FLUX_PERSIST_QUEUE = False
+"""
+:var FLUX_PERSIST_QUEUE: By default flux does not persist the incoming queue on
+    a flux restart any metrics in the queue will be lost.  If flux is only
+    accepting a small amount of data points, flux will probably get through the
+    queue in seconds.  However if 1000s of metrics are being sent to flux per
+    minute and you do not want to lose any metrics and data points when flux is
+    restarted you can set flux to persist the queue, which is done via the
+    flux.queue Redis set.  Persisting the queue has a computational cost and
+    if the queue is large then when flux restarts it may lag and not get through
+    all the queue for some time unless you adjust the amount of FLUX_WORKERS.
+:vartype FLUX_PERSIST_QUEUE: boolean
+"""
+
+FLUX_CHECK_LAST_TIMESTAMP = True
+"""
+:var FLUX_CHECK_LAST_TIMESTAMP: By default flux deduplicates data and only
+    allows for one data point to be submitted per timestamp, however this has a
+    cost in terms of requests and number of keys in Redis.  If you have lots of
+    metrics coming into flux consider setting this to ``False`` and ensure that
+    the application/s submitting data to flux do not submit data unordered.
+:vartype FLUX_CHECK_LAST_TIMESTAMP: boolean
 """
 
 FLUX_SEND_TO_CARBON = False
@@ -3085,7 +3153,8 @@ SNAB_anomalyScore = {}
 """
 :var SNAB_anomalyScore: Each analysis app or all apps can record an anomalyScore
     for each analysis.  This is an advanced feature for testing and development
-    purposes.
+    purposes. NOTE that the above :mod:`settings.SNAB_ENABLED` does not have to
+    be set to True for the SNAB_anomalyScore function to work.
 :vartype SNAB_anomalyScore: dict
 
 - **Examples**::
@@ -3109,13 +3178,13 @@ SNAB_anomalyScore = {}
 
 """
 
-SNAB_checks = {}
+SNAB_CHECKS = {}
 """
-:var SNAB_checks: This is an advanced feature.  A dictionary that defines the
+:var SNAB_CHECKS: This is an advanced feature.  A dictionary that defines the
     any SNAB checks for apps (mirage only) in terms of what namespaces should
     be submitted to snab to be checked by which algortihm/s.
     EXPERIMENTAL.
-:vartype SNAB_checks: dict
+:vartype SNAB_CHECKS: dict
 
 - **Example**::
 
@@ -3134,4 +3203,42 @@ SNAB_checks = {}
         },
     }
 
+"""
+
+SNAB_LOAD_TEST_ANALYZER = 0
+"""
+:var SNAB_LOAD_TEST_ANALYZER: ADVANCED and EXPERIMENTAL FEATURE.  Declare the
+    number of metrics you want to load test via Analyzer.
+:vartype SNAB_LOAD_TEST_ANALYZER: int
+"""
+
+SNAB_FLUX_LOAD_TEST_ENABLED = False
+"""
+:var SNAB_FLUX_LOAD_TEST_ENABLED: ADVANCED FEATURE.  Run flux load testing with
+    snab.
+:vartype SNAB_FLUX_LOAD_TEST_ENABLED: boolean
+"""
+
+SNAB_FLUX_LOAD_TEST_METRICS = 0
+"""
+:var SNAB_FLUX_LOAD_TEST_METRICS: ADVANCED FEATURE.  Declare the
+    number of metrics you want to load test via flux.  0 disables.
+:vartype SNAB_FLUX_LOAD_TEST_METRICS: int
+"""
+
+SNAB_FLUX_LOAD_TEST_METRICS_PER_POST = 480
+"""
+:var SNAB_FLUX_LOAD_TEST_METRICS_PER_POST: ADVANCED FEATURE.  Declare the
+    number of metrics per POST to flux.  This should ideally be less than the
+    Graphite (not Skyline) setting of MAX_DATAPOINTS_PER_MESSAGE which is by
+    default in Graphite 500
+:vartype SNAB_FLUX_LOAD_TEST_METRICS_PER_POST: int
+"""
+
+SNAB_FLUX_LOAD_TEST_NAMESPACE_PREFIX = 'test.snab.flux_load_test'
+"""
+:var SNAB_FLUX_LOAD_TEST_NAMESPACE_PREFIX: ADVANCED FEATURE.  Declare the
+    namespace for the test metrics. This is the namespace that will appear in
+    Graphite with randomly generated metric names. NO trailing dot is required.
+:vartype SNAB_FLUX_LOAD_TEST_NAMESPACE_PREFIX: str
 """
