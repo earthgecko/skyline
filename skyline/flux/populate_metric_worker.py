@@ -50,7 +50,10 @@ if True:
         get_redis_conn_decoded,
         # @added 20201009 - Feature #3780: skyline_functions - sanitise_graphite_url
         #                   Bug #3778: Handle single encoded forward slash requests to Graphite
-        sanitise_graphite_url)
+        sanitise_graphite_url,
+        # @added 20201012 - Feature #3780: skyline_functions - sanitise_graphite_url
+        #                   Bug #3778: Handle single encoded forward slash requests to Graphite
+        encode_graphite_metric_name)
 
 # @modified 20191129 - Branch #3262: py3
 # Consolidate flux logging
@@ -298,6 +301,11 @@ class PopulateMetricWorker(Process):
                     logger.info('populate_metric_worker :: checking %s in Graphite from %s' % (
                         metric, graphite_from))
                     got_data = False
+
+                    # @added 20201012 - Feature #3780: skyline_functions - sanitise_graphite_url
+                    #                   Bug #3778: Handle single encoded forward slash requests to Graphite
+                    encoded_graphite_metric_name = encode_graphite_metric_name(skyline_app, metric)
+
                     try:
                         # We use absolute time so that if there is a lag in mirage the correct
                         # timeseries data is still surfaced relevant to the anomalous datapoint
@@ -306,18 +314,17 @@ class PopulateMetricWorker(Process):
                             url = '%s://%s:%s/%s/?from=%s&target=%s&format=json' % (
                                 settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
                                 str(settings.GRAPHITE_PORT),
-                                settings.GRAPHITE_RENDER_URI, graphite_from, metric)
+                                # @modified 20201012 - Feature #3780: skyline_functions - sanitise_graphite_url
+                                # settings.GRAPHITE_RENDER_URI, graphite_from, metric)
+                                settings.GRAPHITE_RENDER_URI, graphite_from, encoded_graphite_metric_name)
                         else:
                             url = '%s://%s/%s/?from=%s&target=%s&format=json' % (
                                 settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
-                                settings.GRAPHITE_RENDER_URI, graphite_from, metric)
+                                # @modified 20201012 - Feature #3780: skyline_functions - sanitise_graphite_url
+                                # settings.GRAPHITE_RENDER_URI, graphite_from, metric)
+                                settings.GRAPHITE_RENDER_URI, graphite_from, encoded_graphite_metric_name)
                         logger.info('populate_metric_worker :: using Graphite URL - %s' % (
                             url))
-
-                        # @added 20201009 - Feature #3780: skyline_functions - sanitise_graphite_url
-                        #                   Bug #3778: Handle single encoded forward slash requests to Graphite
-                        sanitised = False
-                        sanitised, url = sanitise_graphite_url(skyline_app, url)
 
                         r = requests.get(url)
                         if r.status_code == 200:

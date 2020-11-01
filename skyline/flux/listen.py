@@ -17,6 +17,8 @@ sys.path.insert(0, os.path.dirname(__file__))
 if True:
     import settings
     import flux
+    # @added 20201018 - Feature #3798: FLUX_PERSIST_QUEUE
+    from skyline_functions import get_redis_conn
 
 # @added 20200818 - Feature #3694: flux - POST multiple metrics
 # Added validation of FLUX_API_KEYS
@@ -44,6 +46,19 @@ try:
 except:
     FLUX_GRAPHITE_WHISPER_PATH = '/opt/graphite/storage/whisper'
 
+# added 20201016 - Feature #3788: snab_flux_load_test
+# Wrap per metric logging in if FLUX_VERBOSE_LOGGING
+try:
+    FLUX_VERBOSE_LOGGING = settings.FLUX_VERBOSE_LOGGING
+except:
+    FLUX_VERBOSE_LOGGING = True
+
+# @added 20201018 - Feature #3798: FLUX_PERSIST_QUEUE
+try:
+    FLUX_PERSIST_QUEUE = settings.FLUX_PERSIST_QUEUE
+except:
+    FLUX_PERSIST_QUEUE = False
+
 # @modified 20191129 - Branch #3262: py3
 # Consolidate flux logging
 # logger = set_up_logging('listen')
@@ -51,13 +66,16 @@ logger = set_up_logging(None)
 
 LOCAL_DEBUG = False
 
-ALLOWED_CHARS = ['+', '-', '%', '.', '_', '/']
+ALLOWED_CHARS = ['+', '-', '%', '.', '_', '/', '=']
 for char in string.ascii_lowercase:
     ALLOWED_CHARS.append(char)
 for char in string.ascii_uppercase:
     ALLOWED_CHARS.append(char)
 for char in string.digits:
     ALLOWED_CHARS.append(char)
+
+# @added 20201018 - Feature #3798: FLUX_PERSIST_QUEUE
+redis_conn = get_redis_conn('flux')
 
 
 def validate_key(caller, apikey):
@@ -176,7 +194,11 @@ def validate_metric_name(caller, metric):
 
     # Linux has a maximum filename length of 255 characters for most filesystems
     # and a maximum path of 4096 characters.
-    if (len(metric) + 4) > 255:   # +4 for .wsp
+    # @modified 20201020 - Feature #3764: flux validate metric name
+    # By elements not by metric name
+    # if (len(metric) + 4) > 255:   # +4 for .wsp
+    metric_elements = metric.split('.')
+    if (len(metric_elements[-1]) + 4) > 255:
         logger.error('error :: %s :: metric longer than 255 chars - %s' % (
             caller, str(metric)))
         return False
@@ -375,10 +397,20 @@ class MetricData(object):
         metric_data = [metric, value, timestamp, backfill]
         payload['metric_data'] = str(metric_data)
 
+        # @added 20201018 - Feature #3798: FLUX_PERSIST_QUEUE
+        # Add to data to the flux.queue Redis set
+        if FLUX_PERSIST_QUEUE and metric_data:
+            try:
+                redis_conn.sadd('flux.queue', str(metric_data))
+            except:
+                pass
+
         # Queue the metric
         try:
             flux.httpMetricDataQueue.put(metric_data, block=False)
-            logger.info('listen :: GET request data added to flux.httpMetricDataQueue - %s' % str(metric_data))
+            # modified 20201016 - Feature #3788: snab_flux_load_test
+            if FLUX_VERBOSE_LOGGING:
+                logger.info('listen :: GET request data added to flux.httpMetricDataQueue - %s' % str(metric_data))
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: listen :: failed to add GET request data to flux.httpMetricDataQueue - %s' % str(metric_data))
@@ -609,8 +641,17 @@ class MetricDataPost(object):
                 # Queue the metric
                 try:
                     metric_data = [metric, value, timestamp, backfill]
+                    # @added 20201018 - Feature #3798: FLUX_PERSIST_QUEUE
+                    # Add to data to the flux.queue Redis set
+                    if FLUX_PERSIST_QUEUE and metric_data:
+                        try:
+                            redis_conn.sadd('flux.queue', str(metric_data))
+                        except:
+                            pass
                     flux.httpMetricDataQueue.put(metric_data, block=False)
-                    logger.info('listen :: POST mulitple metric data added to flux.httpMetricDataQueue - %s' % str(metric_data))
+                    # modified 20201016 - Feature #3788: snab_flux_load_test
+                    if FLUX_VERBOSE_LOGGING:
+                        logger.info('listen :: POST mulitple metric data added to flux.httpMetricDataQueue - %s' % str(metric_data))
                 except:
                     logger.error(traceback.format_exc())
                     logger.error('error :: listen :: adding POST metric_data to the flux.httpMetricDataQueue queue - %s' % str(metric_data))
@@ -711,8 +752,18 @@ class MetricDataPost(object):
                 # @modified 20200206 - Feature #3444: Allow flux to backfill
                 # Added backfill
                 metric_data = [metric, value, timestamp, backfill]
+                # @added 20201018 - Feature #3798: FLUX_PERSIST_QUEUE
+                # Add to data to the flux.queue Redis set
+                if FLUX_PERSIST_QUEUE and metric_data:
+                    try:
+                        redis_conn.sadd('flux.queue', str(metric_data))
+                    except:
+                        pass
+
                 flux.httpMetricDataQueue.put(metric_data, block=False)
-                logger.info('listen :: POST data added to flux.httpMetricDataQueue - %s' % str(metric_data))
+                # modified 20201016 - Feature #3788: snab_flux_load_test
+                if FLUX_VERBOSE_LOGGING:
+                    logger.info('listen :: POST data added to flux.httpMetricDataQueue - %s' % str(metric_data))
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: listen :: adding POST metric_data to the flux.httpMetricDataQueue queue - %s' % str(metric_data))

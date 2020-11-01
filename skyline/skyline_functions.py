@@ -2066,6 +2066,15 @@ def is_batch_metric(current_skyline_app, base_name):
     except:
         BATCH_PROCESSING_NAMESPACES = []
 
+    # @added 20201017 - Feature #3818: ANALYZER_BATCH_PROCESSING_OVERFLOW_ENABLED
+    try:
+        ANALYZER_BATCH_PROCESSING_OVERFLOW_ENABLED = settings.ANALYZER_BATCH_PROCESSING_OVERFLOW_ENABLED
+    except:
+        ANALYZER_BATCH_PROCESSING_OVERFLOW_ENABLED = False
+    if ANALYZER_BATCH_PROCESSING_OVERFLOW_ENABLED:
+        if not BATCH_PROCESSING_NAMESPACES:
+            return False
+
     debug_is_batch_metric = None
 
     batch_metric = False
@@ -2424,9 +2433,9 @@ def encode_graphite_metric_name(current_skyline_app, metric):
     # encoded_graphite_metric_name = urllib.parse.quote(encoded_graphite_metric_name)
 
     # Double encode forward slash
-    if '.%2F' in encoded_graphite_metric_name:
+    if '%2F' in encoded_graphite_metric_name:
         try:
-            encoded_graphite_metric_name = encoded_graphite_metric_name.replace('.%2F', '.%252F')
+            encoded_graphite_metric_name = encoded_graphite_metric_name.replace('%2F', '%252F')
             try:
                 current_skyline_app_logger = str(current_skyline_app) + 'Log'
                 current_logger = logging.getLogger(current_skyline_app_logger)
