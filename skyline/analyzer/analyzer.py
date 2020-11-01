@@ -52,7 +52,8 @@ from matched_or_regexed_in_list import matched_or_regexed_in_list
 
 from alerters import trigger_alert
 from algorithms import run_selected_algorithm
-from algorithm_exceptions import TooShort, Stale, Boring
+# modified 20201020 - Feature #3792: algorithm_exceptions - EmptyTimeseries
+from algorithm_exceptions import TooShort, Stale, Boring, EmptyTimeseries
 
 try:
     send_algorithm_run_metrics = settings.ENABLE_ALGORITHM_RUN_METRICS
@@ -162,6 +163,17 @@ try:
 except:
     BATCH_PROCESSING_DEBUG = None
 
+# @added 20201017 - Feature #3818: ANALYZER_BATCH_PROCESSING_OVERFLOW_ENABLED
+# This was implemented to allow a busy analyzer to offload low priority metrics
+# to analyzer_batch, unsuccessfully.  It works, but takes loanger and ages
+# actually.  Being left in as may be workable with a different logic.
+try:
+    ANALYZER_BATCH_PROCESSING_OVERFLOW_ENABLED = settings.ANALYZER_BATCH_PROCESSING_OVERFLOW_ENABLED
+except:
+    ANALYZER_BATCH_PROCESSING_OVERFLOW_ENABLED = False
+# Always disable until refactored to work more efficiently if possible
+ANALYZER_BATCH_PROCESSING_OVERFLOW_ENABLED = False
+
 # @added 20200423 - Feature #3504: Handle airgaps in batch metrics
 #                   Feature #3400: Identify air gaps in the metric data
 CHECK_AIRGAPS = []
@@ -249,6 +261,47 @@ try:
     SNAB_LOAD_TEST_ANALYZER = int(settings.SNAB_LOAD_TEST_ANALYZER)
 except:
     SNAB_LOAD_TEST_ANALYZER = 0
+
+# @added 20201030 - Feature #3812: ANALYZER_ANALYZE_LOW_PRIORITY_METRICS
+try:
+    ANALYZER_ANALYZE_LOW_PRIORITY_METRICS = settings.ANALYZER_ANALYZE_LOW_PRIORITY_METRICS
+except:
+    ANALYZER_ANALYZE_LOW_PRIORITY_METRICS = True
+# @added 20201030 - Feature #3808: ANALYZER_DYNAMICALLY_ANALYZE_LOW_PRIORITY_METRICS
+try:
+    ANALYZER_DYNAMICALLY_ANALYZE_LOW_PRIORITY_METRICS = settings.ANALYZER_DYNAMICALLY_ANALYZE_LOW_PRIORITY_METRICS
+except:
+    ANALYZER_DYNAMICALLY_ANALYZE_LOW_PRIORITY_METRICS = False
+# @added 20201018 - Feature #3810: ANALYZER_MAD_LOW_PRIORITY_METRICS
+try:
+    ANALYZER_MAD_LOW_PRIORITY_METRICS = settings.ANALYZER_MAD_LOW_PRIORITY_METRICS
+except:
+    ANALYZER_MAD_LOW_PRIORITY_METRICS = 0
+# @added 20201030 - Feature #3808: ANALYZER_DYNAMICALLY_ANALYZE_LOW_PRIORITY_METRICS
+# Set the default ANALYZER_MAD_LOW_PRIORITY_METRICS to 10 if not set and
+# ANALYZER_DYNAMICALLY_ANALYZE_LOW_PRIORITY_METRICS is set.
+if ANALYZER_DYNAMICALLY_ANALYZE_LOW_PRIORITY_METRICS:
+    if not ANALYZER_MAD_LOW_PRIORITY_METRICS:
+        ANALYZER_MAD_LOW_PRIORITY_METRICS = 10
+    # Import itemgetter to implement a dictionary sort by value as proposed in
+    # PEP 265
+    from operator import itemgetter
+if ANALYZER_MAD_LOW_PRIORITY_METRICS:
+    # Import mean and absolute from numpy to calculate MAD
+    from numpy import mean, absolute
+# Determine all the settings that place Analyzer in a mode to handle low
+# priority metrics differently
+ANALYZER_MANAGE_LOW_PRIORITY_METRICS = False
+if ANALYZER_BATCH_PROCESSING_OVERFLOW_ENABLED:
+    ANALYZER_MANAGE_LOW_PRIORITY_METRICS = True
+if not ANALYZER_ANALYZE_LOW_PRIORITY_METRICS:
+    ANALYZER_MANAGE_LOW_PRIORITY_METRICS = True
+if ANALYZER_DYNAMICALLY_ANALYZE_LOW_PRIORITY_METRICS:
+    ANALYZER_MANAGE_LOW_PRIORITY_METRICS = True
+if ANALYZER_MAD_LOW_PRIORITY_METRICS:
+    ANALYZER_MANAGE_LOW_PRIORITY_METRICS = True
+low_priority_metrics_hash_key = 'analyzer.low_priority_metrics.last_analyzed_timestamp'
+metrics_last_timestamp_hash_key = 'analyzer.metrics.last_analyzed_timestamp'
 
 # @added 20190522 - Feature #2580: illuminance
 # Disabled for now as in concept phase.  This would work better if
@@ -474,6 +527,196 @@ class Analyzer(Thread):
         # Check if this process is unnecessary
         if len(assigned_metrics) == 0:
             return
+
+        # @added 20201017 - Feature #3818: ANALYZER_BATCH_PROCESSING_OVERFLOW_ENABLED
+        # Enable Analyzer to sort the assigned_metrics and order them by
+        # smtp_alerter_metrics first and non_smtp_alerter_metrics second, so
+        # that is the MAX_ANALYZER_PROCESS_RUNTIME is reached Analyzer will
+        # send any non_smtp_alerter_metrics that have not been analyzed to
+        # analyzer batch
+        smtp_alerter_metrics = []
+        high_priority_assigned_metrics = []
+        low_priority_assigned_metrics = []
+
+        # @added 20201030 - Feature #3812: ANALYZER_ANALYZE_LOW_PRIORITY_METRICS
+        determine_low_priority_metrics = False
+
+        # @modified 20201018 - Feature #3810: ANALYZER_MAD_LOW_PRIORITY_METRICS
+        # Added ANALYZER_MAD_LOW_PRIORITY_METRICS
+        if ANALYZER_BATCH_PROCESSING_OVERFLOW_ENABLED or ANALYZER_MAD_LOW_PRIORITY_METRICS:
+            determine_low_priority_metrics = True
+
+        # @added 20201030 - Feature #3808: ANALYZER_DYNAMICALLY_ANALYZE_LOW_PRIORITY_METRICS
+        if ANALYZER_DYNAMICALLY_ANALYZE_LOW_PRIORITY_METRICS and ANALYZER_ANALYZE_LOW_PRIORITY_METRICS:
+            determine_low_priority_metrics = True
+
+        # @added 20201030 - Feature #3812: ANALYZER_ANALYZE_LOW_PRIORITY_METRICS
+        if not ANALYZER_ANALYZE_LOW_PRIORITY_METRICS:
+            determine_low_priority_metrics = True
+
+        if determine_low_priority_metrics:
+            try:
+                try:
+                    smtp_alerter_metrics = list(self.redis_conn_decoded.smembers('analyzer.smtp_alerter_metrics'))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to generate a list from analyzer.smtp_alerter_metrics Redis set for priority based assigned_metrics')
+                    smtp_alerter_metrics = []
+                unique_smtp_alerter_metrics = []
+                for metric in smtp_alerter_metrics:
+                    metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(metric))
+                    unique_smtp_alerter_metrics.append(metric_name)
+                unique_smtp_alerter_metrics_set = set(unique_smtp_alerter_metrics)
+                del unique_smtp_alerter_metrics
+
+                assigned_metrics_set = set(assigned_metrics)
+                high_priority_assigned_metrics_set = assigned_metrics_set.intersection(unique_smtp_alerter_metrics_set)
+                low_priority_assigned_metrics_set = assigned_metrics_set.difference(high_priority_assigned_metrics_set)
+                del assigned_metrics_set
+                del unique_smtp_alerter_metrics_set
+
+                high_priority_assigned_metrics = list(high_priority_assigned_metrics_set)
+                del high_priority_assigned_metrics_set
+
+                low_priority_assigned_metrics = list(low_priority_assigned_metrics_set)
+                del low_priority_assigned_metrics_set
+
+                # @added 20201030 - Feature #3808: ANALYZER_DYNAMICALLY_ANALYZE_LOW_PRIORITY_METRICS
+                # If ANALYZER_DYNAMICALLY_ANALYZE_LOW_PRIORITY_METRICS is enabled
+                # the last timestamp that was analyzed for each low priority
+                # metric is stored in the analyzer.low_priority_metrics.last_analyzed_timestamp
+                # Redis hash set.  The low priority metrics are then sorted by
+                # the oldest tmestamps so that oldest analyzed metrics are first
+                # in the list.  When a low priority metric is analyzed its
+                # timestamp is updated in the hash set.  This method is fast on
+                # 16000 low priority metrics taking 0.017699 seconds to HGETALL
+                # the set and taking 0.008169 seconds to sort the data by
+                # timestamp using the PEP 256 method and taking 0.002575 seconds
+                # to generate the metric_name list of 16000 metrics.
+                if ANALYZER_DYNAMICALLY_ANALYZE_LOW_PRIORITY_METRICS and ANALYZER_ANALYZE_LOW_PRIORITY_METRICS:
+                    low_priority_metrics_last_analyzed = []
+                    try:
+                        low_priority_metrics_last_analyzed = self.redis_conn_decoded.hgetall(low_priority_metrics_hash_key)
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to get Redis hash key %s to sort low priority metrics on last analyzed timestamp' % (
+                            low_priority_metrics_hash_key))
+                        low_priority_metrics_last_analyzed = []
+                    sorted_low_priority_metrics_last_analyzed = []
+                    if low_priority_metrics_last_analyzed:
+                        try:
+                            sorted_low_priority_metrics_last_analyzed = sorted(low_priority_metrics_last_analyzed.items(), key=itemgetter(1), reverse=False)
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: failed to sort low_priority_metrics_last_analyzed by timestamp values')
+                            sorted_low_priority_metrics_last_analyzed = []
+                    low_priority_analyzed_metrics = []
+                    if sorted_low_priority_metrics_last_analyzed:
+                        try:
+                            low_priority_analyzed_metrics = [item[0] for item in sorted_low_priority_metrics_last_analyzed]
+                            logger.info('reordered low priority metrics by oldest analyzed timestamp from Redis hash key - %s' % (
+                                low_priority_metrics_hash_key))
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: failed to generate list of metric names from sorted_low_priority_metrics_last_analyzed')
+                    # Remove Boring, Stale and TooShort metrics
+                    # The method in use here is fast enough, on 16000 metrics it
+                    # reorders the list by current metrics and the exception
+                    # metrics in 0.842042 seconds.  Because Analyzer refreshes
+                    # the Redis exception sets frequently, these metrics will
+                    # be added back to be reassessed frequently as well, but
+                    # only once in every 300 seconds, this should result in no
+                    # low priority metrics being left in a perpetual exception
+                    # state, unless they are in that state.
+                    if low_priority_analyzed_metrics:
+                        boring_metrics = []
+                        try:
+                            boring_metrics = list(self.redis_conn_decoded.smembers('aet.analyzer.boring'))
+                        except:
+                            boring_metrics = []
+                        stale_metrics = []
+                        try:
+                            stale_metrics = list(self.redis_conn_decoded.smembers('aet.analyzer.stale'))
+                        except:
+                            stale_metrics = []
+                        tooshort_metrics = []
+                        try:
+                            tooshort_metrics = list(self.redis_conn_decoded.smembers('aet.analyzer.tooshort'))
+                        except:
+                            tooshort_metrics = []
+                        low_priority_metric_exception_base_names = boring_metrics + stale_metrics + tooshort_metrics
+                        low_priority_metric_exception_metrics_names_to_remove = []
+                        if low_priority_metric_exception_base_names:
+                            low_priority_metric_exception_base_names_set = set(low_priority_metric_exception_base_names)
+                            for base_name in low_priority_metric_exception_base_names_set:
+                                metric_name = '%s%s' % (settings.FULL_NAMESPACE, base_name)
+                                low_priority_metric_exception_metrics_names_to_remove.append(metric_name)
+                            try:
+                                del low_priority_metric_exception_metrics_to_remove_set
+                            except:
+                                pass
+                            try:
+                                del low_priority_metric_exception_base_names
+                            except:
+                                pass
+                        if low_priority_metric_exception_metrics_names_to_remove:
+                            logger.info('%s boring, slate or tooshort low priority metrics being removed and added to the end of low_priority_analyzed_metrics' % (
+                                str(len(low_priority_metric_exception_metrics_names_to_remove))))
+                            current_low_priority_analyzed_metrics = []
+                            exception_metrics = []
+                            for metric in low_priority_analyzed_metrics:
+                                if metric not in low_priority_metric_exception_metrics_names_to_remove:
+                                    current_low_priority_analyzed_metrics.append(metric)
+                                else:
+                                    exception_metrics.append(metric)
+                            if current_low_priority_analyzed_metrics:
+                                low_priority_analyzed_metrics = current_low_priority_analyzed_metrics + exception_metrics
+                    # Determine and add any missing metrics adding them first
+                    # so they are analyzed
+                    if low_priority_analyzed_metrics:
+                        missing_low_priority_metrics = []
+                        for metric in low_priority_assigned_metrics:
+                            if metric not in low_priority_analyzed_metrics:
+                                missing_low_priority_metrics.append(metric)
+                        if missing_low_priority_metrics:
+                            try:
+                                self.redis_conn.sadd('analyzer.missing_low_priority_metrics', *set(missing_low_priority_metrics))
+                            except:
+                                pass
+                            low_priority_analyzed_metrics = missing_low_priority_metrics + low_priority_analyzed_metrics
+                            logger.info('added %s unknown low priority metrics to low_priority_analyzed_metrics to be analyzed first' % (
+                                str(len(missing_low_priority_metrics))))
+                        low_priority_assigned_metrics = low_priority_analyzed_metrics
+                        try:
+                            self.redis_conn.sadd('analyzer.low_priority_metrics.count', len(low_priority_assigned_metrics))
+                        except:
+                            pass
+                if high_priority_assigned_metrics or low_priority_assigned_metrics:
+                    assigned_metrics = high_priority_assigned_metrics + low_priority_assigned_metrics
+                    logger.info('reordered assigned_metrics by priority, %s high priority alerting metrics and %s low priority non alerting metrics' % (
+                        str(len(high_priority_assigned_metrics)),
+                        str(len(low_priority_assigned_metrics))))
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to generate a priority based assigned_metrics list')
+
+        # @added 20201030 - Feature #3812: ANALYZER_ANALYZE_LOW_PRIORITY_METRICS
+        # If analysis has been disabled on low priority metrics via
+        # ANALYZER_ANALYZE_LOW_PRIORITY_METRICS = False, remove all low priority
+        # metrics created the asssigned_metrics from high priority metrics only.
+        if not ANALYZER_ANALYZE_LOW_PRIORITY_METRICS:
+            try:
+                if high_priority_assigned_metrics:
+                    assigned_metrics = high_priority_assigned_metrics
+                    low_priority_metrics_count = 0
+                    if low_priority_assigned_metrics:
+                        low_priority_metrics_count = len(low_priority_assigned_metrics)
+                    logger.info('assigned_metrics composed of %s high priority alerting metrics only, discarded %s low priority non alerting metrics discarded as ANALYZER_ANALYZE_LOW_PRIORITY_METRICS is False' % (
+                        str(len(high_priority_assigned_metrics)),
+                        str(low_priority_metrics_count)))
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to generate a high priority based assigned_metrics list only')
 
         # Multi get series
         # @modified 20160801 - Adding additional exception handling to Analyzer
@@ -857,6 +1100,33 @@ class Analyzer(Thread):
         except:
             inactive_metrics = []
 
+        # @added 20201017 - Feature #3818: ANALYZER_BATCH_PROCESSING_OVERFLOW_ENABLED
+        low_priority_time_elasped = False
+        low_priority_metrics_sent_to_analyzer_batch = 0
+        skipped_low_priority_metrics_in_analyzer_batch_queue = 0
+        logged_high_priority_run_time = False
+        analyzer_batch_work = None
+        analyzer_batch_queued_metrics = []
+        if ANALYZER_BATCH_PROCESSING_OVERFLOW_ENABLED:
+            redis_set = 'analyzer.batch'
+            try:
+                analyzer_batch_work = self.redis_conn_decoded.smembers(redis_set)
+            except Exception as e:
+                logger.error('error :: could not query Redis for set %s - %s' % (redis_set, e))
+                analyzer_batch_work = None
+            if analyzer_batch_work:
+                for index, analyzer_batch in enumerate(analyzer_batch_work):
+                    try:
+                        batch_processing_metric = literal_eval(analyzer_batch)
+                        analyzer_batch_queued_metrics.append(str(batch_processing_metric[0]))
+                    except:
+                        pass
+            if analyzer_batch_queued_metrics:
+                analyzer_batch_queued_metrics = list(set(analyzer_batch_queued_metrics))
+        # @added 20201018 - Feature #3810: ANALYZER_MAD_LOW_PRIORITY_METRICS
+        low_priority_metrics_analysed_due_to_mad_trigger = 0
+        mad_error_logged = False
+
         # Distill timeseries strings into lists
         for i, metric_name in enumerate(assigned_metrics):
             self.check_if_parent_is_alive()
@@ -864,6 +1134,53 @@ class Analyzer(Thread):
             # @added 20191016 - Branch #3262: py3
             if LOCAL_DEBUG:
                 logger.info('debug :: checking %s' % str(metric_name))
+
+            # @added 20201030 - Feature #3808: ANALYZER_DYNAMICALLY_ANALYZE_LOW_PRIORITY_METRICS
+            #                   ANALYZER_BATCH_PROCESSING_OVERFLOW_ENABLED
+            low_priority_metric = False
+            if low_priority_assigned_metrics and ANALYZER_MANAGE_LOW_PRIORITY_METRICS:
+                if metric_name not in high_priority_assigned_metrics:
+                    low_priority_metric = True
+                    if not logged_high_priority_run_time:
+                        logged_high_priority_run_time = (time() - spin_start)
+                        logger.info('all high priority alerting metrics analysed in %.2f seconds' % logged_high_priority_run_time)
+                if not low_priority_time_elasped:
+                    time_elasped = int(time()) - spin_start
+                    if time_elasped > (settings.MAX_ANALYZER_PROCESS_RUNTIME - 15):
+                        low_priority_time_elasped = True
+            if low_priority_time_elasped and ANALYZER_DYNAMICALLY_ANALYZE_LOW_PRIORITY_METRICS:
+                break
+
+            # @modified 20200728 - Bug #3652: Handle multiple metrics in base_name conversion
+            # base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+            if metric_name.startswith(settings.FULL_NAMESPACE):
+                base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+            else:
+                base_name = metric_name
+
+            # @added 20201017 - Feature #3818: ANALYZER_BATCH_PROCESSING_OVERFLOW_ENABLED
+            if ANALYZER_BATCH_PROCESSING_OVERFLOW_ENABLED:
+                    if metric_name in analyzer_batch_queued_metrics:
+                        skipped_low_priority_metrics_in_analyzer_batch_queue += 1
+                        continue
+                    if low_priority_time_elasped:
+                        last_metric_timestamp_key = 'last_timestamp.%s' % base_name
+                        try:
+                            last_metric_timestamp = int(self.redis_conn.get(last_metric_timestamp_key))
+                        except:
+                            last_metric_timestamp = None
+                        if last_metric_timestamp:
+                            data = [metric_name, last_metric_timestamp]
+                            redis_set = 'analyzer.batch'
+                            try:
+                                self.redis_conn.sadd(redis_set, str(data))
+                                sent_to_analyzer_batch_proccessing_metrics += 1
+                                low_priority_metrics_sent_to_analyzer_batch += 1
+                                continue
+                            except:
+                                logger.error(traceback.format_exc())
+                                logger.error('error :: batch processing - failed to add %s to %s Redis set' % (
+                                    str(data), redis_set))
 
             try:
                 raw_series = raw_assigned[i]
@@ -881,13 +1198,6 @@ class Analyzer(Thread):
             if original_timeseries:
                 timeseries = sort_timeseries(original_timeseries)
                 del original_timeseries
-
-            # @modified 20200728 - Bug #3652: Handle multiple metrics in base_name conversion
-            # base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
-            if metric_name.startswith(settings.FULL_NAMESPACE):
-                base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
-            else:
-                base_name = metric_name
 
             last_timeseries_timestamp = 0
 
@@ -1405,8 +1715,8 @@ class Analyzer(Thread):
                     try:
                         self.redis_conn.sadd('new_derivative_metrics', metric_name)
                     except:
-                        logger.info(traceback.format_exc())
-                        logger.error('error :: failed to add metric to Redis new_derivative_metrics set')
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to add metric to Redis derivative_metrics set')
                     # @added 20200529 - Feature #3480: batch_processing
                     #                   Bug #2050: analyse_derivatives - change in monotonicity
                     # Alway set the derivative_metric_key
@@ -1738,6 +2048,63 @@ class Analyzer(Thread):
                     if base_name in i:
                         metric_airgaps_filled.append(i)
 
+                # @added 20201030 - Feature #3808: ANALYZER_DYNAMICALLY_ANALYZE_LOW_PRIORITY_METRICS
+                #                   ANALYZER_BATCH_PROCESSING_OVERFLOW_ENABLED
+                # low_priority_metrics are added to the analyzer.low_priority_metrics.dynamically_analyzed
+                # Redis set pre analysis as if they are Boring, TooShort, Stale,
+                # etc they will still be recordeded as having been assessed,
+                # even if they are not added to the low_priority_metrics_hash_key
+                # otherwise they appear to me missing.
+                try:
+                    int_metric_timestamp = int(timeseries[-1][0])
+                except:
+                    int_metric_timestamp = 0
+                if low_priority_metric and ANALYZER_MANAGE_LOW_PRIORITY_METRICS:
+                    if int_metric_timestamp:
+                        try:
+                            self.redis_conn.hset(
+                                low_priority_metrics_hash_key, metric_name,
+                                int_metric_timestamp)
+                        except:
+                            pass
+                    try:
+                        self.redis_conn.sadd('analyzer.low_priority_metrics.dynamically_analyzed', metric_name)
+                    except:
+                        pass
+
+                # @added 20201018 - Feature #3810: ANALYZER_MAD_LOW_PRIORITY_METRICS
+                check_for_anomalous = True
+                if ANALYZER_MAD_LOW_PRIORITY_METRICS and ANALYZER_ANALYZE_LOW_PRIORITY_METRICS:
+                    try:
+                        if low_priority_metric:
+                            mad_data = [item[1] for item in timeseries[-ANALYZER_MAD_LOW_PRIORITY_METRICS:]]
+                            # @added 20201020 - Feature #3810: ANALYZER_MAD_LOW_PRIORITY_METRICS
+                            # Handle very sparsely populated metrics with only a
+                            # few data points
+                            if len(mad_data) < ANALYZER_MAD_LOW_PRIORITY_METRICS:
+                                mad_data = None
+                            # @modified 20201020 - Feature #3810: ANALYZER_MAD_LOW_PRIORITY_METRICS
+                            # Handle no data, just send through normal
+                            # algorithms to be classified as the correct
+                            # algorithm exception class. Wrapped in if mad_data
+                            # conditional
+                            if mad_data:
+                                mad = mean(absolute(mad_data - mean(mad_data)))
+                                last_value_difference = timeseries[-2][1] - timeseries[-1][1]
+                                if last_value_difference < 0:
+                                    last_value_difference = last_value_difference * -1
+                                if last_value_difference < mad:
+                                    check_for_anomalous = False
+                                else:
+                                    low_priority_metrics_analysed_due_to_mad_trigger += 1
+                    except:
+                        check_for_anomalous = True
+                        if not mad_error_logged:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: mad error with metric %s and time series length of %s' % (
+                                metric_name, str(len(timeseries))))
+                            mad_error_logged = True
+
                 # @modified 20200424 - Feature #3508: ionosphere.untrainable_metrics
                 # Added negatives_found and run_negatives_present
                 # anomalous, ensemble, datapoint = run_selected_algorithm(timeseries, metric_name, metric_airgaps)
@@ -1746,7 +2113,16 @@ class Analyzer(Thread):
                 # anomalous, ensemble, datapoint, negatives_found = run_selected_algorithm(timeseries, metric_name, metric_airgaps, run_negatives_present)
                 # @modified 20200603 - Feature #3566: custom_algorithms
                 # Added algorithms_run
-                anomalous, ensemble, datapoint, negatives_found, algorithms_run = run_selected_algorithm(timeseries, metric_name, metric_airgaps, metric_airgaps_filled, run_negatives_present, check_for_airgaps_only)
+                if check_for_anomalous:
+                    anomalous, ensemble, datapoint, negatives_found, algorithms_run = run_selected_algorithm(timeseries, metric_name, metric_airgaps, metric_airgaps_filled, run_negatives_present, check_for_airgaps_only)
+                else:
+                    # Low priority metric not analysed
+                    anomalous = False
+                    ensemble = [False]
+                    datapoint = timeseries[-1][1]
+                    negatives_found = False
+                    algorithms_run = ['mad']
+
                 del metric_airgaps
                 del metric_airgaps_filled
 
@@ -1759,6 +2135,18 @@ class Analyzer(Thread):
                     logger.debug('debug :: metric %s - anomalous - %s, ensemble - %s, algorithms_run - %s' % (
                         str(metric_name), str(anomalous), str(ensemble),
                         str(algorithms_run)))
+
+                # @added 20201017 - Feature #3818: ANALYZER_BATCH_PROCESSING_OVERFLOW_ENABLED
+                if ANALYZER_BATCH_PROCESSING_OVERFLOW_ENABLED:
+                    if metric_name not in high_priority_assigned_metrics:
+                        last_metric_timestamp_key = 'last_timestamp.%s' % base_name
+                        try:
+                            int_metric_timestamp = int(timeseries[-1][0])
+                            self.redis_conn.setex(
+                                last_metric_timestamp_key, 2592000,
+                                int_metric_timestamp)
+                        except:
+                            logger.error('error :: ANALYZER_BATCH_PROCESSING_OVERFLOW_ENABLED - failed to set Redis key %s for low priority metric' % last_metric_timestamp_key)
 
                 # @added 20200908 - Feature #3734: waterfall alerts
                 from_timestamp = int(timeseries[1][0])
@@ -2123,6 +2511,31 @@ class Analyzer(Thread):
                                         metric[1], str(metric[2]),
                                         str(mirage_check_sent), str(mirage_check_sent_key)))
                                     mirage_check_not_done = False
+                                # @added 20201026 - Task #3800: Handle feedback metrics in Mirage and waterfall alerts
+                                # Check to see if Analyzer has waterfall alerted
+                                # on the metric if it has do not send it to
+                                # Mirage again within PANORAMA_EXPIRY_TIME
+                                if not mirage_check_sent:
+                                    waterfalled_alert_cache_key = 'last_alert.smtp.%s' % (base_name)
+                                    waterfall_alerted_on = False
+                                    try:
+                                        waterfall_alerted_on = self.redis_conn_decoded.get(waterfalled_alert_cache_key)
+                                    except Exception as e:
+                                        logger.error('error :: could not query Redis for cache_key: %s' % str(e))
+                                    if waterfall_alerted_on:
+                                        mirage_check_not_done = False
+                                        # Unless is it older than PANORAMA_EXPIRY_TIME
+                                        try:
+                                            alerted_on_at = int(waterfall_alerted_on)
+                                            alerted_on_seconds_ago = int(time()) - alerted_on_at
+                                            if alerted_on_seconds_ago >= settings.PANORAMA_EXPIRY_TIME:
+                                                mirage_check_not_done = True
+                                        except:
+                                            mirage_check_not_done = True
+                                            pass
+                                        if not mirage_check_not_done:
+                                            logger.info('a waterfall alert was recently sent for %s, not sending to Mirage' % (
+                                                metric[1]))
 
                             if mirage_metric and mirage_check_not_done:
                                 logger.info('not sending to Ionosphere - Mirage metric - %s' % (base_name))
@@ -2528,6 +2941,20 @@ class Analyzer(Thread):
                 logger.error('error :: added as DeletedByRoomba but possibly not see traceback above')
 
                 exceptions['DeletedByRoomba'] += 1
+
+            # added 20201020 - Feature #3792: algorithm_exceptions - EmptyTimeseries
+            # For performance remove metrics with empty time series data from
+            # metrics.unique_metrics so that they are no longer assessed
+            except EmptyTimeseries:
+                exceptions['EmptyTimeseries'] += 1
+                full_uniques = settings.FULL_NAMESPACE + 'unique_metrics'
+                try:
+                    self.redis_conn.srem(full_uniques, metric_name)
+                    logger.info('removed empty time series metric %s from %s Redis set' % (
+                        metric_name, full_uniques))
+                except:
+                    logger.error('error :: failed to remove empty time series metric %s from %s Redis set' % (
+                        metric_name, full_uniques))
             # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
             # Added Redis sets for Boring, TooShort and Stale
             except TooShort:
@@ -2631,6 +3058,33 @@ class Analyzer(Thread):
                 str(sent_to_analyzer_batch_proccessing_metrics_but_also_processing_normally_to_identify_airgaps)))
             logger.info('batch processing - %s of the batch metrics not batch processed but sent through analyzer to be processed because the current penultimate timeseries timestamp was equal to the second last timestamp in Redis' % (
                 str(batch_metric_but_processing_normally_as_penultimate_timeseries_timestamp_equals_second_last_timestamp_from_redis)))
+
+        # @added 20201017 - Feature #3818: ANALYZER_BATCH_PROCESSING_OVERFLOW_ENABLED
+        if ANALYZER_BATCH_PROCESSING_OVERFLOW_ENABLED and low_priority_metrics_sent_to_analyzer_batch:
+            logger.info('ANALYZER_BATCH_PROCESSING_OVERFLOW_ENABLED - sent %s low priority metrics to analyzer_batch' % (
+                str(low_priority_metrics_sent_to_analyzer_batch)))
+            if skipped_low_priority_metrics_in_analyzer_batch_queue:
+                logger.info('ANALYZER_BATCH_PROCESSING_OVERFLOW_ENABLED - skipped %s low priority metrics already in analyzer_batch queue' % (
+                    str(skipped_low_priority_metrics_in_analyzer_batch_queue)))
+
+        # @added 20201018 - Feature #3810: ANALYZER_MAD_LOW_PRIORITY_METRICS
+        if ANALYZER_MAD_LOW_PRIORITY_METRICS and ANALYZER_ANALYZE_LOW_PRIORITY_METRICS:
+            try:
+                skipped_low_priority_metrics = len(low_priority_assigned_metrics) - low_priority_metrics_analysed_due_to_mad_trigger
+                logger.info('ANALYZER_MAD_LOW_PRIORITY_METRICS - skipped %s low priority as mad did not trigger' % (
+                    str(skipped_low_priority_metrics)))
+                logger.info('ANALYZER_MAD_LOW_PRIORITY_METRICS - analyzed %s low priority as mad triggered over %s datapoints ' % (
+                    str(low_priority_metrics_analysed_due_to_mad_trigger),
+                    str(ANALYZER_MAD_LOW_PRIORITY_METRICS)))
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: ANALYZER_MAD_LOW_PRIORITY_METRICS log error')
+        else:
+            logger.info('ANALYZER_MAD_LOW_PRIORITY_METRICS not enabled')
+            if not ANALYZER_ANALYZE_LOW_PRIORITY_METRICS:
+                logger.info('ANALYZER_ANALYZE_LOW_PRIORITY_METRICS set to False, no low priority metrics were analyzed')
+
+        del low_priority_assigned_metrics
 
         # @added 20200117 - Feature #3400: Identify air gaps in the metric data
         del airgapped_metrics
@@ -2973,15 +3427,20 @@ class Analyzer(Thread):
                 # @added 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
                 # Added Redis sets for Boring, TooShort and Stale
                 try:
-                    self.redis_conn.delete('analyzer.boring')
-                    logger.info('deleted Redis analyzer.boring set to refresh')
+                    # @modified 20201030 - Feature #3808: ANALYZER_DYNAMICALLY_ANALYZE_LOW_PRIORITY_METRICS
+                    # self.redis_conn.delete('analyzer.boring')
+                    # logger.info('deleted Redis analyzer.boring set to refresh')
+                    self.redis_conn.rename('analyzer.boring', 'aet.analyzer.boring')
+                    logger.info('renamed Redis analyzer.boring set to aet.analyzer.boring to refresh')
                 except:
-                    logger.info('no Redis set to delete - analyzer.boring')
+                    logger.info('no Redis set to rename - analyzer.boring')
                 try:
-                    self.redis_conn.delete('analyzer.too_short')
-                    logger.info('deleted Redis analyzer.too_short set to refresh')
+                    # self.redis_conn.delete('analyzer.too_short')
+                    # logger.info('deleted Redis analyzer.too_short set to refresh')
+                    self.redis_conn.rename('analyzer.too_short', 'aet.analyzer.too_short')
+                    logger.info('renamed Redis analyzer.too_short to aet.analyzer.too_short set to refresh')
                 except:
-                    logger.info('no Redis set to delete - analyzer.too_short')
+                    logger.info('no Redis set to rename - analyzer.too_short')
                 try:
                     # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
                     #                   Branch #3262: py3
@@ -2991,16 +3450,108 @@ class Analyzer(Thread):
                     stale_metrics = []
                 if stale_metrics:
                     try:
-                        self.redis_conn.delete('analyzer.stale')
-                        logger.info('deleted Redis analyzer.stale set to refresh')
+                        # self.redis_conn.delete('analyzer.stale')
+                        # logger.info('deleted Redis analyzer.stale set to refresh')
+                        self.redis_conn.rename('analyzer.stale', 'aet.analyzer.stale')
+                        logger.info('renamed Redis analyzer.stale to aet.analyzer.stale set to refresh')
                     except:
-                        logger.info('no Redis set to delete - analyzer.stale')
+                        logger.info('no Redis set to rename - analyzer.stale')
                 # @added 20180807 - Feature #2492: alert on stale metrics
                 try:
                     self.redis_conn.delete('analyzer.alert_on_stale_metrics')
                     logger.info('deleted Redis analyzer.alert_on_stale_metrics set to refresh')
                 except:
                     logger.info('no Redis set to delete - analyzer.alert_on_stale_metrics')
+
+                # @added 20201030 - Feature #3808: ANALYZER_DYNAMICALLY_ANALYZE_LOW_PRIORITY_METRICS
+                # Remove any entries in the Redis low_priority_metrics_hash_key
+                # that are not in unique_metrics
+                if ANALYZER_MANAGE_LOW_PRIORITY_METRICS:
+                    logger.info('managing the Redis hash key %s and removing any metrics not in unique_metrics' % (
+                        low_priority_metrics_hash_key))
+                    low_priority_metrics_last_analyzed = []
+                    try:
+                        low_priority_metrics_last_analyzed = self.redis_conn_decoded.hgetall(low_priority_metrics_hash_key)
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to get Redis hash key %s' % (
+                            low_priority_metrics_hash_key))
+                        low_priority_metrics_last_analyzed = []
+                    low_priority_analyzed_metrics = []
+                    if low_priority_metrics_last_analyzed:
+                        try:
+                            low_priority_analyzed_metrics = [item[0] for item in low_priority_metrics_last_analyzed]
+                            logger.info('there %s metrics in the Redis hash key %s' % (
+                                str(len(low_priority_analyzed_metrics)),
+                                low_priority_metrics_hash_key))
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: failed to generate low_priority_metrics_last_analyzed')
+                            low_priority_analyzed_metrics = []
+                        try:
+                            del low_priority_metrics_last_analyzed
+                        except:
+                            pass
+                    if low_priority_analyzed_metrics:
+                        low_priority_analyzed_metrics_set = None
+                        try:
+                            low_priority_analyzed_metrics_set = set(low_priority_analyzed_metrics)
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: failed to generate low_priority_analyzed_metrics_set')
+                        try:
+                            del low_priority_analyzed_metrics
+                        except:
+                            pass
+                        unique_metrics_set = None
+                        try:
+                            unique_metrics_list = list(unique_metrics)
+                            unique_metrics_set = set(unique_metrics_list)
+                            del unique_metrics_list
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: failed to generate unique_metrics_set')
+                        if low_priority_analyzed_metrics_set and unique_metrics_set:
+                            low_priority_metrics_to_remove = []
+                            try:
+                                set_difference = low_priority_analyzed_metrics_set.difference(unique_metrics_set)
+                                for metric in set_difference:
+                                    low_priority_metrics_to_remove.append(metric)
+                            except:
+                                logger.error(traceback.format_exc())
+                                logger.error('error :: determining difference between low_priority_analyzed_metrics_set and unique_metrics_set')
+                            try:
+                                del low_priority_analyzed_metrics_set
+                            except:
+                                pass
+                            try:
+                                del unique_metrics_set
+                            except:
+                                pass
+                            try:
+                                del set_difference
+                            except:
+                                pass
+                            if low_priority_metrics_to_remove:
+                                try:
+                                    logger.info('removing %s metrics from the Redis hash key %s' % (
+                                        str(len(low_priority_metrics_to_remove)),
+                                        low_priority_metrics_hash_key))
+                                    self.redis_conn.hdel(low_priority_metrics_hash_key, *set(low_priority_metrics_to_remove))
+                                    logger.info('removed %s metrics from the Redis hash key %s' % (
+                                        str(len(low_priority_metrics_to_remove)),
+                                        low_priority_metrics_hash_key))
+                                except:
+                                    logger.error(traceback.format_exc())
+                                    logger.error('error :: failed to remove the low_priority_metrics_to_remove the Redis hash key %s' % (
+                                        low_priority_metrics_hash_key))
+                                try:
+                                    del low_priority_metrics_to_remove
+                                except:
+                                    pass
+                            else:
+                                logger.info('no metrics need to be removed from the Redis hash key %s' % (
+                                    low_priority_metrics_hash_key))
 
             # @added 20160922 - Branch #922: Ionosphere
             # Add a Redis set of mirage.unique_metrics
@@ -3078,6 +3629,7 @@ class Analyzer(Thread):
                     # analyzer.mirage.metrics_expiration_times Redis set
                     analyzer_mirage_metrics_expiration_times_list = []
                     try:
+                        # @modified 20201013 - Bug #3766: Refresh mirage.metrics_expiration_times for batch processing
                         # analyzer_mirage_metrics_expiration_times_list = list(self.redis_conn.smembers('analyzer.mirage.metrics_expiration_times'))
                         analyzer_mirage_metrics_expiration_times_list = list(self.redis_conn_decoded.smembers('analyzer.mirage.metrics_expiration_times'))
                         logger.info('%s items in Redis set analyzer.mirage.metrics_expiration_times' % str(len(analyzer_mirage_metrics_expiration_times_list)))
@@ -3298,7 +3850,7 @@ class Analyzer(Thread):
                 # further on
                 # smtp_alerter_metrics = list(self.redis_conn_decoded.smembers('analyzer.smtp_alerter_metrics'))
                 smtp_alerter_metrics = list(self.redis_conn_decoded.smembers('aet.analyzer.smtp_alerter_metrics'))
-                logger.info('currently %s metrics in smtp_alerter_metrics' % (str(len(smtp_alerter_metrics))))
+                logger.info('currently %s metrics in smtp_alerter_metrics from aet.analyzer.smtp_alerter_metrics' % (str(len(smtp_alerter_metrics))))
                 if LOCAL_DEBUG:
                     logger.info('debug :: smtp_alerter_metrics :: %s' % (str(smtp_alerter_metrics)))
             except:
@@ -3309,20 +3861,87 @@ class Analyzer(Thread):
             if LOCAL_DEBUG:
                 logger.info('debug :: unique_metrics :: %s' % (str(unique_metrics)))
 
+            # @added 20201017 - Feature #3788: snab_flux_load_test
+            #                   Feature #3560: External alert config
+            refresh_redis_alert_sets = False
+            last_all_alerts_set = None
+            try:
+                last_all_alerts_data = self.redis_conn_decoded.get('analyzer.last_all_alerts')
+                if last_all_alerts_data:
+                    last_all_alerts = literal_eval(last_all_alerts_data)
+                    # A normal sorted cannot be used as the list has dicts in it
+                    last_all_alerts_set = sorted(last_all_alerts, key=lambda item: item[0])
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to generate a list from the analyzer.last_all_alerts Redis key')
+                last_all_alerts_set = None
+            all_alerts_set = None
+            if all_alerts:
+                try:
+                    all_alerts_list = [list(row) for row in all_alerts]
+                    # A normal sorted cannot be used as the list has dicts in it
+                    all_alerts_set = sorted(all_alerts_list, key=lambda item: item[0])
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to create a sorted list from all_alerts object of type %s' % str(type(all_alerts_list)))
+                try:
+                    self.redis_conn.set('analyzer.last_all_alerts', str(all_alerts_set))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to set analyzer.last_all_alerts Redis key')
+            if str(all_alerts_set) != str(last_all_alerts_set):
+                logger.info('alert settings have changed alerts will be refreshed, reset current smtp_alerter_metrics list')
+                refresh_redis_alert_sets = True
+                smtp_alerter_metrics = []
+                try:
+                    self.redis_conn.delete('analyzer.smtp_alerter_metrics')
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to delete Redis set analyzer.smtp_alerter_metrics')
+                try:
+                    self.redis_conn.delete('analyzer.non_smtp_alerter_metrics')
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to delete Redis set analyzer.non_smtp_alerter_metrics')
+            else:
+                logger.info('alert settings have not changed alerts will not be refreshed')
+
             # @added 20200723 - Feature #3560: External alert config
             # Speed this up only check alerters if not already in the set
             unique_base_names = []
             if smtp_alerter_metrics:
+                logger.info('adding all stmp_alerter_metrics to analyzer.smtp_alerter_metrics Redis set')
                 try:
                     self.redis_conn.sadd('analyzer.smtp_alerter_metrics', *set(smtp_alerter_metrics))
                 except:
                     logger.error(traceback.format_exc())
                     logger.error('error :: failed to add multiple members to the smtp_alerter_metrics Redis set')
+                logger.info('added all stmp_alerter_metrics to analyzer.smtp_alerter_metrics Redis set')
+                try:
+                    smtp_alerter_metrics = list(self.redis_conn_decoded.smembers('analyzer.smtp_alerter_metrics'))
+                    logger.info('there are %s metrics in smtp_alerter_metrics from analyzer.smtp_alerter_metrics' % (str(len(smtp_alerter_metrics))))
+                    if LOCAL_DEBUG:
+                        logger.info('debug :: smtp_alerter_metrics :: %s' % (str(smtp_alerter_metrics)))
+                except:
+                    logger.info(traceback.format_exc())
+                    logger.error('error :: failed to generate a list from the analyzer.smtp_alerter_metrics Redis set')
+                    smtp_alerter_metrics = []
 
             # @added 20170108 - Feature #1830: Ionosphere alerts
             # Adding lists of smtp_alerter_metrics and non_smtp_alerter_metrics
             # Timed this takes 0.013319 seconds on 689 unique_metrics
+
+            # @modified 20201016 - Feature #3788: snab_flux_load_test
+            #                      Feature #3560: External alert config
+            # Takes 46 seconds on 32000 unique_metrics so changed to using
+            # difference between sets which is near instantaneous
+            logger.info('checking that all alerting unique metrics are in stmp_alerter_metrics and analyzer.smtp_alerter_metrics Redis set')
+            metrics_already_in_smtp_alerter_metrics = 0
+            metrics_added_to_smtp_alerter_metrics = 0
+
+            logger.info('creating unique_base_names list')
             for metric_name in unique_metrics:
+
                 # @added 20191014 - Bug #3266: py3 Redis binary objects not strings
                 #                   Branch #3262: py3
                 if python_version == 3:
@@ -3337,8 +3956,116 @@ class Analyzer(Thread):
 
                 # @added 20200723 - Feature #3560: External alert config
                 # Speed this up only check alerters if not already in the set
-                metric_in_smtp_alerters_set = False
+                # metric_in_smtp_alerters_set = False
                 unique_base_names.append(base_name)
+            logger.info('created unique_base_names list of %s metrics' % str(len(unique_base_names)))
+
+            # @added 20201016 - Feature #3788: snab_flux_load_test
+            #                   Feature #3560: External alert config
+            # Use differences between sets
+            logger.info('comparing unique_base_names_set to smtp_alerter_metrics_set')
+            unique_base_names_set = set(unique_base_names)
+            smtp_alerter_metrics_set = set(smtp_alerter_metrics)
+            logger.info('comparing unique_base_names_set with %s metrics to smtp_alerter_metrics_set with %s metrics' % (
+                str(len(unique_base_names_set)), str(len(smtp_alerter_metrics_set))))
+            missing_metrics = []
+            if unique_base_names_set == smtp_alerter_metrics_set:
+                logger.info('unique_base_names_set and smtp_alerter_metrics_set are the same, nothing to do')
+            else:
+                set_difference = unique_base_names_set.difference(smtp_alerter_metrics_set)
+                for metric in set_difference:
+                    missing_metrics.append(metric)
+                logger.info('there are %s metrics in unique_base_names_set that are not in smtp_alerter_metrics_set, checking see if they need to be added' % str(len(missing_metrics)))
+                del set_difference
+
+            if refresh_redis_alert_sets:
+                missing_metrics = list(unique_base_names)
+                logger.info('alert settings have changed alerts will be refreshed, added all unique_base_names to missing_metrics with %s metrics' % str(len(missing_metrics)))
+
+            aet_non_smtp_alerter_metrics = []
+            non_smtp_alerter_metrics = []
+            try:
+                aet_non_smtp_alerter_metrics = list(self.redis_conn_decoded.smembers('aet.analyzer.non_smtp_alerter_metrics'))
+                logger.info('there are %s metrics in the non_smtp_alerter_metrics list from the aet.analyzer.non_smtp_alerter_metrics Redis set' % str(len(aet_non_smtp_alerter_metrics)))
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to generate a list from aet.analyzer.non_smtp_alerter_metrics Redis set')
+                aet_non_smtp_alerter_metrics = []
+            try:
+                non_smtp_alerter_metrics = list(self.redis_conn_decoded.smembers('analyzer.non_smtp_alerter_metrics'))
+                logger.info('there are %s metrics in the non_smtp_alerter_metrics list from the analyzer.non_smtp_alerter_metrics Redis set' % str(len(non_smtp_alerter_metrics)))
+                if len(non_smtp_alerter_metrics) == 0:
+                    if aet_non_smtp_alerter_metrics:
+                        logger.info('adding all aet_non_smtp_alerter_metrics to analyzer.non_smtp_alerter_metrics Redis set')
+                        try:
+                            self.redis_conn.sadd('analyzer.non_smtp_alerter_metrics', *set(aet_non_smtp_alerter_metrics))
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: failed to add multiple members from aet_non_smtp_alerter_metrics to the analyzer.non_smtp_alerter_metrics Redis set')
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to generate a list from analyzer.non_smtp_alerter_metrics Redis set')
+                non_smtp_alerter_metrics = []
+            all_non_smtp_alerter_metrics = non_smtp_alerter_metrics + aet_non_smtp_alerter_metrics
+            non_smtp_alerter_metrics = list(set(all_non_smtp_alerter_metrics))
+            logger.info('there are %s metrics in the non_smtp_alerter_metrics list from the Redis sets' % str(len(non_smtp_alerter_metrics)))
+
+            if refresh_redis_alert_sets:
+                non_smtp_alerter_metrics = []
+                logger.info('alert settings have changed alerts will be refreshed, reset current non_smtp_alerter_metrics list')
+
+            missing_metrics_set = set(missing_metrics)
+            logger.info('there are %s metrics in the missing_metrics_set' % str(len(missing_metrics_set)))
+            non_smtp_alerter_metrics_set = set(non_smtp_alerter_metrics)
+            logger.info('there are %s metrics in the non_smtp_alerter_metrics_set' % str(len(non_smtp_alerter_metrics_set)))
+            if missing_metrics_set == non_smtp_alerter_metrics_set:
+                logger.info('missing_metrics_set and non_smtp_alerter_metrics_set are the same, nothing to do')
+                missing_metrics = []
+            else:
+                non_alerting_set_difference = missing_metrics_set.difference(non_smtp_alerter_metrics_set)
+                for metric in list(set(non_alerting_set_difference)):
+                    missing_metrics.append(metric)
+                missing_metrics = list(set(missing_metrics))
+                logger.info('there are %s metrics in missing_metrics_set that are not in non_smtp_alerter_metrics_set, checking see if they need to be added' % str(len(missing_metrics)))
+                del non_alerting_set_difference
+            del missing_metrics_set
+            del non_smtp_alerter_metrics_set
+            if missing_metrics:
+                logger.info('adding all missing_metrics to analyzer.non_smtp_alerter_metrics Redis set')
+                try:
+                    self.redis_conn.sadd('analyzer.non_smtp_alerter_metrics', *set(missing_metrics))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to add multiple members to the analyzer.non_smtp_alerter_metrics Redis set')
+                try:
+                    non_smtp_alerter_metrics = list(self.redis_conn_decoded.smembers('analyzer.non_smtp_alerter_metrics'))
+                    logger.info('there are %s metrics in non_smtp_alerter_metrics from analyzer.non_smtp_alerter_metrics' % (str(len(smtp_alerter_metrics))))
+                except:
+                    logger.info(traceback.format_exc())
+                    logger.error('error :: failed to generate a list from the analyzer.non_smtp_alerter_metrics Redis set')
+                    non_smtp_alerter_metrics = []
+                if non_smtp_alerter_metrics:
+                    missing_metrics = []
+            unknown_metrics = []
+            if missing_metrics:
+                for base_name in missing_metrics:
+                    if base_name not in non_smtp_alerter_metrics:
+                        unknown_metrics.append(base_name)
+                if unknown_metrics:
+                    unknown_metrics = list(set(unknown_metrics))
+            logger.info('there are %s metrics with unknown alert status' % str(len(unknown_metrics)))
+
+            # refreshed_smtp_metrics = False
+            if len(smtp_alerter_metrics) == 0:
+                logger.info('there are no known smtp_alerter_metrics so chacking all')
+                unknown_metrics = list(unique_base_names)
+                # refreshed_smtp_metrics = True
+
+            # @modified 20201016 - Feature #3788: snab_flux_load_test
+            #                      Feature #3560: External alert config
+            # Do not operate on all metrics, only metrics that are unknown
+            for base_name in unknown_metrics:
+                metric_in_smtp_alerters_set = False
                 if base_name not in smtp_alerter_metrics:
                     # @modified 20200610 - Feature #3560: External alert config
                     # Use the all_alerts list which includes external alert configs
@@ -3379,6 +4106,7 @@ class Analyzer(Thread):
                                     try:
                                         self.redis_conn.sadd(redis_set, data)
                                         metric_in_smtp_alerters_set = True
+                                        metrics_added_to_smtp_alerter_metrics += 1
                                         break
                                     except:
                                         logger.info(traceback.format_exc())
@@ -3388,6 +4116,8 @@ class Analyzer(Thread):
                                 pattern_match = False
                 else:
                     metric_in_smtp_alerters_set = True
+                    metrics_already_in_smtp_alerter_metrics += 1
+
                 # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
                 # Use Redis set analyzer.smtp_alerter_metrics in place of
                 # self.smtp_alerter_metrics Manager.list
@@ -3415,6 +4145,9 @@ class Analyzer(Thread):
                         logger.info(traceback.format_exc())
                         logger.error('error :: failed to add %s to Redis set %s' % (
                             str(data), str(redis_set)))
+            logger.info('checked that all alerting unique metrics are in stmp_alerter_metrics and analyzer.smtp_alerter_metrics Redis set, %s missing_metrics were already in smtp_alerter_metrics and %s metrics were added' % (
+                str(metrics_already_in_smtp_alerter_metrics),
+                str(metrics_added_to_smtp_alerter_metrics)))
 
             # @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage
             # Define variables from the Redis set which has replaced the Manager
@@ -3429,6 +4162,7 @@ class Analyzer(Thread):
                 logger.info(traceback.format_exc())
                 logger.error('error :: failed to generate a list from analyzer.smtp_alerter_metrics Redis set')
                 smtp_alerter_metrics = []
+            non_smtp_alerter_metrics = []
             try:
                 # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
                 #                   Branch #3262: py3
@@ -3444,9 +4178,21 @@ class Analyzer(Thread):
             # speed this up, entries need to be removed
             logger.info('checking if any metrics need to be removed from smtp_alerter_metrics')
             smtp_alerter_metrics_to_remove = []
-            for smtp_alerter_base_name in smtp_alerter_metrics:
-                if smtp_alerter_base_name not in unique_base_names:
-                    smtp_alerter_metrics_to_remove.append(smtp_alerter_base_name)
+
+            # @modified 20201016 - Feature #3788: snab_flux_load_test
+            #                   Feature #3560: External alert config
+            # Use differences between sets
+            # for smtp_alerter_base_name in smtp_alerter_metrics:
+            #     if smtp_alerter_base_name not in unique_base_names:
+            #         smtp_alerter_metrics_to_remove.append(smtp_alerter_base_name)
+            try:
+                smtp_alerter_metrics_set = set(smtp_alerter_metrics)
+                set_difference = smtp_alerter_metrics_set.difference(unique_base_names_set)
+                for metric in set_difference:
+                    smtp_alerter_metrics_to_remove.append(metric)
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: determine difference between smtp_alerter_metrics_set and unique_base_names_set for smtp_alerter_metrics_to_remove')
             if smtp_alerter_metrics_to_remove:
                 try:
                     logger.info('removing %s metrics from smtp_alerter_metrics' % str(len(smtp_alerter_metrics_to_remove)))
@@ -3459,15 +4205,59 @@ class Analyzer(Thread):
                         logger.error('error :: failed to generate a list from analyzer.smtp_alerter_metrics Redis set after removing entires')
                 except:
                     logger.info(traceback.format_exc())
-                    logger.error('error :: failed to add multiple members to the new_analyzer.smtp_alerter_metrics Redis set')
+                    logger.error('error :: failed to remove multiple members from analyzer.smtp_alerter_metrics Redis set')
             else:
-                logger.info('no metrics need to remove from smtp_alerter_metrics')
+                logger.info('no metrics to remove from analyzer.smtp_alerter_metrics Redis set')
+
+            if non_smtp_alerter_metrics:
+                try:
+                    self.redis_conn.sadd('analyzer.non_smtp_alerter_metrics', *set(non_smtp_alerter_metrics))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to add multiple members to the analyzer.non_smtp_alerter_metrics Redis set')
+
+            logger.info('checking if any metrics need to be removed from non_smtp_alerter_metrics')
+            non_smtp_alerter_metrics_to_remove = []
+            try:
+                non_smtp_alerter_metrics_set = set(non_smtp_alerter_metrics)
+                non_smtp_alerter_set_difference = non_smtp_alerter_metrics_set.difference(unique_base_names_set)
+                for metric in non_smtp_alerter_set_difference:
+                    non_smtp_alerter_metrics_to_remove.append(metric)
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: determine difference between non_smtp_alerter_metrics_set and unique_base_names_set for smtp_alerter_metrics_to_remove')
+            del unique_base_names_set
+            if non_smtp_alerter_metrics_to_remove:
+                try:
+                    logger.info('removing %s metrics from non_smtp_alerter_metrics' % str(len(non_smtp_alerter_metrics_to_remove)))
+                    self.redis_conn.srem('analyzer.non_smtp_alerter_metrics', *set(non_smtp_alerter_metrics_to_remove))
+                except:
+                    logger.info(traceback.format_exc())
+                    logger.error('error :: failed to remove multiple members from analyzer.non_smtp_alerter_metrics Redis set')
+            else:
+                logger.info('no metrics to remove from analyzer.non_smtp_alerter_metrics Redis set')
+            if non_smtp_alerter_metrics and smtp_alerter_metrics_set:
+                try:
+                    logger.info('removing any smtp_alerter_metrics analyzer.non_smtp_alerter_metrics Redis set')
+                    self.redis_conn.srem('analyzer.non_smtp_alerter_metrics', *set(list(smtp_alerter_metrics_set)))
+                except:
+                    logger.info(traceback.format_exc())
+                    logger.error('error :: failed to remove multiple members from analyzer.non_smtp_alerter_metrics Redis set')
+            del smtp_alerter_metrics_set
+
+            # Reload the new set
+            try:
+                non_smtp_alerter_metrics = list(self.redis_conn_decoded.smembers('analyzer.non_smtp_alerter_metrics'))
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to generate a list from analyzer.non_smtp_alerter_metrics Redis set after removing entires')
 
             # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
             # logger.info('smtp_alerter_metrics     :: %s' % str(len(self.smtp_alerter_metrics)))
             # logger.info('non_smtp_alerter_metrics :: %s' % str(len(self.non_smtp_alerter_metrics)))
             logger.info('smtp_alerter_metrics     :: %s' % str(len(smtp_alerter_metrics)))
             logger.info('non_smtp_alerter_metrics :: %s' % str(len(non_smtp_alerter_metrics)))
+            del non_smtp_alerter_metrics_set
 
             # @added 20180423 - Feature #2360: CORRELATE_ALERTS_ONLY
             #                   Branch #2270: luminosity
@@ -3481,24 +4271,24 @@ class Analyzer(Thread):
             # Speed this up with adding multiple members to the set
             # for metric in smtp_alerter_metrics:
             #    self.redis_conn.sadd('new_analyzer.smtp_alerter_metrics', metric)
-            try:
-                self.redis_conn.sadd('new_analyzer.smtp_alerter_metrics', *set(smtp_alerter_metrics))
-            except:
-                logger.error(traceback.format_exc())
-                logger.error('error :: failed to add multiple members to the new_analyzer.smtp_alerter_metrics Redis set')
-
-            try:
-                self.redis_conn.rename('analyzer.smtp_alerter_metrics', 'analyzer.smtp_alerter_metrics.old')
-            except:
-                pass
-            try:
-                self.redis_conn.rename('new_analyzer.smtp_alerter_metrics', 'analyzer.smtp_alerter_metrics')
-            except:
-                pass
-            try:
-                self.redis_conn.delete('analyzer.smtp_alerter_metrics.old')
-            except:
-                pass
+            if smtp_alerter_metrics:
+                try:
+                    self.redis_conn.sadd('new_analyzer.smtp_alerter_metrics', *set(smtp_alerter_metrics))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to add multiple members to the new_analyzer.smtp_alerter_metrics Redis set')
+                try:
+                    self.redis_conn.rename('analyzer.smtp_alerter_metrics', 'analyzer.smtp_alerter_metrics.old')
+                except:
+                    pass
+                try:
+                    self.redis_conn.rename('new_analyzer.smtp_alerter_metrics', 'analyzer.smtp_alerter_metrics')
+                except:
+                    pass
+                try:
+                    self.redis_conn.delete('analyzer.smtp_alerter_metrics.old')
+                except:
+                    pass
 
             # @added 20200827 - Feature #3708: FLUX_ZERO_FILL_NAMESPACES
             # Analyzer determines what metrics flux should 0 fill by creating
@@ -3575,6 +4365,7 @@ class Analyzer(Thread):
                         except:
                             logger.info(traceback.format_exc())
                             logger.error('error :: failed to sunionstore flux.zero_fill_metrics from analyzer.flux_zero_fill_metrics Redis sets')
+            del unique_base_names
 
             # Using count files rather that multiprocessing.Value to enable metrics for
             # metrics for algorithm run times, etc
@@ -3790,7 +4581,9 @@ class Analyzer(Thread):
 
             # @added 20191021 - Bug #3288: Always send anomaly_breakdown and exception metrics
             #                   Branch #3262: py3
-            exceptions_metrics = ['Boring', 'Stale', 'TooShort', 'Other']
+            # modified 20201020 - Feature #3792: algorithm_exceptions - EmptyTimeseries
+            # Added EmptyTimeseries
+            exceptions_metrics = ['Boring', 'Stale', 'TooShort', 'Other', 'EmptyTimeseries']
             for i_exception in exceptions_metrics:
                 if i_exception not in exceptions.keys():
                     exceptions[i_exception] = 0
@@ -3872,6 +4665,7 @@ class Analyzer(Thread):
                 logger.error('error :: failed to add to analyzer.all_anomalous_metrics Redis set')
             ionosphere_alerts = []
             context = 'Analyzer'
+            logger.info('checking for ionosphere.analyzer.alert.* Redis keys')
             try:
                 # @modified 20200430 - Bug #3266: py3 Redis binary objects not strings
                 #                      Branch #3262: py3
@@ -3883,6 +4677,7 @@ class Analyzer(Thread):
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: failed to scan ionosphere.analyzer.alert.* from Redis')
+            logger.info('%s ionosphere_alerts from ionosphere.analyzer.alert.* Redis keys' % str(len(ionosphere_alerts)))
 
             if not ionosphere_alerts:
                 ionosphere_alerts = []
@@ -4191,6 +4986,8 @@ class Analyzer(Thread):
             # resources required are not available for training
             remove_ionosphere_training_data_for = []
 
+            spin_process_sent_to_mirage_list = []
+
             # Send alerts
             if settings.ENABLE_ALERTS:
                 try:
@@ -4381,8 +5178,11 @@ class Analyzer(Thread):
                                 # Only add the metric check file if it was not
                                 # added immediately in the spin_process
                                 if spin_process_sent_to_mirage:
-                                    logger.info('spin_process already added mirage check for %s' % (metric[1]))
-                                    send_check_to_mirage = False
+                                    if metric[1] not in spin_process_sent_to_mirage_list:
+                                        logger.info('spin_process already added mirage check for %s' % (metric[1]))
+                                        send_check_to_mirage = False
+                                        spin_process_sent_to_mirage_list.append(metric[1])
+
                                 # Only add the metric check file if it the check
                                 # was not already submitted in a past run
                                 if send_check_to_mirage:
@@ -4798,6 +5598,31 @@ class Analyzer(Thread):
             for metric_to_remove in remove_ionosphere_training_data_for:
                 data = metric_to_remove[0]
                 wf_metric_training_dir = metric_to_remove[1]
+
+                # @added 20201016 - Feature #3734: waterfall alerts
+                # Remove mirage and ionosphere check file if they exists as they
+                # have been alerted on
+                try:
+                    sane_metricname = filesafe_metricname(str(data[0]))
+                    check_file = '%s.%s.txt' % (str(data[1]), sane_metricname)
+                    mirage_check_file = '%s/%s' % (settings.MIRAGE_CHECK_PATH, check_file)
+                    if os.path.isfile(mirage_check_file):
+                        try:
+                            os.remove(mirage_check_file)
+                            logger.info('removed mirage check file as waterfall alerted on - %s' % mirage_check_file)
+                        except OSError:
+                            logger.error('error - failed to remove %s, continuing' % mirage_check_file)
+                    ionosphere_check_file = '%s/%s' % (settings.IONOSPHERE_CHECK_PATH, check_file)
+                    if os.path.isfile(ionosphere_check_file):
+                        try:
+                            os.remove(ionosphere_check_file)
+                            logger.info('removed ionosphere check file as waterfall alerted on - %s' % ionosphere_check_file)
+                        except OSError:
+                            logger.error('error - failed to remove %s, continuing' % ionosphere_check_file)
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to determine if there are check files to remove for - %s' % (str(metric_to_remove)))
+
                 if os.path.exists(wf_metric_training_dir):
                     try:
                         rmtree(wf_metric_training_dir)
@@ -6077,6 +6902,68 @@ class Analyzer(Thread):
 
             else:
                 logger.info('Redis set analyzer.mirage.metrics_expiration_times has no entries, nothing to update')
+
+            # @added 20201030 - Feature #3808: ANALYZER_DYNAMICALLY_ANALYZE_LOW_PRIORITY_METRICS
+            if ANALYZER_DYNAMICALLY_ANALYZE_LOW_PRIORITY_METRICS and ANALYZER_ANALYZE_LOW_PRIORITY_METRICS:
+                last_dynamic_low_priority_set_count = 0
+                try:
+                    last_dynamic_low_priority_set_count = self.redis_conn_decoded.scard('analyzer.low_priority_metrics.dynamically_analyzed')
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to get Redis set - analyzer.low_priority_metrics.last_dynamically_analyzed')
+                    last_dynamic_low_priority_set_count = 0
+                try:
+                    self.redis_conn.delete('analyzer.low_priority_metrics.dynamically_analyzed')
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to delete Redis set - analyzer.low_priority_metrics.last_dynamically_analyzed')
+                low_priority_metric_count = 0
+                low_priority_metric_count_list = []
+                try:
+                    low_priority_metric_count_list = list(self.redis_conn_decoded.smembers('analyzer.low_priority_metrics.count'))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to generate list from Redis set - analyzer.low_priority_metrics.count')
+                    low_priority_metric_count_list = []
+                if low_priority_metric_count_list:
+                    low_priority_metric_counts = []
+                    for item in low_priority_metric_count_list:
+                        try:
+                            low_priority_metric_counts.append(int(item))
+                        except:
+                            pass
+                    low_priority_metric_count = sum(low_priority_metric_counts)
+                    try:
+                        self.redis_conn.delete('analyzer.low_priority_metrics.count')
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to delete Redis set - analyzer.low_priority_metrics.count')
+                if last_dynamic_low_priority_set_count and low_priority_metric_count:
+                    logger.info('ANALYZER_DYNAMICALLY_ANALYZE_LOW_PRIORITY_METRICS processed %s of the total %s low priority metrics' % (
+                        str(last_dynamic_low_priority_set_count),
+                        str(low_priority_metric_count)))
+                    logger.info('low_priority_metrics.dynamically_analyzed :: %s' % str(last_dynamic_low_priority_set_count))
+                    send_metric_name = '%s.low_priority_metrics.dynamically_analyzed' % skyline_app_graphite_namespace
+                    send_graphite_metric(skyline_app, send_metric_name, str(last_dynamic_low_priority_set_count))
+                    logger.info('low_priority_metrics.total :: %s' % str(low_priority_metric_count))
+                    send_metric_name = '%s.low_priority_metrics.total' % skyline_app_graphite_namespace
+                    send_graphite_metric(skyline_app, send_metric_name, str(low_priority_metric_count))
+                # Keep a record of missing low priority metrics for debug purposes
+                # these tend to be sparsely populated metrics
+                missing_unknown_low_priority_metrics_set_count = 0
+                try:
+                    missing_unknown_low_priority_metrics_set_count = self.redis_conn.scard('analyzer.missing_low_priority_metrics')
+                except:
+                    pass
+                if missing_unknown_low_priority_metrics_set_count:
+                    try:
+                        self.redis_conn.delete('aet.analyzer.missing_low_priority_metrics')
+                    except:
+                        pass
+                    try:
+                        self.redis_conn.rename('analyzer.missing_low_priority_metrics', 'aet.analyzer.missing_low_priority_metrics')
+                    except:
+                        pass
 
             # Sleep if it went too fast
             # if time() - now < 5:
