@@ -208,3 +208,46 @@ Example of log output:
     2020-10-07 16:52:26 :: 3580119 :: Ionosphere metrics :: 763
     2020-10-07 16:52:26 :: 3580119 :: canary duration    :: 24.17
     2020-10-07 16:52:26 :: 3580119 :: sleeping for 33.01 seconds due to low run time...
+
+SNAB flux load tester
+---------------------
+
+So how many metrics can Skyline handle ruuning on that digitalocean droplet?
+
+It is difficult to tell how many metrics a single Skyline server can handle
+given the myriad combinations of configurations and hardware resources it may be
+run on.
+
+This is where SNAB flux load tester comes into play.  It allows you to deploy
+Skyline and the snab app can be configured to send as many metrics as you want
+to Graphite and Skyline.
+
+.. warning:: DO NOT run this on an existing Skyline that is running with real
+  data, it is meant to be run on a new, disposal Skyline build.  This because it
+  populates Graphite, Redis, the database tables, etc with real data of test
+  metrics.  Unless you want to test and remove all the test metrics from Redis,
+  Graphite and MariaDB manually, which would be possible, but not advisable.
+
+To enable a snab_flux_load_test set the following in settings.py:
+
+.. code-block:: python
+
+    SNAB_FLUX_LOAD_TEST_ENABLED = True
+    # the number of metrics you want to load test with, use the number appropriate
+    # for you
+    SNAB_FLUX_LOAD_TEST_METRICS = 2000
+
+Ensure that horizon, analyzer, flux and Graphite are running and start
+snab_flux_load_test.d as appropriate
+
+.. code-block:: bash
+
+    sudo -u skyline /opt/skyline/github/skyline/bin/snab_flux_load_test.d start
+    tail -n 80 /var/log/skyline/snab_flux_load_test.log
+
+    # Stop the load test
+    /opt/skyline/github/skyline/bin/snab_flux_load_test.d stop
+
+You will want to let the load test run for a while and you may want to adjust
+the :mod:`settings.SNAB_FLUX_LOAD_TEST_METRICS` value and restart the test a few
+times.
