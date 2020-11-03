@@ -13,12 +13,33 @@ required, e.g. Luminosity.
 Some organisations have multiple Graphite instances for sharding, geographic or
 latency reasons.  In such a case it is possible that each Graphite instance
 would pickle to a Skyline instance and for there to be multiple Skyline
-instances.
+instances.  However...
+
+Running Skyline in a distributed, HA manner is mostly related to running the
+components of Skyline in this fashion, for example using Galera cluster to
+provide MariaDB replication.  Each of the components have their own high
+availability and clustering methods in most cases and the addition of haproxy,
+mysqlproxy, load balanced or round robin DNS can achieve a lot of redundancy.
+Defining how Skyline can be run in HA or clustered is beyond the scope of
+Skyline itself, it is more an exercise of operations and distributed systems
+which is beyond the scope of this documentation.
+
+However one word of caution, **do not cluster Redis**.  Although some sharded
+configuration may work, it is simpler just to use local Redis data.  Due to
+the metric time series constantly changing in Redis clustering or slaving
+results in most the entire Redis data store being shipped constantly, not
+desired.
+
+That said the actual Skyline modules have certain settings and configurations
+that are HA or distributed _aware_ to allow Skyline itself to provide the
+ability to use HA/clustered/distributed components.  This section deals with
+these.
 
 The following settings pertain to running multiple Skyline instances:
 
 - :mod:`settings.ALTERNATIVE_SKYLINE_URLS`
 - :mod:`settings.REMOTE_SKYLINE_INSTANCES`
+- :mod:`settings.HORIZON_SHARDS`
 
 With the introduction of Luminosity a requirement for Skyline to pull the time
 series data from remote Skyline instances was added to allow for cross
@@ -51,7 +72,7 @@ center.  Where the primary Graphite is pickling to a primary Skyline instance
 and a standby Graphite instance.  With the standby Graphite instance pickling
 data to the standby Skyline instance.
 
-.. code-block
+.. code-block::
 
                         graphite-1
                             |

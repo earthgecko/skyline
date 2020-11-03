@@ -53,6 +53,23 @@ try:
 except:
     DO_NOT_SKIP_LIST = []
 
+# @added 20201103 - Feature #3820: HORIZON_SHARDS
+try:
+    HORIZON_SHARDS = settings.HORIZON_SHARDS.copy()
+except:
+    HORIZON_SHARDS = {}
+try:
+    HORIZON_SHARD_DEBUG = settings.HORIZON_SHARD_DEBUG
+except:
+    HORIZON_SHARD_DEBUG = True
+number_of_horizon_shards = 0
+this_host = str(os.uname()[1])
+HORIZON_SHARD = 0
+if HORIZON_SHARDS:
+    import zlib
+    number_of_horizon_shards = len(HORIZON_SHARDS)
+    HORIZON_SHARD = HORIZON_SHARDS[this_host]
+
 # @added 20190130 - Task #2690: Test Skyline on Python-3.6.7
 #                   Branch #3262: py3
 python_version = int(version_info[0])
@@ -150,6 +167,22 @@ class Worker(Process):
 
         return False
 
+# @added 20201103 - Feature #3820: HORIZON_SHARDS
+    def in_shard(self, metric_name):
+        """
+        Check if the metric belongs to the Horizon instance shard.
+        """
+        if not HORIZON_SHARDS:
+            return True
+        metric_as_bytes = str(metric_name).encode()
+        value = zlib.adler32(metric_as_bytes)
+        modulo_result = value % number_of_horizon_shards
+        if modulo_result == HORIZON_SHARD:
+            return True
+        else:
+            return False
+        return True
+
     def run(self):
         """
         Called when the process intializes.
@@ -193,6 +226,10 @@ class Worker(Process):
 
         logger.info('%s :: started worker %s' % (skyline_app, str(self.worker_number)))
 
+        # @added 20201103 - Feature #3820: HORIZON_SHARDS
+        if HORIZON_SHARDS:
+            logger.info('%s :: HORIZON_SHARDS declared, this horizon instance is assigned shard %s' % (skyline_app, str(HORIZON_SHARD)))
+
         FULL_NAMESPACE = settings.FULL_NAMESPACE
         MINI_NAMESPACE = settings.MINI_NAMESPACE
         MAX_RESOLUTION = settings.MAX_RESOLUTION
@@ -206,6 +243,11 @@ class Worker(Process):
         # @added 20200815 - Feature #3680: horizon.worker.datapoints_sent_to_redis
         datapoints_sent_to_redis = 0
         last_datapoints_to_redis = int(time())
+
+        # @added 20201103 - Feature #3820: HORIZON_SHARDS
+        if HORIZON_SHARDS and HORIZON_SHARD_DEBUG:
+            horizon_shard_assigned_metrics = []
+            horizon_shard_dropped_metrics = []
 
         # python-2.x and python3.x handle while 1 and while True differently
         # while 1:
@@ -238,6 +280,18 @@ class Worker(Process):
                 now = int(time())
 
                 for metric in chunk:
+
+                    # @added 20201103 - Feature #3820: HORIZON_SHARDS
+                    # If a metric does not map to the HORIZON_SHARD, drop it
+                    # and continue
+                    if HORIZON_SHARDS and number_of_horizon_shards:
+                        if not self.in_shard(metric[0]):
+                            if HORIZON_SHARD_DEBUG:
+                                horizon_shard_dropped_metrics.append(metric[0])
+                            continue
+                        else:
+                            if HORIZON_SHARD_DEBUG:
+                                horizon_shard_assigned_metrics.append(metric[0])
 
                     # Check if we should skip it
                     if self.in_skip_list(metric[0]):
@@ -355,3 +409,14 @@ class Worker(Process):
                 send_graphite_metric(skyline_app, send_metric_name, datapoints_sent_to_redis)
                 datapoints_sent_to_redis = 0
                 last_datapoints_to_redis = int(time())
+
+                # @added 20201103 - Feature #3820: HORIZON_SHARDS
+                if HORIZON_SHARDS and HORIZON_SHARD_DEBUG:
+                    horizon_shard_assigned_metrics_count = len(horizon_shard_assigned_metrics)
+                    horizon_shard_dropped_metrics_count = len(horizon_shard_dropped_metrics)
+                    logger.info('%s :: %s assigned metrics to HORIZON_SHARD %s and dropped %s metrics in last 60 seconds' % (
+                        skyline_app, str(horizon_shard_assigned_metrics_count),
+                        str(HORIZON_SHARD),
+                        str(horizon_shard_dropped_metrics_count)))
+                    horizon_shard_assigned_metrics = []
+                    horizon_shard_dropped_metrics = []
