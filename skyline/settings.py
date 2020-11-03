@@ -1340,6 +1340,39 @@ MAX_RESOLUTION = 1000
 :vartype MAX_RESOLUTION: int
 """
 
+HORIZON_SHARDS = {}
+"""
+:var HORIZON_SHARDS: ADVANCED FEATURE - A dictionary of Skyline hostnames and
+    there assigned shard value.
+:vartype HORIZON_SHARDS: dict
+
+This setting is only applicable to running Skyline Horizon services on multiple
+servers (and Graphite instances) in a replicated fashion.  This allows for all
+the Skyline servers to receiver all metrics but only analyze those metrics that
+are assigned to the specific server (shard).  This enables all Skyline servers
+that are running Horizon to receiver the entire metric population stream from
+mulitple Graphite carbon-relays and drop (not submit to their Redis instance)
+any metrics that do not belong to their shard.
+
+- **Example**::
+
+    HORIZON_SHARDS = {
+        'skyline-server-1': 0,
+        'skyline-server-2': 1,
+        'skyline-server-3': 2,
+    }
+
+Shard are 0 indexed.
+
+"""
+
+HORIZON_SHARD_DEBUG = False
+"""
+:var HORIZON_SHARD_DEBUG: For development only to log some sharding debug info
+    not for general use.
+:vartype HORIZON_SHARD_DEBUG: boolean
+"""
+
 SKIP_LIST = [
     # Skip the skyline namespaces, except horizon.  This prevents Skyline
     # populating a lot of anomalies related to timings, algorithm_breakdowns,

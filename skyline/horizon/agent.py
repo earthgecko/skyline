@@ -107,12 +107,28 @@ def run():
     Start the Horizon agent and logger.
     """
     if not isdir(settings.PID_PATH):
-        print ('pid directory does not exist at %s' % settings.PID_PATH)
+        print('pid directory does not exist at %s' % settings.PID_PATH)
         sys.exit(1)
 
     if not isdir(settings.LOG_PATH):
-        print ('log directory does not exist at %s' % settings.LOG_PATH)
+        print('log directory does not exist at %s' % settings.LOG_PATH)
         sys.exit(1)
+
+    # @added 20201103 - Feature #3820: HORIZON_SHARDS
+    try:
+        HORIZON_SHARDS = settings.HORIZON_SHARDS.copy()
+    except:
+        HORIZON_SHARDS = {}
+    horizon_shards_validated = True
+    if HORIZON_SHARDS:
+        for shard_host in HORIZON_SHARDS:
+            try:
+                int(HORIZON_SHARDS[shard_host])
+            except:
+                horizon_shards_validated = False
+        if not horizon_shards_validated:
+            print('the HORIZON_SHARDS dict in settings.py does not have valid shard numbers' % str(settings.HORIZON_SHARDS))
+            sys.exit(1)
 
     logger.setLevel(logging.DEBUG)
     formatter = logging.Formatter("%(asctime)s :: %(process)s :: %(message)s", datefmt="%Y-%m-%d %H:%M:%S")
@@ -132,7 +148,7 @@ def run():
     valid_settings = validate_settings_variables(skyline_app)
 
     if not valid_settings:
-        print ('error :: invalid variables in settings.py - cannot start')
+        print('error :: invalid variables in settings.py - cannot start')
         sys.exit(1)
 
     horizon = Horizon()
