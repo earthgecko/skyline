@@ -643,6 +643,23 @@ def version():
 # def data():
 def api():
 
+    # @added 20201103 - Feature #3770: webapp - analyzer_last_status API endoint
+    if 'analyzer_last_status' in request.args:
+        logger.info('/api?analyzer_last_status request')
+        analyzer_last_status = None
+        try:
+            analyzer_last_status = int(float(str(REDIS_CONN.get('analyzer'))))
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: Webapp could not get the analyzer key from Redis')
+        logger.info('/api?analyzer_last_status responding with %s' % str(analyzer_last_status))
+        data_dict = {"status": {}, "data": {"timestamp": analyzer_last_status}}
+        if not analyzer_last_status:
+            # Return with status code 410 Gone
+            logger.info('/api?analyzer_last_status responding with status code 410 GONE')
+            return jsonify(data_dict), 410
+        return jsonify(data_dict), 200
+
     # @added 20201007 - Feature #3770: webapp - batch_processing metrics API endoint
     if 'batch_processing_metrics' in request.args:
         logger.info('/api?batch_processing_metrics request')

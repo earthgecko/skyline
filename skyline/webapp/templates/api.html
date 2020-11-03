@@ -158,6 +158,45 @@ Or if no metrics of no metrics are set to alert <code>{"data":{"metrics":[]},"st
 		    </tbody>
 		  </table>
 
+	  <h4><span class="logo"><span class="sky">API method ::</span> <span class="re">/api?analyzer_last_status</span></span></h4>
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Name</th>
+  		        <th>Description</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+  		        <td>Description:</td>
+  		        <td>Returns the last timestamp that Analyzer ran as a json object.  The Redis analyzer key is set every run with a TTL of 120 seconds</br>
+                  If the Redis key does not exist the request is responded to with HTTP status code <code>410 GONE</code>
+              </td>
+  		      </tr>
+  		      <tr>
+  		        <td>Endpoint:</td>
+  		        <td><a target='_blank' href="/api?analyzer_last_status">/api?analyzer_last_status</a></td>
+  		      </tr>
+  		      <tr>
+  		        <td>Method:</td>
+  		        <td>GET</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Request example:</td>
+		          <td><code>/api?analyzer_last_status</code></td>
+  		      </tr>
+  		      <tr>
+  		        <td>Responses:</td>
+  		        <td>200 - json response, example
+                  <code>
+{"data":{"timestamp":1604421547},"status":{}}
+</code><br>
+Or if Analyzer has not run in 120 seconds <code>{"data":{"timestamp":null},"status":{}}</code> with status code 410<br>
+              </td>
+  		      </tr>
+		    </tbody>
+		  </table>
+
 	  <h4><span class="logo"><span class="sky">API method ::</span> <span class="re">/api?anomaly</span></span></h4>
   		  <table class="table table-hover">
   		    <thead>
