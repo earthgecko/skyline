@@ -6,7 +6,7 @@ use skyline;
 NOTES:
 
 - The MyISAM storage engine is used for the metadata type tables because it is
-  a simpler struucture and faster for data which is often queried and FULL TEXT
+  a simpler structure and faster for data which is often queried and FULL TEXT
   searching.
 - The InnoDB storage engine is used for the anomaly table - mostly writes.
 - anomaly_timestamp - is limited by the extent of unix data, it does not suit
@@ -71,8 +71,19 @@ CREATE TABLE IF NOT EXISTS `metrics` (
   `learn_valid_ts_older_than` INT DEFAULT 3661 COMMENT 'Ionosphere learn - the age in seconds of a timeseries before it is valid to learn from',
   `max_generations` INT DEFAULT 5 COMMENT 'Ionosphere learn - the maximum number of generations that can be learnt for this metric',
   `max_percent_diff_from_origin` DOUBLE DEFAULT 7.0 COMMENT 'Ionosphere learn - the maximum percentage difference that a learn features profile sum can be from the original human generated features profile',
+/*
+# @added 20201104 - Feature #3828: Add inactive columns to the metrics DB table
+# Add inactive and inactive_at columns
+*/
+  `inactive` TINYINT(1) DEFAULT 0 COMMENT 'inactive 1 or active 0',
+  `inactive_at` INT(11) DEFAULT NULL COMMENT 'unix timestamp when declared inactive',
   PRIMARY KEY (id),
+/*
+# @modified 20201104 - Feature #3828: Add inactive columns to the metrics DB table
+# Added inactive and ionosphere_enabled to the index
   INDEX `metric` (`id`,`metric`)) ENGINE=MyISAM;
+*/
+  INDEX `metric` (`id`,`metric`,`ionosphere_enabled`,`inactive`)) ENGINE=MyISAM;
 
 CREATE TABLE IF NOT EXISTS `anomalies` (
   `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT 'anomaly unique id',
