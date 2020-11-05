@@ -581,11 +581,17 @@ Or if no metrics if no metrics are derivative metrics <code>{"data":{"metrics":[
   		      </tr>
   		      <tr>
   		        <td>Endpoint:</td>
-  		        <td><a target='_blank' href="/api?ionosphere_learn_work">/api?ionosphere_learn_work</a></td>
+  		        <td><a target='_blank' href="/api?ionosphere_learn_work">/api?ionosphere_learn_work</a></br>
+              <a target='_blank' href="/api?ionosphere_learn_work&format=json">/api?ionosphere_learn_work&format=json</a>
+              </td>
   		      </tr>
   		      <tr>
   		        <td>Method:</td>
   		        <td>GET</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Parameters:</td>
+  		        <td>format=json [optional]</td>
   		      </tr>
   		      <tr>
   		        <td>Request example:</td>
@@ -593,7 +599,7 @@ Or if no metrics if no metrics are derivative metrics <code>{"data":{"metrics":[
   		      </tr>
   		      <tr>
   		        <td>Responses:</td>
-  		        <td>200 - json response, example
+  		        <td>200 - json response with strings of lists for literal_eval, example
                   <code>
 {
   "data": {
@@ -604,7 +610,40 @@ Or if no metrics if no metrics are derivative metrics <code>{"data":{"metrics":[
   },
   "status": {}
 }</code><br>
-Or if no metrics if all metrics are set to alert <code>{"data":{"metrics":[]},"status":{}}</code><br>
+Or if no metrics if all metrics are set to alert <code>{"data":{"metrics":[]},"status":{}}</code>
+              </td>
+  		      </tr>
+  		      <tr>
+  		        <td>Request example:</td>
+		          <td><code>/api?ionosphere_learn_work&format=json</code></td>
+  		      </tr>
+  		      <tr>
+  		        <td>Responses:</td>
+              <td>200 - pure json response, example
+              <code>
+{
+  "data": {
+    "metrics": {
+      "test.metric": {
+        "deadline_type": "Soft",
+        "generation": 0,
+        "job_type": "learn_fp_generation",
+        "parent_id": 0,
+        "timestamp": 1580995360
+      },
+      "test.metric.other": {
+        "deadline_type": "Soft",
+        "generation": 3,
+        "job_type": "learn_fp_human",
+        "parent_id": 123,
+        "timestamp": 1580995460
+      }
+    }
+  },
+  "status": {}
+}</code><br>
+Or if no metrics if all metrics are set to alert <code>{"data":{"metrics":{}},"status":{}}</code>
+<br>
 The items are as defined in <a target='_blank' href="https://earthgecko-skyline.readthedocs.io/en/latest/skyline.ionosphere.html#ionosphere.learn.ionosphere_learn">https://earthgecko-skyline.readthedocs.io/en/latest/skyline.ionosphere.html#ionosphere.learn.ionosphere_learn</a>
               </td>
   		      </tr>
