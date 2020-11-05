@@ -110,7 +110,7 @@ if True:
         # @added 20180720 - Feature #2464: luminosity_remote_data
         luminosity_remote_data,
         # @added 20200908 - Feature #3740: webapp - anomaly API endpoint
-        panorama_anomaly_details)
+        panorama_anomaly_details,)
     from ionosphere_backend import (
         ionosphere_data, ionosphere_metric_data,
         # @modified 20170114 - Feature #1854: Ionosphere learn
@@ -670,6 +670,7 @@ def api():
             logger.error(traceback.format_exc())
             logger.error('error :: Webapp could not get the aet.analyzer.batch_processing_metrics list from Redis')
             return 'Internal Server Error', 500
+
         logger.info('/api?batch_processing_metrics responding with %s metrics' % str(len(batch_processing_metrics)))
         data_dict = {"status": {}, "data": {"metrics": batch_processing_metrics}}
         return jsonify(data_dict), 200
@@ -1075,6 +1076,7 @@ def api():
             logger.error(traceback.format_exc())
             logger.error('error :: Webapp could not get the aet.analyzer.smtp_alerter_metrics list from Redis')
             return 'Internal Server Error', 500
+
         logger.info('/api?non_alerting_metrics responding with %s metrics' % str(len(non_alerting_metrics)))
         data_dict = {"status": {}, "data": {"metrics": non_alerting_metrics}}
         return jsonify(data_dict), 200
@@ -1086,6 +1088,7 @@ def api():
             logger.error(traceback.format_exc())
             logger.error('error :: Webapp could not get the aet.analyzer.smtp_alerter_metrics list from Redis')
             return 'Internal Server Error', 500
+
         logger.info('/api?non_alerting_metrics responding with %s metrics' % str(len(alerting_metrics)))
         data_dict = {"status": {}, "data": {"metrics": alerting_metrics}}
         return jsonify(data_dict), 200
@@ -1221,6 +1224,39 @@ def api():
         if echo_work_no_full_duration:
             new_ionosphere_learn_work = ionosphere_learn_work + echo_work_no_full_duration
             ionosphere_learn_work = new_ionosphere_learn_work
+
+        # @added 20201104 - Feature #3368: webapp api - ionosphere_learn_work
+        # Convert strings to json
+        convert_to_json = False
+        if 'format' in request.args:
+            json_passed = request.args.get('format', None)
+            if json_passed == 'json':
+                convert_to_json = True
+        if convert_to_json:
+            metrics_json = {}
+            for str_item in ionosphere_learn_work:
+                try:
+                    item = literal_eval(str_item)
+                    if item[4] is None:
+                        parent_id = 0
+                    else:
+                        parent_id = item[4]
+                    if item[5] is None:
+                        generation = 0
+                    else:
+                        generation = item[5]
+                    metrics_json[item[3]] = {
+                        'deadline_type': item[0],
+                        'job_type': item[1],
+                        'timestamp': item[2],
+                        'parent_id': parent_id,
+                        'generation': generation
+                    }
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: Webapp could not build the ionosphere_learn_work dict to jsonify - %s' % str(str_item))
+            data_dict = {"status": {}, "data": {"metrics": metrics_json}}
+            return jsonify(data_dict), 200
 
         data_dict = {"status": {}, "data": {"metrics": ionosphere_learn_work}}
         return jsonify(data_dict), 200
