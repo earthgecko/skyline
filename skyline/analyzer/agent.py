@@ -18,6 +18,7 @@ if True:
     import settings
     from validate_settings import validate_settings_variables
     from analyzer import Analyzer
+    from metrics_manager import Metrics_Manager
 
 skyline_app = 'analyzer'
 skyline_app_logger = '%sLog' % skyline_app
@@ -45,6 +46,13 @@ class AnalyzerAgent():
     def run(self):
         logger.info('agent starting skyline %s' % skyline_app)
         Analyzer(getpid()).start()
+
+        # @added 20201105 - Feature #3830: metrics_manager
+        # Start a metrics_manager process.  This process is responsible for
+        # managing all the metrics lists, Redis sets and hash keys outside and
+        # independently from the analysis process/es.
+        logger.info('agent starting skyline metrics_manager')
+        Metrics_Manager(getpid()).start()
 
         while 1:
             sleep(100)

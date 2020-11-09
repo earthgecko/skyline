@@ -207,7 +207,7 @@ except:
 
 # @added 20200528 - Feature #3560: External alert config
 try:
-    EXTERNAL_ALERTS = settings.EXTERNAL_ALERTS
+    EXTERNAL_ALERTS = list(settings.EXTERNAL_ALERTS)
 except:
     EXTERNAL_ALERTS = {}
 # @added 20200602 - Feature #3560: External alert config
@@ -302,6 +302,9 @@ if ANALYZER_MAD_LOW_PRIORITY_METRICS:
     ANALYZER_MANAGE_LOW_PRIORITY_METRICS = True
 low_priority_metrics_hash_key = 'analyzer.low_priority_metrics.last_analyzed_timestamp'
 metrics_last_timestamp_hash_key = 'analyzer.metrics.last_analyzed_timestamp'
+
+# @added 20201107 - Feature #3830: metrics_manager
+ANALYZER_USE_METRICS_MANAGER = True
 
 # @added 20190522 - Feature #2580: illuminance
 # Disabled for now as in concept phase.  This would work better if
@@ -944,10 +947,10 @@ class Analyzer(Thread):
             # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
             #                      Branch #3262: py3
             # non_smtp_alerter_metrics = list(self.redis_conn.smembers('analyzer.non_smtp_alerter_metrics'))
-            non_smtp_alerter_metrics = list(self.redis_conn_decoded.smembers('analyzer.non_smtp_alerter_metrics'))
+            non_smtp_alerter_metrics = list(self.redis_conn_decoded.smembers('aet.analyzer.non_smtp_alerter_metrics'))
         except:
             logger.info(traceback.format_exc())
-            logger.error('error :: failed to generate a list from analyzer.non_smtp_alerter_metrics Redis set')
+            logger.error('error :: failed to generate a list from aet.analyzer.non_smtp_alerter_metrics Redis set')
             non_smtp_alerter_metrics = []
 
         # @added 20200527 - Feature #3550: flux.uploaded_data_worker
@@ -2578,11 +2581,17 @@ class Analyzer(Thread):
                                 use_hours_to_resolve = None
                                 mirage_metric_cache_key = 'mirage.metrics.%s' % base_name
                                 try:
-                                    raw_hours_to_resolve = self.redis_conn.get(mirage_metric_cache_key)
+                                    # @modified 20201109 - Feature #3830: metrics_manager
+                                    # Use the metrics_manager mirage.hash_key.metrics_resolutions
+                                    # hash key
+                                    # raw_hours_to_resolve = self.redis_conn.get(mirage_metric_cache_key)
+                                    raw_hours_to_resolve = self.redis_conn_decoded.hget('mirage.hash_key.metrics_resolutions', base_name)
                                     use_hours_to_resolve = int(raw_hours_to_resolve)
                                 except:
-                                    logger.info('mirage check will not be added here (will be added in run alert check) as no mirage.metrics Redis key found to determine hours_to_resolve - %s' % str(mirage_metric_cache_key))
+                                    # logger.info('mirage check will not be added here (will be added in run alert check) as no mirage.metrics Redis key found to determine hours_to_resolve - %s' % str(mirage_metric_cache_key))
+                                    logger.info('mirage check will not be added here (will be added in run alert check) as %s was not found in the mirage.hash_key.metrics_resolutions Redis hash key' % base_name)
                                     use_hours_to_resolve = None
+
                                 anomaly_check_file = None
                                 # Only add if the hours to resolve are known
                                 # from an existing mirage.metrics Redis key, if
@@ -3071,9 +3080,9 @@ class Analyzer(Thread):
         if ANALYZER_MAD_LOW_PRIORITY_METRICS and ANALYZER_ANALYZE_LOW_PRIORITY_METRICS:
             try:
                 skipped_low_priority_metrics = len(low_priority_assigned_metrics) - low_priority_metrics_analysed_due_to_mad_trigger
-                logger.info('ANALYZER_MAD_LOW_PRIORITY_METRICS - skipped %s low priority as mad did not trigger' % (
+                logger.info('ANALYZER_MAD_LOW_PRIORITY_METRICS - skipped %s low priority metrics as mad did not trigger' % (
                     str(skipped_low_priority_metrics)))
-                logger.info('ANALYZER_MAD_LOW_PRIORITY_METRICS - analyzed %s low priority as mad triggered over %s datapoints ' % (
+                logger.info('ANALYZER_MAD_LOW_PRIORITY_METRICS - analyzed %s low priority metrics as mad triggered over %s datapoints ' % (
                     str(low_priority_metrics_analysed_due_to_mad_trigger),
                     str(ANALYZER_MAD_LOW_PRIORITY_METRICS)))
             except:
@@ -3405,6 +3414,40 @@ class Analyzer(Thread):
                 logger.error('error :: all_alerts is not set, so creating from settings.ALERTS')
                 all_alerts = list(settings.ALERTS)
 
+            # @added 20201017 - Feature #3788: snab_flux_load_test
+            #                   Feature #3560: External alert config
+            refresh_redis_alert_sets = False
+            last_all_alerts_set = None
+            try:
+                last_all_alerts_data = self.redis_conn_decoded.get('analyzer.last_all_alerts')
+                if last_all_alerts_data:
+                    last_all_alerts = literal_eval(last_all_alerts_data)
+                    # A normal sorted cannot be used as the list has dicts in it
+                    last_all_alerts_set = sorted(last_all_alerts, key=lambda item: item[0])
+                    logger.info('last_all_alerts_set from analyzer.last_all_alerts Redis set has %s items' % str(len(last_all_alerts_set)))
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to generate a list from the analyzer.last_all_alerts Redis key')
+                last_all_alerts_set = None
+            all_alerts_set = None
+            if all_alerts:
+                try:
+                    all_alerts_list = [list(row) for row in all_alerts]
+                    # A normal sorted cannot be used as the list has dicts in it
+                    all_alerts_set = sorted(all_alerts_list, key=lambda item: item[0])
+                    logger.info('all_alerts_set from all_alerts has %s items' % str(len(all_alerts_set)))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to create a sorted list from all_alerts object of type %s' % str(type(all_alerts_list)))
+                try:
+                    self.redis_conn.set('analyzer.last_all_alerts', str(all_alerts_set))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to set analyzer.last_all_alerts Redis key')
+            if str(all_alerts_set) != str(last_all_alerts_set):
+                logger.info('alert settings have changed alerts will be refreshed, reset current smtp_alerter_metrics list')
+                refresh_redis_alert_sets = True
+
             # @modified 20190518 - Bug #3020: Newly installed analyzer on docker not flushing and recreating analyzer algorithm exception Redis sets
             # The management of the analyzer Redis algorithm exception sets
             # was previously handled in the if settings.ENABLE_MIRAGE
@@ -3463,131 +3506,10 @@ class Analyzer(Thread):
                 except:
                     logger.info('no Redis set to delete - analyzer.alert_on_stale_metrics')
 
-                # @added 20201030 - Feature #3808: ANALYZER_DYNAMICALLY_ANALYZE_LOW_PRIORITY_METRICS
-                # Remove any entries in the Redis low_priority_metrics_hash_key
-                # that are not in unique_metrics
-                if ANALYZER_MANAGE_LOW_PRIORITY_METRICS:
-                    logger.info('managing the Redis hash key %s and removing any metrics not in unique_metrics' % (
-                        low_priority_metrics_hash_key))
-                    low_priority_metrics_last_analyzed = []
-                    try:
-                        low_priority_metrics_last_analyzed = self.redis_conn_decoded.hgetall(low_priority_metrics_hash_key)
-                    except:
-                        logger.error(traceback.format_exc())
-                        logger.error('error :: failed to get Redis hash key %s' % (
-                            low_priority_metrics_hash_key))
-                        low_priority_metrics_last_analyzed = []
-                    low_priority_analyzed_metrics = []
-                    if low_priority_metrics_last_analyzed:
-                        try:
-                            low_priority_analyzed_metrics = [item[0] for item in low_priority_metrics_last_analyzed]
-                            logger.info('there %s metrics in the Redis hash key %s' % (
-                                str(len(low_priority_analyzed_metrics)),
-                                low_priority_metrics_hash_key))
-                        except:
-                            logger.error(traceback.format_exc())
-                            logger.error('error :: failed to generate low_priority_metrics_last_analyzed')
-                            low_priority_analyzed_metrics = []
-                        try:
-                            del low_priority_metrics_last_analyzed
-                        except:
-                            pass
-                    if low_priority_analyzed_metrics:
-                        low_priority_analyzed_metrics_set = None
-                        try:
-                            low_priority_analyzed_metrics_set = set(low_priority_analyzed_metrics)
-                        except:
-                            logger.error(traceback.format_exc())
-                            logger.error('error :: failed to generate low_priority_analyzed_metrics_set')
-                        try:
-                            del low_priority_analyzed_metrics
-                        except:
-                            pass
-                        unique_metrics_set = None
-                        try:
-                            unique_metrics_list = list(unique_metrics)
-                            unique_metrics_set = set(unique_metrics_list)
-                            del unique_metrics_list
-                        except:
-                            logger.error(traceback.format_exc())
-                            logger.error('error :: failed to generate unique_metrics_set')
-                        if low_priority_analyzed_metrics_set and unique_metrics_set:
-                            low_priority_metrics_to_remove = []
-                            try:
-                                set_difference = low_priority_analyzed_metrics_set.difference(unique_metrics_set)
-                                for metric in set_difference:
-                                    low_priority_metrics_to_remove.append(metric)
-                            except:
-                                logger.error(traceback.format_exc())
-                                logger.error('error :: determining difference between low_priority_analyzed_metrics_set and unique_metrics_set')
-                            try:
-                                del low_priority_analyzed_metrics_set
-                            except:
-                                pass
-                            try:
-                                del unique_metrics_set
-                            except:
-                                pass
-                            try:
-                                del set_difference
-                            except:
-                                pass
-                            if low_priority_metrics_to_remove:
-                                try:
-                                    logger.info('removing %s metrics from the Redis hash key %s' % (
-                                        str(len(low_priority_metrics_to_remove)),
-                                        low_priority_metrics_hash_key))
-                                    self.redis_conn.hdel(low_priority_metrics_hash_key, *set(low_priority_metrics_to_remove))
-                                    logger.info('removed %s metrics from the Redis hash key %s' % (
-                                        str(len(low_priority_metrics_to_remove)),
-                                        low_priority_metrics_hash_key))
-                                except:
-                                    logger.error(traceback.format_exc())
-                                    logger.error('error :: failed to remove the low_priority_metrics_to_remove the Redis hash key %s' % (
-                                        low_priority_metrics_hash_key))
-                                try:
-                                    del low_priority_metrics_to_remove
-                                except:
-                                    pass
-                            else:
-                                logger.info('no metrics need to be removed from the Redis hash key %s' % (
-                                    low_priority_metrics_hash_key))
-
-            # @added 20160922 - Branch #922: Ionosphere
-            # Add a Redis set of mirage.unique_metrics
-            if settings.ENABLE_MIRAGE:
-                # @added 20161229 - Feature #1830: Ionosphere alerts
-                # Self manage the Mirage metrics set
-                manage_mirage_unique_metrics = True
-                manage_mirage_unique_metrics_key = []
-                try:
-                    manage_mirage_unique_metrics_key = list(self.redis_conn.get('analyzer.manage_mirage_unique_metrics'))
-                except Exception as e:
-                    if LOCAL_DEBUG:
-                        logger.error('error :: could not query Redis for analyzer.manage_mirage_unique_metrics key: %s' % str(e))
-
-                if not manage_mirage_unique_metrics_key:
-                    manage_mirage_unique_metrics_key = []
-
-                if len(manage_mirage_unique_metrics_key) > 0:
-                    manage_mirage_unique_metrics = False
-
-                mirage_unique_metrics = []
-                try:
-                    # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
-                    #                   Branch #3262: py3
-                    # mirage_unique_metrics = list(self.redis_conn.smembers('mirage.unique_metrics'))
-                    mirage_unique_metrics = list(self.redis_conn_decoded.smembers('mirage.unique_metrics'))
-                    if LOCAL_DEBUG:
-                        logger.info('debug :: fetched the mirage.unique_metrics Redis set')
-                        logger.info('debug :: %s' % str(mirage_unique_metrics))
-                except:
-                    logger.info('failed to fetch the mirage.unique_metrics Redis set')
-                    mirage_unique_metrics = []
-
-                mirage_unique_metrics_count = len(mirage_unique_metrics)
-                logger.info('mirage.unique_metrics Redis set count - %s' % str(mirage_unique_metrics_count))
-
+            # @modified 20201107 - Feature #3830: metrics_manager
+            # All metric management is now done in metrics_manager
+            manage_mirage_unique_metrics = False
+            if settings.ENABLE_MIRAGE and not ANALYZER_USE_METRICS_MANAGER:
                 if manage_mirage_unique_metrics:
                     try:
                         # @added 20200723 - Feature #3560: External alert config
@@ -3599,6 +3521,7 @@ class Analyzer(Thread):
                         # mirage_unique_metrics = []
                         logger.info('Redis mirage.unique_metrics set to refresh, checking for metrics to remove')
                         mirage_metrics_to_remove = []
+# TODO use sets method
                         for mirage_metric in mirage_unique_metrics:
                             if mirage_metric not in unique_metrics:
                                 mirage_metrics_to_remove.append(mirage_metric)
@@ -3637,6 +3560,19 @@ class Analyzer(Thread):
                         logger.error(traceback.format_exc())
                         logger.error('error :: failed to get Redis set analyzer.mirage.metrics_expiration_times')
                     mirage_metrics_expiration_times_known = []
+
+                    # @added 20201104 - Feature #3788: snab_flux_load_test
+                    #                   Feature #3560: External alert config
+                    #                   Bug #3766: Refresh mirage.metrics_expiration_times for batch processing
+                    # The analyzer.mirage.metrics_expiration_times set also
+                    # needs to be refreshed, which takes the time... but if it
+                    # is not, metrics that are change in alert setings context
+                    # from smtp_alerting_metrics to a non_smtp_alerter_metrics
+                    # does not get removed from the smtp_alerter_metrics as it
+                    # is in this list and therefore never gets to run through
+                    # the below pattern_match
+                    analyzer_mirage_metrics_expiration_times_list = []
+
                     if analyzer_mirage_metrics_expiration_times_list:
                         try:
                             for item in analyzer_mirage_metrics_expiration_times_list:
@@ -3721,6 +3657,7 @@ class Analyzer(Thread):
                                     pass
                                 if not pattern_match:
                                     continue
+
                                 # mirage_metric = False
                                 if not mirage_metric:
                                     try:
@@ -3761,6 +3698,14 @@ class Analyzer(Thread):
                                     mirage_metric_redis_key = 'mirage.metrics.%s' % base_name
                                     try:
                                         self.redis_conn.setex(mirage_metric_redis_key, int(alert[2]), SECOND_ORDER_RESOLUTION_FULL_DURATION)
+                                        # @added 20201109 - Feature #3830: metrics_manager
+                                        # Although it would seem sensible to
+                                        # manage these mirage.metrics. keys with
+                                        # metrics_manager, they are also used in
+                                        # waterfall alert and must be dynamic
+                                        # based on their EXPIRATION_TIME
+                                        # therefore they cannot be created by
+                                        # metric_manager
                                     except:
                                         logger.error('error :: failed to set key :: %s' % mirage_metric_redis_key)
 
@@ -3823,6 +3768,17 @@ class Analyzer(Thread):
                 mirage_unique_metrics = []
             # END Redis mirage.unique_metrics_set
 
+            # @added 20201107 - Feature #3830: metrics_manager
+            mirage_unique_metrics = []
+            if settings.ENABLE_MIRAGE:
+                try:
+                    mirage_unique_metrics = list(self.redis_conn_decoded.smembers('mirage.unique_metrics'))
+                except:
+                    logger.info('failed to fetch the mirage.unique_metrics Redis set')
+                    mirage_unique_metrics = []
+                mirage_unique_metrics_count = len(mirage_unique_metrics)
+                logger.info('mirage.unique_metrics Redis set count - %s' % str(mirage_unique_metrics_count))
+
             if LOCAL_DEBUG:
                 # Do we use list or dict, which is better performance?
                 # With dict - Use EAFP (easier to ask forgiveness than
@@ -3861,403 +3817,23 @@ class Analyzer(Thread):
             if LOCAL_DEBUG:
                 logger.info('debug :: unique_metrics :: %s' % (str(unique_metrics)))
 
-            # @added 20201017 - Feature #3788: snab_flux_load_test
-            #                   Feature #3560: External alert config
+            # @added 20201107 - Feature #3830: metrics_manager
             refresh_redis_alert_sets = False
-            last_all_alerts_set = None
+
+            # @added 20201107 - Feature #3830: metrics_manager
             try:
-                last_all_alerts_data = self.redis_conn_decoded.get('analyzer.last_all_alerts')
-                if last_all_alerts_data:
-                    last_all_alerts = literal_eval(last_all_alerts_data)
-                    # A normal sorted cannot be used as the list has dicts in it
-                    last_all_alerts_set = sorted(last_all_alerts, key=lambda item: item[0])
+                non_smtp_alerter_metrics = list(self.redis_conn_decoded.smembers('aet.analyzer.non_smtp_alerter_metrics'))
             except:
                 logger.error(traceback.format_exc())
-                logger.error('error :: failed to generate a list from the analyzer.last_all_alerts Redis key')
-                last_all_alerts_set = None
-            all_alerts_set = None
-            if all_alerts:
-                try:
-                    all_alerts_list = [list(row) for row in all_alerts]
-                    # A normal sorted cannot be used as the list has dicts in it
-                    all_alerts_set = sorted(all_alerts_list, key=lambda item: item[0])
-                except:
-                    logger.error(traceback.format_exc())
-                    logger.error('error :: failed to create a sorted list from all_alerts object of type %s' % str(type(all_alerts_list)))
-                try:
-                    self.redis_conn.set('analyzer.last_all_alerts', str(all_alerts_set))
-                except:
-                    logger.error(traceback.format_exc())
-                    logger.error('error :: failed to set analyzer.last_all_alerts Redis key')
-            if str(all_alerts_set) != str(last_all_alerts_set):
-                logger.info('alert settings have changed alerts will be refreshed, reset current smtp_alerter_metrics list')
-                refresh_redis_alert_sets = True
-                smtp_alerter_metrics = []
-                try:
-                    self.redis_conn.delete('analyzer.smtp_alerter_metrics')
-                except:
-                    logger.error(traceback.format_exc())
-                    logger.error('error :: failed to delete Redis set analyzer.smtp_alerter_metrics')
-                try:
-                    self.redis_conn.delete('analyzer.non_smtp_alerter_metrics')
-                except:
-                    logger.error(traceback.format_exc())
-                    logger.error('error :: failed to delete Redis set analyzer.non_smtp_alerter_metrics')
-            else:
-                logger.info('alert settings have not changed alerts will not be refreshed')
-
-            # @added 20200723 - Feature #3560: External alert config
-            # Speed this up only check alerters if not already in the set
-            unique_base_names = []
-            if smtp_alerter_metrics:
-                logger.info('adding all stmp_alerter_metrics to analyzer.smtp_alerter_metrics Redis set')
-                try:
-                    self.redis_conn.sadd('analyzer.smtp_alerter_metrics', *set(smtp_alerter_metrics))
-                except:
-                    logger.error(traceback.format_exc())
-                    logger.error('error :: failed to add multiple members to the smtp_alerter_metrics Redis set')
-                logger.info('added all stmp_alerter_metrics to analyzer.smtp_alerter_metrics Redis set')
-                try:
-                    smtp_alerter_metrics = list(self.redis_conn_decoded.smembers('analyzer.smtp_alerter_metrics'))
-                    logger.info('there are %s metrics in smtp_alerter_metrics from analyzer.smtp_alerter_metrics' % (str(len(smtp_alerter_metrics))))
-                    if LOCAL_DEBUG:
-                        logger.info('debug :: smtp_alerter_metrics :: %s' % (str(smtp_alerter_metrics)))
-                except:
-                    logger.info(traceback.format_exc())
-                    logger.error('error :: failed to generate a list from the analyzer.smtp_alerter_metrics Redis set')
-                    smtp_alerter_metrics = []
-
-            # @added 20170108 - Feature #1830: Ionosphere alerts
-            # Adding lists of smtp_alerter_metrics and non_smtp_alerter_metrics
-            # Timed this takes 0.013319 seconds on 689 unique_metrics
-
-            # @modified 20201016 - Feature #3788: snab_flux_load_test
-            #                      Feature #3560: External alert config
-            # Takes 46 seconds on 32000 unique_metrics so changed to using
-            # difference between sets which is near instantaneous
-            logger.info('checking that all alerting unique metrics are in stmp_alerter_metrics and analyzer.smtp_alerter_metrics Redis set')
-            metrics_already_in_smtp_alerter_metrics = 0
-            metrics_added_to_smtp_alerter_metrics = 0
-
-            logger.info('creating unique_base_names list')
-            for metric_name in unique_metrics:
-
-                # @added 20191014 - Bug #3266: py3 Redis binary objects not strings
-                #                   Branch #3262: py3
-                if python_version == 3:
-                    metric_name = str(metric_name)
-
-                # @modified 20200728 - Bug #3652: Handle multiple metrics in base_name conversion
-                # base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
-                if metric_name.startswith(settings.FULL_NAMESPACE):
-                    base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
-                else:
-                    base_name = metric_name
-
-                # @added 20200723 - Feature #3560: External alert config
-                # Speed this up only check alerters if not already in the set
-                # metric_in_smtp_alerters_set = False
-                unique_base_names.append(base_name)
-            logger.info('created unique_base_names list of %s metrics' % str(len(unique_base_names)))
-
-            # @added 20201016 - Feature #3788: snab_flux_load_test
-            #                   Feature #3560: External alert config
-            # Use differences between sets
-            logger.info('comparing unique_base_names_set to smtp_alerter_metrics_set')
-            unique_base_names_set = set(unique_base_names)
-            smtp_alerter_metrics_set = set(smtp_alerter_metrics)
-            logger.info('comparing unique_base_names_set with %s metrics to smtp_alerter_metrics_set with %s metrics' % (
-                str(len(unique_base_names_set)), str(len(smtp_alerter_metrics_set))))
-            missing_metrics = []
-            if unique_base_names_set == smtp_alerter_metrics_set:
-                logger.info('unique_base_names_set and smtp_alerter_metrics_set are the same, nothing to do')
-            else:
-                set_difference = unique_base_names_set.difference(smtp_alerter_metrics_set)
-                for metric in set_difference:
-                    missing_metrics.append(metric)
-                logger.info('there are %s metrics in unique_base_names_set that are not in smtp_alerter_metrics_set, checking see if they need to be added' % str(len(missing_metrics)))
-                del set_difference
-
-            if refresh_redis_alert_sets:
-                missing_metrics = list(unique_base_names)
-                logger.info('alert settings have changed alerts will be refreshed, added all unique_base_names to missing_metrics with %s metrics' % str(len(missing_metrics)))
-
-            aet_non_smtp_alerter_metrics = []
-            non_smtp_alerter_metrics = []
-            try:
-                aet_non_smtp_alerter_metrics = list(self.redis_conn_decoded.smembers('aet.analyzer.non_smtp_alerter_metrics'))
-                logger.info('there are %s metrics in the non_smtp_alerter_metrics list from the aet.analyzer.non_smtp_alerter_metrics Redis set' % str(len(aet_non_smtp_alerter_metrics)))
-            except:
-                logger.error(traceback.format_exc())
-                logger.error('error :: failed to generate a list from aet.analyzer.non_smtp_alerter_metrics Redis set')
-                aet_non_smtp_alerter_metrics = []
-            try:
-                non_smtp_alerter_metrics = list(self.redis_conn_decoded.smembers('analyzer.non_smtp_alerter_metrics'))
-                logger.info('there are %s metrics in the non_smtp_alerter_metrics list from the analyzer.non_smtp_alerter_metrics Redis set' % str(len(non_smtp_alerter_metrics)))
-                if len(non_smtp_alerter_metrics) == 0:
-                    if aet_non_smtp_alerter_metrics:
-                        logger.info('adding all aet_non_smtp_alerter_metrics to analyzer.non_smtp_alerter_metrics Redis set')
-                        try:
-                            self.redis_conn.sadd('analyzer.non_smtp_alerter_metrics', *set(aet_non_smtp_alerter_metrics))
-                        except:
-                            logger.error(traceback.format_exc())
-                            logger.error('error :: failed to add multiple members from aet_non_smtp_alerter_metrics to the analyzer.non_smtp_alerter_metrics Redis set')
-            except:
-                logger.error(traceback.format_exc())
-                logger.error('error :: failed to generate a list from analyzer.non_smtp_alerter_metrics Redis set')
+                logger.error('error :: failed to generate a list from aet.analyzer.non_smtp_alerter_metrics Redis set for priority based assigned_metrics')
                 non_smtp_alerter_metrics = []
-            all_non_smtp_alerter_metrics = non_smtp_alerter_metrics + aet_non_smtp_alerter_metrics
-            non_smtp_alerter_metrics = list(set(all_non_smtp_alerter_metrics))
-            logger.info('there are %s metrics in the non_smtp_alerter_metrics list from the Redis sets' % str(len(non_smtp_alerter_metrics)))
-
-            if refresh_redis_alert_sets:
-                non_smtp_alerter_metrics = []
-                logger.info('alert settings have changed alerts will be refreshed, reset current non_smtp_alerter_metrics list')
-
-            missing_metrics_set = set(missing_metrics)
-            logger.info('there are %s metrics in the missing_metrics_set' % str(len(missing_metrics_set)))
-            non_smtp_alerter_metrics_set = set(non_smtp_alerter_metrics)
-            logger.info('there are %s metrics in the non_smtp_alerter_metrics_set' % str(len(non_smtp_alerter_metrics_set)))
-            if missing_metrics_set == non_smtp_alerter_metrics_set:
-                logger.info('missing_metrics_set and non_smtp_alerter_metrics_set are the same, nothing to do')
-                missing_metrics = []
-            else:
-                non_alerting_set_difference = missing_metrics_set.difference(non_smtp_alerter_metrics_set)
-                for metric in list(set(non_alerting_set_difference)):
-                    missing_metrics.append(metric)
-                missing_metrics = list(set(missing_metrics))
-                logger.info('there are %s metrics in missing_metrics_set that are not in non_smtp_alerter_metrics_set, checking see if they need to be added' % str(len(missing_metrics)))
-                del non_alerting_set_difference
-            del missing_metrics_set
-            del non_smtp_alerter_metrics_set
-            if missing_metrics:
-                logger.info('adding all missing_metrics to analyzer.non_smtp_alerter_metrics Redis set')
-                try:
-                    self.redis_conn.sadd('analyzer.non_smtp_alerter_metrics', *set(missing_metrics))
-                except:
-                    logger.error(traceback.format_exc())
-                    logger.error('error :: failed to add multiple members to the analyzer.non_smtp_alerter_metrics Redis set')
-                try:
-                    non_smtp_alerter_metrics = list(self.redis_conn_decoded.smembers('analyzer.non_smtp_alerter_metrics'))
-                    logger.info('there are %s metrics in non_smtp_alerter_metrics from analyzer.non_smtp_alerter_metrics' % (str(len(smtp_alerter_metrics))))
-                except:
-                    logger.info(traceback.format_exc())
-                    logger.error('error :: failed to generate a list from the analyzer.non_smtp_alerter_metrics Redis set')
-                    non_smtp_alerter_metrics = []
-                if non_smtp_alerter_metrics:
-                    missing_metrics = []
-            unknown_metrics = []
-            if missing_metrics:
-                for base_name in missing_metrics:
-                    if base_name not in non_smtp_alerter_metrics:
-                        unknown_metrics.append(base_name)
-                if unknown_metrics:
-                    unknown_metrics = list(set(unknown_metrics))
-            logger.info('there are %s metrics with unknown alert status' % str(len(unknown_metrics)))
-
-            # refreshed_smtp_metrics = False
-            if len(smtp_alerter_metrics) == 0:
-                logger.info('there are no known smtp_alerter_metrics so chacking all')
-                unknown_metrics = list(unique_base_names)
-                # refreshed_smtp_metrics = True
-
-            # @modified 20201016 - Feature #3788: snab_flux_load_test
-            #                      Feature #3560: External alert config
-            # Do not operate on all metrics, only metrics that are unknown
-            for base_name in unknown_metrics:
-                metric_in_smtp_alerters_set = False
-                if base_name not in smtp_alerter_metrics:
-                    # @modified 20200610 - Feature #3560: External alert config
-                    # Use the all_alerts list which includes external alert configs
-                    # for alert in settings.ALERTS:
-                    for alert in all_alerts:
-                        pattern_match = False
-                        if str(alert[1]) == 'smtp':
-
-                            # @added 20200723 - Feature #3560: External alert config
-                            # Speed this up only check internal alerters
-                            try:
-                                if alert[4]['type'] == 'external':
-                                    continue
-                            except:
-                                pass
-
-                            # @modified 20200622 - Task #3586: Change all alert pattern checks to matched_or_regexed_in_list
-                            #                      Feature #3512: matched_or_regexed_in_list function
-                            # Changed original alert matching pattern to use new
-                            # method
-                            # ALERT_MATCH_PATTERN = alert[0]
-                            # METRIC_PATTERN = base_name
-                            try:
-                                pattern_match, metric_matched_by = matched_or_regexed_in_list(skyline_app, base_name, [alert[0]])
-                                if LOCAL_DEBUG and pattern_match:
-                                    logger.debug('debug :: %s matched alert - %s' % (base_name, alert[0]))
-                                try:
-                                    del metric_matched_by
-                                except:
-                                    pass
-                                if pattern_match:
-                                    # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
-                                    # if base_name not in self.smtp_alerter_metrics:
-                                    #     self.smtp_alerter_metrics.append(base_name)
-                                    # if base_name not in smtp_alerter_metrics:
-                                    redis_set = 'analyzer.smtp_alerter_metrics'
-                                    data = str(base_name)
-                                    try:
-                                        self.redis_conn.sadd(redis_set, data)
-                                        metric_in_smtp_alerters_set = True
-                                        metrics_added_to_smtp_alerter_metrics += 1
-                                        break
-                                    except:
-                                        logger.info(traceback.format_exc())
-                                        logger.error('error :: failed to add %s to Redis set %s' % (
-                                            str(data), str(redis_set)))
-                            except:
-                                pattern_match = False
-                else:
-                    metric_in_smtp_alerters_set = True
-                    metrics_already_in_smtp_alerter_metrics += 1
-
-                # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
-                # Use Redis set analyzer.smtp_alerter_metrics in place of
-                # self.smtp_alerter_metrics Manager.list
-                # if base_name not in self.smtp_alerter_metrics:
-                #     if base_name not in self.smtp_alerter_metrics:
-                #         self.non_smtp_alerter_metrics.append(base_name)
-                present_in_smtp_alerter_metrics = False
-                # @added 20200723 - Feature #3560: External alert config
-                # Speed this up only check alerters if not already in the set
-                if metric_in_smtp_alerters_set:
-                    present_in_smtp_alerter_metrics = True
-                if not present_in_smtp_alerter_metrics:
-                    try:
-                        present_in_smtp_alerter_metrics = self.redis_conn.sismember('analyzer.smtp_alerter_metrics', base_name)
-                    except:
-                        logger.error(traceback.format_exc())
-                        logger.error('error :: failed to determine if %s is in analyzer.smtp_alerter_metrics Redis set' % base_name)
-                        present_in_smtp_alerter_metrics = False
-                if not present_in_smtp_alerter_metrics:
-                    redis_set = 'analyzer.non_smtp_alerter_metrics'
-                    data = str(base_name)
-                    try:
-                        self.redis_conn.sadd(redis_set, data)
-                    except:
-                        logger.info(traceback.format_exc())
-                        logger.error('error :: failed to add %s to Redis set %s' % (
-                            str(data), str(redis_set)))
-            logger.info('checked that all alerting unique metrics are in stmp_alerter_metrics and analyzer.smtp_alerter_metrics Redis set, %s missing_metrics were already in smtp_alerter_metrics and %s metrics were added' % (
-                str(metrics_already_in_smtp_alerter_metrics),
-                str(metrics_added_to_smtp_alerter_metrics)))
-
-            # @added 20190522 - Task #3034: Reduce multiprocessing Manager list usage
-            # Define variables from the Redis set which has replaced the Manager
-            # lists
-            smtp_alerter_metrics = []
-            try:
-                # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
-                #                   Branch #3262: py3
-                # smtp_alerter_metrics = list(self.redis_conn.smembers('analyzer.smtp_alerter_metrics'))
-                smtp_alerter_metrics = list(self.redis_conn_decoded.smembers('analyzer.smtp_alerter_metrics'))
-            except:
-                logger.info(traceback.format_exc())
-                logger.error('error :: failed to generate a list from analyzer.smtp_alerter_metrics Redis set')
-                smtp_alerter_metrics = []
-            non_smtp_alerter_metrics = []
-            try:
-                # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
-                #                   Branch #3262: py3
-                # non_smtp_alerter_metrics = list(self.redis_conn.smembers('analyzer.non_smtp_alerter_metrics'))
-                non_smtp_alerter_metrics = list(self.redis_conn_decoded.smembers('analyzer.non_smtp_alerter_metrics'))
-            except:
-                logger.error(traceback.format_exc())
-                logger.error('error :: failed to generate a list from analyzer.non_smtp_alerter_metrics Redis set')
-                non_smtp_alerter_metrics = []
-
-            # @modified 20200723 - Feature #3560: External alert config
-            # Seeings as aet.analyzer.smtp_alerter_metrics is now being used to
-            # speed this up, entries need to be removed
-            logger.info('checking if any metrics need to be removed from smtp_alerter_metrics')
-            smtp_alerter_metrics_to_remove = []
-
-            # @modified 20201016 - Feature #3788: snab_flux_load_test
-            #                   Feature #3560: External alert config
-            # Use differences between sets
-            # for smtp_alerter_base_name in smtp_alerter_metrics:
-            #     if smtp_alerter_base_name not in unique_base_names:
-            #         smtp_alerter_metrics_to_remove.append(smtp_alerter_base_name)
-            try:
-                smtp_alerter_metrics_set = set(smtp_alerter_metrics)
-                set_difference = smtp_alerter_metrics_set.difference(unique_base_names_set)
-                for metric in set_difference:
-                    smtp_alerter_metrics_to_remove.append(metric)
-            except:
-                logger.error(traceback.format_exc())
-                logger.error('error :: determine difference between smtp_alerter_metrics_set and unique_base_names_set for smtp_alerter_metrics_to_remove')
-            if smtp_alerter_metrics_to_remove:
-                try:
-                    logger.info('removing %s metrics from smtp_alerter_metrics' % str(len(smtp_alerter_metrics_to_remove)))
-                    self.redis_conn.srem('analyzer.smtp_alerter_metrics', *set(smtp_alerter_metrics_to_remove))
-                    # Reload the new set
-                    try:
-                        smtp_alerter_metrics = list(self.redis_conn_decoded.smembers('analyzer.smtp_alerter_metrics'))
-                    except:
-                        logger.error(traceback.format_exc())
-                        logger.error('error :: failed to generate a list from analyzer.smtp_alerter_metrics Redis set after removing entires')
-                except:
-                    logger.info(traceback.format_exc())
-                    logger.error('error :: failed to remove multiple members from analyzer.smtp_alerter_metrics Redis set')
-            else:
-                logger.info('no metrics to remove from analyzer.smtp_alerter_metrics Redis set')
-
-            if non_smtp_alerter_metrics:
-                try:
-                    self.redis_conn.sadd('analyzer.non_smtp_alerter_metrics', *set(non_smtp_alerter_metrics))
-                except:
-                    logger.error(traceback.format_exc())
-                    logger.error('error :: failed to add multiple members to the analyzer.non_smtp_alerter_metrics Redis set')
-
-            logger.info('checking if any metrics need to be removed from non_smtp_alerter_metrics')
-            non_smtp_alerter_metrics_to_remove = []
-            try:
-                non_smtp_alerter_metrics_set = set(non_smtp_alerter_metrics)
-                non_smtp_alerter_set_difference = non_smtp_alerter_metrics_set.difference(unique_base_names_set)
-                for metric in non_smtp_alerter_set_difference:
-                    non_smtp_alerter_metrics_to_remove.append(metric)
-            except:
-                logger.error(traceback.format_exc())
-                logger.error('error :: determine difference between non_smtp_alerter_metrics_set and unique_base_names_set for smtp_alerter_metrics_to_remove')
-            del unique_base_names_set
-            if non_smtp_alerter_metrics_to_remove:
-                try:
-                    logger.info('removing %s metrics from non_smtp_alerter_metrics' % str(len(non_smtp_alerter_metrics_to_remove)))
-                    self.redis_conn.srem('analyzer.non_smtp_alerter_metrics', *set(non_smtp_alerter_metrics_to_remove))
-                except:
-                    logger.info(traceback.format_exc())
-                    logger.error('error :: failed to remove multiple members from analyzer.non_smtp_alerter_metrics Redis set')
-            else:
-                logger.info('no metrics to remove from analyzer.non_smtp_alerter_metrics Redis set')
-            if non_smtp_alerter_metrics and smtp_alerter_metrics_set:
-                try:
-                    logger.info('removing any smtp_alerter_metrics analyzer.non_smtp_alerter_metrics Redis set')
-                    self.redis_conn.srem('analyzer.non_smtp_alerter_metrics', *set(list(smtp_alerter_metrics_set)))
-                except:
-                    logger.info(traceback.format_exc())
-                    logger.error('error :: failed to remove multiple members from analyzer.non_smtp_alerter_metrics Redis set')
-            del smtp_alerter_metrics_set
-
-            # Reload the new set
-            try:
-                non_smtp_alerter_metrics = list(self.redis_conn_decoded.smembers('analyzer.non_smtp_alerter_metrics'))
-            except:
-                logger.error(traceback.format_exc())
-                logger.error('error :: failed to generate a list from analyzer.non_smtp_alerter_metrics Redis set after removing entires')
 
             # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
             # logger.info('smtp_alerter_metrics     :: %s' % str(len(self.smtp_alerter_metrics)))
             # logger.info('non_smtp_alerter_metrics :: %s' % str(len(self.non_smtp_alerter_metrics)))
             logger.info('smtp_alerter_metrics     :: %s' % str(len(smtp_alerter_metrics)))
             logger.info('non_smtp_alerter_metrics :: %s' % str(len(non_smtp_alerter_metrics)))
-            del non_smtp_alerter_metrics_set
+            # del non_smtp_alerter_metrics_set
 
             # @added 20180423 - Feature #2360: CORRELATE_ALERTS_ONLY
             #                   Branch #2270: luminosity
@@ -4266,106 +3842,6 @@ class Analyzer(Thread):
             # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
             # Use variable from the Redis set which replaced Manager.list
             # for metric in self.smtp_alerter_metrics:
-
-            # @modified 20200723 - Feature #3560: External alert config
-            # Speed this up with adding multiple members to the set
-            # for metric in smtp_alerter_metrics:
-            #    self.redis_conn.sadd('new_analyzer.smtp_alerter_metrics', metric)
-            if smtp_alerter_metrics:
-                try:
-                    self.redis_conn.sadd('new_analyzer.smtp_alerter_metrics', *set(smtp_alerter_metrics))
-                except:
-                    logger.error(traceback.format_exc())
-                    logger.error('error :: failed to add multiple members to the new_analyzer.smtp_alerter_metrics Redis set')
-                try:
-                    self.redis_conn.rename('analyzer.smtp_alerter_metrics', 'analyzer.smtp_alerter_metrics.old')
-                except:
-                    pass
-                try:
-                    self.redis_conn.rename('new_analyzer.smtp_alerter_metrics', 'analyzer.smtp_alerter_metrics')
-                except:
-                    pass
-                try:
-                    self.redis_conn.delete('analyzer.smtp_alerter_metrics.old')
-                except:
-                    pass
-
-            # @added 20200827 - Feature #3708: FLUX_ZERO_FILL_NAMESPACES
-            # Analyzer determines what metrics flux should 0 fill by creating
-            # the flux.zero_fill_metrics Redis set, which flux references.  This
-            # is done in Analyzer because it manages metric Redis sets as it
-            # always runs.  It is only managed in Analyzer every 5 mins.
-            if FLUX_ZERO_FILL_NAMESPACES:
-                manage_flux_zero_fill_namespaces = False
-                flux_zero_fill_metrics = []
-                # Only manage every 5 mins
-                manage_flux_zero_fill_namespaces_redis_key = 'analyzer.manage_flux_zero_fill_namespaces'
-                try:
-                    manage_flux_zero_fill_namespaces = self.redis_conn.get(manage_flux_zero_fill_namespaces_redis_key)
-                except Exception as e:
-                    if LOCAL_DEBUG:
-                        logger.error('error :: could not query Redis for analyzer.manage_mirage_unique_metrics key: %s' % str(e))
-                if not manage_flux_zero_fill_namespaces:
-                    logger.info('managing FLUX_ZERO_FILL_NAMESPACES Redis sets')
-                    try:
-                        self.redis_conn.delete('analyzer.flux_zero_fill_metrics')
-                    except:
-                        logger.error(traceback.format_exc())
-                        logger.error('error :: failed to delete analyzer.flux_zero_fill_metrics Redis set')
-                    for i_base_name in unique_base_names:
-                        flux_zero_fill_metric = False
-                        pattern_match, metric_matched_by = matched_or_regexed_in_list('analyzer', i_base_name, FLUX_ZERO_FILL_NAMESPACES)
-                        if pattern_match:
-                            flux_zero_fill_metric = True
-                        if flux_zero_fill_metric:
-                            flux_zero_fill_metrics.append(i_base_name)
-                    if flux_zero_fill_metrics:
-                        logger.info('popuating analyzer.flux_zero_fill_metrics Redis set with %s metrics' % str(len(flux_zero_fill_metrics)))
-                        try:
-                            self.redis_conn.sadd('analyzer.flux_zero_fill_metrics', *set(flux_zero_fill_metrics))
-                        except:
-                            logger.error(traceback.format_exc())
-                            logger.error('error :: failed to add multiple members to the analyzer.flux_zero_fill_metrics Redis set')
-                    try:
-                        key_timestamp = int(time())
-                        self.redis_conn.setex(manage_flux_zero_fill_namespaces_redis_key, 300, key_timestamp)
-                    except:
-                        logger.error('error :: failed to set key :: manage_flux_zero_fill_namespaces_redis_key' % manage_flux_zero_fill_namespaces_redis_key)
-                    logger.info('checking if any metrics need to be removed from analyzer.flux_zero_fill_metrics')
-                    flux_zero_fill_metrics_to_remove = []
-                    flux_zero_fill_metrics_list = []
-                    try:
-                        flux_zero_fill_metrics_list = list(self.redis_conn_decoded.smembers('analyzer.flux_zero_fill_metrics'))
-                    except:
-                        logger.info(traceback.format_exc())
-                        logger.error('error :: failed to generate a list from analyzer.flux_zero_fill_metrics Redis set')
-                    for flux_zero_fill_base_name in flux_zero_fill_metrics_list:
-                        if flux_zero_fill_base_name not in unique_base_names:
-                            flux_zero_fill_metrics_to_remove.append(flux_zero_fill_base_name)
-                    if flux_zero_fill_metrics_to_remove:
-                        try:
-                            logger.info('removing %s metrics from smtp_alerter_metrics' % str(len(flux_zero_fill_metrics_to_remove)))
-                            self.redis_conn.srem('analyzer.flux_zero_fill_metrics', *set(flux_zero_fill_metrics_to_remove))
-                            # Reload the new set
-                            try:
-                                flux_zero_fill_metrics_list = list(self.redis_conn_decoded.smembers('analyzer.flux_zero_fill_metrics'))
-                            except:
-                                logger.info(traceback.format_exc())
-                                logger.error('error :: failed to generate a list from analyzer.flux_zero_fill_metrics Redis set after removals')
-                        except:
-                            logger.info(traceback.format_exc())
-                            logger.error('error :: failed to add multiple members to the analyzer.flux_zero_fill_metrics Redis set')
-                    else:
-                        logger.info('no metrics need to remove from analyzer.flux_zero_fill_metrics')
-                    if flux_zero_fill_metrics_list:
-                        # Replace the existing flux.zero_fill_metrics Redis set
-                        try:
-                            self.redis_conn.sunionstore('flux.zero_fill_metrics', 'analyzer.flux_zero_fill_metrics')
-                            logger.info('replaced flux.zero_fill_metrics Redis set with the newly created analyzer.flux_zero_fill_metrics set')
-                        except:
-                            logger.info(traceback.format_exc())
-                            logger.error('error :: failed to sunionstore flux.zero_fill_metrics from analyzer.flux_zero_fill_metrics Redis sets')
-            del unique_base_names
 
             # Using count files rather that multiprocessing.Value to enable metrics for
             # metrics for algorithm run times, etc
@@ -5123,7 +4599,7 @@ class Analyzer(Thread):
                                         resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
                                 # @added 20160815 - Analyzer also alerting on Mirage metrics now #22
                                 # With the reintroduction of the original substring
-                                # matching it become evident that Analyzer could
+                                # matching it became evident that Analyzer could
                                 # alert on a Mirage metric via a match on a parent
                                 # namespace pattern later in the ALERTS tuples.
                                 # If it is a Mirage metric, we add a mirage.metrics
@@ -5131,16 +4607,21 @@ class Analyzer(Thread):
                                 # step below.  This allows us to wildcard and
                                 # substring match, but the mirage.metrics keys act
                                 # as a dynamic SKIP_LIST for Analyzer
-                                mirage_metric_cache_key = 'mirage.metrics.%s' % metric[1]
-                                try:
-                                    # @modified 20200904 - Task #3730: Validate Mirage running multiple processes
-                                    # Use the resolution instead of the value,
-                                    # the packb value is not used anyway
-                                    # self.redis_conn.setex(mirage_metric_cache_key, alert[2], packb(metric[0]))
-                                    self.redis_conn.setex(mirage_metric_cache_key, alert[2], SECOND_ORDER_RESOLUTION_FULL_DURATION)
-                                except:
-                                    logger.error(traceback.format_exc())
-                                    logger.error('error :: failed to add mirage.metrics Redis key - %s' % str(mirage_metric_cache_key))
+
+                                # @modified 20201109 - Feature #3830: metrics_manager
+                                # Use the metrics_manager mirage.hash_key.metrics_resolutions
+                                # hash key
+                                if not ANALYZER_USE_METRICS_MANAGER:
+                                    mirage_metric_cache_key = 'mirage.metrics.%s' % metric[1]
+                                    try:
+                                        # @modified 20200904 - Task #3730: Validate Mirage running multiple processes
+                                        # Use the resolution instead of the value,
+                                        # the packb value is not used anyway
+                                        # self.redis_conn.setex(mirage_metric_cache_key, alert[2], packb(metric[0]))
+                                        self.redis_conn.setex(mirage_metric_cache_key, alert[2], SECOND_ORDER_RESOLUTION_FULL_DURATION)
+                                    except:
+                                        logger.error(traceback.format_exc())
+                                        logger.error('error :: failed to add mirage.metrics Redis key - %s' % str(mirage_metric_cache_key))
 
                                 # metric_timestamp = int(time())
                                 # anomaly_check_file = '%s/%s.%s.txt' % (settings.MIRAGE_CHECK_PATH, metric_timestamp, metric[1])
@@ -5379,11 +4860,17 @@ class Analyzer(Thread):
                                 mirage_metric_key = False
                                 if settings.ENABLE_MIRAGE:
                                     try:
-                                        mirage_metric_key = self.redis_conn.get(mirage_metric_cache_key)
+                                        # @modified 20201109 - Feature #3830: metrics_manager
+                                        # Use the metrics_manager mirage.hash_key.metrics_resolutions
+                                        # hash key
+                                        # mirage_metric_key = self.redis_conn.get(mirage_metric_cache_key)
+                                        raw_mirage_metric_key = self.redis_conn_decoded.hget('mirage.hash_key.metrics_resolutions', metric[1])
+                                        mirage_metric_key = int(raw_mirage_metric_key)
                                         if LOCAL_DEBUG:
-                                            logger.debug('debug :: metric_name analyzer_metric mirage_metric_key - %s' % str(mirage_metric_key))
+                                            logger.debug('debug :: %s metric rsolution - %s' % (metric[1], str(mirage_metric_key)))
                                     except Exception as e:
-                                        logger.error('error :: could not query Redis for mirage_metric_cache_key: %s' % e)
+                                        logger.error('error :: could not determine resolution for %s from mirage.hash_key.metrics_resolutions Redis hash key: %s' % (
+                                            metric[1], e))
 
                                     # @added 20200907 - Feature #3734: waterfall alerts
                                     waterfall_alert_check_string = '%s.%s' % (str(int(metric[2])), metric[1])
