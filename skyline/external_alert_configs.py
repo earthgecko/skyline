@@ -322,6 +322,12 @@ def get_external_alert_configs(current_skyline_app):
                 'type': 'internal'
             }
             new_all_alerts.append([alert[0], alert[1], alert[2], second_order_resolution_hours, internal_alert_config])
+            try:
+                internal_alert_configs[index] = internal_alert_config
+            except:
+                current_logger.error(traceback.format_exc())
+                current_logger.error('error :: get_external_alert_configs :: could not add internal_alert_config dict to internal_alert_configs dict')
+                continue
 
     # external alerts - non-smtp
     if external_alert_configs:
@@ -380,6 +386,13 @@ def get_external_alert_configs(current_skyline_app):
                 'type': 'internal'
             }
             new_all_alerts.append([alert[0], alert[1], alert[2], second_order_resolution_hours, internal_alert_config])
+            try:
+                internal_alert_configs[index] = internal_alert_config
+            except:
+                current_logger.error(traceback.format_exc())
+                current_logger.error('error :: get_external_alert_configs :: could not add internal_alert_config dict to internal_alert_configs dict')
+                continue
+
     if new_all_alerts:
         all_alerts = tuple(new_all_alerts)
 
@@ -395,7 +408,7 @@ def get_external_alert_configs(current_skyline_app):
         if not internal_from_cache:
             redis_key = 'skyline.internal_alert_configs'
             try:
-                redis_conn_decoded.setex(redis_key, 60, str(external_alert_configs))
+                redis_conn_decoded.setex(redis_key, 60, str(internal_alert_configs))
             except:
                 current_logger.error(traceback.format_exc())
                 current_logger.error('error :: get_external_alert_configs :: failed to set %s' % redis_key)

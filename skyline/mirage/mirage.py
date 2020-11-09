@@ -1525,25 +1525,45 @@ class Mirage(Thread):
                 else:
                     logger.info('not identified as an analyzer_batch triggered anomaly as no Redis key found - %s' % analyzer_batch_metric_anomaly_key)
                 if last_alert and analyzer_batch_anomaly:
-                    mirage_metrics_expiration_times = []
+                    # @modified 20201107 - Feature #3830: metrics_manager
+                    # Optimise to use metrics_manager HGETALL rather than
+                    # iterating the list of lists
+                    # mirage_metrics_expiration_times = []
+                    # try:
+                    #     mirage_metrics_expiration_times = list(self.redis_conn_decoded.smembers('mirage.metrics_expiration_times'))
+                    #     if LOCAL_DEBUG:
+                    #         logger.info('debug :: fetched the mirage.metrics_expiration_times Redis set')
+                    # except:
+                    #     logger.info('failed to fetch the mirage.metrics_expiration_times Redis set')
+                    #     mirage_metrics_expiration_times = []
+                    # metric_expiration_time = 3600
+                    # try:
+                    #     for item_list_string in mirage_metrics_expiration_times:
+                    #         mirage_alert_expiration_data = literal_eval(item_list_string)
+                    #         if mirage_alert_expiration_data[0] == base_name:
+                    #             metric_expiration_time = int(mirage_alert_expiration_data[1])
+                    #             break
+                    # except:
+                    #     if LOCAL_DEBUG:
+                    #         logger.error('error :: failed to determine mirage_alert_expiration_data for %s from the mirage.metrics_expiration_times Redis set' % str(base_name))
+                    #     metric_expiration_time = 3600
+                    mirage_metrics_expiration_times = {}
                     try:
-                        mirage_metrics_expiration_times = list(self.redis_conn_decoded.smembers('mirage.metrics_expiration_times'))
-                        if LOCAL_DEBUG:
-                            logger.info('debug :: fetched the mirage.metrics_expiration_times Redis set')
+                        mirage_metrics_expiration_times = self.redis_conn_decoded.hgetall('mirage.hash_key.metrics_expiration_times')
+                        logger.info('%s entries in mirage.hash_key.metrics_expiration_times Redis hash key' % str(len(mirage_metrics_expiration_times)))
                     except:
-                        logger.info('failed to fetch the mirage.metrics_expiration_times Redis set')
-                        mirage_metrics_expiration_times = []
-                    metric_expiration_time = 3600
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to get Redis hash key mirage.hash_key.metrics_expiration_times')
+                        mirage_metrics_expiration_times = {}
                     try:
-                        for item_list_string in mirage_metrics_expiration_times:
-                            mirage_alert_expiration_data = literal_eval(item_list_string)
-                            if mirage_alert_expiration_data[0] == base_name:
-                                metric_expiration_time = int(mirage_alert_expiration_data[1])
-                                break
+                        logger.info('%s entries in mirage.hash_key.metrics_expiration_times Redis hash key' % str(len(mirage_metrics_expiration_times)))
+                        metric_expiration_time = int(mirage_metrics_expiration_times[base_name])
+                        logger.info('%s has expiration time of %s' % (base_name, str(metric_expiration_time)))
                     except:
                         if LOCAL_DEBUG:
-                            logger.error('error :: failed to determine mirage_alert_expiration_data for %s from the mirage.metrics_expiration_times Redis set' % str(base_name))
+                            logger.error('error :: failed to determine mirage_alert_expiration_data for %s from the mirage.hash_key.metrics_expiration_times Redis hash key' % str(base_name))
                         metric_expiration_time = 3600
+
                     last_timestamp = None
                     try:
                         last_timestamp = int(last_alert)
@@ -3710,39 +3730,40 @@ class Mirage(Thread):
             # reported anomaly timestamp can be used to determine
             # whether the EXPIRATION_TIME should be applied to a
             # batch metric in the alerting and Ionosphere contexts
-            mirage_metrics_expiration_times = []
-            try:
-                mirage_metrics_expiration_times = list(self.redis_conn_decoded.smembers('mirage.metrics_expiration_times'))
-                if LOCAL_DEBUG:
-                    logger.info('debug :: fetched the mirage.metrics_expiration_times Redis set')
-            except:
-                logger.info('failed to fetch the mirage.metrics_expiration_times Redis set')
-                mirage_metrics_expiration_times = []
-            try:
-                mirage_unique_metrics = list(self.redis_conn_decoded.smembers('mirage.unique_metrics'))
-                mirage_unique_metrics_count = len(mirage_unique_metrics)
-                logger.info('mirage.unique_metrics Redis set count - %s' % str(mirage_unique_metrics_count))
-                if LOCAL_DEBUG:
-                    logger.info('debug :: fetched the mirage.unique_metrics Redis set')
-                    logger.info('debug :: %s' % str(mirage_unique_metrics))
-            except:
-                logger.info('failed to fetch the mirage.unique_metrics Redis set')
-                mirage_unique_metrics == []
-            for metric in mirage_unique_metrics:
-                if metric.startswith(settings.FULL_NAMESPACE):
-                    base_name = metric.replace(settings.FULL_NAMESPACE, '', 1)
-                else:
-                    base_name = metric
-
-                mirage_alert_expiration_data = [base_name, int(alert[2])]
-                if str(mirage_alert_expiration_data) not in mirage_metrics_expiration_times:
-                    try:
-                        self.redis_conn.sadd('mirage.metrics_expiration_times', str(mirage_alert_expiration_data))
-                        if LOCAL_DEBUG:
-                            logger.info('debug :: added %s to mirage.metrics_expiration_times' % str(mirage_alert_expiration_data))
-                    except:
-                        if LOCAL_DEBUG:
-                            logger.error('error :: failed to add %s to mirage.metrics_expiration_times set' % str(mirage_alert_expiration_data))
+            # @modified 20201107 - Feature #3830: metrics_manager
+            # Use metrics_manager data, now managed there
+            # mirage_metrics_expiration_times = []
+            # try:
+            #     mirage_metrics_expiration_times = list(self.redis_conn_decoded.smembers('mirage.metrics_expiration_times'))
+            #     if LOCAL_DEBUG:
+            #         logger.info('debug :: fetched the mirage.metrics_expiration_times Redis set')
+            # except:
+            #     logger.info('failed to fetch the mirage.metrics_expiration_times Redis set')
+            #     mirage_metrics_expiration_times = []
+            # try:
+            #     mirage_unique_metrics = list(self.redis_conn_decoded.smembers('mirage.unique_metrics'))
+            #     mirage_unique_metrics_count = len(mirage_unique_metrics)
+            #     logger.info('mirage.unique_metrics Redis set count - %s' % str(mirage_unique_metrics_count))
+            #     if LOCAL_DEBUG:
+            #         logger.info('debug :: fetched the mirage.unique_metrics Redis set')
+            #         logger.info('debug :: %s' % str(mirage_unique_metrics))
+            # except:
+            #     logger.info('failed to fetch the mirage.unique_metrics Redis set')
+            #     mirage_unique_metrics == []
+            # for metric in mirage_unique_metrics:
+            #     if metric.startswith(settings.FULL_NAMESPACE):
+            #         base_name = metric.replace(settings.FULL_NAMESPACE, '', 1)
+            #     else:
+            #         base_name = metric
+            #     mirage_alert_expiration_data = [base_name, int(alert[2])]
+            #     if str(mirage_alert_expiration_data) not in mirage_metrics_expiration_times:
+            #         try:
+            #             self.redis_conn.sadd('mirage.metrics_expiration_times', str(mirage_alert_expiration_data))
+            #             if LOCAL_DEBUG:
+            #                 logger.info('debug :: added %s to mirage.metrics_expiration_times' % str(mirage_alert_expiration_data))
+            #         except:
+            #             if LOCAL_DEBUG:
+            #                 logger.error('error :: failed to add %s to mirage.metrics_expiration_times set' % str(mirage_alert_expiration_data))
 
             # Reset counters
             # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
