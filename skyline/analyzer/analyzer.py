@@ -1789,7 +1789,10 @@ class Analyzer(Thread):
                                     running_derivative_metric_key, 960, monotonic_count)
                             except Exception as e:
                                 logger.error('error :: could not set Redis running_derivative_metric key: %s' % e)
-                        if monotonic_count < 10:
+                        # With manage_derivative_metrics running every 300
+                        # seconds the metric has to be monotonic in the last
+                        # 15 data points.
+                        if monotonic_count < 3:
                             is_strictly_increasing_monotonically = False
                 else:
                     is_strictly_increasing_monotonically = False
