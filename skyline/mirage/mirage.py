@@ -3356,6 +3356,18 @@ class Mirage(Thread):
                                             # Do not modify the alert list object, create a new one
                                             new_alert = list(alert)
                                             new_alert.append(['anomaly_id', anomaly_id])
+                                            # @added 20201111 - Feature #3772: Add the anomaly_id to the http_alerter json
+                                            # Add the real anomalyScore
+                                            try:
+                                                if triggered_algorithms and algorithms_run:
+                                                    anomalyScore = len(triggered_algorithms) / len(algorithms_run)
+                                                else:
+                                                    anomalyScore = 1.0
+                                            except:
+                                                logger.error(traceback.format_exc())
+                                                logger.error('error :: failed to determine anomalyScore for %s' % base_name)
+                                                anomalyScore = 1.0
+                                            new_alert.append(['anomalyScore', anomalyScore])
 
                                         # @added 20200929 - Task #3748: POC SNAB
                                         #                   Branch #3068: SNAB

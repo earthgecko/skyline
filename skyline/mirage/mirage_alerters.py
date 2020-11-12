@@ -2017,6 +2017,26 @@ def alert_http(alert, metric, second_order_resolution_seconds, context):
                 if not anomaly_id:
                     logger.error('error :: alert_http :: failed to determine anomaly_id from alert[4] or alert[5]')
 
+            # @added 20201111 - Feature #3772: Add the anomaly_id to the http_alerter json
+            # Add the real anomalyScore
+            anomalyScore = None
+            try:
+                anomalyScore_details = alert[5]
+                if anomalyScore_details[0] == 'anomalyScore':
+                    anomalyScore = anomalyScore_details[1]
+            except:
+                pass
+            if not anomalyScore:
+                try:
+                    anomalyScore_details = alert[6]
+                    if anomalyScore_details[0] == 'anomalyScore':
+                        anomalyScore = anomalyScore_details[1]
+                except:
+                    pass
+            if not anomalyScore:
+                logger.error('error :: alert_http :: failed to determine anomalyScore from alert[5] or alert[6] - set anomalyScore to 1.0')
+                anomalyScore = 1.0
+
             # @modified 20201007 - Feature #3772: Add the anomaly_id to the http_alerter json
             metric_alert_dict = {
                 "metric": str(metric[1]),
