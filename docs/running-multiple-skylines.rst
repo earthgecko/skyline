@@ -37,9 +37,9 @@ these.
 
 The following settings pertain to running multiple Skyline instances:
 
-- :mod:`settings.ALTERNATIVE_SKYLINE_URLS`
-- :mod:`settings.REMOTE_SKYLINE_INSTANCES`
-- :mod:`settings.HORIZON_SHARDS`
+- :mod:`settings.ALTERNATIVE_SKYLINE_URLS` [required]
+- :mod:`settings.REMOTE_SKYLINE_INSTANCES` [required]
+- :mod:`settings.HORIZON_SHARDS` [optional]
 
 With the introduction of Luminosity a requirement for Skyline to pull the time
 series data from remote Skyline instances was added to allow for cross
@@ -48,6 +48,28 @@ endpoint and preprocesses the time series data for Luminosity on the remote
 Skyline instance and returns only the fragments (gzipped) of time series
 required for analysis, by default the previous 12 minutes, to minimise bandwidth
 and ensure performance is maintained.
+
+Running Skyline in any form of clustered configuration requires that each
+Skyline instance know about the other instances and has access to them via the
+appropriate firewall or network rules and via the reverse proxy configuration
+(Apache or nginx).
+
+:mod:`settings.ALTERNATIVE_SKYLINE_URLS` is a reequired list of alternative URLs
+for the other nodes in the Skyline cluster, so that if a request is made to the
+Skyline webapp for a resource it does not have, it can return the other URLs to
+the client.
+
+:mod:`settings.REMOTE_SKYLINE_INSTANCES` is similar but is this is used by
+Skyline internally to request resources from other Skyline instances to:
+
+1. Retrieve time series data and general data for metrics served by the other
+  Skyline instance/s.
+2. To retrieve resources for certain client and API requests to respond with
+  all the data for the cluster, in terms of unique_metrics, alerting_metrics,
+  etc.
+
+Read about :mod:`settings.HORIZON_SHARDS` see
+`HORIZON_SHARDS <horizon.html#HORIZON_SHARDS>`__ section on the Horizon page.
 
 Hot standby configuration
 -------------------------

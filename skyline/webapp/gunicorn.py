@@ -10,9 +10,19 @@ sys.path.insert(0, os.path.dirname(__file__))
 import settings
 
 bind = '%s:%s' % (settings.WEBAPP_IP, str(settings.WEBAPP_PORT))
+# @modified 20201011 - Reduce the number of workers on machine with lots of
+#                      CPUs
 # workers = multiprocessing.cpu_count() * 2 + 1
-workers = 2
-backlog = 10
+# workers = 2
+# backlog = 10
+try:
+    workers = settings.WEBAPP_GUNICORN_WORKERS
+except:
+    workers = 4
+try:
+    backlog = settings.WEBAPP_GUNICORN_BACKLOG
+except:
+    backlog = 254
 
 skyline_app = 'webapp'
 skyline_app_logger = '%sLog' % skyline_app

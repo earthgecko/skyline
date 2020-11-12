@@ -2054,8 +2054,28 @@ Webapp settings
 WEBAPP_SERVER = 'gunicorn'
 """
 :var WEBAPP_SERVER: Run the Webapp via gunicorn (recommended) or the Flask
-    development server, set this to either ``'gunicorn'`` or ``'flask'``
+    development server, set this to either ``'gunicorn'`` or ``'flask'``.
+    Flask is no longer supported.
 :vartype WEBAPP_SERVER: str
+"""
+
+WEBAPP_GUNICORN_WORKERS = 4
+"""
+:var WEBAPP_GUNICORN_WORKERS: How many gunicorn workers to run for the webapp.
+    The normal recommended value for gunicorn is generally be between 2-4
+    workers per core, however on a machine with lots of cores this is probably
+    over provisioning for the webapp, depending on the load on the server.
+:vartype WEBAPP_GUNICORN_WORKERS: int
+"""
+
+WEBAPP_GUNICORN_BACKLOG = 254
+"""
+:var WEBAPP_GUNICORN_BACKLOG: The maximum number of pending connections.  This
+    refers to the number of clients that can be waiting to be served. Exceeding
+    this number results in the client getting an error when attempting to
+    connect. It should only affect servers under significant load.  It must be a
+    positive integer. Generally set in the 64-2048 range.
+:vartype WEBAPP_GUNICORN_BACKLOG: int
 """
 
 WEBAPP_IP = '127.0.0.1'
