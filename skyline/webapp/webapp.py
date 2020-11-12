@@ -110,7 +110,9 @@ if True:
         # @added 20180720 - Feature #2464: luminosity_remote_data
         luminosity_remote_data,
         # @added 20200908 - Feature #3740: webapp - anomaly API endpoint
-        panorama_anomaly_details,)
+        panorama_anomaly_details,
+        # @added 20201103 - Feature #3824: get_cluster_data
+        get_cluster_data)
     from ionosphere_backend import (
         ionosphere_data, ionosphere_metric_data,
         # @modified 20170114 - Feature #1854: Ionosphere learn
@@ -643,6 +645,25 @@ def version():
 # def data():
 def api():
 
+    # @added 20201110 - Feature #3824: get_cluster_data
+    #
+    cluster_data = False
+    if 'cluster_data' in request.args:
+        try:
+            cluster_data_argument = request.args.get('cluster_data', 'false')
+            if cluster_data_argument == 'true':
+                cluster_data = True
+                logger.info('api request with cluster_data=true')
+            elif cluster_data_argument == 'false':
+                cluster_data = False
+                logger.info('api request with cluster_data=false')
+            else:
+                logger.error('error :: api request with invalid cluster_data argument - %s' % str(cluster_data_argument))
+                return 'Bad Request', 400
+        except:
+            logger.error('error :: /api?snab request with invalid cluster_data argument - %s' % str(cluster_data_argument))
+            return 'Bad Request', 400
+
     # @added 20201103 - Feature #3770: webapp - analyzer_last_status API endoint
     if 'analyzer_last_status' in request.args:
         logger.info('/api?analyzer_last_status request')
@@ -670,6 +691,19 @@ def api():
             logger.error(traceback.format_exc())
             logger.error('error :: Webapp could not get the aet.analyzer.batch_processing_metrics list from Redis')
             return 'Internal Server Error', 500
+
+        # @added 20201103 - Feature #3824: get_cluster_data
+        if settings.REMOTE_SKYLINE_INSTANCES and cluster_data:
+            remote_batch_processing_metrics = None
+            try:
+                remote_batch_processing_metrics = get_cluster_data('batch_processing_metrics', 'metrics')
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: Webapp could not get batch_processing_metrics from the remote Skyline instances')
+            if remote_batch_processing_metrics:
+                logger.info('got %s remote metrics from the remote Skyline instances' % str(len(remote_batch_processing_metrics)))
+                batch_processing_metrics_list = batch_processing_metrics + remote_batch_processing_metrics
+                batch_processing_metrics = list(set(batch_processing_metrics_list))
 
         logger.info('/api?batch_processing_metrics responding with %s metrics' % str(len(batch_processing_metrics)))
         data_dict = {"status": {}, "data": {"metrics": batch_processing_metrics}}
@@ -754,7 +788,7 @@ def api():
         if existing_result:
             slack_notified_of_change = webapp_update_slack_thread(snab_id, int(anomaly_timestamp), [existing_result, result], 'snab_result_changed')
             logger.info('slack_updated for snab evaluation - %s, with result %s' % (
-                str(slack_updated), str(result)))
+                str(slack_notified_of_change), str(result)))
 
         data_dict = {"status": {}, "data": {"snab_updated": snab_dict}}
         if snab_result_updated and snab_dict:
@@ -1064,6 +1098,25 @@ def api():
                 logger.error(
                     'error :: failed to iterate literal_eval of training_data_raw')
                 return 'Internal Server Error', 500
+
+        # @added 20201110 - Feature #3824: get_cluster_data
+        if settings.REMOTE_SKYLINE_INSTANCES and cluster_data:
+            remote_training_data = None
+            training_data_uri = 'training_data'
+            if metric_filter:
+                training_data_uri = 'training_data&metric=%s' % metric_filter
+            if timestamp_filter:
+                training_data_uri = '%s&timestamp=%s' % (training_data_uri, timestamp_filter)
+            try:
+                remote_training_data = get_cluster_data(training_data_uri, 'metrics')
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: Webapp could not get remote_training_data from the remote Skyline instances')
+            if remote_training_data:
+                logger.info('got %s remote metrics training data instances from the remote Skyline instances' % str(len(remote_training_data)))
+                remote_training_data_list = training_data + remote_training_data
+                training_data = list(set(batch_processing_metrics_list))
+
         data_dict = {"status": {}, "data": {"metrics": training_data}}
         return jsonify(data_dict), 200
 
@@ -1077,6 +1130,19 @@ def api():
             logger.error('error :: Webapp could not get the aet.analyzer.smtp_alerter_metrics list from Redis')
             return 'Internal Server Error', 500
 
+        # @added 20201103 - Feature #3824: get_cluster_data
+        if settings.REMOTE_SKYLINE_INSTANCES and cluster_data:
+            remote_non_alerting_metrics = None
+            try:
+                remote_non_alerting_metrics = get_cluster_data('non_alerting_metrics', 'metrics')
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: Webapp could not get non_alerting_metrics from the remote Skyline instances')
+            if remote_non_alerting_metrics:
+                logger.info('got %s remote non_alerting_metrics from the remote Skyline instances' % str(len(remote_non_alerting_metrics)))
+                non_alerting_metrics_list = non_alerting_metrics + remote_non_alerting_metrics
+                non_alerting_metrics = list(set(non_alerting_metrics_list))
+
         logger.info('/api?non_alerting_metrics responding with %s metrics' % str(len(non_alerting_metrics)))
         data_dict = {"status": {}, "data": {"metrics": non_alerting_metrics}}
         return jsonify(data_dict), 200
@@ -1088,6 +1154,19 @@ def api():
             logger.error(traceback.format_exc())
             logger.error('error :: Webapp could not get the aet.analyzer.smtp_alerter_metrics list from Redis')
             return 'Internal Server Error', 500
+
+        # @added 20201103 - Feature #3824: get_cluster_data
+        if settings.REMOTE_SKYLINE_INSTANCES and cluster_data:
+            remote_alerting_metrics = None
+            try:
+                remote_alerting_metrics = get_cluster_data('alerting_metrics', 'metrics')
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: Webapp could not get alerting_metrics from the remote Skyline instances')
+            if remote_alerting_metrics:
+                logger.info('got %s remote alerting_metrics from the remote Skyline instances' % str(len(remote_alerting_metrics)))
+                alerting_metrics_list = alerting_metrics + remote_alerting_metrics
+                alerting_metrics = list(set(alerting_metrics_list))
 
         logger.info('/api?non_alerting_metrics responding with %s metrics' % str(len(alerting_metrics)))
         data_dict = {"status": {}, "data": {"metrics": alerting_metrics}}
@@ -1201,6 +1280,7 @@ def api():
 
     # @added 20191231 - Feature #3368: webapp api - ionosphere_learn_work
     if 'ionosphere_learn_work' in request.args:
+        ionosphere_learn_work = []
         try:
             ionosphere_learn_work = list(REDIS_CONN.smembers('ionosphere.learn.work'))
         except:
@@ -1221,9 +1301,12 @@ def api():
                 work_list = literal_eval(work)
                 work_no_fd = [work_list[0], work_list[1], work_list[2], work_list[3], work_list[4], work_list[5]]
                 echo_work_no_full_duration.append(work_no_fd)
-        if echo_work_no_full_duration:
-            new_ionosphere_learn_work = ionosphere_learn_work + echo_work_no_full_duration
-            ionosphere_learn_work = new_ionosphere_learn_work
+                # @added 20201110 - Feature #3368: webapp api - ionosphere_learn_work
+                # Just add as it is literal_evaled below or not
+                ionosphere_learn_work.append(work)
+        # if echo_work_no_full_duration:
+        #     new_ionosphere_learn_work = ionosphere_learn_work + echo_work_no_full_duration
+        #     ionosphere_learn_work = new_ionosphere_learn_work
 
         # @added 20201104 - Feature #3368: webapp api - ionosphere_learn_work
         # Convert strings to json
@@ -6097,8 +6180,12 @@ def rebrow():
         # @modified 20180526 - Feature #2378: Add redis auth to Skyline and rebrow
         # Change password parameter to token parameter
         # url = url_for("rebrow_server_db", host=host, port=port, db=db, password=password)
+        # @modified 20201103 - Feature #3824: get_cluster_data
+        # Change default page from Server to Keys
+        # url = url_for(
+        #     "rebrow_server_db", host=host, port=port, db=db, token=client_token)
         url = url_for(
-            "rebrow_server_db", host=host, port=port, db=db, token=client_token)
+            "rebrow_keys", host=host, port=port, db=db, token=client_token)
         return redirect(url)
     else:
         start = time.time()

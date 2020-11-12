@@ -15,6 +15,9 @@ from flask import request
 from redis import StrictRedis
 from msgpack import Unpacker
 
+# @added 20201103 - Feature #3824: get_cluster_data
+import requests
+
 import settings
 from skyline_functions import (
     mysql_select,
@@ -649,3 +652,81 @@ def panorama_anomaly_details(anomaly_id):
         anomaly_data = [int(anomaly_id), str(metric), anomalous_datapoint, anomaly_timestamp, full_duration, created_timestamp, anomaly_end_timestamp]
         break
     return anomaly_data
+
+
+# @added 20201103 - Feature #3824: get_cluster_data
+def get_cluster_data(api_endpoint, data_required, endpoint_params={}):
+    """
+    Gets data from the /api of REMOTE_SKYLINE_INSTANCES.  This allows the user
+    to query a single Skyline webapp node in a cluster and the Skyline instance
+    will respond with the concentated responses of all the
+    REMOTE_SKYLINE_INSTANCES in one a single response.
+
+    :param api_endpoint: the api endpoint to request data from the remote
+        Skyline instances
+    :param data_required: the element from the api json response that is
+        required
+    :param endpoint_params: A dictionary of any additional parameters that may
+        be required
+    :type api_endpoint: str
+    :type data_required: str
+    :type endpoint_params: dict
+    :return: list
+    :rtype: list
+
+    """
+    try:
+        connect_timeout = int(settings.GRAPHITE_CONNECT_TIMEOUT)
+        read_timeout = int(settings.GRAPHITE_READ_TIMEOUT)
+    except:
+        connect_timeout = 5
+        read_timeout = 10
+    use_timeout = (int(connect_timeout), int(read_timeout))
+    data = []
+    for item in settings.REMOTE_SKYLINE_INSTANCES:
+        r = None
+        user = None
+        password = None
+        use_auth = False
+        try:
+            user = str(item[1])
+            password = str(item[2])
+            use_auth = True
+        except:
+            user = None
+            password = None
+        try:
+            url = '%s/api?%s' % (str(item[0]), api_endpoint)
+            if use_auth:
+                r = requests.get(url, timeout=use_timeout, auth=(user, password))
+            else:
+                r = requests.get(url, timeout=use_timeout)
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: get_cluster_data :: failed to %s from %s' % (
+                api_endpoint, str(item)))
+        if r:
+            if r.status_code != 200:
+                logger.error('error :: get_cluster_data :: %s from %s responded with status code %s and reason %s' % (
+                    api_endpoint, str(item), str(r.status_code), str(r.reason)))
+            js = None
+            try:
+                js = r.json()
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: get_cluster_data :: failed to get json from the response from %s on %s' % (
+                    api_endpoint, str(item)))
+            remote_data = []
+            if js:
+                try:
+                    remote_data = js['data'][data_required]
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: get_cluster_data :: failed to build remote_data from %s on %s' % (
+                        data_required, str(item)))
+            if remote_data:
+                logger.info('get_cluster_data :: got %s %s from %s on %s' % (
+                    str(len(remote_data)), data_required, str(item[0])))
+                data = data + remote_data
+
+    return data
