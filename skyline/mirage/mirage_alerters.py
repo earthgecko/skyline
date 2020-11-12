@@ -2037,6 +2037,81 @@ def alert_http(alert, metric, second_order_resolution_seconds, context):
                 logger.error('error :: alert_http :: failed to determine anomalyScore from alert[5] or alert[6] - set anomalyScore to 1.0')
                 anomalyScore = 1.0
 
+            # @added 20201112 - Feature #3772: Add the anomaly_id to the http_alerter json
+            # Add the upper and lower 3sigma bounds
+            sigma3_upper_bound = 0
+            sigma3_lower_bound = 0
+            sigma3_real_lower_bound = 0
+            anomaly_json = None
+            if settings.IONOSPHERE_ENABLED:
+                logger.info('alert_http :: calculating 3sigma upper and lower bounds for %s' % metric_name)
+                try:
+                    timeseries_dir = metric_name.replace('.', '/')
+                    training_data_dir = '%s/%s/%s' % (
+                        settings.IONOSPHERE_DATA_FOLDER, str(int(metric[2])),
+                        timeseries_dir)
+                    anomaly_json = '%s/%s.json' % (
+                        training_data_dir, metric_name)
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: alert_http :: failed to determine anomaly_json')
+                raw_timeseries = None
+                if anomaly_json:
+                    try:
+                        # Read the timeseries json file
+                        with open(anomaly_json, 'r') as f:
+                            raw_timeseries = f.read()
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: alert_http :: failed to determine 3sigma upper and lower bounds')
+                if raw_timeseries:
+                    try:
+                        timeseries_array_str = str(raw_timeseries).replace('(', '[').replace(')', ']')
+                        timeseries = literal_eval(timeseries_array_str)
+                        values = pd.Series([x[1] for x in timeseries])
+                        array_amin = np.amin(values)
+                        mean = values.mean()
+                        stdDev = values.std()
+                        sigma3 = 3 * stdDev
+                        sigma3_upper_bound = mean + sigma3
+                        if array_amin >= 0:
+                            try:
+                                sigma3_lower_bound = mean - sigma3
+                            except:
+                                sigma3_lower_bound = 0
+                            sigma3_real_lower_bound = sigma3_lower_bound
+                        else:
+                            sigma3_real_lower_bound = 0
+                        if array_amin == 0:
+                            sigma3_real_lower_bound = 0
+                        if sigma3_real_lower_bound < 0:
+                            if array_amin >= 0:
+                                sigma3_real_lower_bound = 0
+                        logger.info('alert_http :: calculated 3sigma_upper: %s and 3sigma_lower: %s for %s' % (
+                            str(sigma3_upper_bound), str(sigma3_lower_bound),
+                            metric_name))
+                        try:
+                            del raw_timeseries
+                        except:
+                            pass
+                        try:
+                            del timeseries_array_str
+                        except:
+                            pass
+                        try:
+                            del timeseries
+                        except:
+                            pass
+                        try:
+                            del values
+                        except:
+                            pass
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: alert_http :: failed to determine 3sigma upper and lower bounds')
+                else:
+                    logger.error('error :: alert_http :: falied to load timeseries data to calculate 3sigma bound from %s' % anomaly_json)
+
             # @modified 20201007 - Feature #3772: Add the anomaly_id to the http_alerter json
             metric_alert_dict = {
                 "metric": str(metric[1]),
@@ -2049,6 +2124,11 @@ def alert_http(alert, metric, second_order_resolution_seconds, context):
                 "id": str(external_alerter_id),
                 "anomaly_id": str(anomaly_id),
                 "anomalyScore": str(anomalyScore),
+                # @added 20201112 - Feature #3772: Add the anomaly_id to the http_alerter json
+                # Add the upper and lower 3sigma bounds
+                "3sigma_upper": sigma3_upper_bound,
+                "3sigma_lower": sigma3_lower_bound,
+                "3sigma_real_lower": sigma3_real_lower_bound,
             }
             # @modified 20200302: Feature #3396: http_alerter
             # Add the token as an independent entity from the alert
