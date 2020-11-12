@@ -560,10 +560,10 @@ class Analyzer(Thread):
         if determine_low_priority_metrics:
             try:
                 try:
-                    smtp_alerter_metrics = list(self.redis_conn_decoded.smembers('analyzer.smtp_alerter_metrics'))
+                    smtp_alerter_metrics = list(self.redis_conn_decoded.smembers('aet.analyzer.smtp_alerter_metrics'))
                 except:
                     logger.error(traceback.format_exc())
-                    logger.error('error :: failed to generate a list from analyzer.smtp_alerter_metrics Redis set for priority based assigned_metrics')
+                    logger.error('error :: failed to generate a list from aet.analyzer.smtp_alerter_metrics Redis set for priority based assigned_metrics')
                     smtp_alerter_metrics = []
                 unique_smtp_alerter_metrics = []
                 for metric in smtp_alerter_metrics:
@@ -580,9 +580,13 @@ class Analyzer(Thread):
 
                 high_priority_assigned_metrics = list(high_priority_assigned_metrics_set)
                 del high_priority_assigned_metrics_set
+                logger.info('discovered %s high_priority_assigned_metrics in assigned_metrics' % (
+                    str(len(high_priority_assigned_metrics))))
 
                 low_priority_assigned_metrics = list(low_priority_assigned_metrics_set)
                 del low_priority_assigned_metrics_set
+                logger.info('discovered %s low_priority_assigned_metrics in assigned_metrics' % (
+                    str(len(low_priority_assigned_metrics))))
 
                 # @added 20201030 - Feature #3808: ANALYZER_DYNAMICALLY_ANALYZE_LOW_PRIORITY_METRICS
                 # If ANALYZER_DYNAMICALLY_ANALYZE_LOW_PRIORITY_METRICS is enabled
@@ -597,6 +601,8 @@ class Analyzer(Thread):
                 # timestamp using the PEP 256 method and taking 0.002575 seconds
                 # to generate the metric_name list of 16000 metrics.
                 if ANALYZER_DYNAMICALLY_ANALYZE_LOW_PRIORITY_METRICS and ANALYZER_ANALYZE_LOW_PRIORITY_METRICS:
+                    logger.info('reordering low priority metrics by oldest analyzed timestamp from Redis hash key - %s' % (
+                        low_priority_metrics_hash_key))
                     low_priority_metrics_last_analyzed = []
                     try:
                         low_priority_metrics_last_analyzed = self.redis_conn_decoded.hgetall(low_priority_metrics_hash_key)
@@ -615,6 +621,8 @@ class Analyzer(Thread):
                             sorted_low_priority_metrics_last_analyzed = []
                     low_priority_analyzed_metrics = []
                     if sorted_low_priority_metrics_last_analyzed:
+                        logger.info('%s metrics by oldest analyzed timestamp' % (
+                            str(len(sorted_low_priority_metrics_last_analyzed))))
                         try:
                             low_priority_analyzed_metrics = [item[0] for item in sorted_low_priority_metrics_last_analyzed]
                             logger.info('reordered low priority metrics by oldest analyzed timestamp from Redis hash key - %s' % (
@@ -622,6 +630,20 @@ class Analyzer(Thread):
                         except:
                             logger.error(traceback.format_exc())
                             logger.error('error :: failed to generate list of metric names from sorted_low_priority_metrics_last_analyzed')
+                        if low_priority_analyzed_metrics:
+                            logger.info('removing reordered low priority metrics that are not assinged to this process')
+                            low_priority_analyzed_metrics_count = len(low_priority_analyzed_metrics)
+                            low_priority_assigned_metrics_count = 0
+                            assigned_low_priority_analyzed_metrics = []
+                            for base_name in low_priority_analyzed_metrics:
+                                if base_name in low_priority_assigned_metrics:
+                                    assigned_low_priority_analyzed_metrics.append(base_name)
+                                    low_priority_assigned_metrics_count += 1
+                            if assigned_low_priority_analyzed_metrics:
+                                removed_metrics_count = low_priority_analyzed_metrics_count - low_priority_assigned_metrics_count
+                                low_priority_analyzed_metrics = assigned_low_priority_analyzed_metrics
+                                logger.info('removed %s low priority metrics that are not assinged to this process' % str(removed_metrics_count))
+
                     # Remove Boring, Stale and TooShort metrics
                     # The method in use here is fast enough, on 16000 metrics it
                     # reorders the list by current metrics and the exception
@@ -634,17 +656,26 @@ class Analyzer(Thread):
                     if low_priority_analyzed_metrics:
                         boring_metrics = []
                         try:
-                            boring_metrics = list(self.redis_conn_decoded.smembers('aet.analyzer.boring'))
+                            all_boring_metrics = list(self.redis_conn_decoded.smembers('aet.analyzer.boring'))
+                            for base_name in all_boring_metrics:
+                                if base_name in low_priority_assigned_metrics:
+                                    boring_metrics.append(base_name)
                         except:
                             boring_metrics = []
                         stale_metrics = []
                         try:
-                            stale_metrics = list(self.redis_conn_decoded.smembers('aet.analyzer.stale'))
+                            all_stale_metrics = list(self.redis_conn_decoded.smembers('aet.analyzer.stale'))
+                            for base_name in all_stale_metrics:
+                                if base_name in low_priority_assigned_metrics:
+                                    stale_metrics.append(base_name)
                         except:
                             stale_metrics = []
                         tooshort_metrics = []
                         try:
-                            tooshort_metrics = list(self.redis_conn_decoded.smembers('aet.analyzer.tooshort'))
+                            all_tooshort_metrics = list(self.redis_conn_decoded.smembers('aet.analyzer.tooshort'))
+                            for base_name in all_tooshort_metrics:
+                                if base_name in low_priority_assigned_metrics:
+                                    tooshort_metrics.append(base_name)
                         except:
                             tooshort_metrics = []
                         low_priority_metric_exception_base_names = boring_metrics + stale_metrics + tooshort_metrics
@@ -907,6 +938,15 @@ class Analyzer(Thread):
                 logger.error('error :: could not query Redis for analyzer.derivative_metrics_expiry key: %s' % str(e))
             manage_derivative_metrics = False
 
+        # @added 20201111 - Feature #3480: batch_processing
+        #                   Bug #2050: analyse_derivatives - change in monotonicity
+        derivative_z_metric_keys_existing = []
+        derivative_z_metric_keys_removed = []
+        derivative_z_metric_keys_added = []
+        metrics_added_to_derivative_metrics = []
+        metrics_removed_from_derivative_metrics = []
+        metrics_added_to_non_derivative_metrics = []
+
         # @added 20170901 - Bug #2154: Infrequent missing new_ Redis keys
         # If the analyzer.derivative_metrics_expiry is going to expire in the
         # next 60 seconds, just manage the derivative_metrics in the run as
@@ -929,6 +969,24 @@ class Analyzer(Thread):
                     except:
                         logger.error('error :: failed to delete Redis key :: analyzer.derivative_metrics_expiry')
 
+        # @added 20201111 - Feature #3480: batch_processing
+        #                   Bug #2050: analyse_derivatives - change in monotonicity
+        # Added sets to track additions and removes
+        if not manage_derivative_metrics and i == 1:
+            logger.info('derivative metrics are being managed - spin_process %s is deleting analyzer.derivative metrics. Redis sets' % str(i))
+            delete_redis_sets = [
+                'analyzer.derivative_metrics_removed',
+                'analyzer.z_derivative_metrics_added',
+                'analyzer.z_derivative_metrics_removed',
+            ]
+            for i_redis_set in delete_redis_sets:
+                redis_set_to_delete = i_redis_set
+                try:
+                    self.redis_conn.delete(redis_set_to_delete)
+                    logger.info('deleted Redis set - %s' % redis_set_to_delete)
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to delete Redis set - %s' % redis_set_to_delete)
         try:
             # @modified 20200606 - Bug #3572: Apply list to settings import
             # non_derivative_monotonic_metrics = settings.NON_DERIVATIVE_MONOTONIC_METRICS
@@ -1152,6 +1210,7 @@ class Analyzer(Thread):
                     if time_elasped > (settings.MAX_ANALYZER_PROCESS_RUNTIME - 15):
                         low_priority_time_elasped = True
             if low_priority_time_elasped and ANALYZER_DYNAMICALLY_ANALYZE_LOW_PRIORITY_METRICS:
+                logger.info('ANALYZER_DYNAMICALLY_ANALYZE_LOW_PRIORITY_METRICS - low_priority_time_elasped has been reached, not analysing any more metrics')
                 break
 
             # @modified 20200728 - Bug #3652: Handle multiple metrics in base_name conversion
@@ -1669,6 +1728,16 @@ class Analyzer(Thread):
                 logger.error('error :: could not query Redis for last_derivative_metric_key: %s' % e)
             if last_derivative_metric_key:
                 known_derivative_metric = True
+                # @added 20201111 - Feature #3480: batch_processing
+                #                   Bug #2050: analyse_derivatives - change in monotonicity
+                derivative_z_metric_keys_existing.append(base_name)
+
+            # @added 20201111 - Feature #3480: batch_processing
+            #                   Bug #2050: analyse_derivatives - change in monotonicity
+            # Unset the unknown_deriv_status if the derivate metrics are being
+            # refreshed
+            if not manage_derivative_metrics:
+                unknown_deriv_status = True
 
             if unknown_deriv_status:
                 # @added 20170617 - Bug #2050: analyse_derivatives - change in monotonicity
@@ -1688,13 +1757,40 @@ class Analyzer(Thread):
                 is_strictly_increasing_monotonically = False
                 if not skip_derivative:
                     is_strictly_increasing_monotonically = strictly_increasing_monotonicity(timeseries)
-                    if is_strictly_increasing_monotonically:
+
+                    # @added 20201111 - Feature #3480: batch_processing
+                    #                   Bug #2050: analyse_derivatives - change in monotonicity
+                    # Only assign as derivative metric if it evaluates as
+                    # strictly_increasing_monotonicity more than once.  This
+                    # prevents metrics which are for example at 0 all day then
+                    # record a 1 from being classified as monotonic if the
+                    # classification happens to occur when the metric is at 1,
+                    # on the next classification runs if the metric is still at
+                    # 1 or increasing then it will be classified as monotonic.
+                    # However if the metric returns to 0, this requirement to
+                    # be classified multiple times ensures it is not incorrectly
+                    # classified as monotonic.
+                    if not last_derivative_metric_key:
+                        running_derivative_metric_key = 'zz.derivative_metric.%s' % str(base_name)
+                        last_key_value = 0
+                        monotonic_count = 0
                         try:
-                            last_expire_set = int(time())
-                            self.redis_conn.setex(
-                                derivative_metric_key, settings.FULL_DURATION, last_expire_set)
+                            last_key_value = self.redis_conn_decoded.get(running_derivative_metric_key)
                         except Exception as e:
-                            logger.error('error :: could not set Redis derivative_metric key: %s' % e)
+                            logger.error('error :: could not query Redis for running_derivative_metric_key - %s: %s' % (
+                                running_derivative_metric_key, e))
+                        try:
+                            monotonic_count = int(last_key_value) + 1
+                        except:
+                            pass
+                        if is_strictly_increasing_monotonically:
+                            try:
+                                self.redis_conn.setex(
+                                    running_derivative_metric_key, 960, monotonic_count)
+                            except Exception as e:
+                                logger.error('error :: could not set Redis running_derivative_metric key: %s' % e)
+                        if monotonic_count < 10:
+                            is_strictly_increasing_monotonically = False
                 else:
                     is_strictly_increasing_monotonically = False
 
@@ -1704,7 +1800,8 @@ class Analyzer(Thread):
                 if last_derivative_metric_key:
                     # Until the z.derivative_metric key expires, it is classed
                     # as such
-                    is_strictly_increasing_monotonically = True
+                    if not is_strictly_increasing_monotonically:
+                        is_strictly_increasing_monotonically = True
 
                 if skip_derivative:
                     is_strictly_increasing_monotonically = False
@@ -1712,9 +1809,23 @@ class Analyzer(Thread):
                     known_derivative_metric = True
                     try:
                         self.redis_conn.sadd('derivative_metrics', metric_name)
+                        # @added 20201111 - Feature #3480: batch_processing
+                        #                   Bug #2050: analyse_derivatives - change in monotonicity
+                        metrics_added_to_derivative_metrics.append(metric_name)
                     except:
                         logger.info(traceback.format_exc())
                         logger.error('error :: failed to add metric to Redis derivative_metrics set')
+
+                    # @added 20201111 - Feature #3480: batch_processing
+                    #                   Bug #2050: analyse_derivatives - change in monotonicity
+                    # Always remove the metric from the non_derivative_metrics
+                    # Redis set
+                    try:
+                        self.redis_conn.srem('non_derivative_metrics', metric_name)
+                    except:
+                        logger.info(traceback.format_exc())
+                        logger.error('error :: failed to add metric to Redis derivative_metrics set')
+
                     try:
                         self.redis_conn.sadd('new_derivative_metrics', metric_name)
                     except:
@@ -1723,15 +1834,25 @@ class Analyzer(Thread):
                     # @added 20200529 - Feature #3480: batch_processing
                     #                   Bug #2050: analyse_derivatives - change in monotonicity
                     # Alway set the derivative_metric_key
-                    try:
-                        last_expire_set = int(time())
-                        self.redis_conn.setex(
-                            derivative_metric_key, settings.FULL_DURATION, last_expire_set)
-                    except Exception as e:
-                        logger.error('error :: could not set Redis derivative_metric key: %s' % e)
+                    # @modified 20201111 - Feature #3480: batch_processing
+                    #                   Bug #2050: analyse_derivatives - change in monotonicity
+                    # Only set the key once
+                    if not last_derivative_metric_key:
+                        try:
+                            last_expire_set = int(time())
+                            self.redis_conn.setex(
+                                derivative_metric_key, settings.FULL_DURATION, last_expire_set)
+                            # @added 20201111 - Feature #3480: batch_processing
+                            #                   Bug #2050: analyse_derivatives - change in monotonicity
+                            derivative_z_metric_keys_added.append(base_name)
+                        except Exception as e:
+                            logger.error('error :: could not set Redis derivative_metric key: %s' % e)
                 else:
                     try:
                         self.redis_conn.sadd('non_derivative_metrics', metric_name)
+                        # @added 20201111 - Feature #3480: batch_processing
+                        #                   Bug #2050: analyse_derivatives - change in monotonicity
+                        metrics_added_to_non_derivative_metrics.append(metric_name)
                     except:
                         logger.info(traceback.format_exc())
                         logger.error('error :: failed to add metric to Redis non_derivative_metrics set')
@@ -1977,16 +2098,6 @@ class Analyzer(Thread):
                     except:
                         logger.error(traceback.format_exc())
                         logger.error('error :: nonNegativeDerivative failed')
-                    # @added 20200529 - Feature #3480: batch_processing
-                    #                   Bug #2050: analyse_derivatives - change in monotonicity
-                    # Always set the derivative_metric_key if it is not set
-                    if not last_derivative_metric_key:
-                        try:
-                            last_expire_set = int(time())
-                            self.redis_conn.setex(
-                                derivative_metric_key, settings.FULL_DURATION, last_expire_set)
-                        except Exception as e:
-                            logger.error('error :: could not set Redis derivative_metric key: %s' % e)
                 else:
                     logger.info('cannot run nonNegativeDerivative on %s timeseries as it has less than 4 data points' % base_name)
 
@@ -2579,7 +2690,12 @@ class Analyzer(Thread):
                                 # phase.  This is done to reduce the time it
                                 # takes to get through the analysis pipeline.
                                 use_hours_to_resolve = None
-                                mirage_metric_cache_key = 'mirage.metrics.%s' % base_name
+
+                                # @modified 20201109 - Feature #3830: metrics_manager
+                                # Use the metrics_manager mirage.hash_key.metrics_resolutions
+                                # hash key
+                                # mirage_metric_cache_key = 'mirage.metrics.%s' % base_name
+
                                 try:
                                     # @modified 20201109 - Feature #3830: metrics_manager
                                     # Use the metrics_manager mirage.hash_key.metrics_resolutions
@@ -3094,6 +3210,48 @@ class Analyzer(Thread):
                 logger.info('ANALYZER_ANALYZE_LOW_PRIORITY_METRICS set to False, no low priority metrics were analyzed')
 
         del low_priority_assigned_metrics
+
+        # @added 20201111 - Feature #3480: batch_processing
+        #                   Bug #2050: analyse_derivatives - change in monotonicity
+        if not manage_derivative_metrics:
+            logger.info('derivative metrics were managed - z.derivative_metrics keys that existed - %s' % str(len(derivative_z_metric_keys_existing)))
+            logger.info('derivative metrics were managed - z.derivative_metrics keys added - %s' % str(len(derivative_z_metric_keys_added)))
+            if len(derivative_z_metric_keys_added) > 0:
+                try:
+                    self.redis_conn.sadd('analyzer.z_derivative_metrics_added', *set(derivative_z_metric_keys_added))
+                    logger.info('derivative metrics were managed - %s metrics added to the analyzer.z_derivative_metrics_added Redis set' % str(len(derivative_z_metric_keys_added)))
+
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to add multiple members to the analyzer.z_derivative_metrics_added Redis set')
+            logger.info('derivative metrics were managed - z.derivative_metrics keys removed - %s' % str(len(derivative_z_metric_keys_removed)))
+            if len(derivative_z_metric_keys_removed) > 0:
+                try:
+                    self.redis_conn.sadd('analyzer.z_derivative_metrics_removed', *set(derivative_z_metric_keys_removed))
+                    logger.info('derivative metrics were managed - %s metrics added to the analyzer.z_derivative_metrics_removed Redis set' % str(len(derivative_z_metric_keys_removed)))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to add multiple members to the analyzer.z_derivative_metrics_removed Redis set')
+            logger.info('derivative metrics were managed - metrics added to the derivative_metrics Redis set - %s' % str(len(metrics_added_to_derivative_metrics)))
+            logger.info('derivative metrics were managed - metrics removed from the derivative_metrics Redis set - %s' % str(len(metrics_removed_from_derivative_metrics)))
+            if len(metrics_removed_from_derivative_metrics) > 0:
+                try:
+                    self.redis_conn.sadd('analyzer.derivative_metrics_removed', *set(metrics_removed_from_derivative_metrics))
+                    logger.info('derivative metrics were managed - %s metrics added to the analyzer.derivative_metrics_removed Redis set' % str(len(metrics_removed_from_derivative_metrics)))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to add multiple members to the analyzer.z_derivative_metrics_removed Redis set')
+            logger.info('derivative metrics were managed - metrics added to the non_derivative_metrics Redis set - %s' % str(len(metrics_added_to_non_derivative_metrics)))
+            # @modified 20201111 - Feature #3480: batch_processing
+            #                      Bug #2050: analyse_derivatives - change in monotonicity
+            # Set only once in the main thread
+            # try:
+            #    # @modified 20170901 - Bug #2154: Infrequent missing new_ Redis keys
+            #    # self.redis_conn.setex('analyzer.derivative_metrics_expiry', 120, key_timestamp)
+            #    self.redis_conn.setex('analyzer.derivative_metrics_expiry', 300, int(time()))
+            #    logger.info('set analyzer.derivative_metrics_expiry Redis key')
+            # except:
+            #     logger.error('error :: failed to set key :: analyzer.analyzer.derivative_metrics_expiry')
 
         # @added 20200117 - Feature #3400: Identify air gaps in the metric data
         del airgapped_metrics
@@ -3811,14 +3969,11 @@ class Analyzer(Thread):
                     logger.info('debug :: smtp_alerter_metrics :: %s' % (str(smtp_alerter_metrics)))
             except:
                 logger.info(traceback.format_exc())
-                logger.error('error :: failed to generate a list from the analyzer.smtp_alerter_metrics Redis set')
+                logger.error('error :: failed to generate a list from the aet.analyzer.smtp_alerter_metrics Redis set')
                 smtp_alerter_metrics = []
 
             if LOCAL_DEBUG:
                 logger.info('debug :: unique_metrics :: %s' % (str(unique_metrics)))
-
-            # @added 20201107 - Feature #3830: metrics_manager
-            refresh_redis_alert_sets = False
 
             # @added 20201107 - Feature #3830: metrics_manager
             try:
@@ -4166,7 +4321,12 @@ class Analyzer(Thread):
                 logger.info('Ionosphere alert/s requested :: %s' % str(ionosphere_alerts))
                 for cache_key in ionosphere_alerts:
                     try:
-                        alert_on = self.redis_conn.get(cache_key)
+                        # @modified 20201110 - Feature #3734: waterfall alerts
+                        # Now that alerts can get back to Analyzer via waterfall
+                        # alerting from Ionosphere the new _decoded function is
+                        # required
+                        # alert_on = self.redis_conn.get(cache_key)
+                        alert_on = self.redis_conn_decoded.get(cache_key)
                         send_alert_for = literal_eval(alert_on)
                         value = float(send_alert_for[0])
                         base_name = str(send_alert_for[1])
@@ -4560,11 +4720,14 @@ class Analyzer(Thread):
                                     if SECOND_ORDER_RESOLUTION_FULL_DURATION > 24:
                                         mirage_metric = True
                                         analyzer_metric = False
-                                        logger.info(
-                                            'mirage check :: %s at %s hours - matched by %s' %
-                                            (metric[1],
-                                                str(SECOND_ORDER_RESOLUTION_FULL_DURATION),
-                                                str(matched_by)))
+                                        # @modified 20201104 - #3560: External alert config
+                                        # Only log if in debug mode
+                                        if LOCAL_DEBUG:
+                                            logger.debug(
+                                                'debug :: mirage check :: %s at %s hours - matched by %s' %
+                                                (metric[1],
+                                                    str(SECOND_ORDER_RESOLUTION_FULL_DURATION),
+                                                    str(matched_by)))
                                         context = 'Mirage'
                                     # @added 20201014 - Feature #3734: waterfall alerts
                                     # Only gets set on the first stmp alerter in
@@ -4869,8 +5032,9 @@ class Analyzer(Thread):
                                         if LOCAL_DEBUG:
                                             logger.debug('debug :: %s metric rsolution - %s' % (metric[1], str(mirage_metric_key)))
                                     except Exception as e:
-                                        logger.error('error :: could not determine resolution for %s from mirage.hash_key.metrics_resolutions Redis hash key: %s' % (
+                                        logger.warn('warning :: could not determine resolution for %s from mirage.hash_key.metrics_resolutions Redis hash key, setting mirage_metric_key to False.  error: %s' % (
                                             metric[1], e))
+                                        mirage_metric_key = False
 
                                     # @added 20200907 - Feature #3734: waterfall alerts
                                     waterfall_alert_check_string = '%s.%s' % (str(int(metric[2])), metric[1])
@@ -6014,48 +6178,50 @@ class Analyzer(Thread):
                     logger.info('failed to delete analyzer.all_anomalous_metrics Redis set')
                     pass
 
-            # @added 20191107 - Feature #3306: Record anomaly_end_timestamp
-            #                   Branch #3262: py3
-            # In order for Analyzer, Mirage and Panorama to all iterate the same
-            # sets of data to determine and record the anomaly_end_timestamp,
-            # some below transient sets need to copied so that the data always
-            # exists, even if it is sourced from a transient set.
-            try:
-                self.redis_conn.delete('aet.analyzer.smtp_alerter_metrics')
-            except:
-                logger.info('failed to delete aet.analyzer.smtp_alerter_metrics Redis set')
-                pass
-            try:
-                self.redis_conn.delete('aet.analyzer.non_smtp_alerter_metrics')
-            except:
-                logger.info('failed to delete aet.analyzer.non_smtp_alerter_metrics Redis set')
-                pass
+            # @added 20201110 - Feature #3830: metrics_manager
+            if not ANALYZER_USE_METRICS_MANAGER:
+                # @added 20191107 - Feature #3306: Record anomaly_end_timestamp
+                #                   Branch #3262: py3
+                # In order for Analyzer, Mirage and Panorama to all iterate the same
+                # sets of data to determine and record the anomaly_end_timestamp,
+                # some below transient sets need to copied so that the data always
+                # exists, even if it is sourced from a transient set.
+                try:
+                    self.redis_conn.delete('aet.analyzer.smtp_alerter_metrics')
+                except:
+                    logger.info('failed to delete aet.analyzer.smtp_alerter_metrics Redis set')
+                    pass
+                try:
+                    self.redis_conn.delete('aet.analyzer.non_smtp_alerter_metrics')
+                except:
+                    logger.info('failed to delete aet.analyzer.non_smtp_alerter_metrics Redis set')
+                    pass
 
-            # @added 20170108 - Feature #1830: Ionosphere alerts
-            # Adding lists of smtp_alerter_metrics and non_smtp_alerter_metrics
-            # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
-            # Replace Manager.list instances with Redis sets
-            # self.smtp_alerter_metrics[:] = []
-            try:
-                # @modified 20191107 - Feature #3306: Record anomaly_end_timestamp
-                # The data in this set is required to determine the app the is
-                # responsible for determining the anomaly_end_timestamp for a
-                # metric.  Therefore these sets on now renamed to the aet. key
-                # namespace to be used by the apps rather than being deleted.
-                # self.redis_conn.delete('analyzer.smtp_alerter_metrics')
-                self.redis_conn.rename('analyzer.smtp_alerter_metrics', 'aet.analyzer.smtp_alerter_metrics')
-            except:
-                # logger.info('failed to delete analyzer.smtp_alerter_metrics Redis set')
-                logger.info('failed to rename Redis set analyzer.smtp_alerter_metrics to aet.analyzer.smtp_alerter_metrics')
-                pass
-            # self.non_smtp_alerter_metrics[:] = []
-            try:
-                # self.redis_conn.delete('analyzer.non_smtp_alerter_metrics')
-                self.redis_conn.rename('analyzer.non_smtp_alerter_metrics', 'aet.analyzer.non_smtp_alerter_metrics')
-            except:
-                # logger.info('failed to delete analyzer.non_smtp_alerter_metrics Redis set')
-                logger.info('failed to rename Redis set analyzer.non_smtp_alerter_metrics to aet.analyzer.non_smtp_alerter_metrics')
-                pass
+                # @added 20170108 - Feature #1830: Ionosphere alerts
+                # Adding lists of smtp_alerter_metrics and non_smtp_alerter_metrics
+                # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
+                # Replace Manager.list instances with Redis sets
+                # self.smtp_alerter_metrics[:] = []
+                try:
+                    # @modified 20191107 - Feature #3306: Record anomaly_end_timestamp
+                    # The data in this set is required to determine the app the is
+                    # responsible for determining the anomaly_end_timestamp for a
+                    # metric.  Therefore these sets on now renamed to the aet. key
+                    # namespace to be used by the apps rather than being deleted.
+                    # self.redis_conn.delete('analyzer.smtp_alerter_metrics')
+                    self.redis_conn.rename('analyzer.smtp_alerter_metrics', 'aet.analyzer.smtp_alerter_metrics')
+                except:
+                    # logger.info('failed to delete analyzer.smtp_alerter_metrics Redis set')
+                    logger.info('failed to rename Redis set analyzer.smtp_alerter_metrics to aet.analyzer.smtp_alerter_metrics')
+                    pass
+                # self.non_smtp_alerter_metrics[:] = []
+                try:
+                    # self.redis_conn.delete('analyzer.non_smtp_alerter_metrics')
+                    self.redis_conn.rename('analyzer.non_smtp_alerter_metrics', 'aet.analyzer.non_smtp_alerter_metrics')
+                except:
+                    # logger.info('failed to delete analyzer.non_smtp_alerter_metrics Redis set')
+                    logger.info('failed to rename Redis set analyzer.non_smtp_alerter_metrics to aet.analyzer.non_smtp_alerter_metrics')
+                    pass
 
             # @added 20180903 - Feature #1986: illuminance
             # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
@@ -6153,7 +6319,7 @@ class Analyzer(Thread):
                     # @modified 20170901 - Bug #2154: Infrequent missing new_ Redis keys
                     # self.redis_conn.setex('analyzer.derivative_metrics_expiry', 120, key_timestamp)
                     self.redis_conn.setex('analyzer.derivative_metrics_expiry', 300, key_timestamp)
-                    logger.info('set analyzer.derivative_metrics_expiry Redis key')
+                    logger.info('derivative metrics were managed - set analyzer.derivative_metrics_expiry Redis key')
                 except:
                     logger.error('error :: failed to set key :: analyzer.analyzer.derivative_metrics_expiry')
 
@@ -6201,7 +6367,7 @@ class Analyzer(Thread):
                         # test_new_derivative_metrics = list(self.redis_conn.smembers('new_derivative_metrics'))
                         test_new_derivative_metrics = list(self.redis_conn_decoded.smembers('new_derivative_metrics'))
                     except:
-                        logger.info(traceback.format_exc())
+                        logger.error(traceback.format_exc())
                         logger.error('error :: failed to add default data to Redis new_derivative_metrics set')
 
                 # @modified 20190517 - Branch #3002: docker
@@ -6212,6 +6378,7 @@ class Analyzer(Thread):
                 if derivative_metrics and test_new_derivative_metrics:
                     try:
                         self.redis_conn.rename('new_derivative_metrics', 'derivative_metrics')
+                        logger.info('derivative metrics were managed - new_derivative_metrics Redis set renamed to derivative_metrics')
                     except Exception as e:
                         # @modified 20190417 - Bug #2946: ANALYZER_ENABLED False - rename Redis keys error
                         #                      Feature #2916: ANALYZER_ENABLED setting
@@ -6227,6 +6394,7 @@ class Analyzer(Thread):
                                     str(ANALYZER_ENABLED), str(e)))
                     try:
                         self.redis_conn.rename('new_non_derivative_metrics', 'non_derivative_metrics')
+                        logger.info('derivative metrics were managed - new_non_derivative_metrics Redis set renamed to non_derivative_metrics')
                     except Exception as e:
                         # @modified 20190417 - Bug #2946: ANALYZER_ENABLED False - rename Redis keys error
                         #                      Feature #2916: ANALYZER_ENABLED setting
@@ -6365,30 +6533,33 @@ class Analyzer(Thread):
             #                   Feature #3486: analyzer_batch
             #                   Feature #3480: batch_processing
             # Use a different set to refresh the set
-            analyzer_mirage_metrics_expiration_times_set = None
-            try:
-                analyzer_mirage_metrics_expiration_times_set = list(self.redis_conn_decoded.smembers('analyzer.mirage.metrics_expiration_times'))
-            except:
-                logger.error(traceback.format_exc())
-                logger.error('error :: failed to get Redis set - analyzer.mirage.metrics_expiration_times')
-            if len(analyzer_mirage_metrics_expiration_times_set) > 0:
+            # @modified 20201110 - Feature #3830: metrics_manager
+            # Now managed by metrics_manager
+            if not ANALYZER_USE_METRICS_MANAGER:
+                analyzer_mirage_metrics_expiration_times_set = None
                 try:
-                    self.redis_conn.rename('analyzer.mirage.metrics_expiration_times', 'mirage.metrics_expiration_times')
-                    logger.info('renamed Redis set analyzer.mirage.metrics_expiration_times to mirage.metrics_expiration_times')
+                    analyzer_mirage_metrics_expiration_times_set = list(self.redis_conn_decoded.smembers('analyzer.mirage.metrics_expiration_times'))
                 except:
-                    # pass
                     logger.error(traceback.format_exc())
-                    logger.error('error :: failed to renamed Redis set analyzer.mirage.metrics_expiration_times to mirage.metrics_expiration_times')
-                try:
-                    self.redis_conn.sunionstore('aet.analyzer.mirage.metrics_expiration_times', 'mirage.metrics_expiration_times')
-                    logger.info('copied Redis set mirage.metrics_expiration_times to aet.analyzer.mirage.metrics_expiration_times with %s items' % str(len(analyzer_mirage_metrics_expiration_times_set)))
-                except:
-                    # pass
-                    logger.error(traceback.format_exc())
-                    logger.error('error :: failed to copy Redis set analyzer.mirage.metrics_expiration_times to aet.analyzer.mirage.metrics_expiration_times')
+                    logger.error('error :: failed to get Redis set - analyzer.mirage.metrics_expiration_times')
+                if len(analyzer_mirage_metrics_expiration_times_set) > 0:
+                    try:
+                        self.redis_conn.rename('analyzer.mirage.metrics_expiration_times', 'mirage.metrics_expiration_times')
+                        logger.info('renamed Redis set analyzer.mirage.metrics_expiration_times to mirage.metrics_expiration_times')
+                    except:
+                        # pass
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to renamed Redis set analyzer.mirage.metrics_expiration_times to mirage.metrics_expiration_times')
+                    try:
+                        self.redis_conn.sunionstore('aet.analyzer.mirage.metrics_expiration_times', 'mirage.metrics_expiration_times')
+                        logger.info('copied Redis set mirage.metrics_expiration_times to aet.analyzer.mirage.metrics_expiration_times with %s items' % str(len(analyzer_mirage_metrics_expiration_times_set)))
+                    except:
+                        # pass
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to copy Redis set analyzer.mirage.metrics_expiration_times to aet.analyzer.mirage.metrics_expiration_times')
 
-            else:
-                logger.info('Redis set analyzer.mirage.metrics_expiration_times has no entries, nothing to update')
+                else:
+                    logger.info('Redis set analyzer.mirage.metrics_expiration_times has no entries, nothing to update')
 
             # @added 20201030 - Feature #3808: ANALYZER_DYNAMICALLY_ANALYZE_LOW_PRIORITY_METRICS
             if ANALYZER_DYNAMICALLY_ANALYZE_LOW_PRIORITY_METRICS and ANALYZER_ANALYZE_LOW_PRIORITY_METRICS:
@@ -6400,10 +6571,10 @@ class Analyzer(Thread):
                     logger.error('error :: failed to get Redis set - analyzer.low_priority_metrics.last_dynamically_analyzed')
                     last_dynamic_low_priority_set_count = 0
                 try:
-                    self.redis_conn.delete('analyzer.low_priority_metrics.dynamically_analyzed')
+                    self.redis_conn.rename('analyzer.low_priority_metrics.dynamically_analyzed', 'aet.analyzer.low_priority_metrics.dynamically_analyzed')
                 except:
                     logger.error(traceback.format_exc())
-                    logger.error('error :: failed to delete Redis set - analyzer.low_priority_metrics.last_dynamically_analyzed')
+                    logger.error('error :: failed to rename Redis set - analyzer.low_priority_metrics.last_dynamically_analyzed to aet.analyzer.low_priority_metrics.last_dynamically_analyzed')
                 low_priority_metric_count = 0
                 low_priority_metric_count_list = []
                 try:
@@ -6427,14 +6598,14 @@ class Analyzer(Thread):
                         logger.error('error :: failed to delete Redis set - analyzer.low_priority_metrics.count')
                 if last_dynamic_low_priority_set_count and low_priority_metric_count:
                     logger.info('ANALYZER_DYNAMICALLY_ANALYZE_LOW_PRIORITY_METRICS processed %s of the total %s low priority metrics' % (
-                        str(last_dynamic_low_priority_set_count),
-                        str(low_priority_metric_count)))
-                    logger.info('low_priority_metrics.dynamically_analyzed :: %s' % str(last_dynamic_low_priority_set_count))
+                        str(low_priority_metric_count),
+                        str(last_dynamic_low_priority_set_count)))
+                    logger.info('low_priority_metrics.dynamically_analyzed :: %s' % str(low_priority_metric_count))
                     send_metric_name = '%s.low_priority_metrics.dynamically_analyzed' % skyline_app_graphite_namespace
-                    send_graphite_metric(skyline_app, send_metric_name, str(last_dynamic_low_priority_set_count))
-                    logger.info('low_priority_metrics.total :: %s' % str(low_priority_metric_count))
-                    send_metric_name = '%s.low_priority_metrics.total' % skyline_app_graphite_namespace
                     send_graphite_metric(skyline_app, send_metric_name, str(low_priority_metric_count))
+                    logger.info('low_priority_metrics.total :: %s' % str(last_dynamic_low_priority_set_count))
+                    send_metric_name = '%s.low_priority_metrics.total' % skyline_app_graphite_namespace
+                    send_graphite_metric(skyline_app, send_metric_name, str(last_dynamic_low_priority_set_count))
                 # Keep a record of missing low priority metrics for debug purposes
                 # these tend to be sparsely populated metrics
                 missing_unknown_low_priority_metrics_set_count = 0
