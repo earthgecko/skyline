@@ -1092,8 +1092,8 @@ class Metrics_Manager(Thread):
                         logger.error('error :: metrics_manager :: failed to stop spawn process')
 
             process_runtime = time() - now
-            if process_runtime < 60:
-                sleep_for = (60 - process_runtime)
+            if process_runtime < 300:
+                sleep_for = (300 - process_runtime)
                 logger.info('metrics_manager :: sleeping for %.2f seconds due to low run time...' % sleep_for)
                 sleep(sleep_for)
                 try:
