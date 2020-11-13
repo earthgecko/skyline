@@ -2057,7 +2057,7 @@ def alert_http(alert, metric, second_order_resolution_seconds, context):
                 smtp_alerter_metric = False
                 try:
                     REDIS_HTTP_ALERTER_CONN_DECODED = get_redis_conn_decoded(skyline_app)
-                    redis_set = 'aet.smtp_alerter_metrics'
+                    redis_set = 'aet.analyzer.smtp_alerter_metrics'
                     try:
                         smtp_alerter_metric = REDIS_HTTP_ALERTER_CONN_DECODED.sismember(redis_set, metric_name)
                     except Exception as e:
