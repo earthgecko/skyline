@@ -2043,7 +2043,39 @@ def alert_http(alert, metric, second_order_resolution_seconds, context):
             sigma3_lower_bound = 0
             sigma3_real_lower_bound = 0
             anomaly_json = None
+
+            # @added 20201113 - Feature #3772: Add the anomaly_id to the http_alerter json
+            # Add the upper and lower 3sigma bounds, only if training data will
+            # exist
+            training_data_available_for_sigma3 = False
+
             if settings.IONOSPHERE_ENABLED:
+                # @added 20201113 - Feature #3772: Add the anomaly_id to the http_alerter json
+                # Add the upper and lower 3sigma bounds, only if the metric is
+                # a smtp_alerter_metrics metric, if not, there will be no
+                # training data
+                smtp_alerter_metric = False
+                try:
+                    REDIS_HTTP_ALERTER_CONN_DECODED = get_redis_conn_decoded(skyline_app)
+                    redis_set = 'aet.smtp_alerter_metrics'
+                    try:
+                        smtp_alerter_metric = REDIS_HTTP_ALERTER_CONN_DECODED.sismember(redis_set, metric_name)
+                    except Exception as e:
+                        logger.error('error :: alert_http :: could not query Redis set %s - %s' % (redis_set, e))
+                    if REDIS_HTTP_ALERTER_CONN_DECODED:
+                        try:
+                            del REDIS_HTTP_ALERTER_CONN_DECODED
+                        except:
+                            pass
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: alert_http :: failed to connect to query Redis for aet.smtp_alerter_metrics')
+                if smtp_alerter_metric:
+                    training_data_available_for_sigma3 = True
+                else:
+                    logger.info('alert_http :: will not calculated 3sigma upper and lower bounds for %s as it is not a smtp_alerter_metric s no training dat to calculate from' % metric_name)
+
+            if training_data_available_for_sigma3:
                 logger.info('alert_http :: calculating 3sigma upper and lower bounds for %s' % metric_name)
                 try:
                     timeseries_dir = metric_name.replace('.', '/')

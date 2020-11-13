@@ -5265,50 +5265,99 @@ class Analyzer(Thread):
 
             logger.info('alerts checked')
 
+            # @added 20201112 - Feature #3772: Add the anomaly_id to the http_alerter json
+            # Allow time for the alerter to add the upper and lower 3sigma
+            # bounds from the training data before removing
+            remove_training_data_redis_set = 'analyzer.waterfall_alerts.remove_training_data'
+
             # @added 20201014 - Feature #3734: waterfall alerts
             # Remove ionosphere training data as all the
             # resources required are not available for training
             for metric_to_remove in remove_ionosphere_training_data_for:
-                data = metric_to_remove[0]
-                wf_metric_training_dir = metric_to_remove[1]
-
-                # @added 20201016 - Feature #3734: waterfall alerts
-                # Remove mirage and ionosphere check file if they exists as they
-                # have been alerted on
+                # @added 20201112 - Feature #3772: Add the anomaly_id to the http_alerter json
+                # Allow time for the alerter to add the upper and lower 3sigma
+                # bounds from the training data before removing
                 try:
-                    sane_metricname = filesafe_metricname(str(data[0]))
-                    check_file = '%s.%s.txt' % (str(data[1]), sane_metricname)
-                    mirage_check_file = '%s/%s' % (settings.MIRAGE_CHECK_PATH, check_file)
-                    if os.path.isfile(mirage_check_file):
-                        try:
-                            os.remove(mirage_check_file)
-                            logger.info('removed mirage check file as waterfall alerted on - %s' % mirage_check_file)
-                        except OSError:
-                            logger.error('error - failed to remove %s, continuing' % mirage_check_file)
-                    ionosphere_check_file = '%s/%s' % (settings.IONOSPHERE_CHECK_PATH, check_file)
-                    if os.path.isfile(ionosphere_check_file):
-                        try:
-                            os.remove(ionosphere_check_file)
-                            logger.info('removed ionosphere check file as waterfall alerted on - %s' % ionosphere_check_file)
-                        except OSError:
-                            logger.error('error - failed to remove %s, continuing' % ionosphere_check_file)
+                    self.redis_conn.sadd(remove_training_data_redis_set, str(metric_to_remove))
+                    logger.info('added item %s to Redis set - %s' % (
+                        str(metric_to_remove), remove_training_data_redis_set))
                 except:
                     logger.error(traceback.format_exc())
-                    logger.error('error :: failed to determine if there are check files to remove for - %s' % (str(metric_to_remove)))
+                    logger.error('error :: failed to add %s to Redis set %s' % (str(metric_to_remove), remove_training_data_redis_set))
+            try:
+                training_data_to_remove = list(self.redis_conn_decoded.smembers(remove_training_data_redis_set))
+                logger.info('%s items in Redis set %s' % (
+                    str(len(training_data_to_remove)),
+                    remove_training_data_redis_set))
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to get Redis set %s' % remove_training_data_redis_set)
+            remove_ionosphere_training_data_for = []
+            if training_data_to_remove:
+                try:
+                    for item in training_data_to_remove:
+                        metric_to_remove = literal_eval(item)
+                        remove_ionosphere_training_data_for.append(metric_to_remove)
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to create remove_ionosphere_training_data_for list')
+            for metric_to_remove in remove_ionosphere_training_data_for:
+                remove_training_dir = False
+                try:
+                    data = metric_to_remove[0]
+                    if int(time()) > (data[1] + 120):
+                        remove_training_dir = True
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to determine whether to remove training data for - %s' % str(metric_to_remove))
+                if remove_training_dir:
+                    wf_metric_training_dir = metric_to_remove[1]
 
-                if os.path.exists(wf_metric_training_dir):
+                    # @added 20201016 - Feature #3734: waterfall alerts
+                    # Remove mirage and ionosphere check file if they exists as they
+                    # have been alerted on
                     try:
-                        rmtree(wf_metric_training_dir)
-                        logger.info('removed ionosphere training dir for waterfall alert metric - %s' % wf_metric_training_dir)
+                        sane_metricname = filesafe_metricname(str(data[0]))
+                        check_file = '%s.%s.txt' % (str(data[1]), sane_metricname)
+                        mirage_check_file = '%s/%s' % (settings.MIRAGE_CHECK_PATH, check_file)
+                        if os.path.isfile(mirage_check_file):
+                            try:
+                                os.remove(mirage_check_file)
+                                logger.info('removed mirage check file as waterfall alerted on - %s' % mirage_check_file)
+                            except OSError:
+                                logger.error('error - failed to remove %s, continuing' % mirage_check_file)
+                        ionosphere_check_file = '%s/%s' % (settings.IONOSPHERE_CHECK_PATH, check_file)
+                        if os.path.isfile(ionosphere_check_file):
+                            try:
+                                os.remove(ionosphere_check_file)
+                                logger.info('removed ionosphere check file as waterfall alerted on - %s' % ionosphere_check_file)
+                            except OSError:
+                                logger.error('error - failed to remove %s, continuing' % ionosphere_check_file)
                     except:
-                        logger.error('error :: failed to rmtree for waterfall alert metric - %s' % wf_metric_training_dir)
-                try:
-                    self.redis_conn.srem('ionosphere.training_data', str(data))
-                    logger.info('removed ionosphere.training_data Redis set item as this is an analyzer waterfall alert and no training data is available - %s' % (
-                        str(data)))
-                except:
-                    logger.error(traceback.format_exc())
-                    logger.error('error :: failed to remove item from Redis ionosphere.training_data set - %s' % (str(data)))
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to determine if there are check files to remove for - %s' % (str(metric_to_remove)))
+
+                    if os.path.exists(wf_metric_training_dir):
+                        try:
+                            rmtree(wf_metric_training_dir)
+                            logger.info('removed ionosphere training dir for waterfall alert metric - %s' % wf_metric_training_dir)
+                        except:
+                            logger.error('error :: failed to rmtree for waterfall alert metric - %s' % wf_metric_training_dir)
+                    try:
+                        self.redis_conn.srem('ionosphere.training_data', str(data))
+                        logger.info('removed ionosphere.training_data Redis set item as this is an analyzer waterfall alert and no training data is available - %s' % (
+                            str(data)))
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to remove item from Redis ionosphere.training_data set - %s' % (str(data)))
+                    try:
+                        self.redis_conn.srem(remove_training_data_redis_set, str(metric_to_remove))
+                        logger.info('removed item - %s from Redis set - %s' % (
+                            str(metric_to_remove), remove_training_data_redis_set))
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to remove %s to Redis set %s' % (str(metric_to_remove), remove_training_data_redis_set))
+
 
             # @added 20200611 - Feature #3578: Test alerts
             # @modified 20200625 - Feature #3578: Test alerts
