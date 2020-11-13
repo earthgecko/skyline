@@ -1393,6 +1393,20 @@ def api():
             logger.error(traceback.format_exc())
             logger.error('error :: Webapp could not get the ionosphere.unique_metrics list from Redis')
             return 'Internal Server Error', 500
+
+        # @added 20201112 - Feature #3824: get_cluster_data
+        if settings.REMOTE_SKYLINE_INSTANCES and cluster_data:
+            remote_ionosphere_metrics = None
+            try:
+                remote_ionosphere_metrics = get_cluster_data('ionosphere_metrics', 'metrics')
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: Webapp could not get ionosphere_metrics from the remote Skyline instances')
+            if remote_ionosphere_metrics:
+                logger.info('got %s remote ionosphere_metrics from the remote Skyline instances' % str(len(remote_ionosphere_metrics)))
+                ionosphere_metrics_list = ionosphere_metrics + remote_ionosphere_metrics
+                ionosphere_metrics = list(set(ionosphere_metrics_list))
+
         data_dict = {
             "status": {},
             "data": {
@@ -1439,6 +1453,20 @@ def api():
             logger.error(traceback.format_exc())
             logger.error('error :: Webapp could not get the unique_metrics list from Redis')
             return 'Internal Server Error', 500
+
+        # @added 20201112 - Feature #3824: get_cluster_data
+        if settings.REMOTE_SKYLINE_INSTANCES and cluster_data:
+            remote_unique_metrics = None
+            try:
+                remote_unique_metrics = get_cluster_data('unique_metrics', 'metrics')
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: Webapp could not get unique_metrics from the remote Skyline instances')
+            if remote_unique_metrics:
+                logger.info('got %s remote unique_metrics from the remote Skyline instances' % str(len(remote_unique_metrics)))
+                unique_metrics_list = unique_metrics + remote_unique_metrics
+                unique_metrics = list(set(unique_metrics_list))
+
         data_dict = {
             "status": {},
             "data": {
