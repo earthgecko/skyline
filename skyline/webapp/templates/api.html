@@ -137,7 +137,9 @@ Or if no airgapped metrics are present <code>{"data":{"metrics":[]},"status":{}}
   		      </tr>
   		      <tr>
   		        <td>Request example:</td>
-		          <td><code>/api?alerting_metrics</code></td>
+		          <td><code>/api?alerting_metrics</code><br>
+              <code>/api?alerting_metrics&cluster_data=true</code> [optional for clustered Skyline]
+              </td>
   		      </tr>
   		      <tr>
   		        <td>Responses:</td>
@@ -306,7 +308,9 @@ Or if Analyzer has not run in 120 seconds <code>{"data":{"timestamp":null},"stat
   		      </tr>
   		      <tr>
   		        <td>Request example:</td>
-		          <td><code>/api?batch_processing_metrics</code></td>
+		          <td><code>/api?batch_processing_metrics</code><br>
+              <code>/api?batch_processing_metrics&cluster_data=true</code> [optional for clustered Skyline]
+              </td>
   		      </tr>
   		      <tr>
   		        <td>Responses:</td>
@@ -350,7 +354,9 @@ Or if no batch processing metrics are present <code>{"data":{"metrics":[]},"stat
   		      </tr>
   		      <tr>
   		        <td>Request example:</td>
-		          <td><code>/api?derivative_metrics</code></td>
+		          <td><code>/api?derivative_metrics</code><br>
+              <code>/api?derivative_metrics&cluster_data=true</code> [optional for clustered Skyline]
+              </td>
   		      </tr>
   		      <tr>
   		        <td>Responses:</td>
@@ -595,7 +601,9 @@ Or if no metrics if no metrics are derivative metrics <code>{"data":{"metrics":[
   		      </tr>
   		      <tr>
   		        <td>Request example:</td>
-		          <td><code>/api?ionosphere_learn_work</code></td>
+		          <td><code>/api?ionosphere_learn_work</code><br>
+              <code>/api?ionosphere_learn_work&cluster_data=true</code> [optional for clustered Skyline]
+              </td>
   		      </tr>
   		      <tr>
   		        <td>Responses:</td>
@@ -673,7 +681,9 @@ The items are as defined in <a target='_blank' href="https://earthgecko-skyline.
   		      </tr>
   		      <tr>
   		        <td>Request example:</td>
-		          <td><code>/api?ionosphere_metrics</code></td>
+		          <td><code>/api?ionosphere_metrics</code><br>
+              <code>/api?ionosphere_metrics&cluster_data=true</code> [optional for clustered Skyline]
+              </td>
   		      </tr>
   		      <tr>
   		        <td>Responses:</td>
@@ -757,7 +767,9 @@ Or if no metrics if no metrics are Ionosphere enabled metrics <code>{"data":{"me
   		      </tr>
   		      <tr>
   		        <td>Request example:</td>
-		          <td><code>/api?mirage_metrics</code></td>
+		          <td><code>/api?mirage_metrics</code><br>
+              <code>/api?mirage_metrics&cluster_data=true</code> [optional for clustered Skyline]
+              </td>
   		      </tr>
   		      <tr>
   		        <td>Responses:</td>
@@ -801,7 +813,9 @@ Or if no metrics if no metrics are Mirage enabled metrics <code>{"data":{"metric
   		      </tr>
   		      <tr>
   		        <td>Request example:</td>
-		          <td><code>/api?non_alerting_metrics</code></td>
+		          <td><code>/api?non_alerting_metrics</code><br>
+              <code>/api?non_alerting_metrics&cluster_data=true</code> [optional for clustered Skyline]
+              </td>
   		      </tr>
   		      <tr>
   		        <td>Responses:</td>
@@ -854,6 +868,7 @@ Or if no metrics if all metrics are set to alert <code>{"data":{"metrics":[]},"s
                   <code>/api?training_data&metric=[metric_name]</code><br>
                   <code>/api?training_data&amp;timestamp=[timestamp]</code><br>
                   <code>/api?training_data&metric=[metric_name]&amp;timestamp=[timestamp]</code><br>
+                  <code>/api?training_data&cluster_data=true</code> [optional for clustered Skyline]
               </td>
   		      </tr>
   		      <tr>
@@ -905,7 +920,9 @@ Or if no metrics with training data are present <code>{"data":{"metrics":[]},"st
   		      </tr>
   		      <tr>
   		        <td>Request example:</td>
-		          <td><code>/api?unique_metrics</code></td>
+		          <td><code>/api?unique_metrics</code><br>
+              <code>/api?unique_metrics&cluster_data=true</code> [optional for clustered Skyline]
+              </td>
   		      </tr>
   		      <tr>
   		        <td>Responses:</td>

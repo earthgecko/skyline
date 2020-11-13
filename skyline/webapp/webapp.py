@@ -646,7 +646,9 @@ def version():
 def api():
 
     # @added 20201110 - Feature #3824: get_cluster_data
-    #
+    # Allow for the cluster_data argument to be added to certain api requests
+    # to allow for data from all remote Skyline instances to be concatenated
+    # into a single response
     cluster_data = False
     if 'cluster_data' in request.args:
         try:
@@ -1115,7 +1117,7 @@ def api():
             if remote_training_data:
                 logger.info('got %s remote metrics training data instances from the remote Skyline instances' % str(len(remote_training_data)))
                 remote_training_data_list = training_data + remote_training_data
-                training_data = list(set(batch_processing_metrics_list))
+                training_data = list(set(remote_training_data_list))
 
         data_dict = {"status": {}, "data": {"metrics": training_data}}
         return jsonify(data_dict), 200
@@ -1146,6 +1148,7 @@ def api():
         logger.info('/api?non_alerting_metrics responding with %s metrics' % str(len(non_alerting_metrics)))
         data_dict = {"status": {}, "data": {"metrics": non_alerting_metrics}}
         return jsonify(data_dict), 200
+
     if 'alerting_metrics' in request.args:
         alerting_metrics = []
         try:
@@ -1308,6 +1311,19 @@ def api():
         #     new_ionosphere_learn_work = ionosphere_learn_work + echo_work_no_full_duration
         #     ionosphere_learn_work = new_ionosphere_learn_work
 
+        # @added 20201112 - Feature #3824: get_cluster_data
+        if settings.REMOTE_SKYLINE_INSTANCES and cluster_data:
+            remote_ionosphere_learn_work = None
+            try:
+                remote_ionosphere_learn_work = get_cluster_data('ionosphere_learn_work', 'metrics')
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: Webapp could not get ionosphere_learn_work from the remote Skyline instances')
+            if remote_ionosphere_learn_work:
+                logger.info('got %s remote ionosphere_learn_work from the remote Skyline instances' % str(len(remote_ionosphere_learn_work)))
+                ionosphere_learn_work_list = ionosphere_learn_work + remote_ionosphere_learn_work
+                ionosphere_learn_work = list(set(ionosphere_learn_work_list))
+
         # @added 20201104 - Feature #3368: webapp api - ionosphere_learn_work
         # Convert strings to json
         convert_to_json = False
@@ -1352,6 +1368,20 @@ def api():
             logger.error(traceback.format_exc())
             logger.error('error :: Webapp could not get the mirage.unique_metrics list from Redis')
             return 'Internal Server Error', 500
+
+        # @added 20201112 - Feature #3824: get_cluster_data
+        if settings.REMOTE_SKYLINE_INSTANCES and cluster_data:
+            remote_mirage_metrics = None
+            try:
+                remote_mirage_metrics = get_cluster_data('mirage_metrics', 'metrics')
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: Webapp could not get mirage_metrics from the remote Skyline instances')
+            if remote_mirage_metrics:
+                logger.info('got %s remote mirage_metrics from the remote Skyline instances' % str(len(remote_mirage_metrics)))
+                mirage_metrics_list = mirage_metrics + remote_mirage_metrics
+                mirage_metrics = list(set(mirage_metrics_list))
+
         data_dict = {"status": {}, "data": {"metrics": mirage_metrics}}
         return jsonify(data_dict), 200
 
@@ -1379,6 +1409,20 @@ def api():
             logger.error(traceback.format_exc())
             logger.error('error :: Webapp could not get the derivative_metrics list from Redis')
             return 'Internal Server Error', 500
+
+        # @added 20201112 - Feature #3824: get_cluster_data
+        if settings.REMOTE_SKYLINE_INSTANCES and cluster_data:
+            remote_derivative_metrics = None
+            try:
+                remote_derivative_metrics = get_cluster_data('derivative_metrics', 'metrics')
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: Webapp could not get derivative_metrics from the remote Skyline instances')
+            if remote_derivative_metrics:
+                logger.info('got %s remote derivative_metrics from the remote Skyline instances' % str(len(remote_derivative_metrics)))
+                derivative_metrics_list = derivative_metrics + remote_derivative_metrics
+                derivative_metrics = list(set(derivative_metrics_list))
+
         data_dict = {
             "status": {},
             "data": {
