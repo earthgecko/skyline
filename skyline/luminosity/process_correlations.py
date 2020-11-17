@@ -38,6 +38,12 @@ try:
 except:
     correlate_namespaces_only = []
 
+# @added 20200924 - Feature #3756: LUMINOSITY_CORRELATION_MAPS
+try:
+    LUMINOSITY_CORRELATION_MAPS = settings.LUMINOSITY_CORRELATION_MAPS.copy()
+except:
+    LUMINOSITY_CORRELATION_MAPS = {}
+
 # Database configuration
 config = {'user': settings.PANORAMA_DBUSER,
           'password': settings.PANORAMA_DBUSERPASS,
@@ -290,6 +296,10 @@ def get_assigned_metrics(i, base_name):
         #                      Branch #3262: py3
         # unique_metrics = list(redis_conn.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
         unique_metrics = list(redis_conn_decoded.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
+        # @added 20200924 - Feature #3756: LUMINOSITY_CORRELATION_MAPS
+        original_unique_metrics = list(unique_metrics)
+        logger.info('get_asssigned_metrics :: created original_unique_metrics with %s metrics' % (
+            str(len(original_unique_metrics))))
     except:
         logger.error(traceback.format_exc())
         logger.error('error :: get_assigned_metrics :: no unique_metrics')
@@ -344,6 +354,32 @@ def get_assigned_metrics(i, base_name):
                 str(len(unique_metrics)), str(len(correlate_with_metrics))))
             unique_metrics = correlate_with_metrics
 
+    # @added 20200924 - Feature #3756: LUMINOSITY_CORRELATION_MAPS
+    # WIP not tested or fully POCed
+    if LUMINOSITY_CORRELATION_MAPS:
+        also_correlate = []
+        if metric_name.startswith(settings.FULL_NAMESPACE):
+            metric_base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+        else:
+            metric_base_name = metric_name
+        for correlation_map in LUMINOSITY_CORRELATION_MAPS:
+            metric_in_map = False
+            for i_map in LUMINOSITY_CORRELATION_MAPS[correlation_map]:
+                if i_map == metric_base_name:
+                    metric_in_map = True
+                    break
+            if metric_in_map:
+                for i_map in LUMINOSITY_CORRELATION_MAPS[correlation_map]:
+                    if i_map != metric_base_name:
+                        also_correlate.append(i_map)
+        if also_correlate:
+            for i_metric_base_name in also_correlate:
+                i_metric_name = '%s%s' % (settings.FULL_NAMESPACE, i_metric_base_name)
+                if i_metric_name not in unique_metrics:
+                    unique_metrics.append(i_metric_name)
+            logger.info('get_correlations :: appended %s metrics to unique_metrics to be correlated' % (
+                str(len(also_correlate)), str(len(correlate_with_metrics))))
+
     # Discover assigned metrics
     # @modified 20180720 - Feature #2464: luminosity_remote_data
     # Use just 1 processor
@@ -391,7 +427,10 @@ def get_remote_assigned(anomaly_timestamp):
         # @added 20180721 - Feature #2464: luminosity_remote_data
         # Use a gzipped response as the response as raw unprocessed time series
         # can be mulitple megabytes
-        url = '%s/luminosity_remote_data?anomaly_timestamp=%s' % (remote_url, str(anomaly_timestamp))
+        # @modified 20201117 - Feature #3824: get_cluster_data
+        # Correct url with api for get_cluster_data
+        # url = '%s/luminosity_remote_data?anomaly_timestamp=%s' % (remote_url, str(anomaly_timestamp))
+        url = '%s/api?luminosity_remote_data&anomaly_timestamp=%s' % (remote_url, str(anomaly_timestamp))
         response_ok = False
 
         # @added 20190519 - Branch #3002: docker
