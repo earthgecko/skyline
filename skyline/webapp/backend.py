@@ -571,6 +571,14 @@ def luminosity_remote_data(anomaly_timestamp):
         # Convert the time series if this is a known_derivative_metric
         # @modified 20200728 - Bug #3652: Handle multiple metrics in base_name conversion
         # base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+
+        # @added 20201117 - Feature #3824: get_cluster_data
+        #                   Feature #2464: luminosity_remote_data
+        #                   Bug #3266: py3 Redis binary objects not strings
+        #                   Branch #3262: py3
+        # Convert metric_name bytes to str
+        metric_name = str(metric_name)
+
         if metric_name.startswith(settings.FULL_NAMESPACE):
             base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
         else:

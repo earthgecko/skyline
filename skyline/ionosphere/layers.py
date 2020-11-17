@@ -396,7 +396,10 @@ def run_layer_algorithms(base_name, layers_id, timeseries, layers_count, layers_
             if e_boundary_percent_tolerance:
                 try:
                     e_boundary_limit_tolerance = int(math.ceil((e_boundary_limit / 100.0) * e_boundary_percent_tolerance))
-                    e_boundary_limit = e_boundary_limit - e_boundary_limit_tolerance
+                    # @modified 20201112 - Feature #2558: Ionosphere - fluid approximation - approximately_close on layers
+                    # Correct sign of e_boundary_limit where e_condition == '<' or '<='
+                    # e_boundary_limit = e_boundary_limit - e_boundary_limit_tolerance
+                    e_boundary_limit = e_boundary_limit + e_boundary_limit_tolerance
                     logger.info(
                         'layers :: subtracted a tolerance of %s to E layer boundary limit of %s, e_boundary_limit now %s' % (
                             str(e_boundary_limit_tolerance),

@@ -1540,6 +1540,7 @@ def api():
     # @added 20180720 - Feature #2464: luminosity_remote_data
     # Added luminosity_remote_data endpoint, requires two request parameter:
     if 'luminosity_remote_data' in request.args:
+        logger.info('/api?luminosity_remote_data')
         anomaly_timestamp = None
         if 'anomaly_timestamp' in request.args:
             anomaly_timestamp_str = request.args.get(str('anomaly_timestamp'), None)
@@ -1548,20 +1549,40 @@ def api():
             except:
                 anomaly_timestamp = None
         else:
+            logger.info('/api?luminosity_remote_data - no anomaly_timestamp parameter was passed to /api?luminosity_remote_data')
             resp = json.dumps(
                 {'results': 'Error: no anomaly_timestamp parameter was passed to /api?luminosity_remote_data'})
             return resp, 400
         luminosity_data = []
         if anomaly_timestamp:
-            luminosity_data, success, message = luminosity_remote_data(anomaly_timestamp)
-            if luminosity_data:
-                resp = json.dumps(
-                    {'results': luminosity_data})
-                return resp, 200
-            else:
-                resp = json.dumps(
-                    {'results': 'No data found'})
-                return resp, 404
+            # @modified 20201117 - Feature #3824: get_cluster_data
+            #                      Feature #2464: luminosity_remote_data
+            #                      Bug #3266: py3 Redis binary objects not strings
+            #                      Branch #3262: py3
+            # Wrapped in try
+            try:
+                luminosity_data, success, message = luminosity_remote_data(anomaly_timestamp)
+                if luminosity_data:
+                    resp = json.dumps(
+                        {'results': luminosity_data})
+                    return resp, 200
+                else:
+                    resp = json.dumps(
+                        {'results': 'No data found'})
+                    return resp, 404
+            except Exception as e:
+                error = "Error: " + str(e)
+                logger.error('error :: luminosity_remote_data - %s' % str(e))
+                resp = json.dumps({'results': error})
+                return resp, 500
+        # @added 20201117 - Feature #3824: get_cluster_data
+        #                   Feature #2464: luminosity_remote_data
+        # Log 400 if no timestamp
+        else:
+            logger.info('/api?luminosity_remote_data - no anomaly_timestamp parameter was passed to /api?luminosity_remote_data, returning 400')
+            resp = json.dumps(
+                {'results': 'Error: no anomaly_timestamp parameter was passed to /api?luminosity_remote_data'})
+            return resp, 400
 
     if 'metric' in request.args:
         metric = request.args.get(str('metric'), None)
@@ -1577,7 +1598,13 @@ def api():
             else:
                 unpacker = Unpacker(use_list=False)
                 unpacker.feed(raw_series)
-                timeseries = [item[:2] for item in unpacker]
+                # @modified 20201117 - Feature #3824: get_cluster_data
+                #                      Feature #2464: luminosity_remote_data
+                #                      Bug #3266: py3 Redis binary objects not strings
+                #                      Branch #3262: py3
+                # Replace redefinition of item from line 1338
+                # timeseries = [item[:2] for item in unpacker]
+                timeseries = [ts_item[:2] for ts_item in unpacker]
                 resp = json.dumps({'results': timeseries})
                 return resp, 200
         except Exception as e:
