@@ -38,9 +38,59 @@ This is an advanced feature related to running multiple, distributed Skyline
 servers (and Graphite instances) in a replicated fashion.  This allows for all
 the Skyline servers to receiver all metrics but only analyze those metrics that
 are assigned to the specific server (shard).  This enables all Skyline servers
-that are running Horizon to receiver the entire metric population stream from
-multiple Graphite carbon-relays and drop (not submit to their Redis instance)
-any metrics that do not belong to their shard.
+that are running Horizon to receive the entire metric population stream from
+multiple Graphite carbon-relays and have Horizon drop (not submit to their Redis
+instance) any metrics that do not belong to their shard.
+
+In order to achieve this replicated configuration, Graphite also needs to be
+configured and run appropriately to allow the metrics to be forwarded to the
+remote Graphite servers.  To achieve this an additional carbon-relay-b instance
+needs to be run on each Graphite server.  This additional carbon-relay-b
+receives metrics from all the other Graphite servers and only relays them to the
+Horizon shard listen process (default port 2026) and the local Graphite
+carbon-cache.  The primary Graphite carbon-relay process on each Graphite server
+relays metrics to the normal horizon listen process (default port 2024), to the
+local carbon-cache and to each remote carbon-relay-b instance.
+
+The carbon-relay-b only relays metrics locally.
+
+This Graphite/Horizon mesh configuration achieves:
+
+- all metrics on all Graphite servers
+- each Skyline server receiving all metrics
+- each Skyline server Horizon only submitting the metrics assigned to its shard
+  for analysis
+
+This allows the cluster to be reconfigured to should any server or service fail.
+If a Skyline server/shard is lost/fails, it can be removed from the
+:mod:`settings.HORIZON_SHARDS` and the metric population will be resharded to
+only the remaining online shards.  Although the Skyline shard server will not
+have the metrics from the other shard in Redis, with the
+:mod:`settings.MIRAGE_AUTOFILL_TOOSHORT` feature enabled, the Skyline Analyzer
+process will automatically initiate population of the FULL_DURATION data into
+its Redis datastore by adding the newly assigned metrics to mirage.populate_redis
+Redis set (queue).  Mirage will then populate Redis with the FULL_DURATION data
+from Graphite.
+
+When the shards reassignment is in process, the Skyline cluster should be
+considered to be running in a degraded state until the failed shard is brought
+back online and all shard reassignment is complete.  For this configuration to
+work in times of failure each Skyline server in the cluster must be able to
+handle (number_of_metrics_per_shard + (100/number_of_horizon_shards)) to handle
+a failure and shard reassignment.  Using other appropriate load management
+Skyline configuration options like :mod:`settings.ANALYZER_DYNAMICALLY_ANALYZE_LOW_PRIORITY_METRICS`
+and possibly adjusting the namespaces in :mod:`settings.SKYLINE_FEEDBACK_NAMESPACES`,
+etc allows Skyline to manage the load in a best effort manage until the cluster
+has been restored to normal configuration.
+
+There are many other different configuration strategies that can be employed run
+achieve HA and clustering with Skyline and Graphite which can augment the
+management of load and failover such as haproxy, MariaDB Galera clustering, etc.
+However, the Skyline/Graphite clustering design outlined here is aimed at
+ensuring that each Skyline/Graphite server has all the data and can handle any
+shard assignment.
+
+HORIZON_SHARDS related settings.
 
 .. code-block:: python
 
@@ -49,6 +99,7 @@ any metrics that do not belong to their shard.
       'skyline-server-2': 1,
       'skyline-server-3': 2,
   }
+  HORIZON_SHARD_PICKLE_PORT = 2026
 
 Shards are 0 indexed.
 
