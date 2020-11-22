@@ -430,13 +430,15 @@ def skyline_matrixprofile(current_skyline_app, parent_pid, timeseries, algorithm
             else:
                 anomalyScore = 0.0
 
-            current_logger.info('%s :: anomalous - %s, anomalyScore - %s' % (
-                algorithm_name, str(anomalous), str(anomalyScore)))
+            if debug_logging:
+                current_logger.info('%s :: anomalous - %s, anomalyScore - %s' % (
+                    algorithm_name, str(anomalous), str(anomalyScore)))
 
-        end = timer()
-        processing_runtime = end - start
-        current_logger.info('%s :: completed analysis in %.6f seconds' % (
-            algorithm_name, processing_runtime))
+        if debug_logging:
+            end = timer()
+            processing_runtime = end - start
+            current_logger.info('%s :: completed analysis in %.6f seconds' % (
+                algorithm_name, processing_runtime))
 
         try:
             del timeseries

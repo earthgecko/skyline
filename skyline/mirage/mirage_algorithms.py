@@ -569,6 +569,7 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
     run_3sigma_algorithms = True
     run_3sigma_algorithms_overridden_by = []
     custom_algorithm = None
+
     if CUSTOM_ALGORITHMS:
         base_name = metric_name.replace(FULL_NAMESPACE, '', 1)
         custom_algorithms_to_run = {}
@@ -648,6 +649,8 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
                 custom_run_3sigma_algorithms = custom_algorithms_to_run[custom_algorithm]['run_3sigma_algorithms']
             except:
                 custom_run_3sigma_algorithms = True
+                if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
+                    logger.debug('debug :: error - algorithms :: could not determine custom_run_3sigma_algorithms - default to True')
             if not custom_run_3sigma_algorithms and result:
                 run_3sigma_algorithms = False
                 run_3sigma_algorithms_overridden_by.append(custom_algorithm)
@@ -656,8 +659,8 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
                         custom_algorithm, base_name))
             else:
                 if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
-                    logger.debug('debug :: algorithms :: run_3sigma_algorithms will now be run on %s' % (
-                        base_name))
+                    logger.debug('debug :: algorithms :: run_3sigma_algorithms will now be run on %s - %s' % (
+                        base_name, str(custom_run_3sigma_algorithms)))
             if result:
                 try:
                     custom_consensus = custom_algorithms_to_run[custom_algorithm]['consensus']
@@ -685,7 +688,10 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
                 str(run_3sigma_algorithms_overridden_by)))
 
     # @added 20200607 - Feature #3566: custom_algorithms
-    ensemble = []
+    # @modified 20201120 - Feature #3566: custom_algorithms
+    # ensemble = []
+    ensemble = final_custom_ensemble
+
     if not custom_consensus_override:
         try:
             ensemble = [globals()[algorithm](timeseries, second_order_resolution_seconds) for algorithm in MIRAGE_ALGORITHMS]
@@ -702,6 +708,12 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
     else:
         for algorithm in MIRAGE_ALGORITHMS:
             ensemble.append(None)
+
+    # @added 20201120 - Feature #3566: custom_algorithms
+    # If 3sigma algorithms have not been run discard the MIRAGE_ALGORITHMS
+    # added above
+    if not run_3sigma_algorithms:
+        ensemble = final_custom_ensemble
 
     # @modified 20200607 - Feature #3566: custom_algorithms
     try:

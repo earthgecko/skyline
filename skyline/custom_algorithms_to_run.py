@@ -36,6 +36,11 @@ def get_custom_algorithms_to_run(current_skyline_app, base_name, custom_algorith
         algorithms_allowed_in_consensus = []
         run_custom_algorithm = False
         max_execution_time = None
+        # @added 20201119 - Feature #3566: custom_algorithms
+        #                   Task #3744: POC matrixprofile
+        # Added missing run_3sigma_algorithms
+        run_3sigma_algorithms = True
+
         if namespaces:
             for namespace in namespaces:
                 if not run_custom_algorithm:
@@ -73,10 +78,31 @@ def get_custom_algorithms_to_run(current_skyline_app, base_name, custom_algorith
                 debug_logging = custom_algorithms[custom_algorithm]['debug_logging']
             except:
                 debug_logging = False
+            # @added 20201119 - Feature #3566: custom_algorithms
+            #                   Task #3744: POC matrixprofile
+            # Added missing run_3sigma_algorithms and use_with parameters
+            try:
+                run_3sigma_algorithms = custom_algorithms[custom_algorithm]['run_3sigma_algorithms']
+            except:
+                run_3sigma_algorithms = True
+            try:
+                use_with = custom_algorithms[custom_algorithm]['use_with']
+            except:
+                use_with = []
+            use_with_app = False
+            for app in use_with:
+                if app == current_skyline_app:
+                    use_with_app = True
+
             if debug:
                 current_logger.debug('debug :: get_custom_algorithms_to_run :: %s - custom_algorithm - %s, max_execution_time - %s' % (
                     base_name, str(custom_algorithm), str(max_execution_time)))
-        if run_custom_algorithm and algorithm_source:
+
+        # @modified 20201119 - Feature #3566: custom_algorithms
+        #                      Task #3744: POC matrixprofile
+        # Added missing run_3sigma_algorithms and use_with parameters
+        # if run_custom_algorithm and algorithm_source:
+        if run_custom_algorithm and algorithm_source and use_with_app:
             try:
                 custom_algorithms_to_run[custom_algorithm] = {
                     'namespaces': namespaces,
@@ -85,7 +111,12 @@ def get_custom_algorithms_to_run(current_skyline_app, base_name, custom_algorith
                     'max_execution_time': max_execution_time,
                     'consensus': consensus,
                     'algorithms_allowed_in_consensus': algorithms_allowed_in_consensus,
-                    'debug_logging': debug_logging
+                    'debug_logging': debug_logging,
+                    # @added 20201119 - Feature #3566: custom_algorithms
+                    #                   Task #3744: POC matrixprofile
+                    # Added missing run_3sigma_algorithms
+                    'run_3sigma_algorithms': run_3sigma_algorithms,
+                    'use_with': use_with,
                 }
                 if debug:
                     current_logger.debug('debug :: get_custom_algorithms_to_run :: %s - custom_algorithms_to_run - %s' % (
