@@ -2239,6 +2239,17 @@ def ionosphere_search(default_query, search_query):
                         else:
                             select_metric_ids = '%s, %s' % (str(select_metric_ids), str(default_search_metric_id))
                     select_metric_ids_stmt = 'SELECT * FROM metrics WHERE id in (%s)' % select_metric_ids
+
+                    # @modified 20201122 - Bug #3844: Handle no features profile in webapp
+                    # When there are no features profiles in the ionosphere
+                    # table, e.g. new install, the default webapp ionosphere
+                    # features profiles page throws an error
+                    # sqlalchemy.exc.ProgrammingError: (mysql.connector.errors.ProgrammingError) 1064 (42000): You have an error in your SQL syntax; check the manual that corresponds to your MariaDB server version for the right syntax to use near ')' at line 1
+                    # [SQL: SELECT * FROM metrics WHERE id in ()]
+                    if select_metric_ids == '':
+                        select_metric_ids_stmt = 'SELECT * FROM metrics WHERE id=0'
+                        logger.warn('warn :: determined 0 metrics with features profiles for the default Ionosphere search')
+
                     try:
                         metrics_result = connection.execute(select_metric_ids_stmt)
                         for row in metrics_result:
