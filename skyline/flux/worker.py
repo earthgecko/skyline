@@ -80,6 +80,14 @@ try:
 except:
     VISTA_ENABLED = False
 
+# @added 20201120 - Feature #3796: FLUX_CHECK_LAST_TIMESTAMP
+#                   Feature #3400: Identify air gaps in the metric data
+try:
+    IDENTIFY_AIRGAPS = settings.IDENTIFY_AIRGAPS
+except:
+    IDENTIFY_AIRGAPS = False
+
+
 
 parent_skyline_app = 'flux'
 
@@ -239,6 +247,10 @@ class Worker(Process):
         if metric_data_queue_size > 10:
             send_to_reciever = 'pickle'
 
+        # @added 202011120 - Feature #3790: flux - pickle to Graphite
+        # Debug Redis set
+        metrics_data_sent = []
+
         # @added 20201020 - Feature #3796: FLUX_CHECK_LAST_TIMESTAMP
         # Even if flux.last Redis keys are disabled in flux they are used in
         # Vista
@@ -329,6 +341,38 @@ class Worker(Process):
                     else:
                         send_to_reciever = 'line'
                     send_to_reciever = 'pickle'
+
+                    # @added 202011120 - Feature #3790: flux - pickle to Graphite
+                    # Debug Redis set
+                    metrics_data_sent_strs = []
+                    for item in metrics_data_sent:
+                        metrics_data_sent_strs.append(str(item))
+                    if metrics_data_sent_strs:
+                        try:
+                            self.redis_conn.sadd('flux.metrics_data_sent', *set(metrics_data_sent_strs))
+                            logger.info('worker :: added %s items to the flux.metrics_data_sent Redis set' % str(len(metrics_data_sent)))
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: worker :: failed to determine size of flux.queue Redis set')
+                        metrics_data_sent = []
+                        try:
+                            new_set = 'aet.flux.metrics_data_sent.%s' % str(self.current_pid)
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: worker :: failed to current_pid for aet.flux.metrics_data_sent Redis set name')
+                            new_set = 'aet.flux.metrics_data_sent'
+                        try:
+                            self.redis_conn.rename('flux.metrics_data_sent', new_set)
+                            logger.info('worker :: renamed flux.metrics_data_sent Redis set to %s' % new_set)
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: worker :: failed to rename flux.metrics_data_sent to %s Redis set' % new_set)
+                        try:
+                            self.redis_conn.expire(new_set, 600)
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: worker :: failed to set 600 seconds TTL on %s Redis set' % new_set)
+
                     # @added 20201018 - Feature #3798: FLUX_PERSIST_QUEUE
                     if FLUX_PERSIST_QUEUE:
                         redis_set_size = 0
@@ -408,8 +452,8 @@ class Worker(Process):
                 # Only check flux.last key if this is not backfill and
                 # FLUX_CHECK_LAST_TIMESTAMP is enable or it is in VISTA_ENABLED
                 cache_key = None
-                if FLUX_CHECK_LAST_TIMESTAMP:
-                    cache_key = 'flux.last.%s' % metric
+                # if FLUX_CHECK_LAST_TIMESTAMP:
+                cache_key = 'flux.last.%s' % metric
                 check_flux_last_key = False
                 if not backfill and FLUX_CHECK_LAST_TIMESTAMP:
                     check_flux_last_key = True
@@ -478,6 +522,9 @@ class Worker(Process):
                                 metrics_sent_to_graphite += 1
                                 # @added 20200827 - Feature #3708: FLUX_ZERO_FILL_NAMESPACES
                                 metrics_sent.append(metric)
+                                # @added 202011120 - Feature #3790: flux - pickle to Graphite
+                                # Debug Redis set
+                                metrics_data_sent.append([metric, value, timestamp])
                             except:
                                 logger.error(traceback.format_exc())
                                 logger.error('error :: worker :: failed to send metric data to Graphite for %s' % str(metric))
@@ -488,6 +535,9 @@ class Worker(Process):
                             submittedToGraphite = True
                             metrics_sent_to_graphite += 1
                             metrics_sent.append(metric)
+                            # @added 202011120 - Feature #3790: flux - pickle to Graphite
+                            # Debug Redis set
+                            metrics_data_sent.append([metric, value, timestamp])
 
                         if submittedToGraphite:
                             # Update the metric Redis flux key
@@ -501,21 +551,25 @@ class Worker(Process):
                                 self.redis_conn.set(cache_key, str(metric_data))
                             # @added 20200213 - Bug #3448: Repeated airgapped_metrics
                             else:
-                                # @added 20200213 - Bug #3448: Repeated airgapped_metrics
-                                # Add a flux.filled key to Redis with a expiry
-                                # set to FULL_DURATION so that Analyzer knows to
-                                # sort and deduplicate the Redis time series
-                                # data as carbon-relay will send it to Horizon
-                                # and the datapoints will be out of order in the
-                                # Redis key
-                                try:
-                                    flux_filled_key = 'flux.filled.%s' % str(metric)
-                                    self.redis_conn.setex(
-                                        flux_filled_key, settings.FULL_DURATION,
-                                        int(time()))
-                                    logger.info('worker :: set Redis key %s' % (str(flux_filled_key)))
-                                except Exception as e:
-                                    logger.error('error :: failed to could not set Redis flux.filled key: %s' % e)
+                                # @added 20201120 - Feature #3796: FLUX_CHECK_LAST_TIMESTAMP
+                                #                   Feature #3400: Identify air gaps in the metric data
+                                # Only execute if IDENTIFY_AIRGAPS is enabled
+                                if IDENTIFY_AIRGAPS:
+                                    # @added 20200213 - Bug #3448: Repeated airgapped_metrics
+                                    # Add a flux.filled key to Redis with a expiry
+                                    # set to FULL_DURATION so that Analyzer knows to
+                                    # sort and deduplicate the Redis time series
+                                    # data as carbon-relay will send it to Horizon
+                                    # and the datapoints will be out of order in the
+                                    # Redis key
+                                    try:
+                                        flux_filled_key = 'flux.filled.%s' % str(metric)
+                                        self.redis_conn.setex(
+                                            flux_filled_key, settings.FULL_DURATION,
+                                            int(time()))
+                                        logger.info('worker :: set Redis key %s' % (str(flux_filled_key)))
+                                    except Exception as e:
+                                        logger.error('error :: failed to could not set Redis flux.filled key: %s' % e)
                     else:
                         # modified 20201016 - Feature #3788: snab_flux_load_test
                         if FLUX_VERBOSE_LOGGING:
@@ -619,6 +673,38 @@ class Worker(Process):
                     send_to_reciever = 'pickle'
                 else:
                     send_to_reciever = 'line'
+
+                # @added 202011120 - Feature #3790: flux - pickle to Graphite
+                # Debug Redis set
+                metrics_data_sent_strs = []
+                for item in metrics_data_sent:
+                    metrics_data_sent_strs.append(str(item))
+                if metrics_data_sent_strs:
+                    try:
+                        self.redis_conn.sadd('flux.metrics_data_sent', *set(metrics_data_sent_strs))
+                        logger.info('worker :: added %s items to the flux.metrics_data_sent Redis set' % str(len(metrics_data_sent)))
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: worker :: failed to determine size of flux.queue Redis set')
+                    metrics_data_sent = []
+                    try:
+                        new_set = 'aet.flux.metrics_data_sent.%s' % str(self.current_pid)
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: worker :: failed to current_pid for aet.flux.metrics_data_sent Redis set name')
+                        new_set = 'aet.flux.metrics_data_sent'
+                    try:
+                        self.redis_conn.rename('flux.metrics_data_sent', new_set)
+                        logger.info('worker :: renamed flux.metrics_data_sent Redis set to %s' % new_set)
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: worker :: failed to rename flux.metrics_data_sent to %s Redis set' % new_set)
+                    try:
+                        self.redis_conn.expire(new_set, 600)
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: worker :: failed to set 600 seconds TTL on %s Redis set' % new_set)
+
                 # @added 20201018 - Feature #3798: FLUX_PERSIST_QUEUE
                 if FLUX_PERSIST_QUEUE:
                     redis_set_size = 0
