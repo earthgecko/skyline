@@ -190,7 +190,9 @@ start () {
       fi
       if [ "$WEBAPP_SERVER" == "gunicorn" ]; then
         cd "$BASEDIR/skyline/${SERVICE_NAME}"
-        gunicorn --config "$BASEDIR/skyline/${SERVICE_NAME}/gunicorn.py" webapp:app &
+        # @modified 20201121 - Feature #3820: HORIZON_SHARDS
+        # Added gunicorn timeout
+        gunicorn --config "$BASEDIR/skyline/${SERVICE_NAME}/gunicorn.py" webapp:app --timeout 120 &
       fi
     else
       if [ "$WEBAPP_SERVER" == "flask" ]; then
@@ -200,7 +202,9 @@ start () {
         cd "$BASEDIR/skyline/${SERVICE_NAME}"
         PYTHON_VIRTUALENV_BIN_DIR=$(dirname $USE_PYTHON)
         source "$PYTHON_VIRTUALENV_BIN_DIR/activate"
-        gunicorn --config "$BASEDIR/skyline/${SERVICE_NAME}/gunicorn.py" webapp:app &
+        # @modified 20201121 - Feature #3820: HORIZON_SHARDS
+        # Added gunicorn timeout
+        gunicorn --config "$BASEDIR/skyline/${SERVICE_NAME}/gunicorn.py" webapp:app --timeout 120 &
       fi
     fi
     RETVAL=$?

@@ -33,6 +33,17 @@ skyline_app_loglock = '%s.lock' % skyline_app_logfile
 skyline_app_logwait = '%s.wait' % skyline_app_logfile
 logfile = '%s/%s.log' % (settings.LOG_PATH, skyline_app)
 
+# @added 20201122 - Feature #3820: HORIZON_SHARDS
+# Add an additional listen process on a different port for the shard
+try:
+    HORIZON_SHARDS = settings.HORIZON_SHARDS.copy()
+except:
+    HORIZON_SHARDS = {}
+try:
+    HORIZON_SHARD_PICKLE_PORT = settings.HORIZON_SHARD_PICKLE_PORT
+except:
+    HORIZON_SHARD_PICKLE_PORT = None
+
 
 class Horizon():
     """
@@ -86,6 +97,19 @@ class Horizon():
         Listen(settings.PICKLE_PORT, listen_queue, pid, type="pickle").start()
         logger.info('%s :: starting Listen - udp' % skyline_app)
         Listen(settings.UDP_PORT, listen_queue, pid, type="udp").start()
+
+        # @added 20201122 - Feature #3820: HORIZON_SHARDS
+        # Add an additional listen process on a different port for the shard
+        if HORIZON_SHARDS:
+            if HORIZON_SHARD_PICKLE_PORT:
+                logger.info('%s :: starting Listen - pickle for horizon shard on port %s' % (
+                    skyline_app, str(settings.HORIZON_SHARD_PICKLE_PORT)))
+                try:
+                    Listen(settings.HORIZON_SHARD_PICKLE_PORT, listen_queue, pid, type="pickle").start()
+                except Exception as e:
+                    logger.error('error :: agent.py falied to start Listen for horizon shard - %s' % str(e))
+            else:
+                logger.error('error :: agent.py could not start the horizon shard Listen process as no port')
 
         # Start the roomba
         logger.info('%s :: starting Roomba' % skyline_app)

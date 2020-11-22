@@ -62,6 +62,7 @@ try:
     HORIZON_SHARD_DEBUG = settings.HORIZON_SHARD_DEBUG
 except:
     HORIZON_SHARD_DEBUG = True
+
 number_of_horizon_shards = 0
 this_host = str(os.uname()[1])
 HORIZON_SHARD = 0
@@ -245,9 +246,11 @@ class Worker(Process):
         last_datapoints_to_redis = int(time())
 
         # @added 20201103 - Feature #3820: HORIZON_SHARDS
-        if HORIZON_SHARDS and HORIZON_SHARD_DEBUG:
+        if HORIZON_SHARDS:
             horizon_shard_assigned_metrics = []
             horizon_shard_dropped_metrics = []
+        # @added 20201120 - Feature #3820: HORIZON_SHARDS
+        metrics_received = []
 
         # python-2.x and python3.x handle while 1 and while True differently
         # while 1:
@@ -281,17 +284,21 @@ class Worker(Process):
 
                 for metric in chunk:
 
+                    # @added 20201120 - Feature #3820: HORIZON_SHARDS
+                    try:
+                        metrics_received.append(metric[0])
+                    except:
+                        pass
+
                     # @added 20201103 - Feature #3820: HORIZON_SHARDS
                     # If a metric does not map to the HORIZON_SHARD, drop it
                     # and continue
                     if HORIZON_SHARDS and number_of_horizon_shards:
                         if not self.in_shard(metric[0]):
-                            if HORIZON_SHARD_DEBUG:
-                                horizon_shard_dropped_metrics.append(metric[0])
+                            horizon_shard_dropped_metrics.append(metric[0])
                             continue
                         else:
-                            if HORIZON_SHARD_DEBUG:
-                                horizon_shard_assigned_metrics.append(metric[0])
+                            horizon_shard_assigned_metrics.append(metric[0])
 
                     # Check if we should skip it
                     if self.in_skip_list(metric[0]):
@@ -410,6 +417,19 @@ class Worker(Process):
                 datapoints_sent_to_redis = 0
                 last_datapoints_to_redis = int(time())
 
+                # @added 20201120 - Feature #3820: HORIZON_SHARDS
+                if HORIZON_SHARDS:
+                    try:
+                        self.redis_conn.sadd('horizon.shards.metrics_assigned', *set(horizon_shard_assigned_metrics))
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('%s :: error adding horizon.shard.metrics_assigned: %s' % (skyline_app, str(e)))
+                    try:
+                        self.redis_conn.sadd('horizon.shard.metrics_dropped', *set(horizon_shard_dropped_metrics))
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('%s :: error adding horizon.shard.metrics_dropped: %s' % (skyline_app, str(e)))
+
                 # @added 20201103 - Feature #3820: HORIZON_SHARDS
                 if HORIZON_SHARDS and HORIZON_SHARD_DEBUG:
                     horizon_shard_assigned_metrics_count = len(horizon_shard_assigned_metrics)
@@ -418,5 +438,25 @@ class Worker(Process):
                         skyline_app, str(horizon_shard_assigned_metrics_count),
                         str(HORIZON_SHARD),
                         str(horizon_shard_dropped_metrics_count)))
+                    if LOCAL_DEBUG:
+                        logger.info('%s :: horizon_shard_assigned_metrics - %s' % (
+                            skyline_app, str(horizon_shard_assigned_metrics)))
+                        logger.info('%s :: horizon_shard_dropped_metrics - %s' % (
+                            skyline_app, str(horizon_shard_dropped_metrics)))
                     horizon_shard_assigned_metrics = []
                     horizon_shard_dropped_metrics = []
+
+                # @added 20201120 - Feature #3820: HORIZON_SHARDS
+                try:
+                    self.redis_conn.sadd('horizon.metrics_received', *set(metrics_received))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('%s :: error adding horizon.metrics_received: %s' % (skyline_app, str(e)))
+                if self.canary:
+                    try:
+                        logger.info('renaming key horizon.metrics_received to aet.horizon.metrics_received')
+                        self.redis_conn.rename('horizon.metrics_received', 'aet.horizon.metrics_received')
+                    except:
+                        logger.info(traceback.format_exc())
+                        logger.error('error :: failed to rename Redis key horizon.metrics_received to aet.horizon.metrics_received')
+                metrics_received = []

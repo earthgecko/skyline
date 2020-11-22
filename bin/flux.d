@@ -176,12 +176,16 @@ start () {
 
     if [ $USE_VIRTUALENV -eq 0 ]; then
       cd "$BASEDIR/skyline/${SERVICE_NAME}"
-      gunicorn --config "$BASEDIR/skyline/${SERVICE_NAME}/gunicorn.py" flux &
+      # @modified 20201121 - Feature #3820: HORIZON_SHARDS
+      # Added gunicorn timeout
+      gunicorn --config "$BASEDIR/skyline/${SERVICE_NAME}/gunicorn.py" flux --timeout 120 &
     else
       cd "$BASEDIR/skyline/${SERVICE_NAME}"
       PYTHON_VIRTUALENV_BIN_DIR=$(dirname $USE_PYTHON)
       source "$PYTHON_VIRTUALENV_BIN_DIR/activate"
-      gunicorn --config "$BASEDIR/skyline/${SERVICE_NAME}/gunicorn.py" flux &
+      # @modified 20201121 - Feature #3820: HORIZON_SHARDS
+      # Added gunicorn timeout
+      gunicorn --config "$BASEDIR/skyline/${SERVICE_NAME}/gunicorn.py" flux --timeout 120 &
     fi
     RETVAL=$?
 
