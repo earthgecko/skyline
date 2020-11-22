@@ -1366,6 +1366,17 @@ Shard are 0 indexed.
 
 """
 
+HORIZON_SHARD_PICKLE_PORT = 2026
+"""
+:var HORIZON_SHARD_PICKLE_PORT: ADVANCED FEATURE - This is the port that listens
+    for Graphite pickles over TCP, sent by Graphite's carbon-relay-b agent.
+    When running Skyline clustered with multiple Horizon instances, an
+    additional Graphite carbon-relay-b instances are required to be run to on
+    the remote Graphite servrs to forward metrics on to the remote Horizons.
+    See https://earthgecko-skyline.readthedocs.io/en/latest/horizon.html#horizon-shards
+:vartype PICKLE_PORT: str
+"""
+
 HORIZON_SHARD_DEBUG = False
 """
 :var HORIZON_SHARD_DEBUG: For development only to log some sharding debug info

@@ -240,7 +240,7 @@ class Listen(Process):
                 logger.info('%s :: listening over tcp for pickles on %s' % (skyline_app, str(self.port)))
 
                 (conn, address) = s.accept()
-                logger.info('%s :: connection from %s:%s' % (skyline_app, str(address[0]), str(self.port)))
+                logger.info('%s :: connection from %s on %s' % (skyline_app, str(address[0]), str(self.port)))
 
                 chunk = []
                 while 1:
