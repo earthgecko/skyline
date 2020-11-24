@@ -2228,6 +2228,12 @@ def alert_http(alert, metric, context):
             sigma3_real_lower_bound = 0
             anomaly_json = None
 
+            # @added 20201124 - Feature #3772: Add the anomaly_id to the http_alerter json
+            # Added yhat values
+            yhat_upper = 0
+            yhat_lower = 0
+            yhat_real_lower = 0
+
             # @added 20201113 - Feature #3772: Add the anomaly_id to the http_alerter json
             # Add the upper and lower 3sigma bounds, only if training data will
             # exist
@@ -2329,8 +2335,13 @@ def alert_http(alert, metric, context):
                 else:
                     logger.error('error :: alert_http :: failed to load timeseries data to calculate 3sigma bound from %s' % anomaly_json)
 
+            # @added 20201124 - Feature #3772: Add the anomaly_id to the http_alerter json
+            # Added yhat values
+            if yhat_upper == 0:
+                yhat_upper = sigma3_upper_bound
+                yhat_lower = sigma3_lower_bound
+                yhat_real_lower = sigma3_real_lower_bound
 
-####
             # @modified 20201008 - Feature #3772: Add the anomaly_id to the http_alerter json
             #                      Feature #3734: waterfall alerts
             #                      Branch #3068: SNAB
@@ -2351,6 +2362,11 @@ def alert_http(alert, metric, context):
                 "3sigma_upper": sigma3_upper_bound,
                 "3sigma_lower": sigma3_lower_bound,
                 "3sigma_real_lower": sigma3_real_lower_bound,
+                # @added 20201124 - Feature #3772: Add the anomaly_id to the http_alerter json
+                # Added yhat values
+                "yhat_upper": yhat_upper,
+                "yhat_lower": yhat_lower,
+                "yhat_real_lower": yhat_real_lower,
             }
             # @modified 20200302: Feature #3396: http_alerter
             # Add the token as an independent entity from the alert
