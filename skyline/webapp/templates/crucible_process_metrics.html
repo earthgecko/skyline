@@ -99,11 +99,11 @@ function validate_to_process_submission()
   		      </tr>
   		      <tr>
               <td>from_timestamp</td>
-              <td><input type="number" name="from_timestamp" value="" /> unix timestamp</td>
+              <td><input type="number" name="from_timestamp" value="" /> [required] unix timestamp</td>
   		      </tr>
   		      <tr>
               <td>until_timestamp</td>
-              <td><input type="number" name="until_timestamp" value="" /> unix timestamp</td>
+              <td><input type="number" name="until_timestamp" value="" /> [required] unix timestamp</td>
   		      </tr>
 <!--        # @added 20200422 - Feature #3500: webapp - crucible_process_metrics
             #                   Feature #1448: Crucible web UI
@@ -161,10 +161,6 @@ function validate_to_process_submission()
 <code>histogram_bins,first_hour_average,stddev_from_average,grubbs,ks_test,mean_subtraction_cumulation,median_absolute_deviation,stddev_from_moving_average,least_squares</code><br>
 or <code>detect_drop_off_cliff</code> or <code>ks_test,detect_drop_off_cliff</code>, etc</td>
   		      </tr>
-        algorithms = settings.ALGORITHMS
-        if run_algorithms:
-            algorithms = run_algorithms
-
   		    </tbody>
   		  </table>
         <br>

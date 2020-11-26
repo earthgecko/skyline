@@ -12,9 +12,10 @@ If you are wanting to implement a custom algorithm, ensure you read this
 documentation **thoroughly** and **understand the layout** in the example
 algorithms.  This will save you time if you do it properly from the beginning.
 
-Custom algorithms are currently implemented in anlayzer, analyzer_batch, mirage
-and soon crucible, they are not yet consumed in boundary and probably will not
-unless there is a good use case for them to be added.
+Custom algorithms are currently implemented in analyzer, analyzer_batch and
+mirage (at some point they may be added to crucible), they are not yet consumed
+in boundary and probably will not unless there is a good use case for them to be
+added.
 
 To implement a custom algorithm, you need to define it in
 :mod:`settings.CUSTOM_ALGORITHMS` and add the Python source custom algorithm
@@ -23,15 +24,32 @@ file.
 .. warning:: **A note on speed**, bear in mind that any custom algorithms added
   have to run **FAST**, otherwise analysis stops being real time and the
   Skyline apps will terminate their own spawned processes if they run too long.
-  Consider that Skyline's 3 sigma algorithms take on average 0.0023 seconds to
+  Consider that Skyline's three-sigma algorithms take on average 0.0023 seconds to
   run and all 9 are run on a metric in about 0.0207 seconds.  Adding any
   algorithms that run substantially slower is **not** recommended, even if it is
-  on a small set of metrics.  If you break Skyline with your own custom
-  algorithms, be that on your head.
+  on a small set of metrics.  Any algorithms added to should be as
+  computationally efficient as possible and suitable for processing real time
+  streaming data, e.g. O(n).  This is especially true for any custom algorithms
+  added to Analyzer.  This is not a hard requirement, just a recommendation.
+  It is possible to add non O(n) algorithms to Mirage, but they should be
+  designed and implemented to be as computationally efficient as possible.
+  If you break Skyline with your own custom algorithms, be that on your head.
 
-Custom algorithms are run **before** the core 3 sigma algorithms, which allows
-the user to disable the running of 3 sigma algorithms on namespaces if they so
-desire, more on this below.
+Custom algorithms can be run **before** or **after** the core three-sigma
+algorithms. The custom algorithm can be configured to run before the three-sigma
+algorithms which allows the user to disable the running of three-sigma
+algorithms on namespaces if they so desire, more on this below.  By default
+custom algorithms are run **before** three-sigma algorithms.
+Running the custom algorithm **after** three-sigma allows the user to only run
+a custom algorithm if three-sigma achieves :mod:`settings.CONSENSUS` or run the
+custom algorithm regardless of the CONSENSUS that was achieved.
+
+The custom algorithms settings are therefore highly configurable, specifically
+take note of the consensus, run_3sigma_algorithms, run_before_3sigma and
+run_only_if_consensus parameters, especially if you are attempting to run
+multiple custom algorithms at different stages, before or after three-sigma and
+what consensus should be applied.  It is possible to configure poorly given the
+methods and modes that can be configured.
 
 :mod:`settings.CUSTOM_ALGORITHMS`
 ---------------------------------
@@ -51,6 +69,8 @@ following **example**:
             'consensus': 6,
             'algorithms_allowed_in_consensus': [],
             'run_3sigma_algorithms': True,
+            'run_before_3sigma': True,
+            'run_only_if_consensus': False,
             'use_with': ['analyzer', 'analyzer_batch', 'mirage', 'crucible'],
             'debug_logging': False,
         },
@@ -67,6 +87,8 @@ following **example**:
             'consensus': 6,
             'algorithms_allowed_in_consensus': [],
             'run_3sigma_algorithms': True,
+            'run_before_3sigma': True,
+            'run_only_if_consensus': False,
             # This does not run on analyzer as it is weekly data
             'use_with': ['mirage', 'crucible'],
             'debug_logging': False,
@@ -80,8 +102,23 @@ following **example**:
             'consensus': 1,
             'algorithms_allowed_in_consensus': ['detect_significant_change'],
             'run_3sigma_algorithms': False,
+            'run_before_3sigma': True,
+            'run_only_if_consensus': False,
             'use_with': ['analyzer', 'crucible'],
             'debug_logging': True,
+        },
+        'matrixprofile': {
+            'namespaces': ['*'],
+            'algorithm_source': '/opt/skyline/github/skyline/skyline/custom_algorithms/skyline_matrixprofile.py',
+            'algorithm_parameters': {},
+            'max_execution_time': 30.0,
+            'consensus': 1,
+            'algorithms_allowed_in_consensus': ['matrixprofile'],
+            'run_3sigma_algorithms': False,
+            'run_before_3sigma': True,
+            'run_only_if_consensus': False,
+            'use_with': ['snab'],
+            'debug_logging': False,
         },
     }
 
@@ -101,27 +138,38 @@ requirements.
   as the Skyline code, just ensure the user running the Skyline process has read
   permissions on the path and file itself.
 - ``algorithm_parameters`` - this is a dictionary of any parameters/arguments
-  that you want to pass to your algorithm.  In your custom algorithm you will
-  need to interpolate your parameters/arguments (key/value) from this
-  dictionary. If none are required simply use an empty dict `{}`.
-- ``max_execution_time`` - a float and read the warning about speed above.
+  that you want to pass to your algorithm.  Your custom algorithm will need to
+  interpolate your parameters/arguments (key/value) from this dictionary. If
+  none are required simply use an empty dict `{}`.
+- ``max_execution_time`` - a float (and read the warning about speed above).
 - ``consensus`` - this allows you to add your algorithm to the ``CONSENSUS`` or
   override ``CONSENSUS`` by setting this to 1.  If you are running
   ``CONSENSUS = 6`` and wanted to just add your custom algorithm as an addition
-  to the normal 3 sigma algorithms, you would just pass ``'consensus': 6`` or
+  to the normal three-sigma algorithms, you would just pass ``'consensus': 6`` or
   ``'consensus': 7`` depending on what you want.  The only other option currently
   is to **override** the ``CONSENSUS``, if you want an anomaly triggered every
-  time your custom algorithm triggers, regardless of 3 sigma ``CONSENSUS`` then
+  time your custom algorithm triggers, regardless of three-sigma ``CONSENSUS`` then
   set ``'consensus': 1``
-- ``algorithms_allowed_in_consensus``: must be passed but is not implemented yet
+- ``algorithms_allowed_in_consensus``: must be passed but is **not implemented yet**
   but this is a list of algorithms that must have triggered for consensus to be
   achieved. If an empty list is passed `[]` this will be ignored and normal
   ``CONSENSUS`` will be used.
-- ``run_3sigma_algorithms``: a boolean stating whether to run the normal 3 sigma
+- ``run_3sigma_algorithms``: a boolean stating whether to run the normal three-sigma
   algorithms, this is optional and defaults to ``True`` if it is not passed
-  in the dictionary.  If any custom algorithm is run that has this set to
-  ``False`` no 3 sigma algorithms will be run regardless of what any other
-  custom algorithms are set to.
+  in the dictionary.  **NOTE** - If any custom algorithm is run that has this
+  set to ``False`` no three-sigma algorithms will be run regardless of what any
+  other custom algorithms are set to.  If multiple custom algorithms are being
+  run and only 1 has this set to ``False`` it will applied to all.
+- ``run_before_3sigma``: a boolean stating whether to run the custom algorithm
+  before the normal three-sigma algorithms, this defaults to ``True``.  If you
+  want your custom algorithm to run after the three-sigma algorithms set this to
+  ``False``.
+- ``run_only_if_consensus``: a boolean stating whether to run the custom
+  algorithm only if CONSENSUS or MIRAGE_CONSENSUS is achieved, it defaults to
+  ``False``.  This only applies to custom algorithms that are run after
+  three-sigma algorithms, e.g. with the parameter ``run_before_3sigma: False``
+  Currently this parameter only uses the CONSENSUS or MIRAGE_CONSENSUS setting
+  and does not apply the consensus parameter above.
 - ``use_with`` - a list of the Skyline apps that should apply the custom
   algorithm.  All the apps can be declared but they will only apply the custom
   algorithm **if** they actually handle the metric.  Simply declaring them in
@@ -218,7 +266,7 @@ Custom algorithm requirements
   being not anomalous and 1.0 being a certain anomaly.  You can pass
   `(False, 0.7)`,  you just have to normalise your ``anomalyScore`` between 0.0
   and 1.0.  The ``anomalyScore`` is currently only for testing it is not used in
-  any way but it  **must** be returned.  The anomalous classification is
+  any way but it **must** be returned.  The anomalous classification is
   currently **only** determined from the boolean and the ``anomalyScore`` is
   currently not used in any way other than for testing.  If your algorithm does
   not calculate an anomaly score, when your algorithm returns ``False`` just
