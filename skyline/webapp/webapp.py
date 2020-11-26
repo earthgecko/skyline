@@ -18,6 +18,9 @@ import string
 from os import remove as os_remove
 from time import sleep
 
+# @added 20201126 - Feature #3850: webapp - yhat_values API endoint
+from timeit import default_timer as timer
+
 # @added 20160703 - Feature #1464: Webapp Redis browser
 import time
 # @modified 20180918 - Feature #2602: Graphs in search_features_profiles
@@ -112,7 +115,9 @@ if True:
         # @added 20200908 - Feature #3740: webapp - anomaly API endpoint
         panorama_anomaly_details,
         # @added 20201103 - Feature #3824: get_cluster_data
-        get_cluster_data)
+        get_cluster_data,
+        # @added 20201125 - Feature #3850: webapp - yhat_values API endoint
+        get_yhat_values)
     from ionosphere_backend import (
         ionosphere_data, ionosphere_metric_data,
         # @modified 20170114 - Feature #1854: Ionosphere learn
@@ -665,6 +670,119 @@ def api():
         except:
             logger.error('error :: /api?snab request with invalid cluster_data argument - %s' % str(cluster_data_argument))
             return 'Bad Request', 400
+
+    # @added 20201125 - Feature #3850: webapp - yhat_values API endoint
+    # api?yhat_value=true&metric=metric&from=<from>&until=<until>&include_value=true&include_mean=true&include_yhat_real_lower=true
+    if 'yhat_values' in request.args:
+        logger.info('/api?yhat_values request')
+        # @added 20201126 - Feature #3850: webapp - yhat_values API endoint
+        start_yhat = timer()
+        try:
+            metric = request.args.get('metric', 0)
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: /api?yhat_values request with invalid metric argument')
+            metric = None
+        if not metric:
+            data_dict = {"status": {"error": "no metric passed"}}
+            return jsonify(data_dict), 400
+        try:
+            from_timestamp = int(request.args.get('from', 0))
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: /api?yhat_values request with invalid from argument')
+            from_timestamp = None
+        if not from_timestamp:
+            data_dict = {"status": {"error": "invalid from argument passed"}}
+            return jsonify(data_dict), 400
+        try:
+            until_timestamp = int(request.args.get('until', 0))
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: /api?yhat_values request with invalid until argument')
+            until_timestamp = None
+        if not until_timestamp:
+            data_dict = {"status": {"error": "invalid until argument passed"}}
+            return jsonify(data_dict), 400
+        include_value = False
+        try:
+            include_value_str = request.args.get('include_value', 'false')
+            if include_value_str == 'true':
+                include_value = True
+        except:
+            pass
+        include_mean = False
+        try:
+            include_mean_str = request.args.get('include_mean', 'false')
+            if include_mean_str == 'true':
+                include_mean = True
+        except:
+            pass
+        include_yhat_real_lower = False
+        try:
+            include_yhat_real_lower_str = request.args.get('include_yhat_real_lower', 'false')
+            if include_yhat_real_lower_str == 'true':
+                include_yhat_real_lower = True
+        except:
+            pass
+        yhat_dict = {}
+
+        # @added 20201126 - Feature #3850: webapp - yhat_values API endoint
+        # Cache request yhat_dict
+        yhat_dict_cache_key = 'webapp.%s.%s.%s.%s.%s.%s' % (
+            metric, str(from_timestamp), str(until_timestamp),
+            str(include_value), str(include_mean),
+            str(include_yhat_real_lower))
+
+        yhat_dict_str = None
+        try:
+            yhat_dict_str = REDIS_CONN.get(yhat_dict_cache_key)
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: Webapp could not get the Redis key - %s' % yhat_dict_cache_key)
+        use_cache_data = False
+        if yhat_dict_str:
+            logger.info('got yhat_values from Redis key - %s' % yhat_dict_cache_key)
+            try:
+                yhat_dict = literal_eval(yhat_dict_str)
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: Webapp failed to literal_eval yhat_dict_str')
+        if yhat_dict:
+            use_cache_data = True
+        if not yhat_dict:
+            try:
+                logger.info('running get_yhat_values(%s, %s, %s, %s, %s, %s)' % (
+                    metric, str(from_timestamp), str(until_timestamp),
+                    str(include_value), str(include_mean),
+                    str(include_yhat_real_lower)))
+                yhat_dict = get_yhat_values(metric, from_timestamp, until_timestamp, include_value, include_mean, include_yhat_real_lower)
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: error in get_yhat_values(%s, %s, %s, %s, %s, %s)' % (
+                    metric, str(from_timestamp), str(until_timestamp),
+                    str(include_value), str(include_mean),
+                    str(include_yhat_real_lower)))
+                logger.error('error :: returning 500')
+                return 'Internal Server Error', 500
+        else:
+            logger.info('yhat_values retrieved from Redis')
+
+        # @added 20201126 - Feature #3850: webapp - yhat_values API endoint
+        # Added yhat_time
+        end_yhat = timer()
+        yhat_time = '%.6f' % (end_yhat - start_yhat)
+        logger.info('yhat_values calculations took %s seconds' % str(yhat_time))
+        if yhat_dict is None:
+            logger.error('error :: returning 500 yhat_dict is %s' % str(yhat_dict))
+            data_dict = {"status": {"request_time": yhat_time, "response": 500}, "data": {}}
+            return 'Internal Server Error', 500
+        if yhat_dict:
+            data_dict = {"status": {"request_time": yhat_time, "response": 200, "cached": use_cache_data}, "data": {"metric": metric, "yhat_values": yhat_dict}}
+            return jsonify(data_dict), 200
+        else:
+            data_dict = {"status": {"request_time": yhat_time, "response": 404}, "data": {"metric": metric, "yhat_values": 'null'}}
+            return jsonify(data_dict), 404
 
     # @added 20201103 - Feature #3770: webapp - analyzer_last_status API endoint
     if 'analyzer_last_status' in request.args:
@@ -1563,9 +1681,14 @@ def api():
             try:
                 luminosity_data, success, message = luminosity_remote_data(anomaly_timestamp)
                 if luminosity_data:
-                    resp = json.dumps(
-                        {'results': luminosity_data})
-                    return resp, 200
+                    # @modified 20201123 - Feature #3824: get_cluster_data
+                    #                      Feature #2464: luminosity_remote_data
+                    # Change from json.dumps to jsonify
+                    # resp = json.dumps(
+                    #    {'results': luminosity_data})
+                    # return resp, 200
+                    data_dict = {'results': luminosity_data}
+                    return jsonify(data_dict), 200
                 else:
                     resp = json.dumps(
                         {'results': 'No data found'})
