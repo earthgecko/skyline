@@ -18,6 +18,9 @@ from msgpack import Unpacker
 # @added 20201103 - Feature #3824: get_cluster_data
 import requests
 
+# @added 20201125 - Feature #3850: webapp - yhat_values API endoint
+import numpy as np
+
 import settings
 from skyline_functions import (
     mysql_select,
@@ -25,7 +28,14 @@ from skyline_functions import (
     # nonNegativeDerivative, in_list, is_derivative_metric,
     # @added 20200507 - Feature #3532: Sort all time series
     # Added sort_timeseries and removed unused in_list
-    nonNegativeDerivative, is_derivative_metric, sort_timeseries)
+    nonNegativeDerivative, is_derivative_metric, sort_timeseries,
+    # @added 20201123 - Feature #3824: get_cluster_data
+    #                   Feature #2464: luminosity_remote_data
+    #                   Bug #3266: py3 Redis binary objects not strings
+    #                   Branch #3262: py3
+    get_redis_conn_decoded,
+    # @added 20201125 - Feature #3850: webapp - yhat_values API endoint
+    get_graphite_metric)
 
 import skyline_version
 skyline_version = skyline_version.__absolute_version__
@@ -508,7 +518,13 @@ def luminosity_remote_data(anomaly_timestamp):
     until_timestamp = int(anomaly_timestamp) + 61
 
     try:
-        unique_metrics = list(REDIS_CONN.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
+        # @modified 20201123 - Feature #3824: get_cluster_data
+        #                      Feature #2464: luminosity_remote_data
+        #                      Bug #3266: py3 Redis binary objects not strings
+        #                      Branch #3262: py3
+        # unique_metrics = list(REDIS_CONN.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
+        REDIS_CONN_DECODED = get_redis_conn_decoded(skyline_app)
+        unique_metrics = list(REDIS_CONN_DECODED.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
     except Exception as e:
         logger.error('error :: %s' % str(e))
         logger.error('error :: luminosity_remote_data :: could not determine unique_metrics from Redis set')
@@ -738,3 +754,72 @@ def get_cluster_data(api_endpoint, data_required, endpoint_params={}):
                 data = data + remote_data
 
     return data
+
+
+# @added 20201125 - Feature #3850: webapp - yhat_values API endoint
+def get_yhat_values(
+        metric, from_timestamp, until_timestamp, include_value, include_mean,
+        include_yhat_real_lower):
+
+    timeseries = []
+    try:
+        logger.info('get_yhat_values :: for %s from %s until %s' % (
+            metric, str(from_timestamp), str(until_timestamp)))
+        timeseries = get_graphite_metric('webapp', metric, from_timestamp, until_timestamp, 'list', 'object')
+    except:
+        logger.error(traceback.format_exc())
+        logger.error('error :: get_yhat_values :: failed to get timeseries data for %s' % (
+            metric))
+        return None
+
+    yhat_dict = {}
+    logger.info('get_yhat_values :: %s values in timeseries for %s to calculate yhat values from' % (
+        str(len(timeseries)), metric))
+    if timeseries:
+        try:
+            array_amin = np.amin([item[1] for item in timeseries])
+            values = []
+            for ts, value in timeseries:
+                values.append(value)
+                va = np.array(values)
+                va_mean = va.mean()
+                va_std_3 = 3 * va.std()
+                # @modified 20201126 - Feature #3850: webapp - yhat_values API endoint
+                # Change dict key to int not float
+                int_ts = int(ts)
+                yhat_dict[int_ts] = {}
+                if include_value:
+                    yhat_dict[int_ts]['value'] = value
+                if include_mean:
+                    yhat_dict[int_ts]['mean'] = va_mean
+                if include_mean:
+                    yhat_dict[int_ts]['mean'] = va_mean
+                yhat_lower = va_mean - va_std_3
+                if include_yhat_real_lower:
+                    if yhat_lower < array_amin and array_amin == 0:
+                        yhat_dict[int_ts]['yhat_real_lower'] = array_amin
+                    else:
+                        yhat_dict[int_ts]['yhat_real_lower'] = yhat_lower
+                yhat_dict[int_ts]['yhat_lower'] = yhat_lower
+                yhat_dict[int_ts]['yhat_upper'] = va_mean + va_std_3
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: get_yhat_values :: failed create yhat_dict for %s' % (
+                metric))
+            return None
+
+    logger.info('get_yhat_values :: calculated yhat values for %s data points' % str(len(yhat_dict)))
+    if yhat_dict:
+        yhat_dict_cache_key = 'webapp.%s.%s.%s.%s.%s.%s' % (
+            metric, str(from_timestamp), str(until_timestamp),
+            str(include_value), str(include_mean),
+            str(include_yhat_real_lower))
+        logger.info('get_yhat_values :: saving yhat_dict to Redis key - %s' % yhat_dict_cache_key)
+        try:
+            REDIS_CONN.setex(yhat_dict_cache_key, 14400, str(yhat_dict))
+            logger.info('get_yhat_values :: created Redis key - %s with 14400 TTL' % yhat_dict_cache_key)
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: get_yhat_values :: failed to setex Redis key - %s' % yhat_dict_cache_key)
+
+    return yhat_dict

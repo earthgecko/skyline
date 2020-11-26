@@ -604,7 +604,7 @@ def get_graphite_metric(
     :param metric: metric name
     :param from_timestamp: unix timestamp
     :param until_timestamp: unix timestamp
-    :param data_type: image or json
+    :param data_type: image, json or list
     :param output_object: object or path and filename to save data as, if set to
                           object, the object is returned
     :type current_skyline_app: str
@@ -780,7 +780,14 @@ def get_graphite_metric(
     # image_url = settings.GRAPHITE_PROTOCOL + '://' + settings.GRAPHITE_HOST + ':' + graphite_port + '/render?from=' + graphite_from + '&until=' + graphite_until + '&target=' + target_metric
     # image_url = settings.GRAPHITE_PROTOCOL + '://' + settings.GRAPHITE_HOST + ':' + graphite_port + '/api/datasources/proxy/1/render/?from=' + graphite_from + '&until=' + graphite_until + '&target=' + target_metric
     image_url = settings.GRAPHITE_PROTOCOL + '://' + settings.GRAPHITE_HOST + ':' + graphite_port + '/' + settings.GRAPHITE_RENDER_URI + '?from=' + graphite_from + '&until=' + graphite_until + '&target=' + target_metric
-    url = image_url + '&format=' + output_format
+
+    # @modified 20201125 - Feature #3850: webapp - yhat_values API endoint
+    # Added list as data_type
+    # if data_type == 'json':
+    if data_type == 'json' or data_type == 'list':
+        url = image_url + '&format=json'
+    else:
+        url = image_url + '&format=' + output_format
 
     current_logger.info('graphite url - %s' % (url))
 
@@ -926,7 +933,9 @@ def get_graphite_metric(
         else:
             return True
 
-    if data_type == 'json':
+    # @modified 20201125 - Feature #3850: webapp - yhat_values API endoint
+    # Added list as data_type
+    if data_type == 'json' or data_type == 'list':
 
         if output_object != 'object':
             if os.path.isfile(output_object):
@@ -985,8 +994,11 @@ def get_graphite_metric(
             if settings.ENABLE_DEBUG:
                 current_logger.info('json file - %s' % output_object)
         else:
-            timeseries_json = json.dumps(converted)
-            return timeseries_json
+            if data_type == 'list':
+                return converted
+            if data_type == 'json':
+                timeseries_json = json.dumps(converted)
+                return timeseries_json
 
         if not os.path.isfile(output_object):
             current_logger.error(
