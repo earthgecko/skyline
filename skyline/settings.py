@@ -728,6 +728,8 @@ CUSTOM_ALGORITHMS = {}
             'consensus': 6,
             'algorithms_allowed_in_consensus': [],
             'run_3sigma_algorithms': True,
+            'run_before_3sigma': True,
+            'run_only_if_consensus': False,
             'use_with': ['analyzer', 'analyzer_batch', 'mirage', 'crucible'],
             'debug_logging': False,
         },
@@ -744,6 +746,8 @@ CUSTOM_ALGORITHMS = {}
             'consensus': 6,
             'algorithms_allowed_in_consensus': [],
             'run_3sigma_algorithms': True,
+            'run_before_3sigma': True,
+            'run_only_if_consensus': False,
             # This does not run on analyzer as it is weekly data
             'use_with': ['mirage', 'crucible'],
             'debug_logging': False,
@@ -757,6 +761,8 @@ CUSTOM_ALGORITHMS = {}
             'consensus': 1,
             'algorithms_allowed_in_consensus': ['detect_significant_change'],
             'run_3sigma_algorithms': False,
+            'run_before_3sigma': True,
+            'run_only_if_consensus': False,
             'use_with': ['analyzer', 'crucible'],
             'debug_logging': True,
         },
@@ -768,6 +774,8 @@ CUSTOM_ALGORITHMS = {}
             'consensus': 1,
             'algorithms_allowed_in_consensus': ['matrixprofile'],
             'run_3sigma_algorithms': False,
+            'run_before_3sigma': True,
+            'run_only_if_consensus': False,
             'use_with': ['snab'],
             'debug_logging': False,
         },
@@ -796,7 +804,18 @@ CUSTOM_ALGORITHMS = {}
 :param run_3sigma_algorithms: a boolean stating whether to run normal 3 sigma
     algorithms, this is optional and defaults to ``True`` if it is not passed
     in the dictionary.  Read the full documentation referred to above to
-    determine the affects of passing this as ``False``.
+    determine the effects of passing this as ``False``.
+: param run_before_3sigma: a boolean stating whether to run the custom algorithm
+  before the normal three-sigma algorithms, this defaults to ``True``.  If you
+  want your custom algorithm to run after the three-sigma algorithms set this to
+  ``False``.  Read the full documentation referred to above to determine the
+    effects of passing this as ``False``.
+:param run_only_if_consensus: a boolean stating whether to run the custom
+    algorithm only if CONSENSUS or MIRAGE_CONSENSUS is achieved, it defaults to
+    ``False``.  This only applies to custom algorithms that are run after
+    three-sigma algorithms, e.g. with the parameter ``run_before_3sigma: False``
+    Currently this parameter only uses the CONSENSUS or MIRAGE_CONSENSUS setting
+    and does not apply the consensus parameter above.
 :param use_with: a list of Skyline apps which should apply the algorithm if
     they handle the metric, it is only applied if the app handles the metric,
     generally set this to ``['analyzer', 'analyzer_batch', 'mirage', 'crucible']``
@@ -808,7 +827,9 @@ CUSTOM_ALGORITHMS = {}
 :type algorithm_parameters: dict
 :type consensus: int
 :type algorithms_allowed_in_consensus: list
+:type run_before_3sigma: boolean
 :type run_3sigma_algorithms: boolean
+:type run_only_if_consensus: boolean
 :type use_with: list
 :type debug_logging: boolean
 

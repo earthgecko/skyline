@@ -451,7 +451,7 @@ class Worker(Process):
                     self.redis_conn.sadd('horizon.metrics_received', *set(metrics_received))
                 except:
                     logger.error(traceback.format_exc())
-                    logger.error('%s :: error adding horizon.metrics_received: %s' % (skyline_app, str(e)))
+                    logger.error('%s :: error adding horizon.metrics_received' % (skyline_app))
                 if self.canary:
                     try:
                         logger.info('renaming key horizon.metrics_received to aet.horizon.metrics_received')

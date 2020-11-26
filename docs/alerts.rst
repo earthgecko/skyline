@@ -5,7 +5,7 @@ Alerts
 Alerts in Skyline are configured via two sets of settings.  There are the
 Analyzer (Mirage and Ionosphere) related settings and the Boundary related
 alert settings.  This is due to the two classes of alerts being different,
-with Analzyer, Mirage and Ionosphere alerts being related to anomalies and
+with Analyzer, Mirage and Ionosphere alerts being related to anomalies and
 Boundary alerts being related to breaches of the static and dynamic thresholds
 defined for Boundary metrics.
 
@@ -75,8 +75,10 @@ the alerter:
 Analyzer, Mirage and Ionosphere related alert settings (anomaly detection) are:
 
 - :mod:`settings.ENABLE_ALERTS` - must be set to `True` to enable alerting
-- :mod:`settings.ENABLE_FULL_DURATION_ALERTS` - must be set to `True` to enable
-  Analyzer to alert
+- :mod:`settings.ENABLE_FULL_DURATION_ALERTS` - should be set to `False` if
+  enable Mirage is enabled.  If this is set to ``True`` Analyzer will alert
+  on all checks sent to Mirage, even if Mirage does not find them anomalous,
+  this is mainly for testing.
 - :mod:`settings.ALERTS` - must be defined to enable alerts via Analyzer and
   Mirage
 - :mod:`settings.SMTP_OPTS` - must be defined

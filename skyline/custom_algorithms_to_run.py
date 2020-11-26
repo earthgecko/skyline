@@ -85,6 +85,17 @@ def get_custom_algorithms_to_run(current_skyline_app, base_name, custom_algorith
                 run_3sigma_algorithms = custom_algorithms[custom_algorithm]['run_3sigma_algorithms']
             except:
                 run_3sigma_algorithms = True
+
+            # @added 20201125 - Feature #3848: custom_algorithms - run_before_3sigma parameter
+            try:
+                run_before_3sigma = custom_algorithms[custom_algorithm]['run_before_3sigma']
+            except:
+                run_before_3sigma = True
+            try:
+                run_only_if_consensus = custom_algorithms[custom_algorithm]['run_only_if_consensus']
+            except:
+                run_only_if_consensus = False
+
             try:
                 use_with = custom_algorithms[custom_algorithm]['use_with']
             except:
@@ -116,6 +127,9 @@ def get_custom_algorithms_to_run(current_skyline_app, base_name, custom_algorith
                     #                   Task #3744: POC matrixprofile
                     # Added missing run_3sigma_algorithms
                     'run_3sigma_algorithms': run_3sigma_algorithms,
+                    # @added 20201125 - Feature #3848: custom_algorithms - run_before_3sigma parameter
+                    'run_before_3sigma': run_before_3sigma,
+                    'run_only_if_consensus': run_only_if_consensus,
                     'use_with': use_with,
                 }
                 if debug:
