@@ -747,10 +747,10 @@ def get_cluster_data(api_endpoint, data_required, endpoint_params={}):
                 except:
                     logger.error(traceback.format_exc())
                     logger.error('error :: get_cluster_data :: failed to build remote_data from %s on %s' % (
-                        data_required, str(item)))
+                        str(data_required), str(item)))
             if remote_data:
-                logger.info('get_cluster_data :: got %s %s from %s on %s' % (
-                    str(len(remote_data)), data_required, str(item[0])))
+                logger.info('get_cluster_data :: got %s %s from %s' % (
+                    str(len(remote_data)), str(data_required), str(item[0])))
                 data = data + remote_data
 
     return data
