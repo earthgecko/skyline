@@ -855,12 +855,18 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
                     logger.info('algorithms :: overidding the CONSENSUS as custom algorithm %s overides on %s' % (
                         str(custom_algorithm), str(base_name)))
             else:
-                if custom_consensus == 1:
-                    # hmmm we are required to hack threshold here
-                    custom_algorithm_not_anomalous = True
-                    if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
-                        logger.debug('debug :: algorithms :: %s did not trigger - custom_algorithm_not_anomalous set to identify as not anomalous' % (
-                            str(custom_algorithm)))
+                # @added 20201127 - Feature #3566: custom_algorithms
+                # Handle if the result is None
+                if result is None:
+                    logger.warn('warning :: algorithms :: %s failed to run on %s' % (
+                        str(custom_algorithm), str(base_name)))
+                else:
+                    if custom_consensus == 1:
+                        # hmmm we are required to hack threshold here
+                        custom_algorithm_not_anomalous = True
+                        if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
+                            logger.debug('debug :: algorithms :: %s did not trigger - custom_algorithm_not_anomalous set to identify as not anomalous' % (
+                                str(custom_algorithm)))
     for item in final_after_custom_ensemble:
         ensemble.append(item)
 
