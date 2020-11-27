@@ -33,6 +33,9 @@ import datetime as dt
 from time import gmtime, strftime, time
 from email import charset
 
+# @added 20201127 - Feature #3820: HORIZON_SHARDS
+from os import uname
+
 # @added 20200116: Feature #3396: http_alerter
 import requests
 
@@ -97,6 +100,16 @@ if True:
         add_panorama_alert,
         # @added 20201013 - Feature #3780: skyline_functions - sanitise_graphite_url
         encode_graphite_metric_name)
+
+# @added 20201127 - Feature #3820: HORIZON_SHARDS
+try:
+    HORIZON_SHARDS = settings.HORIZON_SHARDS.copy()
+except:
+    HORIZON_SHARDS = {}
+this_host = str(uname()[1])
+HORIZON_SHARD = 0
+if HORIZON_SHARDS:
+    HORIZON_SHARD = HORIZON_SHARDS[this_host]
 
 skyline_app = 'analyzer'
 skyline_app_logger = '%sLog' % skyline_app
@@ -1872,6 +1885,11 @@ def alert_slack(alert, metric, context):
             # initial_comment = slack_title + ' :: <' + link  + '|graphite image link>'
             initial_comment = slack_title + ' :: <' + link + '|graphite image link>\nFor anomaly at ' + slack_time_string
 
+        # @added 20201127 - Feature #3820: HORIZON_SHARDS
+        # Add the origin and shard for debugging purposes
+        if HORIZON_SHARDS:
+            initial_comment = initial_comment + ' - from ' + this_host + ' (shard ' + HORIZON_SHARD + ')'
+
         add_to_panorama = True
         try:
             slack_thread_updates = settings.SLACK_OPTS['thread_updates']
@@ -2372,7 +2390,13 @@ def alert_http(alert, metric, context):
             # Add the token as an independent entity from the alert
             # alert_data_dict = {"status": {}, "data": {"alert": metric_alert_dict}}
             alerter_token_str = str(alerter_token)
-            alert_data_dict = {"status": {}, "data": {"token": alerter_token_str, "alert": metric_alert_dict}}
+            # @modified 20201127 - Feature #3820: HORIZON_SHARDS
+            # Add the origin and shard to status for debugging purposes
+            if not HORIZON_SHARDS:
+                alert_data_dict = {"status": {}, "data": {"token": alerter_token_str, "alert": metric_alert_dict}}
+            else:
+                alert_data_dict = {"status": {"origin": this_host, "shard": HORIZON_SHARD}, "data": {"token": alerter_token_str, "alert": metric_alert_dict}}
+
             logger.info('alert_http :: alert_data_dict to send - %s' % str(alert_data_dict))
             # Allow requests to send as json
             # alert_data = json.dumps(alert_data_dict)
