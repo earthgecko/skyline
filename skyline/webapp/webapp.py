@@ -1235,7 +1235,11 @@ def api():
             if remote_training_data:
                 logger.info('got %s remote metrics training data instances from the remote Skyline instances' % str(len(remote_training_data)))
                 remote_training_data_list = training_data + remote_training_data
-                training_data = list(set(remote_training_data_list))
+                # @modified 20201126 - Feature #3824: get_cluster_data
+                # set cannot be used here as each training data item includes a
+                # list which is unhashable
+                # training_data = list(set(remote_training_data_list))
+                training_data = remote_training_data_list
 
         data_dict = {"status": {}, "data": {"metrics": training_data}}
         return jsonify(data_dict), 200
