@@ -3626,7 +3626,7 @@ class Analyzer(Thread):
                     logger.error('error :: failed to set analyzer.last_all_alerts Redis key')
             if str(all_alerts_set) != str(last_all_alerts_set):
                 logger.info('alert settings have changed alerts will be refreshed, reset current smtp_alerter_metrics list')
-                refresh_redis_alert_sets = True
+                # refresh_redis_alert_sets = True
 
             # @modified 20190518 - Bug #3020: Newly installed analyzer on docker not flushing and recreating analyzer algorithm exception Redis sets
             # The management of the analyzer Redis algorithm exception sets
@@ -5400,7 +5400,6 @@ class Analyzer(Thread):
                     except:
                         logger.error(traceback.format_exc())
                         logger.error('error :: failed to remove %s to Redis set %s' % (str(metric_to_remove), remove_training_data_redis_set))
-
 
             # @added 20200611 - Feature #3578: Test alerts
             # @modified 20200625 - Feature #3578: Test alerts
