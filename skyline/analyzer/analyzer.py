@@ -216,7 +216,7 @@ if EXTERNAL_ALERTS:
 
 # @added 20200603 - Feature #3566: custom_algorithms
 try:
-    CUSTOM_ALGORITHMS = settings.CUSTOM_ALGORITHMS
+    CUSTOM_ALGORITHMS = settings.CUSTOM_ALGORITHMS.copy()
 except:
     CUSTOM_ALGORITHMS = None
 try:
@@ -1187,6 +1187,22 @@ class Analyzer(Thread):
         # @added 20201018 - Feature #3810: ANALYZER_MAD_LOW_PRIORITY_METRICS
         low_priority_metrics_analysed_due_to_mad_trigger = 0
         mad_error_logged = False
+
+        # @added 20201127 - Feature #3848: custom_algorithms - run_before_3sigma parameter
+        # Determine if any custom_algorithms are to be run by analyzer so that
+        # DEBUG_CUSTOM_ALGORITHMS only runs if a custom_algorithm is assigned to
+        # analyzer
+        run_custom_algorithm_enabled_on_app = None
+        if CUSTOM_ALGORITHMS and DEBUG_CUSTOM_ALGORITHMS:
+            for custom_algorithm in CUSTOM_ALGORITHMS:
+                try:
+                    use_with = CUSTOM_ALGORITHMS[custom_algorithm]['use_with']
+                    if skyline_app in use_with:
+                        run_custom_algorithm_enabled_on_app = True
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to determine if custom_algorithms are to be run with %s' % (
+                        skyline_app))
 
         # Distill timeseries strings into lists
         for i, metric_name in enumerate(assigned_metrics):
@@ -2248,7 +2264,10 @@ class Analyzer(Thread):
                     logger.debug('debug :: metric %s - anomalous - %s' % (str(metric_name), str(anomalous)))
 
                 # @added 20200608 - Feature #3566: custom_algorithms
-                if DEBUG_CUSTOM_ALGORITHMS:
+                # @modified 20201127 - Feature #3848: custom_algorithms - run_before_3sigma parameter
+                # Only run DEBUG_CUSTOM_ALGORITHMS if there is a custom
+                # algorithm to be run with analyzer
+                if DEBUG_CUSTOM_ALGORITHMS and run_custom_algorithm_enabled_on_app:
                     logger.debug('debug :: metric %s - anomalous - %s, ensemble - %s, algorithms_run - %s' % (
                         str(metric_name), str(anomalous), str(ensemble),
                         str(algorithms_run)))
@@ -4134,6 +4153,22 @@ class Analyzer(Thread):
                     logger.info('%s :: stopping spin_process - %s' % (skyline_app, str(p.is_alive())))
                     p.join()
 
+            # @added 20201127 - Feature #3848: custom_algorithms - run_before_3sigma parameter
+            # Determine if any custom_algorithms are to be run by analyzer so that
+            # DEBUG_CUSTOM_ALGORITHMS only runs if a custom_algorithm is assigned to
+            # analyzer
+            run_custom_algorithm_enabled_on_app = None
+            if CUSTOM_ALGORITHMS and DEBUG_CUSTOM_ALGORITHMS:
+                for custom_algorithm in CUSTOM_ALGORITHMS:
+                    try:
+                        use_with = CUSTOM_ALGORITHMS[custom_algorithm]['use_with']
+                        if skyline_app in use_with:
+                            run_custom_algorithm_enabled_on_app = True
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: run failed to determine if custom_algorithms are to be run with %s' % (
+                            skyline_app))
+
             # @added 20200601 - Feature #3508: ionosphere.untrainable_metrics
             #                   Feature #3400: Identify air gaps in the metric data
             # Check to non 3sigma algorithm errors too
@@ -4145,14 +4180,22 @@ class Analyzer(Thread):
                     logger.debug('debug :: adding identify_airgaps to check_algorithm_errors')
                 check_algorithm_errors.append('identify_airgaps')
             for algorithm in settings.ALGORITHMS:
-                if LOCAL_DEBUG or DEBUG_CUSTOM_ALGORITHMS:
+                # @modified 20201127 - Feature #3848: custom_algorithms - run_before_3sigma parameter
+                # Only run DEBUG_CUSTOM_ALGORITHMS if there is a custom
+                # algorithm to be run with analyzer
+                # if LOCAL_DEBUG or DEBUG_CUSTOM_ALGORITHMS:
+                if LOCAL_DEBUG or (DEBUG_CUSTOM_ALGORITHMS and run_custom_algorithm_enabled_on_app):
                     logger.debug('debug :: adding %s to check_algorithm_errors' % (algorithm))
                 check_algorithm_errors.append(algorithm)
 
             # @added 20200603 - Feature #3566: custom_algorithms
             if CUSTOM_ALGORITHMS:
                 for custom_algorithm in settings.CUSTOM_ALGORITHMS:
-                    if LOCAL_DEBUG or DEBUG_CUSTOM_ALGORITHMS:
+                    # @modified 20201127 - Feature #3848: custom_algorithms - run_before_3sigma parameter
+                    # Only run DEBUG_CUSTOM_ALGORITHMS if there is a custom
+                    # algorithm to be run with analyzer
+                    # if LOCAL_DEBUG or DEBUG_CUSTOM_ALGORITHMS:
+                    if LOCAL_DEBUG or (DEBUG_CUSTOM_ALGORITHMS and run_custom_algorithm_enabled_on_app):
                         logger.debug('debug :: adding custom_algorithm %s to check_algorithm_errors' % (custom_algorithm))
                     check_algorithm_errors.append(custom_algorithm)
 
@@ -5541,23 +5584,31 @@ class Analyzer(Thread):
                 logger.info('debug :: Memory usage in run before algorithm test run times: %s (kb)' % resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
 
             algorithms_to_time = []
-            if LOCAL_DEBUG or DEBUG_CUSTOM_ALGORITHMS:
+            # @modified 20201127 - Feature #3848: custom_algorithms - run_before_3sigma parameter
+            # Only run DEBUG_CUSTOM_ALGORITHMS if there is a custom
+            # algorithm to be run with analyzer
+            # if LOCAL_DEBUG or DEBUG_CUSTOM_ALGORITHMS:
+            if LOCAL_DEBUG or (DEBUG_CUSTOM_ALGORITHMS and run_custom_algorithm_enabled_on_app):
                 logger.debug('debug :: algorithms_to_time reset to - %s' % (str(algorithms_to_time)))
             algorithms_to_time = list(settings.ALGORITHMS)
-            if LOCAL_DEBUG or DEBUG_CUSTOM_ALGORITHMS:
+            # if LOCAL_DEBUG or DEBUG_CUSTOM_ALGORITHMS:
+            if LOCAL_DEBUG or (DEBUG_CUSTOM_ALGORITHMS and run_custom_algorithm_enabled_on_app):
                 logger.debug('debug :: algorithms_to_time from settings.ALGORITHMS - %s' % (str(algorithms_to_time)))
             if CUSTOM_ALGORITHMS:
                 for custom_algorithm in settings.CUSTOM_ALGORITHMS:
                     algorithms_to_time.append(custom_algorithm)
-                    if LOCAL_DEBUG or DEBUG_CUSTOM_ALGORITHMS:
+                    # if LOCAL_DEBUG or DEBUG_CUSTOM_ALGORITHMS:
+                    if LOCAL_DEBUG or (DEBUG_CUSTOM_ALGORITHMS and run_custom_algorithm_enabled_on_app):
                         logger.debug('debug :: algorithms_to_time added %s from settings.CUSTOM_ALGORITHMS - %s' % (str(custom_algorithm), str(algorithms_to_time)))
 
-            if LOCAL_DEBUG or DEBUG_CUSTOM_ALGORITHMS:
+            # if LOCAL_DEBUG or DEBUG_CUSTOM_ALGORITHMS:
+            if LOCAL_DEBUG or (DEBUG_CUSTOM_ALGORITHMS and run_custom_algorithm_enabled_on_app):
                 logger.debug('debug :: algorithms_to_time - %s' % (str(algorithms_to_time)))
                 logger.debug('debug :: processing algorithms_to_time - %s' % (str(algorithms_to_time)))
 
             for algorithm in algorithms_to_time:
-                if LOCAL_DEBUG or DEBUG_CUSTOM_ALGORITHMS:
+                # if LOCAL_DEBUG or DEBUG_CUSTOM_ALGORITHMS:
+                if LOCAL_DEBUG or (DEBUG_CUSTOM_ALGORITHMS and run_custom_algorithm_enabled_on_app):
                     logger.debug('debug :: processing algorithm count and timings - %s' % (str(algorithm)))
 
                 algorithm_count_file = algorithm_tmp_file_prefix + algorithm + '.count'

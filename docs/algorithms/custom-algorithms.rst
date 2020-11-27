@@ -48,8 +48,8 @@ The custom algorithms settings are therefore highly configurable, specifically
 take note of the consensus, run_3sigma_algorithms, run_before_3sigma and
 run_only_if_consensus parameters, especially if you are attempting to run
 multiple custom algorithms at different stages, before or after three-sigma and
-what consensus should be applied.  It is possible to configure poorly given the
-methods and modes that can be configured.
+what consensus should be applied.  It is probably possible to configure poorly
+given the methods and modes that can be configured.
 
 :mod:`settings.CUSTOM_ALGORITHMS`
 ---------------------------------
@@ -111,7 +111,7 @@ following **example**:
             'namespaces': ['*'],
             'algorithm_source': '/opt/skyline/github/skyline/skyline/custom_algorithms/skyline_matrixprofile.py',
             'algorithm_parameters': {},
-            'max_execution_time': 30.0,
+            'max_execution_time': 5.0,
             'consensus': 1,
             'algorithms_allowed_in_consensus': ['matrixprofile'],
             'run_3sigma_algorithms': False,
@@ -159,7 +159,7 @@ requirements.
   in the dictionary.  **NOTE** - If any custom algorithm is run that has this
   set to ``False`` no three-sigma algorithms will be run regardless of what any
   other custom algorithms are set to.  If multiple custom algorithms are being
-  run and only 1 has this set to ``False`` it will applied to all.
+  run and only 1 has this set to ``False`` it will be applied to all.
 - ``run_before_3sigma``: a boolean stating whether to run the custom algorithm
   before the normal three-sigma algorithms, this defaults to ``True``.  If you
   want your custom algorithm to run after the three-sigma algorithms set this to
@@ -176,7 +176,7 @@ requirements.
   the list does not mean that the app will just automatically run them all the
   time.  If the app does not handle the metric, it being declared makes no
   difference, therefore if you are unsure, it is safe to list them all.
-  Altough do **note** that if your custom algorithm needs more data than
+  Although do **note** that if your custom algorithm needs more data than
   :mod:`settings.FULL_DURATION` then do not specify ``'analyzer', 'analyzer_batch'``
   as apps to run the custom algorithm with.
 - ``debug_logging``: a boolean to enable debug_logging, which wraps the custom
