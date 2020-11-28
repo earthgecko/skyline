@@ -880,7 +880,7 @@ def alert_slack(datapoint, metric_name, expiration_time, metric_trigger, algorit
         # @added 20201127 - Feature #3820: HORIZON_SHARDS
         # Add the origin and shard for debugging purposes
         if HORIZON_SHARDS:
-            initial_comment = initial_comment + ' - from ' + this_host + ' (shard ' + HORIZON_SHARD + ')'
+            initial_comment = initial_comment + ' - from ' + this_host + ' (shard ' + str(HORIZON_SHARD) + ')'
 
         try:
             # slack does not allow embedded images, nor links behind authentication

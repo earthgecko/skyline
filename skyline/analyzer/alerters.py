@@ -1888,7 +1888,7 @@ def alert_slack(alert, metric, context):
         # @added 20201127 - Feature #3820: HORIZON_SHARDS
         # Add the origin and shard for debugging purposes
         if HORIZON_SHARDS:
-            initial_comment = initial_comment + ' - from ' + this_host + ' (shard ' + HORIZON_SHARD + ')'
+            initial_comment = initial_comment + ' - from ' + this_host + ' (shard ' + str(HORIZON_SHARD) + ')'
 
         add_to_panorama = True
         try:
