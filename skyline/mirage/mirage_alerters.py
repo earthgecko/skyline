@@ -1676,7 +1676,7 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context):
         # @added 20201127 - Feature #3820: HORIZON_SHARDS
         # Add the origin and shard for debugging purposes
         if HORIZON_SHARDS:
-            initial_comment = initial_comment + ' - from ' + this_host + ' (shard ' + HORIZON_SHARD + ')'
+            initial_comment = initial_comment + ' - from ' + this_host + ' (shard ' + str(HORIZON_SHARD) + ')'
 
         # @added 20200929 - Task #3748: POC SNAB
         #                   Branch #3068: SNAB

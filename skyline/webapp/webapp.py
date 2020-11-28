@@ -222,6 +222,18 @@ if SNAB_ENABLED:
 else:
     update_snab_result = None
 
+# @added 20201127 - Feature #3820: HORIZON_SHARDS
+# Added the HORIZON_SHARD variable to add to alerts for determining which
+# Skyline instance sent the alert
+try:
+    HORIZON_SHARDS = settings.HORIZON_SHARDS.copy()
+except:
+    HORIZON_SHARDS = {}
+this_host = str(os.uname()[1])
+HORIZON_SHARD = 0
+if HORIZON_SHARDS:
+    HORIZON_SHARD = HORIZON_SHARDS[this_host]
+
 skyline_version = skyline_version.__absolute_version__
 
 skyline_app = 'webapp'
@@ -668,7 +680,7 @@ def api():
                 logger.error('error :: api request with invalid cluster_data argument - %s' % str(cluster_data_argument))
                 return 'Bad Request', 400
         except:
-            logger.error('error :: /api?snab request with invalid cluster_data argument - %s' % str(cluster_data_argument))
+            logger.error('error :: /api request with invalid cluster_data argument')
             return 'Bad Request', 400
 
     # @added 20201125 - Feature #3850: webapp - yhat_values API endoint
@@ -826,7 +838,7 @@ def api():
                 batch_processing_metrics = list(set(batch_processing_metrics_list))
 
         logger.info('/api?batch_processing_metrics responding with %s metrics' % str(len(batch_processing_metrics)))
-        data_dict = {"status": {}, "data": {"metrics": batch_processing_metrics}}
+        data_dict = {"status": {"cluster_data": cluster_data}, "data": {"metrics": batch_processing_metrics}}
         return jsonify(data_dict), 200
 
     # @added 20200929 - Task #3748: POC SNAB
@@ -1241,7 +1253,7 @@ def api():
                 # training_data = list(set(remote_training_data_list))
                 training_data = remote_training_data_list
 
-        data_dict = {"status": {}, "data": {"metrics": training_data}}
+        data_dict = {"status": {"cluster_data": cluster_data}, "data": {"metrics": training_data}}
         return jsonify(data_dict), 200
 
     # @added 20200129 - Feature #3422: webapp api - alerting_metrics and non_alerting_metrics
@@ -1268,7 +1280,7 @@ def api():
                 non_alerting_metrics = list(set(non_alerting_metrics_list))
 
         logger.info('/api?non_alerting_metrics responding with %s metrics' % str(len(non_alerting_metrics)))
-        data_dict = {"status": {}, "data": {"metrics": non_alerting_metrics}}
+        data_dict = {"status": {"cluster_data": cluster_data}, "data": {"metrics": non_alerting_metrics}}
         return jsonify(data_dict), 200
 
     if 'alerting_metrics' in request.args:
@@ -1294,7 +1306,7 @@ def api():
                 alerting_metrics = list(set(alerting_metrics_list))
 
         logger.info('/api?non_alerting_metrics responding with %s metrics' % str(len(alerting_metrics)))
-        data_dict = {"status": {}, "data": {"metrics": alerting_metrics}}
+        data_dict = {"status": {"cluster_data": cluster_data}, "data": {"metrics": alerting_metrics}}
         return jsonify(data_dict), 200
 
     # @added 20200117 - Feature #3400: Identify air gaps in the metric data
@@ -1476,10 +1488,10 @@ def api():
                 except:
                     logger.error(traceback.format_exc())
                     logger.error('error :: Webapp could not build the ionosphere_learn_work dict to jsonify - %s' % str(str_item))
-            data_dict = {"status": {}, "data": {"metrics": metrics_json}}
+            data_dict = {"status": {"cluster_data": cluster_data}, "data": {"metrics": metrics_json}}
             return jsonify(data_dict), 200
 
-        data_dict = {"status": {}, "data": {"metrics": ionosphere_learn_work}}
+        data_dict = {"status": {"cluster_data": cluster_data}, "data": {"metrics": ionosphere_learn_work}}
         return jsonify(data_dict), 200
 
     # @added 20191203 - Feature #3350: webapp api - mirage_metrics and ionosphere_metrics
@@ -1504,7 +1516,7 @@ def api():
                 mirage_metrics_list = mirage_metrics + remote_mirage_metrics
                 mirage_metrics = list(set(mirage_metrics_list))
 
-        data_dict = {"status": {}, "data": {"metrics": mirage_metrics}}
+        data_dict = {"status": {"cluster_data": cluster_data}, "data": {"metrics": mirage_metrics}}
         return jsonify(data_dict), 200
 
     # @added 20191203 - Feature #3350: webapp api - mirage_metrics and ionosphere_metrics
@@ -1530,7 +1542,7 @@ def api():
                 ionosphere_metrics = list(set(ionosphere_metrics_list))
 
         data_dict = {
-            "status": {},
+            "status": {"cluster_data": cluster_data},
             "data": {
                 "metrics": ionosphere_metrics
             }
@@ -1560,7 +1572,7 @@ def api():
                 derivative_metrics = list(set(derivative_metrics_list))
 
         data_dict = {
-            "status": {},
+            "status": {"cluster_data": cluster_data},
             "data": {
                 "metrics": derivative_metrics
             }
@@ -1590,7 +1602,7 @@ def api():
                 unique_metrics = list(set(unique_metrics_list))
 
         data_dict = {
-            "status": {},
+            "status": {"cluster_data": cluster_data},
             "data": {
                 "metrics": unique_metrics
             }
@@ -2195,6 +2207,22 @@ def panorama():
                                 if metric_name in other_unique_metrics:
                                     metric_found_in_other_redis = True
                                     logger.info('%s found in derivative_metrics in Redis at %s on port %s' % (metric_name, str(redis_ip), str(redis_port)))
+
+                    # @added 20201127 - Feature #3824: get_cluster_data
+                    #                   Feature #3820: HORIZON_SHARDS
+                    # Change from the deprecated OTHER_SKYLINE_REDIS_INSTANCES
+                    # to use the REMOTE_SKYLINE_INSTANCES and get_cluster_data
+                    if settings.REMOTE_SKYLINE_INSTANCES:
+                        remote_unique_metrics = None
+                        try:
+                            remote_unique_metrics = get_cluster_data('unique_metrics', 'metrics')
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: Webapp could not get unique_metrics from the remote Skyline instances')
+                        if remote_unique_metrics:
+                            logger.info('got %s remote unique_metrics from the remote Skyline instances' % str(len(remote_unique_metrics)))
+                            unique_metrics_list = unique_metrics + remote_unique_metrics
+                            unique_metrics = list(set(unique_metrics_list))
 
                     if metric_name not in unique_metrics and not metric_found_in_other_redis:
                         # @added 20200715 - Task #3648: webapp - fp_search - do not use Redis metric check
@@ -3295,6 +3323,22 @@ def ionosphere():
                                 metric_found_in_other_redis = True
                                 logger.info('%s found in derivative_metrics in Redis at %s on port %s' % (metric_name, str(redis_ip), str(redis_port)))
 
+                # @added 20201127 - Feature #3824: get_cluster_data
+                #                   Feature #3820: HORIZON_SHARDS
+                # Change from the deprecated OTHER_SKYLINE_REDIS_INSTANCES
+                # to use the REMOTE_SKYLINE_INSTANCES and get_cluster_data
+                if settings.REMOTE_SKYLINE_INSTANCES:
+                    remote_unique_metrics = None
+                    try:
+                        remote_unique_metrics = get_cluster_data('unique_metrics', 'metrics')
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: Webapp could not get unique_metrics from the remote Skyline instances')
+                    if remote_unique_metrics:
+                        logger.info('got %s remote unique_metrics from the remote Skyline instances' % str(len(remote_unique_metrics)))
+                        unique_metrics_list = unique_metrics + remote_unique_metrics
+                        unique_metrics = list(set(unique_metrics_list))
+
                 if metric_name not in unique_metrics and not metric_found_in_other_redis:
                     # @added 20200715 - Task #3648: webapp - fp_search - do not use Redis metric check
                     # Do not use the Redis metric check result in a webapp
@@ -4112,7 +4156,50 @@ def ionosphere():
                                     resp = json.dumps(
                                         {'results': 'Error: timestamp too old no training data exists, training data has been purged'})
                             else:
-                                logger.error('%s=%s no timestamp training data dir found - %s' % (key, str(value), ionosphere_data_dir))
+                                if settings.REMOTE_SKYLINE_INSTANCES:
+                                    logger.info('%s=%s no local training data dir found - %s will check other Skyline remote hosts' % (key, str(value), ionosphere_data_dir))
+                                else:
+                                    logger.error('error :: %s=%s no timestamp training data dir found - %s' % (key, str(value), ionosphere_data_dir))
+
+                                # @added 20201127 - Feature #3824: get_cluster_data
+                                #                   Feature #3820: HORIZON_SHARDS
+                                # Determine which remote Skyline host the metric
+                                # assigned to and return the client a redirect
+                                # to the remote Skyline instance that will have
+                                # the ionosphere training data for the metric
+                                if settings.REMOTE_SKYLINE_INSTANCES:
+                                    base_name = request.args.get('metric', 0)
+                                    redis_metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(base_name))
+                                    metric_assigned_to = None
+                                    logger.info('checking which remote Skyline instance is assigned - %s' % str(base_name))
+                                    for item in settings.REMOTE_SKYLINE_INSTANCES:
+                                        try:
+                                            remote_unique_metrics = None
+                                            try:
+                                                remote_unique_metrics = get_cluster_data('unique_metrics', 'metrics', only_host=str(item[0]))
+                                            except:
+                                                logger.error(traceback.format_exc())
+                                                logger.error('error :: Webapp could not get unique_metrics from the remote Skyline instance - %s' % str(item[0]))
+                                            if remote_unique_metrics:
+                                                logger.info('got %s unique_metrics from the remote Skyline instance - %s' % (
+                                                    str(len(remote_unique_metrics)), str(item[0])))
+                                                if redis_metric_name in remote_unique_metrics:
+                                                    metric_assigned_to = str(item[0])
+                                                    logger.info('found %s on %s' % (str(base_name), str(item[0])))
+                                                    break
+                                        except:
+                                            logger.error(traceback.format_exc())
+                                            logger.error('error :: checking which remote Skyline instance is assigned metric to check training_data')
+
+                                    if not metric_assigned_to:
+                                        logger.error('metric %s not found on any Skyline host' % str(base_name))
+                                        resp = json.dumps(
+                                            {'results': 'Error: no training data dir exists only any Skyline host - ' + ionosphere_data_dir + ' - go on... nothing here.'})
+                                    else:
+                                        alt_redirect_url = '%s/ionosphere?timestamp=%s&metric=%s' % (str(metric_assigned_to), str(value), str(base_name))
+                                        logger.info('redirecting client to - %s' % alt_redirect_url)
+                                        return redirect(alt_redirect_url)
+
                                 # @added 20180713 - Branch #2270: luminosity
                                 # Use settings.ALTERNATIVE_SKYLINE_URLS if they are
                                 # declared
@@ -4191,6 +4278,22 @@ def ionosphere():
                                     logger.error('error :: failed to connect to Redis at %s on port %s' % (str(redis_ip), str(redis_port)))
                             if metric_name in other_unique_metrics:
                                 metric_found = True
+
+                    # @added 20201127 - Feature #3824: get_cluster_data
+                    #                   Feature #3820: HORIZON_SHARDS
+                    # Change from the deprecated OTHER_SKYLINE_REDIS_INSTANCES
+                    # to use the REMOTE_SKYLINE_INSTANCES and get_cluster_data
+                    if settings.REMOTE_SKYLINE_INSTANCES:
+                        remote_unique_metrics = None
+                        try:
+                            remote_unique_metrics = get_cluster_data('unique_metrics', 'metrics')
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: Webapp could not get unique_metrics from the remote Skyline instances')
+                        if remote_unique_metrics:
+                            logger.info('got %s remote unique_metrics from the remote Skyline instances' % str(len(remote_unique_metrics)))
+                            unique_metrics_list = unique_metrics + remote_unique_metrics
+                            unique_metrics = list(set(unique_metrics_list))
 
                     # if metric_name not in unique_metrics:
                     if metric_name not in unique_metrics and not metric_found:
@@ -4299,6 +4402,41 @@ def ionosphere():
                         else:
                             # @added 20200814 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
                             training_data_dir_found = True
+
+                        # @added 20201127 - Feature #3824: get_cluster_data
+                        #                   Feature #3820: HORIZON_SHARDS
+                        # Determine which remote Skyline host the metric
+                        # assigned to
+                        if settings.REMOTE_SKYLINE_INSTANCES and not training_data_dir_found:
+                            base_name = request.args.get('metric', 0)
+                            redis_metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(base_name))
+                            metric_assigned_to = None
+                            logger.info('checking which remote Skyline instance is assigned - %s' % str(base_name))
+                            for item in settings.REMOTE_SKYLINE_INSTANCES:
+                                try:
+                                    remote_unique_metrics = None
+                                    try:
+                                        remote_unique_metrics = get_cluster_data('unique_metrics', 'metrics', only_host=str(item[0]))
+                                    except:
+                                        logger.error(traceback.format_exc())
+                                        logger.error('error :: Webapp could not get unique_metrics from the remote Skyline instance - %s' % str(item[0]))
+                                    if remote_unique_metrics:
+                                        logger.info('got %s unique_metrics from the remote Skyline instance - %s' % (
+                                            str(len(remote_unique_metrics)), str(item[0])))
+                                        if redis_metric_name in remote_unique_metrics:
+                                            metric_assigned_to = str(item[0])
+                                            logger.info('found %s on %s' % (str(base_name), str(item[0])))
+                                            break
+                                except:
+                                    logger.error(traceback.format_exc())
+                                    logger.error('error :: checking which remote Skyline instance is assigned metric to check training_data')
+
+                            if not metric_assigned_to:
+                                logger.error('metric %s not found on any Skyline host' % str(base_name))
+                            else:
+                                alt_redirect_url = '%s/ionosphere?timestamp=%s&metric=%s' % (str(metric_assigned_to), str(requested_timestamp), str(base_name))
+                                logger.info('redirecting client to - %s' % alt_redirect_url)
+                                return redirect(alt_redirect_url)
 
                         # @added 20200814 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
                         # if not historical_training_data_exists:

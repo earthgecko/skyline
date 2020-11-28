@@ -679,7 +679,11 @@ def panorama_anomaly_details(anomaly_id):
 
 
 # @added 20201103 - Feature #3824: get_cluster_data
-def get_cluster_data(api_endpoint, data_required, endpoint_params={}):
+# @modified 20201127 - Feature #3824: get_cluster_data
+#                      Feature #3820: HORIZON_SHARDS
+# Allow to query only a single host in the cluster so that just the response
+# can from a single host in the cluster can be evaluated
+def get_cluster_data(api_endpoint, data_required, only_host='all', endpoint_params={}):
     """
     Gets data from the /api of REMOTE_SKYLINE_INSTANCES.  This allows the user
     to query a single Skyline webapp node in a cluster and the Skyline instance
@@ -690,10 +694,13 @@ def get_cluster_data(api_endpoint, data_required, endpoint_params={}):
         Skyline instances
     :param data_required: the element from the api json response that is
         required
+    :param only_host: The remote Skyline host to query, if not passed all are
+        queried.
     :param endpoint_params: A dictionary of any additional parameters that may
         be required
     :type api_endpoint: str
     :type data_required: str
+    :type only_host: str
     :type endpoint_params: dict
     :return: list
     :rtype: list
@@ -707,11 +714,30 @@ def get_cluster_data(api_endpoint, data_required, endpoint_params={}):
         read_timeout = 10
     use_timeout = (int(connect_timeout), int(read_timeout))
     data = []
+
+    if only_host != 'all':
+        logger.info('get_cluster_data :: querying all remote hosts as only_host set to %s' % (
+            str(only_host)))
+
     for item in settings.REMOTE_SKYLINE_INSTANCES:
         r = None
         user = None
         password = None
         use_auth = False
+
+        # @added 20201127 - Feature #3824: get_cluster_data
+        #                   Feature #3820: HORIZON_SHARDS
+        # Allow to query only a single host in the cluster so that just the response
+        # can from a single host in the cluster can be evaluated
+        if only_host != 'all':
+            if only_host != str(item[0]):
+                logger.info('get_cluster_data :: not querying %s as only_host set to %s' % (
+                    str(item[0]), str(only_host)))
+                continue
+            else:
+                logger.info('get_cluster_data :: querying %s as only_host set to %s' % (
+                    str(item[0]), str(only_host)))
+
         try:
             user = str(item[1])
             password = str(item[2])
@@ -719,6 +745,8 @@ def get_cluster_data(api_endpoint, data_required, endpoint_params={}):
         except:
             user = None
             password = None
+        logger.info('get_cluster_data :: querying %s for %s on %s' % (
+            str(item[0]), str(data_required), str(api_endpoint)))
         try:
             url = '%s/api?%s' % (str(item[0]), api_endpoint)
             if use_auth:
@@ -742,6 +770,8 @@ def get_cluster_data(api_endpoint, data_required, endpoint_params={}):
                     api_endpoint, str(item)))
             remote_data = []
             if js:
+                logger.info('get_cluster_data :: got response for %s from %s' % (
+                    str(data_required), str(item[0])))
                 try:
                     remote_data = js['data'][data_required]
                 except:
@@ -752,7 +782,6 @@ def get_cluster_data(api_endpoint, data_required, endpoint_params={}):
                 logger.info('get_cluster_data :: got %s %s from %s' % (
                     str(len(remote_data)), str(data_required), str(item[0])))
                 data = data + remote_data
-
     return data
 
 
