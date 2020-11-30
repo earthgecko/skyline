@@ -1795,16 +1795,45 @@ class Analyzer(Thread):
                         except Exception as e:
                             logger.error('error :: could not query Redis for running_derivative_metric_key - %s: %s' % (
                                 running_derivative_metric_key, e))
+                        # @added 20201130 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
+                        # Do not reclassify until a new data point and timestamp
+                        # are available to prevent a boring sparsely populated
+                        # from being classified on the same subsequence 3 times
+                        # in a row if no new data points are submitted
+                        last_monotonic_timestamp = 0
+                        running_derivative_metric_last_timestamp_key = 'zz.derivative_metric.last_timestamp.%s' % str(base_name)
+                        if last_key_value:
+                            try:
+                                last_monotonic_timestamp = int(self.redis_conn_decoded.get(running_derivative_metric_last_timestamp_key))
+                            except Exception as e:
+                                logger.error('error :: could not query Redis for running_derivative_metric_last_timestamp_key - %s: %s' % (
+                                    running_derivative_metric_last_timestamp_key, e))
+                        if last_monotonic_timestamp:
+                            if last_monotonic_timestamp == int(timeseries[-1][0]):
+                                last_key_value = last_key_value - 1
+
                         try:
                             monotonic_count = int(last_key_value) + 1
                         except:
                             pass
+
                         if is_strictly_increasing_monotonically:
                             try:
                                 self.redis_conn.setex(
                                     running_derivative_metric_key, 960, monotonic_count)
                             except Exception as e:
                                 logger.error('error :: could not set Redis running_derivative_metric key: %s' % e)
+
+                            # @added 20201130 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
+                            # Set a key with the last timestamp incremented and
+                            # classified on
+                            try:
+                                self.redis_conn.setex(
+                                    running_derivative_metric_last_timestamp_key,
+                                    960, int(timeseries[-1][0]))
+                            except Exception as e:
+                                logger.error('error :: could not set Redis running_derivative_metric_last_timestamp_key: %s' % e)
+
                         # With manage_derivative_metrics running every 300
                         # seconds the metric has to be monotonic in the last
                         # 15 data points.
