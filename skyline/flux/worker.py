@@ -87,8 +87,6 @@ try:
 except:
     IDENTIFY_AIRGAPS = False
 
-
-
 parent_skyline_app = 'flux'
 
 # @added 20191010 - Feature #3250: Allow Skyline to send metrics to another Carbon host
@@ -364,9 +362,18 @@ class Worker(Process):
                         try:
                             self.redis_conn.rename('flux.metrics_data_sent', new_set)
                             logger.info('worker :: renamed flux.metrics_data_sent Redis set to %s' % new_set)
-                        except:
-                            logger.error(traceback.format_exc())
-                            logger.error('error :: worker :: failed to rename flux.metrics_data_sent to %s Redis set' % new_set)
+                        # @added 20201128 - Feature #3820: HORIZON_SHARDS
+                        # With metrics that come in at a frequency of less
+                        # than 60 seconds, it is possible that this key will
+                        # not exist as flux has not been sent metric data
+                        # so this operation will error with no such key
+                        except Exception as e:
+                            traceback_str = traceback.format_exc()
+                            if 'no such key' in e:
+                                logger.warn('warning :: worker :: failed to rename flux.metrics_data_sent to %s Redis set - flux has not recieved data in 60 seconds - %s' % (new_set, e))
+                            else:
+                                logger.error(traceback_str)
+                                logger.error('error :: worker :: failed to rename flux.metrics_data_sent to %s Redis set' % new_set)
                         try:
                             self.redis_conn.expire(new_set, 600)
                         except:
@@ -696,9 +703,19 @@ class Worker(Process):
                     try:
                         self.redis_conn.rename('flux.metrics_data_sent', new_set)
                         logger.info('worker :: renamed flux.metrics_data_sent Redis set to %s' % new_set)
-                    except:
-                        logger.error(traceback.format_exc())
-                        logger.error('error :: worker :: failed to rename flux.metrics_data_sent to %s Redis set' % new_set)
+                    # @modified 20201128 - Feature #3820: HORIZON_SHARDS
+                    # With metrics that come in at a frequency of less
+                    # than 60 seconds, it is possible that this key will
+                    # not exist as flux has not been sent metric data
+                    # so this operation will error with no such key
+                    except Exception as e:
+                        traceback_str = traceback.format_exc()
+                        if 'no such key' in e:
+                            logger.warn('warning :: worker :: failed to rename flux.metrics_data_sent to %s Redis set - flux has not recieved data in 60 seconds - %s' % (new_set, e))
+                        else:
+                            logger.error(traceback_str)
+                            logger.error('error :: worker :: failed to rename flux.metrics_data_sent to %s Redis set' % new_set)
+
                     try:
                         self.redis_conn.expire(new_set, 600)
                     except:
