@@ -1391,6 +1391,18 @@ class Mirage(Thread):
                             logger.error(traceback.format_exc())
                             logger.error('error :: failed to remove waterfall alert item for %s at %s from Redis set %s' % (
                                 base_name, str(metric_timestamp), redis_set))
+                    # @added 20201128 - Feature #3734: waterfall alerts
+                    # If the check just done is new than an existing analyzer
+                    # waterfall alert metric timestamp remove those keys as well
+                    if int(waterfall_alert[1]) < metric_timestamp:
+                        try:
+                            self.redis_conn.srem(redis_set, str(waterfall_alert))
+                            logger.info('removed waterfall alert item with older timestamp from Redis set %s - %s' % (
+                                redis_set, str(waterfall_alert)))
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: failed to remove waterfall alert item for %s at %s from Redis set %s' % (
+                                base_name, str(metric_timestamp), redis_set))
 
             logger.info('not anomalous     :: %s with %s' % (metric, value))
 
@@ -2335,7 +2347,12 @@ class Mirage(Thread):
                                 if len(metric_var_files) > 10 and not feedback_cache_key_exists:
                                     logger.info('Mirage is busy removing feedback metric check')
                                     remove_feedback_metric_check = True
-                                else:
+                                # @modified 20201128 - Feature #3734: waterfall alerts
+                                # Only add if does not exist and always add
+                                # else:
+                                #        try:
+                                #            self.redis_conn.setex(feedback_cache_key, 600, feedback_metric_process_time)
+                                if not feedback_cache_key_exists:
                                     logger.info('feedback metric identified as not processed in last 600 seconds adding Redis key with 600 TTL and processing - %s' % feedback_cache_key)
                                     try:
                                         self.redis_conn.setex(feedback_cache_key, 600, feedback_metric_process_time)
@@ -2407,11 +2424,27 @@ class Mirage(Thread):
                                             self.redis_conn.srem(redis_set, str(waterfall_alert))
                                             logger.info('removed waterfall alert item for %s from Redis set %s - %s' % (
                                                 log_str, redis_set, str(waterfall_alert)))
-                                            break
+                                            # @modified 20201128 - Feature #3734: waterfall alerts
+                                            # Do not break, check and remove
+                                            # waterfall_alert items with older
+                                            # timestamps as well
+                                            # break
                                         except:
                                             logger.error(traceback.format_exc())
                                             logger.error('error :: failed to remove waterfall alert item for % %s at %s from Redis set %s' % (
                                                 log_str, base_name, str(metric_timestamp), redis_set))
+                                # @added 20201128 - Feature #3734: waterfall alerts
+                                # If the check just done is new than an existing analyzer
+                                # waterfall alert metric timestamp remove those keys as well
+                                if int(waterfall_alert[1]) < metric_timestamp:
+                                    try:
+                                        self.redis_conn.srem(redis_set, str(waterfall_alert))
+                                        logger.info('removed waterfall alert item with older timestamp for %s from Redis set %s - %s' % (
+                                            log_str, redis_set, str(waterfall_alert)))
+                                    except:
+                                        logger.error(traceback.format_exc())
+                                        logger.error('error :: failed to remove waterfall alert item for % %s at %s from Redis set %s' % (
+                                            log_str, base_name, str(metric_timestamp), redis_set))
 
                 # Discover metric to analyze
                 metric_var_files = ''
@@ -3356,6 +3389,17 @@ class Mirage(Thread):
                                             # Do not modify the alert list object, create a new one
                                             new_alert = list(alert)
                                             new_alert.append(['anomaly_id', anomaly_id])
+
+                                            # @added 20201130 - Feature #3772: Add the anomaly_id to the http_alerter json
+                                            # Determine the triggered_algorithms
+                                            # and algorithms_run
+                                            try:
+                                                triggered_algorithms = metric[4]
+                                                algorithms_run = metric[5]
+                                            except:
+                                                triggered_algorithms = []
+                                                algorithms_run = []
+
                                             # @added 20201111 - Feature #3772: Add the anomaly_id to the http_alerter json
                                             # Add the real anomalyScore
                                             try:
