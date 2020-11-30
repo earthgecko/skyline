@@ -1173,6 +1173,18 @@ class Ionosphere(Thread):
                             logger.error(traceback.format_exc())
                             logger.error('error :: failed to remove waterfall alert item for %s at %s from Redis set %s' % (
                                 base_name, str(metric_timestamp), redis_waterfall_alert_set))
+                    # @added 20201128 - Feature #3734: waterfall alerts
+                    # If the check just done is newer than an existing mirage
+                    # waterfall alert metric timestamp remove those keys as well
+                    if int(waterfall_alert[1]) < metric_timestamp:
+                        try:
+                            self.redis_conn.srem(redis_waterfall_alert_set, str(waterfall_alert))
+                            logger.info('removed waterfall alert item with older timestamp from Redis set %s - %s' % (
+                                redis_waterfall_alert_set, str(waterfall_alert)))
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: failed to remove waterfall alert item for %s at %s from Redis set %s' % (
+                                base_name, str(metric_timestamp), redis_waterfall_alert_set))
             return
 
         # @added 20200908 - Feature #3734: waterfall alerts
