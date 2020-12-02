@@ -1454,6 +1454,10 @@ def api():
         #     new_ionosphere_learn_work = ionosphere_learn_work + echo_work_no_full_duration
         #     ionosphere_learn_work = new_ionosphere_learn_work
 
+        # @added 20201202 - Feature #3824: get_cluster_data
+        # Added some debug logging
+        logger.debug('debug :: ionosphere_learn_work - %s' % str(ionosphere_learn_work))
+
         # @added 20201112 - Feature #3824: get_cluster_data
         if settings.REMOTE_SKYLINE_INSTANCES and cluster_data:
             remote_ionosphere_learn_work = None
@@ -1465,7 +1469,11 @@ def api():
             if remote_ionosphere_learn_work:
                 logger.info('got %s remote ionosphere_learn_work from the remote Skyline instances' % str(len(remote_ionosphere_learn_work)))
                 ionosphere_learn_work_list = ionosphere_learn_work + remote_ionosphere_learn_work
-                ionosphere_learn_work = list(set(ionosphere_learn_work_list))
+                # @modified 20201202 - Feature #3824: get_cluster_data
+                # Cannot use set on unhashable list and debug logging
+                # ionosphere_learn_work = list(set(ionosphere_learn_work_list))
+                ionosphere_learn_work = list(ionosphere_learn_work_list)
+                logger.debug('debug :: remote_ionosphere_learn_work - ionosphere_learn_work - %s' % str(ionosphere_learn_work))
 
         # @added 20201104 - Feature #3368: webapp api - ionosphere_learn_work
         # Convert strings to json
@@ -1498,6 +1506,10 @@ def api():
                     logger.error(traceback.format_exc())
                     logger.error('error :: Webapp could not build the ionosphere_learn_work dict to jsonify - %s' % str(str_item))
             data_dict = {"status": {"cluster_data": cluster_data}, "data": {"metrics": metrics_json}}
+            # @added 20201202 - Feature #3824: get_cluster_data
+            # Added some debug logging
+            logger.debug('debug :: data_dict - %s' % str(data_dict))
+
             return jsonify(data_dict), 200
 
         data_dict = {"status": {"cluster_data": cluster_data}, "data": {"metrics": ionosphere_learn_work}}
