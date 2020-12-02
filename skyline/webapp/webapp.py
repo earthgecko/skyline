@@ -1041,14 +1041,23 @@ def api():
             logger.error(fail_msg)
             return internal_error(fail_msg, trace)
         anomaly_dict = {
-            'id': anomaly_id,
+            # @modified 20201201 - Feature #3740: webapp - anomaly API endpoint
+            # Due to the anomaly ids being used as json keys in the possible
+            # related anomalies and matches the anomaly id is always typed as a
+            # str
+            # 'id': anomaly_id,
+            'id': str(anomaly_id),
             'metric': anomaly_data[1],
             'timestamp': anomaly_data[3],
             'value': anomaly_data[2],
             'end_timestamp': anomaly_end_timestamp,
             'cross correlations': correlationsDict,
-            'possible related anomaly ids': anomaliesDict,
-            'possible related match ids': matchesDict,
+            # @modified 20201201 - Feature #3740: webapp - anomaly API endpoint
+            # Corrected the key names
+            # 'possible related anomaly ids': anomaliesDict,
+            # 'possible related match ids': matchesDict,
+            'possible related anomalies': anomaliesDict,
+            'possible related matches': matchesDict,
         }
 
         data_dict = {"status": {}, "data": {"anomaly": anomaly_dict}}
