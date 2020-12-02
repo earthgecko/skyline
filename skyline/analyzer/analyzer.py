@@ -1804,7 +1804,14 @@ class Analyzer(Thread):
                         running_derivative_metric_last_timestamp_key = 'zz.derivative_metric.last_timestamp.%s' % str(base_name)
                         if last_key_value:
                             try:
-                                last_monotonic_timestamp = int(self.redis_conn_decoded.get(running_derivative_metric_last_timestamp_key))
+                                # @modified 20201204 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
+                                # Only set to int if the response in not None
+                                # otherwise it will log an error and if this
+                                # data does not exist it is OK it is idempotent
+                                # last_monotonic_timestamp_data = int(self.redis_conn_decoded.get(running_derivative_metric_last_timestamp_key))
+                                last_monotonic_timestamp_data = int(self.redis_conn_decoded.get(running_derivative_metric_last_timestamp_key))
+                                if last_monotonic_timestamp_data:
+                                    last_monotonic_timestamp = int(last_monotonic_timestamp_data)
                             except Exception as e:
                                 logger.error('error :: could not query Redis for running_derivative_metric_last_timestamp_key - %s: %s' % (
                                     running_derivative_metric_last_timestamp_key, e))
