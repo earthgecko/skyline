@@ -942,6 +942,108 @@ Or if no metrics with training data are present <code>{"data":{"metrics":[]},"st
 		    </tbody>
 		  </table>
 
+	  <h4><span class="logo"><span class="sky">API method ::</span> <span class="re">/api?yhat_values</span></span></h4>
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Name</th>
+  		        <th>Description</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+  		        <td>Description:</td>
+  		        <td>Returns the yhat values (mean and value OPTIONAL) for a metric timeseries as a json object</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Endpoint:</td>
+  		        <td>/api?yhat_values</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Method:</td>
+  		        <td>GET</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Parameters:</td>
+  		        <td>yhat_values=[true | boolean | <font color=red>required</font>]</br>
+                  metric=[metric name | str | <font color=red>required</font>]</br>
+                  from=[unix timestamp | str | <font color=red>required</font>]</br>
+                  until=[unix timestamp | str | <font color=red>required</font>]</br>
+                  include_value=[false | boolean | optional defaults to false]</br>
+                  include_mean=[false | boolean | optional defaults to false]</br>
+                  include_yhat_real_lower=[false | boolean | optional defaults to false]</br>
+              </td>
+  		      </tr>
+  		      <tr>
+  		        <td>Request examples:</td>
+		          <td><code>/api?yhat_values=true&metric=vista.demo_robustperception_io.prometheus.node_load1&from=1606147200&until=1606750440</code> only returns timestamps, yhat_upper and yhat_lower vlaues per timestamp<br>
+		          <code>/api?yhat_values=true&metric=vista.demo_robustperception_io.prometheus.node_load1&from=1606147200&until=1606750440&include_yhat_real_lower=true&include_mean=true&include_value=true</code> only returns timestamps, yhat_upper, yhat_lower and yhat_real_lower (will not drop below 0 if the metric does not)<br>
+              </td>
+  		      </tr>
+  		      <tr>
+  		        <td>Responses:</td>
+  		        <td>200 with json response<br>
+<code>{
+  "data": {
+    "metric": "vista.demo_robustperception_io.prometheus.node_load1",
+    "yhat_values": {
+      "1606147260": {
+        "yhat_lower": 1.2,
+        "yhat_upper": 1.2
+      },
+      "1606147320": {
+        "yhat_lower": 1.2,
+        "yhat_upper": 1.2
+      },...
+      "1606750440": {
+        "yhat_lower": 0.8529541536511133,
+        "yhat_upper": 1.491394364351672
+      }
+    }
+  },
+  "status": {
+    "request_time": "0.587132",
+    "response": 200
+  }
+}</code><br>
+With value, mean and yhat_real_lower passed
+<code>{
+  "data": {
+    "metric": "vista.demo_robustperception_io.prometheus.node_load1",
+    "yhat_values": {
+      "1606147260": {
+        "mean": 1.2,
+        "value": 1.2,
+        "yhat_lower": 1.2,
+        "yhat_real_lower": 1.2,
+        "yhat_upper": 1.2
+      },
+      "1606147320": {
+        "mean": 1.2,
+        "value": 1.2,
+        "yhat_lower": 1.2,
+        "yhat_real_lower": 1.2,
+        "yhat_upper": 1.2
+      },...
+      "1606750440": {
+        "mean": 1.1721742590013926,
+        "value": 1.27,
+        "yhat_lower": 0.8529541536511133,
+        "yhat_real_lower": 0.8529541536511133,
+        "yhat_upper": 1.491394364351672
+      }
+    }
+  },
+  "status": {
+    "request_time": "0.579628",
+    "response": 200
+  }
+}</code<br>
+              </td>
+  		      </tr>
+		    </tbody>
+		  </table>
+
 
 <!-- END /api block -->
 {% endblock %}

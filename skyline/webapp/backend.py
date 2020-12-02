@@ -825,8 +825,12 @@ def get_yhat_values(
                     yhat_dict[int_ts]['mean'] = va_mean
                 yhat_lower = va_mean - va_std_3
                 if include_yhat_real_lower:
-                    if yhat_lower < array_amin and array_amin == 0:
-                        yhat_dict[int_ts]['yhat_real_lower'] = array_amin
+                    # @modified 20201202 - Feature #3850: webapp - yhat_values API endoint
+                    # Set the yhat_real_lower correctly
+                    # if yhat_lower < array_amin and array_amin == 0:
+                    #     yhat_dict[int_ts]['yhat_real_lower'] = array_amin
+                    if yhat_lower < 0 and array_amin > -0.0000000001:
+                        yhat_dict[int_ts]['yhat_real_lower'] = 0
                     else:
                         yhat_dict[int_ts]['yhat_real_lower'] = yhat_lower
                 yhat_dict[int_ts]['yhat_lower'] = yhat_lower
