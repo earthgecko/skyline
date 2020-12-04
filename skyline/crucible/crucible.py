@@ -130,6 +130,9 @@ class Crucible(Thread):
             kill(self.current_pid, 0)
             kill(self.parent_pid, 0)
         except:
+            # @added 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
+            # Log warning
+            logger.warn('warning :: parent or current process dead')
             exit(0)
 
     # @added 20200327 - Branch #3262: py3

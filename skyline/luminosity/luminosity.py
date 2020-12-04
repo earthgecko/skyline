@@ -184,6 +184,9 @@ class Luminosity(Thread):
             kill(self.current_pid, 0)
             kill(self.parent_pid, 0)
         except:
+            # @added 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
+            # Log warning
+            logger.warn('warning :: parent or current process dead')
             exit(0)
 
     def mysql_insert(self, insert):
@@ -316,7 +319,7 @@ class Luminosity(Thread):
         try:
             self.redis_conn.sadd(redis_set, data)
         except:
-            logger.info(traceback.format_exc())
+            logger.error(traceback.format_exc())
             logger.error('error :: failed to add %s to Redis set %s' % (
                 str(data), str(redis_set)))
         redis_set = 'luminosity.runtimes'
@@ -324,7 +327,7 @@ class Luminosity(Thread):
         try:
             self.redis_conn.sadd(redis_set, data)
         except:
-            logger.info(traceback.format_exc())
+            logger.error(traceback.format_exc())
             logger.error('error :: failed to add %s to Redis set %s' % (
                 str(data), str(redis_set)))
 
@@ -353,7 +356,8 @@ class Luminosity(Thread):
         correlations_shifted_too_far = 0
         if sorted_correlations:
             logger.info('number of correlations shifted too far - %s' % str(correlations_shifted_too_far))
-            logger.info('sorted_correlations :: %s' % str(sorted_correlations))
+            if LOCAL_DEBUG or ENABLE_LUMINOSITY_DEBUG:
+                logger.debug('debug :: sorted_correlations :: %s' % str(sorted_correlations))
             luminosity_correlations = []
             for metric, coefficient, shifted, shifted_coefficient in sorted_correlations:
                 for metric_id, metric_name in correlated_metrics_list:
@@ -383,7 +387,7 @@ class Luminosity(Thread):
                     try:
                         self.redis_conn.sadd(redis_set, data)
                     except:
-                        logger.info(traceback.format_exc())
+                        logger.error(traceback.format_exc())
                         logger.error('error :: failed to add %s to Redis set %s' % (
                             str(data), str(redis_set)))
 
@@ -416,7 +420,8 @@ class Luminosity(Thread):
         if luminosity_populated:
             logger.info('%s correlations added to database for %s anomaly id %s' % (
                 str(number_of_correlations_in_insert), base_name, str(anomaly_id)))
-            logger.info('values_string :: %s' % str(values_string))
+            if LOCAL_DEBUG or ENABLE_LUMINOSITY_DEBUG:
+                logger.debug('debug :: values_string :: %s' % str(values_string))
 
         return luminosity_populated
 

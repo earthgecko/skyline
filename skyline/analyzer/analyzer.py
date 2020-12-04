@@ -400,6 +400,9 @@ class Analyzer(Thread):
             kill(self.current_pid, 0)
             kill(self.parent_pid, 0)
         except:
+            # @added 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
+            # Log warning
+            logger.warn('warning :: parent or current process dead')
             exit(0)
 
     # @added 20200213 - Bug #3448: Repeated airgapped_metrics
@@ -631,7 +634,7 @@ class Analyzer(Thread):
                             logger.error(traceback.format_exc())
                             logger.error('error :: failed to generate list of metric names from sorted_low_priority_metrics_last_analyzed')
                         if low_priority_analyzed_metrics:
-                            logger.info('removing reordered low priority metrics that are not assinged to this process')
+                            logger.info('removing reordered low priority metrics that are not assigned to this process')
                             low_priority_analyzed_metrics_count = len(low_priority_analyzed_metrics)
                             low_priority_assigned_metrics_count = 0
                             assigned_low_priority_analyzed_metrics = []
@@ -642,7 +645,7 @@ class Analyzer(Thread):
                             if assigned_low_priority_analyzed_metrics:
                                 removed_metrics_count = low_priority_analyzed_metrics_count - low_priority_assigned_metrics_count
                                 low_priority_analyzed_metrics = assigned_low_priority_analyzed_metrics
-                                logger.info('removed %s low priority metrics that are not assinged to this process' % str(removed_metrics_count))
+                                logger.info('removed %s low priority metrics that are not assigned to this process' % str(removed_metrics_count))
 
                     # Remove Boring, Stale and TooShort metrics
                     # The method in use here is fast enough, on 16000 metrics it
@@ -1788,13 +1791,33 @@ class Analyzer(Thread):
                     # classified as monotonic.
                     if not last_derivative_metric_key:
                         running_derivative_metric_key = 'zz.derivative_metric.%s' % str(base_name)
+
+                        # @added 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
+                        # Handle key not existing and exception on last_key_value
+                        # if None
+                        last_key_value_data = None
+
                         last_key_value = 0
                         monotonic_count = 0
                         try:
-                            last_key_value = self.redis_conn_decoded.get(running_derivative_metric_key)
+                            # @modified 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
+                            # Handle key not existing and exception on last_key_value
+                            # if None
+                            # last_key_value = self.redis_conn_decoded.get(running_derivative_metric_key)
+                            last_key_value_data = self.redis_conn_decoded.get(running_derivative_metric_key)
                         except Exception as e:
                             logger.error('error :: could not query Redis for running_derivative_metric_key - %s: %s' % (
                                 running_derivative_metric_key, e))
+
+                        # @added 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
+                        # Handle key not existing and exception on last_key_value
+                        # if None
+                        if last_key_value_data:
+                            try:
+                                last_key_value = int(last_key_value_data)
+                            except:
+                                last_key_value = 0
+
                         # @added 20201130 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
                         # Do not reclassify until a new data point and timestamp
                         # are available to prevent a boring sparsely populated
@@ -1804,20 +1827,31 @@ class Analyzer(Thread):
                         running_derivative_metric_last_timestamp_key = 'zz.derivative_metric.last_timestamp.%s' % str(base_name)
                         if last_key_value:
                             try:
-                                # @modified 20201204 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
+                                # @modified 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
                                 # Only set to int if the response in not None
                                 # otherwise it will log an error and if this
                                 # data does not exist it is OK it is idempotent
                                 # last_monotonic_timestamp_data = int(self.redis_conn_decoded.get(running_derivative_metric_last_timestamp_key))
-                                last_monotonic_timestamp_data = int(self.redis_conn_decoded.get(running_derivative_metric_last_timestamp_key))
+                                last_monotonic_timestamp_data = self.redis_conn_decoded.get(running_derivative_metric_last_timestamp_key)
                                 if last_monotonic_timestamp_data:
                                     last_monotonic_timestamp = int(last_monotonic_timestamp_data)
                             except Exception as e:
                                 logger.error('error :: could not query Redis for running_derivative_metric_last_timestamp_key - %s: %s' % (
                                     running_derivative_metric_last_timestamp_key, e))
-                        if last_monotonic_timestamp:
+
+                            # @modified 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
                             if last_monotonic_timestamp == int(timeseries[-1][0]):
                                 last_key_value = last_key_value - 1
+
+                        # @added 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
+                        # Handle key not existing and exception on last_key_value
+                        # if None
+                        if last_monotonic_timestamp:
+                            try:
+                                if last_monotonic_timestamp == int(timeseries[-1][0]):
+                                    last_key_value = last_key_value - 1
+                            except:
+                                pass
 
                         try:
                             monotonic_count = int(last_key_value) + 1
@@ -3737,7 +3771,7 @@ class Analyzer(Thread):
                         # mirage_unique_metrics = []
                         logger.info('Redis mirage.unique_metrics set to refresh, checking for metrics to remove')
                         mirage_metrics_to_remove = []
-# TODO use sets method
+                        # TODO use sets method
                         for mirage_metric in mirage_unique_metrics:
                             if mirage_metric not in unique_metrics:
                                 mirage_metrics_to_remove.append(mirage_metric)
@@ -6729,9 +6763,20 @@ class Analyzer(Thread):
                     last_dynamic_low_priority_set_count = 0
                 try:
                     self.redis_conn.rename('analyzer.low_priority_metrics.dynamically_analyzed', 'aet.analyzer.low_priority_metrics.dynamically_analyzed')
-                except:
-                    logger.error(traceback.format_exc())
-                    logger.error('error :: failed to rename Redis set - analyzer.low_priority_metrics.last_dynamically_analyzed to aet.analyzer.low_priority_metrics.last_dynamically_analyzed')
+                    logger.info('renamed Redis set analyzer.low_priority_metrics.last_dynamically_analyzed to aet.analyzer.low_priority_metrics.dynamically_analyzed')
+                # @modified 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
+                #                      Feature #3808: ANALYZER_DYNAMICALLY_ANALYZE_LOW_PRIORITY_METRICS
+                # Handle key not existing as this is idempotent
+                # except:
+                #     logger.error(traceback.format_exc())
+                #     logger.error('error :: failed to rename Redis set - analyzer.low_priority_metrics.last_dynamically_analyzed to aet.analyzer.low_priority_metrics.last_dynamically_analyzed')
+                except Exception as e:
+                    traceback_str = traceback.format_exc()
+                    if 'no such key' in str(e):
+                        logger.warn('warning :: failed to rename Redis set - analyzer.low_priority_metrics.last_dynamically_analyzed as the key does not exist')
+                    else:
+                        logger.error(traceback_str)
+                        logger.error('error :: failed to rename Redis set - analyzer.low_priority_metrics.last_dynamically_analyzed to aet.analyzer.low_priority_metrics.last_dynamically_analyzed')
                 low_priority_metric_count = 0
                 low_priority_metric_count_list = []
                 try:
