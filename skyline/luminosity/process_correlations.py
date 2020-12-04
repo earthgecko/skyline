@@ -82,6 +82,28 @@ redis_conn = get_redis_conn(skyline_app)
 redis_conn_decoded = get_redis_conn_decoded(skyline_app)
 
 
+# @added 20201203 - Feature #3860: luminosity - handle low frequency data
+# Handle varying metric resolutions
+def determine_resolution(timeseries):
+    """
+    Determine the resolution of the timeseries data
+    """
+    resolution = 60
+    try:
+        ts_resolution = int(timeseries[-1][0]) - int(timeseries[-2][0])
+        if ts_resolution != 60:
+            resolution = ts_resolution
+        # Handle data that has any big airgaps as best effort as possible by
+        # checking the previous timestamps
+        if ts_resolution > 3601:
+            ts_resolution = int(timeseries[-3][0]) - int(timeseries[-4][0])
+        if ts_resolution != 60:
+            resolution = ts_resolution
+    except:
+        pass
+    return resolution
+
+
 def get_anomaly(request_type):
     """
     Query the database for the anomaly details
@@ -143,6 +165,7 @@ def get_anomalous_ts(base_name, anomaly_timestamp):
             smtp_alerter_metrics = list(redis_conn_decoded.smembers('aet.analyzer.smtp_alerter_metrics'))
         except:
             smtp_alerter_metrics = []
+
         if base_name not in smtp_alerter_metrics:
             logger.error('%s has no alerter setting, not correlating' % base_name)
             return []
@@ -242,12 +265,19 @@ def get_anomalous_ts(base_name, anomaly_timestamp):
         derivative_timeseries = nonNegativeDerivative(timeseries)
         timeseries = derivative_timeseries
 
+    # @added 20201203 - Feature #3860: luminosity - handle low frequency data
+    # Determine data resolution
+    resolution = determine_resolution(timeseries)
+
     # Sample the time series
     # @modified 20180720 - Feature #2464: luminosity_remote_data
     # Added note here - if you modify the value of 600 here, it must be
     # modified in the luminosity_remote_data function in
     # skyline/webapp/backend.py as well
-    from_timestamp = anomaly_timestamp - 600
+    # @modified 20201203 - Feature #3860: luminosity - handle low frequency data
+    # from_timestamp = anomaly_timestamp - 600
+    from_timestamp = anomaly_timestamp - (resolution * 10)
+
     anomaly_ts = []
     for ts, value in timeseries:
         if int(ts) < from_timestamp:
@@ -399,7 +429,10 @@ def get_assigned_metrics(i, base_name):
 
 
 # @added 20180720 - Feature #2464: luminosity_remote_data
-def get_remote_assigned(anomaly_timestamp):
+# @modified 20201203 - Feature #3860: luminosity - handle low frequency data
+# Added the metric resolution
+# def get_remote_assigned(anomaly_timestamp):
+def get_remote_assigned(anomaly_timestamp, resolution):
     remote_assigned = []
     for remote_url, remote_user, remote_password in settings.REMOTE_SKYLINE_INSTANCES:
         # @modified 20180722 - Feature #2464: luminosity_remote_data
@@ -430,7 +463,11 @@ def get_remote_assigned(anomaly_timestamp):
         # @modified 20201117 - Feature #3824: get_cluster_data
         # Correct url with api for get_cluster_data
         # url = '%s/luminosity_remote_data?anomaly_timestamp=%s' % (remote_url, str(anomaly_timestamp))
-        url = '%s/api?luminosity_remote_data&anomaly_timestamp=%s' % (remote_url, str(anomaly_timestamp))
+        # @modified 20201203 - Feature #3860: luminosity - handle low frequency data
+        # Added the metric resolution
+        # url = '%s/api?luminosity_remote_data&anomaly_timestamp=%s' % (remote_url, str(anomaly_timestamp))
+        url = '%s/api?luminosity_remote_data&anomaly_timestamp=%s&resolution=%s' % (remote_url, str(anomaly_timestamp), str(resolution))
+
         response_ok = False
 
         # @added 20190519 - Branch #3002: docker
@@ -502,12 +539,20 @@ def get_correlations(
     start = timer()
     count = 0
     metrics_checked_for_correlation = 0
+
+    # @added 20201203 - Feature #3860: luminosity - handle low frequency data
+    # Determine data resolution
+    resolution = determine_resolution(anomalous_ts)
+
     # Sample the time series
     # @modified 20180720 - Feature #2464: luminosity_remote_data
     # Added note here - if you modify the value of 600 here, it must be
     # modified in the luminosity_remote_data function in
     # skyline/webapp/backend.py as well
-    from_timestamp = anomaly_timestamp - 600
+    # @modified 20201203 - Feature #3860: luminosity - handle low frequency data
+    # from_timestamp = anomaly_timestamp - 600
+    from_timestamp = anomaly_timestamp - (resolution * 10)
+
     correlated_metrics = []
     correlations = []
     no_data = False
@@ -591,6 +636,11 @@ def get_correlations(
                 logger.error('error :: nonNegativeDerivative')
 
         correlate_ts = []
+
+        # @added 20201203 - Feature #3860: luminosity - handle low frequency data
+        # Determine data resolution
+        resolution = determine_resolution(timeseries)
+
         for ts, value in timeseries:
             if int(ts) < from_timestamp:
                 continue
@@ -600,7 +650,10 @@ def get_correlations(
             # Added note here - if you modify the value of 61 here, it must be
             # modified in the luminosity_remote_data function in
             # skyline/webapp/backend.py as well
-            if int(ts) > (anomaly_timestamp + 61):
+            # @modified 20201203 - Feature #3860: luminosity - handle low frequency data
+            # Handle varying metric resolutions
+            # if int(ts) > (anomaly_timestamp + 61):
+            if int(ts) > (anomaly_timestamp + (resolution + 1)):
                 break
         if not correlate_ts:
             continue
@@ -615,14 +668,25 @@ def get_correlations(
                 # Added note here - if you modify the value of 120 here, it must be
                 # modified in the luminosity_remote_data function in
                 # skyline/webapp/backend.py as well
-                if int(a.exact_timestamp) < int(anomaly_timestamp - 120):
+                # @modified 20201203 - Feature #3860: luminosity - handle low frequency data
+                # Handle varying metric resolutions
+                # if int(a.exact_timestamp) < int(anomaly_timestamp - 120):
+                #     continue
+                # if int(a.exact_timestamp) > int(anomaly_timestamp + 120):
+                #     continue
+                if int(a.exact_timestamp) < int(anomaly_timestamp - (resolution * 2)):
                     continue
-                if int(a.exact_timestamp) > int(anomaly_timestamp + 120):
+                if int(a.exact_timestamp) > int(anomaly_timestamp + (resolution * 2)):
                     continue
+
             except:
                 continue
             try:
-                time_period = (int(anomaly_timestamp - 120), int(anomaly_timestamp + 120))
+                # @modified 20201203 - Feature #3860: luminosity - handle low frequency data
+                # Handle varying metric resolutions
+                # time_period = (int(anomaly_timestamp - 120), int(anomaly_timestamp + 120))
+                time_period = (int(anomaly_timestamp - (resolution * 2)), int(anomaly_timestamp + (resolution * 2)))
+
                 my_correlator = Correlator(anomaly_ts_dict, correlate_ts_dict, time_period)
                 # For better correlation use 0.9 instead of 0.8 for the threshold
                 # @modified 20180524 - Feature #2360: CORRELATE_ALERTS_ONLY
@@ -681,6 +745,10 @@ def get_correlations(
         if not timeseries:
             continue
 
+        # @added 20201203 - Feature #3860: luminosity - handle low frequency data
+        # Determine data resolution
+        resolution = determine_resolution(timeseries)
+
         correlate_ts = []
         for ts, value in timeseries:
             if int(ts) < from_timestamp:
@@ -691,7 +759,10 @@ def get_correlations(
             # Added note here - if you modify the value of 61 here, it must be
             # modified in the luminosity_remote_data function in
             # skyline/webapp/backend.py as well
-            if int(ts) > (anomaly_timestamp + 61):
+            # @modified 20201203 - Feature #3860: luminosity - handle low frequency data
+            # Handle varying metric resolutions
+            # if int(ts) > (anomaly_timestamp + 61):
+            if int(ts) > (anomaly_timestamp + (resolution + 1)):
                 break
         if not correlate_ts:
             continue
@@ -705,14 +776,24 @@ def get_correlations(
                 # Added note here - if you modify the value of 120 here, it must be
                 # modified in the luminosity_remote_data function in
                 # skyline/webapp/backend.py as well
-                if int(a.exact_timestamp) < int(anomaly_timestamp - 120):
+                # @modified 20201203 - Feature #3860: luminosity - handle low frequency data
+                # Handle varying metric resolutions
+                # if int(a.exact_timestamp) < int(anomaly_timestamp - 120):
+                #     continue
+                # if int(a.exact_timestamp) > int(anomaly_timestamp + 120):
+                #     continue
+                if int(a.exact_timestamp) < int(anomaly_timestamp - (resolution * 2)):
                     continue
-                if int(a.exact_timestamp) > int(anomaly_timestamp + 120):
+                if int(a.exact_timestamp) > int(anomaly_timestamp + (resolution * 2)):
                     continue
             except:
                 continue
             try:
-                time_period = (int(anomaly_timestamp - 120), int(anomaly_timestamp + 120))
+                # @modified 20201203 - Feature #3860: luminosity - handle low frequency data
+                # Handle varying metric resolutions
+                # time_period = (int(anomaly_timestamp - 120), int(anomaly_timestamp + 120))
+                time_period = (int(anomaly_timestamp - (resolution * 2)), int(anomaly_timestamp + (resolution * 2)))
+
                 my_correlator = Correlator(anomaly_ts_dict, correlate_ts_dict, time_period)
                 metrics_checked_for_correlation += 1
                 remote_correlations_check_count += 1
@@ -776,22 +857,32 @@ def process_correlations(i, anomaly_id):
     if not anomalous_ts:
         metrics_checked_for_correlation = 0
         runtime = 0
+        logger.info('process_correlations :: no timeseries data available in Redis for %s, nothing to correlate' % str(base_name))
         return (base_name, anomaly_timestamp, anomalies, correlated_metrics, correlations, sorted_correlations, metrics_checked_for_correlation, runtime)
     anomalies = get_anoms(anomalous_ts)
     if not anomalies:
         metrics_checked_for_correlation = 0
         runtime = 0
+        logger.info('process_correlations :: no anomalies found for %s, nothing to correlate' % str(base_name))
         return (base_name, anomaly_timestamp, anomalies, correlated_metrics, correlations, sorted_correlations, metrics_checked_for_correlation, runtime)
 
     # @modified 20200506 - Feature #3510: Enable Luminosity to handle correlating namespaces only
     # assigned_metrics = get_assigned_metrics(i)
     assigned_metrics = get_assigned_metrics(i, base_name)
 
+    # @added 20201203 - Feature #3860: luminosity - handle low frequency data
+    # Determine data resolution
+    resolution = determine_resolution(anomalous_ts)
+
     raw_assigned = redis_conn.mget(assigned_metrics)
     # @added 20180720 - Feature #2464: luminosity_remote_data
     remote_assigned = []
     if settings.REMOTE_SKYLINE_INSTANCES:
-        remote_assigned = get_remote_assigned(anomaly_timestamp)
+        # @modified 20201203 - Feature #3860: luminosity - handle low frequency data
+        # Add the metric resolution
+        # remote_assigned = get_remote_assigned(anomaly_timestamp)
+        remote_assigned = get_remote_assigned(anomaly_timestamp, resolution)
+
     # @modified 20180720 - Feature #2464: luminosity_remote_data
     # correlated_metrics, correlations = get_correlations(base_name, anomaly_timestamp, anomalous_ts, assigned_metrics, raw_assigned, anomalies)
     correlated_metrics, correlations, metrics_checked_for_correlation, runtime = get_correlations(base_name, anomaly_timestamp, anomalous_ts, assigned_metrics, raw_assigned, remote_assigned, anomalies)

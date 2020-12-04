@@ -491,7 +491,10 @@ def get_list(thing):
 
 
 # @added 20180720 - Feature #2464: luminosity_remote_data
-def luminosity_remote_data(anomaly_timestamp):
+# @modified 20201203 - Feature #3860: luminosity - handle low frequency data
+# Add the metric resolution
+# def luminosity_remote_data(anomaly_timestamp):
+def luminosity_remote_data(anomaly_timestamp, resolution):
     """
     Gets all the unique_metrics from Redis and then mgets Redis data for all
     metrics.  The data is then preprocessed for the remote Skyline luminosity
@@ -514,8 +517,12 @@ def luminosity_remote_data(anomaly_timestamp):
     # If you modify the values of 61 or 600 here, it must be modified in the
     # luminosity_remote_data function in
     # skyline/luminosity/process_correlations.py as well
-    from_timestamp = int(anomaly_timestamp) - 600
-    until_timestamp = int(anomaly_timestamp) + 61
+    # @modified 20201203 - Feature #3860: luminosity - handle low frequency data
+    # Use the metric resolution
+    # from_timestamp = int(anomaly_timestamp) - 600
+    # until_timestamp = int(anomaly_timestamp) + 61
+    from_timestamp = int(anomaly_timestamp) - (resolution * 10)
+    until_timestamp = int(anomaly_timestamp) + (resolution + 1)
 
     try:
         # @modified 20201123 - Feature #3824: get_cluster_data

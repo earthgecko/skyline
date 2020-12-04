@@ -106,7 +106,9 @@ if True:
         # charset='utf-8', decode_responses=True arguments required in py3
         get_redis_conn, get_redis_conn_decoded,
         # @added 20200813 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
-        historical_data_dir_exists,)
+        historical_data_dir_exists,
+        # @added 20201202- Feature #3858: skyline_functions - correlate_or_relate_with
+        correlate_or_relate_with)
 
     from backend import (
         panorama_request, get_list,
@@ -977,6 +979,11 @@ def api():
                 logger.error(fail_msg)
                 return internal_error(fail_msg, trace)
             for related_anomaly_id, related_metric_id, related_metric_name, related_anomaly_timestamp, related_full_duration in related:
+                # @added 20201202- Feature #3858: skyline_functions - correlate_or_relate_with
+                # Filter only related anomalies that are in correlations group
+                correlate_or_relate = correlate_or_relate_with(skyline_app, metric, related_metric_name)
+                if not correlate_or_relate:
+                    continue
                 metric_dict = {
                     'metric': related_metric_name,
                     'timestamp': int(related_anomaly_timestamp),
@@ -1009,6 +1016,12 @@ def api():
                 # @modified 20200908 - Feature #3740: webapp - anomaly API endpoint
                 # Added match_anomaly_timestamp
                 for related_human_date, related_match_id, related_matched_by, related_fp_id, related_layer_id, related_metric, related_uri_to_matched_page, related_validated, match_anomaly_timestamp in related_matches:
+                    # @added 20201202- Feature #3858: skyline_functions - correlate_or_relate_with
+                    # Filter only related matches that are in correlations group
+                    correlate_or_relate = correlate_or_relate_with(skyline_app, metric, related_metric)
+                    if not correlate_or_relate:
+                        continue
+
                     metric_dict = {
                         'metric': related_metric,
                         'timestamp': match_anomaly_timestamp,
@@ -1028,13 +1041,20 @@ def api():
         correlationsDict = {}
         try:
             for correlation in correlations:
-                    metric = correlation[0]
-                    metric_dict = {
-                        'coefficient': float(correlation[1]),
-                        'shifted': float(correlation[2]),
-                        'shifted_coefficient': float(correlation[3])
-                    }
-                    correlationsDict[metric] = metric_dict
+                correlated_metric = correlation[0]
+
+                # @added 20201202- Feature #3858: skyline_functions - correlate_or_relate_with
+                # Filter only correlations that are in correlations group
+                correlate_or_relate = correlate_or_relate_with(skyline_app, metric, correlated_metric)
+                if not correlate_or_relate:
+                    continue
+
+                metric_dict = {
+                    'coefficient': float(correlation[1]),
+                    'shifted': float(correlation[2]),
+                    'shifted_coefficient': float(correlation[3])
+                }
+                correlationsDict[correlated_metric] = metric_dict
         except:
             trace = traceback.format_exc()
             fail_msg = 'error :: Webapp error with get_correlations'
@@ -1698,7 +1718,7 @@ def api():
         logger.info('/api?luminosity_remote_data')
         anomaly_timestamp = None
         if 'anomaly_timestamp' in request.args:
-            anomaly_timestamp_str = request.args.get(str('anomaly_timestamp'), None)
+            anomaly_timestamp_str = request.args.get(str('anomaly_timestamp'), 0)
             try:
                 anomaly_timestamp = int(anomaly_timestamp_str)
             except:
@@ -1708,6 +1728,17 @@ def api():
             resp = json.dumps(
                 {'results': 'Error: no anomaly_timestamp parameter was passed to /api?luminosity_remote_data'})
             return resp, 400
+
+        # @added 20201203 - Feature #3860: luminosity - handle low frequency data
+        # Add the metric resolution
+        resolution = 60
+        if 'resolution' in request.args:
+            resolution_str = request.args.get('resolution', 0)
+            try:
+                resolution = int(resolution_str)
+            except:
+                resolution = 60
+
         luminosity_data = []
         if anomaly_timestamp:
             # @modified 20201117 - Feature #3824: get_cluster_data
@@ -1716,7 +1747,11 @@ def api():
             #                      Branch #3262: py3
             # Wrapped in try
             try:
-                luminosity_data, success, message = luminosity_remote_data(anomaly_timestamp)
+                # @modified 20201203 - Feature #3860: luminosity - handle low frequency data
+                # Added resolution
+                # luminosity_data, success, message = luminosity_remote_data(anomaly_timestamp)
+                luminosity_data, success, message = luminosity_remote_data(anomaly_timestamp, resolution)
+
                 if luminosity_data:
                     # @modified 20201123 - Feature #3824: get_cluster_data
                     #                      Feature #2464: luminosity_remote_data
