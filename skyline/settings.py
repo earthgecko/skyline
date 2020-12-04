@@ -2777,7 +2777,7 @@ LUMINOSITY_CORRELATE_ALL = True
 """
 :var LUMINOSITY_CORRELATE_ALL: By default all metrics will be correlated with
     the entire metric population.
-:vartype LUMINOSITY_CORRELATE_NAMESPACES_ONLY: list
+:vartype LUMINOSITY_CORRELATE_ALL: boolean
 """
 
 LUMINOSITY_CORRELATE_NAMESPACES_ONLY = []
@@ -2786,9 +2786,12 @@ LUMINOSITY_CORRELATE_NAMESPACES_ONLY = []
     the same namespace should be correlated with.  The default is an empty list
     which results in all metrics being correlated with all metrics.  If
     namespaces are declared in the list, all metrics will be evaluated as to
-    whether they are in the list.  Metrics in the list will only be correlated
-    with metrics in the same namespace and excluded from correlations within
-    ANY other namespace, unless defined in the below
+    whether they are in the list.  Metrics will be evaluated against namespaces
+    in this list using :func:`.matched_or_regexed_in_list` which determines if a
+    pattern is in a list as a: 1) absolute match 2) match been dotted elements
+    3) matched by a regex. Metrics in the list will only be correlated with
+    metrics in the same namespace and excluded from correlations within ANY
+    other namespace, unless defined in the below
     mod:`settings.LUMINOSITY_CORRELATION_MAPS` method.
 :vartype LUMINOSITY_CORRELATE_NAMESPACES_ONLY: list
 
