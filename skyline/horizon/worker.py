@@ -112,6 +112,9 @@ class Worker(Process):
         try:
             kill(self.parent_pid, 0)
         except:
+            # @added 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
+            # Log warning
+            logger.warn('warning :: parent process is dead')
             exit(0)
 
     def in_skip_list(self, metric_name):
