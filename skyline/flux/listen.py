@@ -30,7 +30,7 @@ except:
     pass
 FLUX_API_KEYS = {}
 try:
-    FLUX_API_KEYS = settings.FLUX_API_KEYS
+    FLUX_API_KEYS = settings.FLUX_API_KEYS.copy()
 except:
     pass
 if FLUX_API_KEYS:
@@ -333,7 +333,13 @@ class MetricData(object):
             if str(request_param_key) == 'metric':
                 metric = str(request_param_value)
                 # @added 20201006 - Feature #3764: flux validate metric name
-                valid_metric_name = validate_metric_name('listen :: MetricData GET', str(request_param_key))
+                # @modified 20201207 - Task #3864: flux - try except everything
+                try:
+                    valid_metric_name = validate_metric_name('listen :: MetricData GET', str(request_param_key))
+                except Exception as e:
+                    logger.error('error :: listen :: could validate_metric_name - %s - %s' % (str(request_param_key), str(e)))
+                    valid_metric_name = False
+
                 if not valid_metric_name:
                     resp.status = falcon.HTTP_400
                     return
@@ -394,8 +400,12 @@ class MetricData(object):
         # metric to add to queue
         # @modified 20200206 - Feature #3444: Allow flux to backfill
         # Added backfill
-        metric_data = [metric, value, timestamp, backfill]
-        payload['metric_data'] = str(metric_data)
+        # @modified 20201207 - Task #3864: flux - try except everything
+        try:
+            metric_data = [metric, value, timestamp, backfill]
+            payload['metric_data'] = str(metric_data)
+        except Exception as e:
+            logger.error('error :: listen :: failed to add metric_data to payload - %s' % str(e))
 
         # @added 20201018 - Feature #3798: FLUX_PERSIST_QUEUE
         # Add to data to the flux.queue Redis set
@@ -426,8 +436,14 @@ class MetricData(object):
                 logger.error('error :: listen :: failed to determine flux.httpMetricDataQueue.qsize')
 
         if LOCAL_DEBUG:
-            resp.body = json.dumps(payload)
-            resp.status = falcon.HTTP_200
+
+            # @modified 20201207 - Task #3864: flux - try except everything
+            try:
+                resp.body = json.dumps(payload)
+                resp.status = falcon.HTTP_200
+            except Exception as e:
+                logger.error('error :: listen :: failed to json.dumps(payload) - %s' % str(e))
+                resp.status = falcon.HTTP_500
         else:
             resp.status = falcon.HTTP_204
         return

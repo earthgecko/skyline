@@ -191,42 +191,68 @@ class Worker(Process):
             return True
 
         def submit_pickle_data_to_graphite(pickle_data):
-            number_of_datapoints = len(pickle_data)
+
+            # @modified 20201207 - Task #3864: flux - try except everything
+            try:
+                number_of_datapoints = len(pickle_data)
+            except Exception as e:
+                logger.error('error :: worker :: could not determine number_of_datapoints from len(pickle_data) - %s' % str(e))
+                return False
+
             data_points_sent = 0
             smallListOfMetricTuples = []
             tuples_added = 0
+
             for data in pickle_data:
-                smallListOfMetricTuples.append(data)
-                tuples_added += 1
-                if tuples_added >= 480:
-                    pickle_data_sent = pickle_data_to_graphite(smallListOfMetricTuples)
-                    # Reduce the speed of submissions to Graphite
-                    # if there are lots of data points
-                    if number_of_datapoints > 4000:
-                        sleep(0.3)
-                    if pickle_data_sent:
-                        data_points_sent += tuples_added
-                        logger.info('worker :: sent %s/%s of %s data points to Graphite via pickle' % (
-                            str(tuples_added), str(data_points_sent),
-                            str(number_of_datapoints)))
-                        smallListOfMetricTuples = []
-                        tuples_added = 0
-                    else:
-                        logger.error('error :: worker :: failed to send %s data points to Graphite via pickle' % (
-                            str(tuples_added)))
-                        return False
-            if smallListOfMetricTuples:
-                tuples_to_send = len(smallListOfMetricTuples)
-                pickle_data_sent = pickle_data_to_graphite(smallListOfMetricTuples)
-                if pickle_data_sent:
-                    data_points_sent += tuples_to_send
-                    logger.info('worker :: sent the last %s/%s of %s data points to Graphite via pickle' % (
-                        str(tuples_to_send), str(data_points_sent),
-                        str(number_of_datapoints)))
-                else:
-                    logger.error('error :: failed to send the last %s data points to Graphite via pickle' % (
-                        str(tuples_to_send)))
+                # @modified 20201207 - Task #3864: flux - try except everything
+                try:
+                    smallListOfMetricTuples.append(data)
+                    tuples_added += 1
+                    if tuples_added >= 480:
+                        # @modified 20201207 - Task #3864: flux - try except everything
+                        try:
+                            pickle_data_sent = pickle_data_to_graphite(smallListOfMetricTuples)
+                        except Exception as e:
+                            logger.error('error :: worker :: pickle_data_to_graphite error - %s' % str(e))
+                            pickle_data_sent = False
+
+                        # Reduce the speed of submissions to Graphite
+                        # if there are lots of data points
+                        if number_of_datapoints > 4000:
+                            sleep(0.3)
+                        if pickle_data_sent:
+                            data_points_sent += tuples_added
+                            logger.info('worker :: sent %s/%s of %s data points to Graphite via pickle' % (
+                                str(tuples_added), str(data_points_sent),
+                                str(number_of_datapoints)))
+                            smallListOfMetricTuples = []
+                            tuples_added = 0
+                        else:
+                            logger.error('error :: worker :: failed to send %s data points to Graphite via pickle' % (
+                                str(tuples_added)))
+                            return False
+                except Exception as e:
+                    logger.error('error :: worker :: error handling data in pickle_data - %s' % str(e))
                     return False
+
+            if smallListOfMetricTuples:
+                # @modified 20201207 - Task #3864: flux - try except everything
+                try:
+                    tuples_to_send = len(smallListOfMetricTuples)
+                    pickle_data_sent = pickle_data_to_graphite(smallListOfMetricTuples)
+                    if pickle_data_sent:
+                        data_points_sent += tuples_to_send
+                        logger.info('worker :: sent the last %s/%s of %s data points to Graphite via pickle' % (
+                            str(tuples_to_send), str(data_points_sent),
+                            str(number_of_datapoints)))
+                    else:
+                        logger.error('error :: failed to send the last %s data points to Graphite via pickle' % (
+                            str(tuples_to_send)))
+                        return False
+                except Exception as e:
+                    logger.error('error :: worker :: error in smallListOfMetricTuples pickle_data_to_graphite - %s' % str(e))
+                    return False
+
             return True
 
         logger.info('worker :: starting worker')
@@ -244,7 +270,14 @@ class Worker(Process):
         pickle_data = []
         # send_to_reciever = 'line'
         send_to_reciever = 'pickle'
-        metric_data_queue_size = self.q.qsize()
+
+        # @modified 20201207 - Task #3864: flux - try except everything
+        try:
+            metric_data_queue_size = self.q.qsize()
+        except Exception as e:
+            logger.error('error :: worker :: could not determine metric_data_queue_size - %s' % str(e))
+            metric_data_queue_size = 0
+
         if metric_data_queue_size > 10:
             send_to_reciever = 'pickle'
 
@@ -282,8 +315,15 @@ class Worker(Process):
                     #     self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
                     # else:
                     #     self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
-                    self.redis_conn = get_redis_conn(skyline_app)
-                    self.redis_conn_decoded = get_redis_conn_decoded(skyline_app)
+                    # @modified 20201207 - Task #3864: flux - try except everything
+                    try:
+                        self.redis_conn = get_redis_conn(skyline_app)
+                    except Exception as e:
+                        logger.error('error :: worker :: could not get_redis_conn - %s' % str(e))
+                    try:
+                        self.redis_conn_decoded = get_redis_conn_decoded(skyline_app)
+                    except Exception as e:
+                        logger.error('error :: worker :: could not get_redis_conn_decoded - %s' % str(e))
 
             if LOCAL_DEBUG:
                 try:
@@ -302,7 +342,13 @@ class Worker(Process):
 
             except Empty:
                 if pickle_data:
-                    pickle_data_submitted = submit_pickle_data_to_graphite(pickle_data)
+                    # @modified 20201207 - Task #3864: flux - try except everything
+                    try:
+                        pickle_data_submitted = submit_pickle_data_to_graphite(pickle_data)
+                    except Exception as e:
+                        logger.error('error :: worker :: queue Empty failed to submit_pickle_data_to_graphite - %s' % str(e))
+                        pickle_data_submitted = False
+
                     if pickle_data_submitted:
                         pickle_data = []
                 logger.info('worker :: queue is empty and timed out')
@@ -558,7 +604,13 @@ class Worker(Process):
                             # if not backfill:
                             if check_flux_last_key:
                                 metric_data = [timestamp, value]
-                                self.redis_conn.set(cache_key, str(metric_data))
+
+                                # @modified 20201207 - Task #3864: flux - try except everything
+                                try:
+                                    self.redis_conn.set(cache_key, str(metric_data))
+                                except Exception as e:
+                                    logger.error('error :: worker :: failed to set check_flux_last_key Redis key - %s' % str(e))
+
                             # @added 20200213 - Bug #3448: Repeated airgapped_metrics
                             else:
                                 # @added 20201120 - Feature #3796: FLUX_CHECK_LAST_TIMESTAMP
@@ -610,7 +662,13 @@ class Worker(Process):
                         if metric_data_queue_size == 0:
                             submit_pickle_data = True
                 if submit_pickle_data:
-                    pickle_data_submitted = submit_pickle_data_to_graphite(pickle_data)
+                    # @modified 20201207 - Task #3864: flux - try except everything
+                    try:
+                        pickle_data_submitted = submit_pickle_data_to_graphite(pickle_data)
+                    except Exception as e:
+                        logger.error('error :: worker :: submit_pickle_data_to_graphite failed - %s' % str(e))
+                        pickle_data_submitted = False
+
                     if pickle_data_submitted:
                         pickle_data = []
 
@@ -649,7 +707,13 @@ class Worker(Process):
 
             if (time_now - last_sent_to_graphite) >= 60:
                 if pickle_data:
-                    pickle_data_submitted = submit_pickle_data_to_graphite(pickle_data)
+                    # @modified 20201207 - Task #3864: flux - try except everything
+                    try:
+                        pickle_data_submitted = submit_pickle_data_to_graphite(pickle_data)
+                    except Exception as e:
+                        logger.error('error :: worker :: submit_pickle_data_to_graphite failed last_sent_to_graphite >= 60 - %s' % str(e))
+                        pickle_data_submitted = False
+
                     if pickle_data_submitted:
                         pickle_data = []
                 logger.info('worker :: metrics_sent_to_graphite in last 60 seconds - %s' % str(metrics_sent_to_graphite))
