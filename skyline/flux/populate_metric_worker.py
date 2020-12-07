@@ -187,10 +187,19 @@ class PopulateMetricWorker(Process):
                     #     self.redis_conn = StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
                     # else:
                     #     self.redis_conn = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
-                    self.redis_conn = get_redis_conn(skyline_app)
+                    # @modified 20201207 - Task #3864: flux - try except everything
+                    try:
+                        self.redis_conn = get_redis_conn(skyline_app)
+                    except Exception as e:
+                        logger.error('error :: populate_metric_worker :: get_redis_conn - %s' % str(e))
+
                     # @added 20191128 - Bug #3266: py3 Redis binary objects not strings
                     #                   Branch #3262: py3
-                    self.redis_conn_decoded = get_redis_conn_decoded(skyline_app)
+                    # @modified 20201207 - Task #3864: flux - try except everything
+                    try:
+                        self.redis_conn_decoded = get_redis_conn_decoded(skyline_app)
+                    except Exception as e:
+                        logger.error('error :: populate_metric_worker :: get_redis_conn_decoded - %s' % str(e))
 
             metricDict = None
             try:
@@ -259,19 +268,30 @@ class PopulateMetricWorker(Process):
                     logger.error('error :: populate_metric_worker :: failed to read from metricData')
 
             # Best effort to de-duplicate the data sent to Graphite
-            cache_key = 'flux.last.%s' % metric
-            last_flux_timestamp = None
+            # @modified 20201207 - Task #3864: flux - try except everything
             try:
-                # @modified 20191128 - Bug #3266: py3 Redis binary objects not strings
-                #                      Branch #3262: py3
-                # redis_last_metric_data = self.redis_conn.get(cache_key).decode('utf-8')
-                redis_last_metric_data = self.redis_conn_decoded.get(cache_key)
-                last_metric_data = literal_eval(redis_last_metric_data)
-                last_flux_timestamp = int(last_metric_data[0])
-            except:
-                logger.error(traceback.format_exc())
-                logger.error('error :: populate_metric_worker :: failed to determine last_flux_timestamp from Redis key %s' % cache_key)
-                last_flux_timestamp = False
+                cache_key = 'flux.last.%s' % metric
+            except Exception as e:
+                logger.error('error :: populate_metric_worker :: could not interpolate flux.last. cache_key name - %s' % str(e))
+                cache_key = None
+
+            last_flux_timestamp = None
+
+            # @modified 20201207 - Task #3864: flux - try except everything
+            # Only check if cache_key
+            if cache_key:
+                try:
+                    # @modified 20191128 - Bug #3266: py3 Redis binary objects not strings
+                    #                      Branch #3262: py3
+                    # redis_last_metric_data = self.redis_conn.get(cache_key).decode('utf-8')
+                    redis_last_metric_data = self.redis_conn_decoded.get(cache_key)
+                    last_metric_data = literal_eval(redis_last_metric_data)
+                    last_flux_timestamp = int(last_metric_data[0])
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: populate_metric_worker :: failed to determine last_flux_timestamp from Redis key %s' % cache_key)
+                    last_flux_timestamp = False
+
             recent_last_flux_timestamp_present = False
             if last_flux_timestamp:
                 now = int(time())
@@ -307,7 +327,12 @@ class PopulateMetricWorker(Process):
 
                     # @added 20201012 - Feature #3780: skyline_functions - sanitise_graphite_url
                     #                   Bug #3778: Handle single encoded forward slash requests to Graphite
-                    encoded_graphite_metric_name = encode_graphite_metric_name(skyline_app, metric)
+                    # @modified 20201207 - Task #3864: flux - try except everything
+                    try:
+                        encoded_graphite_metric_name = encode_graphite_metric_name(skyline_app, metric)
+                    except Exception as e:
+                        logger.error('error :: populate_metric_worker :: encode_graphite_metric_name error - %s' % str(e))
+                        encoded_graphite_metric_name = metric
 
                     try:
                         # We use absolute time so that if there is a lag in mirage the correct
@@ -374,24 +399,29 @@ class PopulateMetricWorker(Process):
                         except:  # nosec
                             continue
                     last_timestamp_with_data = None
-                    for timestamp, value in timeseries[::-1]:
-                        has_value = False
-                        if value == 0.0:
-                            has_value = True
-                        if value == 0:
-                            has_value = True
-                        if value:
-                            has_value = True
-                        if has_value:
-                            last_timestamp_with_data = int(timestamp)
-                            datapoint = value
-                            break
-                    if last_timestamp_with_data:
-                        # Here we set this as the missing last_flux_timestamp
-                        last_flux_timestamp = last_timestamp_with_data
-                        recent_last_flux_timestamp_present = True
-                        logger.info('populate_metric_worker :: %s last timestamp in Graphite from %s is %s, using as last_flux_timestamp' % (
-                            metric, str(graphite_from), str(last_flux_timestamp)))
+
+                    # @modified 20201207 - Task #3864: flux - try except everything
+                    try:
+                        for timestamp, value in timeseries[::-1]:
+                            has_value = False
+                            if value == 0.0:
+                                has_value = True
+                            if value == 0:
+                                has_value = True
+                            if value:
+                                has_value = True
+                            if has_value:
+                                last_timestamp_with_data = int(timestamp)
+                                datapoint = value
+                                break
+                        if last_timestamp_with_data:
+                            # Here we set this as the missing last_flux_timestamp
+                            last_flux_timestamp = last_timestamp_with_data
+                            recent_last_flux_timestamp_present = True
+                            logger.info('populate_metric_worker :: %s last timestamp in Graphite from %s is %s, using as last_flux_timestamp' % (
+                                metric, str(graphite_from), str(last_flux_timestamp)))
+                    except Exception as e:
+                        logger.error('error :: populate_metric_worker :: error determining last_flux_timestamp - %s' % str(e))
 
             timeseries = []
             start_populating = int(time())
@@ -446,7 +476,12 @@ class PopulateMetricWorker(Process):
                 # @added 20201009 - Feature #3780: skyline_functions - sanitise_graphite_url
                 #                   Bug #3778: Handle single encoded forward slash requests to Graphite
                 sanitised = False
-                sanitised, fetch_url = sanitise_graphite_url(skyline_app, fetch_url)
+
+                # @modified 20201207 - Task #3864: flux - try except everything
+                try:
+                    sanitised, fetch_url = sanitise_graphite_url(skyline_app, fetch_url)
+                except Exception as e:
+                    logger.error('error :: populate_metric_worker :: sanitise_graphite_url - %s' % str(e))
 
                 success = False
                 try:
@@ -488,51 +523,65 @@ class PopulateMetricWorker(Process):
 
                 # @added 20191108 - Bug #3312: flux - populate_metric_worker - handle None in datapoints
                 valid_datapoints = []
-                for datapoint in datapoints:
-                    value = None
-                    timestamp = None
-                    if remote_host_type == 'graphite':
-                        # @added 20191111 - Bug #3312: flux - populate_metric_worker - handle None in datapoints
-                        raw_timeseries.append([datapoint[1], datapoint[0]])
 
-                        try:
-                            raw_value = datapoint[0]
-                            if raw_value is None:
-                                datapoints_with_no_value += 1
+                # @modified 20201207 - Task #3864: flux - try except everything
+                try:
+                    for datapoint in datapoints:
+                        value = None
+                        timestamp = None
+                        if remote_host_type == 'graphite':
+                            # @added 20191111 - Bug #3312: flux - populate_metric_worker - handle None in datapoints
+                            raw_timeseries.append([datapoint[1], datapoint[0]])
+
+                            try:
+                                raw_value = datapoint[0]
+                                if raw_value is None:
+                                    datapoints_with_no_value += 1
+                                    continue
+                                value = float(datapoint[0])
+                                timestamp = int(datapoint[1])
+                                valid_datapoints.append([value, timestamp])
+                            except:
                                 continue
-                            value = float(datapoint[0])
-                            timestamp = int(datapoint[1])
-                            valid_datapoints.append([value, timestamp])
-                        except:
-                            continue
-                    if remote_host_type == 'prometheus':
-                        # @added 20191111 - Bug #3312: flux - populate_metric_worker - handle None in datapoints
-                        raw_timeseries.append([datapoint[0], datapoint[1]])
+                        if remote_host_type == 'prometheus':
+                            # @added 20191111 - Bug #3312: flux - populate_metric_worker - handle None in datapoints
+                            raw_timeseries.append([datapoint[0], datapoint[1]])
 
-                        try:
-                            raw_value = datapoint[1]
-                            if raw_value is None:
-                                datapoints_with_no_value += 1
+                            try:
+                                raw_value = datapoint[1]
+                                if raw_value is None:
+                                    datapoints_with_no_value += 1
+                                    continue
+                                timestamp = int(datapoint[0])
+                                value = float(datapoint[1])
+                            except:
                                 continue
-                            timestamp = int(datapoint[0])
-                            value = float(datapoint[1])
-                        except:
-                            continue
-                        valid_datapoints.append([timestamp, value])
-                datapoints = valid_datapoints
+                            valid_datapoints.append([timestamp, value])
+                except Exception as e:
+                    logger.error('error :: populate_metric_worker :: error determining valid_datapoints - %s' % str(e))
 
-                # Order the time series by timestamp as the tuple can shift
-                # order resulting in more recent data being added before older
-                # data
-                datapoints.sort()
+                # @modified 20201207 - Task #3864: flux - try except everything
+                try:
+                    datapoints = valid_datapoints
+                    # Order the time series by timestamp as the tuple can shift
+                    # order resulting in more recent data being added before older
+                    # data
+                    datapoints.sort()
+                except Exception as e:
+                    logger.error('error :: populate_metric_worker :: error set datapoints from valid_datapoints - %s' % str(e))
 
                 # Determine the timestamp of the current minute to apply
                 # VISTA_DO_NOT_SUBMIT_CURRENT_MINUTE
-                time_now = int(time())
-                current_minute_hour = int(datetime.datetime.utcfromtimestamp(time_now).strftime('%H'))
-                current_minute_minute = int(datetime.datetime.utcfromtimestamp(time_now).strftime('%M'))
-                current_datetime = datetime.datetime.utcfromtimestamp(time_now).replace(hour=current_minute_hour, minute=current_minute_minute, second=0, microsecond=0)
-                current_minute_timestamp_start = int(current_datetime.strftime('%s'))
+                # @modified 20201207 - Task #3864: flux - try except everything
+                try:
+                    time_now = int(time())
+                    current_minute_hour = int(datetime.datetime.utcfromtimestamp(time_now).strftime('%H'))
+                    current_minute_minute = int(datetime.datetime.utcfromtimestamp(time_now).strftime('%M'))
+                    current_datetime = datetime.datetime.utcfromtimestamp(time_now).replace(hour=current_minute_hour, minute=current_minute_minute, second=0, microsecond=0)
+                    current_minute_timestamp_start = int(current_datetime.strftime('%s'))
+                except Exception as e:
+                    logger.error('error :: populate_metric_worker :: error determining current_minute_timestamp_start - %s' % str(e))
+                    current_minute_timestamp_start = int(time())
                 datapoints_in_current_minute = 0
 
                 last_error = None
@@ -581,20 +630,24 @@ class PopulateMetricWorker(Process):
                         datapoints_with_no_value += 1
                         continue
 
-                if last_error:
-                    logger.error(last_error)
-                    logger.error('error :: populate_metric_worker :: the above is the last_error encountered processing %s' % (
-                        str(metric)))
-                if datapoints_with_no_value:
-                    logger.info('populate_metric_worker :: %s of the fetched records were discarded as they had value None' % (
-                        str(datapoints_with_no_value)))
-                if datapoints_in_current_minute:
-                    logger.info('populate_metric_worker :: %s of the fetched records were discarded as they fall within the current minute' % (
-                        str(datapoints_in_current_minute)))
-                logger.info('populate_metric_worker :: %s of the fetched data points are older than the last known flux timestamp' % (
-                    str(datapoints_already_populated)))
-                logger.info('populate_metric_worker :: added %s data points to the time series to submit to Graphite' % (
-                    str(datapoints_added_to_timeseries)))
+                # @modified 20201207 - Task #3864: flux - try except everything
+                try:
+                    if last_error:
+                        logger.error(last_error)
+                        logger.error('error :: populate_metric_worker :: the above is the last_error encountered processing %s' % (
+                            str(metric)))
+                    if datapoints_with_no_value:
+                        logger.info('populate_metric_worker :: %s of the fetched records were discarded as they had value None' % (
+                            str(datapoints_with_no_value)))
+                    if datapoints_in_current_minute:
+                        logger.info('populate_metric_worker :: %s of the fetched records were discarded as they fall within the current minute' % (
+                            str(datapoints_in_current_minute)))
+                    logger.info('populate_metric_worker :: %s of the fetched data points are older than the last known flux timestamp' % (
+                        str(datapoints_already_populated)))
+                    logger.info('populate_metric_worker :: added %s data points to the time series to submit to Graphite' % (
+                        str(datapoints_added_to_timeseries)))
+                except Exception as e:
+                    logger.error('error :: populate_metric_worker :: error logging some info - %s' % str(e))
 
             end_fecthing = int(time())
             seconds_to_fetch = end_fecthing - start_populating
@@ -659,18 +712,28 @@ class PopulateMetricWorker(Process):
             resolution_timestamps = []
             metric_resolution_determined = False
             for metric_datapoint in timeseries[-30:]:
-                timestamp = int(metric_datapoint[0])
-                resolution_timestamps.append(timestamp)
+                # @modified 20201207 - Task #3864: flux - try except everything
+                try:
+                    timestamp = int(metric_datapoint[0])
+                    resolution_timestamps.append(timestamp)
+                except Exception as e:
+                    logger.error('error :: populate_metric_worker :: error constructing resolution_timestamps - %s' % str(e))
+
             timestamp_resolutions = []
             if resolution_timestamps:
                 last_timestamp = None
                 for timestamp in resolution_timestamps:
-                    if last_timestamp:
-                        resolution = timestamp - last_timestamp
-                        timestamp_resolutions.append(resolution)
-                        last_timestamp = timestamp
-                    else:
-                        last_timestamp = timestamp
+                    # @modified 20201207 - Task #3864: flux - try except everything
+                    try:
+                        if last_timestamp:
+                            resolution = timestamp - last_timestamp
+                            timestamp_resolutions.append(resolution)
+                            last_timestamp = timestamp
+                        else:
+                            last_timestamp = timestamp
+                    except Exception as e:
+                        logger.error('error :: populate_metric_worker :: error constructing timestamp_resolutions - %s' % str(e))
+
             if timestamp_resolutions:
                 try:
                     timestamp_resolutions_count = Counter(timestamp_resolutions)
@@ -750,32 +813,41 @@ class PopulateMetricWorker(Process):
                     smallListOfMetricTuples = []
                     tuples_added = 0
                     for data in listOfMetricTuples:
-                        smallListOfMetricTuples.append(data)
-                        tuples_added += 1
-                        if tuples_added >= 1000:
+                        # @modified 20201207 - Task #3864: flux - try except everything
+                        try:
+                            smallListOfMetricTuples.append(data)
+                            tuples_added += 1
+                            if tuples_added >= 1000:
+                                pickle_data_sent = pickle_data_to_graphite(smallListOfMetricTuples)
+                                if pickle_data_sent:
+                                    data_points_sent += tuples_added
+                                    logger.info('populate_metric_worker :: sent %s/%s of %s data points to Graphite via pickle for %s' % (
+                                        str(tuples_added), str(data_points_sent),
+                                        str(timeseries_length), metric))
+                                    sent_to_graphite += len(smallListOfMetricTuples)
+                                    smallListOfMetricTuples = []
+                                    tuples_added = 0
+                                else:
+                                    logger.error('error :: populate_metric_worker :: failed to send %s data points to Graphite via pickle for %s' % (
+                                        str(tuples_added), metric))
+                        except Exception as e:
+                            logger.error('error :: populate_metric_worker :: error while iterating to pickle_data_to_graphite(smallListOfMetricTuples) - %s' % str(e))
+
+                    if smallListOfMetricTuples:
+                        # @modified 20201207 - Task #3864: flux - try except everything
+                        try:
+                            tuples_to_send = len(smallListOfMetricTuples)
                             pickle_data_sent = pickle_data_to_graphite(smallListOfMetricTuples)
                             if pickle_data_sent:
-                                data_points_sent += tuples_added
-                                logger.info('populate_metric_worker :: sent %s/%s of %s data points to Graphite via pickle for %s' % (
-                                    str(tuples_added), str(data_points_sent),
+                                data_points_sent += tuples_to_send
+                                logger.info('populate_metric_worker :: sent the last %s/%s of %s data points to Graphite via pickle for %s' % (
+                                    str(tuples_to_send), str(data_points_sent),
                                     str(timeseries_length), metric))
-                                sent_to_graphite += len(smallListOfMetricTuples)
-                                smallListOfMetricTuples = []
-                                tuples_added = 0
                             else:
-                                logger.error('error :: populate_metric_worker :: failed to send %s data points to Graphite via pickle for %s' % (
-                                    str(tuples_added), metric))
-                    if smallListOfMetricTuples:
-                        tuples_to_send = len(smallListOfMetricTuples)
-                        pickle_data_sent = pickle_data_to_graphite(smallListOfMetricTuples)
-                        if pickle_data_sent:
-                            data_points_sent += tuples_to_send
-                            logger.info('populate_metric_worker :: sent the last %s/%s of %s data points to Graphite via pickle for %s' % (
-                                str(tuples_to_send), str(data_points_sent),
-                                str(timeseries_length), metric))
-                        else:
-                            logger.error('error :: populate_metric_worker :: failed to send the last %s data points to Graphite via pickle for %s' % (
-                                str(tuples_to_send), metric))
+                                logger.error('error :: populate_metric_worker :: failed to send the last %s data points to Graphite via pickle for %s' % (
+                                    str(tuples_to_send), metric))
+                        except Exception as e:
+                            logger.error('error :: populate_metric_worker :: error while pickle_data_to_graphite(smallListOfMetricTuples) - %s' % str(e))
 
             logger.info('populate_metric_worker :: sent %s data points to Graphite for %s' % (
                 str(sent_to_graphite), metric))
