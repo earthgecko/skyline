@@ -27,7 +27,9 @@ from skyline_functions import (
     # charset='utf-8', decode_responses=True arguments required in py3
     get_redis_conn, get_redis_conn_decoded,
     # @added 20200506 - Feature #3532: Sort all time series
-    sort_timeseries)
+    sort_timeseries,
+    # @added 20201207 - Feature #3858: skyline_functions - correlate_or_relate_with
+    correlate_or_relate_with)
 
 # @added 20200428 - Feature #3510: Enable Luminosity to handle correlating namespaces only
 #                   Feature #3512: matched_or_regexed_in_list function
@@ -508,8 +510,11 @@ def get_remote_assigned(anomaly_timestamp, resolution):
                 # try:
                 #     uncompressed = gzip.GzipFile(fileobj=fakefile, mode='r')
                 #    decompressed_data = uncompressed.read()
-                decompressed_data = (r.content)
-                data = literal_eval(decompressed_data)
+                # @modified 20201204 - Feature #2464: luminosity_remote_data
+                #                      Feature #3820: HORIZON_SHARDS
+                # decompressed_data = (r.content)
+                # data = literal_eval(decompressed_data)
+                data = literal_eval(r.text)
                 logger.info('get_remote_assigned :: response data decompressed with native requests gzip decoding')
             except:
                 logger.error(traceback.format_exc())
@@ -519,7 +524,11 @@ def get_remote_assigned(anomaly_timestamp, resolution):
                 ts_data = data['results']
                 logger.info('get_remote_assigned :: %s metrics retrieved compressed from %s' % (str(len(ts_data)), remote_url))
                 if remote_assigned:
-                    remote_assigned.append(ts_data)
+                    # @modified 20201204 - Feature #2464: luminosity_remote_data
+                    #                      Feature #3820: HORIZON_SHARDS
+                    # remote_assigned.append(ts_data)
+                    for item in ts_data:
+                        remote_assigned.append(item)
                 else:
                     remote_assigned = ts_data
 
@@ -719,6 +728,9 @@ def get_correlations(
         str(local_redis_metrics_checked_count),
         (end_local_correlations - start_local_correlations)))
 
+    # @added 20201207 - Feature #3858: skyline_functions - correlate_or_relate_with
+    do_not_correlate_with = []
+
     remote_metrics_count = 0
     remote_correlations_check_count = 0
     remote_correlations_count = 0
@@ -737,6 +749,17 @@ def get_correlations(
 
         if str(metric_base_name) == str(base_name):
             continue
+
+        # @added 20201207 - Feature #3858: skyline_functions - correlate_or_relate_with
+        try:
+            correlate_or_relate = correlate_or_relate_with(skyline_app, base_name, metric_base_name)
+            if not correlate_or_relate:
+                do_not_correlate_with.append(metric_base_name)
+                continue
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: get_remote_assigned :: failed to evaluate correlate_or_relate_with')
+
         timeseries = []
         try:
             timeseries = ts_data[1]
@@ -812,6 +835,12 @@ def get_correlations(
             correlated_metrics.append(metric_base_name)
 
     end_remote_correlations = timer()
+
+    # @added 20201207 - Feature #3858: skyline_functions - correlate_or_relate_with
+    if len(do_not_correlate_with) > 0:
+        logger.info('get_correlations :: discarded %s remote assigned metrics as not in a correlation group with %s' % (
+            str(len(do_not_correlate_with)), base_name))
+
     logger.info('get_correlations :: checked - remote_correlations_check_count is %s' % str(remote_correlations_check_count))
     logger.info('get_correlations :: correlated - remote_correlations_count is %s' % str(remote_correlations_count))
     logger.info('get_correlations :: processed remote correlations on remote_metrics_count %s local metric in %.6f seconds' % (
