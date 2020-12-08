@@ -1503,7 +1503,10 @@ def api():
             if json_passed == 'json':
                 convert_to_json = True
         if convert_to_json:
-            metrics_json = {}
+            # @modified 20201208 - Feature #3368: webapp api - ionosphere_learn_work
+            # Return an array of work
+            # metrics_json = {}
+            work_list = []
             for str_item in ionosphere_learn_work:
                 try:
                     item = literal_eval(str_item)
@@ -1515,17 +1518,31 @@ def api():
                         generation = 0
                     else:
                         generation = item[5]
-                    metrics_json[item[3]] = {
+                    # @modified 20201208 - Feature #3368: webapp api - ionosphere_learn_work
+                    # Return an array of work
+                    # metrics_json[item[3]] = {
+                    #    'deadline_type': item[0],
+                    #    'job_type': item[1],
+                    #    'timestamp': item[2],
+                    #    'parent_id': parent_id,
+                    #    'generation': generation
+                    work_dict = {
+                        'metric': item[3],
                         'deadline_type': item[0],
                         'job_type': item[1],
                         'timestamp': item[2],
                         'parent_id': parent_id,
                         'generation': generation
                     }
+                    work_list.append(work_dict)
                 except:
                     logger.error(traceback.format_exc())
                     logger.error('error :: Webapp could not build the ionosphere_learn_work dict to jsonify - %s' % str(str_item))
-            data_dict = {"status": {"cluster_data": cluster_data}, "data": {"metrics": metrics_json}}
+            # @modified 20201208 - Feature #3368: webapp api - ionosphere_learn_work
+            # Return an array of work
+            # data_dict = {"status": {"cluster_data": cluster_data}, "data": {"metrics": metrics_json}}
+            data_dict = {"status": {"cluster_data": cluster_data}, "data": {"work": work_list}}
+
             # @added 20201202 - Feature #3824: get_cluster_data
             # Added some debug logging
             logger.debug('debug :: data_dict - %s' % str(data_dict))
