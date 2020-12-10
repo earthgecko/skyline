@@ -11,8 +11,15 @@ import os.path
 from ast import literal_eval
 from timeit import default_timer as timer
 
+# @added 20201209 - Feature #3870: metrics_manager - check_data_sparsity
+from msgpack import Unpacker
+from collections import Counter
+
 import settings
-from skyline_functions import get_redis_conn, get_redis_conn_decoded
+from skyline_functions import (
+    # @modified 20201209 - Feature #3870: metrics_manager - check_data_sparsity
+    # Added send_graphite_metric
+    get_redis_conn, get_redis_conn_decoded, send_graphite_metric)
 from matched_or_regexed_in_list import matched_or_regexed_in_list
 
 skyline_app = 'analyzer'
@@ -129,6 +136,25 @@ if ANALYZER_MAD_LOW_PRIORITY_METRICS:
     ANALYZER_MANAGE_LOW_PRIORITY_METRICS = True
 low_priority_metrics_hash_key = 'analyzer.low_priority_metrics.last_analyzed_timestamp'
 metrics_last_timestamp_hash_key = 'analyzer.metrics.last_analyzed_timestamp'
+
+# @added 20201209 - Feature #3870: metrics_manager - check_data_sparsity
+try:
+    CHECK_DATA_SPARSITY = settings.CHECK_DATA_SPARSITY
+except:
+    CHECK_DATA_SPARSITY = True
+try:
+    inactive_after = settings.FULL_DURATION - settings.METRICS_INACTIVE_AFTER
+except:
+    inactive_after = settings.FULL_DURATION - 3600
+# @added 20201210 - Feature #3870: metrics_manager - check_data_sparsity
+try:
+    SKIP_CHECK_DATA_SPARSITY_NAMESPACES = list(settings.SKIP_CHECK_DATA_SPARSITY_NAMESPACES)
+except:
+    SKIP_CHECK_DATA_SPARSITY_NAMESPACES = []
+
+# Declare how often to run metrics_manager is seconds as this is used on some
+# Redis key TTLs as well
+RUN_EVERY = 300
 
 skyline_app_graphite_namespace = 'skyline.%s%s' % (skyline_app, SERVER_METRIC_PATH)
 
@@ -816,7 +842,7 @@ class Metrics_Manager(Thread):
                         logger.error('error :: metrics_manager :: failed to add multiple members to the analyzer.flux_zero_fill_metrics Redis set')
                 try:
                     key_timestamp = int(time())
-                    self.redis_conn.setex(manage_flux_zero_fill_namespaces_redis_key, 300, key_timestamp)
+                    self.redis_conn.setex(manage_flux_zero_fill_namespaces_redis_key, RUN_EVERY, key_timestamp)
                 except:
                     logger.error('error :: metrics_manager :: failed to set key :: manage_flux_zero_fill_namespaces_redis_key' % manage_flux_zero_fill_namespaces_redis_key)
                 logger.info('metrics_manager :: checking if any metrics need to be removed from analyzer.flux_zero_fill_metrics')
@@ -951,6 +977,373 @@ class Metrics_Manager(Thread):
                         logger.info('metrics_manager :: no metrics need to be removed from the Redis hash key %s' % (
                             low_priority_metrics_hash_key))
 
+        # @added 20201209 - Feature #3870: metrics_manager - check_data_sparsity
+        if CHECK_DATA_SPARSITY:
+            check_data_sparsity_start = time()
+            logger.info('metrics_manager :: checking data sparsity')
+
+            # @added 20201210 - Feature #3870: metrics_manager - check_data_sparsity
+            # Allow SKIP_CHECK_DATA_SPARSITY_NAMESPACES
+            check_metrics = list(unique_metrics)
+            do_not_check_metrics = []
+            if SKIP_CHECK_DATA_SPARSITY_NAMESPACES:
+                logger.info('metrics_manager :: determing which metric to skip checking data sparsity on as SKIP_CHECK_DATA_SPARSITY_NAMESPACES has %s namespaces declared' % str(len(SKIP_CHECK_DATA_SPARSITY_NAMESPACES)))
+                check_metrics = []
+                skip_check_data_sparsity_error_logged = False
+                try:
+                    for metric in unique_metrics:
+                        try:
+                            metric_name = str(metric)
+                            if metric_name.startswith(settings.FULL_NAMESPACE):
+                                base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+                            else:
+                                base_name = metric_name
+                            pattern_match = None
+                            try:
+                                pattern_match, metric_matched_by = matched_or_regexed_in_list(skyline_app, base_name, SKIP_CHECK_DATA_SPARSITY_NAMESPACES)
+                            except Exception as e:
+                                if not skip_check_data_sparsity_error_logged:
+                                    logger.error('error :: metrics_manager :: an error occurred while matched_or_regexed_in_list in SKIP_CHECK_DATA_SPARSITY_NAMESPACES - %s' % e)
+                                    skip_check_data_sparsity_error_logged = True
+                                pattern_match = False
+                            if pattern_match:
+                                do_not_check_metrics.append([metric_name, metric_matched_by])
+                            else:
+                                check_metrics.append(metric_name)
+                        except Exception as e:
+                            # Only log one error as to not fill the log
+                            if not skip_check_data_sparsity_error_logged:
+                                logger.error('error :: metrics_manager :: an error occurred while evaluating %s for check_metrics in SKIP_CHECK_DATA_SPARSITY_NAMESPACES - %s' % (str(metric), e))
+                                skip_check_data_sparsity_error_logged = True
+                            else:
+                                pass
+                except Exception as e:
+                    logger.error('error :: metrics_manager :: an error occurred while determining check_metrics in SKIP_CHECK_DATA_SPARSITY_NAMESPACES - %s' % e)
+                if do_not_check_metrics:
+                    try:
+                        logger.info('metrics_manager :: excluding %s metrics from check_data_sparsity as they match a namespace in SKIP_CHECK_DATA_SPARSITY_NAMESPACES' % str(len(do_not_check_metrics)))
+                        try:
+                            self.redis_conn.set(
+                                'analyzer.metrics_manager.metrics_sparsity.skip_check_data_sparsity_metrics', str(do_not_check_metrics))
+                        except Exception as e:
+                            logger.error('error :: metrics_manager :: could not set Redis analyzer.metrics_manager.metrics_sparsity.skip_check_data_sparsity_metrics: %s' % e)
+                    except Exception as e:
+                        logger.error('error :: metrics_manager :: an error occurred while setting Redis analyzer.metrics_manager.metrics_sparsity.skip_check_data_sparsity_metrics - %s' % e)
+
+            # Multi get series
+            try:
+                # @modified 20201210 - Feature #3870: metrics_manager - check_data_sparsity
+                # Allow SKIP_CHECK_DATA_SPARSITY_NAMESPACES
+                # raw_assigned = self.redis_conn.mget(unique_metrics)
+                raw_assigned = self.redis_conn.mget(check_metrics)
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: metrics_manager :: failed to get check_metrics from Redis')
+                raw_assigned = []
+            if not raw_assigned:
+                logger.info('error :: metrics_manager :: No raw_assigned set, returning')
+            else:
+                logger.info('metrics_manager :: checking data sparsity on %s metric timeseries from Redis' % str(len(raw_assigned)))
+            last_metrics_data_sparsity = {}
+            try:
+                last_metrics_data_sparsity = self.redis_conn_decoded.hgetall('analyzer.metrics_manager.hash_key.metrics_data_sparsity')
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: metrics_manager :: failed to get analyzer.metrics_manager.hash_key.metrics_data_sparsity Redis hash key')
+                last_metrics_data_sparsity = {}
+            try:
+                self.redis_conn.delete('analyzer.metrics_manager.hash_key.metrics_data_sparsity')
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: metrics_manager :: failed to delete analyzer.metrics_manager.hash_key.metrics_data_sparsity')
+
+            check_sparsity_error_log = False
+            check_sparsity_error_count = 0
+            added_data_sparsity_keys = 0
+            metrics_sparsity = []
+            metrics_fully_populated = []  # 100% of datapoints
+            metrics_sparsity_decreasing = []  # becoming more densely populated (good)
+            metrics_sparsity_increasing = []  # becoming more sparsely populated (bad)
+            metrics_stale = []
+            metrics_inactive = []
+            sparsities = []
+            metrics_sparsity_use_namespace = skyline_app_graphite_namespace + '.metrics_sparsity'
+
+            # Distill timeseries strings into lists
+            # @modified 20201210 - Feature #3870: metrics_manager - check_data_sparsity
+            # Allow SKIP_CHECK_DATA_SPARSITY_NAMESPACES
+            # for i, metric_name in enumerate(unique_metrics):
+            for i, metric_name in enumerate(check_metrics):
+                try:
+                    try:
+                        raw_series = raw_assigned[i]
+                        unpacker = Unpacker(use_list=False)
+                        unpacker.feed(raw_series)
+                        timeseries = list(unpacker)
+                    except:
+                        timeseries = []
+
+                    timeseries_full_duration = 0
+                    if timeseries:
+                        first_timeseries_timestamp = 0
+                        try:
+                            first_timeseries_timestamp = int(timeseries[0][0])
+                        except:
+                            pass
+                        last_timeseries_timestamp = 0
+                        try:
+                            last_timeseries_timestamp = int(timeseries[-1][0])
+                        except:
+                            pass
+                        timeseries_full_duration = last_timeseries_timestamp - first_timeseries_timestamp
+                    if timeseries_full_duration:
+                        if last_timeseries_timestamp < (int(check_data_sparsity_start) - settings.STALE_PERIOD):
+                            metrics_stale.append(metric_name)
+                            # @modified 20201210 - Feature #3870: metrics_manager - check_data_sparsity
+                            # Keep stale metrics in the so that when metrics
+                            # become stale they do not cause a level shift via
+                            # their removal and suggest that things are
+                            # recovering
+                            # continue
+                        if last_timeseries_timestamp < (int(check_data_sparsity_start) - inactive_after):
+                            metrics_inactive.append(metric_name)
+                            continue
+
+                    metric_resolution = 0
+                    if timeseries_full_duration:
+                        try:
+                            # Determine resolution from the last 30 data points
+                            resolution_timestamps = []
+                            for metric_datapoint in timeseries[-30:]:
+                                timestamp = int(metric_datapoint[0])
+                                resolution_timestamps.append(timestamp)
+                            timestamp_resolutions = []
+                            if resolution_timestamps:
+                                last_timestamp = None
+                                for timestamp in resolution_timestamps:
+                                    if last_timestamp:
+                                        resolution = timestamp - last_timestamp
+                                        timestamp_resolutions.append(resolution)
+                                        last_timestamp = timestamp
+                                    else:
+                                        last_timestamp = timestamp
+                                try:
+                                    del resolution_timestamps
+                                except:
+                                    pass
+                            if timestamp_resolutions:
+                                try:
+                                    timestamp_resolutions_count = Counter(timestamp_resolutions)
+                                    ordered_timestamp_resolutions_count = timestamp_resolutions_count.most_common()
+                                    metric_resolution = int(ordered_timestamp_resolutions_count[0][0])
+                                except:
+                                    if not check_sparsity_error_log:
+                                        logger.error(traceback.format_exc())
+                                        logger.error('error :: metrics_manager :: failed to determine metric_resolution from timeseries')
+                                        check_sparsity_error_log = True
+                                    check_sparsity_error_count += 1
+                                try:
+                                    del timestamp_resolutions
+                                except:
+                                    pass
+                        except:
+                            pass
+                        expected_datapoints = 0
+                        if metric_resolution:
+                            try:
+                                expected_datapoints = timeseries_full_duration / metric_resolution
+                            except:
+                                pass
+                        data_sparsity = 0
+                        if expected_datapoints:
+                            try:
+                                datapoints_present = len(timeseries)
+                                data_sparsity = round(datapoints_present / expected_datapoints * 100, 2)
+                            except Exception as e:
+                                if not check_sparsity_error_log:
+                                    logger.error('error :: metrics_manager :: an error occurred during check_data_sparsity - %s' % str(e))
+                                    check_sparsity_error_log = True
+                                check_sparsity_error_count += 1
+                        previous_sparsity = 0
+                        if last_metrics_data_sparsity:
+                            try:
+                                previous_sparsity = float(last_metrics_data_sparsity[metric_name])
+                            except:
+                                pass
+                        if data_sparsity:
+                            try:
+                                self.redis_conn.hset(
+                                    'analyzer.metrics_manager.hash_key.metrics_data_sparsity',
+                                    metric_name, data_sparsity)
+                                added_data_sparsity_keys += 1
+                            except:
+                                if not check_sparsity_error_log:
+                                    logger.error(traceback.format_exc())
+                                    logger.error('error :: metrics_manager :: failed to add entry in analyzer.metrics_manager.hash_key.metrics_data_sparsity for - %s' % str(metric_name))
+                                    check_sparsity_error_log = True
+                                check_sparsity_error_count += 1
+                            sparsity_change = 0
+                            if data_sparsity >= 100:
+                                metrics_fully_populated.append(metric_name)
+                            else:
+                                if previous_sparsity < data_sparsity:
+                                    metrics_sparsity_decreasing.append(metric_name)
+                                    sparsity_change = previous_sparsity - data_sparsity
+                                if previous_sparsity > data_sparsity:
+                                    metrics_sparsity_increasing.append(metric_name)
+                                    sparsity_change = previous_sparsity - data_sparsity
+                            metric_sparsity_dict = {
+                                'metric': metric_name,
+                                'timestamp': last_timeseries_timestamp,
+                                'resolution': metric_resolution,
+                                'data_sparsity': data_sparsity,
+                                'last_data_sparsity': previous_sparsity,
+                                'change': sparsity_change,
+                            }
+                            metrics_sparsity.append(str(metric_sparsity_dict))
+                            sparsities.append(data_sparsity)
+                except Exception as e:
+                    if not check_sparsity_error_log:
+                        logger.error('error :: metrics_manager :: an error occurred during check_data_sparsity - %s' % str(e))
+                        check_sparsity_error_log = True
+                    check_sparsity_error_count += 1
+            logger.info('metrics_manager :: check_data_sparsity added %s metrics of %s total metrics to analyzer.metrics_manager.hash_key.metrics_data_sparsity Redis hash key' % (
+                str(added_data_sparsity_keys), str(len(unique_metrics))))
+            if metrics_fully_populated:
+                metrics_fully_populated_count = len(metrics_fully_populated)
+                try:
+                    self.redis_conn.rename('analyzer.metrics_manager.metrics_fully_populated', 'aet.analyzer.metrics_manager.metrics_fully_populated')
+                    logger.info('metrics_manager :: created the aet.analyzer.metrics_manager.metrics_fully_populated Redis set')
+                except:
+                    logger.error('metrics_manager :: failed to created the aet.analyzer.metrics_manager.metrics_fully_populated Redis set')
+                try:
+                    self.redis_conn.sadd('analyzer.metrics_manager.metrics_fully_populated', *set(metrics_fully_populated))
+                    logger.info('metrics_manager :: created and added %s metrics to the analyzer.metrics_manager.metrics_fully_populated Redis set' % str(metrics_fully_populated_count))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: metrics_manager :: failed to add multiple members to the analyzer.metrics_manager.metrics_fully_populated Redis set')
+                try:
+                    self.redis_conn.set(
+                        'analyzer.metrics_manager.metrics_sparsity.metrics_fully_populated', metrics_fully_populated_count)
+                except Exception as e:
+                    logger.error('error :: metrics_manager :: could not set Redis analyzer.metrics_manager.metrics_sparsity.metrics_fully_populated: %s' % e)
+                send_metric_name = metrics_sparsity_use_namespace + '.metrics_fully_populated'
+                try:
+                    send_graphite_metric(skyline_app, send_metric_name, str(metrics_fully_populated_count))
+                    logger.info('metrics_manager - sent Graphite metric - %s %s' % (send_metric_name, str(metrics_fully_populated_count)))
+                except Exception as e:
+                    logger.error('error :: metrics_manager :: could not send send_graphite_metric %s %s: %s' % (
+                        send_metric_name, str(metrics_fully_populated_count), e))
+
+            if metrics_sparsity_decreasing:
+                metrics_sparsity_decreasing_count = len(metrics_sparsity_decreasing)
+                try:
+                    self.redis_conn.rename('analyzer.metrics_manager.metrics_sparsity_decreasing', 'aet.analyzer.metrics_manager.metrics_sparsity_decreasing')
+                    logger.info('metrics_manager :: created the aet.analyzer.metrics_manager.metrics_sparsity_decreasing Redis set')
+                except:
+                    logger.error('metrics_manager :: failed to created the aet.analyzer.metrics_manager.metrics_sparsity_decreasing Redis set')
+                try:
+                    self.redis_conn.sadd('analyzer.metrics_manager.metrics_sparsity_decreasing', *set(metrics_sparsity_decreasing))
+                    logger.info('metrics_manager :: created and added %s metrics to the analyzer.metrics_manager.metrics_sparsity_decreasing Redis set' % str(metrics_sparsity_decreasing_count))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: metrics_manager :: failed to add multiple members to the analyzer.metrics_manager.metrics_sparsity_decreasing Redis set')
+                try:
+                    self.redis_conn.set(
+                        'analyzer.metrics_manager.metrics_sparsity.metrics_sparsity_decreasing', metrics_sparsity_decreasing_count)
+                except Exception as e:
+                    logger.error('error :: metrics_manager :: could not set Redis analyzer.metrics_manager.metrics_sparsity.metrics_sparsity_decreasing: %s' % e)
+                send_metric_name = metrics_sparsity_use_namespace + '.metrics_sparsity_decreasing'
+                try:
+                    send_graphite_metric(skyline_app, send_metric_name, str(metrics_sparsity_decreasing_count))
+                    logger.info('metrics_manager - sent Graphite metric - %s %s' % (send_metric_name, str(metrics_sparsity_decreasing_count)))
+                except Exception as e:
+                    logger.error('error :: metrics_manager :: could not send send_graphite_metric %s %s: %s' % (
+                        send_metric_name, str(metrics_sparsity_decreasing_count), e))
+            if metrics_sparsity_increasing:
+                metrics_sparsity_increasing_count = len(metrics_sparsity_increasing)
+                try:
+                    self.redis_conn.rename('analyzer.metrics_manager.metrics_sparsity_increasing', 'aet.analyzer.metrics_manager.metrics_sparsity_increasing')
+                    logger.info('metrics_manager :: created the aet.analyzer.metrics_manager.metrics_sparsity_increasing Redis set')
+                except:
+                    logger.error('metrics_manager :: failed to created the aet.analyzer.metrics_manager.metrics_sparsity_increasing Redis set')
+                try:
+                    self.redis_conn.sadd('analyzer.metrics_manager.metrics_sparsity_increasing', *set(metrics_sparsity_increasing))
+                    logger.info('metrics_manager :: created and added %s metrics to the analyzer.metrics_manager.metrics_sparsity_increasing Redis set' % str(metrics_sparsity_increasing_count))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: metrics_manager :: failed to add multiple members to the analyzer.metrics_manager.metrics_sparsity_increasing Redis set')
+                try:
+                    self.redis_conn.set(
+                        'analyzer.metrics_manager.metrics_sparsity.metrics_sparsity_increasing', metrics_sparsity_increasing_count)
+                except Exception as e:
+                    logger.error('error :: metrics_manager :: could not set Redis analyzer.metrics_manager.metrics_sparsity.metrics_sparsity_increasing: %s' % e)
+                send_metric_name = metrics_sparsity_use_namespace + '.metrics_sparsity_increasing'
+                try:
+                    send_graphite_metric(skyline_app, send_metric_name, str(metrics_sparsity_increasing_count))
+                    logger.info('metrics_manager - sent Graphite metric - %s %s' % (send_metric_name, str(metrics_sparsity_increasing_count)))
+                except Exception as e:
+                    logger.error('error :: metrics_manager :: could not send send_graphite_metric %s %s: %s' % (
+                        send_metric_name, str(metrics_sparsity_increasing_count), e))
+
+            if metrics_sparsity:
+                try:
+                    self.redis_conn.rename('analyzer.metrics_manager.metrics_sparsity', 'aet.analyzer.metrics_manager.metrics_sparsity')
+                    logger.info('metrics_manager :: created the aet.analyzer.metrics_manager.metrics_sparsity Redis set')
+                except:
+                    logger.error('metrics_manager :: failed to created the aet.analyzer.metrics_manager.metrics_sparsity Redis set')
+                try:
+                    self.redis_conn.sadd('analyzer.metrics_manager.metrics_sparsity', *set(metrics_sparsity))
+                    logger.info('metrics_manager :: created and added %s metrics to the analyzer.metrics_manager.metrics_sparsity Redis set' % str(len(metrics_sparsity)))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: metrics_manager :: failed to add multiple members to the analyzer.metrics_manager.metrics_sparsity_increasing Redis set')
+
+            avg_sparsity = None
+            if sparsities:
+                float_sparsities = []
+                for item in sparsities:
+                    try:
+                        float_sparsities.append(float(item))
+                    except:
+                        pass
+                try:
+                    avg_sparsity = sum(float_sparsities) / len(sparsities)
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: metrics_manager :: failed to calculate avg_sparsity')
+            if avg_sparsity:
+                try:
+                    self.redis_conn.set(
+                        'analyzer.metrics_manager.metrics_sparsity.avg_sparsity', float(avg_sparsity))
+                except Exception as e:
+                    logger.error('error :: metrics_manager :: could not set Redis analyzer.metrics_manager.metrics_sparsity.avg_sparsity: %s' % e)
+                send_metric_name = metrics_sparsity_use_namespace + '.avg_sparsity'
+                try:
+                    send_graphite_metric(skyline_app, send_metric_name, str(avg_sparsity))
+                    logger.info('metrics_manager - sent Graphite metric - %s %s' % (send_metric_name, str(avg_sparsity)))
+                except Exception as e:
+                    logger.error('error :: metrics_manager :: could not send send_graphite_metric %s %s: %s' % (
+                        send_metric_name, str(avg_sparsity), e))
+                try:
+                    self.redis_conn.setex(
+                        'analyzer.metrics_manager.sent.metrics_sparsity.metrics', 60, int(time()))
+                except Exception as e:
+                    logger.error('error :: metrics_manager :: could not set Redis analyzer.metrics_manager.sent.metrics_sparsity.metrics: %s' % e)
+
+            logger.info('metrics_manager :: check_data_sparsity - of the %s unique_metrics, %s metrics are fully populated' % (
+                str(len(unique_metrics)), str(len(metrics_fully_populated))))
+            logger.info('metrics_manager :: check_data_sparsity - of the %s unique_metrics, %s metrics are increasing in sparsity (this is could be bad)' % (
+                str(len(unique_metrics)), str(len(metrics_sparsity_increasing))))
+            logger.info('metrics_manager :: check_data_sparsity - of the %s unique_metrics, %s metrics are decreasing in sparsity (this is good)' % (
+                str(len(unique_metrics)), str(len(metrics_sparsity_decreasing))))
+            logger.info('metrics_manager :: check_data_sparsity - of the %s unique_metrics, %s metrics are stale' % (
+                str(len(unique_metrics)), str(len(metrics_stale))))
+            logger.info('metrics_manager :: check_data_sparsity - of the %s unique_metrics, %s metrics are inactive' % (
+                str(len(unique_metrics)), str(len(metrics_inactive))))
+            check_data_sparsity_time = time() - check_data_sparsity_start
+            logger.info('metrics_manager :: check data sparsity took %.2f seconds' % check_data_sparsity_time)
+
         spin_end = time() - spin_start
         logger.info('metrics_manager :: metric_management_process took %.2f seconds' % spin_end)
         return
@@ -1063,7 +1456,7 @@ class Metrics_Manager(Thread):
             p_starts = time()
             # TESTING p.join removal
             # while time() - p_starts <= 1:
-            while time() - p_starts <= 300:
+            while time() - p_starts <= RUN_EVERY:
                 if any(p.is_alive() for p in pids):
                     # Just to avoid hogging the CPU
                     sleep(.1)
@@ -1092,8 +1485,8 @@ class Metrics_Manager(Thread):
                         logger.error('error :: metrics_manager :: failed to stop spawn process')
 
             process_runtime = time() - now
-            if process_runtime < 300:
-                sleep_for = (300 - process_runtime)
+            if process_runtime < RUN_EVERY:
+                sleep_for = (RUN_EVERY - process_runtime)
                 logger.info('metrics_manager :: sleeping for %.2f seconds due to low run time...' % sleep_for)
                 sleep(sleep_for)
                 try:
