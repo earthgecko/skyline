@@ -585,6 +585,26 @@ IDENTIFY_UNORDERED_TIMESERIES = False
 
 """
 
+# @added 20201209 - Feature #3870: metrics_manager - check_data_sparsity
+CHECK_DATA_SPARSITY = True
+"""
+:var CHECK_DATA_SPARSITY: ADVANCED FEATURE - in Analyzer metrics_manager
+    determine how many metrics are fully populated (good), becoming increasingly
+    sparsely populated (bad, not receiving data), becoming more densely populated
+    (good) and the average data sparsity for the entire metric population.
+:vartype CHECK_DATA_SPARSITY: boolen
+"""
+
+SKIP_CHECK_DATA_SPARSITY_NAMESPACES = []
+"""
+:var SKIP_CHECK_DATA_SPARSITY_NAMESPACES: ADVANCED FEATURE - if there are
+    metrics in population that you expect to not send data all the time you can
+    declare the namespaces if you do not want them influencing the data sparsity
+    measurements.  This is a list of absolute metric names, substrings (dotted
+    elements) of a namespace or a regex of a namespace
+:vartype SKIP_CHECK_DATA_SPARSITY_NAMESPACES: list
+"""
+
 # @added 20200411 - Feature #3480: batch_processing
 BATCH_PROCESSING = None
 """
@@ -1459,7 +1479,9 @@ DO_NOT_SKIP_LIST = [
     'skyline.analyzer.mirage_metrics',
     'skyline.analyzer.total_analyzed',
     'skyline.analyzer.total_anomalies',
+    'skyline.analyzer.metrics_sparsity',
     'skyline.exceptions',
+    'skyline.mirage.checks',
 ]
 """
 :var DO_NOT_SKIP_LIST: Metrics to skip

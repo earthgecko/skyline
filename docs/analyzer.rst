@@ -225,6 +225,19 @@ monotonically, metrics that have an incrementing increasing count, so that these
 time series can be handled via their derivative products where appropriate.  For
 full details see `Monotonic metrics <monotonic-metrics.html>`__
 
+Anomaly `end_timestamp`
+======================
+
+The `end_timestamp` means that the anomaly has either:
+
+# Ended, when it is a peak or trough anomaly, and the time series data returns
+  to a state that is represented in the norm in the previous 24 hour period
+# When the state change, in cases of frequency or level shifts, and occurs for
+  sufficient time to begin to be represented in the norm in the previous 24 hour
+  period (:mod:`settings.FULL_DURATION`).  In these cases you might consider the
+  metric to still be in an anomalous state, but in terms of the
+  :mod:`settings.FULL_DURATION` data, it is no longer anomalous.
+
 Push to Mirage
 ==============
 
@@ -278,7 +291,8 @@ In terms of the :mod:`settings.ALERTS` order matters in Analyzer and in the
 Mirage context as well.
 
 .. warning:: It is important to note that Analyzer uses the first alert tuple
-  that matches.
+  that matches.  Unless you have :mod:`settings.EXTERNAL_ALERTS` enabled which
+  is an ADVANCED FEATURE.
 
 So for example, with some annotation.  Let us say we have a set of metrics
 related to how many requests are made per customer.  We have two very important
@@ -360,6 +374,37 @@ Example alert
 .. note:: The Redis data graphs do make the alerter a little more CPU when
   matplotlib plots the alerts and the alert email larger in size.
 
+Monitoring data sparsity
+========================
+
+If you have a reliable metrics pipeline this generally is not required, however
+the Analyzer metrics_manager can be enabled to monitor how sparsely populated
+the metric population is.  If the Analyzer metrics_manager is enabled via
+:mod:`settings.CHECK_DATA_SPARSITY`, the metric population will be analysed
+every ``RUN_EVERY`` (which for metrics_manager is 300 seconds) and the
+resolution of each metric will be dynamically determined from the timeseries
+data, the expected number of data points in :mod:`settings.FULL_DURATION` will
+be determined and the data sparsity value will be calculated for each metric.
+A data sparsity of 100% means that the metric is fully populated, as the value
+decreases the metric data becomes increasingly sparsely populated (bad).
+
+Enabling :mod:`settings.CHECK_DATA_SPARSITY` results in Skyline sending 4 new
+metrics to Graphite:
+
+- skyline.analyzer.<HOSTNAME>.metrics_sparsity.avg_sparsity - the average sparsity e.g. ``sum(all_sparsities) / len(all_sparsities)``
+- skyline.analyzer.<HOSTNAME>.metrics_sparsity.metrics_fully_populated - the number of metrics fully (or over populated)
+- skyline.analyzer.<HOSTNAME>.metrics_sparsity.metrics_sparsity_increasing - the number of metrics becoming more sparsely populated (bad)
+- skyline.analyzer.<HOSTNAME>.metrics_sparsity.metrics_sparsity_increasing - the number of metrics becoming more densely populated (good)
+
+Across the entire population, these are the key metrics regarding the reliability
+of incoming metrics. An increasing `skyline.analyzer.<HOSTNAME>.metrics_sparsity.metrics_sparsity_increasing`
+metric indicates that the metric data submission is degraded and could indicate
+a problem.
+
+Of course there may be some metrics that are not expected to send values
+frequently but only occasionally, if you wish to exclude these types of metrics
+they can be declared in :mod:`settings.SKIP_CHECK_DATA_SPARSITY_NAMESPACES`.
+
 What **Analyzer** does
 ======================
 
@@ -394,3 +439,12 @@ What **Analyzer** does
   - Analyzer will alert for an Analyzer metric that has been returned from
     Ionosphere as anomalous having not matched any known features profile or
     layers.
+
+- Analyzer also runs a metrics_manager process that runs every ``RUN_EVERY``
+  seconds (currently 300 seconds).  This process is responsible for all metric
+  classification in terms of determining what metrics are Mirage metrics,
+  low priority metrics, what metrics are assigned to each alert group, etc.
+  This is a separate process that run isolated from the analysis processes as
+  these classifications some that they do not impact the analysis run time.
+  metrics_manager creates Redis keys, sets and hash key for the various things
+  which are consumed by the other apps.

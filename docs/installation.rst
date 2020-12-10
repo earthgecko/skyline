@@ -50,16 +50,17 @@ the end of this page.
 What the components do
 ----------------------
 
-- Graphite - sends metric data to Skyline Horizon via a pickle.  Graphite is a
-  separate application that will probably be running on another server, although
-  Graphite could run on the same server, in a production environment it would
-  probably be a remote machine or container.  Graphite is not part of Skyline.
+- Graphite - sends metric data to Skyline Horizon via a pickle (Python object
+  serialization).  Graphite is a separate application that will probably be
+  running on another server, although Graphite could run on the same server, in
+  a production environment it might be a remote machine or container.  Graphite
+  is not part of Skyline.
 - Redis - stores :mod:`settings.FULL_DURATION` seconds (usefully 24 hours worth)
   of time series data that Graphite sends to Skyline Horizon and Horizon writes
   the data to Redis.  Skyline Analyzer pulls the data from Redis for analysis.
   Redis must run on the same host as Skyline.  It may be possible to run Redis
   in another container or VM that is on the same host.
-- MySQL/mariadb - stores data about anomalies and time series features profile
+- MySQL/MariaDB - stores data about anomalies and time series features profile
   fingerprints for matching and learning things that are not anomalous.  MySQL
   can run on the same host as Skyline or it can be remote.  Running the DB
   remotely will make the Skyline UI a bit slower.
@@ -90,6 +91,15 @@ documentation configuration options are referred to via their docstrings name
 e.g. :mod:`settings.FULL_DURATION` which links to their description in the
 documentation.
 
+.. note:: You will encounter settings that are described as ADVANCED
+  FEATURE or EXPERIMENTAL.  Many of these settings are not necessarily fully
+  described or even partially documented as they require a deeper understanding
+  of the Skyline internals, generally in terms of how Skyline pipelines, analyses
+  and alerts on the data, in order to understand their use, implementation and
+  execution.  This knowledge comes from use and experience and the documentation
+  cannot describe every aspect of all the highly configurable manners in which
+  Skyline can be run.
+
 Dawn
 ~~~~
 
@@ -115,10 +125,10 @@ Firewall
   - The IP address and port being used to reverse proxy the Webapp e.g.
     <YOUR_SERVER_IP_ADDRESS>:443, ensure that this is only accessible to
     specified IPs in iptables/ip6tables (further these addresses should also be
-    added to the reverse proxy conf as ``Allow from`` defines when you create
-    the reverse proxy conf file).
-  - The IP address and port being used by MySQL/mariadb, if you are not binding
-    MySQL/mariadb to 127.0.0.1 only, ensure that the MySQL/mariadb port declared
+    added to the reverse proxy conf as ``Allow from`` or ``allow`` defines when
+    you create the reverse proxy conf file).
+  - The IP address and port being used by MySQL/MariaDB, if you are not binding
+    MySQL/MariaDB to 127.0.0.1 only, ensure that the MySQL/MariaDB port declared
     in :mod:`settings.PANORAMA_DBPORT` (default 3306) is only accessible to
     specified IPs in iptables/ip6tables
   - Allow the IP address of your Graphite server/s on ports 2024 and 2025 (the
@@ -310,7 +320,7 @@ Apache reverse proxy
 Skyline database
 ~~~~~~~~~~~~~~~~
 
-- Create the Skyline MySQL/mariadb database for Panorama (see
+- Create the Skyline MySQL/MariaDB database for Panorama (see
   `Panorama <panorama.html>`__) and Ionosphere.
 
 Skyline settings
@@ -318,9 +328,9 @@ Skyline settings
 
 The Skyline settings are declared in the settings.py file as valid Python
 variables which are used in code.  The settings values therefore need to be
-defined correctly as the required Python types.  Strings, floats, ints, lists
-and tuples are used in the various settings.  Examples of these Python types
-are briefly outlined here to inform the user of the types.
+defined correctly as the required Python types.  Strings, floats, ints, lists,
+dicts and tuples are used in the various settings.  Examples of these Python
+types are briefly outlined here to inform the user of the types.
 
 .. code-block:: python
 
@@ -331,6 +341,7 @@ are briefly outlined here to inform the user of the types.
     a_list = [1.1, 1.4, 1.7]  # list
     another_list_of_strings = ['one', 'two', 'bob']  # list
     a_list_of_lists = [['server1.cpu.user', 23.6, 1563912300], ['server2.cpu.user', 3.22, 1563912300]]  # list
+    a_dict = {'key': 'value'}  # dict
     a_tuple = ('server1.cpu.user', 23.6, 1563912300)  # tuple
     a_tuple_of_tuples = (('server1.cpu.user', 23.6, 1563912300), ('server2.cpu.user', 3.22, 1563912300))  # tuple
 

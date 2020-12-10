@@ -306,6 +306,12 @@ metrics_last_timestamp_hash_key = 'analyzer.metrics.last_analyzed_timestamp'
 # @added 20201107 - Feature #3830: metrics_manager
 ANALYZER_USE_METRICS_MANAGER = True
 
+# @added 20201209 - Feature #3870: metrics_manager - check_data_sparsity
+try:
+    CHECK_DATA_SPARSITY = settings.CHECK_DATA_SPARSITY
+except:
+    CHECK_DATA_SPARSITY = True
+
 # @added 20190522 - Feature #2580: illuminance
 # Disabled for now as in concept phase.  This would work better if
 # the illuminance_datapoint was determined from the time series
@@ -6824,6 +6830,100 @@ class Analyzer(Thread):
                         self.redis_conn.rename('analyzer.missing_low_priority_metrics', 'aet.analyzer.missing_low_priority_metrics')
                     except:
                         pass
+
+            # @added 20201209 - Feature #3870: metrics_manager - check_data_sparsity
+            # Data sparsity is checked by metrics_manager however due to the
+            # fact that metrics_manager only runs every RUN_EVERY seconds, it
+            # will not submit metrics_sparsity metrics to Graphite every minute.
+            # metrics_sparsity metrics can be important if you want to ensure
+            # that data is being received constantly as expected.  Therefore
+            # Skyline creates metrics that ensure that data sparsity in the
+            # metrics can be monitored.  A positive level shift in the
+            # skyline.analyzer.<HOSTNAME>.metrics_sparsity.metrics_sparsity_increasing
+            # metric signifies that the incoming metrics are no longer fully
+            # populated.  Therefore analyzer sends the last metric_manager
+            # values if metrics_manager did not send them so they themselves are
+            # not sparsely populated
+            if CHECK_DATA_SPARSITY:
+                # If the Redis key exists do not submit metrics_manager metrics
+                # to Graphite
+                metrics_manager_sent_to_graphite = 0
+                try:
+                    metrics_manager_sent_to_graphite_data = self.redis_conn_decoded.get('analyzer.metrics_manager.sent.metrics_sparsity.metrics')
+                    if metrics_manager_sent_to_graphite_data:
+                        metrics_manager_sent_to_graphite = int(metrics_manager_sent_to_graphite_data)
+                        sent_seconds_ago = time() - metrics_manager_sent_to_graphite
+                        logger.info('not sending Graphite metrics for metrics_manager, metrics_manager sent %.2f seconds ago' % sent_seconds_ago)
+                except Exception as e:
+                    logger.error('error :: metrics_manager :: could not get Redis key analyzer.metrics_manager.sent.metrics_sparsity.metrics: %s' % e)
+                # If metrics_manager did not send metrics to Graphite, send the
+                # last values sent
+                if not metrics_manager_sent_to_graphite:
+                    metrics_sparsity_use_namespace = skyline_app_graphite_namespace + '.metrics_sparsity'
+
+                    send_metric_name = metrics_sparsity_use_namespace + '.metrics_fully_populated'
+                    last_metrics_fully_populated = None
+                    try:
+                        last_metrics_fully_populated_data = self.redis_conn_decoded.get('analyzer.metrics_manager.metrics_sparsity.metrics_fully_populated')
+                        if last_metrics_fully_populated_data:
+                            last_metrics_fully_populated = float(last_metrics_fully_populated_data)
+                    except Exception as e:
+                        logger.error('error :: metrics_manager :: failed to determine metrics_fully_populated value from Redis key analyzer.metrics_manager.metrics_sparsity.metrics_fully_populated: %s' % e)
+                    if last_metrics_fully_populated or last_metrics_fully_populated == 0:
+                        try:
+                            send_graphite_metric(skyline_app, send_metric_name, str(last_metrics_fully_populated))
+                            logger.info('sent Graphite metric for metrics_manager - %s %s' % (send_metric_name, str(last_metrics_fully_populated)))
+                        except Exception as e:
+                            logger.error('error :: metrics_manager :: could not send send_graphite_metric %s %s: %s' % (
+                                send_metric_name, str(last_metrics_fully_populated), e))
+
+                    send_metric_name = metrics_sparsity_use_namespace + '.metrics_sparsity_increasing'
+                    last_metrics_sparsity_increasing = None
+                    try:
+                        last_metrics_sparsity_increasing_data = self.redis_conn_decoded.get('analyzer.metrics_manager.metrics_sparsity.metrics_sparsity_increasing')
+                        if last_metrics_sparsity_increasing_data:
+                            last_metrics_sparsity_increasing = float(last_metrics_sparsity_increasing_data)
+                    except Exception as e:
+                        logger.error('error :: metrics_manager :: failed to determine metrics_sparsity_increasing value from Redis key analyzer.metrics_manager.metrics_sparsity.metrics_sparsity_increasing: %s' % e)
+                    if last_metrics_sparsity_increasing or last_metrics_sparsity_increasing == 0:
+                        try:
+                            send_graphite_metric(skyline_app, send_metric_name, str(last_metrics_sparsity_increasing))
+                            logger.info('sent Graphite metric for metrics_manager - %s %s' % (send_metric_name, str(last_metrics_sparsity_increasing)))
+                        except Exception as e:
+                            logger.error('error :: metrics_manager :: could not send send_graphite_metric %s %s: %s' % (
+                                send_metric_name, str(last_metrics_sparsity_increasing), e))
+
+                    send_metric_name = metrics_sparsity_use_namespace + '.metrics_sparsity_decreasing'
+                    last_metrics_sparsity_decreasing = None
+                    try:
+                        last_metrics_sparsity_decreasing_data = self.redis_conn_decoded.get('analyzer.metrics_manager.metrics_sparsity.metrics_sparsity_decreasing')
+                        if last_metrics_sparsity_decreasing_data:
+                            last_metrics_sparsity_decreasing = float(last_metrics_sparsity_decreasing_data)
+                    except Exception as e:
+                        logger.error('error :: metrics_manager :: failed to determine metrics_sparsity_decreasing value from Redis key analyzer.metrics_manager.metrics_sparsity.metrics_sparsity_decreasing: %s' % e)
+                    if last_metrics_sparsity_decreasing or last_metrics_sparsity_decreasing == 0:
+                        try:
+                            send_graphite_metric(skyline_app, send_metric_name, str(last_metrics_sparsity_decreasing))
+                            logger.info('sent Graphite metric for metrics_manager - %s %s' % (send_metric_name, str(last_metrics_sparsity_decreasing)))
+                        except Exception as e:
+                            logger.error('error :: metrics_manager :: could not send send_graphite_metric %s %s: %s' % (
+                                send_metric_name, str(last_metrics_sparsity_decreasing), e))
+
+                    send_metric_name = metrics_sparsity_use_namespace + '.avg_sparsity'
+                    last_avg_sparsity = None
+                    try:
+                        last_avg_sparsity_data = self.redis_conn_decoded.get('analyzer.metrics_manager.metrics_sparsity.avg_sparsity')
+                        if last_avg_sparsity_data:
+                            last_avg_sparsity = float(last_avg_sparsity_data)
+                    except Exception as e:
+                        logger.error('error :: metrics_manager :: failed to determine last_avg_sparsity from Redis key analyzer.metrics_manager.metrics_sparsity.avg_sparsity: %s' % e)
+                    if last_avg_sparsity or last_avg_sparsity == 0:
+                        try:
+                            send_graphite_metric(skyline_app, send_metric_name, str(last_avg_sparsity))
+                            logger.info('sent Graphite metric for metrics_manager - %s %s' % (send_metric_name, str(last_avg_sparsity)))
+                        except Exception as e:
+                            logger.error('error :: metrics_manager :: could not send send_graphite_metric %s %s: %s' % (
+                                send_metric_name, str(last_avg_sparsity), e))
 
             # Sleep if it went too fast
             # if time() - now < 5:
