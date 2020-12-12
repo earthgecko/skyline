@@ -574,7 +574,7 @@ class Worker(Process):
                                 submittedToGraphite = True
                                 # modified 20201016 - Feature #3788: snab_flux_load_test
                                 if FLUX_VERBOSE_LOGGING:
-                                    logger.info('worker :: sent %s, %s, %s to Graphite' % (str(metric), str(value), str(timestamp)))
+                                    logger.info('worker :: sent %s, %s, %s to Graphite - via graphyte' % (str(metric), str(value), str(timestamp)))
                                 metrics_sent_to_graphite += 1
                                 # @added 20200827 - Feature #3708: FLUX_ZERO_FILL_NAMESPACES
                                 metrics_sent.append(metric)
@@ -586,14 +586,20 @@ class Worker(Process):
                                 logger.error('error :: worker :: failed to send metric data to Graphite for %s' % str(metric))
                                 metric = None
                         if send_to_reciever == 'pickle':
-                            tuple_data = (metric, (int(timestamp), float(value)))
-                            pickle_data.append(tuple_data)
-                            submittedToGraphite = True
-                            metrics_sent_to_graphite += 1
-                            metrics_sent.append(metric)
-                            # @added 202011120 - Feature #3790: flux - pickle to Graphite
-                            # Debug Redis set
-                            metrics_data_sent.append([metric, value, timestamp])
+                            # @modified 20201212 - Task #3864: flux - try except everything
+                            try:
+                                tuple_data = (metric, (int(timestamp), float(value)))
+                                pickle_data.append(tuple_data)
+                                if FLUX_VERBOSE_LOGGING:
+                                    logger.info('worker :: sending %s, %s, %s to Graphite - via pickle' % (str(metric), str(value), str(timestamp)))
+                                submittedToGraphite = True
+                                metrics_sent_to_graphite += 1
+                                metrics_sent.append(metric)
+                                # @added 202011120 - Feature #3790: flux - pickle to Graphite
+                                # Debug Redis set
+                                metrics_data_sent.append([metric, value, timestamp])
+                            except Exception as e:
+                                logger.error('error :: worker :: failed to append to pickle_data - %s' % str(e))
 
                         if submittedToGraphite:
                             # Update the metric Redis flux key
