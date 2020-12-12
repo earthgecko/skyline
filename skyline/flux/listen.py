@@ -573,6 +573,15 @@ class MetricDataPost(object):
             resp.status = falcon.HTTP_400
             return
         if metrics:
+            # added 20201211 - Feature #3694: flux - POST multiple metrics
+            # Added metric count
+            if FLUX_VERBOSE_LOGGING:
+                try:
+                    logger.info('listen :: POST mulitple metric data received with %s entries' % str(len(metrics)))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: listen :: could not report number of entries submitted in POST mulitple metric data')
+
             for metric_data in metrics:
                 # Add metric to add to queue
                 metric = None
