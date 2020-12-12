@@ -165,6 +165,8 @@ if True:
     )
 
     # from utilites import alerts_matcher
+    # @added 20201212 - Feature #3880: webapp - utilities - match_metric
+    from matched_or_regexed_in_list import matched_or_regexed_in_list
 
     # @added 20170114 - Feature #1854: Ionosphere learn
     # Decoupled the create_features_profile from ionosphere_backend and moved to
@@ -235,6 +237,16 @@ this_host = str(os.uname()[1])
 HORIZON_SHARD = 0
 if HORIZON_SHARDS:
     HORIZON_SHARD = HORIZON_SHARDS[this_host]
+
+# @added 20201210 - Feature #3824: get_cluster_data
+try:
+    AUTH_DEBUG = settings.AUTH_DEBUG
+except:
+    AUTH_DEBUG = False
+try:
+    PASS_AUTH_ON_REDIRECT = settings.PASS_AUTH_ON_REDIRECT
+except:
+    PASS_AUTH_ON_REDIRECT = False
 
 skyline_version = skyline_version.__absolute_version__
 
@@ -2955,6 +2967,19 @@ def ionosphere():
         user = 'Skyline'
         user_id = 1
 
+    # @added 20201210 - Feature #3824: get_cluster_data
+    if AUTH_DEBUG and settings.WEBAPP_AUTH_ENABLED:
+        try:
+            logger.debug('debug :: auth debug - username - %s' % str(auth.username))
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error ::auth debug - username')
+        try:
+            logger.debug('debug :: auth debug - password - %s' % str(auth.password))
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error ::auth debug - password')
+
     # @added 20191211 - Feature #3230: users DB table
     #                   Ideas #2476: Label and relate anomalies
     #                   Feature #2516: Add label to features profile
@@ -2982,6 +3007,9 @@ def ionosphere():
                 logger.error('error :: /ionosphere get_user_details() with %s did not return an int' % (
                     str(user), str(user_id)))
                 return 'Internal Server Error - ref: i - user_id not int', 500
+
+    logger.info('request.url: %s' % str(request.url))
+    # logger.debug('request.args: %s' % str(request.args))
 
     request_args_present = False
     try:
@@ -4269,7 +4297,30 @@ def ionosphere():
                                         resp = json.dumps(
                                             {'results': 'Error: no training data dir exists only any Skyline host - ' + ionosphere_data_dir + ' - go on... nothing here.'})
                                     else:
-                                        alt_redirect_url = '%s/ionosphere?timestamp=%s&metric=%s' % (str(metric_assigned_to), str(value), str(base_name))
+                                        # @modified 20201210 - Feature #3824: get_cluster_data
+                                        #                      Feature #3820: HORIZON_SHARDS
+                                        # alt_redirect_url = '%s/ionosphere?timestamp=%s&metric=%s' % (str(metric_assigned_to), str(value), str(base_name))
+                                        url_protocol = 'http'
+                                        if 'https' in metric_assigned_to:
+                                            url_protocol = 'https'
+                                        # @added 20201210 - Feature #3824: get_cluster_data
+                                        # Handle authentication details passed
+                                        # in the URL, badly as there is no other
+                                        # way to handle it, other than badly,
+                                        # not recommended, hence not adding to
+                                        # settings, but sometimes necessary.
+                                        if PASS_AUTH_ON_REDIRECT:
+                                            url_auth = '%s:\/\/%s:%s' % (url_protocol, str(auth.username), str(auth.password))
+                                        else:
+                                            url_auth = '%s:\/\/' % (url_protocol)
+                                        replace_string = '%s:\/\/' % url_protocol
+                                        url_with_auth = metric_assigned_to.replace(replace_string, url_auth)
+                                        # alt_redirect_url = '%s/ionosphere?' % (str(metric_assigned_to))
+                                        alt_redirect_url = '%s/ionosphere?' % (str(url_with_auth))
+                                        for key in request.args:
+                                            value = request.args.get(key)
+                                            new_alt_redirect_url = '%s&%s=%s' % (alt_redirect_url, str(key), str(value))
+                                            alt_redirect_url = new_alt_redirect_url
                                         logger.info('redirecting client to - %s' % alt_redirect_url)
                                         return redirect(alt_redirect_url)
 
@@ -4507,7 +4558,24 @@ def ionosphere():
                             if not metric_assigned_to:
                                 logger.error('metric %s not found on any Skyline host' % str(base_name))
                             else:
-                                alt_redirect_url = '%s/ionosphere?timestamp=%s&metric=%s' % (str(metric_assigned_to), str(requested_timestamp), str(base_name))
+                                # @modified 20201210 - Feature #3824: get_cluster_data
+                                #                      Feature #3820: HORIZON_SHARDS
+                                # alt_redirect_url = '%s/ionosphere?timestamp=%s&metric=%s' % (str(metric_assigned_to), str(value), str(base_name))
+                                url_protocol = 'http'
+                                if 'https' in metric_assigned_to:
+                                    url_protocol = 'https'
+                                if PASS_AUTH_ON_REDIRECT:
+                                    url_auth = '%s://%s:%s@' % (url_protocol, str(auth.username), str(auth.password))
+                                else:
+                                    url_auth = '%s:\/\/' % (url_protocol)
+                                replace_string = '%s://' % url_protocol
+                                url_with_auth = metric_assigned_to.replace(replace_string, url_auth)
+                                # alt_redirect_url = '%s/ionosphere?' % (str(metric_assigned_to))
+                                alt_redirect_url = '%s/ionosphere?' % (str(url_with_auth))
+                                for key in request.args:
+                                    value = request.args.get(key)
+                                    new_alt_redirect_url = '%s&%s=%s' % (alt_redirect_url, str(key), str(value))
+                                    alt_redirect_url = new_alt_redirect_url
                                 logger.info('redirecting client to - %s' % alt_redirect_url)
                                 return redirect(alt_redirect_url)
 
@@ -5713,9 +5781,10 @@ def ionosphere_images():
 @app.route("/utilities")
 @requires_auth
 def utilities():
-    # start = time.time()
+    start = time.time()
     try:
-        return render_template('utilities.html'), 200
+        return render_template(
+            'utilities.html', version=skyline_version, duration=(time.time() - start)), 200
     except:
         error_string = traceback.format_exc()
         logger.error('error :: failed to render utilities.html: %s' % str(error_string))
@@ -6203,6 +6272,87 @@ def upload_data():
                                     upload_id=upload_id,
                                     upload_id_key=upload_id_key))
     return 'Bad Request', 400
+
+
+# @added 20201212 - Feature #3880: webapp - utilities - match_metric
+@app.route("/match_metric", methods=['POST'])
+def match_metric():
+    start = time.time()
+    logger.info('/match_metric request')
+
+    metric = None
+    settings_list = None
+    use_settings_list = None
+    match_with = None
+
+    if request.method != 'POST':
+        logger.error('error :: not a POST requests, returning 400')
+        return 'Method Not Allowed', 405
+
+    if request.method == 'POST':
+        logger.info('handling match_metric POST request')
+
+        def get_settings(str):
+            return getattr(sys.modules['settings'], str)
+
+        if 'metric' in request.form:
+            metric = request.form['metric']
+            logger.info('handling match_metric POST with variable metric - %s' % str(metric))
+        if not metric:
+            logger.info('handling match_metric, return 400 no metric')
+            return 'Bad request', 400
+        if 'settings_list' in request.form:
+            settings_list = request.form['settings_list']
+            logger.info('handling match_metric POST with variable settings_list - %s' % str(settings_list))
+        if not settings_list:
+            settings_list = None
+        if settings_list:
+            use_settings_list = None
+            try:
+                use_settings_list = get_settings(settings_list)
+            except Exception as e:
+                trace = traceback.format_exc()
+                message = 'could not interpolate settings_list - %s - %s' % (str(settings_list), e)
+                logger.error(trace)
+                logger.error('error :: %s' % message)
+                return internal_error(message, trace)
+        if not use_settings_list:
+            if 'match_with' in request.form:
+                match_with = request.form['match_with']
+                logger.info('handling match_metric POST with variable match_with - %s' % str(match_with))
+        if metric:
+            if not use_settings_list:
+                if not match_with:
+                    logger.info('handling match_metric, return 400 no settings_list or match_with')
+                    return 'Bad request', 400
+        pattern_match = None
+        try:
+            if use_settings_list:
+                pattern_match, matched_by = matched_or_regexed_in_list(skyline_app, metric, use_settings_list, True)
+            if not use_settings_list and match_with:
+                pattern_match, matched_by = matched_or_regexed_in_list(skyline_app, metric, [match_with], True)
+        except Exception as e:
+            trace = traceback.format_exc()
+            message = 'could not determine if metric matched - error - %s' % (e)
+            logger.error(trace)
+            logger.error('error :: %s' % message)
+            return internal_error(message, trace)
+        if pattern_match is None:
+            logger.info('handling match_metric, pattern_match is None, return 400')
+            return 'Bad request', 400
+        try:
+            return render_template(
+                'utilities.html', match_metric=True, metric=metric,
+                settings_list=settings_list, match_with=match_with,
+                pattern_match=pattern_match, matched_by=matched_by,
+                version=skyline_version, duration=(time.time() - start),
+                print_debug=False), 200
+        except Exception as e:
+            trace = traceback.format_exc()
+            message = 'could not render_template utilities.html - error - %s' % (e)
+            logger.error(trace)
+            logger.error('error :: %s' % message)
+            return internal_error(message, trace)
 
 
 # @added 20160703 - Feature #1464: Webapp Redis browser

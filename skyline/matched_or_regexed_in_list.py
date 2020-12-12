@@ -9,7 +9,10 @@ import re
 # @added 20200423 - Feature #3512: matched_or_regexed_in_list function
 #                   Feature #3508: ionosphere_untrainable_metrics
 #                   Feature #3486: analyzer_batch
-def matched_or_regexed_in_list(current_skyline_app, base_name, match_list):
+# @added 20201212 - Feature #3880: webapp - utilities - match_metric
+# Added debug_log parameter for allowing for debug logging to be turned on in
+# webapp utilities requests
+def matched_or_regexed_in_list(current_skyline_app, base_name, match_list, debug_log=False):
     """
     Determine if a pattern is in a list as a:
     1) absolute match
@@ -30,6 +33,8 @@ def matched_or_regexed_in_list(current_skyline_app, base_name, match_list):
 
     """
     debug_matched_or_regexed_in_list = None
+    if debug_log:
+        debug_matched_or_regexed_in_list = True
 
     if debug_matched_or_regexed_in_list:
         current_skyline_app_logger = str(current_skyline_app) + 'Log'
