@@ -491,8 +491,11 @@ termcolor==1.1.0
 #pytest==3.8.0
 # @modified 20200701 - Task #3608: Update Skyline to Python 3.8.3 and deps
 #py==1.8.0
-py==1.9.0
-
+# @modified 20201212 - Support #3874: SNYK-PYTHON-PY-1049546
+# Dependency vulnerability - py - CVE-2020-29651 #378
+# Update to py 1.10.0
+#py==1.9.0
+py==1.10.0
 # @modified 20190426 - Task #2964: Update dependencies
 #pytest==4.4.0
 # @modified 20190529 - Task #3060: Update dependencies
