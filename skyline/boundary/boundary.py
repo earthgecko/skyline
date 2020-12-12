@@ -275,7 +275,7 @@ class Boundary(Thread):
             #    CHECK_MATCH_PATTERN = metrick[0]
             # Determine the metrics BOUNDARY_METRICS metric tuple settings
             for boundary_alerter in BOUNDARY_METRICS:
-                CHECK_MATCH_PATTERN = boundary_alerter[0]
+                # CHECK_MATCH_PATTERN = boundary_alerter[0]
                 try:
                     pattern_match, metric_matched_by = matched_or_regexed_in_list(skyline_app, base_name, [boundary_alerter[0]])
                     if ENABLE_BOUNDARY_DEBUG and pattern_match:
@@ -411,7 +411,7 @@ class Boundary(Thread):
                     for autoaggregate_metric in BOUNDARY_AUTOAGGRERATION_METRICS:
                         autoaggregate = False
                         autoaggregate_value = 0
-                        CHECK_MATCH_PATTERN = autoaggregate_metric[0]
+                        # CHECK_MATCH_PATTERN = autoaggregate_metric[0]
                         base_name = metric_name.replace(FULL_NAMESPACE, '', 1)
 
                         # @modified 20200622 - Task #3586: Change all alert pattern checks to matched_or_regexed_in_list
@@ -967,7 +967,9 @@ class Boundary(Thread):
                         metric_name = str(test_alert[0])
                         test_alerter = str(test_alert[1])
                         logger.info('test alert to %s for %s' % (test_alerter, metric_name))
-                        trigger_alert(test_alerter, 1, metric_name, 10, 1, 'testing', int(time()))
+                        # @modified 20201207 - Task #3878: Add metric_trigger and alert_threshold to Boundary alerts
+                        # trigger_alert(test_alerter, 1, metric_name, 10, 1, 'testing', int(time()))
+                        trigger_alert(test_alerter, 1, metric_name, 10, 1, 'testing', int(time()), 0)
                     except:
                         logger.error('error :: test trigger_alert - %s' % traceback.format_exc())
                         logger.error('error :: failed to test trigger_alert :: %s' % metric_name)
@@ -1315,26 +1317,38 @@ class Boundary(Thread):
                                             # @modified 20200122 - Feature #3396: http_alerter
                                             # Add the metric timestamp for the http_alerter resend queue
                                             # trigger_alert(alerter, datapoint, base_name, expiration_time, metric_trigger, algorithm)
-                                            trigger_alert(alerter, datapoint, base_name, expiration_time, metric_trigger, algorithm, metric_timestamp)
-                                            logger.info('alert sent :: %s - %s - via %s - %s' % (base_name, datapoint, alerter, algorithm))
-                                            trigger_alert("syslog", datapoint, base_name, expiration_time, metric_trigger, algorithm, metric_timestamp)
-                                            logger.info('alert sent :: %s - %s - via syslog - %s' % (base_name, datapoint, algorithm))
+                                            # @modified 20201207 - Task #3878: Add metric_trigger and alert_threshold to Boundary alerts
+                                            trigger_alert(alerter, datapoint, base_name, expiration_time, metric_trigger, algorithm, metric_timestamp, alert_threshold)
+                                            logger.info('alert sent :: %s - %s - via %s - %s %s %s times' % (
+                                                base_name, str(datapoint), alerter, algorithm, str(metric_trigger), str(alert_threshold)))
+                                            trigger_alert("syslog", datapoint, base_name, expiration_time, metric_trigger, algorithm, metric_timestamp, alert_threshold)
+                                            # logger.info('alert sent :: %s - %s - via syslog - %s' % (base_name, datapoint, algorithm))
+                                            logger.info('alert sent :: %s - %s - via syslog - %s %s %s times' % (
+                                                base_name, str(datapoint), algorithm, str(metric_trigger), str(alert_threshold)))
                                             alerter_alert_sent = True
                                         except Exception as e:
-                                            logger.error('error :: alert failed :: %s - %s - via %s - %s' % (base_name, datapoint, alerter, algorithm))
+                                            logger.error('error :: alert failed :: %s - %s - via %s - %s' % (base_name, str(datapoint), alerter, algorithm))
                                             logger.error('error :: could not send alert: %s' % str(e))
                                             trigger_alert('syslog', datapoint, base_name, expiration_time, metric_trigger, algorithm, metric_timestamp)
                                     else:
                                         if ENABLE_BOUNDARY_DEBUG:
                                             logger.info("debug :: cache_key exists not alerting via %s for %s is less than alerter_limit %s" % (alerter, cache_key))
-                                        trigger_alert("syslog", datapoint, base_name, expiration_time, metric_trigger, algorithm, metric_timestamp)
-                                        logger.info('alert sent :: %s - %s - via syslog - %s' % (base_name, datapoint, algorithm))
+                                        # @modified 20201207 - Task #3878: Add metric_trigger and alert_threshold to Boundary alerts
+                                        trigger_alert("syslog", datapoint, base_name, expiration_time, metric_trigger, algorithm, metric_timestamp, alert_threshold)
+                                        # logger.info('alert sent :: %s - %s - via syslog - %s' % (base_name, str(datapoint), algorithm))
+                                        logger.info('alert sent :: %s - %s - via syslog - %s %s %s times' % (
+                                            base_name, str(datapoint), algorithm, str(metric_trigger), str(alert_threshold)))
                                 except:
-                                    trigger_alert("syslog", datapoint, base_name, expiration_time, metric_trigger, algorithm, metric_timestamp)
-                                    logger.info('alert sent :: %s - %s - via syslog - %s' % (base_name, datapoint, algorithm))
+                                    # @modified 20201207 - Task #3878: Add metric_trigger and alert_threshold to Boundary alerts
+                                    trigger_alert("syslog", datapoint, base_name, expiration_time, metric_trigger, algorithm, metric_timestamp, alert_threshold)
+                                    # logger.info('alert sent :: %s - %s - via syslog - %s' % (base_name, datapoint, algorithm))
+                                    logger.info('alert sent :: %s - %s - via syslog - %s %s %s times' % (
+                                        base_name, str(datapoint), algorithm, str(metric_trigger), str(alert_threshold)))
                             else:
-                                trigger_alert("syslog", datapoint, base_name, expiration_time, metric_trigger, algorithm, metric_timestamp)
-                                logger.info('alert sent :: %s - %s - via syslog - %s' % (base_name, datapoint, algorithm))
+                                trigger_alert("syslog", datapoint, base_name, expiration_time, metric_trigger, algorithm, metric_timestamp, alert_threshold)
+                                # logger.info('alert sent :: %s - %s - via syslog - %s' % (base_name, datapoint, algorithm))
+                                logger.info('alert sent :: %s - %s - via syslog - %s %s %s times' % (
+                                    base_name, str(datapoint), algorithm, str(metric_trigger), str(alert_threshold)))
 
                             # Update the alerts sent for the alerter cache key,
                             # to allow for alert limiting
@@ -1349,8 +1363,10 @@ class Boundary(Thread):
                     else:
                         # Always alert to syslog, even if alert_threshold is not
                         # breached or if send_alert is not True
-                        trigger_alert("syslog", datapoint, base_name, expiration_time, metric_trigger, algorithm, metric_timestamp)
-                        logger.info('alert sent :: %s - %s - via syslog - %s' % (base_name, datapoint, algorithm))
+                        trigger_alert("syslog", datapoint, base_name, expiration_time, metric_trigger, algorithm, metric_timestamp, alert_threshold)
+                        # logger.info('alert sent :: %s - %s - via syslog - %s' % (base_name, datapoint, algorithm))
+                        logger.info('alert sent :: %s - %s - via syslog - %s %s %s times' % (
+                            base_name, str(datapoint), algorithm, str(metric_trigger), str(alert_threshold)))
 
                     # @added 20171216 - Task #2236: Change Boundary to only send to Panorama on alert
                     # Remove tmp_panaroma_anomaly_file
