@@ -1,26 +1,17 @@
-<!DOCTYPE html>
-<html>
-    <body>
-        <title>skyline</title>
-        <script src="/static/js/mousetrap.min.js"></script>
-        <script src="/static/jquery-2.2.4/dist/jquery.min.js"></script>
-        <script src="/static/strftime-0.9.2/strftime-min.js"></script>
-        <script src="/static/dygraph-1.1.1/dygraph-combined.js"></script>
-        <script src="/static/bootstrap-3.3.6-dist/js/bootstrap.min.js"></script>
-        <script src="/static/js/skyline.js"></script>
+{% extends "layout.html" %}
+{% block body %}
+<!-- BEGIN /utilities block -->
+<!--
+# @added 20201212 - Feature #3880: webapp - utilities - match_metric
+ -->
+	<ol class="breadcrumb">
+  	<div class="breadcrumb">
+  		<li><a href="/">Home</a></li>
+  		<li><a href="/utilities">Utilities</a></li>
+  		<li class="active"><span class="logo"><span class="sky">Match</span> <span class="re">metric name</span></li>
+    </div>
+	</ol>
+  {% include "match_metric.html" %}
 
-        <link rel="stylesheet" href="/static/bootstrap-3.3.6-dist/css/bootstrap.min.css">
-        <link rel="stylesheet" type="text/css" href="/static/bootstrap-3.3.6-dist/css/bootstrap-theme.min.css">
-        <link rel="stylesheet" href="/static/fontawesome-4.6.3/css/font-awesome.min.css">
-        <link rel="stylesheet" href="/static/css/skyline.css">
-
-        <div id="navbar">
-            <div class='container'>
-                <a href='/' id="logo" class='brand' href='/'>
-                    skyline
-                </a>
-            </div>
-        </div>
-
-    </body>
-</html>
+<!-- END /flux_frontend block -->
+{% endblock %}
