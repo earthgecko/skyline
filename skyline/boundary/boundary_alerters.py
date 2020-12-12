@@ -1,7 +1,9 @@
 from __future__ import division
 import logging
 import traceback
-import hashlib
+# @modified 20201207 - Task #3878: Add metric_trigger and alert_threshold to Boundary alerts
+# hashlib not used
+# import hashlib
 from smtplib import SMTP
 
 # @added 20200122: Feature #3396: http_alerter
@@ -41,7 +43,9 @@ from time import (gmtime, strftime)
 from os import uname
 
 python_version = int(sys.version_info[0])
-from email import charset
+# @modified 20201207 - Task #3878: Add metric_trigger and alert_threshold to Boundary alerts
+# charset no longer used
+# from email import charset
 if python_version == 2:
     from email.MIMEMultipart import MIMEMultipart
     from email.MIMEText import MIMEText
@@ -122,7 +126,7 @@ except:
     DOCKER_FAKE_EMAIL_ALERTS = False
 
 
-def alert_smtp(datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp):
+def alert_smtp(datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp, alert_threshold):
 
     sender = settings.BOUNDARY_SMTP_OPTS['sender']
 
@@ -185,8 +189,12 @@ def alert_smtp(datapoint, metric_name, expiration_time, metric_trigger, algorith
     # Use alert_context
     # unencoded_graph_title = 'Skyline Boundary - %s at %s hours - %s - %s' % (
     #     alert_context, graphite_previous_hours, metric_name, datapoint)
-    unencoded_graph_title = '%s %s - %s at %s hours - %s - %s' % (
-        main_alert_title, app_alert_context, alert_context, graphite_previous_hours, metric_name, datapoint)
+    # @modified 20201207 - Task #3878: Add metric_trigger and alert_threshold to Boundary alerts
+    # unencoded_graph_title = '%s %s - %s at %s hours - %s - %s' % (
+    #     main_alert_title, app_alert_context, alert_context, graphite_previous_hours, metric_name, datapoint)
+    unencoded_graph_title = '%s %s - %s %s %s times - %s' % (
+        main_alert_title, app_alert_context, alert_context, str(metric_trigger),
+        str(alert_threshold), str(datapoint))
 
     # @added 20181126 - Task #2742: Update Boundary
     #                   Feature #2034: analyse_derivatives
@@ -235,8 +243,12 @@ def alert_smtp(datapoint, metric_name, expiration_time, metric_trigger, algorith
         # @modified 20191002 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
         # unencoded_graph_title = 'Skyline Boundary - %s at %s hours - derivative graph - %s - %s' % (
         #     alert_context, graphite_previous_hours, metric_name, datapoint)
-        unencoded_graph_title = '%s %s - %s at %s hours - derivative graph - %s - %s' % (
-            main_alert_title, app_alert_context, alert_context, graphite_previous_hours, metric_name, datapoint)
+        # @modified 20201207 - Task #3878: Add metric_trigger and alert_threshold to Boundary alerts
+        # unencoded_graph_title = '%s %s - %s at %s hours - derivative graph - %s - %s' % (
+        #     main_alert_title, app_alert_context, alert_context, graphite_previous_hours, metric_name, datapoint)
+        unencoded_graph_title = '%s %s - %s %s %s times - derivative graph - %s' % (
+            main_alert_title, app_alert_context, alert_context, str(metric_trigger),
+            str(alert_threshold), str(datapoint))
 
     graph_title_string = quote(unencoded_graph_title, safe='')
     graph_title = '&title=%s' % graph_title_string
@@ -372,7 +384,11 @@ def alert_smtp(datapoint, metric_name, expiration_time, metric_trigger, algorith
         msg = MIMEMultipart('alternative')
         # @modified 20191002 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
         # msg['Subject'] = '[Skyline alert] ' + 'Boundary ALERT - ' + alert_context + ' - ' + datapoint + ' - ' + metric_name
-        msg['Subject'] = '[' + main_alert_title + ' alert] ' + app_alert_context + ' ALERT - ' + alert_context + ' - ' + datapoint + ' - ' + metric_name
+        # @modified 20201207 - Task #3878: Add metric_trigger and alert_threshold to Boundary alerts
+        # msg['Subject'] = '[' + main_alert_title + ' alert] ' + app_alert_context + ' ALERT - ' + alert_context + ' - ' + datapoint + ' - ' + metric_name
+        email_subject = '[%s alert] %s ALERT - %s' % (
+            main_alert_title, app_alert_context, alert_context, metric_name)
+        msg['Subject'] = email_subject
         msg['From'] = sender
         # @modified 20180524 - Task #2384: Change alerters to cc other recipients
         # msg['To'] = recipient
@@ -418,11 +434,15 @@ def alert_smtp(datapoint, metric_name, expiration_time, metric_trigger, algorith
                         str(metric_timestamp), metric_name))
 
 
-def alert_pagerduty(datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp):
+def alert_pagerduty(datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp, alert_threshold):
     if settings.PAGERDUTY_ENABLED:
         import pygerduty
         pager = pygerduty.PagerDuty(settings.BOUNDARY_PAGERDUTY_OPTS['subdomain'], settings.BOUNDARY_PAGERDUTY_OPTS['auth_token'])
-        pager.trigger_incident(settings.BOUNDARY_PAGERDUTY_OPTS['key'], 'Anomalous metric: %s (value: %s) - %s' % (metric_name, datapoint, algorithm))
+        # @modified 20201207 - Task #3878: Add metric_trigger and alert_threshold to Boundary alerts
+        # pager.trigger_incident(settings.BOUNDARY_PAGERDUTY_OPTS['key'], 'Anomalous metric: %s (value: %s) - %s' % (metric_name, datapoint, algorithm))
+        pager.trigger_incident(settings.BOUNDARY_PAGERDUTY_OPTS['key'], 'Anomalous metric: %s (value: %s) - %s %s %s times' % (
+            metric_name, str(datapoint), algorithm, str(metric_trigger),
+            str(alert_threshold)))
         # @added 20200825 - Feature #3704: Add alert to anomalies
         if settings.PANORAMA_ENABLED:
             added_panorama_alert_event = add_panorama_alert(skyline_app, int(metric_timestamp), metric_name)
@@ -521,12 +541,16 @@ def alert_hipchat(datapoint, metric_name, expiration_time, metric_trigger, algor
         return False
 
 
-def alert_syslog(datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp):
+def alert_syslog(datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp, alert_threshold):
     if settings.SYSLOG_ENABLED:
         import sys
         import syslog
         syslog_ident = settings.SYSLOG_OPTS['ident']
-        message = str('Boundary - Anomalous metric: %s (value: %s) - %s' % (metric_name, datapoint, algorithm))
+        # @modified 20201207 - Task #3878: Add metric_trigger and alert_threshold to Boundary alerts
+        # message = str('Boundary - Anomalous metric: %s (value: %s) - %s' % (metric_name, datapoint, algorithm))
+        message = 'Boundary - Anomalous metric: %s (value: %s) - %s with %s %s times' % (
+            metric_name, str(datapoint), algorithm, str(metric_trigger),
+            str(alert_threshold))
         if sys.version_info[:2] == (2, 6):
             syslog.openlog(syslog_ident, syslog.LOG_PID, syslog.LOG_LOCAL4)
         elif sys.version_info[:2] == (2, 7):
@@ -542,7 +566,7 @@ def alert_syslog(datapoint, metric_name, expiration_time, metric_trigger, algori
 
 # @added 20181126 - Task #2742: Update Boundary
 #                   Feature #2618: alert_slack
-def alert_slack(datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp):
+def alert_slack(datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp, alert_threshold):
 
     if not settings.SLACK_ENABLED:
         return False
@@ -591,7 +615,11 @@ def alert_slack(datapoint, metric_name, expiration_time, metric_trigger, algorit
 #        derivative_metrics = list(REDIS_ALERTER_CONN.smembers('derivative_metrics'))
 #    except:
 #        derivative_metrics = []
-    redis_metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(base_name))
+
+    # @modified 20201207 - Task #3878: Add metric_trigger and alert_threshold to Boundary alerts
+    # redis_metric_name not used
+    # redis_metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(base_name))
+
 #    if redis_metric_name in derivative_metrics:
 #        known_derivative_metric = True
     known_derivative_metric = is_derivative_metric(skyline_app, str(base_name))
@@ -621,19 +649,33 @@ def alert_slack(datapoint, metric_name, expiration_time, metric_trigger, algorit
         #     alert_context, str(graphite_previous_hours), metric)
         # slack_title = '*Skyline Boundary - ALERT* %s on %s at %s hours - derivative graph - %s' % (
         #     alert_context, metric, str(graphite_previous_hours), datapoint)
-        unencoded_graph_title = '%s %s - ALERT %s at %s hours - derivative graph - %s' % (
-            main_alert_title, app_alert_context, alert_context, str(graphite_previous_hours), metric)
-        slack_title = '*%s %s - ALERT* %s on %s at %s hours - derivative graph - %s' % (
-            main_alert_title, app_alert_context, alert_context, metric, str(graphite_previous_hours), datapoint)
+        # @modified 20201207 - Task #3878: Add metric_trigger and alert_threshold to Boundary alerts
+        # unencoded_graph_title = '%s %s - ALERT %s at %s hours - derivative graph - %s' % (
+        #     main_alert_title, app_alert_context, alert_context, str(graphite_previous_hours), metric)
+        # slack_title = '*%s %s - ALERT* %s on %s at %s hours - derivative graph - %s' % (
+        #     main_alert_title, app_alert_context, alert_context, metric, str(graphite_previous_hours), datapoint)
+        unencoded_graph_title = '%s %s - ALERT %s %s %s times - derivative graph - %s' % (
+            main_alert_title, app_alert_context, alert_context,
+            str(metric_trigger), str(alert_threshold), metric)
+        slack_title = '*%s %s - ALERT* %s %s %s times on %s - derivative graph - %s' % (
+            main_alert_title, app_alert_context, alert_context,
+            str(metric_trigger), str(alert_threshold), metric, str(datapoint))
     else:
         # unencoded_graph_title = 'Skyline Boundary - ALERT %s at %s hours - %s' % (
         #     alert_context, str(graphite_previous_hours), metric)
         # slack_title = '*Skyline Boundary - ALERT* %s on %s at %s hours - %s' % (
         #     alert_context, metric, str(graphite_previous_hours), datapoint)
-        unencoded_graph_title = '%s %s - ALERT %s at %s hours - %s' % (
-            main_alert_title, app_alert_context, alert_context, str(graphite_previous_hours), metric)
-        slack_title = '*%s %s - ALERT* %s on %s at %s hours - %s' % (
-            main_alert_title, app_alert_context, alert_context, metric, str(graphite_previous_hours), datapoint)
+        # @modified 20201207 - Task #3878: Add metric_trigger and alert_threshold to Boundary alerts
+        # unencoded_graph_title = '%s %s - ALERT %s at %s hours - %s' % (
+        #     main_alert_title, app_alert_context, alert_context, str(graphite_previous_hours), metric)
+        # slack_title = '*%s %s - ALERT* %s on %s at %s hours - %s' % (
+        #     main_alert_title, app_alert_context, alert_context, metric, str(graphite_previous_hours), datapoint)
+        unencoded_graph_title = '%s %s - ALERT %s %s %s times - %s' % (
+            main_alert_title, app_alert_context, alert_context,
+            str(metric_trigger), str(alert_threshold), metric)
+        slack_title = '*%s %s - ALERT* %s %s %s times on %s - %s' % (
+            main_alert_title, app_alert_context, alert_context,
+            str(metric_trigger), str(alert_threshold), metric, str(datapoint))
 
     graph_title_string = quote(unencoded_graph_title, safe='')
     graph_title = '&title=%s' % graph_title_string
@@ -677,7 +719,11 @@ def alert_slack(datapoint, metric_name, expiration_time, metric_trigger, algorit
             # link = '%s://%s:%s/%s/?from=%s&until=%s&target=cactiStyle(nonNegativeDerivative(%s))%s%s&colorList=orange' % (
             link = '%s://%s:%s/%s/?from=%s&until=%s&target=cactiStyle(nonNegativeDerivative(%s),%%27si%%27)%s%s&colorList=orange' % (
                 settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
-                settings.GRAPHITE_PORT, settings.GRAPHITE_RENDER_URI,
+                # @modified 20201207 - Task #3878: Add metric_trigger and alert_threshold to Boundary alerts
+                #                      Branch #3262: py3
+                #                      Branch #3002: docker
+                # settings.GRAPHITE_PORT, settings.GRAPHITE_RENDER_URI,
+                graphite_port, graphite_render_uri,
                 str(graphite_from), str(graphite_until),
                 # @modified 20201013 - Feature #3780: skyline_functions - sanitise_graphite_url
                 # metric, settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
@@ -693,7 +739,11 @@ def alert_slack(datapoint, metric_name, expiration_time, metric_trigger, algorit
             # link = '%s://%s:%s/%s/?from=%s&until=%s&target=cactiStyle(%s)%s%s&colorList=orange' % (
             link = '%s://%s:%s/%s/?from=%s&until=%s&target=cactiStyle(%s,%%27si%%27)%s%s&colorList=orange' % (
                 settings.GRAPHITE_PROTOCOL, settings.GRAPHITE_HOST,
-                settings.GRAPHITE_PORT, settings.GRAPHITE_RENDER_URI,
+                # @modified 20201207 - Task #3878: Add metric_trigger and alert_threshold to Boundary alerts
+                #                      Branch #3262: py3
+                #                      Branch #3002: docker
+                # settings.GRAPHITE_PORT, settings.GRAPHITE_RENDER_URI,
+                graphite_port, graphite_render_uri,
                 # str(graphite_from), str(graphite_until), metric,
                 # @modified 20201013 - Feature #3780: skyline_functions - sanitise_graphite_url
                 str(graphite_from), str(graphite_until), encoded_graphite_metric_name,
@@ -931,7 +981,7 @@ def alert_slack(datapoint, metric_name, expiration_time, metric_trigger, algorit
 
 
 # @added 20200122: Feature #3396: http_alerter
-def alert_http(alerter, datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp):
+def alert_http(alerter, datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp, alert_threshold):
     """
     Called by :func:`~trigger_alert` and sends and resend anomalies to a http
     endpoint.
@@ -983,6 +1033,9 @@ def alert_http(alerter, datapoint, metric_name, expiration_time, metric_trigger,
                 "value": value_str,
                 "full_duration": full_duration_str,
                 "expiry": expiry_str,
+                # @added 20201207 - Task #3878: Add metric_trigger and alert_threshold to Boundary alerts
+                "metric_trigger": metric_trigger,
+                "alert_threshold": alert_threshold,
                 "source": str(source),
                 "token": str(alerter_token)
             }
@@ -1155,7 +1208,9 @@ def alert_http(alerter, datapoint, metric_name, expiration_time, metric_trigger,
         return
 
 
-def trigger_alert(alerter, datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp):
+# @modified 20201207 - Task #3878: Add metric_trigger and alert_threshold to Boundary alerts
+# def trigger_alert(alerter, datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp):
+def trigger_alert(alerter, datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp, alert_threshold):
 
     if alerter == 'smtp':
         strategy = 'alert_smtp'
@@ -1168,9 +1223,10 @@ def trigger_alert(alerter, datapoint, metric_name, expiration_time, metric_trigg
 
     try:
         if strategy == 'alert_http':
-            getattr(boundary_alerters, strategy)(alerter, datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp)
+            # @modified 20201207 - Task #3878: Add metric_trigger and alert_threshold to Boundary alerts
+            getattr(boundary_alerters, strategy)(alerter, datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp, alert_threshold)
         else:
-            getattr(boundary_alerters, strategy)(datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp)
+            getattr(boundary_alerters, strategy)(datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp, alert_threshold)
     except:
         logger.error(traceback.format_exc())
         logger.error('error :: alerters - %s - getattr error' % strategy)
