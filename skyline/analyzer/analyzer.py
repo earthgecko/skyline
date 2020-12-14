@@ -312,6 +312,12 @@ try:
 except:
     CHECK_DATA_SPARSITY = True
 
+# @added 20201212 - Feature #3884: ANALYZER_CHECK_LAST_TIMESTAMP
+try:
+    ANALYZER_CHECK_LAST_TIMESTAMP = settings.ANALYZER_CHECK_LAST_TIMESTAMP
+except:
+    ANALYZER_CHECK_LAST_TIMESTAMP = False
+
 # @added 20190522 - Feature #2580: illuminance
 # Disabled for now as in concept phase.  This would work better if
 # the illuminance_datapoint was determined from the time series
@@ -494,6 +500,25 @@ class Analyzer(Thread):
             logger.info('nothing to do, no unique_metrics')
             return
 
+        # @added 20201214 - Feature #3892: global_anomalies
+        # TODO
+        # If an event occurs that cause a near global anomalous event, handle the swamp of work that will result on the systems.
+        # In terms of analysis, creating alert resources, sending alerts, Graphite requests, etc, etc
+        # Add a global_anomalies feature in Analyzer and a table in the DB.
+        # If analyzer encounters x anomalies in a run - start a global_anomalies event:
+        # Set a global anomaly key to put the system into a global anomaly state
+        # Do not send to Mirage
+        # Do not send alerts
+        # Do send to panorama
+        # Do send global_anomalies alert
+        # When analyzer encounters less than x anomalies per run for y runs:
+        # Set the global anomaly end_timestamp
+        # Remove the global anomaly key so the system reverts to normal
+        # global_anomalies can occur per shard in a cluster
+        global_anomaly_in_progress = False
+        if global_anomaly_in_progress:
+            logger.warn('warning :: a global anomaly event is in progress')
+
         # @added 20201007 - Feature #3774: SNAB_LOAD_TEST_ANALYZER
         # The number of metrics to load test Analyzer with, testing is only done
         # after the normal analysis run.
@@ -549,6 +574,11 @@ class Analyzer(Thread):
         smtp_alerter_metrics = []
         high_priority_assigned_metrics = []
         low_priority_assigned_metrics = []
+
+        # @added 20201212 - Feature #3884: ANALYZER_CHECK_LAST_TIMESTAMP
+        # all_stale_metrics is required in ANALYZER_ANALYZE_LOW_PRIORITY_METRICS and
+        # ANALYZER_CHECK_LAST_TIMESTAMP so set default
+        all_stale_metrics = []
 
         # @added 20201030 - Feature #3812: ANALYZER_ANALYZE_LOW_PRIORITY_METRICS
         determine_low_priority_metrics = False
@@ -1212,6 +1242,36 @@ class Analyzer(Thread):
                     logger.error(traceback.format_exc())
                     logger.error('error :: failed to determine if custom_algorithms are to be run with %s' % (
                         skyline_app))
+
+        # @added 20201212 - Feature #3884: ANALYZER_CHECK_LAST_TIMESTAMP
+        metrics_last_timestamp_dict = {}
+        metrics_without_new_data = []
+        metrics_with_new_data = []
+        metrics_added_to_last_timestamp_hash_key = []
+        if ANALYZER_CHECK_LAST_TIMESTAMP:
+            try:
+                metrics_last_timestamp_dict = self.redis_conn_decoded.hgetall(metrics_last_timestamp_hash_key)
+                if metrics_last_timestamp_dict:
+                    logger.info('ANALYZER_CHECK_LAST_TIMESTAMP - got %s metrics and last analysed timestamps from %s Redis hash key' % (
+                        str(len(metrics_last_timestamp_dict)),
+                        metrics_last_timestamp_hash_key))
+                else:
+                    logger.warn('warning :: ANALYZER_CHECK_LAST_TIMESTAMP enabled but got no data from the %s Redis hash key' % (
+                        metrics_last_timestamp_hash_key))
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to get Redis hash key %s' % (
+                    metrics_last_timestamp_hash_key))
+                metrics_last_timestamp_dict = {}
+            if not all_stale_metrics:
+                # If all_stale_metrics were not determined for ANALYZER_ANALYZE_LOW_PRIORITY_METRICS
+                # get them
+                try:
+                    all_stale_metrics = list(self.redis_conn_decoded.smembers('aet.analyzer.stale'))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to get Redis key aet.analyzer.stale for ANALYZER_CHECK_LAST_TIMESTAMP')
+                    all_stale_metrics = []
 
         # Distill timeseries strings into lists
         for i, metric_name in enumerate(assigned_metrics):
@@ -2222,6 +2282,29 @@ class Analyzer(Thread):
                 except:
                     pass
 
+            # @added 20201212 - Feature #3884: ANALYZER_CHECK_LAST_TIMESTAMP
+            analyzer_check_last_last_timestamp_new_timestamp = True
+            if ANALYZER_CHECK_LAST_TIMESTAMP and metrics_last_timestamp_dict and last_timeseries_timestamp:
+                try:
+                    last_analyzed_timestamp = metrics_last_timestamp_dict[base_name]
+                except:
+                    last_analyzed_timestamp = None
+                if last_analyzed_timestamp:
+                    try:
+                        if int(last_analyzed_timestamp) == int(last_timeseries_timestamp):
+                            analyzer_check_last_last_timestamp_new_timestamp = False
+                            if base_name not in all_stale_metrics:
+                                if int(spin_start) - int(last_timeseries_timestamp) >= settings.STALE_PERIOD:
+                                    # Send it for analysis to be classifed as
+                                    # stale
+                                    analyzer_check_last_last_timestamp_new_timestamp = True
+                        if not analyzer_check_last_last_timestamp_new_timestamp:
+                            metrics_without_new_data.append(base_name)
+                        else:
+                            metrics_with_new_data.append(base_name)
+                    except:
+                        pass
+
             try:
 
                 # @added 20200425 - Feature #3508: ionosphere.untrainable_metrics
@@ -2283,9 +2366,18 @@ class Analyzer(Thread):
 
                 # @added 20201018 - Feature #3810: ANALYZER_MAD_LOW_PRIORITY_METRICS
                 check_for_anomalous = True
+
+                # @added 20201212 - Feature #3884: ANALYZER_CHECK_LAST_TIMESTAMP
+                if ANALYZER_CHECK_LAST_TIMESTAMP:
+                    if not analyzer_check_last_last_timestamp_new_timestamp:
+                        check_for_anomalous = False
+
+                # @added 20201018 - Feature #3810: ANALYZER_MAD_LOW_PRIORITY_METRICS
                 if ANALYZER_MAD_LOW_PRIORITY_METRICS and ANALYZER_ANALYZE_LOW_PRIORITY_METRICS:
                     try:
-                        if low_priority_metric:
+                        # @modified 20201212 - Feature #3884: ANALYZER_CHECK_LAST_TIMESTAMP
+                        # if low_priority_metric:
+                        if low_priority_metric and check_for_anomalous:
                             mad_data = [item[1] for item in timeseries[-ANALYZER_MAD_LOW_PRIORITY_METRICS:]]
                             # @added 20201020 - Feature #3810: ANALYZER_MAD_LOW_PRIORITY_METRICS
                             # Handle very sparsely populated metrics with only a
@@ -2338,6 +2430,16 @@ class Analyzer(Thread):
                 # @added 20191016 - Branch #3262: py3
                 if LOCAL_DEBUG:
                     logger.debug('debug :: metric %s - anomalous - %s' % (str(metric_name), str(anomalous)))
+
+                # @added 20201212 - Feature #3884: ANALYZER_CHECK_LAST_TIMESTAMP
+                if ANALYZER_CHECK_LAST_TIMESTAMP and check_for_anomalous:
+                    try:
+                        self.redis_conn.hset(
+                            metrics_last_timestamp_hash_key, base_name,
+                            int_metric_timestamp)
+                        metrics_added_to_last_timestamp_hash_key.append(base_name)
+                    except:
+                        pass
 
                 # @added 20200608 - Feature #3566: custom_algorithms
                 # @modified 20201127 - Feature #3848: custom_algorithms - run_before_3sigma parameter
@@ -3308,6 +3410,18 @@ class Analyzer(Thread):
                 logger.info('ANALYZER_ANALYZE_LOW_PRIORITY_METRICS set to False, no low priority metrics were analyzed')
 
         del low_priority_assigned_metrics
+
+        # @added 20201212 - Feature #3884: ANALYZER_CHECK_LAST_TIMESTAMP
+        if ANALYZER_CHECK_LAST_TIMESTAMP:
+            try:
+                logger.info('ANALYZER_CHECK_LAST_TIMESTAMP - there were %s metrics with no new data that were not analysed' % str(len(metrics_without_new_data)))
+                logger.info('ANALYZER_CHECK_LAST_TIMESTAMP - there were %s metrics with new data that were analysed' % str(len(metrics_with_new_data)))
+                logger.info('ANALYZER_CHECK_LAST_TIMESTAMP - %s metrics last analysed timestamps where updated in %s Redis hash key' % (
+                    str(len(metrics_added_to_last_timestamp_hash_key)),
+                    metrics_last_timestamp_hash_key))
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: ANALYZER_CHECK_LAST_TIMESTAMP log error')
 
         # @added 20201111 - Feature #3480: batch_processing
         #                   Bug #2050: analyse_derivatives - change in monotonicity

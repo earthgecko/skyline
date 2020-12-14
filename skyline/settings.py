@@ -605,6 +605,18 @@ SKIP_CHECK_DATA_SPARSITY_NAMESPACES = []
 :vartype SKIP_CHECK_DATA_SPARSITY_NAMESPACES: list
 """
 
+# @added 20201212 - Feature #3884: ANALYZER_CHECK_LAST_TIMESTAMP
+ANALYZER_CHECK_LAST_TIMESTAMP = False
+"""
+:var ANALYZER_CHECK_LAST_TIMESTAMP: ADVANCED FEATURE - whether to make Analyzer
+    record the last analyzed timestamp per metric and only submit the metic to
+    be analysed if it has a new timestamp for the last (or is stale).  Where
+    high frequency metrics are used, this is generally not required, however it
+    is useful and can substantially reduce the amount of analysis run if you
+    have lots of lower frequency metrics.
+:vartype BATCH_PROCESSING: boolen
+"""
+
 # @added 20200411 - Feature #3480: batch_processing
 BATCH_PROCESSING = None
 """
@@ -620,7 +632,7 @@ BATCH_PROCESSING = None
     when a batch of data is received Analyzer sends the metric/s to analyzer_batch
     to analyse.  To ensure that this can be achieved as computationally cheap as
     possible the BATCH_PROCESSING_NAMESPACES list can be applied, to reduce the
-    footprint of this functionality
+    footprint of this functionality.  ADVANCED FEATURE
 :vartype BATCH_PROCESSING: boolen
 """
 
@@ -628,7 +640,7 @@ BATCH_PROCESSING_STALE_PERIOD = 86400
 """
 :var BATCH_PROCESSING_STALE_PERIOD: This is the duration, in seconds, for a
     metric to be deemed as stale and for the analyzer_batch to ignore it until
-    new datapoints are added.
+    new datapoints are added.  ADVANCED FEATURE
 :vartype BATCH_PROCESSING_STALE_PERIOD: int
 """
 
@@ -645,7 +657,7 @@ BATCH_PROCESSING_NAMESPACES = []
     of metric namespaces which can be expected to be batch processed can be
     defined so that BATCH_PROCESSING keys, checks and resources are not applied
     to all metrics.  This list works in the same way that SKIP_LIST does, it
-    matches in the string or dotted namespace elements.
+    matches in the string or dotted namespace elements. ADVANCED FEATURE
 :vartype BATCH_PROCESSING_NAMESPACES: list
 """
 
@@ -701,7 +713,7 @@ ANALYZER_ANALYZE_LOW_PRIORITY_METRICS = True
     this value to False disables ALL analysis of low priority metrics, they are
     simply skipped (except in Luminosity correlations).  To configure low
     priority metrics with any of the below LOW_PRIORITY_METRICS settings, this
-    value must be set to True.  See
+    value must be set to True.  ADVANCED FEATURE.  See
     https://earthgecko-skyline.readthedocs.io/en/latest/analyzer.html#high-and-low-priority-metrics
 :vartype ANALYZER_ANALYZE_LOW_PRIORITY_METRICS: boolean
 """
@@ -712,7 +724,7 @@ ANALYZER_DYNAMICALLY_ANALYZE_LOW_PRIORITY_METRICS = False
     mode will attempt to dynamically analyse as many low priority metrics as
     possible in the available time, looping through the metrics on a best effort
     basis to analyse low priority metrics as frequently as possible without
-    causing lag on the analysis of high priority metrics.
+    causing lag on the analysis of high priority metrics.  ADVANCED FEATURE
 :vartype ANALYZER_DYNAMICALLY_ANALYZE_LOW_PRIORITY_METRICS: boolean
 """
 
@@ -726,14 +738,14 @@ ANALYZER_MAD_LOW_PRIORITY_METRICS = 0
     https://earthgecko-skyline.readthedocs.io/en/latest/analyzer.html#ANALYZER_MAD_LOW_PRIORITY_METRICS
     Note if ANALYZER_DYNAMICALLY_ANALYZE_LOW_PRIORITY_METRICS is set to True,
     ANALYZER_MAD_LOW_PRIORITY_METRICS will be automatically set to 10 if it is
-    set to 0 here.
+    set to 0 here.  ADVANCED FEATURE
 :vartype ANALYZER_MAD_LOW_PRIORITY_METRICS: int
 """
 
 CUSTOM_ALGORITHMS = {}
 """
 :var CUSTOM_ALGORITHMS: Custom algorithms to run.  An empty dict {} disables
-    this feature.
+    this feature. ADVANCED FEATURE.
 :vartype CUSTOM_ALGORITHMS: dict
 
 - For full documentation see https://earthgecko-skyline.readthedocs.io/en/latest/algorithms/custom-algorithms.html
@@ -1009,7 +1021,8 @@ trigger again.
 
 EXTERNAL_ALERTS = {}
 """
-:var EXTERNAL_ALERTS: Skyline can get json alert configs from external sources.
+:var EXTERNAL_ALERTS: ADVANCED FEATURE - Skyline can get json alert configs from
+    external sources.
 :vartype EXTERNAL_ALERTS: dict
 
 See the External alerts documentation for the elements the are required in a
@@ -1393,7 +1406,8 @@ the Skyline servers to receiver all metrics but only analyze those metrics that
 are assigned to the specific server (shard).  This enables all Skyline servers
 that are running Horizon to receiver the entire metric population stream from
 mulitple Graphite carbon-relays and drop (not submit to their Redis instance)
-any metrics that do not belong to their shard.
+any metrics that do not belong to their shard.  Related settings are
+:mod:`settings.REMOTE_SKYLINE_INSTANCES` and :mod:`settings.SNYC_CLUSTER_FILES`
 
 - **Example**::
 
@@ -1403,7 +1417,7 @@ any metrics that do not belong to their shard.
         'skyline-server-3': 2,
     }
 
-Shard are 0 indexed.
+Shards are 0 indexed.
 
 """
 
@@ -1423,6 +1437,24 @@ HORIZON_SHARD_DEBUG = False
 :var HORIZON_SHARD_DEBUG: For development only to log some sharding debug info
     not for general use.
 :vartype HORIZON_SHARD_DEBUG: boolean
+"""
+
+SNYC_CLUSTER_FILES = False
+"""
+:var SNYC_CLUSTER_FILES: ADVANCED FEATURE - If Skyline is running in a clustered
+    configuration the :mod:`settings.REMOTE_SKYLINE_INSTANCES` can sync
+    Ionosphere training data and features_profiles dirs and files between each
+    other.  This allows for the relevant Ionosphere data to be distributed to
+    each instance in the cluster, so that if an instance fails or is removed,
+    all the nodes have that nodes data.  This also allows for an instance to be
+    added to the cluster and it will self populate.  This self populating is
+    rate limited so that a new instance will not thunder against the other
+    instances in the cluster to populate itself as quickly as possible, but
+    rather eventual consistency is achieve. Related settings are
+    :mod:`settings.REMOTE_SKYLINE_INSTANCES`, :mod:`settings.HORIZON_SHARDS`,
+    :mod:`settings.IONOSPHERE_DATA_FOLDER` and
+    :mod:`settings.IONOSPHERE_PROFILES_FOLDER`
+:vartype SNYC_CLUSTER_FILES: boolean
 """
 
 SKIP_LIST = [
@@ -2307,7 +2339,7 @@ IONOSPHERE_HISTORICAL_DATA_FOLDER = '/opt/skyline/ionosphere/historical_data'
     moved to when it reaches it purge age as defined for the namespace in
     :mod:`settings.IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR`. Unless you
     are feeding in and analysing historical data, this can generally be ignored
-    and is an advanced setting.  Note if you do use this and
+    and is an ADVANCED FEATURE.  Note if you do use this and
     :mod:`settings.IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR` be advised
     that there is NO purge of this directory, it must be done MANUALLY when
     you have completed your historical analysis and training.
@@ -2747,22 +2779,27 @@ ALTERNATIVE_SKYLINE_URLS = ['http://skyline-na.example.com:8080','http://skyline
 
 REMOTE_SKYLINE_INSTANCES = []
 """
-:var REMOTE_SKYLINE_INSTANCES: This a nested list of any remote instances
-    that Skyline should query for correlation time series this is ONLY
+:var REMOTE_SKYLINE_INSTANCES: ADVANCE FEATURE - This a nested list of any remote
+    instances that Skyline should query for correlation time series this is ONLY
     applicable if there are multiple Skyline instances each with their own
     Redis data.  This is for Skyline Luminosity to query other Skyline instances
     via the luminosity_remote_data API get the relevant time series fragments,
     by default the previous 12 minutes, for all the metrics on the other Skyline
     instance/s (gizpped) in order to run correlations in all metrics in the
-    population.
+    population.  Related settings are :mod:`settings.HORIZON_SHARDS` and
+    :mod:`settings.SNYC_CLUSTER_FILES`
 :vartype REMOTE_SKYLINE_INSTANCES: list
 
-**For example**, the IP or FQDN, the username and password as a strings str::
+**For example**, the IP or FQDN, the username, password and hostname as strings str::
 
     REMOTE_SKYLINE_INSTANCES = [
-        ['http://skyline-na.example.com:8080','remote_WEBAPP_AUTH_USER','remote_WEBAPP_AUTH_USER_PASSWORD'],
-        ['http://skyline-eu.example.com', 'another_remote_WEBAPP_AUTH_USER','another_WEBAPP_AUTH_USER_PASSWORD']]
+        ['http://skyline-na.example.com:8080','remote_WEBAPP_AUTH_USER','remote_WEBAPP_AUTH_USER_PASSWORD', 'skyline-1'],
+        ['http://skyline-eu.example.com', 'another_remote_WEBAPP_AUTH_USER','another_WEBAPP_AUTH_USER_PASSWORD', 'skyline-2']]
 
+
+The hostname element must match the hostnames in :mod:`settings.HORIZON_SHARDS`
+for the instances to be able to determine which Skyline instance is authorative
+for a metric.
 """
 
 CORRELATE_ALERTS_ONLY = True

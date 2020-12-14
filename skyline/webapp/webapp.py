@@ -161,7 +161,9 @@ if True:
         validate_ionosphere_match,
         # @added 20200226: Ideas #2476: Label and relate anomalies
         #                  Feature #2516: Add label to features profile
-        label_anomalies
+        label_anomalies,
+        # @added 20201213 - Feature #3890: metrics_manager - sync_cluster_files
+        expected_features_profiles_dirs,
     )
 
     # from utilites import alerts_matcher
@@ -696,6 +698,28 @@ def api():
         except:
             logger.error('error :: /api request with invalid cluster_data argument')
             return 'Bad Request', 400
+
+    # @added 20201213 - Feature #3890: metrics_manager - sync_cluster_files
+    if 'expected_features_profiles_dir' in request.args:
+        logger.info('/api?expected_features_profiles_dir')
+        start_features_profiles_dir = timer()
+        features_profiles_dirs = {}
+        try:
+            features_profiles_dirs = expected_features_profiles_dirs()
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: expected_features_profiles_dirs failed returning 500')
+            return 'Internal Server Error', 500
+        end_features_profiles_dir = timer()
+        features_profiles_dir_time = '%.6f' % (end_features_profiles_dir - start_features_profiles_dir)
+        logger.info('report %s expected features_profiles_dirs took, %s seconds' % (
+            str(len(features_profiles_dirs)), str(features_profiles_dir_time)))
+        if features_profiles_dirs:
+            data_dict = {"status": {"request_time": features_profiles_dir_time, "response": 200}, "data": {"features_profile_dirs": features_profiles_dirs}}
+            return jsonify(data_dict), 200
+        else:
+            data_dict = {"status": {"request_time": features_profiles_dir_time, "response": 404}, "data": {"features_profile_dirs": 'null'}}
+            return jsonify(data_dict), 404
 
     # @added 20201125 - Feature #3850: webapp - yhat_values API endoint
     # api?yhat_value=true&metric=metric&from=<from>&until=<until>&include_value=true&include_mean=true&include_yhat_real_lower=true
@@ -2943,7 +2967,7 @@ def crucible():
 
 
 # @added 20161123 - Branch #922: ionosphere
-@app.route("/ionosphere", methods=['GET'])
+@app.route('/ionosphere', methods=['GET'])
 @requires_auth
 def ionosphere():
     if not settings.IONOSPHERE_ENABLED:
@@ -5753,6 +5777,24 @@ def ionosphere_images():
 
             if key == 'image':
                 filename = str(value)
+
+                # @added 20201214 - Feature #3890: metrics_manager - sync_cluster_files
+                # Even though authenticated only allow specific paths
+                IONOSPHERE_IMAGE_ALLOWED_PATHS = [
+                    settings.IONOSPHERE_DATA_FOLDER,
+                    settings.IONOSPHERE_PROFILES_FOLDER,
+                ]
+                allowed_path = False
+                for allowed_image_path in IONOSPHERE_IMAGE_ALLOWED_PATHS:
+                    if allowed_image_path in filename:
+                        allowed_path = True
+                if not allowed_path:
+                    logger.info('forbidden filename, returning 403 - %s' % filename)
+                    return 'Forbidden', 403
+                if '.png' not in filename:
+                    logger.info('forbidden filename, not png, returning 403 - %s' % filename)
+                    return 'Forbidden', 403
+
                 if os.path.isfile(filename):
                     try:
                         return send_file(filename, mimetype='image/png')
@@ -5771,6 +5813,160 @@ def ionosphere_images():
                         trace = traceback.format_exc()
                         return internal_error(message, trace)
 
+    return 'Bad Request', 400
+
+
+# @added 20201213 - Feature #3890: metrics_manager - sync_cluster_files
+@app.route('/ionosphere_files')
+@requires_auth
+def ionosphere_files():
+
+    start = time.time()
+    request_args_present = False
+    try:
+        request_args_len = len(request.args)
+        request_args_present = True
+    except:
+        request_args_len = 0
+        logger.error('error :: ionosphere_files request arguments have no length - %s' % str(request_args_len))
+
+    IONOSPHERE_FILES_REQUEST_ARGS = ['source', 'timestamp', 'metric']
+    IONOSPHERE_FILES_ALLOWED_DIR_TYPES = ['training_data', 'features_profiles']
+
+    allowed_source_dir = False
+    timestamp = None
+    metric = None
+
+    if request_args_present:
+        for i in request.args:
+            key = str(i)
+            if key not in IONOSPHERE_FILES_REQUEST_ARGS:
+                logger.error('error :: ionosphere_files invalid request argument - %s=%s' % (key, str(i)))
+                return 'Bad Request', 400
+            value = request.args.get(key, 0)
+            if key == 'source':
+                source = str(value)
+                if source in IONOSPHERE_FILES_ALLOWED_DIR_TYPES:
+                    allowed_source_dir = True
+                if not allowed_source_dir:
+                    logger.error('error :: ionosphere_files not in IONOSPHERE_FILES_ALLOWED_DIR_TYPES - %s' % source)
+                    return 'Bad Request', 400
+            if key == 'timestamp':
+                timestamp_str = str(value)
+                try:
+                    timestamp = int(timestamp_str)
+                except:
+                    logger.error('error :: ionosphere_files timestamp is not an int - %s' % timestamp_str)
+                    return 'Bad Request', 400
+            if key == 'metric':
+                metric = str(value)
+    if not metric:
+        logger.error('error :: ionosphere_files no metric passed')
+        return 'Bad Request', 400
+
+    required_dir = None
+    if allowed_source_dir and timestamp and metric:
+        try:
+            metric_timeseries_dir = metric.replace('.', '/')
+            if source == 'features_profiles':
+                required_dir = '%s/%s/%s' % (
+                    settings.IONOSPHERE_PROFILES_FOLDER, metric_timeseries_dir,
+                    str(timestamp))
+            if source == 'training_data':
+                required_dir = '%s/%s/%s' % (
+                    settings.IONOSPHERE_DATA_FOLDER, str(timestamp),
+                    metric_timeseries_dir)
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: ionosphere_files failed to interpolate required_dir')
+            return 'Internal Server Error', 500
+
+    files_dict = {}
+    if required_dir:
+        if not isdir(required_dir):
+            logger.info('ionosphere_files required_dir does not exist - %s, returning 404' % str(required_dir))
+            return 'Not Found', 404
+        for dir_path, folders, files in os.walk(required_dir):
+            try:
+                if files:
+                    for i in files:
+                        path_and_file = '%s/%s' % (required_dir, i)
+                        files_dict[i] = path_and_file
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: ionosphere_files failed to build files_list from %s' % str(required_dir))
+    if not files_dict:
+        logger.warn('warning :: ionosphere_files no files in required_dir - %s - returning 404' % str(required_dir))
+        return 'Not Found', 404
+    if files_dict:
+        duration = time.time() - start
+        data_dict = {"status": {"response": 200, "request_time": duration}, "data": {"metric": metric, "timestamp": timestamp, "source": source, "files": files_dict}}
+        logger.info('ionosphere_files returned json with %s files listed' % str(len(files_dict)))
+        return jsonify(data_dict), 200
+    return 'Bad Request', 400
+
+
+# TODO @gzipped this?  But really bandwidth is more available than CPU
+# @added 20201213 - Feature #3890: metrics_manager - sync_cluster_files
+@app.route('/ionosphere_file')
+@requires_auth
+def ionosphere_file():
+
+    request_args_present = False
+    try:
+        request_args_len = len(request.args)
+        request_args_present = True
+    except:
+        request_args_len = 0
+        logger.error('error :: ionosphere_file request arguments have no length - %s' % str(request_args_len))
+
+    IONOSPHERE_FILE_REQUEST_ARGS = ['file']
+    IONOSPHERE_FILE_ALLOWED_PATHS = [
+        settings.IONOSPHERE_DATA_FOLDER,
+        settings.IONOSPHERE_PROFILES_FOLDER,
+    ]
+
+    if request_args_present:
+        for i in request.args:
+            key = str(i)
+            if key not in IONOSPHERE_FILE_REQUEST_ARGS:
+                logger.error('error :: invalid request argument - %s=%s' % (key, str(i)))
+                error_string = 'error :: invalid request argument - %s=%s' % (key, str(i))
+                logger.error(error_string)
+                resp = json.dumps(
+                    {'400 Bad Request': error_string})
+                return flask_escape(resp), 400
+
+            value = request.args.get(key, 0)
+            # logger.info('request argument - %s=%s' % (key, str(value)))
+
+            allowed_file = False
+            if key == 'file':
+                filename = str(value)
+                for allowed_path in IONOSPHERE_FILE_ALLOWED_PATHS:
+                    if allowed_path in filename:
+                        allowed_file = True
+                if not allowed_file:
+                    logger.error('error :: ionosphere_file not in allowed paths - %s' % filename)
+                    return 'Bad Request', 400
+            if allowed_file:
+                if os.path.isfile(filename):
+                    mimetype = 'application/octet-stream'
+                    if filename.endswith('.png'):
+                        mimetype = 'image/png'
+                    if filename.endswith('.json'):
+                        mimetype = 'application/json'
+                    if filename.endswith('.txt'):
+                        mimetype = 'text/plain'
+                    try:
+                        return send_file(filename, mimetype=mimetype)
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: ionosphere_file failed to send_file - %s' % filename)
+                        return 'Internal Server Error', 500
+                else:
+                    logger.warn('warning :: ionosphere_file not found - %s' % filename)
+                    return 'Not Found', 404
     return 'Bad Request', 400
 
 
