@@ -35,7 +35,11 @@ import settings
 import skyline_version
 # from skyline_functions import (
 #    RepresentsInt, mkdir_p, write_data_to_file, get_graphite_metric)
-from skyline_functions import (mkdir_p, get_graphite_metric, write_data_to_file)
+from skyline_functions import (
+    mkdir_p, get_graphite_metric, write_data_to_file,
+    # @added 20201213 - Feature #3890: metrics_manager - sync_cluster_files
+    get_redis_conn_decoded,
+)
 
 # @added 20200813 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
 from skyline_functions import historical_data_dir_exists
@@ -6243,3 +6247,169 @@ def label_anomalies(start_timestamp, end_timestamp, metrics, namespaces, label):
         engine_disposal(engine)
 
     return True, len(anomaly_ids_to_label)
+
+
+# @added 20201213 - Feature #3890: metrics_manager - sync_cluster_files
+def expected_features_profiles_dirs():
+    """
+    Generate a dict of all features_profiles ids and directories that SHOULD
+    exist.
+
+    :rtype:  dict
+
+    """
+
+    try:
+        engine, fail_msg, trace = get_an_engine()
+        logger.info(fail_msg)
+    except:
+        trace = traceback.format_exc()
+        logger.error(trace)
+        logger.error('%s' % fail_msg)
+        logger.error('error :: could not get a MySQL engine to get fp_ids')
+        raise  # to webapp to return in the UI
+    if not engine:
+        trace = 'none'
+        fail_msg = 'error :: engine not obtained'
+        logger.error(fail_msg)
+        raise
+    try:
+        ionosphere_table, log_msg, trace = ionosphere_table_meta(skyline_app, engine)
+        logger.info(log_msg)
+    except:
+        logger.error(traceback.format_exc())
+        logger.error('error :: failed to get ionosphere_table meta for features_profiles_dirs')
+        if engine:
+            engine_disposal(engine)
+        raise  # to webapp to return in the UI
+
+    last_fp_id = 0
+    try:
+        connection = engine.connect()
+        stmt = select([ionosphere_table]).where(ionosphere_table.c.id > 0).order_by(ionosphere_table.c.id.desc()).limit(1)
+        result = connection.execute(stmt)
+        for row in result:
+            last_fp_id = int(row['id'])
+        connection.close()
+    except:
+        logger.error(traceback.format_exc())
+        logger.error('error :: could not determine details of features profiles from ionosphere table for features_profiles_dirs')
+        if engine:
+            engine_disposal(engine)
+        raise
+    logger.info('db reports last_fp_id of %s for features_profile_dirs_dict' % str(last_fp_id))
+
+    redis_conn_decoded = None
+    try:
+        redis_conn_decoded = get_redis_conn_decoded(skyline_app)
+    except:
+        logger.error(traceback.format_exc())
+        logger.error('error :: get_redis_conn_decoded failed for features_profiles_dirs')
+
+    features_profile_dirs_dict = {}
+    if redis_conn_decoded:
+        try:
+            features_profile_dirs_dict = redis_conn_decoded.hgetall('analyzer.metrics_manager.local_features_profile_dirs')
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: failed to get Redis hash key analyzer.metrics_manager.local_features_profile_dirs for features_profiles_dirs')
+            features_profile_dirs_dict = {}
+    if not features_profile_dirs_dict:
+        logger.info('no features_profile_dirs_dict found for features_profiles_dirs from analyzer.metrics_manager.local_features_profile_dirs')
+    else:
+        logger.info('features_profile_dirs_dict found with %s features_profiles_dirs from analyzer.metrics_manager.local_features_profile_dirs' % str(len(features_profile_dirs_dict)))
+
+    last_fp_dir = None
+    if last_fp_id and features_profile_dirs_dict:
+        try:
+            last_fp_dir = features_profile_dirs_dict[last_fp_id]
+        except:
+            last_fp_dir = None
+    if last_fp_dir:
+        logger.info('features_profiles_dirs - no new features profile ids, all known return %s items' % str(len(features_profile_dirs_dict)))
+        return features_profile_dirs_dict
+    else:
+        logger.info('features_profiles_dirs - new features profile ids found determing new dirs, %s currently known dirs' % str(len(features_profile_dirs_dict)))
+
+    fps = {}
+    try:
+        connection = engine.connect()
+        stmt = select([ionosphere_table]).where(ionosphere_table.c.id > 0)
+        result = connection.execute(stmt)
+        for row in result:
+            fp_id = int(row['id'])
+            fp_metric_id = int(row['metric_id'])
+            fp_anomaly_timestamp = int(row['anomaly_timestamp'])
+            fps[fp_id] = {}
+            fps[fp_id]['metric_id'] = fp_metric_id
+            fps[fp_id]['anomaly_timestamp'] = fp_anomaly_timestamp
+        connection.close()
+    except:
+        logger.error(traceback.format_exc())
+        logger.error('error :: could not determine details of features profiles from ionosphere table for features_profiles_dirs')
+        if engine:
+            engine_disposal(engine)
+        raise
+    logger.info('features_profiles_dirs - db responded with %s fps' % str(len(fps)))
+    try:
+        metrics_table, log_msg, trace = metrics_table_meta(skyline_app, engine)
+        logger.info(log_msg)
+        logger.info('metrics_table OK')
+    except:
+        logger.error(traceback.format_exc())
+        logger.error('error :: failed to get metrics_table meta for features_profiles_dirs')
+        if engine:
+            engine_disposal(engine)
+        raise  # to webapp to return in the UI
+    metrics = {}
+    try:
+        connection = engine.connect()
+        stmt = select([metrics_table]).where(metrics_table.c.id > 0)
+        result = connection.execute(stmt)
+        for row in result:
+            metric_id = row['id']
+            metric_name = row['metric']
+            metrics[metric_id] = {}
+            metrics[metric_id]['metric'] = metric_name
+        connection.close()
+    except:
+        logger.error(traceback.format_exc())
+        logger.error('error :: could not determine metric ids from metrics for features_profiles_dirs')
+        if engine:
+            engine_disposal(engine)
+        raise
+    logger.info('features_profiles_dirs - db responded with %s metrics' % str(len(metrics)))
+
+    # features_profiles_dirs_error_logged = False
+    added_fps = 0
+    if fps and metrics:
+        for fp_id in fps:
+            fp_dir = None
+            if features_profile_dirs_dict:
+                try:
+                    fp_id_str = str(fp_id)
+                    fp_dir = features_profile_dirs_dict[fp_id_str]
+                except:
+                    # if not features_profiles_dirs_error_logged:
+                    #     logger.error(traceback.format_exc())
+                    #     logger.error('error :: could not determine fp_dir for fp_id %s' % str(fp_id))
+                    #     features_profiles_dirs_error_logged = True
+                    fp_dir = None
+                    pass
+            if not fp_dir:
+                try:
+                    metric_id = fps[fp_id]['metric_id']
+                    metric = metrics[metric_id]['metric']
+                    timestamp = fps[fp_id]['anomaly_timestamp']
+                    metric_timeseries_dir = metric.replace('.', '/')
+                    fp_dir = '%s/%s/%s' % (
+                        settings.IONOSPHERE_PROFILES_FOLDER, metric_timeseries_dir,
+                        str(timestamp))
+                    features_profile_dirs_dict[fp_id] = fp_dir
+                    added_fps += 1
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: features_profiles_dirs failed to fp_dir to features_profile_dirs_dict')
+    logger.info('added %s new items to features_profiles_dirs, returning %s items' % (
+        str(added_fps), str(len(features_profile_dirs_dict))))
+    return features_profile_dirs_dict

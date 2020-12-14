@@ -13,7 +13,8 @@ required, e.g. Luminosity.
 Some organisations have multiple Graphite instances for sharding, geographic or
 latency reasons.  In such a case it is possible that each Graphite instance
 would pickle to a Skyline instance and for there to be multiple Skyline
-instances.  However...
+instances.  Or you might want to run mulitple Skyline instances due to the
+number of metrics being handled.  However...
 
 Running Skyline in a distributed, HA manner is mostly related to running the
 components of Skyline in this fashion, for example using Galera cluster to
@@ -27,7 +28,7 @@ which is beyond the scope of this documentation.
 However one word of caution, **do not cluster Redis**.  Although some sharded
 configuration may work, it is simpler just to use local Redis data.  Due to
 the metric time series constantly changing in Redis clustering or slaving
-results in most the entire Redis data store being shipped constantly, not
+results in mostly the entire Redis data store being shipped constantly, not
 desired.
 
 That said the actual Skyline modules have certain settings and configurations
@@ -37,9 +38,9 @@ these.
 
 The following settings pertain to running multiple Skyline instances:
 
-- :mod:`settings.ALTERNATIVE_SKYLINE_URLS` [required]
-- :mod:`settings.REMOTE_SKYLINE_INSTANCES` [required]
-- :mod:`settings.HORIZON_SHARDS` [optional]
+- :mod:`settings.REMOTE_SKYLINE_INSTANCES`
+- :mod:`settings.HORIZON_SHARDS`
+- :mod:`settings.SNYC_CLUSTER_FILES`
 
 With the introduction of Luminosity a requirement for Skyline to pull the time
 series data from remote Skyline instances was added to allow for cross
@@ -51,22 +52,25 @@ and ensure performance is maintained.
 
 Running Skyline in any form of clustered configuration requires that each
 Skyline instance know about the other instances and has access to them via the
-appropriate firewall or network rules and via the reverse proxy configuration
-(Apache or nginx).
+webapp therefore appropriate firewall, network rules and reverse proxy
+configuration (Apache or nginx) needs to allow this.
 
-:mod:`settings.ALTERNATIVE_SKYLINE_URLS` is a reequired list of alternative URLs
-for the other nodes in the Skyline cluster, so that if a request is made to the
-Skyline webapp for a resource it does not have, it can return the other URLs to
-the client.
+:mod:`settings.REMOTE_SKYLINE_INSTANCES` is a required list of alternative URLs,
+username, password and hostname for the other instances in the Skyline cluster
+so that if a request is made to the Skyline webapp for a resource it does not
+have, it can return the other URLs to the client.  This is also used in
+:mod:`settings.SNYC_CLUSTER_FILES` so that each instance in the cluster can
+sync relevant Ionosphere training data andd features profiles data to itself.
 
-:mod:`settings.REMOTE_SKYLINE_INSTANCES` is similar but is this is used by
-Skyline internally to request resources from other Skyline instances to:
+It is used by Skyline internally to request resources from other Skyline
+instances to:
 
 1. Retrieve time series data and general data for metrics served by the other
   Skyline instance/s.
 2. To retrieve resources for certain client and API requests to respond with
   all the data for the cluster, in terms of unique_metrics, alerting_metrics,
   etc.
+3. To sync Ionosphere data between the cluster instances.
 
 Read about :mod:`settings.HORIZON_SHARDS` see
 `HORIZON_SHARDS <horizon.html#HORIZON_SHARDS>`__ section on the Horizon page.
@@ -140,4 +144,4 @@ Webapp UI
 
 In terms of the functionality in webapp, the webapp is multiple instance aware.
 Where any "not in Redis" UI errors are found, webapp responds to the request
-with a 301 redirect to the alternate Skyline URL.
+with a 302 redirect to the remote Skyline instance that is assigned the metric.
