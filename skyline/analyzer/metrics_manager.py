@@ -1664,7 +1664,12 @@ class Metrics_Manager(Thread):
                         try:
                             # Determine resolution from the last 30 data points
                             resolution_timestamps = []
-                            for metric_datapoint in timeseries[-30:]:
+                            # @modified 20201215 - Feature #3870: metrics_manager - check_data_sparsity
+                            # The last 30 measures for uploaded data to flux
+                            # seemed sufficient, however from real time metrics
+                            # there is more variance, so using a larger sample
+                            # for metric_datapoint in timeseries[-30:]:
+                            for metric_datapoint in timeseries[-100:]:
                                 timestamp = int(metric_datapoint[0])
                                 resolution_timestamps.append(timestamp)
                             timestamp_resolutions = []
@@ -1697,8 +1702,21 @@ class Metrics_Manager(Thread):
                                 except:
                                     pass
                         except:
+                            # @added 20201215 - Feature #3870: metrics_manager - check_data_sparsity
+                            if not check_sparsity_error_log:
+                                logger.error(traceback.format_exc())
+                                logger.error('error :: metrics_manager :: resolution_error - failed to determine metric_resolution')
+                                check_sparsity_error_log = True
+                            check_sparsity_error_count += 1
                             pass
                         expected_datapoints = 0
+
+                        # @added 20201215 - Feature #3870: metrics_manager - check_data_sparsity
+                        # Handle the slight variances that occur in real time
+                        # metric streams
+                        if metric_resolution in range(57, 63):
+                            metric_resolution = 60
+
                         if metric_resolution:
                             try:
                                 expected_datapoints = timeseries_full_duration / metric_resolution
