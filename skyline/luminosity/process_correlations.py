@@ -436,7 +436,9 @@ def get_assigned_metrics(i, base_name):
 # def get_remote_assigned(anomaly_timestamp):
 def get_remote_assigned(anomaly_timestamp, resolution):
     remote_assigned = []
-    for remote_url, remote_user, remote_password in settings.REMOTE_SKYLINE_INSTANCES:
+    # @modified 20201215 - Feature #3890: metrics_manager - sync_cluster_files
+    # for remote_url, remote_user, remote_password in settings.REMOTE_SKYLINE_INSTANCES:
+    for remote_url, remote_user, remote_password, hostname in settings.REMOTE_SKYLINE_INSTANCES:
         # @modified 20180722 - Feature #2464: luminosity_remote_data
         # Use a gzipped response - deprecated the raw unprocessed time series
         # method
