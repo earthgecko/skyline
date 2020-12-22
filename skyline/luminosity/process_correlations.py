@@ -487,7 +487,13 @@ def get_remote_assigned(anomaly_timestamp, resolution):
         try:
             # @modified 20190519 - Branch #3002: docker
             # r = requests.get(url, timeout=15, auth=(remote_user, remote_password))
-            r = requests.get(url, timeout=15, auth=(remote_user, remote_password), verify=verify_ssl)
+            # @modified 20201222 - Feature #3824: get_cluster_data
+            # Allow for longer response
+            # r = requests.get(url, timeout=15, auth=(remote_user, remote_password), verify=verify_ssl)
+            # @modified 20201222 - Feature #3824: get_cluster_data
+            # Allow for longer cluster responses with large metric populations
+            # r = requests.get(url, timeout=15, auth=(remote_user, remote_password), verify=verify_ssl)
+            r = requests.get(url, timeout=65, auth=(remote_user, remote_password), verify=verify_ssl)
             if int(r.status_code) == 200:
                 logger.info('get_remote_assigned :: time series data retrieved from %s' % remote_url)
                 response_ok = True

@@ -816,7 +816,13 @@ class Luminosity(Thread):
             # Self monitor processes and terminate if any spin_process has run
             # for to long
             p_starts = time()
-            while time() - p_starts <= 60:
+            # @modified 20201222 - Feature #3824: get_cluster_data
+            # Allow for longer cluster responses with large metric populations
+            # while time() - p_starts <= 60:
+            allow_to_run_for = 60
+            if settings.REMOTE_SKYLINE_INSTANCES:
+                allow_to_run_for = 90
+            while time() - p_starts <= allow_to_run_for:
                 if any(p.is_alive() for p in pids):
                     # Just to avoid hogging the CPU
                     sleep(.1)
