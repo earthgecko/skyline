@@ -172,9 +172,9 @@ try:
 except:
     REMOTE_SKYLINE_INSTANCES = []
 try:
-    SNYC_CLUSTER_FILES = settings.SNYC_CLUSTER_FILES
+    SYNC_CLUSTER_FILES = settings.SYNC_CLUSTER_FILES
 except:
-    SNYC_CLUSTER_FILES = False
+    SYNC_CLUSTER_FILES = False
 try:
     FAKE_CLUSTER_SYNC = settings.FAKE_CLUSTER_SYNC
 except:
@@ -236,6 +236,102 @@ class Metrics_Manager(Thread):
         except:
             exit(0)
 
+    # @added 20201214 - Feature #3890: metrics_manager - sync_cluster_files
+    #                   Feature #3820: HORIZON_SHARDS
+    def assigned_to_shard(self, metric_name):
+        """
+        Determine which shard a metric is assigned to.
+        """
+        assigned_host = this_host
+        if HORIZON_SHARDS:
+            try:
+                metric_as_bytes = str(metric_name).encode()
+                value = zlib.adler32(metric_as_bytes)
+                modulo_result = value % number_of_horizon_shards
+                for shard_hostname in HORIZON_SHARDS:
+                    if HORIZON_SHARDS[shard_hostname] == modulo_result:
+                        assigned_host = shard_hostname
+            except Exception as e:
+                logger.error('error :: metrics_manager :: failed to determine what shard %s is assigned to via modulo and HORIZON_SHARDS: %s' % (str(metric_name), e))
+        return assigned_host
+
+    def get_remote_data(self, remote_skyline_instance, data_required, endpoint, save_file=False):
+        try:
+            connect_timeout = int(settings.GRAPHITE_CONNECT_TIMEOUT)
+            read_timeout = int(settings.GRAPHITE_READ_TIMEOUT)
+        except:
+            connect_timeout = 5
+            read_timeout = 10
+        use_timeout = (int(connect_timeout), int(read_timeout))
+        data = []
+        r = None
+        user = None
+        password = None
+        use_auth = False
+        try:
+            user = str(remote_skyline_instance[1])
+            password = str(remote_skyline_instance[2])
+            use_auth = True
+        except:
+            user = None
+            password = None
+        logger.info('metrics_manager :: sync_cluster_files - querying %s for %s on %s' % (
+            str(remote_skyline_instance[0]), str(data_required), str(endpoint)))
+        try:
+            url = '%s/%s' % (str(remote_skyline_instance[0]), endpoint)
+            if use_auth:
+                r = requests.get(url, timeout=use_timeout, auth=(user, password))
+            else:
+                r = requests.get(url, timeout=use_timeout)
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: metrics_manager :: sync_cluster_files - failed to get %s from %s' % (
+                str(endpoint), str(remote_skyline_instance[0])))
+        if not r:
+            logger.warn('warning :: metrics_manager :: sync_cluster_files - no r from %s on %s' % (
+                endpoint, str(remote_skyline_instance[0])))
+            return data
+        if r:
+            if r.status_code != 200:
+                logger.error('error :: metrics_manager :: sync_cluster_files - %s from %s responded with status code %s and reason %s' % (
+                    endpoint, str(remote_skyline_instance[0]), str(r.status_code), str(r.reason)))
+            if save_file and r.status_code == 200:
+                file_saved = False
+                try:
+                    open(save_file, 'wb').write(r.content)
+                    if not os.path.isfile(save_file):
+                        logger.error('error :: metrics_manager :: sync_cluster_files - failed to save_file %s from %s' % (
+                            str(save_file), str(remote_skyline_instance[0])))
+                        return False
+                    else:
+                        file_saved = True
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: metrics_manager :: sync_cluster_files - failed to get %s from %s' % (
+                        endpoint, str(remote_skyline_instance[0])))
+                    return False
+                return file_saved
+
+            js = None
+            try:
+                js = r.json()
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: metrics_manager :: sync_cluster_files - failed to get json from the response from %s on %s' % (
+                    endpoint, str(remote_skyline_instance)))
+            if js:
+                logger.info('metrics_manager :: sync_cluster_files - got response for %s from %s' % (
+                    str(data_required), str(remote_skyline_instance[0])))
+                try:
+                    data = js['data'][data_required]
+                    logger.debug('metrics_manager :: debug :: sync_cluster_files - response for %s has %s items' % (
+                        str(data_required), str(len(data))))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: metrics_manager :: sync_cluster_files - failed to build remote_training_data from %s on %s' % (
+                        str(data_required), str(remote_skyline_instance)))
+        return data
+
     # @added 20201213 - Feature #3890: metrics_manager - sync_cluster_files
     def sync_cluster_files(self, i):
         """
@@ -247,9 +343,10 @@ class Metrics_Manager(Thread):
 
         local_skyline_instance = None
         for remote_skyline_instance in REMOTE_SKYLINE_INSTANCES:
-            if remote_skyline_instance == settings.SKYLINE_URL:
+            # @added 20201213 - Feature #3890: metrics_manager - sync_cluster_files
+            # if remote_skyline_instance == settings.SKYLINE_URL:
+            if remote_skyline_instance[3] == this_host:
                 local_skyline_instance = remote_skyline_instance
-                break
         if FAKE_CLUSTER_SYNC:
             logger.info('metrics_manager :: sync_cluster_files FAKE_CLUSTER_SYNC - True')
             skyline_url = 'http://%s:%s' % (settings.WEBAPP_IP, str(settings.WEBAPP_PORT))
@@ -261,99 +358,16 @@ class Metrics_Manager(Thread):
             else:
                 local_skyline_instance = [skyline_url, None, None, this_host]
 
-        # @added 20201214 - Feature #3890: metrics_manager - sync_cluster_files
-        #                   Feature #3820: HORIZON_SHARDS
-        def assigned_to_shard(metric_name):
-            """
-            Determine which shard a metric is assigned to.
-            """
-            assigned_host = this_host
-            if HORIZON_SHARDS:
-                try:
-                    metric_as_bytes = str(metric_name).encode()
-                    value = zlib.adler32(metric_as_bytes)
-                    modulo_result = value % number_of_horizon_shards
-                    for shard_hostname in HORIZON_SHARDS:
-                        if HORIZON_SHARDS[shard_hostname] == modulo_result:
-                            assigned_host = shard_hostname
-                except Exception as e:
-                    logger.error('error :: metrics_manager :: failed to determine what shard %s is assigned to via modulo and HORIZON_SHARDS: %s' % (str(metric_name), e))
-            return assigned_host
-
-        def get_remote_data(remote_skyline_instance, data_required, endpoint, save_file=False):
-            try:
-                connect_timeout = int(settings.GRAPHITE_CONNECT_TIMEOUT)
-                read_timeout = int(settings.GRAPHITE_READ_TIMEOUT)
-            except:
-                connect_timeout = 5
-                read_timeout = 10
-            use_timeout = (int(connect_timeout), int(read_timeout))
-            data = []
-            r = None
-            user = None
-            password = None
-            use_auth = False
-            try:
-                user = str(remote_skyline_instance[1])
-                password = str(remote_skyline_instance[2])
-                use_auth = True
-            except:
-                user = None
-                password = None
-            logger.info('metrics_manager :: sync_cluster_files - querying %s for %s on %s' % (
-                str(remote_skyline_instance[0]), str(data_required), str(endpoint)))
-            try:
-                url = '%s/%s' % (str(remote_skyline_instance[0]), endpoint)
-                if use_auth:
-                    r = requests.get(url, timeout=use_timeout, auth=(user, password))
-                else:
-                    r = requests.get(url, timeout=use_timeout)
-            except:
-                logger.error(traceback.format_exc())
-                logger.error('error :: metrics_manager :: sync_cluster_files - failed to get %s from %s' % (
-                    str(endpoint), str(remote_skyline_instance[0])))
-            if not r:
-                logger.warn('warning :: metrics_manager :: sync_cluster_files - no r from %s on %s' % (
-                    endpoint, str(remote_skyline_instance[0])))
-                return data
-            if r:
-                if r.status_code != 200:
-                    logger.error('error :: metrics_manager :: sync_cluster_files - %s from %s responded with status code %s and reason %s' % (
-                        endpoint, str(remote_skyline_instance[0]), str(r.status_code), str(r.reason)))
-                if save_file and r.status_code == 200:
-                    file_saved = False
-                    try:
-                        open(save_file, 'wb').write(r.content)
-                        if not os.path.isfile(save_file):
-                            logger.error('error :: metrics_manager :: sync_cluster_files - failed to save_file %s from %s' % (
-                                str(save_file), str(remote_skyline_instance[0])))
-                            return False
-                        else:
-                            file_saved = True
-                    except:
-                        logger.error(traceback.format_exc())
-                        logger.error('error :: metrics_manager :: sync_cluster_files - failed to get %s from %s' % (
-                            endpoint, str(remote_skyline_instance[0])))
-                        return False
-                    return file_saved
-
-                js = None
-                try:
-                    js = r.json()
-                except:
-                    logger.error(traceback.format_exc())
-                    logger.error('error :: metrics_manager :: sync_cluster_files - failed to get json from the response from %s on %s' % (
-                        endpoint, str(remote_skyline_instance)))
-                if js:
-                    logger.info('metrics_manager :: sync_cluster_files - got response for %s from %s' % (
-                        str(data_required), str(remote_skyline_instance[0])))
-                    try:
-                        data = js['data'][data_required]
-                    except:
-                        logger.error(traceback.format_exc())
-                        logger.error('error :: metrics_manager :: sync_cluster_files - failed to build remote_training_data from %s on %s' % (
-                            str(data_required), str(remote_skyline_instance)))
-            return data
+        if not local_skyline_instance:
+            logger.info('metrics_manager :: sync_cluster_files cound not determine local_skyline_instance from REMOTE_SKYLINE_INSTANCES, created')
+            skyline_url = 'http://%s:%s' % (settings.WEBAPP_IP, str(settings.WEBAPP_PORT))
+            if settings.WEBAPP_AUTH_ENABLED:
+                local_skyline_instance = [
+                    skyline_url, settings.WEBAPP_AUTH_USER,
+                    settings.WEBAPP_AUTH_USER_PASSWORD, this_host
+                ]
+            else:
+                local_skyline_instance = [skyline_url, None, None, this_host]
 
         # Check training data on REMOTE_SKYLINE_INSTANCES and determine what
         # training_data needs to be fetched
@@ -394,12 +408,13 @@ class Metrics_Manager(Thread):
             endpoint = 'api?training_data'
             save_file = False
             try:
-                remote_training_data = get_remote_data(remote_skyline_instance, data_required, endpoint, save_file)
+                remote_training_data = self.get_remote_data(remote_skyline_instance, data_required, endpoint, save_file)
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: metrics_manager :: sync_cluster_files - failed to get %s from %s' % (
                     endpoint, str(remote_skyline_instance[0])))
             remote_training_data_to_fetch = []
+            training_data_already_fetched = 0
             if remote_training_data:
                 logger.info('metrics_manager :: sync_cluster_files - got %s %s from %s' % (
                     str(len(remote_training_data)), str(data_required), str(remote_skyline_instance[0])))
@@ -415,52 +430,93 @@ class Metrics_Manager(Thread):
             logger.info('metrics_manager :: sync_cluster_files - %s training_data dirs to fetch from %s' % (
                 str(len(remote_training_data_to_fetch)), str(remote_skyline_instance[0])))
             if remote_training_data_to_fetch:
-                data_required = 'files'
-                save_file = False
                 for fetch_item in remote_training_data_to_fetch:
-                    remote_training_data_files = None
+                    cache_key_exists = False
                     try:
+                        cache_key = 'analyzer.metrics_manager.training_data_fetched.%s.%s' % (
+                            str(fetch_item[0]), str(fetch_item[1]))
+                        cache_key_exists = self.redis_conn.get(cache_key)
+                    except:
+                        pass
+                    if cache_key_exists:
+                        training_data_already_fetched += 1
+                        continue
+                    remote_training_data_files = []
+                    try:
+                        data_required = 'files'
+                        save_file = False
                         endpoint = 'ionosphere_files?source=training_data&metric=%s&timestamp=%s' % (
                             str(fetch_item[0]), str(fetch_item[1]))
-                        remote_training_data_files = get_remote_data(remote_skyline_instance, data_required, endpoint, save_file)
+                        remote_training_data_files = self.get_remote_data(remote_skyline_instance, data_required, endpoint, save_file)
                     except:
                         logger.error(traceback.format_exc())
                         logger.error('error :: metrics_manager :: sync_cluster_files - failed to get %s from %s' % (
                             endpoint, str(remote_skyline_instance[0])))
+                    if not remote_training_data_files:
+                        logger.debug('metrics_manager :: debug :: sync_cluster_files - no training_data files were returned from %s' % (
+                            str(remote_skyline_instance[0])))
                     if remote_training_data_files:
                         files_to_fetch = len(remote_training_data_files)
                         files_fetched = 0
-                        logger.info('metrics_manager :: sync_cluster_files - %s training_data files to fetch for %s for %s from %s' % (
+                        files_exist = 0
+                        logger.info('metrics_manager :: sync_cluster_files - %s training_data files to fetch from %s' % (
                             str(files_to_fetch),
                             str(remote_skyline_instance[0])))
-                        data_required = 'file_saved'
-                        for data_file in remote_training_data_files:
+                        for remote_file in remote_training_data_files:
                             try:
+                                data_file = remote_training_data_files[remote_file]
                                 data_dir = os.path.dirname(data_file)
                                 if not os.path.exists(data_dir):
                                     mkdir_p(data_dir)
                                 if not os.path.exists(data_dir):
                                     logger.error('error :: metrics_manager :: sync_cluster_files - failed to create dir - %s' % data_dir)
                                     continue
+                                data_required = 'file_saved'
                                 endpoint = 'ionosphere_file?file=%s' % str(data_file)
-                                file_saved = get_remote_data(remote_skyline_instance, data_required, endpoint, data_file)
-                                if not file_saved:
-                                    logger.error('error :: metrics_manager :: sync_cluster_files - failed to get %s from %s' % (
-                                        data_file, str(remote_skyline_instance[0])))
-                                    continue
+                                file_saved = None
+                                if not os.path.isfile(data_file):
+                                    file_saved = self.get_remote_data(remote_skyline_instance, data_required, endpoint, data_file)
+                                    if not file_saved:
+                                        logger.error('error :: metrics_manager :: sync_cluster_files - failed to get %s from %s' % (
+                                            data_file, str(remote_skyline_instance[0])))
+                                        continue
+                                    else:
+                                        logger.info('metrics_manager :: sync_cluster_files - got %s from %s' % (
+                                            data_file, str(remote_skyline_instance[0])))
+                                        files_fetched += 1
                                 else:
-                                    logger.info('metrics_manager :: sync_cluster_files - got %s from %s' % (
-                                        data_file, str(remote_skyline_instance[0])))
-                                    files_fetched += 1
+                                    if LOCAL_DEBUG:
+                                        logger.info('metrics_manager :: sync_cluster_files - file exists locally nothing to do %s' % (
+                                            data_file))
+                                    files_exist += 1
                             except:
                                 logger.error(traceback.format_exc())
                                 logger.error('error :: metrics_manager :: sync_cluster_files - failed to get %s from %s' % (
                                     endpoint, str(remote_skyline_instance[0])))
                         if files_fetched == files_to_fetch:
                             training_data_fetched += 1
-                        else:
+                            try:
+                                cache_key = 'analyzer.metrics_manager.training_data_fetched.%s.%s' % (
+                                    str(fetch_item[0]), str(fetch_item[1]))
+                                self.redis_conn.setex(cache_key, 900, int(time()))
+                                logger.info('created Redis key - %s' % (cache_key))
+                            except:
+                                pass
+                        if files_exist == files_to_fetch:
+                            logger.info('metrics_manager :: sync_cluster_files - all %s files to fetch exist locally, nothing to do' % (
+                                str(files_to_fetch)))
+                            try:
+                                cache_key = 'analyzer.metrics_manager.training_data_fetched.%s.%s' % (
+                                    str(fetch_item[0]), str(fetch_item[1]))
+                                self.redis_conn.setex(cache_key, 900, int(time()))
+                                logger.info('created Redis key - %s' % (cache_key))
+                            except:
+                                pass
+                        if (files_fetched + files_exist) != files_to_fetch:
                             logger.error('error :: metrics_manager :: sync_cluster_files - failed to get all %s training_data files for %s from %s' % (
                                 str(files_to_fetch), str(fetch_item), str(remote_skyline_instance[0])))
+            logger.info('metrics_manager :: sync_cluster_files - %s training_data dirs already fetched and present locally' % (
+                str(training_data_already_fetched)))
 
         # Check what features_profiles directories need to be retrieved from
         # REMOTE_SKYLINE_INSTANCES and saved locally
@@ -470,7 +526,7 @@ class Metrics_Manager(Thread):
             endpoint = 'api?expected_features_profiles_dir'
             data_required = 'features_profile_dirs'
             save_file = False
-            expected_features_profile_dirs = get_remote_data(local_skyline_instance, data_required, endpoint, save_file)
+            expected_features_profile_dirs = self.get_remote_data(local_skyline_instance, data_required, endpoint, save_file)
             logger.info('metrics_manager :: %s entries in the expected_features_profiles_dir response' % str(len(expected_features_profile_dirs)))
         except:
             logger.error(traceback.format_exc())
@@ -581,7 +637,7 @@ class Metrics_Manager(Thread):
                 authorative_host = None
                 if REMOTE_SKYLINE_INSTANCES:
                     try:
-                        authorative_host = assigned_to_shard(metric)
+                        authorative_host = self.assigned_to_shard(metric)
                     except Exception as e:
                         logger.error('error :: metrics_manager :: sync_cluster_files - failed to determine authorative_host for %s' % (
                             str(metric)))
@@ -608,7 +664,7 @@ class Metrics_Manager(Thread):
                         save_file = False
                         host_features_profile_files = {}
                         try:
-                            host_features_profile_files = get_remote_data(remote_skyline_instance, data_required, endpoint, save_file)
+                            host_features_profile_files = self.get_remote_data(remote_skyline_instance, data_required, endpoint, save_file)
                         except:
                             logger.error(traceback.format_exc())
                             logger.error('error :: metrics_manager :: sync_cluster_files - failed to get %s from %s' % (
@@ -662,8 +718,9 @@ class Metrics_Manager(Thread):
                             str(files_to_fetch), str(fp_id),
                             str(remote_skyline_instance[0])))
                         data_required = 'file_saved'
-                        for data_file in features_profile_files:
+                        for remote_file in features_profile_files:
                             try:
+                                data_file = features_profile_files[remote_file]
                                 data_dir = os.path.dirname(data_file)
                                 if not os.path.exists(data_dir):
                                     mkdir_p(data_dir)
@@ -673,8 +730,9 @@ class Metrics_Manager(Thread):
                                 endpoint = 'ionosphere_file?file=%s' % str(data_file)
                                 # Only fetch it if it does not exist
                                 if not os.path.isfile(data_file):
+                                    data_required = 'file_saved'
                                     file_saved = False
-                                    file_saved = get_remote_data(remote_skyline_instance, data_required, endpoint, data_file)
+                                    file_saved = self.get_remote_data(remote_skyline_instance, data_required, endpoint, data_file)
                                     if not file_saved:
                                         logger.error('error :: metrics_manager :: sync_cluster_files - failed to get %s from %s' % (
                                             data_file, str(remote_skyline_instance[0])))
@@ -1646,6 +1704,10 @@ class Metrics_Manager(Thread):
                         except:
                             pass
                         timeseries_full_duration = last_timeseries_timestamp - first_timeseries_timestamp
+                        # @modified 20201216 - Feature #3870: metrics_manager - check_data_sparsity
+                        # If roomba has not pruned some data in minutes
+                        if first_timeseries_timestamp < (last_timeseries_timestamp - settings.FULL_DURATION):
+                            timeseries_full_duration = settings.FULL_DURATION
                     if timeseries_full_duration:
                         if last_timeseries_timestamp < (int(check_data_sparsity_start) - settings.STALE_PERIOD):
                             metrics_stale.append(metric_name)
@@ -2095,12 +2157,14 @@ class Metrics_Manager(Thread):
                 # is enabled run the sync_cluster_files process every minute
                 run_sync_cluster_files = False
                 if REMOTE_SKYLINE_INSTANCES:
-                    if SNYC_CLUSTER_FILES:
+                    if SYNC_CLUSTER_FILES:
                         run_sync_cluster_files = True
                 if FAKE_CLUSTER_SYNC:
                     run_sync_cluster_files = True
                     logger.info('metrics_manager :: run_sync_cluster_files as FAKE_CLUSTER_SYNC')
+                logger.info('metrics_manager :: run_sync_cluster_files is set to %s' % str(run_sync_cluster_files))
                 if run_sync_cluster_files:
+                    logger.info('metrics_manager :: running sync_cluster_files')
                     try:
                         sync_until = now + (sleep_for - 60)
                         sync_time = time()
@@ -2139,7 +2203,7 @@ class Metrics_Manager(Thread):
                                     break
                             else:
                                 # We only enter this if we didn't 'break' above.
-                                logger.info('metrics_manager :: timed out, killingsync_cluster_files process')
+                                logger.info('metrics_manager :: timed out, killing sync_cluster_files process')
                                 for p in pids:
                                     logger.info('metrics_manager :: killing sync_cluster_files process')
                                     p.terminate()
@@ -2157,7 +2221,7 @@ class Metrics_Manager(Thread):
                             sync_time = time()
                     except:
                         logger.error(traceback.format_exc())
-                        logger.error('error :: metrics_manager :: sync_cluster_files spawing failed')
+                        logger.error('error :: metrics_manager :: sync_cluster_files spawning failed')
 
                 process_runtime_now = time() - now
                 sleep_for = (RUN_EVERY - process_runtime_now)

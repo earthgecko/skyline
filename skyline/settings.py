@@ -1407,7 +1407,7 @@ are assigned to the specific server (shard).  This enables all Skyline servers
 that are running Horizon to receiver the entire metric population stream from
 mulitple Graphite carbon-relays and drop (not submit to their Redis instance)
 any metrics that do not belong to their shard.  Related settings are
-:mod:`settings.REMOTE_SKYLINE_INSTANCES` and :mod:`settings.SNYC_CLUSTER_FILES`
+:mod:`settings.REMOTE_SKYLINE_INSTANCES` and :mod:`settings.SYNC_CLUSTER_FILES`
 
 - **Example**::
 
@@ -1439,9 +1439,9 @@ HORIZON_SHARD_DEBUG = False
 :vartype HORIZON_SHARD_DEBUG: boolean
 """
 
-SNYC_CLUSTER_FILES = False
+SYNC_CLUSTER_FILES = False
 """
-:var SNYC_CLUSTER_FILES: ADVANCED FEATURE - If Skyline is running in a clustered
+:var SYNC_CLUSTER_FILES: ADVANCED FEATURE - If Skyline is running in a clustered
     configuration the :mod:`settings.REMOTE_SKYLINE_INSTANCES` can sync
     Ionosphere training data and features_profiles dirs and files between each
     other.  This allows for the relevant Ionosphere data to be distributed to
@@ -1454,7 +1454,7 @@ SNYC_CLUSTER_FILES = False
     :mod:`settings.REMOTE_SKYLINE_INSTANCES`, :mod:`settings.HORIZON_SHARDS`,
     :mod:`settings.IONOSPHERE_DATA_FOLDER` and
     :mod:`settings.IONOSPHERE_PROFILES_FOLDER`
-:vartype SNYC_CLUSTER_FILES: boolean
+:vartype SYNC_CLUSTER_FILES: boolean
 """
 
 SKIP_LIST = [
@@ -2787,7 +2787,7 @@ REMOTE_SKYLINE_INSTANCES = []
     by default the previous 12 minutes, for all the metrics on the other Skyline
     instance/s (gizpped) in order to run correlations in all metrics in the
     population.  Related settings are :mod:`settings.HORIZON_SHARDS` and
-    :mod:`settings.SNYC_CLUSTER_FILES`
+    :mod:`settings.SYNC_CLUSTER_FILES`
 :vartype REMOTE_SKYLINE_INSTANCES: list
 
 **For example**, the IP or FQDN, the username, password and hostname as strings str::

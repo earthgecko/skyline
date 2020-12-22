@@ -5841,7 +5841,7 @@ def ionosphere_files():
         for i in request.args:
             key = str(i)
             if key not in IONOSPHERE_FILES_REQUEST_ARGS:
-                logger.error('error :: ionosphere_files invalid request argument - %s=%s' % (key, str(i)))
+                logger.error('error :: ionosphere_files invalid request argument - %s' % (key))
                 return 'Bad Request', 400
             value = request.args.get(key, 0)
             if key == 'source':
@@ -5884,8 +5884,36 @@ def ionosphere_files():
     files_dict = {}
     if required_dir:
         if not isdir(required_dir):
-            logger.info('ionosphere_files required_dir does not exist - %s, returning 404' % str(required_dir))
-            return 'Not Found', 404
+            # @modified 20201216 - Feature #3890: metrics_manager - sync_cluster_files
+            # Remove the entry from the ionosphere.training data Redis set if
+            # the directory does not exist on this node
+            # logger.info('ionosphere_files required_dir does not exist - %s, returning 404' % str(required_dir))
+            # return 'Not Found', 404
+            data_dict = {"status": {"response": 404}, "data": {"features_profiles dir": "not found"}}
+            if source == 'training_data':
+                try:
+                    ionosphere_training_data = list(REDIS_CONN.smembers('ionosphere.training_data'))
+                    training_data_removed = False
+                    for training_data_item in ionosphere_training_data:
+                        training_data = literal_eval(training_data_item)
+                        if training_data[0] == metric:
+                            if training_data[1] == int(timestamp):
+                                try:
+                                    REDIS_CONN.srem('ionosphere.training_data', str(training_data))
+                                    logger.info('ionosphere_files removed item from ionosphere.training_data - %s' % str(training_data))
+                                    training_data_removed = True
+                                except:
+                                    logger.error(traceback.format_exc())
+                                    logger.error('error :: ionosphere_files failed to remove item from ionosphere.training_data - %s' % str(training_data))
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: ionosphere_files failed to try and remove the unfound training data dir for %s from ionosphere.training_data' % required_dir)
+                if not training_data_removed:
+                    logger.info('ionosphere_files found no item to remove from ionosphere.training_data for %s at %s' % (metric, str(timestamp)))
+                logger.info('ionosphere_files dir not found for %s at %s, returning 404' % (metric, str(timestamp)))
+                data_dict = {"status": {"response": 404}, "data": {"training_data dir": "not found"}}
+            return jsonify(data_dict), 404
+
         for dir_path, folders, files in os.walk(required_dir):
             try:
                 if files:
@@ -5895,11 +5923,13 @@ def ionosphere_files():
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: ionosphere_files failed to build files_list from %s' % str(required_dir))
+    duration = time.time() - start
     if not files_dict:
         logger.warn('warning :: ionosphere_files no files in required_dir - %s - returning 404' % str(required_dir))
-        return 'Not Found', 404
+        # return 'Not Found', 404
+        data_dict = {"status": {"response": 404, "request_time": duration}, "data": {"metric": metric, "timestamp": timestamp, source: "not found"}}
+        return jsonify(data_dict), 404
     if files_dict:
-        duration = time.time() - start
         data_dict = {"status": {"response": 200, "request_time": duration}, "data": {"metric": metric, "timestamp": timestamp, "source": source, "files": files_dict}}
         logger.info('ionosphere_files returned json with %s files listed' % str(len(files_dict)))
         return jsonify(data_dict), 200
