@@ -40,7 +40,7 @@ The following settings pertain to running multiple Skyline instances:
 
 - :mod:`settings.REMOTE_SKYLINE_INSTANCES`
 - :mod:`settings.HORIZON_SHARDS`
-- :mod:`settings.SNYC_CLUSTER_FILES`
+- :mod:`settings.SYNC_CLUSTER_FILES`
 
 With the introduction of Luminosity a requirement for Skyline to pull the time
 series data from remote Skyline instances was added to allow for cross
@@ -59,7 +59,7 @@ configuration (Apache or nginx) needs to allow this.
 username, password and hostname for the other instances in the Skyline cluster
 so that if a request is made to the Skyline webapp for a resource it does not
 have, it can return the other URLs to the client.  This is also used in
-:mod:`settings.SNYC_CLUSTER_FILES` so that each instance in the cluster can
+:mod:`settings.SYNC_CLUSTER_FILES` so that each instance in the cluster can
 sync relevant Ionosphere training data andd features profiles data to itself.
 
 It is used by Skyline internally to request resources from other Skyline
