@@ -53,7 +53,9 @@ from pymemcache.client.base import Client as pymemcache_Client
 # @added 20180617 - Feature #2404: Ionosphere - fluid approximation
 import pandas as pd
 from tsfresh.feature_extraction import (
-    extract_features, ReasonableFeatureExtractionSettings)
+    # @modified 20210101 - Task #3928: Update Skyline to use new tsfresh feature extraction method
+    # extract_features, ReasonableFeatureExtractionSettings)
+    extract_features, EfficientFCParameters)
 
 import settings
 from skyline_functions import (
@@ -3052,8 +3054,10 @@ class Ionosphere(Thread):
                         settings.SKYLINE_TMP_DIR, metric_timestamp, base_name)
                     anomalous_fp_fname_out = anomalous_ts_csv + '.transposed.csv'
 
-                    tsf_settings = ReasonableFeatureExtractionSettings()
-                    tsf_settings.disable_progressbar = True
+                    # @modified 20210101 - Task #3928: Update Skyline to use new tsfresh feature extraction method
+                    # tsf_settings = ReasonableFeatureExtractionSettings()
+                    # tsf_settings.disable_progressbar = True
+
                     minmax_fp_features_sum = None
                     minmax_anomalous_features_sum = None
                     if minmax_anomalous_ts and minmax_fp_ts:
@@ -3101,8 +3105,12 @@ class Ionosphere(Thread):
                             logger.error('error :: failed to created data frame from %s' % (str(minmax_fp_ts_csv)))
                         try:
                             df_features = extract_features(
-                                df, column_id='metric', column_sort='timestamp', column_kind=None,
-                                column_value=None, feature_extraction_settings=tsf_settings)
+                                # @modified 20210101 - Task #3928: Update Skyline to use new tsfresh feature extraction method
+                                # df, column_id='metric', column_sort='timestamp', column_kind=None,
+                                # column_value=None, feature_extraction_settings=tsf_settings)
+                                df, default_fc_parameters=EfficientFCParameters(),
+                                column_id='metric', column_sort='timestamp', column_kind=None,
+                                column_value=None, disable_progressbar=True)
                         except:
                             logger.error(traceback.format_exc())
                             logger.error('error :: failed to created df_features from %s' % (str(minmax_fp_ts_csv)))
@@ -3156,8 +3164,12 @@ class Ionosphere(Thread):
                         df = pd.read_csv(anomalous_ts_csv, delimiter=',', header=None, names=['metric', 'timestamp', 'value'])
                         df.columns = ['metric', 'timestamp', 'value']
                         df_features_current = extract_features(
-                            df, column_id='metric', column_sort='timestamp', column_kind=None,
-                            column_value=None, feature_extraction_settings=tsf_settings)
+                            # @modified 20210101 - Task #3928: Update Skyline to use new tsfresh feature extraction method
+                            # df, column_id='metric', column_sort='timestamp', column_kind=None,
+                            # column_value=None, feature_extraction_settings=tsf_settings)
+                            df, default_fc_parameters=EfficientFCParameters(),
+                            column_id='metric', column_sort='timestamp', column_kind=None,
+                            column_value=None, disable_progressbar=True)
 
                         del df
 
