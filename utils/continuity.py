@@ -63,23 +63,23 @@ def check_continuity(metric, mini=False):
 
 if __name__ == "__main__":
     length, total_sum, start, end, duration, bad, missing = check_continuity(metric)
-    print ""
-    print "Stats for full %s:" % metric
-    print "Length of %s" % length
-    print "Total sum of last 50 datapoints: %s" % total_sum
-    print "Start time: %s" % start
-    print "End time: %s" % end
-    print "Duration: %.2f hours" % duration
-    print "Number of missing data periods: %s" % bad
-    print "Total duration of missing data in seconds: %s" % missing
+    print("")
+    print("Stats for full %s:" % metric)
+    print("Length of %s" % length)
+    print("Total sum of last 50 datapoints: %s" % total_sum)
+    print("Start time: %s" % start)
+    print("End time: %s" % end)
+    print("Duration: %.2f hours" % duration)
+    print("Number of missing data periods: %s" % bad)
+    print("Total duration of missing data in seconds: %s" % missing)
 
     length, total_sum, start, end, duration, bad, missing = check_continuity(metric, True)
-    print ""
-    print "Stats for mini %s:" % metric
-    print "Length: %s" % length
-    print "Total sum of last 50 datapoints: %s" % total_sum
-    print "Start time: %s" % start
-    print "End time: %s" % end
-    print "Duration: %.2f hours" % duration
-    print "Number of missing data periods: %s" % bad
-    print "Total duration of missing data in seconds: %s" % missing
+    print("")
+    print("Stats for mini %s:" % metric)
+    print("Length: %s" % length)
+    print("Total sum of last 50 datapoints: %s" % total_sum)
+    print("Start time: %s" % start)
+    print("End time: %s" % end)
+    print("Duration: %.2f hours" % duration)
+    print("Number of missing data periods: %s" % bad)
+    print("Total duration of missing data in seconds: %s" % missing)

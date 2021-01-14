@@ -225,18 +225,18 @@ monotonically, metrics that have an incrementing increasing count, so that these
 time series can be handled via their derivative products where appropriate.  For
 full details see `Monotonic metrics <monotonic-metrics.html>`__
 
-Anomaly `end_timestamp`
-======================
+Anomaly end_timestamp
+=====================
 
 The `end_timestamp` means that the anomaly has either:
 
-# Ended, when it is a peak or trough anomaly, and the time series data returns
-  to a state that is represented in the norm in the previous 24 hour period
-# When the state change, in cases of frequency or level shifts, and occurs for
-  sufficient time to begin to be represented in the norm in the previous 24 hour
-  period (:mod:`settings.FULL_DURATION`).  In these cases you might consider the
-  metric to still be in an anomalous state, but in terms of the
-  :mod:`settings.FULL_DURATION` data, it is no longer anomalous.
+1. Ended, when it is a peak or trough anomaly, and the time series data returns
+   to a state that is represented in the norm in the previous 24 hour period
+2. When the state change, in cases of frequency or level shifts, and occurs for
+   sufficient time to begin to be represented in the norm in the previous 24 hour
+   period (:mod:`settings.FULL_DURATION`).  In these cases you might consider the
+   metric to still be in an anomalous state, but in terms of the
+   :mod:`settings.FULL_DURATION` data, it is no longer anomalous.
 
 Push to Mirage
 ==============
