@@ -46,7 +46,7 @@ pytest==5.4.3
 SQLAlchemy==1.3.19
 pymemcache==3.2.0
 PyJWT==1.7.1
-git+git://github.com/earthgecko/luminol@d429044#egg=luminol
+git+git://github.com/earthgecko/luminol@2de3fb2#egg=luminol
 slackclient==2.7.2
 urllib3==1.25.9
 graphyte==1.6.0

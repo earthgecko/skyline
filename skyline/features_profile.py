@@ -13,7 +13,10 @@ from timeit import default_timer as timer
 import pandas as pd
 
 from tsfresh.feature_extraction import (
-    extract_features, ReasonableFeatureExtractionSettings)
+
+    # @modified 20210101 - Task #3928: Update Skyline to use new tsfresh feature extraction method
+    # extract_features, ReasonableFeatureExtractionSettings)
+    extract_features, EfficientFCParameters)
 from tsfresh import __version__ as tsfresh_version
 
 import settings
@@ -393,12 +396,22 @@ def calculate_features_profile(current_skyline_app, timestamp, metric, context):
         # In terms of inline feature calculatation, always exclude
         # high_comp_cost features.
         # df_features = extract_features(df, column_id='metric', column_sort='timestamp', column_kind=None, column_value=None)
-        tsf_settings = ReasonableFeatureExtractionSettings()
+        # @modified 20210101 - Task #3928: Update Skyline to use new tsfresh feature extraction method
+        # tsf_settings = ReasonableFeatureExtractionSettings()
+        # >>> from tsfresh.feature_extraction import extract_features, EfficientFCParameters
+        # >>> extract_features(df, default_fc_parameters=EfficientFCParameters())
+
         # Disable tqdm progress bar
-        tsf_settings.disable_progressbar = True
+        # @modified 20210101 - Task #3928: Update Skyline to use new tsfresh feature extraction method
+        # tsf_settings.disable_progressbar = True
+
         df_features = extract_features(
-            df, column_id='metric', column_sort='timestamp', column_kind=None,
-            column_value=None, feature_extraction_settings=tsf_settings)
+            # @modified 20210101 - Task #3928: Update Skyline to use new tsfresh feature extraction method
+            # df, column_id='metric', column_sort='timestamp', column_kind=None,
+            # column_value=None, feature_extraction_settings=tsf_settings)
+            df, default_fc_parameters=EfficientFCParameters(),
+            column_id='metric', column_sort='timestamp', column_kind=None,
+            column_value=None, disable_progressbar=True)
         # @modified 20190413 - Bug #2934: Ionosphere - no mirage.redis.24h.json file
         # Added log_context to report the context
         current_logger.info('%s :: features extracted from %s data' % (

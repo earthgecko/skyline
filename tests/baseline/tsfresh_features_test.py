@@ -45,6 +45,9 @@ if 'post' in TSFRESH_BASELINE_VERSION:
     travis_tsfresh_version = re.sub('\.post.*', '', TSFRESH_BASELINE_VERSION)
     TSFRESH_BASELINE_VERSION = travis_tsfresh_version
 
+# Directly declared every version hardcoded
+TSFRESH_BASELINE_VERSION = '0.17.9'
+
 python_version = int(sys.version_info[0])
 baseline_dir = os.path.dirname(os.path.realpath(__file__))
 tests_dir = os.path.dirname(baseline_dir)
@@ -229,6 +232,12 @@ class TestTsfreshBaseline(unittest.TestCase):
                     # done
                     if feature_name.replace('"', '') in exclude_py38_features:
                         continue
+
+                    if feature_name in ['nan', 'variable']:
+                        continue
+                    if feature_name == '':
+                        continue
+
                     count_id += 1
                     feature_names.append([count_id, feature_name])
 

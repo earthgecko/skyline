@@ -1,4 +1,4 @@
-TSFRESH_VERSION = '0.4.0'
+TSFRESH_VERSION = '0.17.9'
 """
 :var TSFRESH_VERSION: The version of tsfresh installed by pip, this is important
     in terms of feature extraction baselines
@@ -6,7 +6,7 @@ TSFRESH_VERSION = '0.4.0'
 """
 
 # TSFRESH_BASELINE_VERSION = '0.1.2'
-TSFRESH_BASELINE_VERSION = '0.4.0'
+TSFRESH_BASELINE_VERSION = '0.17.9'
 """
 :var TSFRESH_BASELINE_VERSION: The version of tsfresh that was used to generate
     feature extraction baselines on.
