@@ -55,9 +55,9 @@ a simpler structure and faster for data which is often queried and FULL TEXT
 searching.
 
 The InnoDB storage engine is used for the anomaly table - mostly writes.
-z_fp_ tables are InnoDB tables and each metric that has an Ionosphere features
-profile created (e.g. has been trained) has a z_fp_<metric_id> and a
-z_ts_<metric_id> table created, therefore if you have 10000 metrics and you
+``z_fp_`` tables are InnoDB tables and each metric that has an Ionosphere features
+profile created (e.g. has been trained) has a ``z_fp_<metric_id>`` and a
+``z_ts_<metric_id>`` table created, therefore if you have 10000 metrics and you
 created features profiles (trained) for each one, there would be 20000 tables.
 Bear in mind, that not all metrics will have features profiles created as you
 have to manually train to create each one.

@@ -65,12 +65,12 @@ sync relevant Ionosphere training data andd features profiles data to itself.
 It is used by Skyline internally to request resources from other Skyline
 instances to:
 
-1. Retrieve time series data and general data for metrics served by the other
+# Retrieve time series data and general data for metrics served by the other
   Skyline instance/s.
-2. To retrieve resources for certain client and API requests to respond with
+# To retrieve resources for certain client and API requests to respond with
   all the data for the cluster, in terms of unique_metrics, alerting_metrics,
   etc.
-3. To sync Ionosphere data between the cluster instances.
+# To sync Ionosphere data between the cluster instances.
 
 Read about :mod:`settings.HORIZON_SHARDS` see
 `HORIZON_SHARDS <horizon.html#HORIZON_SHARDS>`__ section on the Horizon page.

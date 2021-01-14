@@ -164,6 +164,8 @@ if True:
         label_anomalies,
         # @added 20201213 - Feature #3890: metrics_manager - sync_cluster_files
         expected_features_profiles_dirs,
+        # @added 20210107 - Feature #3934: ionosphere_performance
+        get_ionosphere_performance,
     )
 
     # from utilites import alerts_matcher
@@ -365,6 +367,10 @@ try:
     IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR = settings.IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
 except:
     IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR = []
+
+# @added 20210112 - Feature #3934: ionosphere_performance
+ionosphere_dir = path.dirname(settings.IONOSPHERE_DATA_FOLDER)
+performance_dir = '%s/performance' % (ionosphere_dir)
 
 
 @app.before_request
@@ -831,8 +837,12 @@ def api():
             data_dict = {"status": {"request_time": yhat_time, "response": 200, "cached": use_cache_data}, "data": {"metric": metric, "yhat_values": yhat_dict}}
             return jsonify(data_dict), 200
         else:
-            data_dict = {"status": {"request_time": yhat_time, "response": 404}, "data": {"metric": metric, "yhat_values": 'null'}}
-            return jsonify(data_dict), 404
+            # @modified 20210112 - Feature #3850: webapp - yhat_values API endoint
+            # Return a 204 with null rather than a 404
+            # data_dict = {"status": {"request_time": yhat_time, "response": 404}, "data": {"metric": metric, "yhat_values": 'null'}}
+            # return jsonify(data_dict), 404
+            data_dict = {"status": {"request_time": yhat_time, "response": 204, "cached": use_cache_data, "no_data": "true"}, "data": {"metric": metric, "yhat_values": 'null'}}
+            return jsonify(data_dict), 204
 
     # @added 20201103 - Feature #3770: webapp - analyzer_last_status API endoint
     if 'analyzer_last_status' in request.args:
@@ -3261,6 +3271,131 @@ def ionosphere():
                 #                   Feature #2516: Add label to features profile
                 user=user,
                 duration=(time.time() - start), print_debug=False), 200
+
+    # @added 20210107 - Feature #3934: ionosphere_performance
+    performance_request = False
+    if 'performance' in request.args:
+        performance_req = request.args.get('performance', 'false')
+        if performance_req == 'true':
+            performance_request = True
+    if performance_request:
+        REQUEST_ARGS = [
+            'performance', 'metric', 'metric_like', 'from_timestamp',
+            'until_timestamp', 'format', 'anomalies', 'new_fps', 'total_fps',
+            'fps_matched_count', 'layers_matched_count', 'sum_matches',
+            'title', 'period', 'height', 'width', 'fp_type',
+        ]
+        metric = None
+        metric_like = None
+        from_timestamp = 0
+        until_timestamp = 0
+        format = 'normal'
+        performance_data_request = False
+        for i in request.args:
+            key = str(i)
+            if key not in REQUEST_ARGS:
+                error_string = 'error :: invalid request argument - %s' % (key)
+                logger.error(error_string)
+                resp = json.dumps(
+                    {'400 Bad Request': error_string})
+                return flask_escape(resp), 400
+            value = request.args.get(key, 0)
+            if key == 'metric':
+                if str(value) == 'all':
+                    metric = str(value)
+                    performance_data_request = True
+                if str(value) != 'all':
+                    metric = str(value)
+                    performance_data_request = True
+            if key == 'from_timestamp' or key == 'until_timestamp':
+                timestamp_format_invalid = True
+                if value == 'all':
+                    timestamp_format_invalid = False
+                # unix timestamp
+                if value.isdigit():
+                    timestamp_format_invalid = False
+                # %Y%m%d %H:%M timestamp
+                if timestamp_format_invalid:
+                    value_strip_colon = value.replace(':', '')
+                    new_value = value_strip_colon.replace(' ', '')
+                    if new_value.isdigit():
+                        timestamp_format_invalid = False
+                if timestamp_format_invalid:
+                    error_string = 'error :: invalid %s value passed %s' % (key, value)
+                    logger.error('error :: invalid %s value passed %s' % (key, value))
+                    error_string = 'error :: invalid request argument - %s' % (key)
+                    logger.error(error_string)
+                    resp = json.dumps(
+                        {'400 Bad Request': error_string})
+                    return flask_escape(resp), 400
+                if key == 'from_timestamp':
+                    from_timestamp = value
+                if key == 'until_timestamp':
+                    until_timestamp = value
+            if key == 'metric_like':
+                logger.info('metric_like %s was passed' % value)
+                metric_like = str(value)
+                if metric_like != 'all':
+                    performance_data_request = True
+            if key == 'format':
+                if value == 'json':
+                    format = 'json'
+                    logger.info('format %s was passed' % value)
+        ionosphere_performance_data = {}
+        if performance_data_request:
+            try:
+                ionosphere_performance_data = get_ionosphere_performance(metric, metric_like, from_timestamp, until_timestamp, format)
+            except:
+                trace = traceback.format_exc()
+                fail_msg = 'error :: Webapp error with get_ionosphere_performance'
+                logger.error(trace)
+                logger.error(fail_msg)
+                return internal_error(fail_msg, trace)
+            if not ionosphere_performance_data:
+                trace = ionosphere_performance_data
+                fail_msg = 'error :: Webapp no ionosphere_performance_data'
+                return internal_error(fail_msg, trace)
+
+        performance_json_dict = {}
+
+        performance_success = False
+        if ionosphere_performance_data:
+            performance_success = ionosphere_performance_data['success']
+        if performance_success:
+            logger.info('ionosphere ionosphere_performance_data has length - %s performance elements listed' % str(len(ionosphere_performance_data)))
+            performance_list = ionosphere_performance_data['performance']
+            columns = []
+            for item in performance_list:
+                for element in item:
+                    columns.append(element)
+                break
+            dates = []
+            for item in performance_list:
+                dates.append(item['date'])
+            for date_str in dates:
+                performance_json_dict[date_str] = {}
+                for item in performance_list:
+                    if item['date'] == date_str:
+                        for column in columns:
+                            if column == 'date':
+                                continue
+                            performance_json_dict[date_str][column] = item[column]
+        data_dict = {"status": {"response": 200, "request_time": (time.time() - start)}, "data": {"metric": metric, "metric_like": metric_like, "performance": performance_json_dict}}
+        if not performance_success:
+            data_dict = {"status": {"response": 204, "request_time": (time.time() - start)}, "data": {"metric": metric, "metric_like": metric_like, "performance": performance_json_dict, "success": False, "reason": "no data for query"}}
+        if format == 'json':
+            logger.info('ionosphere performance returned json with %s performance elements listed' % str(len(performance_json_dict)))
+            return jsonify(data_dict), 200
+
+        return render_template(
+            'ionosphere.html', performance=True,
+            performance_results=ionosphere_performance_data,
+            performance_json_dict=data_dict,
+            for_metric=metric, metric_like=metric_like,
+            from_timestamp=from_timestamp, until_timestamp=until_timestamp,
+            matched_from_datetime=matched_from_datetime,
+            version=skyline_version, user=user,
+            duration=(time.time() - start), print_debug=False), 200
 
     # @added 20170220 - Feature #1862: Ionosphere features profiles search page
     # Ionosphere features profiles by generations
@@ -5783,6 +5918,8 @@ def ionosphere_images():
                 IONOSPHERE_IMAGE_ALLOWED_PATHS = [
                     settings.IONOSPHERE_DATA_FOLDER,
                     settings.IONOSPHERE_PROFILES_FOLDER,
+                    # @added 20210112 - Feature #3934: ionosphere_performance
+                    performance_dir,
                 ]
                 allowed_path = False
                 for allowed_image_path in IONOSPHERE_IMAGE_ALLOWED_PATHS:
@@ -5954,6 +6091,8 @@ def ionosphere_file():
     IONOSPHERE_FILE_ALLOWED_PATHS = [
         settings.IONOSPHERE_DATA_FOLDER,
         settings.IONOSPHERE_PROFILES_FOLDER,
+        # @added 20210112 - Feature #3934: ionosphere_performance
+        performance_dir,
     ]
 
     if request_args_present:
@@ -5988,6 +6127,9 @@ def ionosphere_file():
                         mimetype = 'application/json'
                     if filename.endswith('.txt'):
                         mimetype = 'text/plain'
+                    # @added 20210112 - Feature #3934: ionosphere_performance
+                    if filename.endswith('.csv'):
+                        mimetype = 'text/csv'
                     try:
                         return send_file(filename, mimetype=mimetype)
                     except:
@@ -6220,6 +6362,22 @@ def upload_data():
             except:
                 logger.info('no known key found for %s in flux_upload_keys' % parent_metric_namespace)
                 known_key = None
+            # @added 20210114 - Task #3936: Allow for FLUX_API_KEYS rotation
+            # Allow multiple keys per namespace to allow for key rotation
+            if not known_key:
+                try:
+                    for i_key in flux_upload_keys:
+                        parent_metric_namespace_for_key = flux_upload_keys[i_key]
+                        if parent_metric_namespace_for_key == parent_metric_namespace:
+                            known_key = i_key
+                            logger.info('a key match for the key found for %s in flux_upload_keys was found' % parent_metric_namespace)
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: iterating flux_upload_keys')
+                    known_key = None
+                if not known_key:
+                    logger.info('no key match was found for %s in flux_upload_keys' % parent_metric_namespace)
+
         if not known_key:
             redis_temporary_upload_key = 'flux.tmp.temporary_upload_key.%s' % api_key
             try:
