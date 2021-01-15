@@ -273,6 +273,16 @@ cycler==0.10.0
 #pyparsing==2.4.2
 pyparsing==2.4.7
 
+# @added 20210115 - Bug #3940: SNYK-PYTHON-PILLOW-1055461 and SNYK-PYTHON-PILLOW-1055462
+# Added as matplotlib@3.3.3 introduced pillow@8.0.1 and Pillow is now fixed at
+# 8.1.0 as per:
+# https://snyk.io/vuln/SNYK-PYTHON-PILLOW-1055461
+# https://snyk.io/vuln/SNYK-PYTHON-PILLOW-1055462
+# https://github.com/python-pillow/Pillow/pull/5174 which fixes CVE-2020-35653
+# and CVE-2020-35655
+# When matplotlib requires >=8.1.0 this Pillow==8.1.0 can be removed
+Pillow==8.1.0
+
 # @modified 20160820 - Issue #23 Test dependency updates
 #matplotlib==1.5.1
 # @modified 20161119 - Branch #922: ionosphere
