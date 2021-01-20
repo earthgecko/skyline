@@ -53,7 +53,7 @@ urllib3==1.26.2
 graphyte==1.6.0
 statsd==3.3.0
 falcon==2.0.0
-xlrd==2.0.1
+xlrd==1.2.0
 pandas_log==0.1.6; python_version >= '3.2'
 timeout-decorator==0.4.1
 matrixprofile==1.1.4
