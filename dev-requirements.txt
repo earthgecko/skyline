@@ -650,7 +650,9 @@ falcon==2.0.0
 #                   Feature #3538: webapp - upload_data endpoint
 # @modified 20201229 - Task #3898: Test Python 3.8.6 and deps
 #xlrd==1.2.0
-xlrd==2.0.1
+# @modified 20210121 - Bug #3944: xlrd-2.0.1 removed support for xlsx format
+#xlrd==2.0.1
+xlrd==1.2.0
 
 # @added 20200520 - Feature #3550: flux.uploaded_data_worker
 # pin to 0.1.6 until pandas-1.0.3 has been thoroughly tested
