@@ -56,7 +56,9 @@ itsdangerous==1.1.0
 #Jinja2==2.10
 # @modified 20200701 - Task #3608: Update Skyline to Python 3.8.3 and deps
 #Jinja2==2.10.1
-Jinja2==2.11.2
+# @modified 20210202 - Task #3960: SNYK-PYTHON-JINJA2-1012994
+#Jinja2==2.11.2
+Jinja2==2.11.3
 
 # @modified 20190412 - Task #2926: Update dependencies
 #MarkupSafe==1.0
