@@ -489,6 +489,7 @@ class PopulateMetricWorker(Process):
                     response = requests.get(fetch_url)
                     if response.status_code == 200:
                         success = True
+                        logger.info('populate_metric_worker :: got responses from %s' % str(fetch_url))
                 except:
                     logger.info(traceback.format_exc())
                     logger.error('error :: populate_metric_worker :: http status code - %s, reason - %s' % (
@@ -817,7 +818,10 @@ class PopulateMetricWorker(Process):
                         try:
                             smallListOfMetricTuples.append(data)
                             tuples_added += 1
-                            if tuples_added >= 1000:
+                            # @modified 20210115 - Task #3864: flux - try except everything
+                            # Bring into line with flux worker performance changes
+                            # if tuples_added >= 1000:
+                            if tuples_added >= 480:
                                 pickle_data_sent = pickle_data_to_graphite(smallListOfMetricTuples)
                                 if pickle_data_sent:
                                     data_points_sent += tuples_added
@@ -827,6 +831,12 @@ class PopulateMetricWorker(Process):
                                     sent_to_graphite += len(smallListOfMetricTuples)
                                     smallListOfMetricTuples = []
                                     tuples_added = 0
+                                # @added 20210115 - Task #3864: flux - try except everything
+                                # Bring into line with flux worker performance changes
+                                # Reduce the speed of submissions to Graphite
+                                # if there are lots of data points
+                                if timeseries_length > 4000:
+                                    sleep(0.3)
                                 else:
                                     logger.error('error :: populate_metric_worker :: failed to send %s data points to Graphite via pickle for %s' % (
                                         str(tuples_added), metric))
