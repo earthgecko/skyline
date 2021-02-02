@@ -177,7 +177,7 @@ follows.  Note that in this instance you would need a your
 .. code-block:: python
 
     FLUX_UPLOADS_KEYS = {
-        'temp_monitoring.warehouse.2.012383': '484166bf-df66-4f7d-ad4a-9336da9ef620',
+        '484166bf-df66-4f7d-ad4a-9336da9ef620': 'temp_monitoring.warehouse.2.012383',
     }
 
 curl request.
