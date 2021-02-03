@@ -527,10 +527,11 @@ skyline.analyzer.skyline-1.algorithm_breakdown.ks_test.timing.times_run
 
 Example:
 
-CHECK_AIRGAPS = [
-    'remote_hosts',
-    'external_hosts.dc1',
-]
+    CHECK_AIRGAPS = [
+        'remote_hosts',
+        'external_hosts.dc1',
+    ]
+
 """
 
 SKIP_AIRGAPS = []
@@ -554,11 +555,12 @@ skyline.analyzer.skyline-1.algorithm_breakdown.ks_test.timing.times_run
 
 Example:
 
-SKIP_AIRGAPS = [
-    'carbon',
-    'skyline',
-    'stats',
-]
+    SKIP_AIRGAPS = [
+        'carbon',
+        'skyline',
+        'stats',
+    ]
+
 """
 
 IDENTIFY_UNORDERED_TIMESERIES = False
@@ -2714,6 +2716,31 @@ IONOSPHERE_UNTRAINABLES = []
 :vartype IONOSPHERE_UNTRAINABLES: list
 """
 
+IONOSPHERE_PERFORMANCE_DATA_POPULATE_CACHE = False
+"""
+:var IONOSPHERE_PERFORMANCE_DATA_POPULATE_CACHE: whether metrics_manager should
+    populate the performance cache items at the beginning of the data.  Under
+    normal circumstances this is not required, it just make the Ionosphere
+    performance graphs build quicker.
+:vartype IONOSPHERE_PERFORMANCE_DATA_POPULATE_CACHE: boolean
+"""
+
+IONOSPHERE_PERFORMANCE_DATA_POPULATE_CACHE_DEPTH = 0
+"""
+:var IONOSPHERE_PERFORMANCE_DATA_POPULATE_CACHE_DEPTH: namespace element depth
+    to cache.  If IONOSPHERE_PERFORMANCE_DATA_POPULATE_CACHE is enabled this is
+    the number of namespace elements (0 indexed) to populate the cache to
+    (including :mod:`settings.FULL_NAMESPACE` for which we shall use ``metrics.``
+    in the example below).  For example take the metric namespaces,
+    metrics.stats.* and metrics.telegraf.* if you wanted to cache the
+    performance data for the metrics.stats.* namespace as a whole and the
+    metrics.telegraf.* namespace as a whole, you would set this to 1.
+    0 would cache perfromance data for all metrics
+    1 would cache perfromance data for the sum of all metrics.*, and sum of all
+    metrics.stats.* and sum of all metrics.telegraf.*. e.g. 0 is implied
+:vartype IONOSPHERE_PERFORMANCE_DATA_POPULATE_CACHE_DEPTH: int
+"""
+
 MEMCACHE_ENABLED = False
 """
 :var MEMCACHE_ENABLED: Enables the use of memcache in Ionosphere to optimise
@@ -2981,14 +3008,16 @@ FLUX_API_KEYS = {}
     Each API key must be a 32 character alphanumeric string [a-Z][0-9]
     The trailing dot of the namespace prefix must not be specified it will be
     automatically added as the separator between the namespace prefix and the
-    metric name.
+    metric name. For more see
+    https://earthgecko-skyline.readthedocs.io/en/latest/upload-data-to-flux.html
 :vartype FLUX_API_KEYS: dict
 
 - **Example**::
 
     FLUX_API_KEYS = {
-        'ZlJXpBL6QVuZg5KL4Vwrccvl8Bl3bBjC': None,
-        'KYRsv508FJpVg7pr11vnZTbeu11UvUqR': 'warehouse-1'
+        'ZlJXpBL6QVuZg5KL4Vwrccvl8Bl3bBjC': 'warehouse-1',
+        'KYRsv508FJpVg7pr11vnZTbeu11UvUqR': 'warehouse-1'  # allow multiple keys for a namesapce to allow for key rotation
+        'ntG9Tlk74FeV7Muy65EdHbZ07Mpvj7Gg': 'warehouse-2.floor.1'
     }
 
 """

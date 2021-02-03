@@ -406,7 +406,11 @@ Added fp_count and fp_checked
 */
   `user_id` INT DEFAULT NULL COMMENT 'the user id that validated the match',
   PRIMARY KEY (id),
+/*
+# @modified 20210201 - Feature #3934: ionosphere_performance
   INDEX `features_profile_matched` (`id`,`fp_id`))
+*/
+  INDEX `features_profile_matched` (`id`,`fp_id`,`metric_timestamp`))
   ENGINE=InnoDB;
 
 /*
@@ -482,7 +486,11 @@ Added layers_count and layers_checked
 */
   `user_id` INT DEFAULT NULL COMMENT 'the user id that validated the match',
   PRIMARY KEY (id),
+/*
+# @modified 20210201 - Feature #3934: ionosphere_performance
   INDEX `layers_matched` (`id`,`layer_id`,`fp_id`,`metric_id`))
+*/
+  INDEX `layers_matched` (`id`,`layer_id`,`fp_id`,`metric_id`,`anomaly_timestamp`))
   ENGINE=InnoDB;
 
 # @added 20180413 - Branch #2270: luminosity
