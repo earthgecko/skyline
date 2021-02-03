@@ -70,6 +70,10 @@
   		        <td><input type="text" name="metric" value="all" /> Metric name (if one is desired)</td>
   		      </tr>
   		      <tr>
+  		        <td>remove prefix:</td>
+  		        <td><input type="text" name="remove_prefix" value="false" /> Remove the prefix from the metric name (do not include the final dot) e.g. <code>telegraf</code></td>
+  		      </tr>
+  		      <tr>
   		        <td>Metric like</td>
   		        <td><input type="text" name="metric_like" value="all"> (wildcards are MySQL LIKE style, % e.g. stats.app.requests.http_status_codes.% or %.http_status_codes.%)</td>
   		      </tr>
@@ -89,6 +93,16 @@
                 <option value="monthly">monthly</option>
               </select> Period</td>
   		      </tr>
+  		      <tr>
+  		        <td>timezone</td>
+              <td><select name="tz">
+                <option value="UTC">UTC</option>
+                {% for item in pytz_timezones %}
+                <option value="{{ item }}">{{ item }}</option>
+                {% endfor %}
+              </select></td>
+  		      </tr>
+
   		      <tr>
   		        <td>anomalies</td>
               <td><select name="anomalies">
