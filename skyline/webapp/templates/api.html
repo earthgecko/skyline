@@ -953,7 +953,11 @@ Or if no metrics with training data are present <code>{"data":{"metrics":[]},"st
   		    <tbody>
   		      <tr>
   		        <td>Description:</td>
-  		        <td>Returns the yhat values (mean and value OPTIONAL) for a metric timeseries as a json object</td>
+  		        <td>Returns the yhat values (mean and value OPTIONAL) for a metric timeseries as a json object<br>
+              yhat values default to the upper and lower three-sigma boundaries.<br>
+              If any custom algorithms are in use the three-sigma yhat upper and lower vlues are replaced with the value (+/- 10%) which the custom algorithm did not trigger on<br>
+              Where the customa algorithm replaces the three-sigma value in the yhat_upper or yhat_lower elements, a 3sigma_lower or 3sigma_upper will also be returned in the element
+              </td>
   		      </tr>
   		      <tr>
   		        <td>Endpoint:</td>
@@ -972,6 +976,8 @@ Or if no metrics with training data are present <code>{"data":{"metrics":[]},"st
                   include_value=[false | boolean | optional defaults to false]</br>
                   include_mean=[false | boolean | optional defaults to false]</br>
                   include_yhat_real_lower=[false | boolean | optional defaults to false]</br>
+                  include_anomalous_periods=[false | boolean | optional defaults to false]</br>
+                  remove_prefix=[str | optional] - prefix string to remove (do not pass a trailing dot)</br>
               </td>
   		      </tr>
   		      <tr>

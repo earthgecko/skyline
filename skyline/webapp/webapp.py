@@ -734,7 +734,7 @@ def api():
         # @added 20201126 - Feature #3850: webapp - yhat_values API endoint
         start_yhat = timer()
         try:
-            metric = request.args.get('metric', 0)
+            metric = request.args.get('metric', '0')
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: /api?yhat_values request with invalid metric argument')
@@ -743,7 +743,7 @@ def api():
             data_dict = {"status": {"error": "no metric passed"}}
             return jsonify(data_dict), 400
         try:
-            from_timestamp = int(request.args.get('from', 0))
+            from_timestamp = int(request.args.get('from', '0'))
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: /api?yhat_values request with invalid from argument')
@@ -752,7 +752,7 @@ def api():
             data_dict = {"status": {"error": "invalid from argument passed"}}
             return jsonify(data_dict), 400
         try:
-            until_timestamp = int(request.args.get('until', 0))
+            until_timestamp = int(request.args.get('until', '0'))
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: /api?yhat_values request with invalid until argument')
@@ -781,6 +781,24 @@ def api():
                 include_yhat_real_lower = True
         except:
             pass
+
+        # @modified 20210126 - Task #3958: Handle secondary algorithms in yhat_values
+        # Added anomalous periods and remove prefix
+        include_anomalous_periods = False
+        try:
+            include_anomalous_periods_str = request.args.get('include_anomalous_periods', 'false')
+            if include_anomalous_periods_str == 'true':
+                include_anomalous_periods = True
+        except:
+            pass
+        remove_prefix = False
+        try:
+            remove_prefix_str = request.args.get('remove_prefix', 'false')
+            if remove_prefix_str != 'false':
+                remove_prefix = True
+        except:
+            pass
+
         yhat_dict = {}
 
         # @added 20201126 - Feature #3850: webapp - yhat_values API endoint
@@ -806,13 +824,41 @@ def api():
                 logger.error('error :: Webapp failed to literal_eval yhat_dict_str')
         if yhat_dict:
             use_cache_data = True
+
+        # @modified 20210126 - Task #3958: Handle secondary algorithms in yhat_values
+        # Added anomalous_periods_dict
+        anomalous_periods_dict = {}
+        if include_anomalous_periods:
+            anomalous_periods_dict_cache_key = 'webapp.%s.%s.%s.%s.%s.%s.anomalous_periods' % (
+                metric, str(from_timestamp), str(until_timestamp),
+                str(include_value), str(include_mean),
+                str(include_yhat_real_lower))
+            anomalous_periods_dict_str = None
+            try:
+                anomalous_periods_dict_str = REDIS_CONN.get(anomalous_periods_dict_cache_key)
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: Webapp could not get the Redis key - %s' % anomalous_periods_dict_cache_key)
+            if anomalous_periods_dict_str:
+                logger.info('got anomalous_periods_dict from Redis key - %s' % anomalous_periods_dict_cache_key)
+                try:
+                    anomalous_periods_dict = literal_eval(anomalous_periods_dict_str)
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: Webapp failed to literal_eval anomalous_periods_dict_str')
+            if not anomalous_periods_dict:
+                use_cache_data = False
+                yhat_dict = {}
+
         if not yhat_dict:
             try:
                 logger.info('running get_yhat_values(%s, %s, %s, %s, %s, %s)' % (
                     metric, str(from_timestamp), str(until_timestamp),
                     str(include_value), str(include_mean),
                     str(include_yhat_real_lower)))
-                yhat_dict = get_yhat_values(metric, from_timestamp, until_timestamp, include_value, include_mean, include_yhat_real_lower)
+                # @modified 20210126 - Task #3958: Handle secondary algorithms in yhat_values
+                # Added anomalous_periods_dict and include_anomalous_periods
+                yhat_dict, anomalous_periods_dict = get_yhat_values(metric, from_timestamp, until_timestamp, include_value, include_mean, include_yhat_real_lower, include_anomalous_periods)
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: error in get_yhat_values(%s, %s, %s, %s, %s, %s)' % (
@@ -833,16 +879,39 @@ def api():
             logger.error('error :: returning 500 yhat_dict is %s' % str(yhat_dict))
             data_dict = {"status": {"request_time": yhat_time, "response": 500}, "data": {}}
             return 'Internal Server Error', 500
+
+        # @added 20210126 - Task #3958: Handle secondary algorithms in yhat_values
+        # Allow for the removal of a prefix from the metric name
+        if remove_prefix:
+            try:
+                if remove_prefix_str.endswith('.'):
+                    remove_prefix = '%s' % remove_prefix_str
+                else:
+                    remove_prefix = '%s.' % remove_prefix_str
+                metric = metric.replace(remove_prefix, '')
+            except Exception as e:
+                logger.error('error :: failed to remove prefix %s from %s' % (str(remove_prefix_str), metric))
+
         if yhat_dict:
-            data_dict = {"status": {"request_time": yhat_time, "response": 200, "cached": use_cache_data}, "data": {"metric": metric, "yhat_values": yhat_dict}}
+            if include_anomalous_periods:
+                data_dict = {"status": {"request_time": yhat_time, "response": 200, "cached": use_cache_data}, "data": {"metric": metric, "yhat_values": yhat_dict, "anomalous_periods": anomalous_periods_dict}}
+            else:
+                data_dict = {"status": {"request_time": yhat_time, "response": 200, "cached": use_cache_data}, "data": {"metric": metric, "yhat_values": yhat_dict}}
             return jsonify(data_dict), 200
         else:
             # @modified 20210112 - Feature #3850: webapp - yhat_values API endoint
             # Return a 204 with null rather than a 404
             # data_dict = {"status": {"request_time": yhat_time, "response": 404}, "data": {"metric": metric, "yhat_values": 'null'}}
             # return jsonify(data_dict), 404
-            data_dict = {"status": {"request_time": yhat_time, "response": 204, "cached": use_cache_data, "no_data": "true"}, "data": {"metric": metric, "yhat_values": 'null'}}
-            return jsonify(data_dict), 204
+            # @modified 20210112 - Feature #3850: webapp - yhat_values API endoint
+            # Return a 200 with null rather than 204 as 204 can have No content
+            # data_dict = {"status": {"request_time": yhat_time, "response": 204, "cached": use_cache_data, "no_data": "true"}, "data": {"metric": metric, "yhat_values": 'null'}}
+            # return jsonify(data_dict), 204
+            if include_anomalous_periods:
+                data_dict = {"status": {"request_time": yhat_time, "response": 200, "cached": use_cache_data, "no_data": "true"}, "data": {"metric": metric, "yhat_values": None, "anomalous_periods": None}}
+            else:
+                data_dict = {"status": {"request_time": yhat_time, "response": 200, "cached": use_cache_data, "no_data": "true"}, "data": {"metric": metric, "yhat_values": None}}
+            return jsonify(data_dict), 200
 
     # @added 20201103 - Feature #3770: webapp - analyzer_last_status API endoint
     if 'analyzer_last_status' in request.args:
@@ -3283,13 +3352,39 @@ def ionosphere():
             'performance', 'metric', 'metric_like', 'from_timestamp',
             'until_timestamp', 'format', 'anomalies', 'new_fps', 'total_fps',
             'fps_matched_count', 'layers_matched_count', 'sum_matches',
-            'title', 'period', 'height', 'width', 'fp_type',
+            'title', 'period', 'height', 'width', 'fp_type', 'remove_prefix',
+            # @added 20210202 - Feature #3934: ionosphere_performance
+            # Handle user timezone
+            'tz',
         ]
         metric = None
         metric_like = None
         from_timestamp = 0
         until_timestamp = 0
         format = 'normal'
+
+        # @added 20210128 - Feature #3934: ionosphere_performance
+        # Improve performance and pass arguments to get_ionosphere_performance
+        # for cache key
+        anomalies = True
+        new_fps = True
+        fps_matched_count = False
+        layers_matched_count = False
+        sum_matches = True
+        title = None
+        period = 'weekly'
+        height = '8'
+        width = '4'
+        fp_type = 'all'
+        remove_prefix = False
+
+        # @added 20210202 - Feature #3934: ionosphere_performance
+        # Handle user timezone
+        timezone_str = 'UTC'
+        pytz_timezones = []
+        for pytz_timezone in pytz.all_timezones:
+            pytz_timezones.append(pytz_timezone)
+
         performance_data_request = False
         for i in request.args:
             key = str(i)
@@ -3299,7 +3394,7 @@ def ionosphere():
                 resp = json.dumps(
                     {'400 Bad Request': error_string})
                 return flask_escape(resp), 400
-            value = request.args.get(key, 0)
+            value = request.args.get(key, '0')
             if key == 'metric':
                 if str(value) == 'all':
                     metric = str(value)
@@ -3341,10 +3436,40 @@ def ionosphere():
                 if value == 'json':
                     format = 'json'
                     logger.info('format %s was passed' % value)
+            if key == 'new_fps':
+                if value == 'false':
+                    new_fps = False
+            if key == 'total_fps':
+                if value == 'true':
+                    fps_matched_count = True
+
+        try:
+            remove_prefix_str = request.args.get('remove_prefix', 'false')
+            if remove_prefix_str != 'false':
+                remove_prefix = True
+        except:
+            pass
+
+        # @added 20210202 - Feature #3934: ionosphere_performance
+        # Handle user timezone
+        try:
+            timezone_str = request.args.get('tz', 'UTC')
+        except:
+            pass
+
         ionosphere_performance_data = {}
         if performance_data_request:
             try:
-                ionosphere_performance_data = get_ionosphere_performance(metric, metric_like, from_timestamp, until_timestamp, format)
+                ionosphere_performance_data = get_ionosphere_performance(
+                    metric, metric_like, from_timestamp, until_timestamp, format,
+                    # @added 20210128 - Feature #3934: ionosphere_performance
+                    # Improve performance and pass arguments to get_ionosphere_performance
+                    # for cache key
+                    anomalies, new_fps, fps_matched_count, layers_matched_count,
+                    sum_matches, title, period, height, width, fp_type,
+                    # @added 20210202 - Feature #3934: ionosphere_performance
+                    # Handle user timezone
+                    timezone_str)
             except:
                 trace = traceback.format_exc()
                 fail_msg = 'error :: Webapp error with get_ionosphere_performance'
@@ -3380,6 +3505,24 @@ def ionosphere():
                             if column == 'date':
                                 continue
                             performance_json_dict[date_str][column] = item[column]
+                            # @added 20210127 - Feature #3934: ionosphere_performance
+                            # Convert nan to null or 0 for valid json
+                            if str(item[column]) == 'nan':
+                                if column == 'fps_total_count':
+                                    performance_json_dict[date_str][column] = 0
+                                else:
+                                    performance_json_dict[date_str][column] = None
+        # Allow for the removal of a prefix from the metric name
+        if remove_prefix:
+            try:
+                if remove_prefix_str.endswith('.'):
+                    remove_prefix = '%s' % remove_prefix_str
+                else:
+                    remove_prefix = '%s.' % remove_prefix_str
+                metric = metric.replace(remove_prefix, '')
+            except Exception as e:
+                logger.error('error :: failed to remove prefix %s from %s - %s' % (str(remove_prefix_str), metric, e))
+
         data_dict = {"status": {"response": 200, "request_time": (time.time() - start)}, "data": {"metric": metric, "metric_like": metric_like, "performance": performance_json_dict}}
         if not performance_success:
             data_dict = {"status": {"response": 204, "request_time": (time.time() - start)}, "data": {"metric": metric, "metric_like": metric_like, "performance": performance_json_dict, "success": False, "reason": "no data for query"}}
@@ -3394,6 +3537,9 @@ def ionosphere():
             for_metric=metric, metric_like=metric_like,
             from_timestamp=from_timestamp, until_timestamp=until_timestamp,
             matched_from_datetime=matched_from_datetime,
+            # @added 20210202 - Feature #3934: ionosphere_performance
+            # Handle user timezone
+            pytz_timezones=pytz_timezones,
             version=skyline_version, user=user,
             duration=(time.time() - start), print_debug=False), 200
 

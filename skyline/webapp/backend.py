@@ -540,6 +540,18 @@ def luminosity_remote_data(anomaly_timestamp, resolution):
         return luminosity_data, success, message
     logger.info('luminosity_remote_data :: %s unique_metrics' % str(len(unique_metrics)))
 
+    # @added 20210125 - Feature #3956: luminosity - motifs
+    #                   Improve luminosity_remote_data performance
+    # Although the is_derivative_metric function is appropriate in the below
+    # loop here that is not the  most performant manner in which to determine if
+    # the metrics are derivatives, as it needs to fire on every metric, so here
+    # we just trust the Redis derivative_metrics list.  This increases
+    # performance on 1267 metrics from 6.442009 seconds to 1.473067 seconds
+    try:
+        derivative_metrics = list(REDIS_CONN_DECODED.smembers('derivative_metrics'))
+    except:
+        derivative_metrics = []
+
     # assigned metrics
     assigned_min = 0
     assigned_max = len(unique_metrics)
@@ -602,12 +614,22 @@ def luminosity_remote_data(anomaly_timestamp, resolution):
         # Convert metric_name bytes to str
         metric_name = str(metric_name)
 
-        if metric_name.startswith(settings.FULL_NAMESPACE):
-            base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
-        else:
-            base_name = metric_name
+        # @modified 20210125 - Feature #3956: luminosity - motifs
+        #                      Improve luminosity_remote_data performance
+        # Although the is_derivative_metric function is appropriate here it is
+        # not the most performant manner in which to determine if the metric
+        # is a derivative in this case as it needs to fire on every metric, so
+        # here we just trust the Redis derivative_metrics list. This increases
+        # performance on 1267 metrics from 6.442009 seconds to 1.473067 seconds
+        # if metric_name.startswith(settings.FULL_NAMESPACE):
+        #     base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+        # else:
+        #     base_name = metric_name
+        # known_derivative_metric = is_derivative_metric('webapp', base_name)
+        known_derivative_metric = False
+        if metric_name in derivative_metrics:
+            known_derivative_metric = True
 
-        known_derivative_metric = is_derivative_metric('webapp', base_name)
         if known_derivative_metric:
             try:
                 derivative_timeseries = nonNegativeDerivative(timeseries)
@@ -615,14 +637,20 @@ def luminosity_remote_data(anomaly_timestamp, resolution):
             except:
                 logger.error('error :: nonNegativeDerivative failed')
 
-        correlate_ts = []
-        for ts, value in timeseries:
-            if int(ts) < from_timestamp:
-                continue
-            if int(ts) <= anomaly_timestamp:
-                correlate_ts.append((int(ts), value))
-            if int(ts) > (anomaly_timestamp + until_timestamp):
-                break
+        # @modified 20210125 - Feature #3956: luminosity - motifs
+        #                      Improve luminosity_remote_data performance
+        # The list comprehension method halves the time to create the
+        # correlate_ts from 0.0008357290644198656 to 0.0004676780663430691 seconds
+        # correlate_ts = []
+        # for ts, value in timeseries:
+        #     if int(ts) < from_timestamp:
+        #         continue
+        #     if int(ts) <= anomaly_timestamp:
+        #         correlate_ts.append((int(ts), value))
+        #     if int(ts) > (anomaly_timestamp + until_timestamp):
+        #         break
+        correlate_ts = [x for x in timeseries if x[0] >= from_timestamp if x[0] <= until_timestamp]
+
         if not correlate_ts:
             continue
         metric_data = [str(metric_name), correlate_ts]
@@ -795,7 +823,7 @@ def get_cluster_data(api_endpoint, data_required, only_host='all', endpoint_para
 # @added 20201125 - Feature #3850: webapp - yhat_values API endoint
 def get_yhat_values(
         metric, from_timestamp, until_timestamp, include_value, include_mean,
-        include_yhat_real_lower):
+        include_yhat_real_lower, include_anomalous_periods):
 
     timeseries = []
     try:
@@ -811,15 +839,194 @@ def get_yhat_values(
     yhat_dict = {}
     logger.info('get_yhat_values :: %s values in timeseries for %s to calculate yhat values from' % (
         str(len(timeseries)), metric))
+
+    # @added 20210126 - Task #3958: Handle secondary algorithms in yhat_values
+    anomalous_periods_dict = {}
+    if timeseries:
+        metric_id = 0
+        if metric:
+            logger.info('get_yhat_values :: getting db id for metric - %s' % metric)
+            query = 'select id from metrics WHERE metric=\'%s\'' % metric  # nosec
+            try:
+                result = mysql_select(skyline_app, query)
+                metric_id = int(result[0][0])
+            except:
+                logger.error('error :: get_yhat_values :: failed to get id from db: %s' % traceback.format_exc())
+        anomalies_at = []
+        if metric_id:
+            logger.info('get_yhat_values :: getting latest anomalies')
+            query = 'select anomaly_timestamp, anomalous_datapoint, anomaly_end_timestamp from anomalies WHERE metric_id=%s AND anomaly_timestamp >= %s AND anomaly_timestamp <= %s' % (
+                str(metric_id), str(from_timestamp), str(until_timestamp))
+            try:
+                rows = mysql_select(skyline_app, query)
+                for row in rows:
+                    a_timestamp = int(row[0])
+                    a_value = float(row[1])
+                    try:
+                        a_end_timestamp = int(row[2])
+                    except:
+                        a_end_timestamp = 0
+                    anomalies_at.append([a_timestamp, a_value, a_end_timestamp])
+            except:
+                logger.error('error :: get_yhat_values :: failed to get anomalies from db: %s' % traceback.format_exc())
+                rows = []
+        timeseries_ranges = []
+        last_timestamp = None
+        for index, item in enumerate(timeseries):
+            if last_timestamp:
+                t_range = list(range(last_timestamp, int(item[0])))
+                timeseries_ranges.append([index, t_range, item])
+            last_timestamp = int(item[0])
+        t_range = list(range(last_timestamp, (int(item[0]) + 1)))
+        timeseries_ranges.append([index, t_range, item])
+        anomalies_index = []
+        for index, time_range, item in timeseries_ranges:
+            for a_timestamp, a_value, a_end_timestamp in anomalies_at:
+                if a_timestamp in time_range:
+                    anomalies_index.append([index, item])
+        anomalous_period_indices = []
+        anomalies_indices = [item[0] for item in anomalies_index]
+        for index, item in enumerate(timeseries):
+            for idx in anomalies_indices:
+                anomaly_index_range = list(range((idx - 3), (idx + 5)))
+                if index in anomaly_index_range:
+                    for i in anomaly_index_range:
+                        anomalous_period_indices.append(i)
+        anomaly_timestamps_indices = []
+        anomalies = []
+        for item in anomalies_index:
+            anomaly_timestamps_indices.append(item[0])
+            anomalies.append(item[1])
+
     if timeseries:
         try:
             array_amin = np.amin([item[1] for item in timeseries])
             values = []
-            for ts, value in timeseries:
+
+            # @added 20210126 - Task #3958: Handle secondary algorithms in yhat_values
+            # last_value = None
+            # start_anomalous_period = None
+            # end_anomalous_period = None
+            # sigma3_array = []
+            # sigma3_values = []
+            # extended_values = []
+            last_breach = 0
+            breach_for = 10
+            last_breach_vector = 'positive'
+            # last_used_extended = False
+            # last_used_extended_value = None
+            top = []
+            bottom = []
+            left = []
+            right = []
+
+            # @modified 20210126 - Task #3958: Handle secondary algorithms in yhat_values
+            # for ts, value in timeseries:
+            #     values.append(value)
+            #     va = np.array(values)
+            #     va_mean = va.mean()
+            #    va_std_3 = 3 * va.std()
+            for index, item in enumerate(timeseries):
+                ts = item[0]
+                value = item[1]
                 values.append(value)
                 va = np.array(values)
                 va_mean = va.mean()
                 va_std_3 = 3 * va.std()
+
+                # @added 20210126 - Task #3958: Handle secondary algorithms in yhat_values
+                anomalous_period = 0
+                three_sigma_lower = va_mean - va_std_3
+                three_sigma_upper = va_mean + va_std_3
+                # sigma3_array.append([ts, value, va_mean, [three_sigma_lower, three_sigma_upper]])
+                # sigma3_values.append([three_sigma_lower, three_sigma_upper])
+                use_extended = False
+                drop_expected_range = False
+                if index not in anomaly_timestamps_indices:
+                    use_extended = True
+                    # if last_used_extended:
+                    #     last_used_extended_value = None
+                else:
+                    drop_expected_range = True
+                for anomaly_index in anomaly_timestamps_indices:
+                    if index > anomaly_index:
+                        # if index < (anomaly_index + 30):
+                        if index < (anomaly_index + breach_for):
+                            use_extended = False
+                            anomalous_period = 1
+                            break
+                extended_lower = three_sigma_lower
+                extended_upper = three_sigma_upper
+                if use_extended:
+                    if item[1] > three_sigma_upper:
+                        extended_lower = three_sigma_lower
+                        extended_upper = (item[1] + ((item[1] / 100) * 5))
+                        last_breach = index
+                        last_breach_vector = 'positive'
+                    elif item[1] < three_sigma_lower:
+                        extended_lower = (item[1] - ((item[1] / 100) * 5))
+                        extended_upper = three_sigma_upper
+                        last_breach = index
+                        last_breach_vector = 'negative'
+                    elif index < (last_breach + breach_for) and index > last_breach:
+                        if last_breach_vector == 'positive':
+                            extended_value = (item[1] + ((item[1] / 100) * 5))
+                            three_sigma_value = three_sigma_upper
+                            if three_sigma_value > extended_value:
+                                extended_value = (three_sigma_value + ((three_sigma_value / 100) * 5))
+                            extended_lower = three_sigma_lower
+                            extended_upper = extended_value
+                        else:
+                            extended_lower = (item[1] - ((item[1] / 100) * 5))
+                            extended_upper = three_sigma_upper
+                        if drop_expected_range:
+                            use_extended = False
+                            if last_breach_vector == 'positive':
+                                extended_lower = three_sigma_lower - (three_sigma_upper * 0.1)
+                                extended_upper = item[1] - (item[1] * 0.1)
+                            if last_breach_vector == 'negative':
+                                extended_lower = three_sigma_lower - (three_sigma_lower * 0.1)
+                                extended_upper = item[1] + (item[1] * 0.1)
+                    else:
+                        extended_lower = three_sigma_lower
+                        extended_upper = three_sigma_upper
+                        if drop_expected_range:
+                            use_extended = False
+                            if last_breach_vector == 'positive':
+                                extended_lower = three_sigma_lower - (three_sigma_upper * 0.1)
+                                extended_upper = item[1] - (item[1] * 0.1)
+                            if last_breach_vector == 'negative':
+                                extended_lower = three_sigma_lower - (three_sigma_lower * 0.1)
+                                extended_upper = item[1] + (item[1] * 0.1)
+                else:
+                    extended_lower = three_sigma_lower
+                    extended_upper = three_sigma_upper
+                    if drop_expected_range:
+                        use_extended = False
+                        if last_breach_vector == 'positive':
+                            extended_lower = three_sigma_lower - (three_sigma_upper * 0.1)
+                            extended_upper = item[1] - (item[1] * 0.1)
+                        if last_breach_vector == 'negative':
+                            extended_lower = three_sigma_lower - (three_sigma_lower * 0.1)
+                            extended_upper = item[1] + (item[1] * 0.1)
+                # extended_values.append([extended_lower, extended_upper])
+                lower = extended_lower
+                upper = extended_upper
+                if index in sorted(list(set(anomalous_period_indices))):
+                    if index in anomalies_indices:
+                        continue
+                    for idx in anomaly_timestamps_indices:
+                        if (index + 3) == idx:
+                            a_top = extended_upper + (extended_upper * 0.1)
+                            top.append(a_top)
+                            a_bottom = extended_lower - (extended_lower * 0.1)
+                            bottom.append(a_bottom)
+                            a_left = item[0]
+                            left.append(a_left)
+                        if (index - 4) == idx:
+                            a_right = item[0]
+                            right.append(a_right)
+
                 # @modified 20201126 - Feature #3850: webapp - yhat_values API endoint
                 # Change dict key to int not float
                 int_ts = int(ts)
@@ -830,7 +1037,12 @@ def get_yhat_values(
                     yhat_dict[int_ts]['mean'] = va_mean
                 if include_mean:
                     yhat_dict[int_ts]['mean'] = va_mean
-                yhat_lower = va_mean - va_std_3
+
+                # @modified 20210201 - Task #3958: Handle secondary algorithms in yhat_values
+                # yhat_lower = va_mean - va_std_3
+                yhat_lower = lower
+                yhat_upper = upper
+
                 if include_yhat_real_lower:
                     # @modified 20201202 - Feature #3850: webapp - yhat_values API endoint
                     # Set the yhat_real_lower correctly
@@ -841,7 +1053,17 @@ def get_yhat_values(
                     else:
                         yhat_dict[int_ts]['yhat_real_lower'] = yhat_lower
                 yhat_dict[int_ts]['yhat_lower'] = yhat_lower
+                # @modified 20210201 - Task #3958: Handle secondary algorithms in yhat_values
                 yhat_dict[int_ts]['yhat_upper'] = va_mean + va_std_3
+                yhat_dict[int_ts]['yhat_upper'] = upper
+                # @added 20210201 - Task #3958: Handle secondary algorithms in yhat_values
+                if use_extended:
+                    if yhat_lower != three_sigma_lower:
+                        yhat_dict[int_ts]['3sigma_lower'] = three_sigma_lower
+                    if yhat_upper != three_sigma_upper:
+                        yhat_dict[int_ts]['3sigma_upper'] = three_sigma_upper
+                if include_anomalous_periods:
+                    yhat_dict[int_ts]['anomalous_period'] = anomalous_period
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: get_yhat_values :: failed create yhat_dict for %s' % (
@@ -862,4 +1084,26 @@ def get_yhat_values(
             logger.error(traceback.format_exc())
             logger.error('error :: get_yhat_values :: failed to setex Redis key - %s' % yhat_dict_cache_key)
 
-    return yhat_dict
+    # @added 20210126 - Task #3958: Handle secondary algorithms in yhat_values
+    # Add rectangle coordinates that describe anomalous periods
+    anomalous_periods_dict['rectangles'] = {}
+    anomalous_periods_dict['rectangles']['top'] = top
+    anomalous_periods_dict['rectangles']['bottom'] = bottom
+    anomalous_periods_dict['rectangles']['left'] = left
+    anomalous_periods_dict['rectangles']['right'] = right
+    if anomalous_periods_dict:
+        yhat_anomalous_periods_dict_cache_key = 'webapp.%s.%s.%s.%s.%s.%s.anomalous_periods' % (
+            metric, str(from_timestamp), str(until_timestamp),
+            str(include_value), str(include_mean),
+            str(include_yhat_real_lower))
+        logger.info('get_yhat_values :: saving yhat_dict to Redis key - %s' % yhat_anomalous_periods_dict_cache_key)
+        try:
+            REDIS_CONN.setex(yhat_anomalous_periods_dict_cache_key, 14400, str(yhat_anomalous_periods_dict_cache_key))
+            logger.info('get_yhat_values :: created Redis key - %s with 14400 TTL' % yhat_anomalous_periods_dict_cache_key)
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: get_yhat_values :: failed to setex Redis key - %s' % yhat_dict_cache_key)
+
+    # @modified 20210201 - Task #3958: Handle secondary algorithms in yhat_values
+    # return yhat_dict
+    return yhat_dict, anomalous_periods_dict

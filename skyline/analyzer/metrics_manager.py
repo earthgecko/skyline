@@ -192,6 +192,16 @@ if HORIZON_SHARDS:
     number_of_horizon_shards = len(HORIZON_SHARDS)
     HORIZON_SHARD = HORIZON_SHARDS[this_host]
 
+# @added 20210202 - Feature #3934: ionosphere_performance
+try:
+    IONOSPHERE_PERFORMANCE_DATA_POPULATE_CACHE = settings.IONOSPHERE_PERFORMANCE_DATA_POPULATE_CACHE
+except:
+    IONOSPHERE_PERFORMANCE_DATA_POPULATE_CACHE = False
+try:
+    IONOSPHERE_PERFORMANCE_DATA_POPULATE_CACHE_DEPTH = int(settings.IONOSPHERE_PERFORMANCE_DATA_POPULATE_CACHE_DEPTH)
+except:
+    IONOSPHERE_PERFORMANCE_DATA_POPULATE_CACHE_DEPTH = 0
+
 skyline_app_graphite_namespace = 'skyline.%s%s' % (skyline_app, SERVER_METRIC_PATH)
 
 full_uniques = '%sunique_metrics' % settings.FULL_NAMESPACE

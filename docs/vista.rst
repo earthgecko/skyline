@@ -37,6 +37,12 @@ This will result in a new metric in Graphite named
 `vista.stats.cumulative.procs_running`, that will have its own time series data
 for seasonal analysis, correlation and visualisation.
 
+.. note:: If you create a metric from a Graphite function/s on metrics your
+  ``populate_at_resolutions`` tuple should be only be set to the duration of the
+  first Graphite retention.  A metric created from function/s over metrics from
+  aggregated data retentions will not have the result a user may expect as the
+  function is applied to the aggregated values.
+
 Important note - Intended use
 -----------------------------
 
@@ -250,8 +256,8 @@ The setting consists of a tuple of tuples, like the Analyzer
     VISTA_FETCH_METRICS = (
         # (remote_host, remote_host_type, frequency, remote_target, graphite_target, uri, namespace_prefix, api_key, token, user, password, (populate_at_resolution_1, populate_at_resolution_2, ...)),
         # Example with no authentication
-        ('https://graphite.example.org', 'graphite', 60, 'stats.web01.cpu.user', 'stats.web01.cpu.user', '/render/?from=-10minutes&format=json&target=', 'vista.graphite_example_org', None, None, None, None, ('90days', '7days', '24hours', '6hours')),
-        ('https://graphite.example.org', 'graphite', 60, 'sumSeries(stats.*.cpu.user)', 'stats.cumulative.cpu.user', '/render/?from=-10minutes&format=json&target=', 'vista.graphite_example_org', None, None, None, None, ('90days', '7days', '24hours', '6hours')),
+        ('https://graphite.example.org', 'graphite', 60, 'stats.web01.cpu.user', 'stats.web01.cpu.user', '/render/?from=-10minutes&until=-1minutes&format=json&target=', 'vista.graphite_example_org', None, None, None, None, ('90days', '7days', '24hours', '6hours')),
+        ('https://graphite.example.org', 'graphite', 60, 'sumSeries(stats.*.cpu.user)', 'stats.cumulative.cpu.user', '/render/?from=-24hours&until=-1minutes&format=json&target=', 'vista.graphite_example_org', None, None, None, None, ('6days')),
         ('https://graphite.example.org', 'graphite', 3600, 'swell.tar.hm0', 'swell.tar.hm0', '/render/?from=-120minutes&format=json&target=', 'graphite_example_org', None, None, None, None, ('90days', '7days', '24hours', '6hours')),
         ('http://prometheus.example.org:9090', 'prometheus', 60, 'node_load1', 'node_load1', 'default', 'vista.prometheus_example_org', None, None, None, None, , ('15d')),
         ('http://prometheus.example.org:9090', 'prometheus', 60, 'node_network_transmit_bytes_total{device="eth0"}', 'node_network_transmit_bytes_total.eth0', 'default', 'vista.prometheus_example_org', None, None, None, None, , ('15d',)),
