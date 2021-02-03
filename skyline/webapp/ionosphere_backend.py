@@ -6696,13 +6696,13 @@ def get_ionosphere_performance(
                 # @added 20210203 - Feature #3934: ionosphere_performance
                 # Handle user timezone
                 if timezone_str != 'UTC':
-                    logger.info('get_ionosphere_performance - determining %s datetime from UTC start_timestamp - %s' % (timezone_str, str(start_timestamp)))
-                    from_timestamp_datetime_obj = datetime.datetime.strptime(start_timestamp, '%Y-%m-%d %H:%M:%S')
+                    logger.info('get_ionosphere_performance - determining %s datetime from UTC start_timestamp_str - %s' % (timezone_str, str(start_timestamp_str)))
+                    from_timestamp_datetime_obj = datetime.datetime.strptime(start_timestamp_str, '%Y-%m-%d %H:%M:%S')
                     logger.info('get_ionosphere_performance - from_timestamp_datetime_obj - %s' % str(from_timestamp_datetime_obj))
                     tz_offset = pytz.timezone(timezone_str).localize(from_timestamp_datetime_obj).strftime('%z')
-                    tz_from_date = '%s %s' % (from_timestamp, tz_offset)
+                    tz_from_date = '%s %s' % (start_timestamp_str, tz_offset)
                     logger.info('get_ionosphere_performance - tz_from_date - %s' % str(tz_from_date))
-                    tz_from_timestamp_datetime_obj = datetime.datetime.strptime(tz_from_date, '%Y%m%d %H:%M:%S %z')
+                    tz_from_timestamp_datetime_obj = datetime.datetime.strptime(tz_from_date, '%Y-%m-%d %H:%M:%S %z')
                     begin_date = tz_from_timestamp_datetime_obj.strftime('%Y-%m-%d')
                     logger.info('get_ionosphere_performance - begin_date with %s timezone applied - %s' % (timezone_str, str(begin_date)))
 
@@ -6745,13 +6745,13 @@ def get_ionosphere_performance(
                     # @added 20210203 - Feature #3934: ionosphere_performance
                     # Handle user timezone
                     if timezone_str != 'UTC':
-                        logger.info('get_ionosphere_performance - determining %s datetime from UTC start_timestamp - %s' % (timezone_str, str(start_timestamp)))
-                        from_timestamp_datetime_obj = datetime.datetime.strptime(start_timestamp, '%Y-%m-%d %H:%M:%S')
+                        logger.info('get_ionosphere_performance - determining %s datetime from UTC start_timestamp_str - %s' % (timezone_str, str(start_timestamp_str)))
+                        from_timestamp_datetime_obj = datetime.datetime.strptime(start_timestamp_str, '%Y-%m-%d %H:%M:%S')
                         logger.info('get_ionosphere_performance - from_timestamp_datetime_obj - %s' % str(from_timestamp_datetime_obj))
                         tz_offset = pytz.timezone(timezone_str).localize(from_timestamp_datetime_obj).strftime('%z')
-                        tz_from_date = '%s %s' % (from_timestamp, tz_offset)
+                        tz_from_date = '%s %s' % (start_timestamp_str, tz_offset)
                         logger.info('get_ionosphere_performance - tz_from_date - %s' % str(tz_from_date))
-                        tz_from_timestamp_datetime_obj = datetime.datetime.strptime(tz_from_date, '%Y%m%d %H:%M:%S %z')
+                        tz_from_timestamp_datetime_obj = datetime.datetime.strptime(tz_from_date, '%Y-%m-%d %H:%M:%S %z')
                         begin_date = tz_from_timestamp_datetime_obj.strftime('%Y-%m-%d')
                         logger.info('get_ionosphere_performance - begin_date with %s timezone applied - %s' % (timezone_str, str(begin_date)))
 
