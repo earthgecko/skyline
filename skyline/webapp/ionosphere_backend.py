@@ -6452,6 +6452,11 @@ def get_ionosphere_performance(
     user_timezone = pytz.timezone(timezone_str)
     utc_timezone = pytz.timezone('UTC')
 
+    # @added 20210203 - Feature #3934: ionosphere_performance
+    # Add default timestamp
+    start_timestamp = 0
+    end_timestamp = 0
+
     if from_timestamp == 0:
         start_timestamp = 0
         determine_start_timestamp = True
@@ -6477,6 +6482,10 @@ def get_ionosphere_performance(
                 logger.info('get_ionosphere_performance - new_from_timestamp - %s' % str(new_from_timestamp))
                 determine_timezone_start_date = True
             start_timestamp = int(new_from_timestamp)
+        # @added 20210203 - Feature #3934: ionosphere_performance
+        # Add default timestamp
+        else:
+            start_timestamp = int(from_timestamp)
         if from_timestamp == 'all':
             start_timestamp = 0
             determine_start_timestamp = True
@@ -6494,6 +6503,10 @@ def get_ionosphere_performance(
                 new_from_timestamp = tz_epoch_timestamp
                 # new_from_timestamp = time.mktime(datetime.datetime.strptime(tz_until_timestamp, '%Y%m%d %H:%M:%S %z').timetuple())
             end_timestamp = int(new_until_timestamp)
+        # @added 20210203 - Feature #3934: ionosphere_performance
+        # Add default timestamp
+        else:
+            end_timestamp = int(until_timestamp)
 
     determine_timezone_end_date = False
     if until_timestamp == 'all':
@@ -7432,8 +7445,10 @@ def get_ionosphere_performance(
     if len(performance_df) > 0:
         logger.info('get_ionosphere_performance - final step of creating performance_df with %s columns' % str(len(performance_df.columns)))
         logger.info('get_ionosphere_performance - columns - %s' % str(performance_df.columns))
+        # @modified 20210203 - Feature #3934: ionosphere_performance
+        # Correct conditional operator
         # performance_df = performance_df[(performance_df.index > begin_date) & (performance_df.index <= end_date)]
-        performance_df = performance_df[(performance_df.index > original_begin_date) & (performance_df.index <= use_end_date)]
+        performance_df = performance_df[(performance_df.index >= original_begin_date) & (performance_df.index <= use_end_date)]
         performance_df = performance_df.dropna(how='any')
 
     plot_png = None
@@ -7485,13 +7500,24 @@ def get_ionosphere_performance(
         plot_done = False
         if 'fps_total_count' in performance_df.columns and report_total_fps:
             import matplotlib.pyplot as plt
+
+            # @added 20210203 - Feature #3934: ionosphere_performance
+            # Correct axes labels
+            ylabel = 'Anomalies and matches'
+            if 'new_fps_count' in performance_df.columns:
+                ylabel = 'Anomalies, new fps and matches'
+
             plt.figure()
             ax = performance_df.plot(
                 secondary_y=['fps_total_count'],
                 figsize=(width, height), title=plot_title, linewidth=1,
                 style=style)
-            ax.set_ylabel('Total fps')
-            # ax.right_ax.set_ylabel('Anomalies, new fps and matches')
+            # @modified 20210203 - Feature #3934: ionosphere_performance
+            # Correct axes labels
+            # ax.set_ylabel('Total fps')
+            # # ax.right_ax.set_ylabel('Anomalies, new fps and matches')
+            ax.set_ylabel(ylabel)
+            ax.right_ax.set_ylabel('Total features profiles', rotation=-90)
             plt.savefig(plot_png)
             plot_done = True
 
