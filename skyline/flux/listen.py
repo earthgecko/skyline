@@ -316,7 +316,7 @@ class MetricData(object):
                     # @modified 20200206 - Feature #3444: Allow flux to backfill
                     # Only valid_timestamp is this is not a backfill request
                     if not backfill:
-                        valid_timestamp = validate_timestamp('listen :: MetricData GET', str(request_param_value))
+                        valid_timestamp = validate_timestamp('listen :: MetricData GET - parameter - %s', str(request_param_value))
                     else:
                         valid_timestamp = True
                     if valid_timestamp:
@@ -718,7 +718,7 @@ class MetricDataPost(object):
                     # @modified 20200206 - Feature #3444: Allow flux to backfill
                     # Only valid_timestamp is this is not a backfill request
                     if not backfill:
-                        valid_timestamp = validate_timestamp('listen :: MetricDataPOST POST', str(postData['timestamp']))
+                        valid_timestamp = validate_timestamp('listen :: MetricDataPOST POST - timestamp - %s', str(postData['timestamp']))
                     else:
                         valid_timestamp = True
                     if valid_timestamp:

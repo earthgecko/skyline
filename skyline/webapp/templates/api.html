@@ -744,6 +744,51 @@ Or if no metrics if no metrics are Ionosphere enabled metrics <code>{"data":{"me
 		    </tbody>
 		  </table>
 
+	  <h4><span class="logo"><span class="sky">API method ::</span> <span class="re">/api?last_analyzed_timestamp</span></span></h4>
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Name</th>
+  		        <th>Description</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+  		        <td>Description:</td>
+  		        <td>Returns the last timestamp that Analyzer analysed for a metric.</br>
+                  If a timestamp for the metric does not exist the request is responded to with HTTP status code <code>400</code>
+              </td>
+  		      </tr>
+  		      <tr>
+  		        <td>Endpoint:</td>
+  		        <td><a target='_blank' href="/api?last_analyzed_timestamp">/api?last_analyzed_timestamp</a></td>
+  		      </tr>
+  		      <tr>
+  		        <td>Method:</td>
+  		        <td>GET</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Parameters:</td>
+  		        <td>metric=[metric_name | str | <font color=red>required</font>]</br>
+              </td>
+  		      </tr>
+  		      <tr>
+  		        <td>Request example:</td>
+		          <td><code>/api?last_analyzed_timestamp&metric=stats.statsd.graphiteStats.calculationtime</code></br>
+		          <td><code>/api?last_analyzed_timestamp&metric=stats.statsd.graphiteStats.calculationtime&cluster_data=true</code> [optional for clustered Skyline]
+              </td>
+  		      </tr>
+  		      <tr>
+  		        <td>Response:</td>
+  		        <td>200 - json response, example
+                  <code>
+{"data":{"last_analyzed_timestamp":1613564520,"metric":"stats.statsd.graphiteStats.calculationtime"},"status":{"cluster_data":true,"remote_data":false,"request_time":0.001747,"response":200}}
+</code><br>
+              </td>
+  		      </tr>
+		    </tbody>
+		  </table>
+
 	  <h4><span class="logo"><span class="sky">API method ::</span> <span class="re">/api?mirage_metrics</span></span></h4>
   		  <table class="table table-hover">
   		    <thead>

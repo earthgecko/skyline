@@ -372,6 +372,12 @@ except:
 ionosphere_dir = path.dirname(settings.IONOSPHERE_DATA_FOLDER)
 performance_dir = '%s/performance' % (ionosphere_dir)
 
+# @added 20210209 - Feature #1448: Crucible web UI
+try:
+    crucible_jobs_dir = '%s/jobs' % path.dirname(settings.CRUCIBLE_DATA_FOLDER)
+except:
+    crucible_jobs_dir = '/opt/skyline/crucible/jobs'
+
 
 @app.before_request
 # def setup_logging():
@@ -704,6 +710,59 @@ def api():
         except:
             logger.error('error :: /api request with invalid cluster_data argument')
             return 'Bad Request', 400
+
+    # @added 20210211 - Feature - last_analyzed_timestamp
+    # @added 20210211 - Feature #3968: webapp - last_analyzed_timestamp API endpoint
+    if 'last_analyzed_timestamp' in request.args:
+        logger.info('/api?last_analyzed_timestamp')
+        start_last_analyzed_timestamp = timer()
+        try:
+            metric = request.args.get('metric')
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: /api?yhat_values request with invalid metric argument')
+            metric = None
+        if not metric:
+            data_dict = {"status": {"error": "no metric passed"}}
+            return jsonify(data_dict), 400
+        redis_hash_key = 'analyzer.metrics.last_analyzed_timestamp'
+        last_analyzed_timestamp = 0
+        try:
+            last_analyzed_timestamp = REDIS_CONN.hget(redis_hash_key, metric)
+        except Exception as e:
+            logger.error(traceback.format_exc())
+            logger.error('error :: /api?last_analyzed_timestamp fail to query Redis hash key %s for %s' % (redis_hash_key, metric))
+            last_analyzed_timestamp = None
+        if not last_analyzed_timestamp:
+            redis_hash_key = 'analyzer.low_priority_metrics.last_analyzed_timestamp'
+            redis_metric_name = '%s%s' % (settings.FULL_NAMESPACE, metric)
+            try:
+                last_analyzed_timestamp = REDIS_CONN.hget(redis_hash_key, redis_metric_name)
+            except Exception as e:
+                logger.error(traceback.format_exc())
+                logger.error('error :: /api?last_analyzed_timestamp fail to query Redis hash key %s for %s' % (redis_hash_key, redis_metric_name))
+                last_analyzed_timestamp = None
+        if last_analyzed_timestamp:
+            end_last_analyzed_timestamp = timer()
+            last_analyzed_timestamp_time = '%.6f' % (end_last_analyzed_timestamp - start_last_analyzed_timestamp)
+            data_dict = {"status": {"cluster_data": cluster_data, "remote_data": False, "request_time": float(last_analyzed_timestamp_time), "response": 200}, "data": {"metric": metric, "last_analyzed_timestamp": int(last_analyzed_timestamp)}}
+            return jsonify(data_dict), 200
+        remote_last_analyzed_timestamp = None
+        if settings.REMOTE_SKYLINE_INSTANCES and cluster_data:
+            last_analyzed_timestamp_uri = 'last_analyzed_timestamp&metric=%s' % metric
+            try:
+                remote_last_analyzed_timestamp = get_cluster_data(last_analyzed_timestamp_uri, 'last_analyzed_timestamp')
+            except Exception as e:
+                logger.error('error :: /api?last_analyzed_timestamp fail to get last_analyzed_timestamp for %s from other cluster nodes - %s' % (metric, e))
+        end_last_analyzed_timestamp = timer()
+        last_analyzed_timestamp_time = '%.6f' % (end_last_analyzed_timestamp - start_last_analyzed_timestamp)
+        if remote_last_analyzed_timestamp:
+            status_code = 200
+            data_dict = {"status": {"cluster_data": cluster_data, "remote_data": True, "request_time": float(last_analyzed_timestamp_time), "response": 200}, "data": {"metric": metric, "last_analyzed_timestamp": int(remote_last_analyzed_timestamp)}}
+        else:
+            status_code = 400
+            data_dict = {"status": {"cluster_data": cluster_data, "remote_data": False, "request_time": float(last_analyzed_timestamp_time), "reason": "no last analyzed timestamp found for the named metric, does not exist", "response": 400}, "data": {"metric": metric, "last_analyzed_timestamp": None}}
+        return jsonify(data_dict), status_code
 
     # @added 20201213 - Feature #3890: metrics_manager - sync_cluster_files
     if 'expected_features_profiles_dir' in request.args:
@@ -6066,6 +6125,8 @@ def ionosphere_images():
                     settings.IONOSPHERE_PROFILES_FOLDER,
                     # @added 20210112 - Feature #3934: ionosphere_performance
                     performance_dir,
+                    # @added 20210209 - Feature #1448: Crucible web UI
+                    crucible_jobs_dir,
                 ]
                 allowed_path = False
                 for allowed_image_path in IONOSPHERE_IMAGE_ALLOWED_PATHS:
