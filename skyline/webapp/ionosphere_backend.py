@@ -6485,10 +6485,18 @@ def get_ionosphere_performance(
         # @added 20210203 - Feature #3934: ionosphere_performance
         # Add default timestamp
         else:
-            start_timestamp = int(from_timestamp)
+            if from_timestamp == 'all':
+                start_timestamp = 0
+                determine_start_timestamp = True
+            else:
+                start_timestamp = int(from_timestamp)
         if from_timestamp == 'all':
             start_timestamp = 0
             determine_start_timestamp = True
+    if from_timestamp == 'all':
+        start_timestamp = 0
+        determine_start_timestamp = True
+
     if until_timestamp and until_timestamp != 'all':
         if ":" in until_timestamp:
             if timezone_str == 'UTC':
@@ -6506,7 +6514,10 @@ def get_ionosphere_performance(
         # @added 20210203 - Feature #3934: ionosphere_performance
         # Add default timestamp
         else:
-            end_timestamp = int(until_timestamp)
+            if until_timestamp == 'all':
+                end_timestamp = int(time.time())
+            else:
+                end_timestamp = int(until_timestamp)
 
     determine_timezone_end_date = False
     if until_timestamp == 'all':
