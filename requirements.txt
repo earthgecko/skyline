@@ -26,7 +26,7 @@ python-dateutil==2.8.1
 pytz==2020.5
 cycler==0.10.0
 pyparsing==2.4.7
-Pillow==8.1.0
+Pillow==8.1.1
 matplotlib==3.3.3
 pandas==1.2.0
 patsy==0.5.1
@@ -48,6 +48,10 @@ SQLAlchemy==1.3.22
 pymemcache==3.4.0
 PyJWT==1.7.1
 git+git://github.com/earthgecko/luminol@2de3fb2#egg=luminol
+# @added 20210305 - Support #3974: SNYK-PYTHON-AIOHTTP-1079232
+# Open Redirect in aiohttp@3.7.3 introduced by slackclient@2.9.3 > aiohttp@3.7.3
+# When slackclient requires aiohttp>=3.7.4 this can be removed
+aiohttp==3.7.4
 slackclient==2.9.3
 urllib3==1.26.2
 graphyte==1.6.0

@@ -283,7 +283,10 @@ pyparsing==2.4.7
 # https://github.com/python-pillow/Pillow/pull/5174 which fixes CVE-2020-35653
 # and CVE-2020-35655
 # When matplotlib requires >=8.1.0 this Pillow==8.1.0 can be removed
-Pillow==8.1.0
+# @modified 20210305 - Support #3972: SNYK-PYTHON-PILLOW-1080635
+# When matplotlib requires >=8.1.1 this Pillow==8.1.1 can be removed
+#Pillow==8.1.0
+Pillow==8.1.1
 
 # @modified 20160820 - Issue #23 Test dependency updates
 #matplotlib==1.5.1
@@ -626,6 +629,11 @@ git+git://github.com/earthgecko/luminol@2de3fb2#egg=luminol
 # @modified 20201229 - Task #3898: Test Python 3.8.6 and deps
 #slackclient==2.7.2
 slackclient==2.9.3
+
+# @added 20210305 - Support #3974: SNYK-PYTHON-AIOHTTP-1079232
+# Open Redirect in aiohttp@3.7.3 introduced by slackclient@2.9.3 > aiohttp@3.7.3
+# When slackclient requires aiohttp>=3.7.4 this can be removed
+aiohttp==3.7.4
 
 # @added 20190412 - Task #2926: Update dependencies
 # Added to address CVE-2018-20060 as is required by requests at >=1.21.1,<1.25
