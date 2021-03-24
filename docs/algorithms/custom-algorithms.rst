@@ -24,10 +24,10 @@ file.
 .. warning:: **A note on speed**, bear in mind that any custom algorithms added
   have to run **FAST**, otherwise analysis stops being real time and the
   Skyline apps will terminate their own spawned processes if they run too long.
-  Consider that Skyline's three-sigma algorithms take on average 0.0023 seconds to
-  run and all 9 are run on a metric in about 0.0207 seconds.  Adding any
-  algorithms that run substantially slower is **not** recommended, even if it is
-  on a small set of metrics.  Any algorithms added to should be as
+  Consider that Skyline's three-sigma triggered algorithms take on average
+  0.0023 seconds to run and all 9 are run on a metric in about 0.0207 seconds.
+  Adding any algorithms that run substantially slower is **not** recommended,
+  even if it is on a small set of metrics.  Any algorithms added to should be as
   computationally efficient as possible and suitable for processing real time
   streaming data, e.g. O(n).  This is especially true for any custom algorithms
   added to Analyzer.  This is not a hard requirement, just a recommendation.
@@ -219,7 +219,7 @@ Custom algorithm requirements
 
 - Must be written in Python
 - Must import all modules and classes it requires.
-- The algorithm must have four parameters, e.g.
+- The algorithm must have the following four parameters, e.g.
 
 .. code-block:: python
 

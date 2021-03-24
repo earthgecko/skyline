@@ -881,6 +881,39 @@ class Metrics_Manager(Thread):
             unique_base_names.append(base_name)
         logger.info('metrics_manager :: created unique_base_names list of %s metrics' % str(len(unique_base_names)))
 
+        # @added 20210308 - Feature #3978: luminosity - classify_metrics
+        #                  Feature #3642: Anomaly type classification
+        # Make a Redis set of unique_base_names for other apps to use
+        if unique_base_names:
+            logger.info('metrics_manager :: recreating the analyzer.unique_base_names set')
+            try:
+                self.redis_conn.sadd('new_analyzer.unique_base_names', *set(unique_base_names))
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: metrics_manager :: failed to add multiple members to the new_analyzer.unique_base_names Redis set')
+            try:
+                self.redis_conn.delete('new_analyzer.unique_base_names.old')
+            except:
+                pass
+            try:
+                self.redis_conn.rename('analyzer.unique_base_names', 'analyzer.unique_base_names.old')
+            except:
+                pass
+            try:
+                self.redis_conn.rename('new_analyzer.unique_base_names', 'analyzer.unique_base_names')
+            except:
+                pass
+            try:
+                self.redis_conn.delete('unique_base_names.old')
+            except:
+                pass
+            try:
+                self.redis_conn.sunionstore('aet.analyzer.unique_base_names', 'analyzer.unique_base_names')
+                logger.info('metrics_manager :: copied Redis set analyzer.unique_base_names to aet.analyzer.unique_base_names via sunion')
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to copy Redis set analyzer.unique_base_names to aet.analyzer.unique_base_names via sunion')
+
         #####
         # Check whether any internal or external alert settings have been changed
         # if so do a full refresh

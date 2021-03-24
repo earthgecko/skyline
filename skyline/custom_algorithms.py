@@ -181,6 +181,10 @@ def run_custom_algorithm_on_timeseries(current_skyline_app, parent_pid, base_nam
     except:
         algorithm_parameters = {}
 
+    # @added 20210226 - Feature #3970: custom_algorithm - adtk_level_shift
+    # Add the metric name to the algorithm_parameters
+    algorithm_parameters['base_name'] = base_name
+
     max_execution_time = 0.05
     try:
         max_execution_time = float(custom_algorithm_dict['max_execution_time'])
@@ -204,8 +208,23 @@ def run_custom_algorithm_on_timeseries(current_skyline_app, parent_pid, base_nam
             start_debug_timer = timer()
         anomalous = None
         anomalyScore = None
+
+        # @aded 20210308 - Feature #3978: luminosity - classify_metrics
+        #                  Feature #3642: Anomaly type classification
+        # Allow for anomalies to be returned
+        anomalies = []
+        return_anomalies = False
         try:
-            anomalous, anomalyScore = use_custom_algorithm(current_skyline_app, parent_pid, timeseries, algorithm_parameters)
+            return_anomalies = algorithm_parameters['return_anomalies']
+        except:
+            return_anomalies = False
+
+        try:
+            if not return_anomalies:
+                anomalous, anomalyScore = use_custom_algorithm(current_skyline_app, parent_pid, timeseries, algorithm_parameters)
+            else:
+                anomalous, anomalyScore, anomalies = use_custom_algorithm(current_skyline_app, parent_pid, timeseries, algorithm_parameters)
+
             if debug_custom_algortihms:
                 end_debug_timer = timer()
                 if not current_logger:
@@ -226,7 +245,10 @@ def run_custom_algorithm_on_timeseries(current_skyline_app, parent_pid, base_nam
                         func_name, str(funcPid), custom_algorithm,
                         str(max_execution_time),
                         (end_debug_timer - start_debug_timer)))
-            return (None, None)
+            if not return_anomalies:
+                return (None, None)
+            else:
+                return (None, None, [])
         except:
             if not current_logger:
                 current_logger = get_log(current_skyline_app)
@@ -235,17 +257,35 @@ def run_custom_algorithm_on_timeseries(current_skyline_app, parent_pid, base_nam
             current_logger.error(
                 'error :: run_custom_algorithm_with_timeout :: pid %s, failed to evaluate time series with custom algorithm - %s' % (
                     str(funcPid), custom_algorithm))
-            return (None, None)
-        return (anomalous, anomalyScore)
+            if not return_anomalies:
+                return (None, None)
+            else:
+                return (None, None, [])
+
+        # return (anomalous, anomalyScore)
+        if not return_anomalies:
+            return (anomalous, anomalyScore)
+        else:
+            return (anomalous, anomalyScore, anomalies)
 
     if debug_logging or debug_custom_algortihms:
         current_logger.debug(
             'debug :: %s :: pid %s, running %s with run_custom_algorithm_with_timeout set to %s' % (
                 func_name, str(myPid), custom_algorithm, str(max_execution_time)))
         debug_custom_algortihms = True
+
+    return_anomalies = False
+    try:
+        return_anomalies = algorithm_parameters['return_anomalies']
+    except:
+        return_anomalies = False
+
     try:
         # anomalous, anomalyScore = use_custom_algorithm(current_skyline_app, timeseries, algorithm_parameters)
-        anomalous, anomalyScore = run_custom_algorithm_with_timeout(current_logger, custom_algorithm, use_custom_algorithm, current_skyline_app, parent_pid, timeseries, algorithm_parameters, debug_custom_algortihms, max_execution_time)
+        if not return_anomalies:
+            anomalous, anomalyScore = run_custom_algorithm_with_timeout(current_logger, custom_algorithm, use_custom_algorithm, current_skyline_app, parent_pid, timeseries, algorithm_parameters, debug_custom_algortihms, max_execution_time)
+        else:
+            anomalous, anomalyScore, anomalies = run_custom_algorithm_with_timeout(current_logger, custom_algorithm, use_custom_algorithm, current_skyline_app, parent_pid, timeseries, algorithm_parameters, debug_custom_algortihms, max_execution_time)
     except StopIteration:
         if not current_logger:
             current_logger = get_log(current_skyline_app)
@@ -259,15 +299,21 @@ def run_custom_algorithm_on_timeseries(current_skyline_app, parent_pid, base_nam
             'warning :: %s :: pid %s, terminated evaluation of time series after max_execution_time %s was reached (timeout) with custom algorithm - %s - loaded from algorithm_source file - %s' % (
                 func_name, str(myPid), str(max_execution_time),
                 custom_algorithm, str(algorithm_source)))
-        return (None, None)
-    except:
+        if not return_anomalies:
+            return (None, None)
+        else:
+            return (None, None, [])
+
         if not current_logger:
             current_logger = get_log(current_skyline_app)
         current_logger.error(traceback.format_exc())
         current_logger.error(
             'error :: %s :: pid %s, failed to evaluate time series with custom algorithm - %s - loaded from algorithm_source file - %s' % (
                 func_name, str(myPid), custom_algorithm, str(algorithm_source)))
-        return (None, None)
+        if not return_anomalies:
+            return (None, None)
+        else:
+            return (None, None, [])
 
     if debug_logging or debug_custom_algortihms:
         current_logger.debug(
@@ -275,4 +321,7 @@ def run_custom_algorithm_on_timeseries(current_skyline_app, parent_pid, base_nam
                 func_name, str(myPid), custom_algorithm, str(anomalous),
                 str(anomalyScore)))
 
-    return (anomalous, anomalyScore)
+    if not return_anomalies:
+        return (anomalous, anomalyScore)
+    else:
+        return (anomalous, anomalyScore, anomalies)

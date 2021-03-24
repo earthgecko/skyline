@@ -840,9 +840,9 @@ CUSTOM_ALGORITHMS = {}
     in the dictionary.  Read the full documentation referred to above to
     determine the effects of passing this as ``False``.
 : param run_before_3sigma: a boolean stating whether to run the custom algorithm
-  before the normal three-sigma algorithms, this defaults to ``True``.  If you
-  want your custom algorithm to run after the three-sigma algorithms set this to
-  ``False``.  Read the full documentation referred to above to determine the
+    before the normal three-sigma algorithms, this defaults to ``True``.  If you
+    want your custom algorithm to run after the three-sigma algorithms set this to
+    ``False``.  Read the full documentation referred to above to determine the
     effects of passing this as ``False``.
 :param run_only_if_consensus: a boolean stating whether to run the custom
     algorithm only if CONSENSUS or MIRAGE_CONSENSUS is achieved, it defaults to
@@ -2771,6 +2771,17 @@ LUMINOSITY_PROCESSES = 1
 """
 
 ENABLE_LUMINOSITY_DEBUG = False
+"""
+:var ENABLE_LUMINOSITY_DEBUG: To allow luminosity debug logging.
+:vartype ENABLE_LUMINOSITY_DEBUG: boolean
+"""
+
+LUMINOSITY_DATA_FOLDER = '/opt/skyline/luminosity'
+"""
+:var LUMINOSITY_DATA_FOLDER: This is the path for luminosity data where
+    classify_metrics plot images, etc are stored - absolute path.
+:vartype LUMINOSITY_DATA_FOLDER: str
+"""
 
 OTHER_SKYLINE_REDIS_INSTANCES = []
 """
@@ -2930,6 +2941,48 @@ result of both methods, meaning that a metric will be evaluated against both
 methods and the resulting list of metrics that it should be correlated against
 will be used.
 
+"""
+
+LUMINOSITY_CLASSIFY_METRICS_LEVEL_SHIFT = False
+"""
+:var LUMINOSITY_CLASSIFY_METRICS_LEVEL_SHIFT: ADVANCED FEATURE. Enable
+    luminosity/classify_metrics to identify metrics that experience significant
+    level shifts.
+:vartype LUMINOSITY_CLASSIFY_METRICS_LEVEL_SHIFT: boolean
+"""
+
+LUMINOSITY_LEVEL_SHIFT_SKIP_NAMESPACES = []
+"""
+:var LUMINOSITY_LEVEL_SHIFT_SKIP_NAMESPACES: namespace to skip level shift
+    classification.
+:vartype LUMINOSITY_LEVEL_SHIFT_SKIP_NAMESPACES: list
+
+These are metrics that you want luminosity to not attempt to classify as level
+shift metrics, generally sparsely populated namespaces. Works in the same way
+that SKIP_LIST works, it matches in the string or dotted namespace elements.
+"""
+
+LUMINOSITY_CLASSIFY_ANOMALIES = False
+"""
+:var LUMINOSITY_CLASSIFY_ANOMALIES: Whether to classify anomaly types.
+:vartype LUMINOSITY_CLASSIFY_ANOMALIES: boolean
+"""
+
+LUMINOSITY_CLASSIFY_ANOMALY_ALGORITHMS = [
+    'adtk_level_shift', 'adtk_volatility_shift', 'adtk_persist',
+    'adtk_seasonal',
+]
+"""
+:var LUMINOSITY_CLASSIFY_ANOMALY_ALGORITHMS: ADVANCED FEATURE. List of custom
+    algorithms to be used for classifying anomalies.
+:vartype LUMINOSITY_CLASSIFY_ANOMALIES: list
+"""
+
+LUMINOSITY_CLASSIFY_ANOMALIES_SAVE_PLOTS = False
+"""
+:var LUMINOSITY_CLASSIFY_ANOMALIES_SAVE_PLOTS: ADVANCED FEATURE. Whether to save
+    anomaly classification plots in the training data.
+:vartype LUMINOSITY_CLASSIFY_ANOMALIES_SAVE_PLOTS: boolean
 """
 
 """

@@ -552,7 +552,10 @@ def is_anomalously_anomalous(metric_name, ensemble, datapoint):
 # @modified 20200423 - Feature #3508: ionosphere.untrainable_metrics
 # Added run_negatives_present
 # def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seconds):
-def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seconds, run_negatives_present):
+# @modified 20210304 - Feature #3642: Anomaly type classification
+#                      Feature #3970: custom_algorithm - adtk_level_shift
+# Added triggered_algorithms
+def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seconds, run_negatives_present, triggered_algorithms):
     """
     Run selected algorithms
     """
@@ -594,6 +597,16 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
                 debug_logging = False
             if DEBUG_CUSTOM_ALGORITHMS:
                 debug_logging = True
+
+            # @modified 20210304 - Feature #3642: Anomaly type classification
+            #                      Feature #3970: custom_algorithm - adtk_level_shift
+            # Added triggered_algorithms
+            if custom_algorithm == 'adtk_level_shift':
+                if 'adtk_level_shift' not in triggered_algorithms:
+                    if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
+                        logger.debug('debug :: custom_algorithms :: NOT running custom algorithm %s on %s as was not in triggered_algorithms' % (
+                            str(custom_algorithm), str(base_name)))
+                    continue
 
             # @added 20201125 - Feature #3848: custom_algorithms - run_before_3sigma parameter
             run_before_3sigma = True

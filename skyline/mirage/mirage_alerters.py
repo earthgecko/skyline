@@ -176,7 +176,10 @@ except:
     DOCKER_FAKE_EMAIL_ALERTS = False
 
 
-def alert_smtp(alert, metric, second_order_resolution_seconds, context):
+# @modified 20210304 - Feature #3642: Anomaly type classification
+#                      Feature #3970: custom_algorithm - adtk_level_shift
+# Added triggered_algorithms
+def alert_smtp(alert, metric, second_order_resolution_seconds, context, triggered_algorithms):
     """
     Called by :func:`~trigger_alert` and sends an alert via smtp to the
     recipients that are configured for the metric.
@@ -1168,7 +1171,10 @@ def alert_smtp(alert, metric, second_order_resolution_seconds, context):
     return
 
 
-def alert_pagerduty(alert, metric, second_order_resolution_seconds, context):
+# @modified 20210304 - Feature #3642: Anomaly type classification
+#                      Feature #3970: custom_algorithm - adtk_level_shift
+# Added triggered_algorithms
+def alert_pagerduty(alert, metric, second_order_resolution_seconds, context, triggered_algorithms):
     """
     Called by :func:`~trigger_alert` and sends an alert via PagerDuty
     """
@@ -1214,7 +1220,10 @@ def alert_pagerduty(alert, metric, second_order_resolution_seconds, context):
         return False
 
 
-def alert_hipchat(alert, metric, second_order_resolution_seconds, context):
+# @modified 20210304 - Feature #3642: Anomaly type classification
+#                      Feature #3970: custom_algorithm - adtk_level_shift
+# Added triggered_algorithms
+def alert_hipchat(alert, metric, second_order_resolution_seconds, context, triggered_algorithms):
     """
     Called by :func:`~trigger_alert` and sends an alert the hipchat room that is
     configured in settings.py.
@@ -1276,7 +1285,10 @@ def alert_hipchat(alert, metric, second_order_resolution_seconds, context):
         return False
 
 
-def alert_syslog(alert, metric, second_order_resolution_seconds, context):
+# @modified 20210304 - Feature #3642: Anomaly type classification
+#                      Feature #3970: custom_algorithm - adtk_level_shift
+# Added triggered_algorithms
+def alert_syslog(alert, metric, second_order_resolution_seconds, context, triggered_algorithms):
     """
     Called by :func:`~trigger_alert` and logs anomalies to syslog.
 
@@ -1298,7 +1310,10 @@ def alert_syslog(alert, metric, second_order_resolution_seconds, context):
 
 
 # @added 20181006 - Feature #2618: alert_slack
-def alert_slack(alert, metric, second_order_resolution_seconds, context):
+# @modified 20210304 - Feature #3642: Anomaly type classification
+#                      Feature #3970: custom_algorithm - adtk_level_shift
+# Added triggered_algorithms
+def alert_slack(alert, metric, second_order_resolution_seconds, context, triggered_algorithms):
 
     if not settings.SLACK_ENABLED:
         logger.info('alert_slack - SLACK_ENABLED is False, not slack alerting for anomalous metric :: alert: %s, metric: %s' % (
@@ -1426,6 +1441,14 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context):
         slack_title = '*%s %s - ALERT* on %s at %s hours - derivative graph - %s' % (
             main_alert_title, alert_context, str(metric[1]), str(int(second_order_resolution_in_hours)),
             str(metric[0]))
+        # @added 20210304 - Feature #3642: Anomaly type classification
+        #                   Feature #3970: custom_algorithm - adtk_level_shift
+        # Added type
+        if 'adtk_level_shift' in triggered_algorithms:
+            slack_title = '*%s %s - Level shift ALERT* on %s at %s hours - derivative graph - %s' % (
+                main_alert_title, alert_context, str(metric[1]), str(int(second_order_resolution_in_hours)),
+                str(metric[0]))
+            logger.info('adtk_level_shift alert - %s' % slack_title)
     else:
         # @modified 20191008 - Feature #3194: Add CUSTOM_ALERT_OPTS to settings
         # unencoded_graph_title = 'Skyline %s - ALERT at %s hours - %s' % (
@@ -1440,6 +1463,15 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context):
         slack_title = '*%s %s - ALERT* on %s at %s hours - %s' % (
             main_alert_title, alert_context, str(metric[1]), str(int(second_order_resolution_in_hours)),
             str(metric[0]))
+
+        # @added 20210304 - Feature #3642: Anomaly type classification
+        #                      Feature #3970: custom_algorithm - adtk_level_shift
+        # Added type
+        if 'adtk_level_shift' in triggered_algorithms:
+            slack_title = '*%s %s - Level shit ALERT* on %s at %s hours - %s' % (
+                main_alert_title, alert_context, str(metric[1]), str(int(second_order_resolution_in_hours)),
+                str(metric[0]))
+            logger.info('adtk_level_shift alert - %s' % slack_title)
 
     # @added 20200907 - Feature #3734: waterfall alerts
     # Add waterfall alert to title
@@ -1950,7 +1982,10 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context):
 
 
 # @added 20200116: Feature #3396: http_alerter
-def alert_http(alert, metric, second_order_resolution_seconds, context):
+# @modified 20210304 - Feature #3642: Anomaly type classification
+#                      Feature #3970: custom_algorithm - adtk_level_shift
+# Added triggered_algorithms
+def alert_http(alert, metric, second_order_resolution_seconds, context, triggered_algorithms):
     """
     Called by :func:`~trigger_alert` and sends anomalies to a http endpoint.
 
@@ -2361,7 +2396,10 @@ def alert_http(alert, metric, second_order_resolution_seconds, context):
         return
 
 
-def trigger_alert(alert, metric, second_order_resolution_seconds, context):
+# @modified 20210304 - Feature #3642: Anomaly type classification
+#                      Feature #3970: custom_algorithm - adtk_level_shift
+# Added triggered_algorithms
+def trigger_alert(alert, metric, second_order_resolution_seconds, context, triggered_algorithms):
     """
     Called by :class:`~skyline.skyline.Mirage.run` to trigger an alert,
     Mirage passes two arguments, both of them tuples.  The alerting strategy
@@ -2398,7 +2436,10 @@ def trigger_alert(alert, metric, second_order_resolution_seconds, context):
         strategy = 'alert_%s' % alert[1]
 
     try:
-        getattr(mirage_alerters, strategy)(alert, metric, second_order_resolution_seconds, context)
+        # @modified 20210304 - Feature #3642: Anomaly type classification
+        #                      Feature #3970: custom_algorithm - adtk_level_shift
+        # Added triggered_algorithms
+        getattr(mirage_alerters, strategy)(alert, metric, second_order_resolution_seconds, context, triggered_algorithms)
     except:
         logger.error('error :: alerters - %s - getattr error' % strategy)
         logger.info(traceback.format_exc())

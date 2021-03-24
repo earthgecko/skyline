@@ -14,6 +14,9 @@ import os
 import traceback
 import json
 import requests
+
+from ast import literal_eval
+
 # @modified 20191025 - Task #3290: Handle urllib2 in py3
 #                      Branch #3262: py3
 # try:
@@ -654,11 +657,19 @@ def get_graphite_metric(
 #            import urllib.request
 #            import urllib.error
 
+    # @aded 20210309 - Feature #3978: luminosity - classify_metrics
+    #                  Feature #3642: Anomaly type classification
+    # Do not log luminosity classify_metrics calls unless error
+    write_to_log = True
+    if current_skyline_app == 'luminosity' and data_type == 'list' and output_object == 'object':
+        write_to_log = False
+
     current_skyline_app_logger = str(current_skyline_app) + 'Log'
     current_logger = logging.getLogger(current_skyline_app_logger)
 
 #    if settings.ENABLE_DEBUG:
-    current_logger.info('graphite_metric - %s' % (metric))
+    if write_to_log:
+        current_logger.info('get_graphite_metric :: graphite_metric - %s' % (metric))
 
     # @added 20160803 - Unescaped Graphite target - https://github.com/earthgecko/skyline/issues/20
     #                   bug1546: Unescaped Graphite target
@@ -672,21 +683,19 @@ def get_graphite_metric(
     # Graphite timeouts
     connect_timeout = int(settings.GRAPHITE_CONNECT_TIMEOUT)
     if settings.ENABLE_DEBUG:
-        current_logger.info('connect_timeout - %s' % str(connect_timeout))
-
-    current_logger.info('connect_timeout - %s' % str(connect_timeout))
+        current_logger.debug('debug :: get_graphite_metric :: connect_timeout - %s' % str(connect_timeout))
 
     read_timeout = int(settings.GRAPHITE_READ_TIMEOUT)
     if settings.ENABLE_DEBUG:
-        current_logger.info('read_timeout - %s' % str(read_timeout))
-
-    current_logger.info('read_timeout - %s' % str(read_timeout))
+        current_logger.debug('debug :: get_graphite_metric :: read_timeout - %s' % str(read_timeout))
 
     graphite_from = datetime.datetime.fromtimestamp(int(from_timestamp)).strftime('%H:%M_%Y%m%d')
-    current_logger.info('graphite_from - %s' % str(graphite_from))
+    if write_to_log:
+        current_logger.info('get_graphite_metric :: graphite_from - %s' % str(graphite_from))
 
     graphite_until = datetime.datetime.fromtimestamp(int(until_timestamp)).strftime('%H:%M_%Y%m%d')
-    current_logger.info('graphite_until - %s' % str(graphite_until))
+    if write_to_log:
+        current_logger.info('get_graphite_metric :: graphite_until - %s' % str(graphite_until))
 
     output_format = data_type
 
@@ -700,7 +709,7 @@ def get_graphite_metric(
         REDIS_CONN_DECODED = get_redis_conn_decoded(current_skyline_app)
     except:
         current_logger.error(traceback.format_exc())
-        current_logger.error('error :: %s :: get_graphite_metric - failed to get_redis_conn')
+        current_logger.error('error :: get_graphite_metric - failed to get_redis_conn_decoded')
 
 #    try:
 #        # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
@@ -757,11 +766,12 @@ def get_graphite_metric(
                     other_derivative_metrics = list(other_redis_conn.smembers('derivative_metrics'))
                 except:
                     current_logger.error(traceback.format_exc())
-                    current_logger.error('error :: failed to connect to Redis at %s on port %s' % (str(redis_ip), str(redis_port)))
+                    current_logger.error('error :: get_graphite_metric :: failed to connect to Redis at %s on port %s' % (str(redis_ip), str(redis_port)))
                 if redis_metric_name in other_derivative_metrics:
                     known_derivative_metric = True
                     metric_found_in_redis = True
-                    current_logger.info('%s found in derivative_metrics in Redis at %s on port %s' % (redis_metric_name, str(redis_ip), str(redis_port)))
+                    if write_to_log:
+                        current_logger.info('get_graphite_metric :: %s found in derivative_metrics in Redis at %s on port %s' % (redis_metric_name, str(redis_ip), str(redis_port)))
 
     target_metric = metric
     if known_derivative_metric:
@@ -789,7 +799,8 @@ def get_graphite_metric(
     else:
         url = image_url + '&format=' + output_format
 
-    current_logger.info('graphite url - %s' % (url))
+    if write_to_log:
+        current_logger.info('get_graphite_metric :: graphite url - %s' % (url))
 
     get_image = False
     if data_type == 'image' and output_object != 'object':
@@ -797,13 +808,14 @@ def get_graphite_metric(
             get_image = True
         else:
             if settings.ENABLE_DEBUG:
-                current_logger.info('graph file exists - %s' % str(output_object))
+                current_logger.debug('debug :: get_graphite_metric :: graph file exists - %s' % str(output_object))
             return True
 
     if get_image:
-        current_logger.info(
-            'retrieving png - surfacing %s graph from graphite from %s to %s' % (
-                metric, str(graphite_from), str(graphite_until)))
+        if write_to_log:
+            current_logger.info(
+                'get_graphite_metric :: retrieving png - surfacing %s graph from graphite from %s to %s' % (
+                    metric, str(graphite_from), str(graphite_until)))
 
         graphite_image_file = output_object
         if 'width' not in image_url:
@@ -871,10 +883,11 @@ def get_graphite_metric(
                 if 'matched.layers.fp_id' in output_object:
                     add_parameters = '%s&colorList=green%s' % (settings.GRAPHITE_GRAPH_SETTINGS, graph_title)
                 image_url += add_parameters
-                current_logger.info('Ionosphere graphite NOW url - %s' % (image_url))
+                if write_to_log:
+                    current_logger.info('get_graphite_metric :: Ionosphere graphite NOW url - %s' % (image_url))
 
         if settings.ENABLE_DEBUG:
-            current_logger.info('graphite image url - %s' % (str(image_url)))
+            current_logger.debug('debug :: get_graphite_metric :: graphite image url - %s' % (str(image_url)))
         # image_url_timeout = int(connect_timeout)
 
         image_data = None
@@ -904,7 +917,7 @@ def get_graphite_metric(
                 current_skyline_app, image_url, graphite_image_file)
         except:
             current_logger.error(traceback.format_exc())
-            fail_msg = 'error :: %s :: get_graphite_graph_image :: failed to get_graphite_graph_image(%s, %s, %s)' % (
+            fail_msg = 'error :: %s :: get_graphite_metric :: failed to get_graphite_graph_image(%s, %s, %s)' % (
                 str(current_skyline_app), str(url), str(graphite_image_file))
             current_logger.error(fail_msg)
 
@@ -912,7 +925,8 @@ def get_graphite_metric(
         if image_data == 'disabled_for_testing':
             with open(graphite_image_file, 'w') as f:
                 f.write(image_data)
-            current_logger.info('retrieved - %s' % (graphite_image_file))
+            if write_to_log:
+                current_logger.info('get_graphite_metric :: retrieved - %s' % (graphite_image_file))
             if python_version == 2:
                 os.chmod(graphite_image_file, 0o644)
             if python_version == 3:
@@ -922,7 +936,7 @@ def get_graphite_metric(
         #         'error :: failed to retrieve - %s' % (graphite_image_file))
 
         if not os.path.isfile(graphite_image_file):
-            msg = 'retrieve failed to surface %s graph from Graphite' % (metric)
+            msg = 'get_graphite_metric :: retrieve failed to surface %s graph from Graphite' % (metric)
             current_logger.error('error :: %s' % msg)
         # @added 20170107 - Feature #1842: Ionosphere - Graphite now graphs
         # In order to determine whether a Graphite image was retrieved or not
@@ -941,15 +955,16 @@ def get_graphite_metric(
             if os.path.isfile(output_object):
                 return True
 
-        msg = 'surfacing timeseries data for %s from graphite from %s to %s' % (
-            metric, graphite_from, graphite_until)
-        current_logger.info('%s' % msg)
+        if write_to_log:
+            msg = 'get_graphite_metric :: surfacing timeseries data for %s from graphite from %s to %s' % (
+                metric, graphite_from, graphite_until)
+            current_logger.info('%s' % msg)
         if requests.__version__ >= '2.4.0':
             use_timeout = (int(connect_timeout), int(read_timeout))
         else:
             use_timeout = int(connect_timeout)
         if settings.ENABLE_DEBUG:
-            current_logger.info('use_timeout - %s' % (str(use_timeout)))
+            current_logger.debug('debug :: get_graphite_metric :: use_timeout - %s' % (str(use_timeout)))
 
         # @added 20201009 - Feature #3780: skyline_functions - sanitise_graphite_url
         #                   Bug #3778: Handle single encoded forward slash requests to Graphite
@@ -962,17 +977,17 @@ def get_graphite_metric(
             graphite_json_fetched = True
         except:
             datapoints = [[None, str(graphite_until)]]
-            current_logger.error('error :: data retrieval from Graphite failed')
+            current_logger.error('error :: get_graphite_metric :: data retrieval from Graphite failed')
 
         if graphite_json_fetched:
             try:
                 js = r.json()
                 datapoints = js[0]['datapoints']
                 if settings.ENABLE_DEBUG:
-                    current_logger.info('data retrieved OK')
+                    current_logger.debug('debug :: get_graphite_metric :: data retrieved OK')
             except:
                 datapoints = [[None, str(graphite_until)]]
-                current_logger.error('error :: failed to parse data points from retrieved json')
+                current_logger.error('error :: get_graphite_metric :: failed to parse data points from retrieved json')
 
         converted = []
         for datapoint in datapoints:
@@ -992,7 +1007,7 @@ def get_graphite_metric(
             if python_version == 3:
                 os.chmod(output_object, mode=0o644)
             if settings.ENABLE_DEBUG:
-                current_logger.info('json file - %s' % output_object)
+                current_logger.debug('debug :: get_graphite_metric :: json file - %s' % output_object)
         else:
             if data_type == 'list':
                 return converted
@@ -1002,7 +1017,7 @@ def get_graphite_metric(
 
         if not os.path.isfile(output_object):
             current_logger.error(
-                'error :: failed to surface %s json from graphite' % (metric))
+                'error :: get_graphite_metric :: failed to surface %s json from graphite' % (metric))
             return False
         else:
             return True
@@ -2576,3 +2591,133 @@ def correlate_or_relate_with(current_skyline_app, metric, metric_to_correlate_or
     except:
         pass
     return False
+
+
+# @added 20210323 - Feature #3642: Anomaly type classification
+def get_anomaly_id(current_skyline_app, base_name, timestamp):
+    """
+    Given a base_name and timestamp, return the anomaly id
+
+    :param current_skyline_app: the Skyline app calling the function
+    :param base_name: the base_name of the metric in question
+    :param timestamp: the timestamp
+    :type current_skyline_app: str
+    :type base_name: str
+    :type timestamp: int
+    :return: id
+    :rtype: int
+
+    """
+
+    try:
+        current_skyline_app_logger = str(current_skyline_app) + 'Log'
+        current_logger = logging.getLogger(current_skyline_app_logger)
+    except:
+        pass
+
+    panorama_anomaly_id = 0
+    # Time shift the requested_timestamp by 120 seconds either way on the
+    # from_timestamp and until_timestamp parameter to account for any lag in the
+    # insertion of the anomaly by Panorama in terms Panorama only running every
+    # 60 second and Analyzer to Mirage to Ionosphere and back introduce
+    # additional lags.  Panorama will not add multiple anomalies from the same
+    # metric in the time window so there is no need to consider the possibility
+    # of there being multiple anomaly ids being returned.
+    grace_from_timestamp = int(timestamp) - 120
+    grace_until_timestamp = int(timestamp) + 120
+    url = '%s/panorama?metric=%s&from_timestamp=%s&until_timestamp=%s&panorama_anomaly_id=true' % (
+        settings.SKYLINE_URL, str(base_name), str(grace_from_timestamp),
+        str(grace_until_timestamp))
+    panorama_resp = None
+
+    # @added 20190519 - Branch #3002: docker
+    # Handle self signed certificate on Docker
+    verify_ssl = True
+    try:
+        running_on_docker = settings.DOCKER
+    except:
+        running_on_docker = False
+    if running_on_docker:
+        verify_ssl = False
+
+    # @added 20191029 - Branch #3262: py3
+    # Allow for the use of self signed SSL certificates even if not running on
+    # docker.
+    try:
+        overall_verify_ssl = settings.VERIFY_SSL
+    except:
+        overall_verify_ssl = True
+    if not overall_verify_ssl:
+        verify_ssl = False
+
+    if settings.WEBAPP_AUTH_ENABLED:
+        user = str(settings.WEBAPP_AUTH_USER)
+        password = str(settings.WEBAPP_AUTH_USER_PASSWORD)
+    try:
+        if settings.WEBAPP_AUTH_ENABLED:
+            r = requests.get(url, timeout=settings.GRAPHITE_READ_TIMEOUT, auth=(user, password), verify=verify_ssl)
+        else:
+            r = requests.get(url, timeout=settings.GRAPHITE_READ_TIMEOUT, verify=verify_ssl)
+        panorama_resp = True
+    except:
+        current_logger.error(traceback.format_exc())
+        current_logger.error('error :: get_anomaly_id :: failed to get anomaly id from panorama: %s' % str(url))
+    if panorama_resp:
+        try:
+            data = literal_eval(r.text)
+            if str(data) == '[]':
+                panorama_anomaly_id = 0
+            else:
+                panorama_anomaly_id = int(data[0][0])
+            current_logger.info('get_anomaly_id :: anomaly id: %s' % str(panorama_anomaly_id))
+        except:
+            current_logger.error(traceback.format_exc())
+            current_logger.error('error :: get_anomaly_id :: failed to get anomaly id from panorama response: %s' % str(r.text))
+    return panorama_anomaly_id
+
+
+# @added 20210324 - Feature #3642: Anomaly type classification
+def get_anomaly_type(current_skyline_app, anomaly_id):
+    """
+    Given an anomaly id return any classified types
+
+    :param current_skyline_app: the Skyline app calling the function
+    :param anomaly_id: the anomaly id
+    :type current_skyline_app: str
+    :type anomaly_id: int
+    :return: (anomaly_type_list, anomaly_type_id_list)
+    :rtype: tuple
+
+    """
+    anomaly_type_id_list = []
+    anomaly_type_list = []
+    try:
+        current_skyline_app_logger = str(current_skyline_app) + 'Log'
+        current_logger = logging.getLogger(current_skyline_app_logger)
+    except:
+        pass
+
+    anomaly_type_ids = None
+    query = 'SELECT type from anomalies_type WHERE id=%s' % str(anomaly_id)  # nosec
+    try:
+        result = mysql_select(current_skyline_app, query)
+        if result:
+            anomaly_type_ids = str(result[0][0])
+    except Exception as e:
+        current_logger.error('error :: get_anomaly_type :: failed to get anomaly type for anomaly id %s from the db: %s' % (
+            str(anomaly_id), str(e)))
+    if anomaly_type_ids:
+        anomaly_type_ids_str_list = anomaly_type_ids.split(',')
+        for anomaly_type_id in anomaly_type_ids_str_list:
+            anomaly_type_id_list.append(int(anomaly_type_id))
+    if anomaly_type_id_list:
+        query = 'SELECT id,algorithm,type FROM anomaly_types'
+        try:
+            results = mysql_select(current_skyline_app, query)
+        except:
+            current_logger.error(traceback.format_exc())
+            current_logger.error('error :: querying MySQL - SELECT id,type FROM anomaly_types')
+        for id, associated_algorithm, anomaly_type in results:
+            if int(id) in anomaly_type_id_list:
+                anomaly_type_list.append(anomaly_type)
+    return (anomaly_type_list, anomaly_type_id_list)
