@@ -1142,6 +1142,10 @@ def run_selected_algorithm(timeseries, metric_name, airgapped_metrics, airgapped
 
     algorithm_tmp_file_prefix = '%s/%s.' % (SKYLINE_TMP_DIR, skyline_app)
 
+    # @added 20210304 - Feature #3566: custom_algorithms
+    # Update Analyzer algorithms CUSTOM_ALGORITHMS method to the Mirage method
+    final_custom_ensemble = []
+
     # @added 20200603 - Feature #3566: custom_algorithms
     algorithms_run = []
     custom_consensus_override = False
@@ -1149,6 +1153,12 @@ def run_selected_algorithm(timeseries, metric_name, airgapped_metrics, airgapped
     run_3sigma_algorithms = True
     run_3sigma_algorithms_overridden_by = []
     custom_algorithm = None
+
+    # @added 20201125 - Feature #3848: custom_algorithms - run_before_3sigma parameter
+    run_custom_algorithm_after_3sigma = False
+    final_after_custom_ensemble = []
+    custom_algorithm_not_anomalous = False
+
     if CUSTOM_ALGORITHMS:
         base_name = metric_name.replace(FULL_NAMESPACE, '', 1)
         custom_algorithms_to_run = {}
@@ -1161,82 +1171,95 @@ def run_selected_algorithm(timeseries, metric_name, airgapped_metrics, airgapped
             logger.error('error :: get_custom_algorithms_to_run :: %s' % traceback.format_exc())
             custom_algorithms_to_run = {}
         for custom_algorithm in custom_algorithms_to_run:
-            if consensus_possible:
-                algorithm = custom_algorithm
+            debug_logging = False
+            try:
+                debug_logging = custom_algorithms_to_run[custom_algorithm]['debug_logging']
+            except:
                 debug_logging = False
-                try:
-                    debug_logging = custom_algorithms_to_run[custom_algorithm]['debug_logging']
-                except:
-                    debug_logging = False
-                if DEBUG_CUSTOM_ALGORITHMS:
-                    debug_logging = True
-                if send_algorithm_run_metrics:
-                    algorithm_count_file = '%s%s.count' % (algorithm_tmp_file_prefix, algorithm)
-                    algorithm_timings_file = '%s%s.timings' % (algorithm_tmp_file_prefix, algorithm)
-                run_algorithm = []
-                run_algorithm.append(algorithm)
-                number_of_algorithms += 1
-                number_of_algorithms_run += 1
-                if send_algorithm_run_metrics:
-                    start = timer()
+            if DEBUG_CUSTOM_ALGORITHMS:
+                debug_logging = True
+
+            # @added 20201125 - Feature #3848: custom_algorithms - run_before_3sigma parameter
+            run_before_3sigma = True
+            try:
+                run_before_3sigma = custom_algorithms_to_run[custom_algorithm]['run_before_3sigma']
+            except:
+                run_before_3sigma = True
+            if not run_before_3sigma:
+                run_custom_algorithm_after_3sigma = True
                 if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
-                    logger.debug('debug :: algorithms :: running custom algorithm %s on %s' % (
-                        str(algorithm), str(base_name)))
-                    start_debug_timer = timer()
-                run_custom_algorithm_on_timeseries = None
+                    logger.debug('debug :: algorithms :: NOT running custom algorithm %s on %s BEFORE three-sigma algorithms' % (
+                        str(custom_algorithm), str(base_name)))
+                continue
+
+            if send_algorithm_run_metrics:
+                algorithm_count_file = '%s%s.count' % (algorithm_tmp_file_prefix, custom_algorithm)
+                algorithm_timings_file = '%s%s.timings' % (algorithm_tmp_file_prefix, custom_algorithm)
+
+            # @added 20210304 - Feature #3566: custom_algorithms
+            # Update Analyzer algorithms CUSTOM_ALGORITHMS method to the Mirage method
+            run_algorithm = []
+            run_algorithm.append(custom_algorithm)
+            number_of_algorithms += 1
+            number_of_algorithms_run += 1
+            if send_algorithm_run_metrics:
+                start = timer()
+            if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
+                logger.debug('debug :: algorithms :: running custom algorithm %s on %s' % (
+                    str(custom_algorithm), str(base_name)))
+                start_debug_timer = timer()
+            run_custom_algorithm_on_timeseries = None
+            try:
+                from custom_algorithms import run_custom_algorithm_on_timeseries
+                if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
+                    logger.debug('debug :: algorithms :: loaded run_custom_algorithm_on_timeseries')
+            except:
+                if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: algorithms :: failed to load run_custom_algorithm_on_timeseries')
+            result = None
+            anomalyScore = None
+            if run_custom_algorithm_on_timeseries:
                 try:
-                    from custom_algorithms import run_custom_algorithm_on_timeseries
+                    result, anomalyScore = run_custom_algorithm_on_timeseries(skyline_app, getpid(), base_name, timeseries, custom_algorithm, custom_algorithms_to_run[custom_algorithm], DEBUG_CUSTOM_ALGORITHMS)
+                    algorithm_result = [result]
                     if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
-                        logger.debug('debug :: algorithms :: loaded run_custom_algorithm_on_timeseries')
+                        logger.debug('debug :: algorithms :: run_custom_algorithm_on_timeseries run with result - %s, anomalyScore - %s' % (
+                            str(result), str(anomalyScore)))
                 except:
                     if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
                         logger.error(traceback.format_exc())
-                        logger.error('error :: algorithms :: failed to load run_custom_algorithm_on_timeseries')
-                result = None
-                anomalyScore = None
-                if run_custom_algorithm_on_timeseries:
-                    try:
-                        result, anomalyScore = run_custom_algorithm_on_timeseries(skyline_app, getpid(), base_name, timeseries, custom_algorithm, custom_algorithms_to_run[custom_algorithm], DEBUG_CUSTOM_ALGORITHMS)
-                        algorithm_result = [result]
-                        if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
-                            logger.debug('debug :: algorithms :: run_custom_algorithm_on_timeseries run with result - %s, anomalyScore - %s' % (
-                                str(result), str(anomalyScore)))
-                    except:
-                        if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
-                            logger.error(traceback.format_exc())
-                            logger.error('error :: algorithms :: failed to run custom_algorithm %s on %s' % (
-                                custom_algorithm, base_name))
-                        result = None
-                        algorithm_result = [None]
-                else:
-                    if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
-                        logger.error('error :: debug :: algorithms :: run_custom_algorithm_on_timeseries was not loaded so was not run')
-                if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
-                    end_debug_timer = timer()
-                    logger.debug('debug :: algorithms :: ran custom algorithm %s on %s with result of (%s, %s) in %.6f seconds' % (
-                        str(algorithm), str(base_name),
-                        str(result), str(anomalyScore),
-                        (end_debug_timer - start_debug_timer)))
-                algorithms_run.append(algorithm)
-                if send_algorithm_run_metrics:
-                    end = timer()
-                    with open(algorithm_count_file, 'a') as f:
-                        f.write('1\n')
-                    with open(algorithm_timings_file, 'a') as f:
-                        f.write('%.6f\n' % (end - start))
+                        logger.error('error :: algorithms :: failed to run custom_algorithm %s on %s' % (
+                            custom_algorithm, base_name))
+                    result = None
+                    algorithm_result = [None]
             else:
-                algorithm_result = [False]
+                if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
+                    logger.error('error :: debug :: algorithms :: run_custom_algorithm_on_timeseries was not loaded so was not run')
+            if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
+                end_debug_timer = timer()
+                logger.debug('debug :: algorithms :: ran custom algorithm %s on %s with result of (%s, %s) in %.6f seconds' % (
+                    str(custom_algorithm), str(base_name),
+                    str(result), str(anomalyScore),
+                    (end_debug_timer - start_debug_timer)))
+            algorithms_run.append(custom_algorithm)
+
+            if send_algorithm_run_metrics:
+                end = timer()
+                with open(algorithm_count_file, 'a') as f:
+                    f.write('1\n')
+                with open(algorithm_timings_file, 'a') as f:
+                    f.write('%.6f\n' % (end - start))
 
             if algorithm_result.count(True) == 1:
                 result = True
-                number_of_algorithms_triggered += 1
             elif algorithm_result.count(False) == 1:
                 result = False
             elif algorithm_result.count(None) == 1:
                 result = None
             else:
                 result = False
-            final_ensemble.append(result)
+            final_custom_ensemble.append(result)
             custom_consensus = None
             algorithms_allowed_in_consensus = []
             # @added 20200605 - Feature #3566: custom_algorithms
@@ -1247,12 +1270,18 @@ def run_selected_algorithm(timeseries, metric_name, airgapped_metrics, airgapped
                 custom_run_3sigma_algorithms = custom_algorithms_to_run[custom_algorithm]['run_3sigma_algorithms']
             except:
                 custom_run_3sigma_algorithms = True
+                if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
+                    logger.debug('debug :: error - algorithms :: could not determine custom_run_3sigma_algorithms - default to True')
             if not custom_run_3sigma_algorithms and result:
                 run_3sigma_algorithms = False
                 run_3sigma_algorithms_overridden_by.append(custom_algorithm)
                 if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
                     logger.debug('debug :: algorithms :: run_3sigma_algorithms is False on %s for %s' % (
                         custom_algorithm, base_name))
+            else:
+                if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
+                    logger.debug('debug :: algorithms :: run_3sigma_algorithms will now be run on %s - %s' % (
+                        base_name, str(custom_run_3sigma_algorithms)))
             if result:
                 try:
                     custom_consensus = custom_algorithms_to_run[custom_algorithm]['consensus']
@@ -1267,10 +1296,9 @@ def run_selected_algorithm(timeseries, metric_name, airgapped_metrics, airgapped
                 except:
                     algorithms_allowed_in_consensus = []
                 if custom_consensus == 1:
-                    consensus_possible = False
                     custom_consensus_override = True
                     logger.info('algorithms :: overidding the CONSENSUS as custom algorithm %s overides on %s' % (
-                        str(algorithm), str(base_name)))
+                        str(custom_algorithm), str(base_name)))
                 # TODO - figure out how to handle consensus overrides if
                 #        multiple custom algorithms are used
     if DEBUG_CUSTOM_ALGORITHMS:
@@ -1280,75 +1308,217 @@ def run_selected_algorithm(timeseries, metric_name, airgapped_metrics, airgapped
             logger.debug('algorithms :: run_3sigma_algorithms overridden by %s' % (
                 str(run_3sigma_algorithms_overridden_by)))
 
-    for algorithm in ALGORITHMS:
-        # @modified 20200605 - Feature #3566: custom_algorithms
-        # Added run_3sigma_algorithms to allow only single or multiple custom
-        # algorithms to run and allow the a custom algorithm to specify not to
-        # run 3sigma aglorithms.
-        # if consensus_possible:
-        if consensus_possible and run_3sigma_algorithms:
-            if send_algorithm_run_metrics:
-                algorithm_count_file = '%s%s.count' % (algorithm_tmp_file_prefix, algorithm)
-                algorithm_timings_file = '%s%s.timings' % (algorithm_tmp_file_prefix, algorithm)
+    # @added 20200607 - Feature #3566: custom_algorithms
+    # @modified 20201120 - Feature #3566: custom_algorithms
+    # ensemble = []
+    ensemble = final_custom_ensemble
 
-            run_algorithm = []
-            run_algorithm.append(algorithm)
-            number_of_algorithms_run += 1
-            if send_algorithm_run_metrics:
-                start = timer()
-            try:
-                algorithm_result = [globals()[test_algorithm](timeseries) for test_algorithm in run_algorithm]
-            except:
-                # logger.error('%s failed' % (algorithm))
+    # @modified 20201125 - Feature #3848: custom_algorithms - run_before_3sigma parameter
+    # Check run_3sigma_algorithms as well to the conditional
+    # if not custom_consensus_override:
+    if run_3sigma_algorithms and not custom_consensus_override:
+        if DEBUG_CUSTOM_ALGORITHMS:
+            logger.debug('debug :: running three-sigma algorithms')
+
+        for algorithm in ALGORITHMS:
+
+            if consensus_possible and run_3sigma_algorithms:
+                if send_algorithm_run_metrics:
+                    algorithm_count_file = '%s%s.count' % (algorithm_tmp_file_prefix, algorithm)
+                    algorithm_timings_file = '%s%s.timings' % (algorithm_tmp_file_prefix, algorithm)
+
+                run_algorithm = []
+                run_algorithm.append(algorithm)
+                number_of_algorithms_run += 1
+                if send_algorithm_run_metrics:
+                    start = timer()
+                try:
+                    algorithm_result = [globals()[test_algorithm](timeseries) for test_algorithm in run_algorithm]
+                except:
+                    # logger.error('%s failed' % (algorithm))
+                    algorithm_result = [None]
+
+                # @added 20200603 - Feature #3566: custom_algorithms
+                algorithms_run.append(algorithm)
+
+                if send_algorithm_run_metrics:
+                    end = timer()
+                    with open(algorithm_count_file, 'a') as f:
+                        f.write('1\n')
+                    with open(algorithm_timings_file, 'a') as f:
+                        f.write('%.6f\n' % (end - start))
+            else:
                 algorithm_result = [None]
+                # logger.info('CONSENSUS NOT ACHIEVABLE - skipping %s' % (str(algorithm)))
+                algorithms_run.append(algorithm)
 
-            # @added 20200603 - Feature #3566: custom_algorithms
-            algorithms_run.append(algorithm)
+            if algorithm_result.count(True) == 1:
+                result = True
+                number_of_algorithms_triggered += 1
+                # logger.info('algorithm %s triggerred' % (str(algorithm)))
+            elif algorithm_result.count(False) == 1:
+                result = False
+            elif algorithm_result.count(None) == 1:
+                result = None
+            else:
+                result = False
 
-            if send_algorithm_run_metrics:
-                end = timer()
-                with open(algorithm_count_file, 'a') as f:
-                    f.write('1\n')
-                with open(algorithm_timings_file, 'a') as f:
-                    f.write('%.6f\n' % (end - start))
-        else:
-            algorithm_result = [None]
-            # logger.info('CONSENSUS NOT ACHIEVABLE - skipping %s' % (str(algorithm)))
-            algorithms_run.append(algorithm)
+            final_ensemble.append(result)
 
-        if algorithm_result.count(True) == 1:
-            result = True
-            number_of_algorithms_triggered += 1
-            # logger.info('algorithm %s triggerred' % (str(algorithm)))
-        elif algorithm_result.count(False) == 1:
-            result = False
-        elif algorithm_result.count(None) == 1:
-            result = None
-        else:
-            result = False
+            if not RUN_OPTIMIZED_WORKFLOW:
+                continue
 
-        final_ensemble.append(result)
+            if time_all_algorithms:
+                continue
 
-        if not RUN_OPTIMIZED_WORKFLOW:
-            continue
+            if ENABLE_ALL_ALGORITHMS_RUN_METRICS:
+                continue
 
-        if time_all_algorithms:
-            continue
+            # true_count = final_ensemble.count(True)
+            # false_count = final_ensemble.count(False)
+            # logger.info('current false_count %s' % (str(false_count)))
 
-        if ENABLE_ALL_ALGORITHMS_RUN_METRICS:
-            continue
-
-        # true_count = final_ensemble.count(True)
-        # false_count = final_ensemble.count(False)
-        # logger.info('current false_count %s' % (str(false_count)))
-
-        if final_ensemble.count(False) >= maximum_false_count:
-            consensus_possible = False
-            # logger.info('CONSENSUS cannot be reached as %s algorithms have already not been triggered' % (str(false_count)))
-            # skip_algorithms_count = number_of_algorithms - number_of_algorithms_run
-            # logger.info('skipping %s algorithms' % (str(skip_algorithms_count)))
+            if final_ensemble.count(False) >= maximum_false_count:
+                consensus_possible = False
+                # logger.info('CONSENSUS cannot be reached as %s algorithms have already not been triggered' % (str(false_count)))
+                # skip_algorithms_count = number_of_algorithms - number_of_algorithms_run
+                # logger.info('skipping %s algorithms' % (str(skip_algorithms_count)))
 
     # MOVED custom algorithms from HERE
+
+    # @added 20201120 - Feature #3566: custom_algorithms
+    # If 3sigma algorithms have not been run discard the MIRAGE_ALGORITHMS
+    # added above
+    if not run_3sigma_algorithms:
+        ensemble = final_custom_ensemble
+
+    # @added 20201125 - Feature #3848: custom_algorithms - run_before_3sigma parameter
+    if run_custom_algorithm_after_3sigma:
+        if DEBUG_CUSTOM_ALGORITHMS:
+            logger.debug('debug :: checking custom algorithms to run AFTER three-sigma algorithms')
+        for custom_algorithm in custom_algorithms_to_run:
+            debug_logging = False
+            try:
+                debug_logging = custom_algorithms_to_run[custom_algorithm]['debug_logging']
+            except:
+                debug_logging = False
+            if DEBUG_CUSTOM_ALGORITHMS:
+                debug_logging = True
+            run_before_3sigma = True
+            try:
+                run_before_3sigma = custom_algorithms_to_run[custom_algorithm]['run_before_3sigma']
+            except:
+                run_before_3sigma = True
+            if run_before_3sigma:
+                if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
+                    logger.debug('debug :: algorithms :: NOT running custom algorithm %s on %s AFTER three-sigma algorithms as run_before_3sigma is %s' % (
+                        str(custom_algorithm), str(base_name),
+                        str(run_before_3sigma)))
+                continue
+            try:
+                custom_consensus = custom_algorithms_to_run[custom_algorithm]['consensus']
+                if custom_consensus == 0:
+                    custom_consensus = int(CONSENSUS)
+                else:
+                    custom_consensus_values.append(custom_consensus)
+            except:
+                custom_consensus = int(CONSENSUS)
+            run_only_if_consensus = False
+            try:
+                run_only_if_consensus = custom_algorithms_to_run[custom_algorithm]['run_only_if_consensus']
+            except:
+                run_only_if_consensus = False
+            if run_only_if_consensus:
+                if ensemble.count(True) < int(CONSENSUS):
+                    if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
+                        logger.debug('debug :: algorithms :: NOT running custom algorithm %s on %s AFTER three-sigma algorithms as only %s three-sigma algorithms triggered - MIRAGE_CONSENSUS of %s not achieved' % (
+                            str(custom_algorithm), str(base_name),
+                            str(ensemble.count(True)), str(CONSENSUS)))
+                    continue
+                else:
+                    if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
+                        logger.debug('debug :: algorithms :: running custom algorithm %s on %s AFTER three-sigma algorithms as %s three-sigma algorithms triggered - MIRAGE_CONSENSUS of %s was achieved' % (
+                            str(custom_algorithm), str(base_name),
+                            str(ensemble.count(True)), str(CONSENSUS)))
+            run_algorithm = []
+            run_algorithm.append(custom_algorithm)
+            if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
+                logger.debug('debug :: algorithms :: running custom algorithm %s on %s' % (
+                    str(custom_algorithm), str(base_name)))
+                start_debug_timer = timer()
+            run_custom_algorithm_on_timeseries = None
+            try:
+                from custom_algorithms import run_custom_algorithm_on_timeseries
+                if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
+                    logger.debug('debug :: algorithms :: loaded run_custom_algorithm_on_timeseries')
+            except:
+                if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: algorithms :: failed to load run_custom_algorithm_on_timeseries')
+            result = None
+            anomalyScore = None
+            if run_custom_algorithm_on_timeseries:
+                try:
+                    result, anomalyScore = run_custom_algorithm_on_timeseries(skyline_app, getpid(), base_name, timeseries, custom_algorithm, custom_algorithms_to_run[custom_algorithm], DEBUG_CUSTOM_ALGORITHMS)
+                    algorithm_result = [result]
+                    if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
+                        logger.debug('debug :: algorithms :: run_custom_algorithm_on_timeseries run with result - %s, anomalyScore - %s' % (
+                            str(result), str(anomalyScore)))
+                except:
+                    if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: algorithms :: failed to run custom_algorithm %s on %s' % (
+                            custom_algorithm, base_name))
+                    result = None
+                    algorithm_result = [None]
+            else:
+                if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
+                    logger.error('error :: debug :: algorithms :: run_custom_algorithm_on_timeseries was not loaded so was not run')
+            if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
+                end_debug_timer = timer()
+                logger.debug('debug :: algorithms :: ran custom algorithm %s on %s with result of (%s, %s) in %.6f seconds' % (
+                    str(custom_algorithm), str(base_name),
+                    str(result), str(anomalyScore),
+                    (end_debug_timer - start_debug_timer)))
+            algorithms_run.append(custom_algorithm)
+            if algorithm_result.count(True) == 1:
+                result = True
+            elif algorithm_result.count(False) == 1:
+                result = False
+            elif algorithm_result.count(None) == 1:
+                result = None
+            else:
+                result = False
+            final_after_custom_ensemble.append(result)
+            algorithms_allowed_in_consensus = []
+            # custom_run_3sigma_algorithms = True does not need to be checked
+            # here as if three-sigma algorithms have run they have already run
+            # at this point, unlike above in the run_before_3sigma custom
+            # algorithms run
+            if result:
+                try:
+                    algorithms_allowed_in_consensus = custom_algorithms_to_run[custom_algorithm]['algorithms_allowed_in_consensus']
+                except:
+                    algorithms_allowed_in_consensus = []
+                if custom_consensus == 1:
+                    custom_consensus_override = True
+                    logger.info('algorithms :: overidding the CONSENSUS as custom algorithm %s overides on %s' % (
+                        str(custom_algorithm), str(base_name)))
+            else:
+                # @added 20201127 - Feature #3566: custom_algorithms
+                # Handle if the result is None
+                if result is None:
+                    logger.warn('warning :: algorithms :: %s failed to run on %s' % (
+                        str(custom_algorithm), str(base_name)))
+                else:
+                    if custom_consensus == 1:
+                        # hmmm we are required to hack threshold here
+                        custom_algorithm_not_anomalous = True
+                        if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
+                            logger.debug('debug :: algorithms :: %s did not trigger - custom_algorithm_not_anomalous set to identify as not anomalous' % (
+                                str(custom_algorithm)))
+    for item in final_after_custom_ensemble:
+        ensemble.append(item)
 
     # logger.info('final_ensemble: %s' % (str(final_ensemble)))
 
