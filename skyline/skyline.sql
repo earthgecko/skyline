@@ -588,7 +588,6 @@ CREATE TABLE IF NOT EXISTS `anomalies_type` (
   `id` INT(11) NOT NULL COMMENT 'anomaly id',
   `metric_id` INT(11) NOT NULL COMMENT 'metric id',
   `type` VARCHAR(255) NOT NULL COMMENT 'a csv list of the anomaly_types ids e.g 1,2,3',
-  PRIMARY KEY (id),
   INDEX `anomalies_type_id` (`id`,`metric_id`)) ENGINE=InnoDB;
 
 /*
