@@ -35,8 +35,8 @@ unittest2==1.1.0
 funcsigs==1.0.2
 pbr==5.5.1
 mock==4.0.3
-numpy==1.19.0
-scipy==1.5.0
+numpy==1.19.4
+scipy==1.5.4
 python-dateutil==2.8.1
 pytz==2020.5
 cycler==0.10.0
@@ -47,7 +47,7 @@ pandas==1.2.0
 patsy==0.5.1
 statsmodels==0.12.1
 msgpack-python==0.5.6
-requests==2.24.0
+requests==2.25.1
 #python-simple-hipchat==0.4.0
 pygerduty==0.38.3
 mysql-connector-python==8.0.22
