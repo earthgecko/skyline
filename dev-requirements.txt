@@ -652,7 +652,9 @@ aiohttp==3.7.4
 #urllib3==1.25.3
 # @modified 20201229 - Task #3898: Test Python 3.8.6 and deps
 #urllib3==1.25.9
-urllib3==1.26.2
+# @modified 20210324 - Support #3988: SNYK-PYTHON-URLLIB3-1085966
+#urllib3==1.26.2
+urllib3==1.26.4
 
 # @added 201906025 - Branch #956: flux
 graphyte==1.6.0
