@@ -197,6 +197,19 @@ except:
     except:
         SKYLINE_FEEDBACK_NAMESPACES = [this_host]
 
+# @added 20201208 - Feature #3866: MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+#                   Task #3868: POC MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+try:
+    MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS = settings.MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+except:
+    MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS = False
+
+# @added 20210323 - Feature #3642: Anomaly type classification
+try:
+    LUMINOSITY_CLASSIFY_ANOMALIES = settings.LUMINOSITY_CLASSIFY_ANOMALIES
+except:
+    LUMINOSITY_CLASSIFY_ANOMALIES = False
+
 skyline_app_graphite_namespace = 'skyline.%s%s' % (skyline_app, SERVER_METRIC_PATH)
 failed_checks_dir = '%s_failed' % settings.MIRAGE_CHECK_PATH
 # @added 20191107 - Branch #3262: py3
@@ -263,7 +276,10 @@ class Mirage(Thread):
             logger.warn('warning :: parent or current process dead')
             exit(0)
 
-    def spawn_alerter_process(self, alert, metric, second_order_resolution_seconds, context):
+    # @modified 20210304 - Feature #3642: Anomaly type classification
+    #                      Feature #3970: custom_algorithm - adtk_level_shift
+    # Added triggered_algorithms
+    def spawn_alerter_process(self, alert, metric, second_order_resolution_seconds, context, triggered_algorithms):
         """
         Spawn a process to trigger an alert.  This is used by smtp alerters so
         that matplotlib objects are cleared down and the alerter cannot create
@@ -276,9 +292,15 @@ class Mirage(Thread):
         # https://github.com/earthgecko/skyline/issues/21
         """
 
-        trigger_alert(alert, metric, second_order_resolution_seconds, context)
+        # @modified 20210304 - Feature #3642: Anomaly type classification
+        #                      Feature #3970: custom_algorithm - adtk_level_shift
+        # Added triggered_algorithms
+        trigger_alert(alert, metric, second_order_resolution_seconds, context, triggered_algorithms)
 
-    def surface_graphite_metric_data(self, metric_name, graphite_from, graphite_until):
+    # @modified 20201208 - Feature #3866: MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+    #                      Task #3868: POC MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+    # def surface_graphite_metric_data(self, metric_name, graphite_from, graphite_until):
+    def surface_graphite_metric_data(self, metric_name, graphite_from, graphite_until, high_res=False):
 
         # @added 20160803 - Unescaped Graphite target - https://github.com/earthgecko/skyline/issues/20
         #                   bug1546: Unescaped Graphite target
@@ -345,6 +367,15 @@ class Mirage(Thread):
 
         metric_data_folder = str(settings.MIRAGE_DATA_FOLDER) + "/" + target
         mkdir_p(metric_data_folder)
+
+        # @added 20201208 - Feature #3866: MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+        #                   Task #3868: POC MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+        if high_res:
+            with open(metric_data_folder + "/" + target + '.high_res', 'w') as f:
+                f.write(json.dumps(converted))
+                f.close()
+                return True
+
         with open(metric_data_folder + "/" + target + '.json', 'w') as f:
             f.write(json.dumps(converted))
             f.close()
@@ -424,6 +455,11 @@ class Mirage(Thread):
         #                   Task #3744: POC matrixprofile
         boolean_keys = ['snab_only_check']
 
+        # @added 20210304 - Feature #3642: Anomaly type classification
+        #                   Feature #3970: custom_algorithm - adtk_level_shift
+        # Added triggered_algorithms to mirage_check_file
+        list_keys = ['triggered_algorithms']
+
         metric_vars_array = []
         for var_array in metric_vars:
             # @modified 20181023 - Feature #2618: alert_slack
@@ -461,6 +497,23 @@ class Mirage(Thread):
                         value = True
                     else:
                         value = False
+
+                # @added 20210304 - Feature #3642: Anomaly type classification
+                #                   Feature #3970: custom_algorithm - adtk_level_shift
+                # Added triggered_algorithms to mirage_check_file
+                if var_array[0] in list_keys:
+                    key = var_array[0]
+                    logger.debug(
+                        'debug :: list key - key: %s, value: %s' % (
+                            str(var_array[0]), str(var_array[1])))
+                    _value_str = str(var_array[1]).replace("'", '')
+                    try:
+                        value = literal_eval(var_array[1])
+                    except Exception as e:
+                        logger.error(
+                            'error :: loading metric variables - failed to literal_eval list for %s, %s - %s' % (
+                                str(key), str(var_array[1]), e))
+                        value = []
 
                 if key:
                     metric_vars_array.append([key, value])
@@ -931,6 +984,16 @@ class Mirage(Thread):
             logger.error('error :: failed to add %s to Redis set %s' % (
                 str(data), str(redis_set)))
 
+        # @added 20210304 - Feature #3642: Anomaly type classification
+        #                   Feature #3970: custom_algorithm - adtk_level_shift
+        # Added triggered_algorithms to mirage_check_file
+        try:
+            key = 'triggered_algorithms'
+            value_list = [var_array[1] for var_array in metric_vars_array if var_array[0] == key]
+            triggered_algorithms = value_list[0]
+        except:
+            triggered_algorithms = []
+
         metric_data_dir = '%s/%s' % (settings.MIRAGE_DATA_FOLDER, str(metric))
 
         # Ignore any metric check with a timestamp greater than MIRAGE_STALE_SECONDS
@@ -1087,6 +1150,43 @@ class Mirage(Thread):
             logger.info('retrieved data :: for %s at %s seconds' % (
                 metric, str(second_order_resolution_seconds)))
 
+####
+        # @added 20201208 - Feature #3866: MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+        #                   Task #3868: POC MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+        use_high_res_file = False
+        if MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS:
+            high_resolution_seconds = int_second_order_resolution_seconds - 3600
+            high_resolution_timestamp = int_metric_timestamp - high_resolution_seconds
+            graphite_from = datetime.datetime.fromtimestamp(high_resolution_timestamp).strftime('%H:%M_%Y%m%d')
+
+            # Remove any old file related to the metric
+            metric_high_res_file = '%s/%s.high_res' % (metric_data_dir, str(metric))
+            try:
+                os.remove(metric_high_res_file)
+            except OSError:
+                pass
+            # Get data from graphite
+            logger.info(
+                'retrieve data :: surfacing high resolution %s time series from graphite for %s seconds' % (
+                    metric, str(high_resolution_seconds)))
+            try:
+                high_res = True
+                self.surface_graphite_metric_data(metric, graphite_from, graphite_until, high_res)
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to surface_graphite_metric_data to populate %s' % (
+                    str(metric_high_res_file)))
+            # Check there is a json high_res timeseries file to test
+            if not os.path.isfile(metric_high_res_file):
+                logger.error(
+                    'error :: retrieve failed - failed to surface high resolution %s time series from graphite' % (
+                        metric))
+            else:
+                logger.info('retrieved data :: for %s at %s seconds' % (
+                    metric, str(high_resolution_seconds)))
+                use_high_res_file = metric_high_res_file
+####
+
         # Make process-specific dicts
         exceptions = defaultdict(int)
         anomaly_breakdown = defaultdict(int)
@@ -1096,6 +1196,26 @@ class Mirage(Thread):
         with open((metric_json_file), 'r') as f:
             timeseries = json.loads(f.read())
             logger.info('data points surfaced :: %s' % (str(len(timeseries))))
+
+        # @added 20201208 - Feature #3866: MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+        #                   Task #3868: POC MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+        high_resolution_analysis = False
+        if use_high_res_file:
+            high_resolution_timeseries = []
+            try:
+                with open((use_high_res_file), 'r') as f:
+                    high_resolution_timeseries = json.loads(f.read())
+                    logger.info('high resolution data points surfaced :: %s' % (str(len(timeseries))))
+            except Exception as e:
+                logger.error('error :: could not create high_resolution_timeseries from %s - %s' % (
+                    str(use_high_res_file), str(e)))
+            if high_resolution_timeseries:
+                low_resolution_timeseries = list(timeseries)
+                logger.info('overriding timeseries with high_resolution_timeseries for analysis')
+                timeseries = high_resolution_timeseries
+                second_order_low_resolution_seconds = int(second_order_resolution_seconds)
+                second_order_resolution_seconds = int(high_resolution_seconds)
+                high_resolution_analysis = True
 
         # @added 20170212 - Feature #1886: Ionosphere learn
         # Only process if the metric has sufficient data
@@ -1304,7 +1424,10 @@ class Mirage(Thread):
                 # anomalous, ensemble, datapoint = run_selected_algorithm(timeseries, metric, second_order_resolution_seconds)
                 # @modified 20200607 - Feature #3566: custom_algorithms
                 # Added algorithms_run
-                anomalous, ensemble, datapoint, negatives_found, algorithms_run = run_selected_algorithm(timeseries, metric, second_order_resolution_seconds, run_negatives_present)
+                # @modified 20210304 - Feature #3642: Anomaly type classification
+                #                      Feature #3970: custom_algorithm - adtk_level_shift
+                # Added triggered_algorithms
+                anomalous, ensemble, datapoint, negatives_found, algorithms_run = run_selected_algorithm(timeseries, metric, second_order_resolution_seconds, run_negatives_present, triggered_algorithms)
             else:
                 logger.info('not analyzing :: %s at %s seconds as there is not sufficiently older datapoints in the timeseries - not valid_mirage_timeseries' % (metric, second_order_resolution_seconds))
                 anomalous = False
@@ -1342,6 +1465,14 @@ class Mirage(Thread):
         analysis_run_time = time() - analysis_start_time
         logger.info('algorithms analysis completed in %.2f seconds' % (
             analysis_run_time))
+
+        # @added 20201208 - Feature #3866: MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+        #                   Task #3868: POC MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
+        if high_resolution_analysis:
+            second_order_resolution_seconds = int(second_order_low_resolution_seconds)
+            datapoint = low_resolution_timeseries[-1][1]
+            timeseries = low_resolution_timeseries
+            logger.info('analysis on high resolution done, reverting to original timeseries and second_order_resolution_seconds')
 
         # @added 20200904 - Feature #3734: waterfall alerts
         # Remove the metric from the waterfall_alerts Redis set
@@ -1687,6 +1818,26 @@ class Mirage(Thread):
                     logger.error('error :: failed to add %s to Redis set %s' % (
                         str(data), str(redis_set)))
 
+                # @added 20210323 - Feature #3642: Anomaly type classification
+                if LUMINOSITY_CLASSIFY_ANOMALIES:
+                    redis_set = 'luminosity.classify_anomalies'
+                    data_dict = {
+                        'metric': metric,
+                        'timestamp': int_metric_timestamp,
+                        'value': datapoint,
+                        'algorithms': algorithms_run,
+                        'triggered_algorithms': triggered_algorithms,
+                        'app': skyline_app,
+                        'added_at': int(added_at),
+                    }
+                    data = [metric, int_metric_timestamp, int(added_at), data_dict]
+                    try:
+                        self.redis_conn.sadd(redis_set, str(data))
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to add %s to Redis set %s' % (
+                            str(data), str(redis_set)))
+
                 # @added 20200904 - Feature #3734: waterfall alerts
                 # Remove the metric from the waterfall_alerts Redis set
                 # [metric, timestamp, value, added_to_waterfall_timestamp]
@@ -2002,13 +2153,19 @@ class Mirage(Thread):
         else:
             logger.info('bin/%s.d log management done' % skyline_app)
 
-        def smtp_trigger_alert(alert, metric, second_order_resolution_seconds, context):
+        # @modified 20210304 - Feature #3642: Anomaly type classification
+        #                      Feature #3970: custom_algorithm - adtk_level_shift
+        # Added triggered_algorithms
+        def smtp_trigger_alert(alert, metric, second_order_resolution_seconds, context, triggered_algorithms):
             # Spawn processes
             pids = []
             spawned_pids = []
             pid_count = 0
             try:
-                p = Process(target=self.spawn_alerter_process, args=(alert, metric, second_order_resolution_seconds, context))
+                # @modified 20210304 - Feature #3642: Anomaly type classification
+                #                      Feature #3970: custom_algorithm - adtk_level_shift
+                # Added triggered_algorithms
+                p = Process(target=self.spawn_alerter_process, args=(alert, metric, second_order_resolution_seconds, context, triggered_algorithms))
                 pids.append(p)
                 pid_count += 1
                 p.start()
@@ -2239,11 +2396,21 @@ class Mirage(Thread):
                             test_alerter = str(test_alert[1])
                             metric = (1, metric_name, int(time()))
                             alert = (metric_name, test_alerter, 10)
+                            # @added 20210304 - Feature #3642: Anomaly type classification
+                            #                   Feature #3970: custom_algorithm - adtk_level_shift
+                            triggered_algorithms = ['testing']
+
                             if settings.SLACK_ENABLED and test_alerter == 'slack':
                                 logger.info('test alert to slack for %s' % (metric_name))
-                                trigger_alert(alert, metric, 604800, skyline_app)
+                                # @modified 20210304 - Feature #3642: Anomaly type classification
+                                #                      Feature #3970: custom_algorithm - adtk_level_shift
+                                # Added triggered_algorithms
+                                trigger_alert(alert, metric, 604800, skyline_app, triggered_algorithms)
                             if test_alerter == 'smtp':
-                                smtp_trigger_alert(alert, metric, 604800, skyline_app)
+                                # @modified 20210304 - Feature #3642: Anomaly type classification
+                                #                      Feature #3970: custom_algorithm - adtk_level_shift
+                                # Added triggered_algorithms
+                                smtp_trigger_alert(alert, metric, 604800, skyline_app, triggered_algorithms)
                         except:
                             logger.error('error :: test trigger_alert - %s' % traceback.format_exc())
                             logger.error('error :: failed to test trigger_alert :: %s' % metric_name)
@@ -2836,6 +3003,27 @@ class Mirage(Thread):
                             logger.error(traceback.format_exc())
                             logger.error('error :: failed to add %s to Redis set %s' % (
                                 str(data), str(redis_set)))
+
+                        # @added 20210323 - Feature #3642: Anomaly type classification
+                        if LUMINOSITY_CLASSIFY_ANOMALIES:
+                            redis_set = 'luminosity.classify_anomalies'
+                            added_at = int(time())
+                            data_dict = {
+                                'metric': base_name,
+                                'timestamp': int(metric_timestamp),
+                                'value': value,
+                                'algorithms': algorithms_run,
+                                'triggered_algorithms': triggered_algorithms,
+                                'app': skyline_app,
+                                'added_at': added_at,
+                            }
+                            data = [base_name, int(metric_timestamp), added_at, data_dict]
+                            try:
+                                self.redis_conn.sadd(redis_set, str(data))
+                            except:
+                                logger.error(traceback.format_exc())
+                                logger.error('error :: failed to add %s to Redis set %s' % (
+                                    str(data), str(redis_set)))
 
                         anomaly_breakdown = dict()
                         for algorithm in triggered_algorithms:
@@ -3464,19 +3652,28 @@ class Mirage(Thread):
                                                 str(new_alert), str(metric),
                                                 str(second_order_resolution_seconds),
                                                 str(alert_context)))
-                                            trigger_alert(new_alert, metric, second_order_resolution_seconds, alert_context)
+                                            # @modified 20210304 - Feature #3642: Anomaly type classification
+                                            #                      Feature #3970: custom_algorithm - adtk_level_shift
+                                            # Added triggered_algorithms
+                                            trigger_alert(new_alert, metric, second_order_resolution_seconds, alert_context, triggered_algorithms)
                                         else:
                                             logger.info('trigger_alert :: alert: %s, metric: %s, second_order_resolution_seconds: %s, context: %s' % (
                                                 str(alert), str(metric),
                                                 str(second_order_resolution_seconds),
                                                 str(alert_context)))
-                                            trigger_alert(alert, metric, second_order_resolution_seconds, alert_context)
+                                            # @modified 20210304 - Feature #3642: Anomaly type classification
+                                            #                      Feature #3970: custom_algorithm - adtk_level_shift
+                                            # Added triggered_algorithms
+                                            trigger_alert(alert, metric, second_order_resolution_seconds, alert_context, triggered_algorithms)
                                     else:
                                         logger.info('smtp_trigger_alert :: alert: %s, metric: %s, second_order_resolution_seconds: %s, context: %s' % (
                                             str(alert), str(metric),
                                             str(second_order_resolution_seconds),
                                             str(alert_context)))
-                                        smtp_trigger_alert(alert, metric, second_order_resolution_seconds, alert_context)
+                                        # @modified 20210304 - Feature #3642: Anomaly type classification
+                                        #                      Feature #3970: custom_algorithm - adtk_level_shift
+                                        # Added triggered_algorithms
+                                        smtp_trigger_alert(alert, metric, second_order_resolution_seconds, alert_context, triggered_algorithms)
                                     logger.info('sent %s alert: For %s' % (alert[1], metric[1]))
                                 except Exception as e:
                                     logger.error('error :: could not send %s alert for %s: %s' % (alert[1], metric[1], e))
