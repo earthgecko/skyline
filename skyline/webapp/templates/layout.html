@@ -94,6 +94,11 @@ Using https://github.com/rendro/countdown
           	class="active"
           	{% endif %}
           	><a href="/ionosphere">Ionosphere</a></li>
+          	<li
+          	{% if url_for("luminosity") in request.path %}
+          	class="active"
+          	{% endif %}
+          	><a href="/luminosity">Luminosity</a></li>
 <!--
 # @added 20200420 - Feature #1448: Crucible web UI
 #                   Branch #868: crucible

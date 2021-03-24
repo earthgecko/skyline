@@ -133,7 +133,7 @@ request.
 Here is an example of the data a multiple metrics POST requires and an example
 POST request for multiple metrics:
 
-.. warning:: When submitting mulitple metrics in a POST, if any one element of
+.. warning:: When submitting multiple metrics in a POST, if any one element of
   any metric is not valid the entire POST will be rejected.
 
 .. code-block:: json

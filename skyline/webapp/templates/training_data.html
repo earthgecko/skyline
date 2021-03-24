@@ -758,7 +758,8 @@ and a metric is checking and found anomalous a number of times in a row.
     {% endif %}
 
   {% for image in metric_images %}
-    {% if (( not '.redis.plot' in image) and ( not '.matplotlib' in image)) %}
+<!-- # @modified 20210323 - Feature #3642: Anomaly type classification -->
+    {% if (( not '.redis.plot' in image) and ( not '.matplotlib' in image) and ( not 'luminosity.classify_anomaly' in image )) %}
       {% if metric_second_order_resolution_hours != False %}
       <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">anomaly ::</span></span></span> graph at <strong>{{ metric_second_order_resolution_hours }} hours</strong></h4>
       {% else %}
@@ -856,6 +857,28 @@ Image file: {{ image }}<br><br>
   {% if panorama_anomaly_id %}
     {% include "correlations.html" %}
   {% endif %}
+
+<!-- # @added 20210324 - Feature #3642: Anomaly type classification -->
+  {% if anomaly_types %}
+  <h4><span class="logo"><span class="sky">Luminosity ::</span> <span class="re">classify_anomaly ::</span></span> types</h4>
+    {{ anomaly_types }}
+  {% endif %}
+
+<!-- # @added 20210323 - Feature #3642: Anomaly type classification -->
+  {% if 'luminosity.classify_anomaly' in metric_images_str %}
+    {% if metric_second_order_resolution_hours != False %}
+  <h4><span class="logo"><span class="sky">Luminosity ::</span> <span class="re">classify_anomaly ::</span></span> graphs at <strong>{{ metric_second_order_resolution_hours }} hours</strong></h4>
+    {% else %}
+  <h4><span class="logo"><span class="sky">Luminosity ::</span> <span class="re">classify_anomaly ::</span> graphs at <strong>{{ metric_full_duration_in_hours }} hours</strong></h4>
+    {% endif %}
+    {% for image in metric_images %}
+      {% if 'luminosity.classify_anomaly' in image %}
+      <img src="ionosphere_images?image={{ image }}" alt="{{ for_metric }} timeseries graph" class="img-responsive center-block" /><br>
+Image file: {{ image }}<br><br>
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+
 
     <h4><span class="logo"><span class="sky">Training ::</span> <span class="re">data ::</span></span></span> files</h4>
       <table>

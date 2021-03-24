@@ -2928,7 +2928,11 @@ class Analyzer(Thread):
                                             #                      Task #3744: POC matrixprofile
                                             # metric_name, anomalous datapoint, hours to resolve, timestamp, snab_only
                                             # fh.write('metric = "%s"\nvalue = "%s"\nhours_to_resolve = "%s"\nmetric_timestamp = "%s"\n' % (metric[1], metric[0], str(use_hours_to_resolve), str(metric[2])))
-                                            fh.write('metric = "%s"\nvalue = "%s"\nhours_to_resolve = "%s"\nmetric_timestamp = "%s"\nsnab_only_check = "%s"\n' % (metric[1], metric[0], str(use_hours_to_resolve), str(metric[2]), str(snab_only_check)))
+                                            # @modified 20210304 - Feature #3642: Anomaly type classification
+                                            #                      Feature #3970: custom_algorithm - adtk_level_shift
+                                            # Added triggered_algorithms to mirage_check_file
+                                            # fh.write('metric = "%s"\nvalue = "%s"\nhours_to_resolve = "%s"\nmetric_timestamp = "%s"\nsnab_only_check = "%s"\n' % (metric[1], metric[0], str(use_hours_to_resolve), str(metric[2]), str(snab_only_check)))
+                                            fh.write('metric = "%s"\nvalue = "%s"\nhours_to_resolve = "%s"\nmetric_timestamp = "%s"\nsnab_only_check = "%s"\ntriggered_algorithms = %s\n' % (metric[1], metric[0], str(use_hours_to_resolve), str(metric[2]), str(snab_only_check), str(triggered_algorithms)))
                                         mirage_anomaly_check_file_created = True
                                     except:
                                         logger.error(traceback.format_exc())

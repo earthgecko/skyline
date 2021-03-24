@@ -108,7 +108,10 @@ if True:
         # @added 20200813 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
         historical_data_dir_exists,
         # @added 20201202- Feature #3858: skyline_functions - correlate_or_relate_with
-        correlate_or_relate_with)
+        correlate_or_relate_with,
+        # @added 20210324 - Feature #3642: Anomaly type classification
+        get_anomaly_type,
+    )
 
     from backend import (
         panorama_request, get_list,
@@ -190,6 +193,10 @@ if True:
         submit_crucible_job, get_crucible_jobs, get_crucible_job,
         send_crucible_job_metric_to_panorama)
 
+    # @added 20210317 - Feature #3978: luminosity - classify_metrics
+    #                   Feature #3642: Anomaly type classification
+    from luminosity_backend import get_classify_metrics
+
 # @added 20200516 - Feature #3538: webapp - upload_data endoint
 file_uploads_enabled = False
 try:
@@ -251,6 +258,12 @@ try:
     PASS_AUTH_ON_REDIRECT = settings.PASS_AUTH_ON_REDIRECT
 except:
     PASS_AUTH_ON_REDIRECT = False
+
+# @added 20210324 - Feature #3642: Anomaly type classification
+try:
+    LUMINOSITY_CLASSIFY_ANOMALIES = settings.LUMINOSITY_CLASSIFY_ANOMALIES
+except:
+    LUMINOSITY_CLASSIFY_ANOMALIES = False
 
 skyline_version = skyline_version.__absolute_version__
 
@@ -377,6 +390,13 @@ try:
     crucible_jobs_dir = '%s/jobs' % path.dirname(settings.CRUCIBLE_DATA_FOLDER)
 except:
     crucible_jobs_dir = '/opt/skyline/crucible/jobs'
+
+# @added 20210316 - Feature #3978: luminosity - classify_metrics
+#                   Feature #3642: Anomaly type classification
+try:
+    luminosity_data_folder = settings.LUMINOSITY_DATA_FOLDER
+except:
+    luminosity_data_folder = '/opt/skyline/luminosity'
 
 
 @app.before_request
@@ -1124,6 +1144,7 @@ def api():
         logger.info('/api?anomaly request with id - %s' % (
             str(anomaly_id)))
 
+        start = time.time()
         anomaly_data = []
         try:
             # anomaly_data = [int(anomaly_id), str(metric), anomalous_datapoint, anomaly_timestamp, full_duration, created_timestamp, anomaly_end_timestamp]
@@ -1234,6 +1255,16 @@ def api():
             fail_msg = 'error :: Webapp error with get_correlations'
             logger.error(fail_msg)
             return internal_error(fail_msg, trace)
+
+        # @added 20210324 - Feature #3642: Anomaly type classification
+        anomaly_types = []
+        if LUMINOSITY_CLASSIFY_ANOMALIES:
+            try:
+                anomaly_types, anomaly_type_ids = get_anomaly_type(skyline_app, anomaly_id)
+            except Exception as e:
+                fail_msg = 'error :: Webapp error with get_anomaly_type - %s' % str(e)
+                logger.error(fail_msg)
+
         anomaly_dict = {
             # @modified 20201201 - Feature #3740: webapp - anomaly API endpoint
             # Due to the anomaly ids being used as json keys in the possible
@@ -1252,9 +1283,10 @@ def api():
             # 'possible related match ids': matchesDict,
             'possible related anomalies': anomaliesDict,
             'possible related matches': matchesDict,
+            # @added 20210324 - Feature #3642: Anomaly type classification
+            'anomaly_types': anomaly_types,
         }
-
-        data_dict = {"status": {}, "data": {"anomaly": anomaly_dict}}
+        data_dict = {"status": {"response": 200, "request_time": (time.time() - start)}, "data": {"anomaly": anomaly_dict}}
         logger.info('/api?anomaly request returning data - %s' % (
             str(data_dict)))
         return jsonify(data_dict), 200
@@ -5978,10 +6010,21 @@ def ionosphere():
                     logger.info(traceback.format_exc())
                     logger.error('error :: Webapp could not determine if this is historical training data')
 
+            # @added 20210324 - Feature #3642: Anomaly type classification
+            anomaly_types = None
+            anomaly_type_ids = None
+            if LUMINOSITY_CLASSIFY_ANOMALIES and p_id:
+                try:
+                    anomaly_types, anomaly_type_ids = get_anomaly_type(skyline_app, int(p_id))
+                except Exception as e:
+                    fail_msg = 'error :: Webapp error with get_anomaly_type - %s' % str(e)
+                    logger.error(fail_msg)
+
             return render_template(
                 'ionosphere.html', timestamp=requested_timestamp,
                 for_metric=base_name, metric_vars=m_vars, metric_files=mpaths,
-                metric_images=sorted_images, human_date=hdate, timeseries=ts_json,
+                metric_images=sorted_images, metric_images_str=str(sorted_images),
+                human_date=hdate, timeseries=ts_json,
                 data_ok=data_to_process, td_files=mpaths,
                 panorama_anomaly_id=p_id, graphite_url=graph_url,
                 extracted_features=features, calc_time=f_calc,
@@ -6066,6 +6109,8 @@ def ionosphere():
                 labelled_anomalies=labelled_anomalies,
                 # @added 20200813 - Feature #3670: IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
                 historical_training_data=historical_training_data,
+                # @added 20210324 - Feature #3642: Anomaly type classification
+                anomaly_types=anomaly_types, anomaly_type_ids=anomaly_type_ids,
                 version=skyline_version, duration=(time.time() - start),
                 print_debug=debug_on), 200
         except:
@@ -6086,6 +6131,10 @@ def ionosphere():
 
 
 @app.route('/ionosphere_images')
+# @added 20210316 - Feature #3978: luminosity - classify_metrics
+#                   Feature #3642: Anomaly type classification
+# Serve the luminosity_images endpoint as well, for classify_metrics plots
+@app.route('/luminosity_images')
 def ionosphere_images():
 
     request_args_present = False
@@ -6127,6 +6176,9 @@ def ionosphere_images():
                     performance_dir,
                     # @added 20210209 - Feature #1448: Crucible web UI
                     crucible_jobs_dir,
+                    # @added 20210316 - Feature #3978: luminosity - classify_metrics
+                    #                   Feature #3642: Anomaly type classification
+                    luminosity_data_folder,
                 ]
                 allowed_path = False
                 for allowed_image_path in IONOSPHERE_IMAGE_ALLOWED_PATHS:
@@ -6162,6 +6214,10 @@ def ionosphere_images():
 
 # @added 20201213 - Feature #3890: metrics_manager - sync_cluster_files
 @app.route('/ionosphere_files')
+# @added 20210316 - Feature #3978: luminosity - classify_metrics
+#                   Feature #3642: Anomaly type classification
+# Serve the luminosity_file endpoint as well, for classify_metrics plots
+@app.route('/luminosity_files')
 @requires_auth
 def ionosphere_files():
 
@@ -6174,8 +6230,15 @@ def ionosphere_files():
         request_args_len = 0
         logger.error('error :: ionosphere_files request arguments have no length - %s' % str(request_args_len))
 
-    IONOSPHERE_FILES_REQUEST_ARGS = ['source', 'timestamp', 'metric']
-    IONOSPHERE_FILES_ALLOWED_DIR_TYPES = ['training_data', 'features_profiles']
+    # @modified 20210316 - Feature #3978: luminosity - classify_metrics
+    #                      Feature #3642: Anomaly type classification
+    # Added algorithm_name and classify_metrics
+    IONOSPHERE_FILES_REQUEST_ARGS = [
+        'source', 'timestamp', 'metric', 'algorithm_name',
+    ]
+    IONOSPHERE_FILES_ALLOWED_DIR_TYPES = [
+        'training_data', 'features_profiles', 'classify_metrics',
+    ]
 
     allowed_source_dir = False
     timestamp = None
@@ -6204,6 +6267,13 @@ def ionosphere_files():
                     return 'Bad Request', 400
             if key == 'metric':
                 metric = str(value)
+            # @added 20210316 - Feature #3978: luminosity - classify_metrics
+            #                   Feature #3642: Anomaly type classification
+            # Added algorithm_name
+            algorithm_name = None
+            if key == 'algorithm_name':
+                algorithm_name = str(value)
+
     if not metric:
         logger.error('error :: ionosphere_files no metric passed')
         return 'Bad Request', 400
@@ -6220,6 +6290,13 @@ def ionosphere_files():
                 required_dir = '%s/%s/%s' % (
                     settings.IONOSPHERE_DATA_FOLDER, str(timestamp),
                     metric_timeseries_dir)
+            # @added 20210316 - Feature #3978: luminosity - classify_metrics
+            #                   Feature #3642: Anomaly type classification
+            # Added classify_metrics
+            if source == 'classify_metrics':
+                required_dir = '%s/%s/%s/%s/%s' % (
+                    luminosity_data_folder, source, algorithm_name,
+                    metric_timeseries_dir, str(timestamp))
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: ionosphere_files failed to interpolate required_dir')
@@ -6271,10 +6348,22 @@ def ionosphere_files():
     if not files_dict:
         logger.warn('warning :: ionosphere_files no files in required_dir - %s - returning 404' % str(required_dir))
         # return 'Not Found', 404
-        data_dict = {"status": {"response": 404, "request_time": duration}, "data": {"metric": metric, "timestamp": timestamp, source: "not found"}}
+        data_dict = {"status": {"response": 404, "request_time": duration}, "data": {"metric": metric, "timestamp": timestamp, "source": source, "files": "not found"}}
+        if algorithm_name and source == 'classify_metrics':
+            data_dict = {"status": {"response": 404, "request_time": duration}, "data": {"metric": metric, "timestamp": timestamp, "source": source, "algorithm_name": algorithm_name, "files": "not found"}}
         return jsonify(data_dict), 404
     if files_dict:
         data_dict = {"status": {"response": 200, "request_time": duration}, "data": {"metric": metric, "timestamp": timestamp, "source": source, "files": files_dict}}
+        # @added 20210316 - Feature #3978: luminosity - classify_metrics
+        #                   Feature #3642: Anomaly type classification
+        # Added algorithm_name for classify_metrics
+        if algorithm_name and source == 'classify_metrics':
+            data_dict = {
+                "status": {"response": 200, "request_time": duration},
+                "data": {
+                    "metric": metric, "timestamp": timestamp, "source": source,
+                    "algorithm_name": algorithm_name, "files": files_dict}
+            }
         logger.info('ionosphere_files returned json with %s files listed' % str(len(files_dict)))
         return jsonify(data_dict), 200
     return 'Bad Request', 400
@@ -6283,6 +6372,10 @@ def ionosphere_files():
 # TODO @gzipped this?  But really bandwidth is more available than CPU
 # @added 20201213 - Feature #3890: metrics_manager - sync_cluster_files
 @app.route('/ionosphere_file')
+# @added 20210316 - Feature #3978: luminosity - classify_metrics
+#                   Feature #3642: Anomaly type classification
+# Serve the luminosity_file endpoint as well, for classify_metrics plots
+@app.route('/luminosity_file')
 @requires_auth
 def ionosphere_file():
 
@@ -6300,6 +6393,11 @@ def ionosphere_file():
         settings.IONOSPHERE_PROFILES_FOLDER,
         # @added 20210112 - Feature #3934: ionosphere_performance
         performance_dir,
+        # @added 20210223 - Feature #2054: ionosphere.save.training_data
+        settings.IONOSPHERE_DATA_FOLDER + '_saved',
+        # @added 20210316 - Feature #3978: luminosity - classify_metrics
+        #                   Feature #3642: Anomaly type classification
+        luminosity_data_folder,
     ]
 
     if request_args_present:
@@ -6944,6 +7042,147 @@ def match_metric():
             logger.error(trace)
             logger.error('error :: %s' % message)
             return internal_error(message, trace)
+
+
+# @added 20210316 - Feature #3978: luminosity - classify_metrics
+#                   Feature #3642: Anomaly type classification
+@app.route("/luminosity", methods=['GET'])
+@requires_auth
+def luminosity():
+    debug_on = False
+
+    # file_uploads_enabled = True
+    logger.info('/luminosity request')
+    start = time.time()
+
+    try:
+        request_args_len = len(request.args)
+    except:
+        request_args_len = 0
+
+    LUMINOSITY_REQUEST_ARGS = [
+        'classify_metrics', 'algorithm', 'metric', 'timestamp', 'significant',
+        'classification', 'classify_metric',
+    ]
+
+    classify_metrics = False
+    algorithm = 'all'
+    metric = 'all'
+    timestamp = 'all'
+    significant = False
+    classification = False
+    classify_metric = False
+    request_arguments = []
+
+    if request_args_len == 0:
+        classify_metrics = True
+
+    if request_args_len:
+        for key in request.args:
+            if key == 'classification':
+                value = request.args.get(key, None)
+                if str(value) == 'true':
+                    classification = True
+        if classification:
+            algorithm = None
+            metric = None
+
+        for i in request.args:
+            key = str(i)
+            if key not in LUMINOSITY_REQUEST_ARGS:
+                logger.error('error :: invalid request argument - %s=%s' % (key, str(i)))
+                error_string = 'error :: invalid request argument - %s=%s' % (key, str(i))
+                logger.error(error_string)
+                resp = json.dumps(
+                    {'400 Bad Request': error_string})
+                return flask_escape(resp), 400
+            value = request.args.get(key, None)
+            request_arguments.append([key, value])
+            if key == 'classify_metrics':
+                classify_metrics = True
+            if key == 'algorithm':
+                algorithm = str(value)
+            if key == 'metric':
+                metric = str(value)
+            if key == 'timestamp':
+                timestamp = str(value)
+            if key == 'significant':
+                if str(value) == 'true':
+                    significant = True
+            if key == 'classification':
+                if str(value) == 'true':
+                    classification = True
+            if key == 'classify_metric':
+                if str(value) == 'true':
+                    classify_metric = True
+    logger.info('/luminosity request_arguments: %s' % str(request_arguments))
+
+    valid_request = True
+    if classify_metrics:
+        if not metric or not timestamp or not algorithm:
+            valid_request = False
+        if not valid_request:
+            status_code = 400
+            data_dict = {"status": {"classify_metrics": True, "reason": "required parameter not passed", "response": 400}, "data": {"metric": metric, "timestamp": timestamp, "algorithm": algorithm}}
+            return jsonify(data_dict), status_code
+
+    if classification and valid_request:
+        if not metric or not algorithm:
+            valid_request = False
+        if not valid_request:
+            status_code = 400
+            data_dict = {"status": {"classification": True, "reason": "required parameter not passed", "response": 400}, "data": {"metric": metric, "algorithm": algorithm}}
+
+    if classify_metric and valid_request:
+        if not metric or not algorithm and not timestamp:
+            valid_request = False
+        if not valid_request:
+            status_code = 400
+            data_dict = {"status": {"classify_metric": True, "reason": "required parameter not passed", "response": 400}, "data": {"metric": metric, "algorithm": algorithm, "timestamp": timestamp}}
+
+    if not valid_request:
+        return jsonify(data_dict), status_code
+
+    classify_metrics_dict = {}
+    classified_metrics = []
+    try:
+        classify_metrics_dict, classified_metrics, fail_msg, trace = get_classify_metrics(metric, timestamp, algorithm, significant)
+    except Exception as e:
+        trace = traceback.format_exc()
+        message = 'could not determine if metric matched - error - %s' % (e)
+        logger.error(trace)
+        logger.error('error :: %s' % message)
+        return internal_error(message, trace)
+
+    if classification:
+        if metric == 'all' and algorithm == 'all':
+            classification = False
+            classify_metrics = True
+            timestamp = 'all'
+
+    classification_count = 0
+    siginificant_count = 0
+    if len(classify_metrics_dict) > 0:
+        if metric != 'all':
+            classification_count = classify_metrics_dict[metric][algorithm]['classifications']
+            siginificant_count = classify_metrics_dict[metric][algorithm]['significant']
+
+    try:
+        return render_template(
+            'luminosity.html', classify_metrics=classify_metrics,
+            metric=metric, timestamp=timestamp, algorithm=algorithm,
+            classify_metrics_dict=classify_metrics_dict,
+            classification_count=classification_count,
+            siginificant_count=siginificant_count,
+            classified_metrics=classified_metrics,
+            classification=classification,
+            classify_metric=classify_metric,
+            version=skyline_version, duration=(time.time() - start),
+            print_debug=debug_on), 200
+    except:
+        message = 'Uh oh ... a Skyline 500 :('
+        trace = traceback.format_exc()
+        return internal_error(message, trace)
 
 
 # @added 20160703 - Feature #1464: Webapp Redis browser
