@@ -121,14 +121,14 @@ request.
 
   {
   	"metric": "vista.nodes.skyline-1.cpu.user",
-  	"timestamp": "1478021700",
-  	"value": "1.0",
+  	"timestamp": 1478021700,
+  	"value": 1.0,
   	"key": "YOURown32charSkylineAPIkeySecret"
   }
 
 .. code-block:: bash
 
-  curl -vvv -u username:password -d '{"metric":"vista.nodes.skyline-1.cpu.user","timestamp":"1478021700","value":"1.0","key":"YOURown32charSkylineAPIkeySecret"}' -H "Content-Type: application/json" -X POST https://skyline.example.org/flux/metric_data_post
+  curl -vvv -u username:password -d '{"metric":"vista.nodes.skyline-1.cpu.user","timestamp":1478021700,"value":1.0,"key":"YOURown32charSkylineAPIkeySecret"}' -H "Content-Type: application/json" -X POST https://skyline.example.org/flux/metric_data_post
 
 Here is an example of the data a multiple metrics POST requires and an example
 POST request for multiple metrics:
@@ -143,21 +143,21 @@ POST request for multiple metrics:
     "metrics": [
       {
       	"metric": "vista.nodes.skyline-1.cpu.user",
-      	"timestamp": "1478021700",
-      	"value": "1.0",
+      	"timestamp": 1478021700,
+      	"value": 1.0,
       },
       {
       	"metric": "vista.nodes.skyline-1.cpu.system",
-      	"timestamp": "1478021700",
-      	"value": "0.2",
+      	"timestamp": 1478021700,
+      	"value": 0.2,
       }
     ]
   }
 
 .. code-block:: bash
 
-  curl -vvv -u username:password -d '{"key":"YOURown32charSkylineAPIkeySecret","metrics":[{"metric":"vista.nodes.skyline-1.cpu.user","timestamp":"1478021700","value":"1.0"},{"metric":"vista.nodes.skyline-1.cpu.system","timestamp":"1478021700","value":"0.2"}]}' -H "Content-Type: application/json" -X POST https://skyline.example.org/flux/metric_data_post
 
+  curl -vvv -u username:password -d '{"key":"YOURown32charSkylineAPIkeySecret","metrics":[{"metric":"vista.nodes.skyline-1.cpu.user","timestamp":1478021700,"value":1.0},{"metric":"vista.nodes.skyline-1.cpu.system","timestamp":1478021700,"value":0.2}]}' -H "Content-Type: application/json" -X POST https://skyline.example.org/flux/metric_data_post
 GET request
 -----------
 
