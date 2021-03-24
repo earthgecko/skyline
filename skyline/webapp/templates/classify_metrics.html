@@ -1,0 +1,173 @@
+{% block classify_metrics_block %}
+<!-- BEGIN /ionosphere/fp_veiw=true&fp_search=true block -->
+{% if print_debug == 'True' %}
+<code> DEBUG </code> :: /luminosity classify_metrics block</br>
+{% endif %}
+
+{% if display_message %}
+<code> ERROR </code></br>
+<code> message </code>: {{ display_message }}<br>
+{% endif %}
+
+<div class="navbar-header" role="navigation">
+  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+    <span class="sr-only">Toggle navigation</span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+  </button>
+		<ul class="nav nav-tabs" role="view_tablist" id="view">
+		  <li class="active"><a href="?classify_metrics=true"><span class="logo"><span class="sky">Classify</span> <span class="re">metrics</span></span></a></li>
+<!--
+		  <li><a href="?classification=true"><span class="logo"><span class="sky">Classifications</span> - <span class="re">metric</span></span></span></a></li>
+-->
+		</ul>
+		<div class="tab-content">
+	  	<div class="tab-pane active" id="view">
+	<br>
+  <div class="navbar-header" role="navigation">
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+  </div>
+
+<!--	<div class="col-md-9 col-md-pull-3"> -->
+	<div class="col-md-12">
+		<ul class="nav nav-tabs" role="tablist" id="list_by-tabs">
+		  <li class="active"><a href="?classify_metrics=true">Search</a></li>
+		</ul>
+		<div class="tab-content">
+
+  		<div class="col-md-12">
+<!--  		<div class="container"> -->
+  		  <h4><span class="logo"><span class="sky">Search ::</span> <span class="re">classified metrics</span></span></span></h4>
+  {% if classified_metrics %}
+        <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#search_options">Show search options</button>
+        <div id="search_options" class="collapse">
+  {% endif %}
+        <form action="luminosity">
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Search criteria</th>
+  		        <th>filter</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+  		        <td>Classify metrics search</td>
+  		        <td><select name="classify_metrics">
+                <option value="true">true</option>
+              </select></td>
+  		      </tr>
+  		      <tr>
+  		        <td>metric:</td>
+  		        <td><input type="text" name="metric" value="all" /></td>
+  		      </tr>
+  		      <tr>
+  		        <td>timestamp</td>
+  		        <td><input type="text" name="timestamp" value="all"> unix timestamp or all</td>
+  		      </tr>
+  		      <tr>
+  		        <td>algorithm</td>
+  		        <td><select name="algorithm">
+                <option value="all">all</option>
+                <option value="adtk_level_shift">adtk_level_shift</option>
+                <option value="adtk_volatility_shift">adtk_volatility_shift</option>
+              </select></td>
+  		      </tr>
+  		      <tr>
+  		        <td>significant</td>
+  		        <td><select name="significant">
+                <option value="false">false</option>
+                <option value="true">true</option>
+              </select></td>
+  		      </tr>
+  		    </tbody>
+  		  </table>
+        <br>
+        <input type="submit" value="Search">
+      </form>
+  {% if classify_metrics_dict %}
+<!-- collapse button div -->
+      </div>
+  {% endif %}
+      </div>
+
+  {% if classify_metrics and classify_metrics_dict and metric == 'all' and not classification %}
+	  <div class="tab-pane active" id="search">
+      <h4><span class="logo"><span class="sky">Metrics ::</span> <span class="re">classified</span></span> ({{ classify_metrics_dict|length }} metrics)</h4>
+
+			<table class="table table-hover">
+				<thead>
+					<tr>
+            <th>metric</th>
+            <th>algorithm</th>
+            <th>classifications</th>
+            <th>significant</th>
+					</tr>
+				</thead>
+				<tbody>
+  {% for current_metric in classify_metrics_dict %}
+    {% for algo in classify_metrics_dict[current_metric] %}
+          <tr>
+            <td onclick="window.location='?classification=true&metric={{ current_metric }}&algorithm={{ algo }}'">
+              <a href="?classification=true&metric={{ current_metric }}&algorithm={{ algo }}">{{ current_metric }}</a>
+            </td>
+            <td>
+              {{ algo }}
+            </td>
+            <td>
+              {{ classify_metrics_dict[current_metric][algo]['classifications'] }}
+            </td>
+            <td>
+              {{ classify_metrics_dict[current_metric][algo]['significant'] }}
+            </td>
+          </tr>
+    {% endfor %}
+  {% endfor %}
+				</tbody>
+			</table>
+		</div>
+  {% endif %}
+
+  {% if classify_metrics and metric != 'all' %}
+	  <div class="tab-pane active" id="search">
+      <h4><span class="logo"><span class="sky">Metrics ::</span> <span class="re">classified</span></span></h4>
+
+			<table class="table table-hover">
+				<thead>
+					<tr>
+            <th>metric</th>
+					</tr>
+				</thead>
+				<tbody>
+  {% for metric in classified_metrics %}
+          <tr>
+            <td onclick="window.location='?classify_metrics=true&metric={{ metric }}'">
+              <a href="?classify_metrics=true&metric={{ metric }}">{{ metric }}</a>
+            </td>
+          </tr>
+  {% endfor %}
+				</tbody>
+			</table>
+		</div>
+  {% endif %}
+
+
+    </div> <!-- END div class="col-md-12" -->
+
+	</div>
+	</div>
+	</div>
+  </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- END /ionosphere/fp_veiw=true&fp_search=true block -->
+{% endblock %}

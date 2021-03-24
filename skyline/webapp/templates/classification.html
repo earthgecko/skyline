@@ -1,0 +1,130 @@
+{% block classifications_block %}
+<!-- BEGIN /luminosity?classifications=true block -->
+{% if print_debug == 'True' %}
+<code> DEBUG </code> :: /luminosity classifications block</br>
+{% endif %}
+
+{% if display_message %}
+<code> ERROR </code></br>
+<code> message </code>: {{ display_message }}<br>
+{% endif %}
+
+<div class="navbar-header" role="navigation">
+  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+    <span class="sr-only">Toggle navigation</span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+  </button>
+		<ul class="nav nav-tabs" role="view_tablist" id="view">
+		  <li ><a href="?classify_metrics=true"><span class="logo"><span class="sky">Classify</span> <span class="re">metric</span></span></a></li>
+		  <li class="active"><a href="?classification=true"><span class="logo"><span class="sky">Classifictions</span> - <span class="re">metric</span></span></a></li>
+		</ul>
+		<div class="tab-content">
+	  	<div class="tab-pane active" id="view">
+	<br>
+  <div class="navbar-header" role="navigation">
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+  </div>
+
+<!--	<div class="col-md-9 col-md-pull-3"> -->
+	<div class="col-md-12">
+		<ul class="nav nav-tabs" role="tablist" id="list_by-tabs">
+		  <li ><a href="?classify_metrics=true">Search</a></li>
+		  <li class="active"><a href="?classification=true">Classify</a></li>
+		</ul>
+		<div class="tab-content">
+
+  {% if classify_metrics_dict and classification %}
+	  <div class="tab-pane active" id="classify">
+      <h4><span class="logo"><span class="sky">Metric ::</span> <span class="re">classification</span></span> {{ metric }}</h4>
+      <h5><span class="logo"><span class="sky">All ::</span> <span class="re">classification :: </span></span> {{ classification_count }}</h5>
+      <h5><span class="logo"><span class="sky">Significant ::</span> <span class="re">classification :: </span></span> {{ siginificant_count }}</h5>
+
+			<table class="table table-hover">
+				<thead>
+					<tr>
+            <th>algorithm</th>
+            <th>timestamp</th>
+            <th>anomalies</th>
+            <th>significant</th>
+					</tr>
+				</thead>
+				<tbody>
+  {% for current_metric in classify_metrics_dict %}
+    {% for algo in classify_metrics_dict[current_metric] %}
+          <tr>
+            <td>
+              {{ algo }}
+            </td>
+            <td onclick="window.location='?classify_metric=true&metric={{ current_metric }}&algorithm={{ algo }}&timestamp=all'">
+              <a href="?classify_metric=true&metric={{ current_metric }}&algorithm={{ algo }}&timestamp=all">view all</a>
+            </td>
+            <td>
+              N/A
+            </td>
+            <td>
+              N/A
+            </td>
+          </tr>
+          <tr>
+            <td>
+              {{ algo }}
+            </td>
+            <td onclick="window.location='?classify_metric=true&metric={{ current_metric }}&algorithm={{ algo }}&timestamp=all&significant=true'">
+              <a href="?classify_metric=true&metric={{ current_metric }}&algorithm={{ algo }}&timestamp=all&significant=true">view all significant</a>
+            </td>
+            <td>
+              N/A
+            </td>
+            <td>
+              N/A
+            </td>
+          </tr>
+      {% for ts in classify_metrics_dict[current_metric][algo]['timestamps'] %}
+          <tr>
+            <td>
+              {{ algo }}
+            </td>
+            <td onclick="window.location='?classify_metric=true&metric={{ current_metric }}&algorithm={{ algo }}&timestamp={{ ts }}'">
+              <a href="?classify_metric=true&metric={{ current_metric }}&algorithm={{ algo }}&timestamp={{ ts }}">{{ ts }}</a>
+            </td>
+            <td>
+              {{ classify_metrics_dict[current_metric][algo]['timestamps'][ts]['anomalies']|length }}
+            </td>
+            <td>
+        {% if classify_metrics_dict[current_metric][algo]['timestamps'][ts]['significant'] %}
+              <span class="logo"><span class="sky">True</span></span>
+        {% else %}
+              <span class="logo"><span class="re">False</span></span>
+        {% endif %}
+            </td>
+          </tr>
+      {% endfor %}
+    {% endfor %}
+  {% endfor %}
+				</tbody>
+			</table>
+		</div>
+  {% endif %}
+
+    </div> <!-- END div class="col-md-12" -->
+
+	</div>
+	</div>
+	</div>
+  </div>
+<!--
+</div>
+</div>
+</div>
+</div>
+</div>
+-->
+
+<!-- END /ionosphere/fp_veiw=true&fp_search=true block -->
+{% endblock %}

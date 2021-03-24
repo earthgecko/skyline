@@ -1,0 +1,116 @@
+{% block classifications_block %}
+<!-- BEGIN /luminosity?classify_metric=true block -->
+{% if print_debug == 'True' %}
+<code> DEBUG </code> :: /luminosity classify_metric block</br>
+{% endif %}
+
+{% if display_message %}
+<code> ERROR </code></br>
+<code> message </code>: {{ display_message }}<br>
+{% endif %}
+
+<div class="navbar-header" role="navigation">
+  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+    <span class="sr-only">Toggle navigation</span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+  </button>
+		<ul class="nav nav-tabs" role="view_tablist" id="view">
+		  <li ><a href="?classify_metrics=true"><span class="logo"><span class="sky">Classify</span> <span class="re">metrics</span></span></a></li>
+		  <li><a href="?classification=true&metric={{ metric }}&algorithm={{ algorithm }}"><span class="logo"><span class="sky">Classifications</span> - <span class="re">metric</span></span></a></li>
+		  <li class="active"><a href="?classify_metric=true&metric={{ metric }}&algortihm={{ algorithm }}&timestamp={{ timestamp }}"><span class="logo"><span class="sky">Classify</span> - <span class="re">metric</span></span></a></li>
+		</ul>
+		<div class="tab-content">
+	  	<div class="tab-pane active" id="view">
+	<br>
+
+<!--	<div class="col-md-9 col-md-pull-3"> -->
+	<div class="col-md-12">
+		<ul class="nav nav-tabs" role="tablist" id="list_by-tabs">
+		  <li><a href="?classification=true&metric={{ metric }}&algorithm={{ algorithm }}">Classifications</a></li>
+		  <li class="active"><a href="?classify_metric=true&metric={{ metric }}&algortihm={{ algorithm }}&timestamp={{ timestamp }}">Classify</a></li>
+		</ul>
+		<div class="tab-content">
+
+	  <div class="tab-pane active" id="classify">
+
+      <h4><span class="logo"><span class="sky">Luminosity ::</span> <span class="re">classify metric</span></span>:: {{ metric }} - {{ algorithm }}</h4>
+  		<table class="table table-hover">
+  			<thead>
+  				<tr>
+            <th>Details</th>
+            <th>Detection plot</th>
+  				</tr>
+  			</thead>
+  			<tbody>
+  {% for algo in classify_metrics_dict[metric] %}
+    {% for ts in classify_metrics_dict[metric][algo]['timestamps'] %}
+      {% if timestamp == 'all' %}
+          {% for file in classify_metrics_dict[metric][algo]['timestamps'][ts]['files'] %}
+            {% if 'png' in file %}
+            <tr>
+              {% if classify_metrics_dict[metric][algo]['timestamps'][ts]['significant'] %}
+              <td>file: {{ file }}<br>timestamp: {{ ts }}<br>significant: <span class="logo"><span class="sky">True</span></span></td>
+              {% else %}
+              <td>file: {{ file }}<br>timestamp: {{ ts }}<br>significant: <span class="logo"><span class="re">False</span></span></td>
+              {% endif %}
+              <td><img src="luminosity_images?image={{ classify_metrics_dict[metric][algo]['timestamps'][ts]['file_path'] }}/{{ file }}" alt="{{ algo }} {{ metric }}" class="img-responsive center-block" /></td>
+            {% endif %}
+            </tr>
+          {% endfor %}
+      {% else %}
+        {% if ts|int == timestamp|int %}
+          {% for file in classify_metrics_dict[metric][algo]['timestamps'][ts]['files'] %}
+            {% if 'png' in file %}
+            <tr>
+              {% if classify_metrics_dict[metric][algo]['timestamps'][ts]['significant'] %}
+              <td>file: {{ file }}<br>timestamp: {{ ts }}<br>significant: <span class="logo"><span class="sky">True</span></span></td>
+              {% else %}
+              <td>file: {{ file }}<br>timestamp: {{ ts }}<br>significant: <span class="logo"><span class="re">False</span></span></td>
+              {% endif %}
+              <td><img src="luminosity_images?image={{ classify_metrics_dict[metric][algo]['timestamps'][ts]['file_path'] }}/{{ file }}" alt="{{ algo }} {{ metric }}" class="img-responsive center-block" /></td>
+            {% endif %}
+            </tr>
+          {% endfor %}
+        {% endif %}
+      {% endif %}
+    {% endfor %}
+  {% endfor %}
+			</tbody>
+		</table>
+
+  {% if timestamp != 'all' %}
+  <h4><span class="logo"><span class="sky">{{ algorithm }} ::</span> <span class="re">anomalies</span></span> {{ classify_metrics_dict[metric][algorithm]['timestamps'][timestamp|int]['anomalies']|length }} anomalies detected</h4>
+		<table class="table table-hover">
+			<thead>
+				<tr>
+          <th>Timestamp</th>
+          <th>Anomalous value</th>
+				</tr>
+			</thead>
+			<tbody>
+    {% for ts in classify_metrics_dict[metric][algorithm]['timestamps'] %}
+      {% if ts|int == timestamp|int %}
+        {% for a_ts in classify_metrics_dict[metric][algorithm]['timestamps'][ts]['anomalies'] %}
+        <tr>
+          <td>{{ a_ts }}</td>
+          <td>{{ classify_metrics_dict[metric][algorithm]['timestamps'][ts]['anomalies'][a_ts] }}</td>
+        </tr>
+        {% endfor %}
+      {% endif %}
+    {% endfor %}
+			</tbody>
+		</table>
+  {% endif %}
+
+		</div>
+
+    </div> <!-- END div class="col-md-12" -->
+
+	</div>
+	</div>
+	</div>
+  </div>
+
+<!-- END /luminosity?classify_metric=true block -->
+{% endblock %}
