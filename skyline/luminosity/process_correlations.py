@@ -46,6 +46,16 @@ try:
 except:
     LUMINOSITY_CORRELATION_MAPS = {}
 
+# @added 20210124 - Feature #3956: luminosity - motifs
+try:
+    LUMINOSITY_ANALYSE_MOTIFS = settings.LUMINOSITY_ANALYSE_MOTIFS
+except:
+    LUMINOSITY_ANALYSE_MOTIFS = True
+if LUMINOSITY_ANALYSE_MOTIFS:
+    from collections import Counter
+    import matrixprofile as mp
+    import numpy as np
+
 # Database configuration
 config = {'user': settings.PANORAMA_DBUSER,
           'password': settings.PANORAMA_DBUSERPASS,
@@ -862,6 +872,13 @@ def get_correlations(
     # @added 20170720 - Task #2462: Implement useful metrics for Luminosity
     # Added runtime to calculate avg_runtime Graphite metric
     runtime = '%.6f' % (end - start)
+
+    # @added 20210124 - Feature #3956: luminosity - motifs
+    if LUMINOSITY_ANALYSE_MOTIFS:
+        # DO stuff...
+        # def skyline_matrixprofile(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
+        todo = True
+
     return (correlated_metrics, correlations, metrics_checked_for_correlation, runtime)
 
 
@@ -873,6 +890,8 @@ def process_correlations(i, anomaly_id):
     correlated_metrics = []
     correlations = []
     sorted_correlations = []
+    # @added 20210124 - Feature #3956: luminosity - motifs
+    motifs = []
 
     start_process_correlations = timer()
 
@@ -888,20 +907,26 @@ def process_correlations(i, anomaly_id):
         logger.info('process_correlations :: the anomaly_timestamp %s is too old not correlating' % str(anomaly_timestamp))
         metrics_checked_for_correlation = 0
         runtime = 0
-        return (base_name, anomaly_timestamp, anomalies, correlated_metrics, correlations, sorted_correlations, metrics_checked_for_correlation, runtime)
+        # @added 20210124 - Feature #3956: luminosity - motifs
+        # Added motifs
+        return (base_name, anomaly_timestamp, anomalies, correlated_metrics, correlations, sorted_correlations, metrics_checked_for_correlation, runtime, motifs)
 
     anomalous_ts = get_anomalous_ts(base_name, anomaly_timestamp)
     if not anomalous_ts:
         metrics_checked_for_correlation = 0
         runtime = 0
         logger.info('process_correlations :: no timeseries data available in Redis for %s, nothing to correlate' % str(base_name))
-        return (base_name, anomaly_timestamp, anomalies, correlated_metrics, correlations, sorted_correlations, metrics_checked_for_correlation, runtime)
+        # @added 20210124 - Feature #3956: luminosity - motifs
+        # Added motifs
+        return (base_name, anomaly_timestamp, anomalies, correlated_metrics, correlations, sorted_correlations, metrics_checked_for_correlation, runtime, motifs)
     anomalies = get_anoms(anomalous_ts)
     if not anomalies:
         metrics_checked_for_correlation = 0
         runtime = 0
         logger.info('process_correlations :: no anomalies found for %s, nothing to correlate' % str(base_name))
-        return (base_name, anomaly_timestamp, anomalies, correlated_metrics, correlations, sorted_correlations, metrics_checked_for_correlation, runtime)
+        # @added 20210124 - Feature #3956: luminosity - motifs
+        # Added motifs
+        return (base_name, anomaly_timestamp, anomalies, correlated_metrics, correlations, sorted_correlations, metrics_checked_for_correlation, runtime, motifs)
 
     # @modified 20200506 - Feature #3510: Enable Luminosity to handle correlating namespaces only
     # assigned_metrics = get_assigned_metrics(i)
@@ -929,4 +954,6 @@ def process_correlations(i, anomaly_id):
     logger.info('process_correlations :: took %.6f seconds' % (
         (end_process_correlations - start_process_correlations)))
 
-    return (base_name, anomaly_timestamp, anomalies, correlated_metrics, correlations, sorted_correlations, metrics_checked_for_correlation, runtime)
+    # @modified 20210124 - Feature #3956: luminosity - motifs
+    # Added motifs
+    return (base_name, anomaly_timestamp, anomalies, correlated_metrics, correlations, sorted_correlations, metrics_checked_for_correlation, runtime, motifs)
