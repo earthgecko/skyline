@@ -82,7 +82,7 @@ def classify_anomalies(i, classify_anomalies_set, start_timestamp, classify_for)
             try:
                 cursor = cnx.cursor()
                 cursor.execute(insert)
-                inserted_id = cursor.lastrowid
+                inserted_id = cursor.rowcount
                 # Make sure data is committed to the database
                 cnx.commit()
                 cursor.close()
@@ -346,8 +346,10 @@ def classify_anomalies(i, classify_anomalies_set, start_timestamp, classify_for)
             try:
                 anomaly_id = get_anomaly_id(skyline_app, base_name, timestamp)
             except:
-                logger.info('classify_anomalies :: stopping before timeout is reached')
+                logger.error('error :: classify_anomalies :: get_anomaly_id failed to determine id')
                 anomaly_id = 0
+        logger.info('classify_anomalies :: anomaly_id: %s' % (
+            str(anomaly_id)))
         type_data = []
         if anomaly_id:
             query = 'SELECT id,algorithm,type FROM anomaly_types'
@@ -374,6 +376,31 @@ def classify_anomalies(i, classify_anomalies_set, start_timestamp, classify_for)
             type_data = []
             for anomaly_type in anomaly_types:
                 type_data.append(int(db_anomaly_types[anomaly_type]['id']))
+        logger.info('classify_anomalies :: type_data: %s' % (
+            str(type_data)))
+
+        classification_exists = None
+        if type_data and anomaly_id:
+            query = 'SELECT metric_id FROM anomalies_type WHERE id=%s' % anomaly_id
+            try:
+                results = mysql_select(skyline_app, query)
+                for item in results:
+                    classification_exists = item[0]
+                    break
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: classify_anomalies :: querying MySQL - SELECT metric_id FROM anomalies_type WHERE id=%s' % anomaly_id)
+        if classification_exists:
+            try:
+                redis_conn.srem('luminosity.classify_anomalies', str(classify_anomaly))
+                logger.info('classify_anomalies :: results already recorded for metric_id %s so removed %s, %s, %s item from luminosity.classify_anomalies Redis set' % (
+                    str(classification_exists), base_name, str(timestamp),
+                    anomaly_data_dict['app']))
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: classify_anomalies :: after results recorded failed to remove %s, %s, %s item from luminosity.classify_anomalies Redis set' % (
+                    base_name, str(timestamp), anomaly_data_dict['app']))
+            type_data = None
 
         if type_data:
             type_data_str = ''
@@ -382,10 +409,14 @@ def classify_anomalies(i, classify_anomalies_set, start_timestamp, classify_for)
                     type_data_str = '%s' % str(id)
                 else:
                     type_data_str = '%s,%s' % (type_data_str, str(id))
-            ins_values = '(%s , %s, \'%s\')' % (str(anomaly_id), str(metric_id), type_data_str)
+            ins_values = '(%s,%s,\'%s\')' % (str(anomaly_id), str(metric_id), type_data_str)
             values_string = 'INSERT INTO anomalies_type (id, metric_id, type) VALUES %s' % ins_values
             try:
                 results_recorded = mysql_insert(values_string)
+                logger.debug('debug :: classify_anomalies :: INSERT: %s' % (
+                    str(values_string)))
+                logger.debug('debug :: classify_anomalies :: results_recorded: %s' % (
+                    str(results_recorded)))
             except Exception as e:
                 # Handle a process updating on SystemExit
                 if 'Duplicate entry' in str(e):
@@ -397,7 +428,7 @@ def classify_anomalies(i, classify_anomalies_set, start_timestamp, classify_for)
                     logger.error('error :: MySQL insert - %s' % str(values_string))
                     results_recorded = 0
             if results_recorded:
-                logger.info('classify_anomalies :: added row %s to anomalies_type for anomaly id %s on %s - %s' % (
+                logger.info('classify_anomalies :: added %s row to anomalies_type for anomaly id %s on %s - %s' % (
                     str(results_recorded), str(anomaly_id), base_name,
                     str(type_data)))
         if results_recorded:
