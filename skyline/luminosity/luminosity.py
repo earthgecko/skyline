@@ -3,6 +3,7 @@ import logging
 import os
 from os import kill, getpid
 from sys import version_info
+from ast import literal_eval
 
 # @modified 20191115 - Branch #3262: py3
 # try:
@@ -68,6 +69,20 @@ except:
     # It is fast and lightweight
     # luminosity_processes = 2
     LUMINOSITY_PROCESSES = 1
+
+# @aded 20210308 - Feature #3978: luminosity - classify_metrics
+#                  Feature #3642: Anomaly type classification
+try:
+    LUMINOSITY_CLASSIFY_METRICS = settings.LUMINOSITY_CLASSIFY_METRICS
+except:
+    LUMINOSITY_CLASSIFY_METRICS = True
+
+# @added 20210323 - Feature #3642: Anomaly type classification
+try:
+    LUMINOSITY_CLASSIFY_ANOMALIES = settings.LUMINOSITY_CLASSIFY_ANOMALIES
+except:
+    LUMINOSITY_CLASSIFY_ANOMALIES = False
+
 
 skyline_app_graphite_namespace = 'skyline.%s%s' % (skyline_app, SERVER_METRIC_PATH)
 
@@ -238,6 +253,74 @@ class Luminosity(Thread):
 
         return False
 
+    # @added 20210323 - Feature #3642: Anomaly type classification
+    def classify_anomalies(self, i, classify_anomalies_set, start_timestamp, max_run_seconds):
+        """
+        Classify anomalies
+
+        :param i: python process id
+        :param classify_anomalies_set: set from luminosity.classify_anomalies
+        :param start_timestamp: the process star timestamp
+        :param max_run_seconds: the max number of seconds to run for
+        :type i: object
+        :type classify_anomalies_set: set
+        :type start_timestamp: int
+        :type max_run_seconds: int
+        :return: boolean
+        :rtype: boolean
+
+        """
+
+        child_process_pid = os.getpid()
+        logger.info('child process pid %s - classifying anomalies' % (str(child_process_pid)))
+        ran = False
+
+        try:
+            from classify_anomalies import classify_anomalies
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: importing classify_anomalies')
+
+        try:
+            ran = classify_anomalies(i, classify_anomalies_set, start_timestamp, max_run_seconds)
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: running classify_anomalies')
+            return False
+        return ran
+
+    def classify_metrics(self, i, start_timestamp, max_run_seconds):
+        """
+        Classify metrics
+
+        :param i: python process id
+        :param start_timestamp: the process star timestamp
+        :param max_run_seconds: the max number of seconds to run for
+        :type i: object
+        :type start_timestamp: int
+        :type max_run_seconds: int
+        :return: boolean
+        :rtype: boolean
+
+        """
+
+        child_process_pid = os.getpid()
+        logger.info('child process pid %s - classifying metrics' % (str(child_process_pid)))
+        ran = False
+
+        try:
+            from classify_metrics import classify_metrics
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: importing classify_metrics')
+        try:
+            ran = classify_metrics(i, start_timestamp, max_run_seconds)
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: running classify_metrics')
+            return False
+        return ran
+
     def spin_process(self, i, anomaly_id):
         """
         Assign an anomalous metric and determine correlated metrics
@@ -294,7 +377,9 @@ class Luminosity(Thread):
         try:
             # @modified 20180720 - Task #2462: Implement useful metrics for Luminosity
             # Added runtime
-            base_name, anomaly_timestamp, anomalies, correlated_metrics, correlations, sorted_correlations, metrics_checked_for_correlation, runtime = process_correlations(i, anomaly_id)
+            # @modified 20210124 - Feature #3956: luminosity - motifs
+            # Added motifs
+            base_name, anomaly_timestamp, anomalies, correlated_metrics, correlations, sorted_correlations, metrics_checked_for_correlation, runtime, motifs = process_correlations(i, anomaly_id)
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: processing correlations')
@@ -657,15 +742,148 @@ class Luminosity(Thread):
                                 process_anomaly_id = None
 
                 if not process_anomaly_id:
-                    logger.info('sleeping 20 no anomalies to correlate - last processed anomaly id - %s' % str(last_processed_anomaly_id))
-                    sleep(20)
-                    up_now = time()
-                    # Report app up
-                    try:
-                        self.redis_conn.setex(skyline_app, 120, up_now)
-                        logger.info('updated Redis key for %s up' % skyline_app)
-                    except:
-                        logger.error('error :: failed to update Redis key for %s up' % skyline_app)
+
+                    if not LUMINOSITY_CLASSIFY_METRICS and not LUMINOSITY_CLASSIFY_ANOMALIES:
+                        logger.info('sleeping 20 no anomalies to correlate - last processed anomaly id - %s' % str(last_processed_anomaly_id))
+                        sleep(20)
+                        up_now = time()
+                        # Report app up
+                        try:
+                            self.redis_conn.setex(skyline_app, 120, up_now)
+                            logger.info('updated Redis key for %s up' % skyline_app)
+                        except:
+                            logger.error('error :: failed to update Redis key for %s up' % skyline_app)
+
+                    # @added 20210323 - Feature #3642: Anomaly type classification
+                    if LUMINOSITY_CLASSIFY_ANOMALIES:
+                        classify_anomalies_set = {}
+                        try:
+                            classify_anomalies_set = self.redis_conn_decoded.smembers('luminosity.classify_anomalies')
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: from query - %s' % query)
+                        if len(classify_anomalies_set) > 0:
+                            current_now = int(time())
+                            classify_for = 19
+                            logger.info('classifying anomalies for %.2f seconds' % classify_for)
+                            pid_count = 0
+                            pids = []
+                            spawned_pids = []
+                            try:
+                                p = Process(target=self.classify_anomalies, args=(self.current_pid, classify_anomalies_set, current_now, classify_for))
+                                pids.append(p)
+                                pid_count += 1
+                                logger.info('starting classify_anomalies')
+                                p.start()
+                                spawned_pids.append(p.pid)
+                            except:
+                                logger.error(traceback.format_exc())
+                                logger.error('error :: failed to start classify_anomalies')
+
+                            # Self monitor processes and terminate if any classify_anomalies
+                            # that has run for too long
+                            p_starts = time()
+                            while time() - p_starts <= classify_for:
+                                if any(p.is_alive() for p in pids):
+                                    # Just to avoid hogging the CPU
+                                    sleep(.1)
+                                else:
+                                    # All the processes are done, break now.
+                                    time_to_run = time() - p_starts
+                                    logger.info(
+                                        'classify_anomalies completed in %.2f seconds' % (
+                                            time_to_run))
+                                    break
+                            else:
+                                # We only enter this if we didn't 'break' above.
+                                logger.info('timed out, killing classify_anomalies process')
+                                for p in pids:
+                                    try:
+                                        p.terminate()
+                                        # p.join()
+                                        logger.info('killed classify_anomalies process')
+                                    except:
+                                        logger.error(traceback.format_exc())
+                                        logger.error('error :: killing all classify_anomalies processes')
+                            for p in pids:
+                                if p.is_alive():
+                                    logger.info('stopping classify_anomalies - %s' % (str(p.is_alive())))
+                                    p.join()
+                            logger.info('classify_anomalies - complete')
+                            up_now = time()
+                            # Report app up
+                            try:
+                                self.redis_conn.setex(skyline_app, 120, up_now)
+                                logger.info('updated Redis key for %s up' % skyline_app)
+                            except:
+                                logger.error('error :: failed to update Redis key for %s up' % skyline_app)
+                            run_end = time()
+                            classify_anomalies_runtime = run_end - current_now
+                            logger.info('classify_anomalies took %.6f seconds' % classify_anomalies_runtime)
+
+                    # @added 20210308 - Feature #3978: luminosity - classify_metrics
+                    #                   Feature #3642: Anomaly type classification
+                    if LUMINOSITY_CLASSIFY_METRICS:
+                        current_now = int(time())
+                        classify_for = 19
+                        logger.info('classifying metrics for %.2f seconds' % classify_for)
+                        pid_count = 0
+                        pids = []
+                        spawned_pids = []
+                        try:
+                            p = Process(target=self.classify_metrics, args=(self.current_pid, current_now, classify_for))
+                            pids.append(p)
+                            pid_count += 1
+                            logger.info('starting classify_metrics')
+                            p.start()
+                            spawned_pids.append(p.pid)
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: failed to start classify_metrics')
+
+                        # Self monitor processes and terminate if any classify_metrics
+                        # that has run for too long
+                        p_starts = time()
+                        while time() - p_starts <= classify_for:
+                            if any(p.is_alive() for p in pids):
+                                # Just to avoid hogging the CPU
+                                sleep(.1)
+                            else:
+                                # All the processes are done, break now.
+                                time_to_run = time() - p_starts
+                                logger.info(
+                                    'classify_metrics completed in %.2f seconds' % (
+                                        time_to_run))
+                                break
+                        else:
+                            # We only enter this if we didn't 'break' above.
+                            logger.info('timed out, killing classify_metrics process')
+                            for p in pids:
+                                try:
+                                    p.terminate()
+                                    # p.join()
+                                    logger.info('killed classify_metrics process')
+                                except:
+                                    logger.error(traceback.format_exc())
+                                    logger.error('error :: killing all classify_metrics processes')
+                        for p in pids:
+                            if p.is_alive():
+                                logger.info('stopping classify_metrics - %s' % (str(p.is_alive())))
+                                p.join()
+                        logger.info('classify_metrics - complete')
+                        up_now = time()
+                        # Report app up
+                        try:
+                            self.redis_conn.setex(skyline_app, 120, up_now)
+                            logger.info('updated Redis key for %s up' % skyline_app)
+                        except:
+                            logger.error('error :: failed to update Redis key for %s up' % skyline_app)
+                        run_end = time()
+                        classify_runtime = int(run_end - current_now)
+                        if classify_runtime < 19:
+                            sleep_for = (20 - classify_runtime)
+                            logger.info('sleeping for %.2f seconds due to low classify run time' % sleep_for)
+                            sleep(sleep_for)
 
                 cache_key = '%s.sent_graphite_metrics' % skyline_app
                 redis_sent_graphite_metrics = False
@@ -729,6 +947,45 @@ class Luminosity(Thread):
                     logger.info('metrics_checked_for_correlation   :: %s' % metrics_checked_for_correlation)
                     send_metric_name = '%s.metrics_checked_for_correlation' % skyline_app_graphite_namespace
                     send_graphite_metric(skyline_app, send_metric_name, metrics_checked_for_correlation)
+
+                    # @added 20210308 - Feature #3978: luminosity - classify_metrics
+                    #                   Feature #3642: Anomaly type classification
+                    if LUMINOSITY_CLASSIFY_METRICS:
+                        metrics_proceessed_counts = []
+                        classify_metrics_proceessed = []
+                        try:
+                            classify_metrics_proceessed = self.redis_conn_decoded.smembers('luminosity.classify_metrics.proceessed')
+                        except Exception as e:
+                            logger.error('error :: could not query Redis for key luminosity.classify_metrics.proceessed: %s' % str(e))
+                        try:
+                            self.redis_conn.delete('luminosity.classify_metrics.proceessed')
+                        except Exception as e:
+                            logger.error('error :: could not delete Redis for key luminosity.classify_metrics.proceessed: %s' % str(e))
+                        for metrics_proceessed_item in classify_metrics_proceessed:
+                            metrics_proceessed = literal_eval(metrics_proceessed_item)
+                            metrics_proceessed_counts.append(metrics_proceessed[1])
+                        metrics_proceessed = sum(metrics_proceessed_counts)
+                        logger.info('classify_metrics_proceessed   :: %s' % metrics_proceessed)
+                        send_metric_name = '%s.classify_metrics.proceessed' % skyline_app_graphite_namespace
+                        send_graphite_metric(skyline_app, send_metric_name, str(metrics_proceessed))
+                        metrics_classified_counts = []
+                        classify_metrics_classified = []
+                        try:
+                            classify_metrics_classified = self.redis_conn_decoded.smembers('luminosity.classify_metrics.classified')
+                        except Exception as e:
+                            logger.error('error :: could not query Redis for key luminosity.classify_metrics.classified: %s' % str(e))
+                        try:
+                            self.redis_conn.delete('luminosity.classify_metrics.classified')
+                        except Exception as e:
+                            logger.error('error :: could not delete Redis for key luminosity.classify_metrics.classified: %s' % str(e))
+                        for metrics_classified_item in classify_metrics_classified:
+                            metrics_classified = literal_eval(metrics_classified_item)
+                            metrics_classified_counts.append(metrics_classified[1])
+                        metrics_classified = sum(metrics_classified_counts)
+                        logger.info('classify_metrics_classified   :: %s' % metrics_classified)
+                        send_metric_name = '%s.classify_metrics.classified' % skyline_app_graphite_namespace
+                        send_graphite_metric(skyline_app, send_metric_name, str(metrics_classified))
+
                     sent_graphite_metrics_now = int(time())
                     try:
                         self.redis_conn.setex(cache_key, 59, sent_graphite_metrics_now)
@@ -851,7 +1108,9 @@ class Luminosity(Thread):
                     logger.info('stopping spin_process - %s' % (str(p.is_alive())))
                     p.join()
 
-            process_runtime = time() - now
+            current_now = time()
+            process_runtime = current_now - now
+
             if process_runtime < 10:
                 sleep_for = (10 - process_runtime)
                 logger.info('sleeping for %.2f seconds due to low run time...' % sleep_for)
