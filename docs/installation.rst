@@ -461,6 +461,12 @@ Starting and testing the Skyline installation
 
 .. code-block:: bash
 
+    # NOTE: if Graphite carbon-relay is ALREADY sending data to Horizon, seed_data
+    #       will most likely fail as Horizon/listen will already have a connection
+    #       and will be reading the Graphite pickle.  If you wish to test seeding
+    #       data, stop Graphite carbon-relay and restart Horizon, BEFORE running
+    #       seed_data.py.  Run seed_data.py and then restart Horizon and start
+    #       Graphite carbon-relay again after seed data has run.
     cd "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}"
     source bin/activate
     "bin/python${PYTHON_MAJOR_VERSION}" /opt/skyline/github/skyline/utils/seed_data.py

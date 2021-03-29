@@ -393,6 +393,12 @@ def seed():
         print('info :: please check your settings.py and ensure that the Horizon and Redis settings are correct.')
         print('info :: ensure Redis is available via socket in your redis.conf')
         print('info :: restart these services and try again')
+        # @added 20210328 - [Q] The "horizon.test.pickle" test is getting an error. #419
+        print('WARNING :: If Graphite started and pickling data to Horizon seeding data')
+        print('WARNING :: will not work as Horizon/listen will already have a connection')
+        print('WARNING :: and will be reading the Graphite pickle.  If you wish to test')
+        print('WARNING :: seeding data, stop Graphite carbon-relay, run seed_data.py')
+        print('WARNING :: and then restart Graphite carbon-relay.')
 
 
 if __name__ == '__main__':
