@@ -526,12 +526,23 @@ class Ionosphere(Thread):
                                 continue
                             for ifile in files:
                                 if ifile.endswith('.png'):
+                                    # @added 20210329 - Feature #3978: luminosity - classify_metrics
+                                    #                   Feature #3642: Anomaly type classification
+                                    if ifile.startswith('adtk_'):
+                                        continue
                                     add_folder = True
                                 if ifile.endswith('.txt'):
                                     if ifile.endswith('.fp.details.txt'):
                                         continue
-                                    if ifile.endswith('.fp.created.txt'):
+                                    elif ifile.endswith('.fp.created.txt'):
                                         continue
+                                    # @added 20210329 - Feature #3978: luminosity - classify_metrics
+                                    #                   Feature #3642: Anomaly type classification
+                                    elif ifile.startswith('adtk_'):
+                                        continue
+                                    elif ifile == 'data.txt':
+                                        continue
+
                                     else:
                                         metric_file = ifile
                                         metric_file_path = path
@@ -547,6 +558,10 @@ class Ionosphere(Thread):
                                     # Determine and add resolution
                                     resolution_seconds = settings.FULL_DURATION
                                     for ifile in files:
+                                        # @added 20210329 - Feature #3978: luminosity - classify_metrics
+                                        #                   Feature #3642: Anomaly type classification
+                                        if ifile.startswith('adtk_'):
+                                            continue
                                         if ifile.endswith('.png') and 'mirage' in ifile and 'graphite' in ifile:
                                             try:
                                                 ifile_resolution_elements = ifile.replace('.png', '', 1).split('.')
