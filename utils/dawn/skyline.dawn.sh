@@ -14,6 +14,7 @@
 # @modified 20200703 - Task #3608: Update Skyline to Python 3.8.3 and deps
 #                      Branch #3262: py3
 # @modified 20201016 - Branch #3068: SNAB
+# @modified 20210328 - [Q] The "horizon.test.pickle" test is getting an error. #419
 # @modified
 # @license
 # @source https://github.com/earthgecko/skyline/utils/dawn/skyline.dawn.sh
@@ -1087,6 +1088,18 @@ else
   systemctl restart apache2
 fi
 
+# @modified 20210328 - [Q] The "horizon.test.pickle" test is getting an error. #419
+# Moved to before Graphite install if it is done so that carbon-relay does not
+# block the seed_data socket connection
+echo "Seeding Skyline with data"
+sleep 2
+cd "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}" || exit 1
+source bin/activate
+bin/python${PYTHON_MAJOR_VERSION} /opt/skyline/github/skyline/utils/seed_data.py
+deactivate
+cd /tmp || exit
+
+
 # @added 20191016 - Branch #3262: py3
 # Allow to install Graphite on CentOS 6 for now, allows for an end to end
 # testing environment
@@ -1382,14 +1395,6 @@ WantedBy = multi-user.target" > /etc/systemd/system/graphite.service
   ps aux | grep -v grep | grep skyline
   deactivate
 fi
-
-echo "Seeding Skyline with data"
-sleep 2
-cd "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}" || exit 1
-source bin/activate
-bin/python${PYTHON_MAJOR_VERSION} /opt/skyline/github/skyline/utils/seed_data.py
-deactivate
-cd /tmp || exit
 
 echo "Skyline is deployed and running"
 echo "Please visit https://$YOUR_SKYLINE_SERVER_FQDN"
