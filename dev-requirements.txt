@@ -289,7 +289,9 @@ pyparsing==2.4.7
 # @modified 20210309 - Support #3972: SNYK-PYTHON-PILLOW-1080635
 # When matplotlib requires >=8.1.2 this Pillow==8.1.2 can be removed
 #Pillow==8.1.1
-Pillow==8.1.2
+# @modified 20210407 - Support #4008: SNYK-PYTHON-PILLOW-1090584
+#Pillow==8.1.2
+Pillow==8.2.0
 
 # @modified 20160820 - Issue #23 Test dependency updates
 #matplotlib==1.5.1

@@ -6,6 +6,7 @@
 # @modified 20190822 - Task #3060: Update dependencies
 # @modified 20210324 - Support #3990: Update jinja - CVE-2020-28493
 #                      Task #3960: SNYK-PYTHON-JINJA2-1012994
+# @modified 20210407 - Support #4008: SNYK-PYTHON-PILLOW-1090584
 # Use pip 10.0.1 as may be a readthedocs issue - testing
 pip>=10.0.1
 # @modified 20200808 - Task #3608: Update Skyline to Python 3.8.3 and deps
@@ -41,7 +42,9 @@ python-dateutil==2.8.1
 pytz==2020.5
 cycler==0.10.0
 pyparsing==2.4.7
-Pillow==8.1.2
+# @modified 20210407 - Support #4008: SNYK-PYTHON-PILLOW-1090584
+#Pillow==8.1.2
+Pillow==8.2.0
 matplotlib==3.3.3
 pandas==1.2.0
 patsy==0.5.1
