@@ -22,6 +22,11 @@ import gzip
 import zipfile
 import tarfile
 from collections import Counter
+
+# @added 20210407 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES
+# Better handle multiple workers
+import random
+
 import pandas as pd
 import pytz
 from timeit import default_timer as timer
@@ -205,6 +210,12 @@ class UploadedDataWorker(Process):
                 continue
 
             uploads_to_process = []
+
+            # @added 20210407 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES
+            # Better handle multiple workers
+            sleep_for = random.uniform(0.1, 1.5)
+            sleep(sleep_for)
+
             try:
                 # Get uploads to process from the Redis set which the webapp
                 # /upload_data populates
@@ -215,8 +226,13 @@ class UploadedDataWorker(Process):
                 logger.error('error :: uploaded_data_worker :: failed to query Redis for flux.uploaded_data - %s' % str(e))
 
             if not uploads_to_process:
-                logger.info('uploaded_data_worker :: there are no uploads to process, sleeping for 30 seconds')
-                sleep(30)
+                # @modified 20210407 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES
+                # Better handle multiple workers
+                # logger.info('uploaded_data_worker :: there are no uploads to process, sleeping for 30 seconds')
+                # sleep(30)
+                sleep_for = random.uniform(0.1, 1.5)
+                logger.info('uploaded_data_worker :: there are no uploads to process, sleeping for 30 seconds and some random %s seconds' % str(sleep_for))
+                sleep((30 + sleep_for))
                 continue
 
             processing_upload_failed = False
@@ -246,6 +262,17 @@ class UploadedDataWorker(Process):
                     logger.error(traceback.format_exc())
                     logger.error('error :: uploaded_data_worker :: failed to literal_eval the upload_dict from upload_to_process - %s ' % str(upload_to_process))
                     processing_upload_failed = True
+
+            # @added 20210407 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES
+            # Better handle multiple workers, remove the item from the set
+            # immediately so another worker does not assign itself to same work
+            if upload_dict:
+                item_removed = remove_redis_set_item(str(upload_dict))
+                if item_removed:
+                    logger.info('uploaded_data_worker :: removed failed upload from the flux.uploaded_data Redis set')
+                else:
+                    logger.error('error :: uploaded_data_worker :: failed to remove item from the Redis flux.uploaded_data set - %s' % str(upload_dict))
+
             if upload_dict:
                 try:
                     parent_metric_namespace = upload_dict['parent_metric_namespace']

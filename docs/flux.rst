@@ -34,22 +34,22 @@ For example if you sent the following 3 data points to flux for a metric:
 
   {
   	"metric": "test.multiple_timestamps_per_period.3",
-  	"timestamp": "1478021701",
-  	"value": "3.0",
+  	"timestamp": 1478021701,
+  	"value": 3.0,
   	"key": "YOURown32charSkylineAPIkeySecret"
   }
 
   {
   	"metric": "test.multiple_timestamps_per_period.3",
-  	"timestamp": "1478021715",
-  	"value": "6.0",
+  	"timestamp": 1478021715,
+  	"value": 6.0,
   	"key": "YOURown32charSkylineAPIkeySecret"
   }
 
   {
   	"metric": "test.multiple_timestamps_per_period.3",
-  	"timestamp": "1478021745",
-  	"value": "1.0",
+  	"timestamp": 1478021745,
+  	"value": 1.0,
   	"key": "YOURown32charSkylineAPIkeySecret"
   }
 
@@ -114,6 +114,8 @@ POST request
 The POST endpoint is `/flux/metric_data_post` and this accepts JSON data.  The
 json can have data for a single metric or for multiple metrics in a single POST.
 
+A successful POST will respond with no content and a 204 HTTP response code.
+
 Here is an example of the data a sinlge metric POST requires and an example POST
 request.
 
@@ -156,14 +158,16 @@ POST request for multiple metrics:
 
 .. code-block:: bash
 
-
   curl -vvv -u username:password -d '{"key":"YOURown32charSkylineAPIkeySecret","metrics":[{"metric":"vista.nodes.skyline-1.cpu.user","timestamp":1478021700,"value":1.0},{"metric":"vista.nodes.skyline-1.cpu.system","timestamp":1478021700,"value":0.2}]}' -H "Content-Type: application/json" -X POST https://skyline.example.org/flux/metric_data_post
+
 GET request
 -----------
 
 However if the flux instance in question is only receiving metrics on a local
 network or protected network and you do not mind sending the API key in
 plaintext, the GET method can be used.
+
+A successful GET request will respond with no content and a 204 HTTP response code.
 
 The `/flux/metric_data` endpoint is called via a GET request with the URI
 parameters as defined below:

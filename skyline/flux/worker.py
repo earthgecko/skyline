@@ -21,6 +21,10 @@ import pickle  # nosec
 import socket
 import struct
 
+# @added 20210407 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES
+# Better handle multiple workers
+import random
+
 # from redis import StrictRedis
 import graphyte
 import statsd
@@ -257,6 +261,45 @@ class Worker(Process):
 
         logger.info('worker :: starting worker')
 
+        # Determine a master worker that zerofills and last_known_value
+        worker_pid = getpid()
+        main_process_pid = 0
+        try:
+            main_process_pid = int(self.redis_conn_decoded.get('flux.main_process_pid'))
+            if main_process_pid:
+                logger.info('worker :: main_process_pid found in Redis key - %s' % str(main_process_pid))
+        except:
+            main_process_pid = 0
+        if not main_process_pid:
+            logger.error('error :: worker :: no main_process_pid known, exiting')
+            sys.exit(1)
+
+        primary_worker_key = 'flux.primary_worker_pid.%s' % str(main_process_pid)
+        logger.info('worker :: starting primary_worker election using primary_worker_key: %s' % primary_worker_key)
+        sleep_for = random.uniform(0.1, 1.5)
+        logger.info('worker :: starting primary_worker election - sleeping for %s' % str(sleep_for))
+        sleep(sleep_for)
+        primary_worker_pid = 0
+        try:
+            primary_worker_pid = int(self.redis_conn_decoded.get(primary_worker_key))
+            if primary_worker_pid:
+                logger.info('worker :: primary_worker_pid found in Redis key - %s' % str(primary_worker_pid))
+        except:
+            primary_worker_pid = 0
+        if not primary_worker_pid:
+            logger.info('worker :: no primary_worker found, becoming primary_worker')
+            try:
+                self.redis_conn.setex(primary_worker_key, 300, worker_pid)
+                primary_worker_pid = int(self.redis_conn_decoded.get(primary_worker_key))
+                logger.info('worker :: set self pid to primary_worker - %s' % str(primary_worker_pid))
+            except:
+                primary_worker_pid = 0
+        primary_worker = False
+        if primary_worker_pid == worker_pid:
+            primary_worker = True
+        logger.info('worker :: primary_worker_pid is set to %s, primary_worker: %s' % (
+            str(primary_worker_pid), str(primary_worker)))
+
         last_sent_to_graphite = int(time())
         metrics_sent_to_graphite = 0
 
@@ -294,6 +337,10 @@ class Worker(Process):
                 vista_metrics = list(self.redis_conn_decoded.sscan_iter('vista.metrics', match='*'))
             except:
                 vista_metrics = []
+
+        # @added 20210407 - Bug #4002: Change flux FLUX_ZERO_FILL_NAMESPACES to pickle
+        # Set the variable to default
+        last_zero_fill_to_graphite = []
 
         # Populate API keys and tokens in memcache
         # python-2.x and python3.x handle while 1 and while True differently
@@ -355,19 +402,120 @@ class Worker(Process):
                 sleep(1)
                 # @added 20201017 - Feature #3788: snab_flux_load_test
                 # Send to Graphite even if worker gets no metrics
-                if (int(time()) - last_sent_to_graphite) >= 60:
+                current_time = int(time())
+                if (current_time - last_sent_to_graphite) >= 60:
+
+                    # @added 20210407 - Bug #4002: Change flux FLUX_ZERO_FILL_NAMESPACES to pickle
+                    # Added to FLUX_ZERO_FILL_NAMESPACES to the empty queue
+                    # block as well as it was only execute in the final block
+                    # which resulted in missing data if the loop exited on the
+                    # empty queue.
+                    # Send 0 for any metric in the flux.zero_fill_metrics Redis set that
+                    # has not submitted data in the last 60 seconds.  The flux.last
+                    # Redis key is not updated for these sent 0 values so if the source
+                    # sends data for a timestamp in the period later (due to a lag, etc),
+                    # it will be valid and sent to Graphite.
+                    # @modified 20210406 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES
+                    # Now that the zero_fill setting can be passed in the
+                    # FLUX_AGGREGATE_NAMESPACES settings check the Redis set
+                    # if FLUX_ZERO_FILL_NAMESPACES:
+                    # if not last_zero_fill_to_graphite:
+                    #     last_zero_fill_to_graphite = current_time - 60
+                    if primary_worker:
+                        flux_zero_fill_metrics = []
+                        try:
+                            flux_zero_fill_metrics = list(self.redis_conn_decoded.smembers('flux.zero_fill_metrics'))
+                        except:
+                            logger.info(traceback.format_exc())
+                            logger.error('error :: failed to generate a list from flux.zero_fill_metrics Redis set')
+                        # @modified 20210408 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES
+                        # Use Redis set
+                        try:
+                            all_metrics_sent = list(self.redis_conn_decoded.smembers('flux.workers.metrics_sent'))
+                        except:
+                            logger.info(traceback.format_exc())
+                            logger.error('error :: failed to generate a list from flux.workers.metrics_sent Redis set')
+
+                        for flux_zero_fill_metric in flux_zero_fill_metrics:
+                            # if flux_zero_fill_metric not in metrics_sent:
+                            if flux_zero_fill_metric not in all_metrics_sent:
+                                try:
+                                    tuple_data = (flux_zero_fill_metric, (last_sent_to_graphite, 0.0))
+                                    pickle_data.append(tuple_data)
+                                    if FLUX_VERBOSE_LOGGING:
+                                        logger.info('worker :: zero fill - added %s to pickle_data' % (str(tuple_data)))
+                                    metrics_sent_to_graphite += 1
+                                    metrics_sent.append(flux_zero_fill_metric)
+                                    # @added 20210407 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES
+                                    # Better handle multiple workers
+                                    try:
+                                        self.redis_conn.sadd('flux.workers.metrics_sent', flux_zero_fill_metric)
+                                    except:
+                                        pass
+                                except:
+                                    logger.error(traceback.format_exc())
+                                    logger.error('error :: worker :: zero fill - failed to add metric data to pickle for %s' % str(flux_zero_fill_metric))
+                                    metric = None
+                        last_zero_fill_to_graphite = current_time
+
+                        flux_last_known_value_metrics = []
+                        try:
+                            flux_last_known_value_metrics = list(self.redis_conn_decoded.smembers('flux.last_known_value_metrics'))
+                        except:
+                            logger.info(traceback.format_exc())
+                            logger.error('error :: failed to generate a list from flux.last_known_value_metrics Redis set')
+                            flux_last_known_value_metrics = []
+                        for flux_last_known_value_metric in flux_last_known_value_metrics:
+                            if flux_last_known_value_metric not in metrics_sent:
+                                last_known_value = None
+                                try:
+                                    last_known_value = float(self.redis_conn_decoded.hget('flux.last_known_value', flux_last_known_value_metric))
+                                except:
+                                    logger.error(traceback.format_exc())
+                                    logger.error('error :: worker :: last_known_value - failed to get last known value for %s' % str(flux_last_known_value_metric))
+                                    last_known_value = None
+                                if last_known_value is not None:
+                                    try:
+                                        tuple_data = (flux_last_known_value_metric, (last_sent_to_graphite, last_known_value))
+                                        pickle_data.append(tuple_data)
+                                        if FLUX_VERBOSE_LOGGING:
+                                            logger.info('worker :: last_known_value - added %s to pickle_data' % (str(tuple_data)))
+                                        metrics_sent_to_graphite += 1
+                                        metrics_sent.append(flux_last_known_value_metric)
+                                        # @added 20210407 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES
+                                        # Better handle multiple workers
+                                        try:
+                                            self.redis_conn.sadd('flux.workers.metrics_sent', flux_last_known_value_metric)
+                                        except:
+                                            pass
+                                    except:
+                                        logger.error(traceback.format_exc())
+                                        logger.error('error :: worker :: last_known_value - failed to add metric data to pickle for %s' % str(flux_last_known_value_metric))
+                        last_last_known_value_to_graphite = current_time
+
                     logger.info('worker :: metrics_sent_to_graphite in last 60 seconds - %s' % str(metrics_sent_to_graphite))
                     skyline_metric = '%s.metrics_sent_to_graphite' % skyline_app_graphite_namespace
-                    try:
-                        # @modified 20191008 - Feature #3250: Allow Skyline to send metrics to another Carbon host
-                        # graphyte.send(skyline_metric, metrics_sent_to_graphite, time_now)
-                        send_graphite_metric(skyline_app, skyline_metric, metrics_sent_to_graphite)
-                        last_sent_to_graphite = int(time())
-                        metrics_sent_to_graphite = 0
-                    except:
-                        logger.error(traceback.format_exc())
-                        logger.error('error :: worker :: failed to send_graphite_metric %s with %s' % (
-                            skyline_metric, str(metrics_sent_to_graphite)))
+                    if primary_worker:
+                        try:
+                            # @modified 20191008 - Feature #3250: Allow Skyline to send metrics to another Carbon host
+                            # graphyte.send(skyline_metric, metrics_sent_to_graphite, time_now)
+                            # @modified 20210407 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES
+                            # Better handle multiple workers get count from the key
+                            # send_graphite_metric(skyline_app, skyline_metric, metrics_sent_to_graphite)
+                            all_metrics_sent_to_graphite = int(metrics_sent_to_graphite)
+                            try:
+                                all_metrics_sent_to_graphite = len(list(self.redis_conn_decoded.smembers('flux.workers.metrics_sent')))
+                                self.redis_conn.delete('flux.workers.metrics_sent')
+                            except:
+                                pass
+                            send_graphite_metric(skyline_app, skyline_metric, all_metrics_sent_to_graphite)
+                            logger.info('worker :: all_metrics_sent_to_graphite in last 60 seconds - %s' % str(all_metrics_sent_to_graphite))
+                            last_sent_to_graphite = int(time())
+                            metrics_sent_to_graphite = 0
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: worker :: failed to send_graphite_metric %s with %s' % (
+                                skyline_metric, str(metrics_sent_to_graphite)))
                     metric_data_queue_size = 0
                     try:
                         metric_data_queue_size = self.q.qsize()
@@ -376,12 +524,13 @@ class Worker(Process):
                         logger.error(traceback.format_exc())
                         logger.error('error :: worker :: failed to determine size of queue flux.httpMetricDataQueue')
                     skyline_metric = '%s.httpMetricDataQueue.size' % skyline_app_graphite_namespace
-                    try:
-                        send_graphite_metric(skyline_app, skyline_metric, metric_data_queue_size)
-                    except:
-                        logger.error(traceback.format_exc())
-                        logger.error('error :: worker :: failed to send_graphite_metric %s with %s' % (
-                            skyline_metric, str(metrics_sent_to_graphite)))
+                    if primary_worker:
+                        try:
+                            send_graphite_metric(skyline_app, skyline_metric, metric_data_queue_size)
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: worker :: failed to send_graphite_metric %s with %s' % (
+                                skyline_metric, str(metrics_sent_to_graphite)))
                     # @added 20201019 - Feature #3790: flux - pickle to Graphite
                     if metric_data_queue_size > 10:
                         send_to_reciever = 'pickle'
@@ -463,6 +612,45 @@ class Worker(Process):
                             vista_metrics = list(self.redis_conn_decoded.sscan_iter('vista.metrics', match='*'))
                         except:
                             vista_metrics = []
+
+                    # @added 20210407 - Bug #4002: Change flux FLUX_ZERO_FILL_NAMESPACES to pickle
+                    # Reset metrics_sent
+                    metrics_sent = []
+
+                    primary_worker_pid = 0
+                    try:
+                        primary_worker_pid = int(self.redis_conn_decoded.get(primary_worker_key))
+                        if primary_worker_pid:
+                            logger.info('worker :: primary_worker_pid found in Redis key - %s' % str(primary_worker_pid))
+                    except:
+                        primary_worker_pid = 0
+                    if not primary_worker_pid:
+                        logger.info('worker :: no primary_worker found, taking role')
+                        try:
+                            self.redis_conn.setex(primary_worker_key, 300, worker_pid)
+                            primary_worker_pid = int(self.redis_conn_decoded.get(primary_worker_key))
+                            logger.info('worker :: set self pid to primary_worker - %s' % str(primary_worker_pid))
+                        except:
+                            primary_worker_pid = 0
+                    if primary_worker_pid and primary_worker:
+                        if primary_worker_pid != worker_pid:
+                            logger.info('worker :: primary_worker role has been taken over by %s' % str(primary_worker_pid))
+                            primary_worker = False
+                    if primary_worker_pid == worker_pid:
+                        if not primary_worker:
+                            logger.info('worker :: taking over primary_worker role')
+                        primary_worker = True
+
+                    if primary_worker:
+                        try:
+                            self.redis_conn.setex(primary_worker_key, 300, worker_pid)
+                            primary_worker_pid = int(self.redis_conn_decoded.get(primary_worker_key))
+                            logger.info('worker :: set Redis primary_worker_key key to self pid to primary_worker - %s' % str(primary_worker_pid))
+                        except Exception as e:
+                            logger.error('error :: worker :: failed to set Redis primary_worker_key key to self pid - %s' % (str(e)))
+                    else:
+                        last_sent_to_graphite = int(time())
+
             except NotImplementedError:
                 pass
             except KeyboardInterrupt:
@@ -578,6 +766,13 @@ class Worker(Process):
                                 metrics_sent_to_graphite += 1
                                 # @added 20200827 - Feature #3708: FLUX_ZERO_FILL_NAMESPACES
                                 metrics_sent.append(metric)
+                                # @added 20210407 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES
+                                # Better handle multiple workers
+                                try:
+                                    self.redis_conn.sadd('flux.workers.metrics_sent', metric)
+                                except:
+                                    pass
+
                                 # @added 202011120 - Feature #3790: flux - pickle to Graphite
                                 # Debug Redis set
                                 metrics_data_sent.append([metric, value, timestamp])
@@ -595,6 +790,13 @@ class Worker(Process):
                                 submittedToGraphite = True
                                 metrics_sent_to_graphite += 1
                                 metrics_sent.append(metric)
+                                # @added 20210407 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES
+                                # Better handle multiple workers
+                                try:
+                                    self.redis_conn.sadd('flux.workers.metrics_sent', metric)
+                                except:
+                                    pass
+
                                 # @added 202011120 - Feature #3790: flux - pickle to Graphite
                                 # Debug Redis set
                                 metrics_data_sent.append([metric, value, timestamp])
@@ -654,6 +856,12 @@ class Worker(Process):
                         logger.info('worker sent %s, %s, %s to statsd' % (metric, str(value), str(timestamp)))
                     # @added 20200827 - Feature #3708: FLUX_ZERO_FILL_NAMESPACES
                     metrics_sent.append(metric)
+                    # @added 20210407 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES
+                    # Better handle multiple workers
+                    try:
+                        self.redis_conn.sadd('flux.workers.metrics_sent', metric)
+                    except:
+                        pass
 
                 submit_pickle_data = False
                 if pickle_data:
@@ -679,39 +887,78 @@ class Worker(Process):
                         pickle_data = []
 
             time_now = int(time())
-
-            # @added 20200827 - Feature #3708: FLUX_ZERO_FILL_NAMESPACES
-            # Send 0 for any metric in the flux.zero_fill_metrics Redis set that
-            # has not submitted data in the last 60 seconds.  The flux.last
-            # Redis key is not updated for these sent 0 values so if the source
-            # sends data for a timestamp in the period later (due to a lag, etc),
-            # it will be valid and sent to Graphite.
-            if FLUX_ZERO_FILL_NAMESPACES:
-                if not last_zero_fill_to_graphite:
-                    last_zero_fill_to_graphite = time_now - 60
-                if (time_now - last_sent_to_graphite) >= 60:
-                    try:
-                        flux_zero_fill_metrics = list(self.redis_conn_decoded.smembers('flux.zero_fill_metrics'))
-                    except:
-                        logger.info(traceback.format_exc())
-                        logger.error('error :: failed to generate a list from flux.zero_fill_metrics Redis set')
-                    for flux_zero_fill_metric in flux_zero_fill_metrics:
-                        if flux_zero_fill_metric not in metrics_sent:
-                            try:
-                                graphyte.send(flux_zero_fill_metric, 0.0, time_now)
-                                # modified 20201016 - Feature #3788: snab_flux_load_test
-                                if FLUX_VERBOSE_LOGGING:
-                                    logger.info('worker :: zero fill - sent %s, %s, %s to Graphite' % (str(flux_zero_fill_metric), str(0.0), str(time_now)))
-                                metrics_sent_to_graphite += 1
-                                metrics_sent.append(metric)
-                            except:
-                                logger.error(traceback.format_exc())
-                                logger.error('error :: worker :: zero fill - failed to send metric data to Graphite for %s' % str(flux_zero_fill_metric))
-                                metric = None
-                    last_zero_fill_to_graphite = time_now
-                    metrics_sent = []
-
             if (time_now - last_sent_to_graphite) >= 60:
+
+                # @added 20200827 - Feature #3708: FLUX_ZERO_FILL_NAMESPACES
+                # Send 0 for any metric in the flux.zero_fill_metrics Redis set that
+                # has not submitted data in the last 60 seconds.  The flux.last
+                # Redis key is not updated for these sent 0 values so if the source
+                # sends data for a timestamp in the period later (due to a lag, etc),
+                # it will be valid and sent to Graphite.
+
+                # @modified 20210407 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES
+                # Better handle multiple workers, only do on the primary
+                # worker and now that the zero_fill setting can be passed in the
+                # FLUX_AGGREGATE_NAMESPACES settings check the Redis set
+                # if FLUX_ZERO_FILL_NAMESPACES:
+                if primary_worker:
+                    if not last_zero_fill_to_graphite:
+                        last_zero_fill_to_graphite = time_now - 60
+                    run_fill = True
+                    # Check that it was not run in the empty exception
+                    # immediately before
+                    if last_zero_fill_to_graphite in list(range((time_now - 5), time_now)):
+                        run_fill = False
+                    if run_fill:
+                        flux_zero_fill_metrics = []
+                        try:
+                            flux_zero_fill_metrics = list(self.redis_conn_decoded.smembers('flux.zero_fill_metrics'))
+                        except:
+                            logger.info(traceback.format_exc())
+                            logger.error('error :: failed to generate a list from flux.zero_fill_metrics Redis set')
+
+                        # @added 20210408 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES
+                        # Use Redis set
+                        try:
+                            all_metrics_sent = list(self.redis_conn_decoded.smembers('flux.workers.metrics_sent'))
+                        except:
+                            logger.info(traceback.format_exc())
+                            logger.error('error :: failed to generate a list from flux.workers.metrics_sent Redis set')
+
+                        for flux_zero_fill_metric in flux_zero_fill_metrics:
+                            # if flux_zero_fill_metric not in metrics_sent:
+                            if flux_zero_fill_metric not in all_metrics_sent:
+                                try:
+                                    # @modified 20210406 - Bug #4002: Change flux FLUX_ZERO_FILL_NAMESPACES to pickle
+                                    # Do not use graphyte to send zeros as it can
+                                    # result in missing data, add date to the pickle
+                                    # graphyte.send(flux_zero_fill_metric, 0.0, time_now)
+                                    tuple_data = (flux_zero_fill_metric, (last_zero_fill_to_graphite, 0.0))
+                                    pickle_data.append(tuple_data)
+
+                                    # modified 20201016 - Feature #3788: snab_flux_load_test
+                                    if FLUX_VERBOSE_LOGGING:
+                                        # @modified 20210406 - Bug #4002: Change flux FLUX_ZERO_FILL_NAMESPACES to pickle
+                                        # logger.info('worker :: zero fill - sent %s, %s, %s to Graphite' % (str(flux_zero_fill_metric), str(0.0), str(time_now)))
+                                        logger.info('worker :: zero fill - added %s to pickle_data' % (str(tuple_data)))
+                                    metrics_sent_to_graphite += 1
+                                    metrics_sent.append(flux_zero_fill_metric)
+                                    # @added 20210407 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES
+                                    # Better handle multiple workers
+                                    try:
+                                        self.redis_conn.sadd('flux.workers.metrics_sent', flux_zero_fill_metric)
+                                    except:
+                                        pass
+                                except:
+                                    logger.error(traceback.format_exc())
+                                    logger.error('error :: worker :: zero fill - failed to add metric data to pickle for %s' % str(flux_zero_fill_metric))
+                                    metric = None
+                        last_zero_fill_to_graphite = time_now
+
+                # @added 20210406 - Bug #4002: Change flux FLUX_ZERO_FILL_NAMESPACES to pickle
+                # Reset metrics_sent
+                metrics_sent = []
+
                 if pickle_data:
                     # @modified 20201207 - Task #3864: flux - try except everything
                     try:
@@ -724,16 +971,27 @@ class Worker(Process):
                         pickle_data = []
                 logger.info('worker :: metrics_sent_to_graphite in last 60 seconds - %s' % str(metrics_sent_to_graphite))
                 skyline_metric = '%s.metrics_sent_to_graphite' % skyline_app_graphite_namespace
-                try:
-                    # @modified 20191008 - Feature #3250: Allow Skyline to send metrics to another Carbon host
-                    # graphyte.send(skyline_metric, metrics_sent_to_graphite, time_now)
-                    send_graphite_metric(skyline_app, skyline_metric, metrics_sent_to_graphite)
-                    last_sent_to_graphite = int(time())
-                    metrics_sent_to_graphite = 0
-                except:
-                    logger.error(traceback.format_exc())
-                    logger.error('error :: worker :: failed to send_graphite_metric %s with %s' % (
-                        skyline_metric, str(metrics_sent_to_graphite)))
+                if primary_worker:
+                    try:
+                        # @modified 20191008 - Feature #3250: Allow Skyline to send metrics to another Carbon host
+                        # graphyte.send(skyline_metric, metrics_sent_to_graphite, time_now)
+                        # @modified 20210407 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES
+                        # Better handle multiple workers get count from the key
+                        # send_graphite_metric(skyline_app, skyline_metric, metrics_sent_to_graphite)
+                        all_metrics_sent_to_graphite = int(metrics_sent_to_graphite)
+                        try:
+                            all_metrics_sent_to_graphite = len(list(self.redis_conn_decoded.smembers('flux.workers.metrics_sent')))
+                            self.redis_conn.delete('flux.workers.metrics_sent')
+                        except:
+                            pass
+                        send_graphite_metric(skyline_app, skyline_metric, all_metrics_sent_to_graphite)
+                        logger.info('worker :: all_metrics_sent_to_graphite in last 60 seconds - %s' % str(all_metrics_sent_to_graphite))
+                        last_sent_to_graphite = int(time())
+                        metrics_sent_to_graphite = 0
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: worker :: failed to send_graphite_metric %s with %s' % (
+                            skyline_metric, str(metrics_sent_to_graphite)))
                 metric_data_queue_size = 0
                 try:
                     metric_data_queue_size = self.q.qsize()
@@ -742,17 +1000,22 @@ class Worker(Process):
                     logger.error(traceback.format_exc())
                     logger.error('error :: worker :: failed to determine size of queue flux.httpMetricDataQueue')
                 skyline_metric = '%s.httpMetricDataQueue.size' % skyline_app_graphite_namespace
-                try:
-                    send_graphite_metric(skyline_app, skyline_metric, metric_data_queue_size)
-                except:
-                    logger.error(traceback.format_exc())
-                    logger.error('error :: worker :: failed to send_graphite_metric %s with %s' % (
-                        skyline_metric, str(metrics_sent_to_graphite)))
+                if primary_worker:
+                    try:
+                        send_graphite_metric(skyline_app, skyline_metric, metric_data_queue_size)
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: worker :: failed to send_graphite_metric %s with %s' % (
+                            skyline_metric, str(metrics_sent_to_graphite)))
                 # @added 20201019 - Feature #3790: flux - pickle to Graphite
                 if metric_data_queue_size > 10:
                     send_to_reciever = 'pickle'
                 else:
                     send_to_reciever = 'line'
+
+                # @added 20210406 - Bug #4002: Change flux FLUX_ZERO_FILL_NAMESPACES to pickle
+                # Only use pickle
+                send_to_reciever = 'pickle'
 
                 # @added 202011120 - Feature #3790: flux - pickle to Graphite
                 # Debug Redis set
@@ -773,6 +1036,7 @@ class Worker(Process):
                         logger.error(traceback.format_exc())
                         logger.error('error :: worker :: failed to current_pid for aet.flux.metrics_data_sent Redis set name')
                         new_set = 'aet.flux.metrics_data_sent'
+
                     try:
                         self.redis_conn.rename('flux.metrics_data_sent', new_set)
                         logger.info('worker :: renamed flux.metrics_data_sent Redis set to %s' % new_set)
@@ -788,7 +1052,6 @@ class Worker(Process):
                         else:
                             logger.error(traceback_str)
                             logger.error('error :: worker :: failed to rename flux.metrics_data_sent to %s Redis set' % new_set)
-
                     try:
                         self.redis_conn.expire(new_set, 600)
                     except:
@@ -829,3 +1092,40 @@ class Worker(Process):
                         vista_metrics = list(self.redis_conn_decoded.sscan_iter('vista.metrics', match='*'))
                     except:
                         vista_metrics = []
+
+                # @added 20210407 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES
+                # Better handle multiple workers
+                primary_worker_pid = 0
+                try:
+                    primary_worker_pid = int(self.redis_conn_decoded.get(primary_worker_key))
+                    if primary_worker_pid:
+                        logger.info('worker :: primary_worker_pid found in Redis key - %s' % str(primary_worker_pid))
+                except:
+                    primary_worker_pid = 0
+                if not primary_worker_pid:
+                    logger.info('worker :: no primary_worker found, taking role')
+                    try:
+                        self.redis_conn.setex(primary_worker_key, 300, worker_pid)
+                        primary_worker_pid = int(self.redis_conn_decoded.get(primary_worker_key))
+                        logger.info('worker :: set self pid to primary_worker - %s' % str(primary_worker_pid))
+                    except:
+                        primary_worker_pid = 0
+                if primary_worker_pid and primary_worker:
+                    if primary_worker_pid != worker_pid:
+                        logger.info('worker :: primary_worker role has been taken over by %s' % str(primary_worker_pid))
+                        primary_worker = False
+                if primary_worker_pid == worker_pid:
+                    if not primary_worker:
+                        logger.info('worker :: taking over primary_worker role')
+                    primary_worker = True
+
+                if primary_worker:
+                    try:
+                        self.redis_conn.setex(primary_worker_key, 300, worker_pid)
+                        primary_worker_pid = int(self.redis_conn_decoded.get(primary_worker_key))
+                        logger.info('worker :: set Redis primary_worker_key key to self pid to primary_worker - %s' % str(primary_worker_pid))
+                    except Exception as e:
+                        logger.error('error :: worker :: failed to set Redis primary_worker_key key to self pid - %s' % (str(e)))
+                else:
+                    last_sent_to_graphite = int(time())
+                metrics_sent_to_graphite = 0

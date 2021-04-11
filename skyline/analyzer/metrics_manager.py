@@ -95,6 +95,12 @@ try:
 except:
     FLUX_ZERO_FILL_NAMESPACES = []
 
+# @added 20210407 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES
+try:
+    FLUX_LAST_KNOWN_VALUE_NAMESPACES = settings.FLUX_LAST_KNOWN_VALUE_NAMESPACES
+except:
+    FLUX_LAST_KNOWN_VALUE_NAMESPACES = []
+
 # @added 20201017 - Feature #3818: ANALYZER_BATCH_PROCESSING_OVERFLOW_ENABLED
 # This was implemented to allow a busy analyzer to offload low priority metrics
 # to analyzer_batch, unsuccessfully.  It works, but takes loanger and ages
@@ -201,6 +207,16 @@ try:
     IONOSPHERE_PERFORMANCE_DATA_POPULATE_CACHE_DEPTH = int(settings.IONOSPHERE_PERFORMANCE_DATA_POPULATE_CACHE_DEPTH)
 except:
     IONOSPHERE_PERFORMANCE_DATA_POPULATE_CACHE_DEPTH = 0
+
+# @added 20210406 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES
+try:
+    FLUX_AGGREGATE_NAMESPACES = settings.FLUX_AGGREGATE_NAMESPACES.copy()
+except:
+    FLUX_AGGREGATE_NAMESPACES = {}
+try:
+    FLUX_EXTERNAL_AGGREGATE_NAMESPACES = settings.FLUX_EXTERNAL_AGGREGATE_NAMESPACES
+except:
+    FLUX_EXTERNAL_AGGREGATE_NAMESPACES = False
 
 skyline_app_graphite_namespace = 'skyline.%s%s' % (skyline_app, SERVER_METRIC_PATH)
 
@@ -1455,21 +1471,165 @@ class Metrics_Manager(Thread):
         logger.info('metrics_manager :: non_smtp_alerter_metrics :: %s' % str(len(non_smtp_alerter_metrics)))
         logger.info('metrics_manager :: mirage_metrics :: %s' % str(len(mirage_metrics)))
 
+        # @added 20210406 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES
+        # Analyzer determines what metrics flux should aggregate by creating the
+        # the flux.aggregate_metrics Redis set, which flux/listen and flux/aggregate
+        # reference.  This is done in analyzer/metrics_manager because it manages
+        # metric Redis sets as it always runs.  It is only managed every 5 mins.
+        aggregate_namespaces = []
+        flux_aggregate_metrics = []
+        flux_aggregate_zerofill_metrics = []
+        flux_aggregate_lkv_metrics = []
+        if FLUX_AGGREGATE_NAMESPACES or FLUX_EXTERNAL_AGGREGATE_NAMESPACES:
+            if FLUX_AGGREGATE_NAMESPACES:
+                aggregate_namespaces = list(FLUX_AGGREGATE_NAMESPACES.keys())
+            if FLUX_EXTERNAL_AGGREGATE_NAMESPACES:
+                logger.info('metrics_manager :: TODO :: FLUX_EXTERNAL_AGGREGATE_NAMESPACES')
+                # TODO
+                # flux_external_aggregate_namespaces_dict = self.redis_conn_decoded.hgetall(...
+                # for i_metric in ...:
+                #      aggregate_namespaces.append(i_metric)
+            manage_flux_aggregate_namespaces = False
+            # Only manage every 5 mins
+            manage_flux_aggregate_namespaces_redis_key = 'metrics_manager.manage_flux_aggregate_namespaces'
+            try:
+                manage_flux_aggregate_namespaces = self.redis_conn.get(manage_flux_aggregate_namespaces_redis_key)
+            except Exception as e:
+                if LOCAL_DEBUG:
+                    logger.error('error :: metrics_manager :: could not query Redis for metrics_manager.manage_flux_aggregate_namespaces key: %s' % str(e))
+            if not manage_flux_aggregate_namespaces:
+                logger.info('metrics_manager :: managing FLUX_AGGREGATE_NAMESPACES Redis sets')
+                try:
+                    self.redis_conn.delete('analyzer.flux_aggregate_metrics')
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: metrics_manager :: failed to delete analyzer.flux_aggregate_metrics Redis set')
+
+                try:
+                    self.redis_conn.delete('metrics_manager.flux_zero_fill_aggregate_metrics')
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: metrics_manager :: failed to delete metrics_manager.flux_zero_fill_aggregate_metrics Redis set')
+                try:
+                    self.redis_conn.delete('metrics_manager.flux_last_known_value_aggregate_metrics')
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: metrics_manager :: failed to delete metrics_manager.flux_last_known_value_aggregate_metrics Redis set')
+
+                for i_base_name in unique_base_names:
+                    pattern_match, metric_matched_by = matched_or_regexed_in_list('analyzer', i_base_name, aggregate_namespaces)
+                    if pattern_match:
+                        flux_aggregate_metrics.append(i_base_name)
+                        matched_namespace = metric_matched_by['matched_namespace']
+                        metric_aggregation_settings = FLUX_AGGREGATE_NAMESPACES[matched_namespace]
+                        # Add the configuration to Redis
+                        self.redis_conn.hset('metrics_manager.flux.aggregate_namespaces.settings', i_base_name, str(metric_aggregation_settings))
+                        # @added 20210407 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES
+                        # Allow for zero_fill and last_known_value setting to be
+                        # defined in the FLUX_AGGREGATE_NAMESPACES setting
+                        add_to_zero_fill = False
+                        try:
+                            add_to_zero_fill = metric_aggregation_settings['zero_fill']
+                        except:
+                            add_to_zero_fill = False
+                        if add_to_zero_fill:
+                            flux_aggregate_zerofill_metrics.append(i_base_name)
+                        add_to_last_known_value = False
+                        try:
+                            add_to_last_known_value = metric_aggregation_settings['last_known_value']
+                        except:
+                            add_to_last_known_value = False
+                        if add_to_last_known_value:
+                            flux_aggregate_lkv_metrics.append(i_base_name)
+                if flux_aggregate_zerofill_metrics:
+                    try:
+                        logger.info('metrics_manager :: adding %s aggregate metrics that have zerofill aggregation setting to metrics_manager.flux_zero_fill_aggregate_metrics' % str(len(flux_aggregate_zerofill_metrics)))
+                        self.redis_conn.sadd('metrics_manager.flux_zero_fill_aggregate_metrics', *set(flux_aggregate_zerofill_metrics))
+                    except:
+                        logger.info(traceback.format_exc())
+                        logger.error('error :: metrics_manager :: failed to add multiple aggregation metric members to the metrics_manager.flux_zero_fill_aggregate_metrics Redis set')
+                if flux_aggregate_lkv_metrics:
+                    try:
+                        logger.info('metrics_manager :: adding %s aggregate metrics that have last_known_value aggregation setting to metrics_manager.flux_last_known_value_aggregate_metrics' % str(len(flux_aggregate_lkv_metrics)))
+                        self.redis_conn.sadd('metrics_manager.flux_last_known_value_aggregate_metrics', *set(flux_aggregate_lkv_metrics))
+                    except:
+                        logger.info(traceback.format_exc())
+                        logger.error('error :: metrics_manager :: failed to add multiple members to the metrics_manager.flux_last_known_value_aggregate_metrics Redis set')
+                if flux_aggregate_metrics:
+                    logger.info('metrics_manager :: popuating analyzer.flux_aggregate_metrics Redis set with %s metrics' % str(len(flux_aggregate_metrics)))
+                    try:
+                        self.redis_conn.sadd('analyzer.flux_aggregate_metrics', *set(flux_aggregate_metrics))
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: metrics_manager :: failed to add multiple members to the analyzer.flux_aggregate_metrics Redis set')
+                try:
+                    key_timestamp = int(time())
+                    self.redis_conn.setex(manage_flux_aggregate_namespaces_redis_key, RUN_EVERY, key_timestamp)
+                except:
+                    logger.error('error :: metrics_manager :: failed to set key :: manage_flux_aggregate_namespaces_redis_key' % manage_flux_aggregate_namespaces_redis_key)
+                logger.info('metrics_manager :: checking if any metrics need to be removed from analyzer.flux_aggregate_metrics')
+                flux_aggregate_metrics_to_remove = []
+                flux_aggregate_metrics_list = []
+                try:
+                    flux_aggregate_metrics_list = list(self.redis_conn_decoded.smembers('analyzer.flux_aggregate_metrics'))
+                except:
+                    logger.info(traceback.format_exc())
+                    logger.error('error :: metrics_manager :: failed to generate a list from analyzer.flux_aggregate_metrics Redis set')
+                for flux_aggregate_base_name in flux_aggregate_metrics_list:
+                    if flux_aggregate_base_name not in unique_base_names:
+                        flux_aggregate_metrics_to_remove.append(flux_aggregate_base_name)
+                if flux_aggregate_metrics_to_remove:
+                    try:
+                        logger.info('metrics_manager :: removing %s metrics from analyzer.flux_aggregate_metrics' % str(len(flux_aggregate_metrics_to_remove)))
+                        self.redis_conn.srem('analyzer.flux_aggregate_metrics', *set(flux_aggregate_metrics_to_remove))
+                        # Reload the new set
+                        try:
+                            flux_aggregate_metrics_list = list(self.redis_conn_decoded.smembers('analyzer.flux_aggregate_metrics'))
+                        except:
+                            logger.info(traceback.format_exc())
+                            logger.error('error :: metrics_manager :: failed to generate a list from analyzer.flux_aggregate_metrics Redis set after removals')
+                    except:
+                        logger.info(traceback.format_exc())
+                        logger.error('error :: metrics_manager :: failed to add multiple members to the analyzer.flux_aggregate_metrics Redis set')
+                else:
+                    logger.info('metrics_manager :: no metrics need to remove from analyzer.flux_aggregate_metrics')
+                if flux_aggregate_metrics_list:
+                    # Replace the existing flux.aggregate_metrics Redis set
+                    try:
+                        self.redis_conn.sunionstore('metrics_manager.flux.aggregate_metrics', 'analyzer.flux_aggregate_metrics')
+                        logger.info('metrics_manager :: replaced metrics_manager.flux.aggregate_metrics Redis set with the newly created analyzer.flux_aggregate_metrics set')
+                    except:
+                        logger.info(traceback.format_exc())
+                        logger.error('error :: metrics_manager :: failed to sunionstore metrics_manager.flux.aggregate_metrics from analyzer.flux_aggregate_metrics Redis sets')
+                    # Create a Redis hash for flux/listen.  These entries are
+                    # managed flux/listen, if the timestamp for an entry is
+                    # older than 12 hours flux/listen removes it from the hash
+                    time_now = int(time())
+                    for flux_aggregate_metric in flux_aggregate_metrics_list:
+                        try:
+                            self.redis_conn.hset(
+                                'metrics_manager.flux.aggregate_metrics.hash', flux_aggregate_metric,
+                                time_now)
+                        except:
+                            pass
+
         # @added 20200827 - Feature #3708: FLUX_ZERO_FILL_NAMESPACES
         # Analyzer determines what metrics flux should 0 fill by creating
         # the flux.zero_fill_metrics Redis set, which flux references.  This
         # is done in Analyzer because it manages metric Redis sets as it
         # always runs.  It is only managed in Analyzer every 5 mins.
-        if FLUX_ZERO_FILL_NAMESPACES:
+        # @modified 20210407 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES
+        # if FLUX_ZERO_FILL_NAMESPACES:
+        if FLUX_ZERO_FILL_NAMESPACES or flux_aggregate_zerofill_metrics:
             manage_flux_zero_fill_namespaces = False
             flux_zero_fill_metrics = []
             # Only manage every 5 mins
-            manage_flux_zero_fill_namespaces_redis_key = 'analyzer.manage_flux_zero_fill_namespaces'
+            manage_flux_zero_fill_namespaces_redis_key = 'metrics_manager.manage_flux_zero_fill_namespaces'
             try:
                 manage_flux_zero_fill_namespaces = self.redis_conn.get(manage_flux_zero_fill_namespaces_redis_key)
             except Exception as e:
                 if LOCAL_DEBUG:
-                    logger.error('error :: metrics_manager :: could not query Redis for analyzer.manage_mirage_unique_metrics key: %s' % str(e))
+                    logger.error('error :: metrics_manager :: could not query Redis for metrics_manager.manage_flux_zero_fill_namespaces key: %s' % str(e))
             if not manage_flux_zero_fill_namespaces:
                 logger.info('metrics_manager :: managing FLUX_ZERO_FILL_NAMESPACES Redis sets')
                 try:
@@ -1477,6 +1637,12 @@ class Metrics_Manager(Thread):
                 except:
                     logger.error(traceback.format_exc())
                     logger.error('error :: metrics_manager :: failed to delete analyzer.flux_zero_fill_metrics Redis set')
+                # @added 20210407 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES
+                if flux_aggregate_zerofill_metrics:
+                    for i_base_name in flux_aggregate_zerofill_metrics:
+                        flux_zero_fill_metrics.append(i_base_name)
+                    logger.info('metrics_manager :: added %s flux_aggregate_zerofill_metrics to add to Redis sets' % str(len(flux_aggregate_zerofill_metrics)))
+
                 for i_base_name in unique_base_names:
                     flux_zero_fill_metric = False
                     pattern_match, metric_matched_by = matched_or_regexed_in_list('analyzer', i_base_name, FLUX_ZERO_FILL_NAMESPACES)
@@ -1530,6 +1696,89 @@ class Metrics_Manager(Thread):
                     except:
                         logger.info(traceback.format_exc())
                         logger.error('error :: metrics_manager :: failed to sunionstore flux.zero_fill_metrics from analyzer.flux_zero_fill_metrics Redis sets')
+
+        # @added 20210407 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES
+        # Analyzer determines what metrics flux send the last known value for by
+        # creating
+        # the flux.last_known_value_metrics Redis set, which flux references.  This
+        # is done in Analyzer because it manages metric Redis sets as it
+        # always runs.  It is only managed in Analyzer every 5 mins.
+        if FLUX_LAST_KNOWN_VALUE_NAMESPACES or flux_aggregate_lkv_metrics:
+            manage_flux_last_known_value_namespaces = False
+            flux_last_known_value_metrics = []
+            # Only manage every 5 mins
+            manage_flux_last_known_value_namespaces_redis_key = 'metrics_manager.manage_flux_last_known_value_namespaces'
+            try:
+                manage_flux_last_known_value_namespaces = self.redis_conn.get(manage_flux_last_known_value_namespaces_redis_key)
+            except Exception as e:
+                if LOCAL_DEBUG:
+                    logger.error('error :: metrics_manager :: could not query Redis for metrics_manager.manage_flux_last_known_value_namespaces key: %s' % str(e))
+            if not manage_flux_last_known_value_namespaces:
+                logger.info('metrics_manager :: managing FLUX_LAST_KNOWN_VALUE_NAMESPACES Redis sets')
+                try:
+                    self.redis_conn.delete('analyzer.flux_last_known_value_metrics')
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: metrics_manager :: failed to delete analyzer.flux_last_known_value_metrics Redis set')
+                if flux_aggregate_lkv_metrics:
+                    for i_base_name in flux_aggregate_lkv_metrics:
+                        flux_last_known_value_metrics.append(i_base_name)
+                    logger.info('metrics_manager :: added %s flux_aggregate_lkv_metrics to add to Redis sets' % str(len(flux_aggregate_lkv_metrics)))
+
+                for i_base_name in unique_base_names:
+                    flux_last_known_value_metric = False
+                    pattern_match, metric_matched_by = matched_or_regexed_in_list('analyzer', i_base_name, FLUX_LAST_KNOWN_VALUE_NAMESPACES)
+                    if pattern_match:
+                        flux_last_known_value_metric = True
+                    if flux_last_known_value_metric:
+                        flux_last_known_value_metrics.append(i_base_name)
+                if flux_last_known_value_metrics:
+                    logger.info('metrics_manager :: popuating analyzer.flux_last_known_value_metrics Redis set with %s metrics' % str(len(flux_last_known_value_metrics)))
+                    try:
+                        self.redis_conn.sadd('analyzer.flux_last_known_value_metrics', *set(flux_last_known_value_metrics))
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: metrics_manager :: failed to add multiple members to the analyzer.flux_last_known_value_metrics Redis set')
+                try:
+                    key_timestamp = int(time())
+                    self.redis_conn.setex(manage_flux_last_known_value_namespaces_redis_key, RUN_EVERY, key_timestamp)
+                except:
+                    logger.error('error :: metrics_manager :: failed to set key :: manage_flux_last_known_value_namespaces_redis_key' % manage_flux_last_known_value_namespaces_redis_key)
+                logger.info('metrics_manager :: checking if any metrics need to be removed from analyzer.flux_last_known_value_metrics')
+                flux_last_known_value_metrics_to_remove = []
+                flux_last_known_value_metrics_list = []
+                try:
+                    flux_last_known_value_metrics_list = list(self.redis_conn_decoded.smembers('analyzer.flux_last_known_value_metrics'))
+                except:
+                    logger.info(traceback.format_exc())
+                    logger.error('error :: metrics_manager :: failed to generate a list from analyzer.flux_last_known_value_metrics Redis set')
+                for flux_last_known_value_base_name in flux_last_known_value_metrics_list:
+                    if flux_last_known_value_base_name not in unique_base_names:
+                        flux_last_known_value_metrics_to_remove.append(flux_last_known_value_base_name)
+                if flux_last_known_value_metrics_to_remove:
+                    try:
+                        logger.info('metrics_manager :: removing %s metrics from analyzer.flux_last_known_value_metrics' % str(len(flux_last_known_value_metrics_to_remove)))
+                        self.redis_conn.srem('analyzer.flux_last_known_value_metrics', *set(flux_last_known_value_metrics_to_remove))
+                        # Reload the new set
+                        try:
+                            flux_last_known_value_metrics_list = list(self.redis_conn_decoded.smembers('analyzer.flux_last_known_value_metrics'))
+                        except:
+                            logger.info(traceback.format_exc())
+                            logger.error('error :: metrics_manager :: failed to generate a list from analyzer.flux_last_known_value_metrics Redis set after removals')
+                    except:
+                        logger.info(traceback.format_exc())
+                        logger.error('error :: metrics_manager :: failed to add multiple members to the analyzer.flux_last_known_value_metrics Redis set')
+                else:
+                    logger.info('metrics_manager :: no metrics need to remove from analyzer.flux_last_known_value_metrics')
+                if flux_last_known_value_metrics_list:
+                    # Replace the existing flux.last_known_value_metrics Redis set
+                    try:
+                        self.redis_conn.sunionstore('flux.last_known_value_metrics', 'analyzer.flux_last_known_value_metrics')
+                        logger.info('metrics_manager :: replaced flux.last_known_value_metrics Redis set with the newly created analyzer.flux_last_known_value_metrics set')
+                    except:
+                        logger.info(traceback.format_exc())
+                        logger.error('error :: metrics_manager :: failed to sunionstore flux.last_known_value_metrics from analyzer.flux_last_known_value_metrics Redis sets')
+
         del unique_base_names
 
         # @added 20201030 - Feature #3808: ANALYZER_DYNAMICALLY_ANALYZE_LOW_PRIORITY_METRICS
@@ -2050,6 +2299,104 @@ class Metrics_Manager(Thread):
                                 str(metric), metrics_last_timestamp_hash_key, e))
             logger.info('metrics_manager :: ANALYZER_CHECK_LAST_TIMESTAMP - removed %s inactive metrics from the %s Redis hash key' % (
                 str(removed_old_keys), metrics_last_timestamp_hash_key))
+
+        # @added 20210330 - Feature #3994: Panorama - mirage not anomalous
+        # The mirage.panorama.not_anomalous_metrics is managed here and entries
+        # older than 7 days are removed.
+        redis_hash = 'mirage.panorama.not_anomalous_metrics'
+        mirage_panorama_not_anomalous = {}
+        try:
+            mirage_panorama_not_anomalous = self.redis_conn_decoded.hgetall(redis_hash)
+            logger.info('metrics_manager :: %s entries to check in the %s Redis hash key' % (
+                str(len(mirage_panorama_not_anomalous)), redis_hash))
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: metrics_manager :: failed to get Redis hash key %s' % redis_hash)
+            mirage_panorama_not_anomalous = {}
+        timestamp_floats = []
+        if mirage_panorama_not_anomalous:
+            timestamp_floats = list(mirage_panorama_not_anomalous.keys())
+        timestamp_floats_to_remove = []
+        if timestamp_floats:
+            try:
+                timestamp_week_ago = int(time()) - (86400 - 7)
+                for timestamp_float in timestamp_floats:
+                    if int(float(timestamp_float)) < timestamp_week_ago:
+                        timestamp_floats_to_remove.append(timestamp_float)
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: metrics_manager :: failed to determine entries to remove from Redis hash key %s' % (
+                    redis_hash))
+        if timestamp_floats_to_remove:
+            try:
+                self.redis_conn.hdel(redis_hash, *set(timestamp_floats_to_remove))
+                logger.info('metrics_manager :: %s entries were removed from Redis hash %s' % (
+                    str(len(set(timestamp_floats_to_remove))), redis_hash))
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: metrics_manager :: failed to %s remove entries from Redis hash key %s' % (
+                    str(len(timestamp_floats_to_remove)), redis_hash))
+        else:
+            logger.info('metrics_manager :: there are no entries that need to be removed from Redis hash %s' % (
+                redis_hash))
+
+        # @added 20210330 - Feature #3994: Panorama - mirage not anomalous
+        # The panorama.not_anomalous_plots are managed here and entries
+        # older than 7 days are removed and files deleted
+        redis_hash = 'panorama.not_anomalous_plots'
+        panorama_not_anomalous_plots = {}
+        try:
+            panorama_not_anomalous_plots = self.redis_conn_decoded.hgetall(redis_hash)
+            logger.info('metrics_manager :: %s entries to check in the %s Redis hash key' % (
+                str(len(panorama_not_anomalous_plots)), redis_hash))
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: metrics_manager :: failed to get Redis hash key %s' % redis_hash)
+            mirage_panorama_not_anomalous = {}
+        timestamp_floats = []
+        if mirage_panorama_not_anomalous:
+            timestamp_floats = list(panorama_not_anomalous_plots.keys())
+        timestamp_floats_to_remove = []
+        if timestamp_floats:
+            try:
+                timestamp_week_ago = int(time()) - (86400 - 7)
+                for timestamp_float in timestamp_floats:
+                    if int(float(timestamp_float)) < timestamp_week_ago:
+                        timestamp_floats_to_remove.append(timestamp_float)
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: metrics_manager :: failed to determine entries to remove from Redis hash key %s' % (
+                    redis_hash))
+        if timestamp_floats_to_remove:
+            # Remove plot files
+            for timestamp_float in timestamp_floats_to_remove:
+                file_to_remove = None
+                try:
+                    file_to_remove = self.redis_conn_decoded.hget(redis_hash, timestamp_float)
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: metrics_manager :: failed to determine file to remove from %s from Redis hash key %s' % (
+                        str(timestamp_float), redis_hash))
+                if file_to_remove:
+                    try:
+                        if os.path.exists(file_to_remove):
+                            os.remove(file_to_remove)
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: metrics_manager :: failed to file for remove entries from Redis hash key %s' % (
+                            str(len(timestamp_floats_to_remove)), redis_hash))
+            # Remove entries from the hash
+            try:
+                self.redis_conn.hdel(redis_hash, *set(timestamp_floats_to_remove))
+                logger.info('metrics_manager :: %s entries were removed from Redis hash %s' % (
+                    str(len(set(timestamp_floats_to_remove))), redis_hash))
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: metrics_manager :: failed to %s remove entries from Redis hash key %s' % (
+                    str(len(timestamp_floats_to_remove)), redis_hash))
+        else:
+            logger.info('metrics_manager :: there are no entries or files that need to be removed from Redis hash %s' % (
+                redis_hash))
 
         spin_end = time() - spin_start
         logger.info('metrics_manager :: metric_management_process took %.2f seconds' % spin_end)

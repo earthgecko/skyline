@@ -3218,6 +3218,56 @@ FLUX_ZERO_FILL_NAMESPACES = []
 
 """
 
+FLUX_LAST_KNOWN_VALUE_NAMESPACES = []
+"""
+:var FLUX_LAST_KNOWN_VALUE_NAMESPACES: For each namespace or namespace elements
+    declared in this list, flux will send the last value if no data is recieved
+    for a metric in the namespace in the last 60 seconds. The namespaces
+    declared here can be absolute metric names, elements or a regex of the
+    namespace.
+:vartype FLUX_LAST_KNOWN_VALUE_NAMESPACES: list
+
+- **Example**::
+
+    FLUX_LAST_KNOWN_VALUE_NAMESPACES = [
+        'external_sites.www_example_com.users',
+        'external_sites.shop_example_com.products',
+    ]
+
+"""
+
+FLUX_AGGREGATE_NAMESPACES = {}
+"""
+:var FLUX_AGGREGATE_NAMESPACES: For each namespace or namespace elements
+    declared in this dict, flux/listen will send data points received to
+    flux/aggregator which will then submit metrics to flux/worker at every
+    interval, aggregating by the defined method/s. If multiple methods are used
+    flux will submit a metric per method defined.
+:vartype FLUX_AGGREGATE_NAMESPACES: dict
+
+- **Example**::
+
+    FLUX_AGGREGATE_NAMESPACES = {
+        'mysite.events.loadtime': {
+            'method': ['avg'],
+            'interval': 60,
+            'zero_fill': True,
+            'last_known_value': False,
+            'method_suffix': False},
+        'mysite.events.pageloads': {
+            'method': ['avg', 'sum', 'high'],
+            'interval': 60,
+            'zero_fill': False,
+            'last_known_value': False,
+            'method_suffix': True},
+        'warehouse1.kwh.meter.reading': {
+            'method': ['avg'],
+            'interval': 60,
+            'zero_fill': False,
+            'last_known_value': False,
+            'method_suffix': False},
+    }
+"""
 
 FLUX_SEND_TO_STATSD = False
 """

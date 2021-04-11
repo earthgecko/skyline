@@ -23,6 +23,9 @@ if True:
     from worker import Worker
     from populate_metric import PopulateMetric
     from populate_metric_worker import PopulateMetricWorker
+    # @added 20210406 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES
+    from aggregator import Aggregator
+
     # @added 20200517 - Feature #3550: flux.uploaded_data_worker
     try:
         flux_process_uploads = settings.FLUX_PROCESS_UPLOADS
@@ -96,6 +99,9 @@ else:
         logger.info('flux :: there were no items in the flux.queue Redis set to add to the queue')
     else:
         logger.info('flux :: FLUX_PERSIST_QUEUE is set to %s, not persisting' % str(FLUX_PERSIST_QUEUE))
+
+logger.info('flux :: starting %s aggregator processes' % str(settings.FLUX_WORKERS))
+Aggregator(pid).start()
 
 logger.info('flux :: starting %s worker/s' % str(settings.FLUX_WORKERS))
 Worker(httpMetricDataQueue, pid).start()
