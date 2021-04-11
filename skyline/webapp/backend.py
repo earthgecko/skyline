@@ -1,11 +1,14 @@
 import logging
-from os import path
+from os import path, walk
 import string
 import operator
 import time
 import re
 
 import traceback
+
+from ast import literal_eval
+
 from flask import request
 # import mysql.connector
 # from mysql.connector import errorcode
@@ -21,6 +24,9 @@ import requests
 # @added 20201125 - Feature #3850: webapp - yhat_values API endoint
 import numpy as np
 
+# @added 20210328 - Feature #3994: Panorama - mirage not anomalous
+import pandas as pd
+
 import settings
 from skyline_functions import (
     mysql_select,
@@ -35,7 +41,9 @@ from skyline_functions import (
     #                   Branch #3262: py3
     get_redis_conn_decoded,
     # @added 20201125 - Feature #3850: webapp - yhat_values API endoint
-    get_graphite_metric)
+    get_graphite_metric,
+    # @added 20210328 - Feature #3994: Panorama - mirage not anomalous
+    filesafe_metricname, mkdir_p)
 
 import skyline_version
 skyline_version = skyline_version.__absolute_version__
@@ -1107,3 +1115,420 @@ def get_yhat_values(
     # @modified 20210201 - Task #3958: Handle secondary algorithms in yhat_values
     # return yhat_dict
     return yhat_dict, anomalous_periods_dict
+
+
+# @added 20210326 - Feature #3994: Panorama - mirage not anomalous
+def get_mirage_not_anomalous_metrics(
+        metric=None, from_timestamp=None, until_timestamp=None,
+        anomalies=False):
+    """
+    Determine mirage not anomalous metrics from mirage.panorama.not_anomalous_metrics
+
+    :param metric: base_name
+    :param from_timestamp: the from_timestamp
+    :param until_timestamp: the until_timestamp
+    :param anomalies: whether to report anomalies as well
+    :type metric: str
+    :type from_timestamp: int
+    :type until_timestamp: int
+    :type anomalies: boolean
+    :return: (dict, dict)
+    :rtype: tuple
+
+    """
+
+    import datetime
+
+    fail_msg = None
+    trace = None
+
+    current_date = datetime.datetime.now().date()
+    current_date_str = '%s 00:00' % str(current_date)
+    from_timestamp_date_str = current_date_str
+    until_timestamp_date_str = current_date_str
+    until_timestamp = str(int(time.time()))
+
+    base_name = None
+    if 'metric' in request.args:
+        base_name = request.args.get('metric', None)
+        if base_name == 'all':
+            base_name = None
+    if metric:
+        base_name = metric
+
+    if not from_timestamp and 'from_timestamp' in request.args:
+        from_timestamp = request.args.get('from_timestamp', None)
+        if from_timestamp == 'today':
+            from_timestamp_date_str = current_date_str
+            new_from_timestamp = time.mktime(datetime.datetime.strptime(current_date_str, '%Y-%m-%d %H:%M').timetuple())
+            from_timestamp = str(int(new_from_timestamp))
+        if from_timestamp and from_timestamp != 'today':
+            if ":" in from_timestamp:
+                try:
+                    datetime_object = datetime.datetime.strptime(from_timestamp, '%Y-%m-%d %H:%M')
+                except:
+                    # Handle old format
+                    datetime_object = datetime.datetime.strptime(from_timestamp, '%Y%m%d %H:%M')
+                from_timestamp_date_str = str(datetime_object.date())
+                new_from_timestamp = time.mktime(datetime.datetime.strptime(from_timestamp, '%Y-%m-%d %H:%M').timetuple())
+                from_timestamp = str(int(new_from_timestamp))
+    else:
+        from_timestamp_date_str = current_date_str
+        new_from_timestamp = time.mktime(datetime.datetime.strptime(current_date_str, '%Y-%m-%d %H:%M').timetuple())
+        from_timestamp = str(int(new_from_timestamp))
+
+    if not until_timestamp and 'until_timestamp' in request.args:
+        until_timestamp = request.args.get('until_timestamp', None)
+        if until_timestamp == 'all':
+            until_timestamp_date_str = current_date_str
+            until_timestamp = str(int(time.time()))
+        if until_timestamp and until_timestamp != 'all':
+            if ":" in until_timestamp:
+                datetime_object = datetime.datetime.strptime(until_timestamp, '%Y-%m-%d %H:%M')
+                until_timestamp_date_str = str(datetime_object.date())
+                new_until_timestamp = time.mktime(datetime.datetime.strptime(until_timestamp, '%Y-%m-%d %H:%M').timetuple())
+                until_timestamp = str(int(new_until_timestamp))
+    else:
+        until_timestamp_date_str = current_date_str
+        until_timestamp = str(int(time.time()))
+
+    get_anomalies = False
+    if 'anomalies' in request.args:
+        anomalies_str = request.args.get('anomalies', 'false')
+        if anomalies_str == 'true':
+            get_anomalies = True
+        logger.info(
+            'get_mirage_not_anomalous_metrics - also determining anomalies for %s' % (
+                str(base_name)))
+
+    logger.info(
+        'get_mirage_not_anomalous_metrics - base_name: %s, from_timestamp: %s, until_timestamp: %s' % (
+            str(base_name), str(from_timestamp), str(until_timestamp)))
+
+    redis_hash = 'mirage.panorama.not_anomalous_metrics'
+    mirage_panorama_not_anomalous = {}
+    try:
+        REDIS_CONN_DECODED = get_redis_conn_decoded(skyline_app)
+        mirage_panorama_not_anomalous = REDIS_CONN_DECODED.hgetall(redis_hash)
+        logger.info('get_mirage_not_anomalous_metrics :: %s entries to check in the %s Redis hash key' % (
+            str(len(mirage_panorama_not_anomalous)), redis_hash))
+    except:
+        logger.error(traceback.format_exc())
+        logger.error('error :: get_mirage_not_anomalous_metrics :: failed to get Redis hash key %s' % redis_hash)
+        mirage_panorama_not_anomalous = {}
+    all_timestamp_float_strings = []
+    if mirage_panorama_not_anomalous:
+        all_timestamp_float_strings = list(mirage_panorama_not_anomalous.keys())
+    timestamp_floats = []
+    if all_timestamp_float_strings:
+        for timestamp_float_string in all_timestamp_float_strings:
+            if int(float(timestamp_float_string)) >= int(from_timestamp):
+                if int(float(timestamp_float_string)) <= int(until_timestamp):
+                    timestamp_floats.append(timestamp_float_string)
+
+    not_anomalous_dict = {}
+    not_anomalous_count = 0
+    for timestamp_float_string in timestamp_floats:
+        try:
+            timestamp_float_dict = literal_eval(mirage_panorama_not_anomalous[timestamp_float_string])
+            for i_metric in list(timestamp_float_dict.keys()):
+                if base_name:
+                    if base_name != i_metric:
+                        continue
+                try:
+                    metric_dict = not_anomalous_dict[i_metric]
+                except:
+                    metric_dict = {}
+                    not_anomalous_dict[i_metric] = {}
+                    not_anomalous_dict[i_metric]['from'] = int(from_timestamp)
+                    not_anomalous_dict[i_metric]['until'] = int(until_timestamp)
+                    not_anomalous_dict[i_metric]['timestamps'] = {}
+                metric_timestamp = timestamp_float_dict[i_metric]['timestamp']
+                try:
+                    metric_timestamp_dict = not_anomalous_dict[i_metric]['timestamps'][metric_timestamp]
+                except:
+                    not_anomalous_dict[i_metric]['timestamps'][metric_timestamp] = {}
+                    metric_timestamp_dict = {}
+                if not metric_timestamp_dict:
+                    not_anomalous_dict[i_metric]['timestamps'][metric_timestamp]['value'] = timestamp_float_dict[i_metric]['value']
+                    not_anomalous_dict[i_metric]['timestamps'][metric_timestamp]['hours_to_resolve'] = timestamp_float_dict[i_metric]['hours_to_resolve']
+                    not_anomalous_count += 1
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: get_mirage_not_anomalous_metrics :: failed iterate mirage_panorama_not_anomalous entry')
+
+    logger.info(
+        'get_mirage_not_anomalous_metrics - not_anomalous_count: %s, for base_name: %s' % (
+            str(not_anomalous_count), str(base_name)))
+
+    anomalies_dict = {}
+    if get_anomalies:
+        for i_metric in list(not_anomalous_dict.keys()):
+            metric_id = None
+            query = 'SELECT id FROM metrics WHERE metric=\'%s\'' % i_metric
+            try:
+                results = mysql_select(skyline_app, query)
+                for item in results:
+                    metric_id = int(item[0])
+                    break
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: get_mirage_not_anomalous_metrics :: querying MySQL - %s' % query)
+            query_start_str = 'SELECT anomaly_timestamp,anomalous_datapoint,anomaly_end_timestamp,full_duration FROM anomalies'
+            if metric_id:
+                query = '%s WHERE metric_id=%s AND anomaly_timestamp > %s AND anomaly_timestamp < %s' % (
+                    query_start_str, metric_id, str(from_timestamp), str(until_timestamp))
+            else:
+                query = '%s WHERE anomaly_timestamp > %s AND anomaly_timestamp < %s' % (
+                    query_start_str, str(from_timestamp), str(until_timestamp))
+            anomalies = []
+            try:
+                results = mysql_select(skyline_app, query)
+                for item in results:
+                    anomalies.append([i_metric, int(item[0]), float(item[1]), float(item[2]), round(int(item[3]) / 3600)])
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: get_mirage_not_anomalous_metrics :: querying MySQL - %s' % query)
+
+            anomalies_dict[i_metric] = {}
+            anomalies_dict[i_metric]['from'] = int(from_timestamp)
+            anomalies_dict[i_metric]['until'] = int(until_timestamp)
+            anomalies_dict[i_metric]['timestamps'] = {}
+            if anomalies:
+                for a_metric, timestamp, value, anomaly_end_timestamp, hours_to_resolve in anomalies:
+                    anomalies_dict[i_metric]['timestamps'][timestamp] = {}
+                    anomalies_dict[i_metric]['timestamps'][timestamp]['value'] = value
+                    anomalies_dict[i_metric]['timestamps'][timestamp]['hours_to_resolve'] = hours_to_resolve
+                    anomalies_dict[i_metric]['timestamps'][timestamp]['end_timestamp'] = anomaly_end_timestamp
+
+    # @added 20210328 - Feature #3994: Panorama - mirage not anomalous
+    # Save key to use in not_anomalous_metric
+    not_anomalous_dict_key = 'panorama.not_anomalous_dict.%s.%s' % (
+        str(from_timestamp), str(until_timestamp))
+    not_anomalous_dict_key_ttl = 600
+    if base_name:
+        not_anomalous_dict_key = 'panorama.not_anomalous_dict.%s.%s.%s' % (
+            str(from_timestamp), str(until_timestamp), base_name)
+        not_anomalous_dict_key_ttl = 600
+    try:
+        REDIS_CONN.setex(not_anomalous_dict_key, not_anomalous_dict_key_ttl, str(not_anomalous_dict))
+        logger.info('get_mirage_not_anomalous_metrics :: created Redis key - %s with %s TTL' % (
+            not_anomalous_dict_key, str(not_anomalous_dict_key_ttl)))
+    except:
+        logger.error(traceback.format_exc())
+        logger.error('error :: get_mirage_not_anomalous_metrics :: failed to created Redis key - %s with %s TTL' % (
+            not_anomalous_dict_key, str(not_anomalous_dict_key_ttl)))
+    if not base_name:
+        recent_not_anomalous_dict_key = 'panorama.not_anomalous_dict.recent'
+        recent_not_anomalous_dict_key_ttl = 180
+        try:
+            REDIS_CONN.setex(recent_not_anomalous_dict_key, recent_not_anomalous_dict_key_ttl, str(not_anomalous_dict))
+            logger.info('get_mirage_not_anomalous_metrics :: created Redis key - %s with %s TTL' % (
+                recent_not_anomalous_dict_key, str(recent_not_anomalous_dict_key_ttl)))
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: get_mirage_not_anomalous_metrics :: failed to created Redis key - %s with %s TTL' % (
+                recent_not_anomalous_dict_key, str(recent_not_anomalous_dict_key_ttl)))
+
+    anomalies_dict_key = 'panorama.anomalies_dict.%s.%s' % (
+        str(from_timestamp), str(until_timestamp))
+    anomalies_dict_key_ttl = 600
+    if base_name:
+        anomalies_dict_key = 'panorama.anomalies_dict.%s.%s.%s' % (
+            str(from_timestamp), str(until_timestamp), base_name)
+        anomalies_dict_key_ttl = 600
+    try:
+        REDIS_CONN.setex(anomalies_dict_key, anomalies_dict_key_ttl, str(anomalies_dict))
+        logger.info('get_mirage_not_anomalous_metrics :: created Redis key - %s with %s TTL' % (
+            anomalies_dict_key, str(anomalies_dict_key_ttl)))
+    except:
+        logger.error(traceback.format_exc())
+        logger.error('error :: get_mirage_not_anomalous_metrics :: failed to created Redis key - %s with %s TTL' % (
+            anomalies_dict_key, str(anomalies_dict_key_ttl)))
+    if not base_name:
+        recent_anomalies_dict_key = 'panorama.not_anomalous_dict.recent'
+        recent_anomalies_dict_key_ttl = 180
+        try:
+            REDIS_CONN.setex(recent_anomalies_dict_key, recent_anomalies_dict_key_ttl, str(anomalies_dict))
+            logger.info('get_mirage_not_anomalous_metrics :: created Redis key - %s with %s TTL' % (
+                recent_anomalies_dict_key, str(recent_anomalies_dict_key_ttl)))
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: get_mirage_not_anomalous_metrics :: failed to created Redis key - %s with %s TTL' % (
+                recent_anomalies_dict_key, str(recent_anomalies_dict_key_ttl)))
+
+    return not_anomalous_dict, anomalies_dict
+
+
+# @added 20210328 - Feature #3994: Panorama - mirage not anomalous
+def plot_not_anomalous_metric(not_anomalous_dict, anomalies_dict, plot_type):
+    """
+    Plot the metric not anomalous or anomalies graph and return the file path
+
+    :param not_anomalous_dict: the dictionary of not anomalous events for the
+        metric
+    :param anomalies_dict: the dictionary of anomalous events for the
+        metric
+    :type not_anomalous_dict: dict
+    :type anomalies_dict: dict
+    :type plot_type: str ('not_anomalous' or 'anomalies')
+    :return: path and filename
+    :rtype: str
+
+    """
+
+    fail_msg = None
+    trace = None
+
+    metric = None
+    from_timestamp = None
+    until_timestamp = None
+
+    try:
+        metric = list(not_anomalous_dict.keys())[0]
+        from_timestamp = not_anomalous_dict[metric]['from']
+        until_timestamp = not_anomalous_dict[metric]['until']
+    except:
+        trace = traceback.format_exc()
+        logger.error('%s' % trace)
+        fail_msg = 'error :: plot_not_anomalous_metric :: failed to get details for plot from not_anomalous_dict'
+        logger.error('%s' % fail_msg)
+        raise  # to webapp to return in the UI
+    if not metric or not from_timestamp or not until_timestamp or not plot_type:
+        fail_msg = 'error :: plot_not_anomalous_metric :: failed to get details for plot'
+        logger.error('%s' % fail_msg)
+        raise  # to webapp to return in the UI
+
+    try:
+        timeseries = get_graphite_metric(
+            skyline_app, metric, from_timestamp, until_timestamp, 'list',
+            'object')
+    except:
+        trace = traceback.format_exc()
+        logger.error('%s' % trace)
+        fail_msg = 'error :: plot_not_anomalous_metric :: failed to get timeseries from Graphite for details for %s' % metric
+        logger.error('%s' % fail_msg)
+        raise  # to webapp to return in the UI
+
+    if plot_type == 'not_anomalous':
+        data_dict = not_anomalous_dict
+    if plot_type == 'anomalies':
+        data_dict = anomalies_dict
+
+    plot_timestamps = list(data_dict[metric]['timestamps'].keys())
+
+    logger.info('plot_not_anomalous_metric :: building not %s timeseries' % plot_type)
+    plot_timeseries = []
+    last_timestamp = None
+    a_timestamps_done = []
+    for timestamp, value in timeseries:
+        anomaly = 0
+        if not last_timestamp:
+            last_timestamp = int(timestamp)
+            plot_timeseries.append([int(timestamp), anomaly])
+            continue
+        for a_timestamp in plot_timestamps:
+            if a_timestamp < last_timestamp:
+                continue
+            if a_timestamp > int(timestamp):
+                continue
+            if a_timestamp in a_timestamps_done:
+                continue
+            if a_timestamp in list(range(last_timestamp, int(timestamp))):
+                anomaly = 1
+                a_timestamps_done.append(a_timestamp)
+        plot_timeseries.append([int(timestamp), anomaly])
+    logger.info('plot_not_anomalous_metric :: created %s timeseries' % plot_type)
+
+    logger.info('plot_not_anomalous_metric :: creating timeseries dataframe')
+    try:
+        df = pd.DataFrame(timeseries, columns=['date', 'value'])
+        df['date'] = pd.to_datetime(df['date'], unit='s')
+        datetime_index = pd.DatetimeIndex(df['date'].values)
+        df = df.set_index(datetime_index)
+        df.drop('date', axis=1, inplace=True)
+    except:
+        trace = traceback.format_exc()
+        logger.error('%s' % trace)
+        fail_msg = 'error :: plot_not_anomalous_metric :: failed create timeseries dataframe to plot %s' % metric
+        logger.error('%s' % fail_msg)
+        raise  # to webapp to return in the UI
+
+    logger.info('plot_not_anomalous_metric :: creating %s dataframe' % plot_type)
+    try:
+        plot_df = pd.DataFrame(plot_timeseries, columns=['date', 'value'])
+        plot_df['date'] = pd.to_datetime(plot_df['date'], unit='s')
+        datetime_index = pd.DatetimeIndex(plot_df['date'].values)
+        plot_df = plot_df.set_index(datetime_index)
+        plot_df.drop('date', axis=1, inplace=True)
+    except:
+        trace = traceback.format_exc()
+        logger.error('%s' % trace)
+        fail_msg = 'error :: plot_not_anomalous_metric :: failed create not anomalous dataframe to plot %s' % metric
+        logger.error('%s' % fail_msg)
+        raise  # to webapp to return in the UI
+
+    try:
+        logger.info('plot_not_anomalous_metric :: loading plot from adtk.visualization')
+        from adtk.visualization import plot
+        sane_metricname = filesafe_metricname(str(metric))
+        save_to_file = '%s/panorama/not_anomalous/%s/%s.%s.%s.%s.png' % (
+            settings.SKYLINE_TMP_DIR, sane_metricname, plot_type,
+            str(from_timestamp),
+            str(until_timestamp), sane_metricname)
+        save_to_path = path.dirname(save_to_file)
+        if plot_type == 'not_anomalous':
+            title = 'Not anomalous analysis\n%s' % metric
+        if plot_type == 'anomalies':
+            title = 'Anomalies\n%s' % metric
+
+        if not path.exists(save_to_path):
+            try:
+                mkdir_p(save_to_path)
+            except Exception as e:
+                logger.error('error :: plot_not_anomalous_metric :: failed to create dir - %s - %s' % (
+                    save_to_path, e))
+        if path.exists(save_to_path):
+            try:
+                logger.info('plot_not_anomalous_metric :: plotting')
+                if plot_type == 'not_anomalous':
+                    plot(
+                        df, anomaly=plot_df, anomaly_color='green', title=title,
+                        ts_markersize=1, anomaly_alpha=0.4, legend=False,
+                        save_to_file=save_to_file)
+                if plot_type == 'anomalies':
+                    plot(
+                        df, anomaly=plot_df, anomaly_color='red', title=title,
+                        ts_markersize=1, anomaly_alpha=1, legend=False,
+                        save_to_file=save_to_file)
+                logger.debug('debug :: plot_not_anomalous_metric :: plot saved to - %s' % (
+                    save_to_file))
+            except Exception as e:
+                trace = traceback.format_exc()
+                logger.error('%s' % trace)
+                fail_msg = 'error :: plot_not_anomalous_metric :: failed to plot - %s: %s' % (str(metric), e)
+                logger.error('%s' % fail_msg)
+                raise  # to webapp to return in the UI
+    except:
+        trace = traceback.format_exc()
+        logger.error('%s' % trace)
+        fail_msg = 'error :: plot_not_anomalous_metric :: plotting %s for %s' % (str(metric), plot_type)
+        logger.error('%s' % fail_msg)
+        raise  # to webapp to return in the UI
+
+    if not path.isfile(save_to_file):
+        trace = traceback.format_exc()
+        logger.error('%s' % trace)
+        fail_msg = 'error :: plot_not_anomalous_metric :: plotting %s for %s to %s failed' % (
+            str(metric), plot_type, save_to_file)
+        logger.error('%s' % fail_msg)
+        raise  # to webapp to return in the UI
+    else:
+        try:
+            REDIS_CONN.hset('panorama.not_anomalous_plots', time.time(), save_to_file)
+            logger.info('plot_not_anomalous_metric :: set Redis hash in panorama.not_anomalous_plots for clean up')
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: plot_not_anomalous_metric :: failed to set save_to_file in Redis hash - panorama.not_anomalous_plots')
+
+    return save_to_file

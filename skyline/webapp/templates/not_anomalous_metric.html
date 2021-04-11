@@ -1,0 +1,54 @@
+{% block get_mirage_not_anomalous_metrics_from_logsblock %}
+<!-- BEGIN /panorama>?not_anomalous=true block -->
+{% if print_debug == 'True' %}
+<code> DEBUG </code> :: /panorama not_anomalous_metric_block</br>
+{% endif %}
+
+{% if display_message %}
+<code> ERROR </code></br>
+<code> message </code>: {{ display_message }}<br>
+{% endif %}
+
+
+<div class="navbar-header" role="navigation">
+  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+    <span class="sr-only">Toggle navigation</span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+  </button>
+		<ul class="nav nav-tabs" role="view_tablist" id="not_anomalous_metric">
+		  <li><a href="/panorama"><span class="logo"><span class="sky">Search</span> <span class="re">anomalies</span></span></a></li>
+		  <li><a href="?label_anomalies=true"><span class="logo"><span class="sky">Label</span> <span class="re">anomalies</span></span></a></li>
+		  <li><a href="?not_anomalous=true"><span class="logo"><span class="sky">Not</span> <span class="re">anomalous</span></span></a></li>
+		  <li class="active"><a href="?not_anomalous_metric=true&metric={{ metric }}&from_timestamp={{ from_timestamp }}&until_timestamp={{ until_timestamp }}"><span class="logo"><span class="sky">Not</span> <span class="re">anomalous metric</span></span></a></li>
+		</ul>
+		<div class="tab-content">
+	  	<div class="tab-pane active" id="not_anomalous_metric">
+	<br>
+  <div class="navbar-header" role="navigation">
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+  </div>
+
+  <h4><span class="logo"><span class="sky">Not ::</span> <span class="re">anomalous ::</span></span> {{ metric }}</h4>
+
+      <img src="panorama_images?image={{ not_anomalous_plot }}" alt="{{ metric }} - not anomalous timeseries graph" class="img-responsive center-block" /><br>
+Image file: {{ not_anomalous_plot }}<br><br>
+
+  {% if anomalies_plot %}
+  <h4><span class="logo"><span class="sky">Detected ::</span> <span class="re">anomalies ::</span></span> {{ metric }}</h4>
+
+      <img src="panorama_images?image={{ anomalies_plot }}" alt="{{ metric }} - anomalies timeseries graph" class="img-responsive center-block" /><br>
+Image file: {{ anomalies_plot }}<br><br>
+  {% endif %}
+
+      </div>
+    </div>
+  </div>
+
+<!-- END /panorama?not_anomalous_metric block -->
+{% endblock %}

@@ -122,7 +122,12 @@ if True:
         # @added 20201103 - Feature #3824: get_cluster_data
         get_cluster_data,
         # @added 20201125 - Feature #3850: webapp - yhat_values API endoint
-        get_yhat_values)
+        get_yhat_values,
+        # @added 20210326 - Feature #3994: Panorama - mirage not anomalous
+        get_mirage_not_anomalous_metrics,
+        # @added 20210328 - Feature #3994: Panorama - mirage not anomalous
+        plot_not_anomalous_metric,
+    )
     from ionosphere_backend import (
         ionosphere_data, ionosphere_metric_data,
         # @modified 20170114 - Feature #1854: Ionosphere learn
@@ -656,6 +661,20 @@ def panorama_anomalies():
             json_data = f.read()
     except:
         logger.error('error :: failed to get panorama.json: ' + traceback.format_exc())
+        return 'Uh oh ... a Skyline 500 :(', 500
+    return json_data, 200
+
+
+@app.route("/panorama_not_anomalous.json")
+def panorama_not_anomalous():
+    try:
+        anomalies_json = path.abspath(path.join(path.dirname(__file__), '..', settings.ANOMALY_DUMP))
+        panorama_not_anomalous_json = anomalies_json.replace('anomalies.json', 'panorama_not_anomalous.json')
+        logger.info('opening - %s' % panorama_not_anomalous_json)
+        with open(panorama_not_anomalous_json, 'r') as f:
+            json_data = f.read()
+    except:
+        logger.error('error :: failed to get panorama_not_anomalous.json: ' + traceback.format_exc())
         return 'Uh oh ... a Skyline 500 :(', 500
     return json_data, 200
 
@@ -2307,6 +2326,213 @@ def panorama():
             return 'Uh oh ... a Skyline 500 :(', 500
 
     start = time.time()
+
+    # @added 20210326 - Feature #3994: Panorama - mirage not anomalous
+    if 'not_anomalous' in request.args:
+        not_anomalous_dict = {}
+        anomalies_dict = {}
+        try:
+            not_anomalous_dict, anomalies_dict = get_mirage_not_anomalous_metrics()
+        except:
+            trace = traceback.format_exc()
+            message = 'Uh oh ... a Skyline 500 using get_mirage_not_anomalous_metrics'
+            return internal_error(message, trace)
+        format = None
+        if 'format' in request.args:
+            format = request.args.get('format', 'normal')
+        anomalies = False
+        if 'anomalies' in request.args:
+            anomalies_str = request.args.get('anomalies', 'false')
+            if anomalies_str == 'true':
+                anomalies = True
+        if format == 'json':
+            if not not_anomalous_dict and not anomalies_dict:
+                data_dict = {"status": {"response": 204, "request_time": (time.time() - start), "message": "no data"}, "data": {"not anomalous": {}, "anomalies": {}}}
+            else:
+                if anomalies:
+                    data_dict = {"status": {"response": 200, "request_time": (time.time() - start)}, "data": {"not anomalous": not_anomalous_dict, "anomalies": anomalies_dict}}
+                else:
+                    data_dict = {"status": {"response": 200, "request_time": (time.time() - start)}, "data": {"not anomalous": not_anomalous_dict}}
+            logger.info('mirage_not_anomalous returned json with %s metrics' % str(len(not_anomalous_dict)))
+            return jsonify(data_dict), 200
+
+        not_anomalous_metrics_dict = {}
+        if not_anomalous_dict:
+            for i_metric in list(not_anomalous_dict.keys()):
+                not_anomalous_metrics_dict[i_metric] = {}
+                not_anomalous_metrics_dict[i_metric]['count'] = len(not_anomalous_dict[i_metric]['timestamps'])
+                not_anomalous_metrics_dict[i_metric]['from'] = not_anomalous_dict[i_metric]['from']
+                not_anomalous_metrics_dict[i_metric]['until'] = not_anomalous_dict[i_metric]['until']
+        anomalies_metrics_dict = {}
+        if anomalies_dict:
+            for i_metric in list(anomalies_dict.keys()):
+                anomalies_metrics_dict[i_metric] = {}
+                anomalies_metrics_dict[i_metric]['count'] = len(anomalies_dict[i_metric]['timestamps'])
+                anomalies_metrics_dict[i_metric]['from'] = anomalies_dict[i_metric]['from']
+                anomalies_metrics_dict[i_metric]['until'] = anomalies_dict[i_metric]['until']
+
+        return render_template(
+            'panorama.html', not_anomalous=True,
+            not_anomalous_dict=not_anomalous_dict,
+            not_anomalous_metrics_dict=not_anomalous_metrics_dict,
+            anomalies_dict=anomalies_dict,
+            anomalies_metrics_dict=anomalies_metrics_dict,
+            version=skyline_version,
+            duration=(time.time() - start), print_debug=False), 200
+
+    # @added 20210328 - Feature #3994: Panorama - mirage not anomalous
+    if 'not_anomalous_metric' in request.args:
+        base_name = None
+        anomalies = False
+        if 'metric' in request.args:
+            base_name = request.args.get('metric', None)
+            if base_name == 'all':
+                base_name = None
+        if not base_name:
+            data_dict = {"status": {"response": 400, "request_time": (time.time() - start)}, "error": "no metric parameter passed", "data": {}}
+            return jsonify(data_dict), 400
+        from_timestamp = None
+        if 'from_timestamp' in request.args:
+            from_timestamp = request.args.get('from_timestamp', 'all')
+        if not from_timestamp:
+            data_dict = {"status": {"response": 400, "request_time": (time.time() - start)}, "error": "no from_timestamp parameter passed", "data": {}}
+            return jsonify(data_dict), 400
+        until_timestamp = None
+        if 'until_timestamp' in request.args:
+            until_timestamp = request.args.get('until_timestamp', 'all')
+        if not until_timestamp:
+            data_dict = {"status": {"response": 400, "request_time": (time.time() - start)}, "error": "no until_timestamp parameter passed", "data": {}}
+            return jsonify(data_dict), 400
+        if 'anomalies' in request.args:
+            anomalies_arg = request.args.get('anomalies', 'false')
+            if anomalies_arg == 'true':
+                anomalies = True
+
+        def get_cache_dict(plot_type, base_name, from_timestamp, until_timestamp):
+            data_dict_key = 'panorama.%s_dict.%s.%s.%s' % (
+                plot_type, str(from_timestamp), str(until_timestamp), base_name)
+            metric_data_dict = {}
+            data_dict = {}
+            try:
+                raw_data_dict = REDIS_CONN.get(data_dict_key)
+                if raw_data_dict:
+                    metric_data_dict = literal_eval(raw_data_dict)
+                if metric_data_dict:
+                    logger.info('key found: %s' % data_dict_key)
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: Webapp could not get the Redis key - %s' % data_dict_key)
+            if not metric_data_dict:
+                logger.info('key not found: %s' % data_dict_key)
+                try:
+                    data_dict_all_key = 'panorama.%s_dict.%s.%s' % (
+                        plot_type, str(from_timestamp), str(until_timestamp))
+                    raw_data_dict_all = REDIS_CONN.get(data_dict_all_key)
+                    data_dict_all = {}
+                    if raw_data_dict_all:
+                        data_dict_all = literal_eval(raw_data_dict_all)
+                    if data_dict_all:
+                        metric_data_dict = data_dict_all[base_name]
+                    if data_dict:
+                        logger.info('key found: %s' % data_dict_all_key)
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: Webapp could not get the Redis key - %s' % data_dict_all_key)
+            if not metric_data_dict:
+                logger.info('key not found: %s' % data_dict_all_key)
+                recent_data_dict_all_key = 'panorama.%s_dict.recent' % plot_type
+                try:
+                    raw_data_dict_all = REDIS_CONN.get(recent_data_dict_all_key)
+                    data_dict_all = {}
+                    if raw_data_dict_all:
+                        data_dict_all = literal_eval(raw_data_dict_all)
+                    if data_dict_all:
+                        metric_data_dict = data_dict_all[base_name]
+                    if data_dict:
+                        logger.info('key found: %s' % data_dict_all_key)
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: Webapp could not get the Redis key - %s' % recent_data_dict_all_key)
+            if metric_data_dict:
+                data_dict[base_name] = metric_data_dict
+            return data_dict
+
+        not_anomalous_dict = {}
+        try:
+            not_anomalous_dict = get_cache_dict('not_anomalous', base_name, from_timestamp, until_timestamp)
+        except:
+            trace = traceback.format_exc()
+            message = 'Uh oh ... a Skyline 500 using get_mirage_not_anomalous_metrics'
+            return internal_error(message, trace)
+        anomalies_dict = {}
+        if anomalies:
+            try:
+                anomalies_dict = get_cache_dict('anomalies', base_name, from_timestamp, until_timestamp)
+            except:
+                trace = traceback.format_exc()
+                message = 'Uh oh ... a Skyline 500 using get_mirage_not_anomalous_metrics'
+                return internal_error(message, trace)
+
+        if not not_anomalous_dict:
+            logger.info('not_anomalous_dict data not found in Redis')
+            logger.info('calling get_mirage_not_anomalous_metrics(%s, %s, %s)' % (
+                str(base_name), str(from_timestamp), str(until_timestamp),
+                str(anomalies)))
+            try:
+                not_anomalous_dict, anomalies_dict = get_mirage_not_anomalous_metrics(base_name, from_timestamp, until_timestamp, anomalies)
+            except:
+                trace = traceback.format_exc()
+                message = 'Uh oh ... a Skyline 500 using get_mirage_not_anomalous_metrics'
+                return internal_error(message, trace)
+        format = None
+        if 'format' in request.args:
+            format = request.args.get('format', 'normal')
+        if format == 'json':
+            if anomalies:
+                data_dict = {"status": {"response": 200, "request_time": (time.time() - start)}, "data": {"not anomalous": not_anomalous_dict, "anomalies": anomalies_dict}}
+            else:
+                data_dict = {"status": {"response": 200, "request_time": (time.time() - start)}, "data": {"not anomalous": not_anomalous_dict}}
+            try:
+                not_anomalous_count = len(not_anomalous_dict[base_name]['timestamps'])
+            except:
+                not_anomalous_count = 0
+            if anomalies:
+                try:
+                    anomalies_count = len(anomalies_dict[base_name]['timestamps'])
+                except:
+                    anomalies_count = 0
+            if anomalies:
+                logger.info('mirage_not_anomalous returned json with %s not_anomalous events and %s anomalies for %s' % (
+                    str(not_anomalous_count), str(anomalies_count), base_name))
+            else:
+                logger.info('mirage_not_anomalous returned json with %s not_anomalous events for %s' % (
+                    str(not_anomalous_count), base_name))
+            return jsonify(data_dict), 200
+
+        try:
+            not_anomalous_plot = plot_not_anomalous_metric(not_anomalous_dict, anomalies_dict, 'not_anomalous')
+        except:
+            trace = traceback.format_exc()
+            message = 'Uh oh ... a Skyline 500 using get_mirage_not_anomalous_metrics'
+            return internal_error(message, trace)
+
+        anomalies_plot = False
+        if anomalies:
+            try:
+                anomalies_plot = plot_not_anomalous_metric(not_anomalous_dict, anomalies_dict, 'anomalies')
+            except:
+                trace = traceback.format_exc()
+                message = 'Uh oh ... a Skyline 500 using get_mirage_not_anomalous_metrics'
+                return internal_error(message, trace)
+
+        return render_template(
+            'panorama.html', not_anomalous_metric=True, metric=base_name,
+            not_anomalous_dict=not_anomalous_dict,
+            from_timestamp=from_timestamp, until_timestamp=until_timestamp,
+            not_anomalous_plot=not_anomalous_plot,
+            anomalies_plot=anomalies_plot,
+            version=skyline_version,
+            duration=(time.time() - start), print_debug=False), 200
 
     try:
         apps = get_list('app')
@@ -6135,6 +6361,9 @@ def ionosphere():
 #                   Feature #3642: Anomaly type classification
 # Serve the luminosity_images endpoint as well, for classify_metrics plots
 @app.route('/luminosity_images')
+# @added 20210328 - Feature #3994: Panorama - mirage not anomalous
+# Serve the panorama_file endpoint as well
+@app.route('/panorama_images')
 def ionosphere_images():
 
     request_args_present = False
@@ -6179,6 +6408,8 @@ def ionosphere_images():
                     # @added 20210316 - Feature #3978: luminosity - classify_metrics
                     #                   Feature #3642: Anomaly type classification
                     luminosity_data_folder,
+                    # @added 20210328 - Feature #3994: Panorama - mirage not anomalous
+                    settings.SKYLINE_TMP_DIR,
                 ]
                 allowed_path = False
                 for allowed_image_path in IONOSPHERE_IMAGE_ALLOWED_PATHS:
