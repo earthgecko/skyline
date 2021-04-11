@@ -326,7 +326,18 @@ class Listen(Process):
                     # and https://stackoverflow.com/a/47070687/107406
                     # metric = unpackb(data)
                     if python_version == 3:
-                        metric = unpackb(data, encoding='utf-8')
+                        # @added 20210328 - [Q] The "horizon.test.pickle" test is getting an error. #419
+                        # Wrap in try and except and try without encoding if
+                        # with encoding fails
+                        try:
+                            metric = unpackb(data, encoding='utf-8')
+                        except Exception as e:
+                            logger.error('%s :: unpackb error : %s' % (skyline_app, str(e)))
+                            try:
+                                logger.info('%s :: trying unpackb without encoding' % (skyline_app))
+                                metric = unpackb(data)
+                            except Exception as e:
+                                logger.info('%s :: unpackb without encoding error : %s' % (skyline_app, str(e)))
                     else:
                         metric = unpackb(data)
 
