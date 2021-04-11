@@ -1,5 +1,7 @@
 import sys
 import os.path
+from os import getpid
+
 # import logging
 # import multiprocessing
 # import traceback
@@ -14,6 +16,7 @@ sys.path.insert(0, os.path.dirname(__file__))
 # This prevents flake8 E402 - module level import not at top of file
 if True:
     import settings
+    from skyline_functions import get_redis_conn
 
 bind = '%s:%s' % (settings.FLUX_IP, str(settings.FLUX_PORT))
 # workers = multiprocessing.cpu_count() * 2 + 1
@@ -28,6 +31,19 @@ skyline_app = 'flux'
 logger = set_up_logging(None)
 
 pidfile = '%s/%s.pid' % (settings.PID_PATH, skyline_app)
+
+pid = getpid()
+redis_conn = get_redis_conn(skyline_app)
+try:
+    redis_conn.set('flux.main_process_pid', pid)
+    logger.info('flux :: gunicorn.py :: set the Redis key flux.main_process_pid to %s' % (
+        str(pid)))
+except Exception as e:
+    logger.error('error :: flux :: gunicorn.py :: failed to set the Redis key flux.main_process_pid to %s, exit - %s' % (
+        str(pid), str(e)))
+    sys.exit(1)
+
+del redis_conn
 
 # access_log_format = '%(h)s %(l)s %(u)s %(t)s "%(r)s" %(s)s %(b)s "%(f)s" "%(a)s"'
 

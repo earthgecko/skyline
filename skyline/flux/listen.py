@@ -18,7 +18,9 @@ if True:
     import settings
     import flux
     # @added 20201018 - Feature #3798: FLUX_PERSIST_QUEUE
-    from skyline_functions import get_redis_conn
+    # @modified 20210406 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES
+    # Added get_redis_conn_decoded
+    from skyline_functions import get_redis_conn, get_redis_conn_decoded
 
 # @added 20200818 - Feature #3694: flux - POST multiple metrics
 # Added validation of FLUX_API_KEYS
@@ -59,6 +61,18 @@ try:
 except:
     FLUX_PERSIST_QUEUE = False
 
+# @added 20210406 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES
+try:
+    FLUX_AGGREGATE_NAMESPACES = settings.FLUX_AGGREGATE_NAMESPACES.copy()
+    # aggregate_namespaces = list(FLUX_AGGREGATE_NAMESPACES.keys())
+except:
+    FLUX_AGGREGATE_NAMESPACES = {}
+    # aggregate_namespaces = []
+try:
+    FLUX_EXTERNAL_AGGREGATE_NAMESPACES = settings.FLUX_EXTERNAL_AGGREGATE_NAMESPACES
+except:
+    FLUX_EXTERNAL_AGGREGATE_NAMESPACES = False
+
 # @modified 20191129 - Branch #3262: py3
 # Consolidate flux logging
 # logger = set_up_logging('listen')
@@ -76,6 +90,18 @@ for char in string.digits:
 
 # @added 20201018 - Feature #3798: FLUX_PERSIST_QUEUE
 redis_conn = get_redis_conn('flux')
+
+# @added 20210406 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES
+aggregate_metrics = []
+if FLUX_AGGREGATE_NAMESPACES or FLUX_EXTERNAL_AGGREGATE_NAMESPACES:
+    redis_conn_decoded = get_redis_conn_decoded('flux')
+    try:
+        aggregate_metrics = list(redis_conn_decoded.smembers('metrics_manager.flux.aggregate_metrics'))
+        logger.info('listen :: there are %s metrics in the metrics_manager.flux.aggregate_metrics Redis set' % (
+            str(len(aggregate_metrics))))
+    except Exception as e:
+        logger.error('error :: listen :: could get Redis set metrics_manager.flux.aggregate_metrics - %s' % str(e))
+        aggregate_metrics = []
 
 
 def validate_key(caller, apikey):
@@ -209,6 +235,63 @@ def validate_metric_name(caller, metric):
             caller, str(full_whisper_path)))
         return False
     return True
+
+
+# @added 20210406 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES
+# To reduce the overhead of making a redis query for every metric
+# submitted, the metric name is checked against the initial loaded
+# aggregate_metrics list, if not found in there then the elements of the
+# metric name are checked to see if element could any possible match an
+# aggregation namespace, only then is Redis queried.
+def add_to_aggregate_metric_queue(metric, metric_data, aggregate_metrics):
+    added_to_aggregation_queue = False
+    return_status_code = 204
+    aggregate_metric = False
+    # First check the list of aggregate_metrics created at startup from
+    # the analyzer/metrics_manager metrics_manager.flux.aggregate_metrics Redis
+    # set and if not in there try the Redis metrics_manager.flux.aggregate_metrics.hash
+    if aggregate_metrics:
+        if metric in aggregate_metrics:
+            aggregate_metric = True
+    aggregate_metric_timestamp = None
+    if not aggregate_metric:
+        try:
+            # current_redis_conn_decoded = get_redis_conn_decoded('flux')
+            aggregate_metric_timestamp = int(redis_conn_decoded.hget('metrics_manager.flux.aggregate_metrics.hash', metric))
+        except Exception as e:
+            if LOCAL_DEBUG:
+                logger.error('error :: listen :: could get metric %s from Redis hash metrics_manager.flux.aggregate_metrics.hash - %s' % (metric, str(e)))
+            aggregate_metric_timestamp = None
+    if aggregate_metric_timestamp:
+        try:
+            if aggregate_metric_timestamp > (time() - 3600):
+                aggregate_metric = True
+            else:
+                if aggregate_metric_timestamp < (time() - (3600 * 12)):
+                    try:
+                        redis_conn_decoded.hdel('metrics_manager.flux.aggregate_metrics.hash', metric)
+                        logger.info('listen :: deleted metric %s from Redis hash metrics_manager.flux.aggregate_metrics.hash as entry is 12 hours old' % metric)
+                    except Exception as e:
+                        if LOCAL_DEBUG:
+                            logger.error('error :: listen :: could delete metric %s from Redis hash metrics_manager.flux.aggregate_metrics.hash - %s' % (metric, str(e)))
+                        aggregate_metric_timestamp = None
+        except:
+            pass
+    # Add the metric to the flux/aggregator queue
+    if aggregate_metric:
+        try:
+            redis_conn.sadd('flux.aggregator.queue', str(metric_data))
+            added_to_aggregation_queue = True
+            return_status_code = 204
+            if FLUX_VERBOSE_LOGGING:
+                logger.debug('debug :: listen :: data added to flux.aggregator.queue Redis set - %s' % str(metric_data))
+            logger.info('listen :: data added to flux.aggregator.queue Redis set - %s' % str(metric_data))
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: listen :: failed to add data to flux.aggregator.queue Redis set - %s' % str(metric_data))
+            return_status_code = 500
+            return added_to_aggregation_queue, return_status_code
+    return added_to_aggregation_queue, return_status_code
 
 
 class MetricData(object):
@@ -415,6 +498,28 @@ class MetricData(object):
             except:
                 pass
 
+        # @added 20210406 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES
+        # To reduce the overhead of making a redis query for every metric
+        # submitted, the metric name is checked against the initial loaded
+        # aggregate_metrics list, if not found in there then the elements of the
+        # metric name are checked to see if element could any possible match an
+        # aggregation namespace, only then is Redis queried.
+        if aggregate_metrics:
+            added_to_aggregation_queue, return_status_code = add_to_aggregate_metric_queue(metric, metric_data, aggregate_metrics)
+            if added_to_aggregation_queue:
+                if return_status_code == 500:
+                    resp.status = falcon.HTTP_500
+                if return_status_code == 204:
+                    resp.status = falcon.HTTP_204
+                if LOCAL_DEBUG:
+                    try:
+                        queue_size = flux.httpMetricDataAggregatorQueue.qsize()
+                        logger.info('listen :: flux.httpMetricDataAggregatorQueue.qsize - %s' % str(queue_size))
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: listen :: failed to determine flux.httpMetricDataAggregatorQueue.qsize')
+                return
+
         # Queue the metric
         try:
             flux.httpMetricDataQueue.put(metric_data, block=False)
@@ -461,8 +566,8 @@ class MetricDataPost(object):
 
             {
                 "metric": "metric|str",
-                "timestamp": "timestamp|int",
-                "value": "value|float",
+                "timestamp": timestamp|int,
+                "value": value|float,
                 "key": "api_key|str",
                 "fill": "boolean|optional"
             }
@@ -471,15 +576,15 @@ class MetricDataPost(object):
 
             {
                 "metric": "vista.nodes.skyline-1.cpu.user",
-                "timestamp": "1478021700",
-                "value": "1.0",
+                "timestamp": 1478021700,
+                "value": 1.0,
                 "key": "YOURown32charSkylineAPIkeySecret"
             }
 
             {
                 "metric": "vista.nodes.skyline-1.cpu.user",
-                "timestamp": "1478021700",
-                "value": "1.0",
+                "timestamp": 1478021700,
+                "value": 1.0,
                 "key": "YOURown32charSkylineAPIkeySecret",
                 "fill": "true"
             }
@@ -673,6 +778,18 @@ class MetricDataPost(object):
                             redis_conn.sadd('flux.queue', str(metric_data))
                         except:
                             pass
+
+                    # @added 20210406 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES
+                    if aggregate_metrics:
+                        added_to_aggregation_queue, return_status_code = add_to_aggregate_metric_queue(metric, metric_data, aggregate_metrics)
+                        if added_to_aggregation_queue:
+                            if return_status_code == 500:
+                                resp.status = falcon.HTTP_500
+                                return
+                            if return_status_code == 204:
+                                resp.status = falcon.HTTP_204
+                            continue
+
                     flux.httpMetricDataQueue.put(metric_data, block=False)
                     # modified 20201016 - Feature #3788: snab_flux_load_test
                     if FLUX_VERBOSE_LOGGING:
@@ -784,6 +901,21 @@ class MetricDataPost(object):
                         redis_conn.sadd('flux.queue', str(metric_data))
                     except:
                         pass
+
+                # @added 20210406 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES
+                # To reduce the overhead of making a redis query for every metric
+                # submitted, the metric name is checked against the initial loaded
+                # aggregate_metrics list, if not found in there then the elements of the
+                # metric name are checked to see if element could any possible match an
+                # aggregation namespace, only then is Redis queried.
+                if aggregate_metrics:
+                    added_to_aggregation_queue, return_status_code = add_to_aggregate_metric_queue(metric, metric_data, aggregate_metrics)
+                    if added_to_aggregation_queue:
+                        if return_status_code == 500:
+                            resp.status = falcon.HTTP_500
+                        if return_status_code == 204:
+                            resp.status = falcon.HTTP_204
+                        return
 
                 flux.httpMetricDataQueue.put(metric_data, block=False)
                 # modified 20201016 - Feature #3788: snab_flux_load_test
