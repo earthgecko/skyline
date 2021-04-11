@@ -738,6 +738,14 @@ class AnalyzerBatch(Thread):
                             derivative_metric_key, settings.FULL_DURATION, last_expire_set)
                     except Exception as e:
                         logger.error('error :: could not set Redis derivative_metric key: %s' % e)
+                    # @added 20210325 - Feature #3480: batch_processing
+                    #                   Bug #2050: analyse_derivatives - change in monotonicity
+                    # Remove from non_derivative_metrics as per analyzer
+                    try:
+                        self.redis_conn.srem('non_derivative_metrics', metric_name)
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to add metric to Redis non_derivative_metrics set')
                 else:
                     try:
                         self.redis_conn.sadd('non_derivative_metrics', metric_name)
