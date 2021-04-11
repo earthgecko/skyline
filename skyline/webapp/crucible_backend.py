@@ -478,7 +478,14 @@ def get_crucible_job(crucible_job_id, metric):
     image_file_names = []
     crucible_path = os.path.dirname(settings.CRUCIBLE_DATA_FOLDER)
     jobs_data_dir = '%s/jobs' % crucible_path
-    data_dir = '%s/%s/%s' % (jobs_data_dir, crucible_job_id, metric)
+
+    # @modified 20210325 - Feature #3500: webapp - crucible_process_metrics
+    #                      Feature #1448: Crucible web UI
+    # filesafe metric name
+    sane_metricname = filesafe_metricname(str(metric))
+    # data_dir = '%s/%s/%s' % (jobs_data_dir, crucible_job_id, metric)
+    data_dir = '%s/%s/%s' % (jobs_data_dir, crucible_job_id, sane_metricname)
+
     crucible_job_details_filename = '%s.txt' % metric
     crucible_job_details_file = '%s/%s' % (data_dir, crucible_job_details_filename)
     skyline_anomalies_score_file = '%s/skyline.anomalies_score.txt' % data_dir
