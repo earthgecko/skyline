@@ -1538,6 +1538,33 @@ class Mirage(Thread):
                             logger.error('error :: failed to remove waterfall alert item for %s at %s from Redis set %s' % (
                                 base_name, str(metric_timestamp), redis_set))
 
+            # @added 20210330 - Feature #3994: Panorama - mirage not anomalous
+            # A hash is added to the mirage.panorama.not_anomalous_metrics for
+            # every metric that is found to be not anomalous.  This provides
+            # data for /panorama?not_anomalous and /panorama?not_anomalous_metric
+            # method which are used for plots in the webapp and json response.
+            # The mirage.panorama.not_anomalous_metrics Redis hash is managed in
+            # analyzer/metrics_manager
+            not_anomalous_timestamp = None
+            try:
+                not_anomalous_timestamp = int(timeseries[-1][0])
+            except:
+                not_anomalous_timestamp = int(metric_timestamp)
+            redis_hash = 'mirage.panorama.not_anomalous_metrics'
+            try:
+                data = {
+                    base_name: {
+                        'timestamp': not_anomalous_timestamp,
+                        'value': datapoint,
+                        'hours_to_resolve': int(hours_to_resolve),
+                    }
+                }
+                self.redis_conn.hset(redis_hash, time(), str(data))
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to add %s to Redis hash %s' % (
+                    str(data), str(redis_hash)))
+
             logger.info('not anomalous     :: %s with %s' % (metric, value))
 
         # If it's anomalous, add it to list
@@ -3556,6 +3583,27 @@ class Mirage(Thread):
 
                                 # trigger_alert(alert, metric, second_order_resolution_seconds, context)
                                 try:
+
+                                    # @added 20210409 - Feature #3642: Anomaly type classification
+                                    #                   Feature #3970: custom_algorithm - adtk_level_shift
+                                    # Always determine triggered_algorithms and
+                                    # calculate anomalyScore
+                                    try:
+                                        triggered_algorithms = metric[4]
+                                        algorithms_run = metric[5]
+                                    except:
+                                        triggered_algorithms = []
+                                        algorithms_run = []
+                                    try:
+                                        if triggered_algorithms and algorithms_run:
+                                            anomalyScore = len(triggered_algorithms) / len(algorithms_run)
+                                        else:
+                                            anomalyScore = 1.0
+                                    except:
+                                        logger.error(traceback.format_exc())
+                                        logger.error('error :: failed to determine anomalyScore for %s' % base_name)
+                                        anomalyScore = 1.0
+
                                     if alert[1] != 'smtp':
 
                                         new_alert = None
