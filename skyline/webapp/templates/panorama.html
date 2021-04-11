@@ -13,6 +13,27 @@
     </div>
 	</ol>
   {% include "label_anomalies.html" %}
+<!-- # @added 20210326 - Feature #3994: Panorama - mirage not anomalous -->
+{% elif not_anomalous %}
+	<ol class="breadcrumb">
+  	<div class="breadcrumb">
+  		<li><a href="/">Home</a></li>
+  		<li><a href="/panorama">Panorama</a></li>
+  		<li class="active"><span class="logo"><span class="sky">Not</span> <span class="re">anomalous</span></li>
+    </div>
+	</ol>
+  {% include "not_anomalous.html" %}
+<!-- # @added 20210328 - Feature #3994: Panorama - mirage not anomalous -->
+{% elif not_anomalous_metric %}
+	<ol class="breadcrumb">
+  	<div class="breadcrumb">
+  		<li><a href="/">Home</a></li>
+  		<li><a href="/panorama">Panorama</a></li>
+  		<li><a href="/panorama/not_anomalous=true"><span class="logo"><span class="sky">Not</span> <span class="re">anomalous</span></a></li>
+  		<li class="active"><span class="logo"><span class="sky">Not</span> <span class="re">anomalous metric</span></li>
+    </div>
+	</ol>
+  {% include "not_anomalous_metric.html" %}
 {% else %}
 
   <script src="/static/js/panorama.js"></script>
@@ -42,8 +63,9 @@ Have Skyline serve the js, tried of allowing cloudflare scripts
     <span class="icon-bar"></span>
   </button>
 		<ul class="nav nav-tabs" role="view_tablist" id="view">
-		  <li class="active"><a href="/panorama"><span class="logo"><span class="sky">Search</span> <span class="re">anomalies</span></span></span></a></li>
-		  <li><a href="?label_anomalies=true"><span class="logo"><span class="sky">Label</span> <span class="re">anomalies</span></span></span></a></li>
+		  <li class="active"><a href="/panorama"><span class="logo"><span class="sky">Search</span> <span class="re">anomalies</span></span></a></li>
+		  <li><a href="?label_anomalies=true"><span class="logo"><span class="sky">Label</span> <span class="re">anomalies</span></span></a></li>
+		  <li><a href="?not_anomalous=true"><span class="logo"><span class="sky">Not</span> <span class="re">anomalous</span></span></a></li>
 		</ul>
 		<div class="tab-content">
 	  	<div class="tab-pane active" id="view">

@@ -1,0 +1,97 @@
+{% block not_anomalous_block %}
+<!-- BEGIN /panorama>?not_anomalous=true block -->
+{% if print_debug == 'True' %}
+<code> DEBUG </code> :: /panorama not_anomalous_block</br>
+{% endif %}
+
+{% if display_message %}
+<code> ERROR </code></br>
+<code> message </code>: {{ display_message }}<br>
+{% endif %}
+
+<div class="navbar-header" role="navigation">
+  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+    <span class="sr-only">Toggle navigation</span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+  </button>
+		<ul class="nav nav-tabs" role="view_tablist" id="view">
+		  <li><a href="/panorama"><span class="logo"><span class="sky">Search</span> <span class="re">anomalies</span></span></a></li>
+		  <li><a href="?label_anomalies=true"><span class="logo"><span class="sky">Label</span> <span class="re">anomalies</span></span></a></li>
+		  <li class="active"><a href="?not_anomalous=true"><span class="logo"><span class="sky">Not</span> <span class="re">anomalous</span></span></a></li>
+		</ul>
+		<div class="tab-content">
+	  	<div class="tab-pane active" id="view">
+	<br>
+  <div class="navbar-header" role="navigation">
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+  </div>
+
+        <div class="container main_container">
+          <div class="container search_container">
+            <h4><span class="logo"><span class="sky">Search</span> <span class="re">not anomalous</span></span></h4>
+            <form action="panorama">
+			        <input type="hidden" name="not_anomalous" value="true" />
+              <label>metric:</label><input type="text" name="metric" value="all" /><br>
+              <label>from_timestamp:</label><input type="text" name="from_timestamp" value="today"> (unix timestamp or %Y-%m-%d %H:%M)<br>
+              <label>until_timestamp:</label><input type="text" name="until_timestamp" value="all"> (unix timestamp or %Y-%m-%d %H:%M)<br>
+              <label>anomalies:</label><select name="anomalies">
+                <option value="true">true</option>
+                <option value="false">false</option>
+              </select> (whether to create a plot with anomalies as well)
+              <br>
+              <input type="submit" value="Submit">
+            </form>
+          </div>
+          <p>
+{% if not_anomalous_dict %}
+          <div class="container search_results_container"></p>
+            <h4><span class="logo"><span class="sky">Found</span> <span class="re">not anomalous</span></span></h4>
+      			<table class="table table-hover">
+      				<thead>
+                <tr>
+                    <th>metric</th>
+                    <th>not anomalous analysis count</th>
+  {% if anomalies_metrics_dict %}
+                    <th>anomalies count</th>
+  {% endif %}
+                </tr>
+      				</thead>
+      				<tbody>
+  {% for current_metric in not_anomalous_metrics_dict %}
+                <tr>
+                    <td><code>{{ current_metric }}</code></td>
+    {% if anomalies_metrics_dict %}
+                    <td onclick="window.location='?not_anomalous_metric=true&metric={{ current_metric }}&from_timestamp={{ not_anomalous_metrics_dict[current_metric]['from'] }}&until_timestamp={{ not_anomalous_metrics_dict[current_metric]['until'] }}&anomalies=true'">
+                      <a href="?not_anomalous_metric=true&metric={{ current_metric }}&from_timestamp={{ not_anomalous_metrics_dict[current_metric]['from'] }}&until_timestamp={{ not_anomalous_metrics_dict[current_metric]['until'] }}&anomalies=true">{{ not_anomalous_metrics_dict[current_metric]['count'] }}</a>
+                    </td>
+    {% else %}
+                    <td onclick="window.location='?not_anomalous_metric=true&metric={{ current_metric }}&from_timestamp={{ not_anomalous_metrics_dict[current_metric]['from'] }}&until_timestamp={{ not_anomalous_metrics_dict[current_metric]['until'] }}'">
+                      <a href="?not_anomalous_metric=true&metric={{ current_metric }}&from_timestamp={{ not_anomalous_metrics_dict[current_metric]['from'] }}&until_timestamp={{ not_anomalous_metrics_dict[current_metric]['until'] }}">{{ not_anomalous_metrics_dict[current_metric]['count'] }}</a>
+                    </td>
+    {% endif %}
+    {% if anomalies_metrics_dict %}
+      {% if anomalies_metrics_dict[current_metric]['count'] %}
+                    <td>{{ anomalies_metrics_dict[current_metric]['count'] }}</td>
+      {% else %}
+                    <td>0</td>
+      {% endif %}
+    {% endif %}
+                </tr>
+  {% endfor %}
+{% endif %}
+					   </tbody>
+            </table>
+          </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- END /panorama?not_anomalous block -->
+{% endblock %}
