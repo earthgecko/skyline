@@ -656,7 +656,7 @@ aiohttp==3.7.4
 #urllib3==1.25.9
 # @modified 20210324 - Support #3988: SNYK-PYTHON-URLLIB3-1085966
 #urllib3==1.26.2
-urllib3==1.26.4
+urllib3==1.26.5
 
 # @added 201906025 - Branch #956: flux
 graphyte==1.6.0

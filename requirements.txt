@@ -53,7 +53,7 @@ git+git://github.com/earthgecko/luminol@2de3fb2#egg=luminol
 # When slackclient requires aiohttp>=3.7.4 this can be removed
 aiohttp==3.7.4
 slackclient==2.9.3
-urllib3==1.26.4
+urllib3==1.26.5
 graphyte==1.6.0
 statsd==3.3.0
 falcon==2.0.0
