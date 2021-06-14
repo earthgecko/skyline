@@ -768,10 +768,13 @@ class Boundary(Thread):
                 exceptions['DeletedByRoomba'] += 1
             except TooShort:
                 exceptions['TooShort'] += 1
+                logger.info('TooShort metric :: %s - %s' % (base_name, str(metric_timestamp)))
             except Stale:
                 exceptions['Stale'] += 1
+                logger.info('Stale metric :: %s - %s' % (base_name, str(metric_timestamp)))
             except Boring:
                 exceptions['Boring'] += 1
+                logger.info('Boring metric :: %s - %s' % (base_name, str(metric_timestamp)))
             except:
                 logger.error(traceback.format_exc())
                 exceptions['Other'] += 1
