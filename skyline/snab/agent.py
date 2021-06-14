@@ -1,10 +1,9 @@
 import logging
 import sys
-import traceback
 from os import getpid
 from os.path import isdir
 from daemon import runner
-from time import sleep, time
+from time import sleep
 from sys import version_info
 
 from logging.handlers import TimedRotatingFileHandler, MemoryHandler
@@ -15,8 +14,8 @@ sys.path.insert(0, os.path.dirname(__file__))
 
 if True:
     import settings
-    from validate_settings import validate_settings_variables
     from snab import SNAB
+    from validate_settings import validate_settings_variables
 
 skyline_app = 'snab'
 skyline_app_logger = '%sLog' % skyline_app
@@ -80,7 +79,7 @@ def run():
     valid_settings = validate_settings_variables(skyline_app)
 
     if not valid_settings:
-        print ('error :: invalid variables in settings.py - cannot start')
+        print('error :: invalid variables in settings.py - cannot start')
         sys.exit(1)
 
     snab = SNABAgent()

@@ -14,9 +14,9 @@ sys.path.insert(0, os.path.dirname(__file__))
 if True:
     try:
         import settings
-        from validate_settings import validate_settings_variables
         from fetcher import Fetcher
         from worker import Worker
+        from validate_settings import validate_settings_variables
     except:
         print(traceback.format_exc())
         print('failed to import Skyline modules')
@@ -93,7 +93,7 @@ def run():
     valid_settings = validate_settings_variables(skyline_app)
 
     if not valid_settings:
-        print ('error :: agent :: invalid variables in settings.py - cannot start')
+        print('error :: agent :: invalid variables in settings.py - cannot start')
         sys.exit(1)
 
     vista = Vista()

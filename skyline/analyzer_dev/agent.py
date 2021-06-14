@@ -17,9 +17,8 @@ sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.par
 sys.path.insert(0, os.path.dirname(__file__))
 
 import settings
-from validate_settings import validate_settings_variables
-
 from analyzer_dev import AnalyzerDev
+from validate_settings import validate_settings_variables
 
 skyline_app = 'analyzer_dev'
 skyline_app_logger = '%sLog' % skyline_app
