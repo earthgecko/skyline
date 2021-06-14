@@ -27,6 +27,22 @@ from skyline_functions import (
     mkdir_p)
 from matched_or_regexed_in_list import matched_or_regexed_in_list
 
+# @added 20210430 - Task #4030: refactoring
+from functions.database.queries.get_all_db_metric_names import get_all_db_metric_names
+
+# @added 20210519 - Feature #4076: CUSTOM_STALE_PERIOD
+from functions.settings.get_custom_stale_period import custom_stale_period
+from functions.thunder.stale_metrics import thunder_stale_metrics
+
+# @added 20210601 - Feature #4000: EXTERNAL_SETTINGS
+from functions.settings.manage_external_settings import manage_external_settings
+
+# @added 20210602 - Feature #4076: CUSTOM_STALE_PERIOD
+from functions.settings.get_external_settings import get_external_settings
+from functions.thunder.manage_thunder_alerted_on_stale_metrics_hash_key import manage_thunder_alerted_on_stale_metrics_hash_key
+from functions.redis.prune_metrics_timestamp_hash_key import prune_metrics_timestamp_hash_key
+from functions.thunder.no_data import thunder_no_data
+
 skyline_app = 'analyzer'
 skyline_app_logger = '%sLog' % skyline_app
 logger = logging.getLogger(skyline_app_logger)
@@ -218,6 +234,24 @@ try:
 except:
     FLUX_EXTERNAL_AGGREGATE_NAMESPACES = False
 
+# @added 20210513 - Feature #4068: ANALYZER_SKIP
+try:
+    ANALYZER_SKIP = settings.ANALYZER_SKIP
+except:
+    ANALYZER_SKIP = []
+
+# @added 20210519 - Feature #4076: CUSTOM_STALE_PERIOD
+try:
+    CUSTOM_STALE_PERIOD = settings.CUSTOM_STALE_PERIOD.copy()
+except:
+    CUSTOM_STALE_PERIOD = {}
+
+# @added 20210601 - Feature #4000: EXTERNAL_SETTINGS
+try:
+    EXTERNAL_SETTINGS = settings.EXTERNAL_SETTINGS.copy()
+except:
+    EXTERNAL_SETTINGS = {}
+
 skyline_app_graphite_namespace = 'skyline.%s%s' % (skyline_app, SERVER_METRIC_PATH)
 
 full_uniques = '%sunique_metrics' % settings.FULL_NAMESPACE
@@ -227,16 +261,16 @@ LOCAL_DEBUG = False
 
 class Metrics_Manager(Thread):
     """
-    The Analyzer class which controls the metrics_manager thread and
+    The Metrics_Manager class which controls the metrics_manager thread and
     spawned processes.
 
     All of this functionality was previously done in the Analyzer thread itself
     however with 10s of 1000s of metrics, this process can take longer than a
     minute to achieve, which would make Analyzer lag.  All the original commits
-    and references from the Analyzer code has been maintained here, although
-    the logically order has been changed and the blocks ordered in a different,
-    but more appropriate an efficient manner than they were laid out in Analyzer.
-    Further some blocks from Analyzer were removed as with the new consolidated
+    and references from the Analyzer code have been maintained here, although
+    the logical order has been changed and the blocks ordered in a different,
+    but more appropriate and efficient manner than they were laid out in Analyzer.
+    Further some blocks from Analyzer were removed with the new consolidated
     methods using sets, they were no longer required.
 
     """
@@ -665,8 +699,8 @@ class Metrics_Manager(Thread):
                     try:
                         authorative_host = self.assigned_to_shard(metric)
                     except Exception as e:
-                        logger.error('error :: metrics_manager :: sync_cluster_files - failed to determine authorative_host for %s' % (
-                            str(metric)))
+                        logger.error('error :: metrics_manager :: sync_cluster_files - failed to determine authorative_host for %s - %s' % (
+                            str(metric), e))
                     if authorative_host:
                         USE_REMOTE_SKYLINE_INSTANCES = []
                         for remote_skyline_instance in REMOTE_SKYLINE_INSTANCES:
@@ -674,15 +708,15 @@ class Metrics_Manager(Thread):
                                 if remote_skyline_instance[3] == authorative_host:
                                     USE_REMOTE_SKYLINE_INSTANCES.append(remote_skyline_instance)
                             except Exception as e:
-                                logger.error('error :: metrics_manager :: sync_cluster_files - failed to the remote_skyline_instance list for the authorative_host - %s' % (
-                                    str(authorative_host)))
+                                logger.error('error :: metrics_manager :: sync_cluster_files - failed to the remote_skyline_instance list for the authorative_host - %s - %s' % (
+                                    str(authorative_host), e))
                         for remote_skyline_instance in REMOTE_SKYLINE_INSTANCES:
                             try:
                                 if remote_skyline_instance[3] != authorative_host:
                                     USE_REMOTE_SKYLINE_INSTANCES.append(remote_skyline_instance)
                             except Exception as e:
-                                logger.error('error :: metrics_manager :: sync_cluster_files - failed to the secondary remote_skyline_instance list for the authorative_host - %s' % (
-                                    str(authorative_host)))
+                                logger.error('error :: metrics_manager :: sync_cluster_files - failed to the secondary remote_skyline_instance list for the authorative_host - %s - %s' % (
+                                    str(authorative_host), e))
 
                 for remote_skyline_instance in USE_REMOTE_SKYLINE_INSTANCES:
                     if endpoint:
@@ -707,8 +741,8 @@ class Metrics_Manager(Thread):
                                     try:
                                         features_profile_files[features_profile_file] = host_features_profile_files[features_profile_file]
                                     except Exception as e:
-                                        logger.error('error :: metrics_manager :: sync_cluster_files - failed to add features_profile_file %s to features_profile_files' % (
-                                            str(features_profile_file)))
+                                        logger.error('error :: metrics_manager :: sync_cluster_files - failed to add features_profile_file %s to features_profile_files - %s' % (
+                                            str(features_profile_file), e))
                     if len(features_profile_files) > 0:
                         logger.info('%s features profile files found to download from %s to %s' % (
                             str(len(features_profile_files)), remote_skyline_instance[0],
@@ -901,6 +935,7 @@ class Metrics_Manager(Thread):
         #                  Feature #3642: Anomaly type classification
         # Make a Redis set of unique_base_names for other apps to use
         if unique_base_names:
+            unique_base_names = list(set(unique_base_names))
             logger.info('metrics_manager :: recreating the analyzer.unique_base_names set')
             try:
                 self.redis_conn.sadd('new_analyzer.unique_base_names', *set(unique_base_names))
@@ -1428,10 +1463,10 @@ class Metrics_Manager(Thread):
                                 'mirage.hash_key.metrics_resolutions', base_name,
                                 hours_to_resolve)
                             metrics_added += 1
-                        except:
+                        except Exception as e:
                             if not metrics_to_add_error_logged:
                                 logger.error(traceback.format_exc())
-                                logger.error('error :: metrics_manager :: failed to add %s to mirage.hash_key.metrics_resolutions' % base_name)
+                                logger.error('error :: metrics_manager :: failed to add %s to mirage.hash_key.metrics_resolutions - %s' % (base_name, e))
                                 metrics_to_add_error_logged = True
                     logger.info('metrics_manager :: added %s metrics to the mirage.hash_key.metrics_resolutions Redis hash key' % str(metrics_added))
 
@@ -1470,6 +1505,21 @@ class Metrics_Manager(Thread):
         logger.info('metrics_manager :: smtp_alerter_metrics     :: %s' % str(len(smtp_alerter_metrics)))
         logger.info('metrics_manager :: non_smtp_alerter_metrics :: %s' % str(len(non_smtp_alerter_metrics)))
         logger.info('metrics_manager :: mirage_metrics :: %s' % str(len(mirage_metrics)))
+
+        # @added 20210601 - Feature #4000: EXTERNAL_SETTINGS
+        external_settings = {}
+        external_from_cache = False
+        if EXTERNAL_SETTINGS:
+            logger.info('metrics_manager :: managing external_settings')
+            try:
+                external_settings, external_from_cache = manage_external_settings(skyline_app)
+            except Exception as e:
+                logger.error(traceback.format_exc())
+                logger.error('error :: metrics_manager :: fetch_external_settings failed - %s' % (
+                    e))
+            if external_settings:
+                logger.info('metrics_manager :: %s external_settings from cache %s' % (
+                    str(len(list(external_settings.keys()))), str(external_from_cache)))
 
         # @added 20210406 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES
         # Analyzer determines what metrics flux should aggregate by creating the
@@ -1546,14 +1596,14 @@ class Metrics_Manager(Thread):
                         logger.info('metrics_manager :: adding %s aggregate metrics that have zerofill aggregation setting to metrics_manager.flux_zero_fill_aggregate_metrics' % str(len(flux_aggregate_zerofill_metrics)))
                         self.redis_conn.sadd('metrics_manager.flux_zero_fill_aggregate_metrics', *set(flux_aggregate_zerofill_metrics))
                     except:
-                        logger.info(traceback.format_exc())
+                        logger.error(traceback.format_exc())
                         logger.error('error :: metrics_manager :: failed to add multiple aggregation metric members to the metrics_manager.flux_zero_fill_aggregate_metrics Redis set')
                 if flux_aggregate_lkv_metrics:
                     try:
                         logger.info('metrics_manager :: adding %s aggregate metrics that have last_known_value aggregation setting to metrics_manager.flux_last_known_value_aggregate_metrics' % str(len(flux_aggregate_lkv_metrics)))
                         self.redis_conn.sadd('metrics_manager.flux_last_known_value_aggregate_metrics', *set(flux_aggregate_lkv_metrics))
                     except:
-                        logger.info(traceback.format_exc())
+                        logger.error(traceback.format_exc())
                         logger.error('error :: metrics_manager :: failed to add multiple members to the metrics_manager.flux_last_known_value_aggregate_metrics Redis set')
                 if flux_aggregate_metrics:
                     logger.info('metrics_manager :: popuating analyzer.flux_aggregate_metrics Redis set with %s metrics' % str(len(flux_aggregate_metrics)))
@@ -1573,7 +1623,7 @@ class Metrics_Manager(Thread):
                 try:
                     flux_aggregate_metrics_list = list(self.redis_conn_decoded.smembers('analyzer.flux_aggregate_metrics'))
                 except:
-                    logger.info(traceback.format_exc())
+                    logger.error(traceback.format_exc())
                     logger.error('error :: metrics_manager :: failed to generate a list from analyzer.flux_aggregate_metrics Redis set')
                 for flux_aggregate_base_name in flux_aggregate_metrics_list:
                     if flux_aggregate_base_name not in unique_base_names:
@@ -1586,10 +1636,10 @@ class Metrics_Manager(Thread):
                         try:
                             flux_aggregate_metrics_list = list(self.redis_conn_decoded.smembers('analyzer.flux_aggregate_metrics'))
                         except:
-                            logger.info(traceback.format_exc())
+                            logger.error(traceback.format_exc())
                             logger.error('error :: metrics_manager :: failed to generate a list from analyzer.flux_aggregate_metrics Redis set after removals')
                     except:
-                        logger.info(traceback.format_exc())
+                        logger.error(traceback.format_exc())
                         logger.error('error :: metrics_manager :: failed to add multiple members to the analyzer.flux_aggregate_metrics Redis set')
                 else:
                     logger.info('metrics_manager :: no metrics need to remove from analyzer.flux_aggregate_metrics')
@@ -1599,7 +1649,7 @@ class Metrics_Manager(Thread):
                         self.redis_conn.sunionstore('metrics_manager.flux.aggregate_metrics', 'analyzer.flux_aggregate_metrics')
                         logger.info('metrics_manager :: replaced metrics_manager.flux.aggregate_metrics Redis set with the newly created analyzer.flux_aggregate_metrics set')
                     except:
-                        logger.info(traceback.format_exc())
+                        logger.error(traceback.format_exc())
                         logger.error('error :: metrics_manager :: failed to sunionstore metrics_manager.flux.aggregate_metrics from analyzer.flux_aggregate_metrics Redis sets')
                     # Create a Redis hash for flux/listen.  These entries are
                     # managed flux/listen, if the timestamp for an entry is
@@ -1668,7 +1718,7 @@ class Metrics_Manager(Thread):
                 try:
                     flux_zero_fill_metrics_list = list(self.redis_conn_decoded.smembers('analyzer.flux_zero_fill_metrics'))
                 except:
-                    logger.info(traceback.format_exc())
+                    logger.error(traceback.format_exc())
                     logger.error('error :: metrics_manager :: failed to generate a list from analyzer.flux_zero_fill_metrics Redis set')
                 for flux_zero_fill_base_name in flux_zero_fill_metrics_list:
                     if flux_zero_fill_base_name not in unique_base_names:
@@ -1681,10 +1731,10 @@ class Metrics_Manager(Thread):
                         try:
                             flux_zero_fill_metrics_list = list(self.redis_conn_decoded.smembers('analyzer.flux_zero_fill_metrics'))
                         except:
-                            logger.info(traceback.format_exc())
+                            logger.error(traceback.format_exc())
                             logger.error('error :: metrics_manager :: failed to generate a list from analyzer.flux_zero_fill_metrics Redis set after removals')
                     except:
-                        logger.info(traceback.format_exc())
+                        logger.error(traceback.format_exc())
                         logger.error('error :: metrics_manager :: failed to add multiple members to the analyzer.flux_zero_fill_metrics Redis set')
                 else:
                     logger.info('metrics_manager :: no metrics need to remove from analyzer.flux_zero_fill_metrics')
@@ -1694,7 +1744,7 @@ class Metrics_Manager(Thread):
                         self.redis_conn.sunionstore('flux.zero_fill_metrics', 'analyzer.flux_zero_fill_metrics')
                         logger.info('metrics_manager :: replaced flux.zero_fill_metrics Redis set with the newly created analyzer.flux_zero_fill_metrics set')
                     except:
-                        logger.info(traceback.format_exc())
+                        logger.error(traceback.format_exc())
                         logger.error('error :: metrics_manager :: failed to sunionstore flux.zero_fill_metrics from analyzer.flux_zero_fill_metrics Redis sets')
 
         # @added 20210407 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES
@@ -1750,7 +1800,7 @@ class Metrics_Manager(Thread):
                 try:
                     flux_last_known_value_metrics_list = list(self.redis_conn_decoded.smembers('analyzer.flux_last_known_value_metrics'))
                 except:
-                    logger.info(traceback.format_exc())
+                    logger.error(traceback.format_exc())
                     logger.error('error :: metrics_manager :: failed to generate a list from analyzer.flux_last_known_value_metrics Redis set')
                 for flux_last_known_value_base_name in flux_last_known_value_metrics_list:
                     if flux_last_known_value_base_name not in unique_base_names:
@@ -1763,10 +1813,10 @@ class Metrics_Manager(Thread):
                         try:
                             flux_last_known_value_metrics_list = list(self.redis_conn_decoded.smembers('analyzer.flux_last_known_value_metrics'))
                         except:
-                            logger.info(traceback.format_exc())
+                            logger.error(traceback.format_exc())
                             logger.error('error :: metrics_manager :: failed to generate a list from analyzer.flux_last_known_value_metrics Redis set after removals')
                     except:
-                        logger.info(traceback.format_exc())
+                        logger.error(traceback.format_exc())
                         logger.error('error :: metrics_manager :: failed to add multiple members to the analyzer.flux_last_known_value_metrics Redis set')
                 else:
                     logger.info('metrics_manager :: no metrics need to remove from analyzer.flux_last_known_value_metrics')
@@ -1775,9 +1825,203 @@ class Metrics_Manager(Thread):
                     try:
                         self.redis_conn.sunionstore('flux.last_known_value_metrics', 'analyzer.flux_last_known_value_metrics')
                         logger.info('metrics_manager :: replaced flux.last_known_value_metrics Redis set with the newly created analyzer.flux_last_known_value_metrics set')
-                    except:
-                        logger.info(traceback.format_exc())
-                        logger.error('error :: metrics_manager :: failed to sunionstore flux.last_known_value_metrics from analyzer.flux_last_known_value_metrics Redis sets')
+                    except Exception as e:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: metrics_manager :: failed to sunionstore flux.last_known_value_metrics from analyzer.flux_last_known_value_metrics Redis sets - %s' % e)
+
+        # @added 20210513 - Feature #4068: ANALYZER_SKIP
+        analyzer_skip_metrics = []
+        if ANALYZER_SKIP:
+            logger.info('metrics_manager :: determining ANALYZER_SKIP metrics')
+            for i_metric in unique_metrics:
+                pattern_match, metric_matched_by = matched_or_regexed_in_list('analyzer', i_metric, ANALYZER_SKIP)
+                if pattern_match:
+                    analyzer_skip_metrics.append(i_metric)
+        if analyzer_skip_metrics:
+            logger.info('metrics_manager :: adding %s metrics to analyzer.metrics_manager.analyzer_skip' % str(len(analyzer_skip_metrics)))
+            try:
+                self.redis_conn.sadd('new.analyzer.metrics_manager.analyzer_skip', *set(analyzer_skip_metrics))
+                self.redis_conn.sunionstore('analyzer.metrics_manager.analyzer_skip', 'new.analyzer.metrics_manager.analyzer_skip')
+                logger.info('metrics_manager :: replaced analyzer.metrics_manager.analyzer_skip Redis set with the newly created new.analyzer.metrics_manager.analyzer_skip set')
+            except Exception as e:
+                logger.error(traceback.format_exc())
+                logger.error('error :: metrics_manager :: failed to sunionstore analyzer.metrics_manager.analyzer_skip from new.analyzer.metrics_manager.analyzer_skip Redis sets - %s' % e)
+            del analyzer_skip_metrics
+
+        # @added 20210519 - Feature #4076: CUSTOM_STALE_PERIOD
+        custom_stale_periods = []
+        custom_stale_period_metrics = []
+        default_metric_stale_period = int(settings.STALE_PERIOD)
+        if not CUSTOM_STALE_PERIOD:
+            logger.info('metrics_manager :: no CUSTOM_STALE_PERIOD metrics defined')
+        if CUSTOM_STALE_PERIOD:
+            logger.info('metrics_manager :: determining known CUSTOM_STALE_PERIOD metrics from analyzer.metrics_manager.custom_stale_period')
+            custom_stale_metrics_hash_key = 'analyzer.metrics_manager.custom_stale_periods'
+            known_custom_stale_metrics_dict = {}
+            try:
+                known_custom_stale_metrics_dict = self.redis_conn_decoded.hgetall(custom_stale_metrics_hash_key)
+            except Exception as e:
+                logger.error(traceback.format_exc())
+                logger.error('error :: metrics_manager :: failed to create known_custom_stale_metrics_dict from Redis hash key %s - %s' % (
+                    custom_stale_metrics_hash_key, e))
+            known_custom_stale_metrics = []
+            if known_custom_stale_metrics_dict:
+                try:
+                    known_custom_stale_metrics = list(known_custom_stale_metrics_dict.keys())
+                except Exception as e:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: metrics_manager :: failed to create list of known_custom_stale_metrics from known_custom_stale_metrics_dict - %s' % (
+                        e))
+            logger.info('metrics_manager :: determined %s known CUSTOM_STALE_PERIOD metrics from analyzer.metrics_manager.custom_stale_period' % str(len(known_custom_stale_metrics)))
+            logger.info('metrics_manager :: determining unique_base_names matching CUSTOM_STALE_PERIOD')
+
+            # @added 20210601 - Feature #4000: EXTERNAL_SETTINGS
+            # Pass the external_settings as a custom_stale_period argument
+            if not external_settings:
+                try:
+                    # debug
+                    # external_settings = get_external_settings(skyline_app)
+                    external_settings = get_external_settings(skyline_app, None, True)
+                except Exception as e:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: metrics_manager :: get_external_settings failed - %s' % (
+                        e))
+
+            for i_metric in unique_base_names:
+                if i_metric in custom_stale_period_metrics:
+                    continue
+                metric_stale_period = int(default_metric_stale_period)
+                try:
+                    # @modified 20210601 - Feature #4000: EXTERNAL_SETTINGS
+                    # Pass the external_settings as a custom_stale_period argument
+                    metric_stale_period = custom_stale_period(skyline_app, i_metric, external_settings, log=False)
+                except Exception as e:
+                    logger.error('error :: failed running custom_stale_period - %s' % e)
+                    metric_stale_period = int(default_metric_stale_period)
+                if int(float(metric_stale_period)) != default_metric_stale_period:
+                    custom_stale_periods.append([i_metric, int(float(metric_stale_period))])
+                    custom_stale_period_metrics.append(i_metric)
+
+            logger.info('metrics_manager :: determined %s custom_stale_period metrics' % (
+                str(len(custom_stale_periods))))
+
+        if custom_stale_periods:
+            metrics_unchanged = 0
+            metrics_added_to_hash_key = 0
+            metrics_updated_in_hash_key = 0
+            metrics_removed_from_hash_key = 0
+            logger.info('metrics_manager :: managing %s metrics in analyzer.metrics_manager.custom_stale_period hash key' % (
+                str(len(custom_stale_periods))))
+            for i_metric, i_stale_period in custom_stale_periods:
+                update_hash_key = False
+                to_add_to_hash_key = False
+                if i_metric in known_custom_stale_metrics:
+                    if int(float(i_stale_period)) != int(float(known_custom_stale_metrics_dict[i_metric])):
+                        update_hash_key = True
+                    else:
+                        metrics_unchanged += 1
+                else:
+                    update_hash_key = True
+                    to_add_to_hash_key = True
+                if update_hash_key:
+                    try:
+                        self.redis_conn.hset(
+                            custom_stale_metrics_hash_key,
+                            i_metric, int(float(i_stale_period)))
+                        if to_add_to_hash_key:
+                            metrics_added_to_hash_key += 1
+                        else:
+                            metrics_updated_in_hash_key += 1
+                    except Exception as e:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: metrics_manager :: failed to add entry in analyzer.metrics_manager.hash_key.metrics_data_sparsity for - %s - %s' % (
+                            str(metric_name), e))
+            metrics_to_remove_from_custom_stale_period_hash = []
+            for i_metric in known_custom_stale_metrics:
+                if i_metric not in custom_stale_period_metrics:
+                    metrics_to_remove_from_custom_stale_period_hash.append(i_metric)
+            if metrics_to_remove_from_custom_stale_period_hash:
+                try:
+                    self.redis_conn.hdel(custom_stale_metrics_hash_key, *set(metrics_to_remove_from_custom_stale_period_hash))
+                    metrics_removed_from_hash_key = len(set(metrics_to_remove_from_custom_stale_period_hash))
+                except Exception as e:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: metrics_manager :: failed to remove %s metricsfrom the Redis hash key %s - %s' % (
+                        str(len(metrics_to_remove_from_custom_stale_period_hash)),
+                        custom_stale_metrics_hash_key, e))
+            logger.info('metrics_manager :: managed analyzer.metrics_manager.custom_stale_period - unchanged: %s, added: %s, updated: %s, removed: %s' % (
+                str(metrics_unchanged), str(metrics_added_to_hash_key),
+                str(metrics_updated_in_hash_key),
+                str(metrics_removed_from_hash_key)))
+
+        # @added 20210519 - Feature #4076: CUSTOM_STALE_PERIOD
+        #                   Branch #1444: thunder
+        # Prune any entries out of the analyzer.metrics.last_timeseries_timestamp
+        # has key that are older that FULL_DURATION
+        logger.info('metrics_manager :: pruning analyzer.metrics.last_timeseries_timestamp Redis hash key')
+        removed_from_hash = None
+        prune_hash_key = 'analyzer.metrics.last_timeseries_timestamp'
+        older_than_timestamp = int(time()) - settings.FULL_DURATION
+        try:
+            removed_from_hash = prune_metrics_timestamp_hash_key(skyline_app, prune_hash_key, older_than_timestamp, True)
+        except Exception as e:
+            logger.error(traceback.format_exc())
+            logger.error('error :: metrics_manager :: prune_metrics_timestamp_hash_key failed - %s' % e)
+        logger.info('metrics_manager :: removed %s entries from %s hash key' % (
+            str(removed_from_hash), prune_hash_key))
+
+        # @added 20210518 - Branch #1444: thunder
+        # Determine stale metrics AND custom stale metrics per parent namespace.
+        # If any are present send them to thunder.
+        namespace_stale_metrics_dict = {}
+        namespace_recovered_metrics_dict = {}
+        try:
+            namespace_stale_metrics_dict, namespace_recovered_metrics_dict = thunder_stale_metrics(skyline_app, log=True)
+        except Exception as e:
+            logger.error(traceback.format_exc())
+            logger.error('error :: metrics_manager :: thunder_stale_metrics falied to get get namespace_stale_metrics_dict via - %s' % (
+                e))
+        logger.info('metrics_manager :: %s namespaces checked for stale metrics discovered with thunder_stale_metrics' % (
+            str(len(namespace_stale_metrics_dict))))
+        if namespace_stale_metrics_dict:
+            try:
+                self.redis_conn.set('analyzer.metrics_manager.namespaces.stale_metrics', str(namespace_stale_metrics_dict))
+                logger.info('metrics_manager :: set analyzer.metrics_manager.namespaces.stale_metrics Redis key')
+            except Exception as e:
+                logger.error(traceback.format_exc())
+                logger.error('error :: metrics_manager :: failed to set analyzer.metrics_manager.namespaces.stale_metrics Redis key - %s' % e)
+        # Thunder stale_metrics alerts on recovered metrics
+        if namespace_recovered_metrics_dict:
+            try:
+                self.redis_conn.set('analyzer.metrics_manager.namespaces.recovered.stale_metrics', str(namespace_recovered_metrics_dict))
+                logger.info('metrics_manager :: set analyzer.metrics_manager.namespaces.recovered.stale_metrics Redis key')
+            except Exception as e:
+                logger.error(traceback.format_exc())
+                logger.error('error :: metrics_manager :: failed to set analyzer.metrics_manager.namespaces.recovered.stale_metrics Redis key - %s' % e)
+        logger.info('metrics_manager :: managing thunder alerted on stale metrics hash key')
+        removed_from_hash = None
+        try:
+            removed_from_hash = manage_thunder_alerted_on_stale_metrics_hash_key(skyline_app, True)
+        except Exception as e:
+            logger.error(traceback.format_exc())
+            logger.error('error :: metrics_manager :: manage_thunder_alerted_on_stale_metrics_hash_key failed - %s' % e)
+        logger.info('metrics_manager :: removed %s from thunder alerted on stale metrics hash key' % str(removed_from_hash))
+
+        # @added 20210518 - Branch #1444: thunder
+        # Determine no data per parent namespace and if any are found send them
+        # to thunder
+        namespaces_no_data_dict = {}
+        try:
+            namespaces_no_data_dict = thunder_no_data(skyline_app, log=True)
+        except Exception as e:
+            logger.error(traceback.format_exc())
+            logger.error('error :: metrics_manager :: thunder_no_data failed - %s' % (
+                e))
+        if namespaces_no_data_dict:
+            logger.info('metrics_manager :: %s namespaces discovered not receiving data with thunder_no_data' % (
+                str(len(namespaces_no_data_dict))))
+        else:
+            logger.info('metrics_manager :: thunder_no_data - all namespaces receiving data OK')
 
         del unique_base_names
 
@@ -2000,6 +2244,16 @@ class Metrics_Manager(Thread):
                         # If roomba has not pruned some data in minutes
                         if first_timeseries_timestamp < (last_timeseries_timestamp - settings.FULL_DURATION):
                             timeseries_full_duration = settings.FULL_DURATION
+
+                        # @added 20210602 - Feature #3870: metrics_manager - check_data_sparsity
+                        #                   Feature #4076: CUSTOM_STALE_PERIOD
+                        #                   Feature #4000: EXTERNAL_SETTINGS
+                        #                   Branch #1444: thunder
+                        # Prevent calculating an incorrect metric_resolution on
+                        # periodic and infrequently sparsely populated metrics
+                        if timeseries_full_duration < 3600:
+                            timeseries_full_duration = settings.FULL_DURATION
+
                     if timeseries_full_duration:
                         if last_timeseries_timestamp < (int(check_data_sparsity_start) - settings.STALE_PERIOD):
                             metrics_stale.append(metric_name)
@@ -2018,6 +2272,7 @@ class Metrics_Manager(Thread):
                         try:
                             # Determine resolution from the last 30 data points
                             resolution_timestamps = []
+
                             # @modified 20201215 - Feature #3870: metrics_manager - check_data_sparsity
                             # The last 30 measures for uploaded data to flux
                             # seemed sufficient, however from real time metrics
@@ -2062,7 +2317,6 @@ class Metrics_Manager(Thread):
                                 logger.error('error :: metrics_manager :: resolution_error - failed to determine metric_resolution')
                                 check_sparsity_error_log = True
                             check_sparsity_error_count += 1
-                            pass
                         expected_datapoints = 0
 
                         # @added 20201215 - Feature #3870: metrics_manager - check_data_sparsity
@@ -2092,16 +2346,17 @@ class Metrics_Manager(Thread):
                                 previous_sparsity = float(last_metrics_data_sparsity[metric_name])
                             except:
                                 pass
-                        if data_sparsity:
+                        if data_sparsity or data_sparsity == 0:
                             try:
                                 self.redis_conn.hset(
                                     'analyzer.metrics_manager.hash_key.metrics_data_sparsity',
                                     metric_name, data_sparsity)
                                 added_data_sparsity_keys += 1
-                            except:
+                            except Exception as e:
                                 if not check_sparsity_error_log:
                                     logger.error(traceback.format_exc())
-                                    logger.error('error :: metrics_manager :: failed to add entry in analyzer.metrics_manager.hash_key.metrics_data_sparsity for - %s' % str(metric_name))
+                                    logger.error('error :: metrics_manager :: failed to add entry in analyzer.metrics_manager.hash_key.metrics_data_sparsity for - %s - %s' % (
+                                        str(metric_name), e))
                                     check_sparsity_error_log = True
                                 check_sparsity_error_count += 1
                             sparsity_change = 0
@@ -2340,6 +2595,46 @@ class Metrics_Manager(Thread):
             logger.info('metrics_manager :: there are no entries that need to be removed from Redis hash %s' % (
                 redis_hash))
 
+        # @added 20210429 - Feature #3994: Panorama - mirage not anomalous
+        # The ionosphere.panorama.not_anomalous_metrics is managed here and entries
+        # older than 7 days are removed.
+        redis_hash = 'ionosphere.panorama.not_anomalous_metrics'
+        ionosphere_panorama_not_anomalous = {}
+        try:
+            ionosphere_panorama_not_anomalous = self.redis_conn_decoded.hgetall(redis_hash)
+            logger.info('metrics_manager :: %s entries to check in the %s Redis hash key' % (
+                str(len(ionosphere_panorama_not_anomalous)), redis_hash))
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: metrics_manager :: failed to get Redis hash key %s' % redis_hash)
+            ionosphere_panorama_not_anomalous = {}
+        ionosphere_timestamp_floats = []
+        if ionosphere_panorama_not_anomalous:
+            ionosphere_timestamp_floats = list(ionosphere_panorama_not_anomalous.keys())
+        ionosphere_timestamp_floats_to_remove = []
+        if ionosphere_timestamp_floats:
+            try:
+                timestamp_week_ago = int(time()) - (86400 - 7)
+                for timestamp_float in ionosphere_timestamp_floats:
+                    if int(float(timestamp_float)) < timestamp_week_ago:
+                        ionosphere_timestamp_floats_to_remove.append(timestamp_float)
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: metrics_manager :: failed to determine entries to remove from Redis hash key %s' % (
+                    redis_hash))
+        if ionosphere_timestamp_floats_to_remove:
+            try:
+                self.redis_conn.hdel(redis_hash, *set(ionosphere_timestamp_floats_to_remove))
+                logger.info('metrics_manager :: %s entries were removed from Redis hash %s' % (
+                    str(len(set(ionosphere_timestamp_floats_to_remove))), redis_hash))
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: metrics_manager :: failed to %s remove entries from Redis hash key %s' % (
+                    str(len(timestamp_floats_to_remove)), redis_hash))
+        else:
+            logger.info('metrics_manager :: there are no entries that need to be removed from Redis hash %s' % (
+                redis_hash))
+
         # @added 20210330 - Feature #3994: Panorama - mirage not anomalous
         # The panorama.not_anomalous_plots are managed here and entries
         # older than 7 days are removed and files deleted
@@ -2352,10 +2647,11 @@ class Metrics_Manager(Thread):
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: metrics_manager :: failed to get Redis hash key %s' % redis_hash)
-            mirage_panorama_not_anomalous = {}
+            panorama_not_anomalous_plots = {}
         timestamp_floats = []
-        if mirage_panorama_not_anomalous:
+        if panorama_not_anomalous_plots:
             timestamp_floats = list(panorama_not_anomalous_plots.keys())
+
         timestamp_floats_to_remove = []
         if timestamp_floats:
             try:
@@ -2384,7 +2680,7 @@ class Metrics_Manager(Thread):
                     except:
                         logger.error(traceback.format_exc())
                         logger.error('error :: metrics_manager :: failed to file for remove entries from Redis hash key %s' % (
-                            str(len(timestamp_floats_to_remove)), redis_hash))
+                            redis_hash))
             # Remove entries from the hash
             try:
                 self.redis_conn.hdel(redis_hash, *set(timestamp_floats_to_remove))
@@ -2397,6 +2693,27 @@ class Metrics_Manager(Thread):
         else:
             logger.info('metrics_manager :: there are no entries or files that need to be removed from Redis hash %s' % (
                 redis_hash))
+
+        # @added 20210430 - Task #4030: refactoring
+        metric_names = []
+        try:
+            metric_names = get_all_db_metric_names(skyline_app)
+        except Exception as e:
+            logger.error(traceback.format_exc())
+            logger.error('error :: metrics_manager :: failed to get_all_db_metric_names - %s' % (
+                e))
+        if metric_names:
+            try:
+                self.redis_conn.rename('analyzer.metrics_manager.db.metric_names', 'aet.analyzer.metrics_manager.db.metric_names')
+                logger.info('metrics_manager :: created the aet.analyzer.metrics_manager.db.metric_names Redis set')
+            except Exception as e:
+                logger.error('metrics_manager :: failed to created the aet.analyzer.metrics_manager.db.metrics_fully_populated Redis set - %s' % e)
+            try:
+                self.redis_conn.sadd('analyzer.metrics_manager.db.metric_names', *set(metric_names))
+                logger.info('metrics_manager :: created and added %s metrics to the analyzer.metrics_manager.db.metric_names Redis set' % str(len(metric_names)))
+            except Exception as e:
+                logger.error(traceback.format_exc())
+                logger.error('error :: metrics_manager :: failed to add multiple members to the analyzer.metrics_manager.db.metrics_fully_populated Redis set - %s' % e)
 
         spin_end = time() - spin_start
         logger.info('metrics_manager :: metric_management_process took %.2f seconds' % spin_end)
@@ -2437,14 +2754,15 @@ class Metrics_Manager(Thread):
             SERVER_METRIC_PATH = '.%s' % settings.SERVER_METRICS_NAME
             if SERVER_METRIC_PATH == '.':
                 SERVER_METRIC_PATH = ''
-        except:
+        except Exception as e:
             SERVER_METRIC_PATH = ''
+            logger.warn('warning :: metrics_manager :: settings.SERVER_METRICS_NAME is not declared in settings.py, defaults to \'\' - %s' % e)
         try:
             ANALYZER_ENABLED = settings.ANALYZER_ENABLED
             logger.info('metrics_manager :: ANALYZER_ENABLED is set to %s' % str(ANALYZER_ENABLED))
-        except:
+        except Exception as e:
             ANALYZER_ENABLED = True
-            logger.info('warning :: metrics_manager :: ANALYZER_ENABLED is not declared in settings.py, defaults to True')
+            logger.info('warning :: metrics_manager :: ANALYZER_ENABLED is not declared in settings.py, defaults to True - %s' % e)
 
         while 1:
             now = time()
@@ -2452,16 +2770,17 @@ class Metrics_Manager(Thread):
             # Make sure Redis is up
             try:
                 self.redis_conn.ping()
-            except:
-                logger.error('error :: metrics_manager cannot connect to redis at socket path %s' % settings.REDIS_SOCKET_PATH)
-                logger.info(traceback.format_exc())
+            except Exception as e:
+                logger.error(traceback.format_exc())
+                logger.error('error :: metrics_manager cannot connect to redis at socket path %s - %s' % (
+                    settings.REDIS_SOCKET_PATH, e))
                 sleep(10)
                 try:
                     self.redis_conn = get_redis_conn(skyline_app)
                     self.redis_conn_decoded = get_redis_conn_decoded(skyline_app)
-                except:
-                    logger.info(traceback.format_exc())
-                    logger.error('error :: metrics_manager cannot connect to get_redis_conn')
+                except Exception as e:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: metrics_manager cannot connect to get_redis_conn - %s' % e)
                 continue
 
             # Report app up
