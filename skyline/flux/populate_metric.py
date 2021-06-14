@@ -118,9 +118,11 @@ class PopulateMetric(object):
             key = str(metricDict['key'])
             if LOCAL_DEBUG:
                 logger.info('populate_metric :: key from metricData set to %s' % key)
-            token = str(metricDict['token'])
-            if LOCAL_DEBUG:
-                logger.info('populate_metric :: token from metricData set to %s' % token)
+            # @modified 20210421 - Task #4030: refactoring
+            # semgrep - python-logger-credential-disclosure
+            # token = str(metricDict['token'])
+            # if LOCAL_DEBUG:
+            #     logger.info('populate_metric :: token from metricData set to %s' % token)
             user = str(metricDict['user'])
             if LOCAL_DEBUG:
                 logger.info('populate_metric :: user from metricData set to %s' % user)
@@ -162,11 +164,17 @@ class PopulateMetric(object):
                         # Check to determine if it is a valid API key
                         apiKeyValid = True
                     else:
-                        logger.error('error :: populate_metric :: invalid api key length key in POST data - %s - %s' % (
-                            str(key), str(apiKeyLength)))
+                        # @modified 20210421 - Task #4030: refactoring
+                        # semgrep - python-logger-credential-disclosure
+                        # logger.error('error :: populate_metric :: invalid api key length key in POST data - %s - %s' % (
+                        #     str(key), str(apiKeyLength)))
+                        logger.error('error :: populate_metric :: invalid api key length key in POST data')
             if not apiKeyValid:
-                logger.error('error :: populate_metric :: invalid api key in POST data - %s - %s' % (
-                    str(key), str(postData)))
+                # @modified 20210421 - Task #4030: refactoring
+                # semgrep - python-logger-credential-disclosure
+                # logger.error('error :: populate_metric :: invalid api key in POST data - %s - %s' % (
+                #     str(key), str(postData)))
+                logger.error('error :: populate_metric :: invalid api key in POST data')
                 resp.status = falcon.HTTP_400
                 return
         except:

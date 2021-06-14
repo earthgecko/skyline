@@ -40,6 +40,10 @@ from database import (
 # @added 2017014 - Feature #1854: Ionosphere learn
 from ionosphere_functions import create_features_profile
 
+# @added 20210425 - Task #4030: refactoring
+#                   Feature #4014: Ionosphere - inference
+from functions.numpy.percent_different import get_percent_different
+
 skyline_app = 'ionosphere'
 skyline_app_logger = '%sLog' % skyline_app
 logger = logging.getLogger(skyline_app_logger)
@@ -1431,22 +1435,34 @@ def ionosphere_learn(timestamp):
             # TODO: base this on common features
             logger.info('learn :: checking the percent difference for the origin features sum')
             percent_different = 100
-            sums_array = np.array([origin_features_profile_sum, learnt_fp_features_sum], dtype=float)
+            # @modified 20210425 - Task #4030: refactoring
+            #                      Feature #4014: Ionosphere - inference
+            # Use the common function added
+            # sums_array = np.array([origin_features_profile_sum, learnt_fp_features_sum], dtype=float)
+            # try:
+            #     calc_percent_different = np.diff(sums_array) / sums_array[:-1] * 100.
+            #     percent_different = calc_percent_different[0]
+            #     logger.info(
+            #         'learn :: percent_different between features sums of the learnt training data and origin fp_id %s is %s' % (
+            #             str(origin_fp_id), str(percent_different)))
+            # except:
+            #     logger.error(traceback.format_exc())
+            #     logger.error('error :: failed to calculate percent_different')
+            #     remove_work_list_from_redis_set(learn_metric_list)
+            #     continue
+            # Check that the max_percent_diff_from_origin is not breached
+            # if percent_different < 0:
+            #     new_pdiff = percent_different * -1
+            #     percent_different = new_pdiff
             try:
-                calc_percent_different = np.diff(sums_array) / sums_array[:-1] * 100.
-                percent_different = calc_percent_different[0]
+                percent_different = get_percent_different(origin_features_profile_sum, learnt_fp_features_sum, True)
                 logger.info(
                     'learn :: percent_different between features sums of the learnt training data and origin fp_id %s is %s' % (
                         str(origin_fp_id), str(percent_different)))
-            except:
-                logger.error(traceback.format_exc())
-                logger.error('error :: failed to calculate percent_different')
+            except Exception as e:
+                logger.error('error :: failed to calculate percent_different - %s' % e)
                 remove_work_list_from_redis_set(learn_metric_list)
                 continue
-            # Check that the max_percent_diff_from_origin is not breached
-            if percent_different < 0:
-                new_pdiff = percent_different * -1
-                percent_different = new_pdiff
 
             if float(percent_different) > float(max_percent_diff_from_origin):
                 logger.info(

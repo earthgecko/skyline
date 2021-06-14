@@ -63,6 +63,12 @@ try:
 except:
     VISTA_ENABLED = False
 
+# @added 20210512 - Feature #4064: VERBOSE_LOGGING
+try:
+    VERBOSE_LOGGING = settings.VISTA_VERBOSE_LOGGING
+except:
+    VERBOSE_LOGGING = False
+
 USE_FLUX = False
 LOCAL_DEBUG = False
 
@@ -136,9 +142,9 @@ class Fetcher(Thread):
             try:
                 url_elements = url.split('/')
                 remote_host = url_elements[2]
-            except:
-                logger.info(traceback.format_exc())
-                logger.error('error :: fetcher :: failed to determine the remote_host from the url - %s' % str(url))
+            except Exception as e:
+                logger.error('error :: fetcher :: failed to determine the remote_host from the url - %s - %s' % (
+                    str(url), e))
             from_timestamp = None
             try:
                 from_timestamp_str = param_value_from_url(url, 'from')
@@ -146,17 +152,17 @@ class Fetcher(Thread):
                     from_timestamp = int(from_timestamp_str)
                 except:
                     from_timestamp = None
-            except:
-                logger.info(traceback.format_exc())
-                logger.error('error :: fetcher :: failed to determine the timestamp from the from url parameter - %s' % str(url))
+            except Exception as e:
+                logger.error('error :: fetcher :: failed to determine the timestamp from the from url parameter - %s - %s' % (
+                    str(url), e))
             if not from_timestamp:
                 continue
             target = None
             try:
                 target = param_value_from_url(url, 'target')
-            except:
-                logger.info(traceback.format_exc())
-                logger.error('error :: fetcher :: failed to determine the metric from the target url parameter - %s' % str(url))
+            except Exception as e:
+                logger.error('error :: fetcher :: failed to determine the metric from the target url parameter - %s - %s' % (
+                    str(url), e))
             added_to_batch = False
             add_to_batch = False
             for batch_number, batch_remote_host, batch_from_timestamp, batch_url in graphite_batches:
@@ -168,8 +174,8 @@ class Fetcher(Thread):
                             try:
                                 if batch_url.count('target') < graphite_batch_target_count:
                                     add_to_batch = int(batch_number)
-                            except:
-                                logger.error('error :: fetcher :: failed to determine whether to add to batch')
+                            except Exception as e:
+                                logger.error('error :: fetcher :: failed to determine whether to add to batch - %s' % e)
                                 continue
                 except:
                     logger.error('error :: fetcher :: failed to determine whether to add to batch')
@@ -205,9 +211,10 @@ class Fetcher(Thread):
                 batch_response = requests.get(url)
                 batch_js = batch_response.json()
                 batch_responses.append(batch_js)
-            except:
+            except Exception as e:
                 logger.error(traceback.format_exc())
-                logger.error('error :: fetcher :: failed to get valid response for batch request %s' % str(url))
+                logger.error('error :: fetcher :: failed to get valid response for batch request %s - %s' % (
+                    str(url), e))
         if batch_responses:
             end_batch_fetches = int(time())
             time_to_fetch_batches = end_batch_fetches - start_batch_fetches
@@ -233,10 +240,12 @@ class Fetcher(Thread):
                                 js = i
                                 batched_response = True
                                 success = True
-                                logger.info('fetcher :: data for %s was fetched in a batch' % str(remote_target))
-                except:
+                                if VERBOSE_LOGGING:
+                                    logger.info('fetcher :: data for %s was fetched in a batch' % str(remote_target))
+                except Exception as e:
                     logger.error(traceback.format_exc())
-                    logger.error('error :: fetcher :: failed to detemine if %s was in batch_responses' % str(remote_target))
+                    logger.error('error :: fetcher :: failed to detemine if %s was in batch_responses - %s' % (
+                        str(remote_target), e))
 
             # @added 20201009 - Feature #3780: skyline_functions - sanitise_graphite_url
             #                   Bug #3778: Handle single encoded forward slash requests to Graphite
@@ -254,13 +263,14 @@ class Fetcher(Thread):
                     response = requests.get(url)
                     if response.status_code == 200:
                         success = True
-                except:
+                except Exception as e:
                     logger.error(traceback.format_exc())
                     # @modified 20191115 - Branch #3262: py3
                     # Do not report last response data
                     # logger.error('error :: fetcher :: http status code - %s, reason - %s' % (
                     #     str(response.status_code), str(response.reason)))
-                    logger.error('error :: fetcher :: failed to get data from %s' % str(url))
+                    logger.error('error :: fetcher :: failed to get data from %s - %s' % (
+                        str(url), e))
             if not success:
                 continue
 
@@ -277,7 +287,8 @@ class Fetcher(Thread):
                 if not js:
                     js = response.json()
                 else:
-                    logger.info('fetcher :: data for %s was fetched in a batch' % str(remote_target))
+                    if VERBOSE_LOGGING:
+                        logger.info('fetcher :: data for %s was fetched in a batch' % str(remote_target))
 
                 if remote_host_type == 'graphite':
                     # @modified 20191127 - Feature #3338: Vista - batch Graphite requests
@@ -297,9 +308,10 @@ class Fetcher(Thread):
                 if LOCAL_DEBUG:
                     logger.info('fetcher :: retrieved %s data points from %s' % (
                         str(datapoints_fetched), str(url)))
-            except:
-                logger.info(traceback.format_exc())
-                logger.error('error :: fetcher :: failed to get data from %s' % str(url))
+            except Exception as e:
+                logger.error(traceback.format_exc())
+                logger.error('error :: fetcher :: failed to get data from %s - %s' % (
+                    str(url), e))
 
             # Example
             # datapoints[0]
@@ -384,9 +396,9 @@ class Fetcher(Thread):
                             logger.info('fetcher :: Redis key %s last_flux_timestamp %s' % (str(cache_key), str(last_flux_timestamp)))
                         else:
                             logger.info('fetcher :: Redis key %s last_flux_timestamp unknown' % (str(cache_key)))
-                except:
+                except Exception as e:
                     logger.error(traceback.format_exc())
-                    logger.error('error :: fetch :: failed determining last_flux_timestamp')
+                    logger.error('error :: fetch :: failed determining last_flux_timestamp - %s' % e)
                     last_flux_timestamp = False
 
             value = None
@@ -437,36 +449,39 @@ class Fetcher(Thread):
                     if int(last_ts) > (fetch_process_start - 120):
                         if sorted_raw_timeseries[-1][1] is None:
                             set_flux_key = True
-                except:
+                except Exception as e:
                     logger.error(traceback.format_exc())
-                    logger.error('error :: fetcher :: failed to determine if last value was null')
+                    logger.error('error :: fetcher :: failed to determine if last value was null - %s' % e)
                 if set_flux_key:
                     cache_key = 'flux.last.%s' % metric
                     try:
                         # Update Redis flux key
                         metric_data = [int(last_ts), None]
                         self.redis_conn.set(cache_key, str(metric_data))
-                        logger.info('fetcher :: even though no data points so as to not loop round on this metric, set the metric Redis key - %s - %s' % (
-                            cache_key, str(metric_data)))
-                    except:
+                        if VERBOSE_LOGGING:
+                            logger.info('fetcher :: even though no data points so as to not loop round on this metric, set the metric Redis key - %s - %s' % (
+                                cache_key, str(metric_data)))
+                    except Exception as e:
                         logger.error(traceback.format_exc())
-                        logger.error('error :: fetcher :: even though no data points, failed to set Redis key - %s' % (
-                            cache_key))
+                        logger.error('error :: fetcher :: even though no data points, failed to set Redis key - %s - %s' % (
+                            cache_key, e))
                     # Adding to the vista.fetcher.unique_metrics Redis set
                     redis_set = 'vista.fetcher.unique_metrics'
                     data = str(metric)
                     try:
                         self.redis_conn.sadd(redis_set, data)
-                        logger.info('fetcher :: even though no data points, added %s to Redis set %s' % (
-                            remote_target, redis_set))
-                    except:
-                        logger.info(traceback.format_exc())
-                        logger.error('error :: fetcher :: even though no data points, failed to add %s to Redis set %s' % (
-                            str(data), str(redis_set)))
+                        if VERBOSE_LOGGING:
+                            logger.info('fetcher :: even though no data points, added %s to Redis set %s' % (
+                                remote_target, redis_set))
+                    except Exception as e:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: fetcher :: even though no data points, failed to add %s to Redis set %s - %s' % (
+                            str(data), str(redis_set), e))
                     continue
 
             if not timeseries:
-                logger.info('fetcher :: no new data in the timeseries list for the time series for %s' % metric)
+                if VERBOSE_LOGGING:
+                    logger.info('fetcher :: no new data in the timeseries list for the time series for %s' % metric)
                 continue
 
             # Order the time series by timestamp as the tuple can shift
@@ -474,8 +489,9 @@ class Fetcher(Thread):
             # data
             timeseries.sort()
             timeseries_length = len(timeseries)
-            logger.info('fetcher :: %s data points to add to vista.fetcher.metrics.json for %s' % (
-                str(timeseries_length), metric))
+            if VERBOSE_LOGGING:
+                logger.info('fetcher :: %s data points to add to vista.fetcher.metrics.json for %s' % (
+                    str(timeseries_length), metric))
 
             payload = None
             timeseries_str = '"%s"' % timeseries
@@ -492,9 +508,9 @@ class Fetcher(Thread):
                     'password': password,
                     'datapoints': timeseries_str
                 }]
-            except:
+            except Exception as e:
                 logger.error(traceback.format_exc())
-                logger.error('error :: fetcher :: could not build the payload json')
+                logger.error('error :: fetcher :: could not build the payload json - %s' % e)
             redis_set = 'vista.fetcher.metrics.json'
             data = str(payload)
             try:
@@ -502,19 +518,19 @@ class Fetcher(Thread):
                 if LOCAL_DEBUG:
                     logger.info('fetcher :: added data from %s to Redis set %s' % (
                         str(url), redis_set))
-            except:
+            except Exception as e:
                 logger.error(traceback.format_exc())
-                logger.error('error :: failed to add %s to Redis set %s' % (
-                    str(data), str(redis_set)))
+                logger.error('error :: failed to add %s to Redis set %s - %s' % (
+                    str(data), str(redis_set), e))
             redis_set = 'vista.fetcher.metrics.fetched'
             time_now = int(time())
             data = [str(remote_target), time_now]
             try:
                 self.redis_conn.sadd(redis_set, str(data))
-            except:
+            except Exception as e:
                 logger.error(traceback.format_exc())
-                logger.error('error :: failed to add %s to Redis set %s' % (
-                    str(data), str(redis_set)))
+                logger.error('error :: failed to add %s to Redis set %s - %s' % (
+                    str(data), str(redis_set), e))
         fetch_process_end = time()
         fetch_time = fetch_process_end - fetch_process_start
         logger.info('fetcher :: metrics fetched in %s seconds' % str(fetch_time))
@@ -593,7 +609,7 @@ class Fetcher(Thread):
                 try:
                     redis_up = self.redis_conn.ping()
                 except:
-                    logger.info(traceback.format_exc())
+                    logger.error(traceback.format_exc())
                     logger.error('error :: fetcher :: cannot connect to redis at socket path %s' % settings.REDIS_SOCKET_PATH)
                     sleep(2)
                     try:
@@ -615,7 +631,7 @@ class Fetcher(Thread):
                 self.redis_conn.setex(skyline_app, 120, begin_fetcher_run)
             except:
                 logger.error('error :: fetcher :: could not update the Redis %s key' % skyline_app)
-                logger.info(traceback.format_exc())
+                logger.error(traceback.format_exc())
 
             # Known fetcher metrics that are known to have already been fetched,
             # metrics in this set are named as follows namespace_prefix.metric
@@ -714,26 +730,35 @@ class Fetcher(Thread):
                         logger.info('fetcher :: with metric %s' % str(metric))
                     api_key = str(api_key)
                     if LOCAL_DEBUG:
-                        logger.info('fetcher :: with api_key %s' % str(api_key))
+                        # @modified 20210421 - Task #4030: refactoring
+                        # semgrep - python-logger-credential-disclosure
+                        # logger.info('fetcher :: with api_key %s' % str(api_key))
+                        logger.info('fetcher :: with api_key (no disclosure)')
                     token = str(token)
                     if LOCAL_DEBUG:
-                        logger.info('fetcher :: with token %s' % str(token))
+                        # @modified 20210421 - Task #4030: refactoring
+                        # semgrep - python-logger-credential-disclosure
+                        # logger.info('fetcher :: with token %s' % str(token))
+                        logger.info('fetcher :: with token (no disclosure)')
                     user = str(user)
                     if LOCAL_DEBUG:
                         logger.info('fetcher :: with user %s' % str(user))
                     password = str(password)
                     if LOCAL_DEBUG:
-                        logger.info('fetcher :: with password %s' % str(password))
+                        # @modified 20210421 - Task #4030: refactoring
+                        # semgrep - python-logger-credential-disclosure
+                        # logger.info('fetcher :: with password %s' % str(password))
+                        logger.info('fetcher :: with password (no disclosure)')
                     populate_at_resolutions_str = str(populate_at_resolutions)
                     if LOCAL_DEBUG:
                         logger.info('fetcher :: with populate_at_resolutions %s' % populate_at_resolutions_str)
                     # Handle if the user passes (None) instead of None
                     if populate_at_resolutions == ():
                         populate_at_resolutions = None
-                except:
+                except Exception as e:
                     logger.error(traceback.format_exc())
-                    logger.error('error :: fetcher :: could not determine the required values in VISTA_FETCH_METRICS tuple for - %s' % (
-                        str(remote_target)))
+                    logger.error('error :: fetcher :: could not determine the required values in VISTA_FETCH_METRICS tuple for - %s - %s' % (
+                        str(remote_target), e))
                     continue
 
                 # If the metric is not known to Vista and the metric
@@ -977,10 +1002,10 @@ class Fetcher(Thread):
                                 if LOCAL_DEBUG:
                                     logger.info('fetcher :: appended resolution_url - %s - %s' % (
                                         str(resolution_url), metric))
-                    except:
+                    except Exception as e:
                         logger.error(traceback.format_exc())
-                        logger.error('error :: fetcher :: could not determine the required resolutions for values in VISTA_FETCH_METRICS tuple for - %s' % (
-                            str(remote_target)))
+                        logger.error('error :: fetcher :: could not determine the required resolutions for values in VISTA_FETCH_METRICS tuple for - %s - %s' % (
+                            str(remote_target), e))
 
                 # @added 20200108 - Task #3376: Enable vista and flux to deal with lower frequency data
                 # Prometheus metrics that use a custom uri cannot be pre populated
@@ -1029,10 +1054,10 @@ class Fetcher(Thread):
                             resolution_url = '%s%s' % (
                                 str(remote_prometheus_host), uri)
                             fetch_resolution_urls.append(resolution_url)
-                    except:
+                    except Exception as e:
                         logger.error(traceback.format_exc())
-                        logger.error('error :: fetcher :: could not determine the required pre-populate URI for values in VISTA_FETCH_METRICS tuple for - %s' % (
-                            str(populate_at_resolutions)))
+                        logger.error('error :: fetcher :: could not determine the required pre-populate URI for values in VISTA_FETCH_METRICS tuple for - %s - %s' % (
+                            str(populate_at_resolutions), e))
 
                 if fetch_resolution_urls:
                     set_fetch_resolution_urls = set(fetch_resolution_urls)
@@ -1045,9 +1070,9 @@ class Fetcher(Thread):
                     flux_url = '%s%s:%s/populate_metric' % (
                         protocol, str(settings.FLUX_IP),
                         str(settings.FLUX_PORT))
-                except:
+                except Exception as e:
                     logger.error(traceback.format_exc())
-                    logger.error('error :: fetcher :: could not build the flux URL')
+                    logger.error('error :: fetcher :: could not build the flux URL - %s' % e)
                 payload = None
                 fetch_resolution_urls_str = '"%s"' % fetch_resolution_urls
                 if fetch_resolution_urls and pre_populate_graphite_metric:
@@ -1061,9 +1086,9 @@ class Fetcher(Thread):
                             'password': password,
                             'fetch_resolution_urls': fetch_resolution_urls_str
                         }
-                    except:
+                    except Exception as e:
                         logger.error(traceback.format_exc())
-                        logger.error('error :: fetcher :: could not build the payload json')
+                        logger.error('error :: fetcher :: could not build the payload json - %s' % e)
                 if flux_url and payload:
                     try:
                         # @modified 20191011 - Task #3258: Reduce vista logging
@@ -1091,10 +1116,10 @@ class Fetcher(Thread):
                         if not good_response:
                             logger.error('fetcher :: flux /populate_metric did not respond with 200 or 204, status code - %s for %s' % (
                                 str(response.status_code), flux_url))
-                    except:
+                    except Exception as e:
                         logger.error(traceback.format_exc())
-                        logger.error('error :: fetcher :: could not post data to flux URL - %s, data - %s' % (
-                            str(flux_url), str(payload)))
+                        logger.error('error :: fetcher :: could not post data to flux URL - %s, data - %s - %s' % (
+                            str(flux_url), str(payload), e))
 
                 if not pre_populate_graphite_metric:
                     if last_flux_timestamp and remote_host_type == 'graphite':
@@ -1118,9 +1143,9 @@ class Fetcher(Thread):
                                     rep_str = '-%s' % url_period
                                 fetch_from_timestamp = last_flux_timestamp - 300
                                 url = re.sub(rep_str, str(fetch_from_timestamp), url)
-                        except:
+                        except Exception as e:
                             logger.error(traceback.format_exc())
-                            logger.error('error :: fetcher :: could not determine backfill parameters')
+                            logger.error('error :: fetcher :: could not determine backfill parameters - %s' % e)
 
                     if last_flux_timestamp and remote_host_type == 'prometheus':
                         try:
@@ -1132,9 +1157,9 @@ class Fetcher(Thread):
                                     str(urlencoded_remote_target),
                                     str(pop_start_timestamp), str(end_timestamp))
                             url = '%s%s' % (str(remote_prometheus_host), uri)
-                        except:
+                        except Exception as e:
                             logger.error(traceback.format_exc())
-                            logger.error('error :: fetcher :: could not determine backfill parameters')
+                            logger.error('error :: fetcher :: could not determine backfill parameters - %s' % e)
 
                     metric_to_fetch = [remote_host_type, frequency, remote_target, graphite_target, metric, url, namespace_prefix, api_key, token, user, password]
                     metrics_to_fetch.append(metric_to_fetch)
@@ -1162,9 +1187,9 @@ class Fetcher(Thread):
                         logger.info('fetcher :: starting %s of %s fetch_process/es' % (str(pid_count), str(settings.VISTA_FETCHER_PROCESSES)))
                         p.start()
                         spawned_pids.append(p.pid)
-                    except:
-                        logger.info(traceback.format_exc())
-                        logger.error('error :: fetcher :: failed to spawn fetch_process')
+                    except Exception as e:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: fetcher :: failed to spawn fetch_process - %s' % e)
 
                 # Self monitor processes and terminate if any fetch_process has run
                 # for longer than VISTA_FETCHER_PROCESS_MAX_RUNTIME seconds

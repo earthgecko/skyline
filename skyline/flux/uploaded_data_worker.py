@@ -331,6 +331,9 @@ class UploadedDataWorker(Process):
 
             upload_info = None
             info_file = None
+            # @added 20210504  - Task #4030: refactoring
+            open_info_file = None
+
             if upload_id and info_filename:
                 info_file = '%s/%s/%s' % (DATA_UPLOADS_PATH, upload_id, info_filename)
                 if not os.path.isfile(info_file):
@@ -341,9 +344,17 @@ class UploadedDataWorker(Process):
                         upload_error = 'info file not found - %s' % info_filename
                         upload_status.append(['error', upload_error])
                         upload_status = new_upload_status(upload_status, 'error', upload_error)
-            if info_file:
+                # @added 20210504  - Task #4030: refactoring
+                else:
+                    open_info_file = '%s/%s' % (os.path.dirname(info_file), os.path.basename(info_file))
+
+            # @modified 20210504  - Task #4030: refactoring
+            # if info_file:
+            if open_info_file:
                 try:
-                    with open(info_file) as f:
+                    # @modified 20210504  - Task #4030: refactoring
+                    # with open(info_file) as f:
+                    with open(open_info_file) as f:
                         dict_data_str = f.read()
                     upload_info = literal_eval(dict_data_str)
                 except:
@@ -495,7 +506,13 @@ class UploadedDataWorker(Process):
             if refresh_info:
                 logger.info('uploaded_data_worker :: refresh info for the info.json included in the data archive - %s' % info_file)
                 try:
-                    with open(info_file) as f:
+
+                    # @added 20210504  - Task #4030: refactoring
+                    open_info_file = '%s/%s' % (os.path.dirname(info_file), os.path.basename(info_file))
+
+                    # @modified 20210504  - Task #4030: refactoring
+                    # with open(info_file) as f:
+                    with open(open_info_file) as f:
                         dict_data_str = f.read()
                     upload_info = literal_eval(dict_data_str)
                 except:

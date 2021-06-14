@@ -27,6 +27,9 @@ from skyline_functions import (
     # @added 20191029 - Task #3302: Handle csv.reader in py3
     #                   Branch #3262: py3
     read_csv)
+# @added 20210425 - Task #4030: refactoring
+#                   Feature #4014: Ionosphere - inference
+from functions.numpy.percent_different import get_percent_different
 
 from tsfresh_feature_names import TSFRESH_FEATURES, TSFRESH_VERSION
 
@@ -478,21 +481,30 @@ def calculate_features_other_minmax(use_file, i_json_file, metric):
     percent_different = 100
     if minmax_fp_features_sum and minmax_anomalous_features_sum:
         percent_different = None
+        # @modified 20210425 - Task #4030: refactoring
+        #                      Feature #4014: Ionosphere - inference
+        # Use the common function added
+        # try:
+        #     fp_sum_array = [minmax_fp_features_sum]
+        #     calc_sum_array = [minmax_anomalous_features_sum]
+        #     percent_different = 100
+        #     sums_array = np.array([minmax_fp_features_sum, minmax_anomalous_features_sum], dtype=float)
+        #     calc_percent_different = np.diff(sums_array) / sums_array[:-1] * 100.
+        #     percent_different = calc_percent_different[0]
+        #     print('percent_different between minmax scaled features sums - %s' % str(percent_different))
+        # except:
+        #     print('error :: failed to calculate percent_different from minmax scaled features sums')
         try:
-            fp_sum_array = [minmax_fp_features_sum]
-            calc_sum_array = [minmax_anomalous_features_sum]
-            percent_different = 100
-            sums_array = np.array([minmax_fp_features_sum, minmax_anomalous_features_sum], dtype=float)
-            calc_percent_different = np.diff(sums_array) / sums_array[:-1] * 100.
-            percent_different = calc_percent_different[0]
-            print('percent_different between minmax scaled features sums - %s' % str(percent_different))
-        except:
-            print('error :: failed to calculate percent_different from minmax scaled features sums')
+            percent_different = get_percent_different(minmax_fp_features_sum, minmax_anomalous_features_sum, True)
+            print('percent_different between minmax_fp_features_sum and minmax_anomalous_features_sum - %s' % str(percent_different))
+        except Exception as e:
+            print('error :: failed to calculate percent_different - %s' % e)
 
         if percent_different:
             almost_equal = None
             try:
-                np.testing.assert_array_almost_equal(fp_sum_array, calc_sum_array)
+                # np.testing.assert_array_almost_equal(fp_sum_array, calc_sum_array)
+                np.testing.assert_array_almost_equal(minmax_fp_features_sum, minmax_anomalous_features_sum)
                 almost_equal = True
             except:
                 almost_equal = False

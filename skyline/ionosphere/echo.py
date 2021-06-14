@@ -36,7 +36,7 @@ this_host = str(os.uname()[1])
 try:
     ENABLE_IONOSPHERE_DEBUG = settings.ENABLE_IONOSPHERE_DEBUG
 except:
-    logger.error('error :: learn :: cannot determine ENABLE_IONOSPHERE_DEBUG from settings' % skyline_app)
+    logger.error('error :: echo :: cannot determine ENABLE_IONOSPHERE_DEBUG from settings' % skyline_app)
     ENABLE_IONOSPHERE_DEBUG = False
 
 try:
@@ -51,7 +51,7 @@ context = 'ionosphere_echo'
 
 def echo_get_metric_from_metrics(base_name, engine):
     """
-    Called by :func:`~learn` and returns the metric id and metric db object
+    Called by :func:`~echo` and returns the metric id and metric db object
 
     :param timestamp: timestamp at which learn was called
     :type timestamp: int
@@ -68,10 +68,10 @@ def echo_get_metric_from_metrics(base_name, engine):
     metrics_table = None
     try:
         metrics_table, log_msg, trace = metrics_table_meta(skyline_app, engine)
-        logger.info('learn :: metrics_table OK for %s' % base_name)
+        logger.info('echo :: metrics_table OK for %s' % base_name)
     except:
         logger.error(traceback.format_exc())
-        logger.error('error :: learn :: failed to get metrics_table meta for %s' % base_name)
+        logger.error('error :: echo :: failed to get metrics_table meta for %s' % base_name)
         return False
 
     try:
@@ -84,7 +84,7 @@ def echo_get_metric_from_metrics(base_name, engine):
         connection.close()
     except:
         logger.error(traceback.format_exc())
-        logger.error('error :: learn :: could not determine id from metrics table for - %s' % base_name)
+        logger.error('error :: echo :: could not determine id from metrics table for - %s' % base_name)
         return False
 
     return metrics_id, metric_db_object
