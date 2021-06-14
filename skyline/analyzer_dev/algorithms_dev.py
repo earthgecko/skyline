@@ -129,7 +129,10 @@ def grubbs(timeseries):
     # logger.info('Running ' + str(get_function_name()))
 
     try:
-        series = scipy.array([x[1] for x in timeseries])
+        # @modified 20210420 - Support #4026: Change from scipy array to numpy array
+        # Deprecation of scipy.array
+        # series = scipy.array([x[1] for x in timeseries])
+        series = np.array([x[1] for x in timeseries])
         stdDev = scipy.std(series)
 
         # Issue #27 - Handle z_score agent.py RuntimeWarning - https://github.com/earthgecko/skyline/issues/27
@@ -295,7 +298,11 @@ def histogram_bins(timeseries):
     """
 
     try:
-        series = scipy.array([x[1] for x in timeseries])
+        # @modified 20210420 - Support #4026: Change from scipy array to numpy array
+        # Deprecation of scipy.array
+        # series = scipy.array([x[1] for x in timeseries])
+        series = np.array([x[1] for x in timeseries])
+
         t = tail_avg(timeseries)
         h = np.histogram(series, bins=15)
         bins = h[1]
@@ -325,8 +332,12 @@ def ks_test(timeseries):
     try:
         hour_ago = time() - 3600
         ten_minutes_ago = time() - 600
-        reference = scipy.array([x[1] for x in timeseries if x[0] >= hour_ago and x[0] < ten_minutes_ago])
-        probe = scipy.array([x[1] for x in timeseries if x[0] >= ten_minutes_ago])
+        # @modified 20210420 - Support #4026: Change from scipy array to numpy array
+        # Deprecation of scipy.array
+        # reference = scipy.array([x[1] for x in timeseries if x[0] >= hour_ago and x[0] < ten_minutes_ago])
+        # probe = scipy.array([x[1] for x in timeseries if x[0] >= ten_minutes_ago])
+        reference = np.array([x[1] for x in timeseries if x[0] >= hour_ago and x[0] < ten_minutes_ago])
+        probe = np.array([x[1] for x in timeseries if x[0] >= ten_minutes_ago])
 
         if reference.size < 20 or probe.size < 20:
             return False
