@@ -383,7 +383,11 @@ def histogram_bins(timeseries, use_full_duration):
     """
 
     try:
-        series = scipy.array([x[1] for x in timeseries])
+        # @modified 20210420 - Support #4026: Change from scipy array to numpy array
+        # Deprecation of scipy.array
+        # series = scipy.array([x[1] for x in timeseries])
+        series = np.array([x[1] for x in timeseries])
+
         # @modified 20200904 - Feature #3684: ROOMBA_BATCH_METRICS_CUSTOM_DURATIONS
         # Added use_full_duration
         t = tail_avg(timeseries, use_full_duration)
@@ -418,8 +422,12 @@ def ks_test(timeseries, use_full_duration):
     try:
         hour_ago = time() - 3600
         ten_minutes_ago = time() - 600
-        reference = scipy.array([x[1] for x in timeseries if x[0] >= hour_ago and x[0] < ten_minutes_ago])
-        probe = scipy.array([x[1] for x in timeseries if x[0] >= ten_minutes_ago])
+        # @modified 20210420 - Support #4026: Change from scipy array to numpy array
+        # Deprecation of scipy.array
+        # reference = scipy.array([x[1] for x in timeseries if x[0] >= hour_ago and x[0] < ten_minutes_ago])
+        # probe = scipy.array([x[1] for x in timeseries if x[0] >= ten_minutes_ago])
+        reference = np.array([x[1] for x in timeseries if x[0] >= hour_ago and x[0] < ten_minutes_ago])
+        probe = np.array([x[1] for x in timeseries if x[0] >= ten_minutes_ago])
 
         if reference.size < 20 or probe.size < 20:
             return False
