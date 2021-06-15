@@ -24,8 +24,9 @@ skyline_dir = parent_dir + '/skyline'
 sys.path.append(skyline_dir)
 root_dir = os.path.dirname(parent_dir)
 
-import settings
-from tsfresh_feature_names import TSFRESH_FEATURES, TSFRESH_BASELINE_VERSION
+if True:
+    import settings
+    from tsfresh_feature_names import TSFRESH_FEATURES, TSFRESH_BASELINE_VERSION
 
 # TODO: reconsider including a config with no feature names just declaring the
 # current baseline version as there is not difference in the baselines between
