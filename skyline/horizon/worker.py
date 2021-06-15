@@ -243,6 +243,9 @@ class Worker(Process):
 
         last_send_to_graphite = time()
         queue_sizes = []
+        # @added 20210416 - Task #4020: Add horizon.queue_size_60s_avg metric
+        last_log_queue_size = time()
+        queue_sizes_60_seconds = []
 
         # @added 20200815 - Feature #3680: horizon.worker.datapoints_sent_to_redis
         datapoints_sent_to_redis = 0
@@ -379,12 +382,19 @@ class Worker(Process):
 
             # Log progress
             if self.canary:
-                logger.info('%s :: queue size at %d' % (skyline_app, self.q.qsize()))
+                # @modified 20210511
+                # Do not logg queue size for every chunk
+                # logger.info('%s :: queue size at %d' % (skyline_app, self.q.qsize()))
+
                 queue_sizes.append(self.q.qsize())
                 # Only send average queue mertics to graphite once per 10 seconds
                 now = time()
-                last_sent_graphite = now - last_send_to_graphite
-                if last_sent_graphite > 10:
+
+                # @modified 20210416 - Task #4020: Add horizon.queue_size_60s_avg metric
+                # last_sent_graphite = now - last_send_to_graphite
+                # if last_sent_graphite > 10:
+                last_logged_queue_size = now - last_log_queue_size
+                if last_logged_queue_size > 10:
                     number_queue_sizes = len(queue_sizes)
                     total_of_queue_sizes = sum(queue_sizes)
                     if total_of_queue_sizes > 0:
@@ -398,10 +408,51 @@ class Worker(Process):
                     # self.send_graphite_metric('queue_size', average_queue_size)
                     send_metric_name = '%s.queue_size' % skyline_app_graphite_namespace
                     send_graphite_metric(skyline_app, send_metric_name, average_queue_size)
-
-                    # reset queue_sizes and last_sent_graphite
+                    # @added 20210416 - Task #4020: Add horizon.queue_size_60s_avg metric
+                    for size_value in queue_sizes:
+                        queue_sizes_60_seconds.append(size_value)
+                    # reset queue_sizes
                     queue_sizes = []
-                    last_send_to_graphite = time()
+                    # last_send_to_graphite = time()
+                    last_log_queue_size = time()
+
+                # @added 20210416 - Task #4020: Add horizon.queue_size_60s_avg metric
+                # Moved from the 10 second block above to its own 60 seconds block
+                last_sent_graphite = now - last_send_to_graphite
+                if last_sent_graphite >= 60:
+                    try:
+                        number_queue_sizes = len(queue_sizes_60_seconds)
+                        total_of_queue_sizes = sum(queue_sizes_60_seconds)
+                        if total_of_queue_sizes > 0:
+                            average_queue_size = total_of_queue_sizes / number_queue_sizes
+                        else:
+                            average_queue_size = 0
+                        logger.info('%s :: total queue size for the last 60 seconds - %s' % (skyline_app, str(total_of_queue_sizes)))
+                        logger.info('%s :: total queue values known for the last 60 seconds - %s' % (skyline_app, str(number_queue_sizes)))
+                        logger.info('%s :: average queue size for the last 60 seconds - %s' % (skyline_app, str(average_queue_size)))
+                        send_metric_name = '%s.queue_size_60s_avg' % skyline_app_graphite_namespace
+                        send_graphite_metric(skyline_app, send_metric_name, average_queue_size)
+                        # reset queue_sizes_60_seconds and last_sent_graphite
+                        queue_sizes_60_seconds = []
+                        last_send_to_graphite = time()
+                    except Exception as e:
+                        logger.error(traceback.format_exc())
+                        logger.error('%s :: error: %s' % (skyline_app, str(e)))
+
+                    # @added 20210520 - Branch #1444: thunder
+                    # Added Redis hash keys for thunder to monitor the horizon
+                    # listen state, inferred via the
+                    # horizon.worker.average_queue_size, without incurring the
+                    # addition of Redis to horizon/listen.  This is used by
+                    # Thunder notify on degradation of service and operational
+                    # changes.
+                    cache_key = 'horizon.worker.average_queue_size'
+                    try:
+                        self.redis_conn.hset(cache_key, 'value', int(average_queue_size))
+                        self.redis_conn.hset(cache_key, 'timestamp', int(now))
+                    except Exception as e:
+                        logger.error('error :: horizon :: worker :: could not update the Redis %s key - %s' % (
+                            cache_key, e))
 
             # @added 20200815 - Feature #3680: horizon.worker.datapoints_sent_to_redis
             # @modified 20201017 - Feature #3788: snab_flux_load_test
@@ -424,12 +475,12 @@ class Worker(Process):
                 if HORIZON_SHARDS:
                     try:
                         self.redis_conn.sadd('horizon.shards.metrics_assigned', *set(horizon_shard_assigned_metrics))
-                    except:
+                    except Exception as e:
                         logger.error(traceback.format_exc())
                         logger.error('%s :: error adding horizon.shard.metrics_assigned: %s' % (skyline_app, str(e)))
                     try:
                         self.redis_conn.sadd('horizon.shard.metrics_dropped', *set(horizon_shard_dropped_metrics))
-                    except:
+                    except Exception as e:
                         logger.error(traceback.format_exc())
                         logger.error('%s :: error adding horizon.shard.metrics_dropped: %s' % (skyline_app, str(e)))
 
@@ -459,7 +510,39 @@ class Worker(Process):
                     try:
                         logger.info('renaming key horizon.metrics_received to aet.horizon.metrics_received')
                         self.redis_conn.rename('horizon.metrics_received', 'aet.horizon.metrics_received')
-                    except:
+                    except Exception as e:
                         logger.info(traceback.format_exc())
-                        logger.error('error :: failed to rename Redis key horizon.metrics_received to aet.horizon.metrics_received')
+                        logger.error('error :: failed to rename Redis key horizon.metrics_received to aet.horizon.metrics_received - %s' % e)
+
+                    # @added 20210520 - Branch #1444: thunder
+                    # Added Redis hash keys for thunder to monitor the horizon
+                    # listen state, inferred via the
+                    # horizon.worker.average_queue_size, without incurring the
+                    # addition of Redis to horizon/listen.  This is used by
+                    # Thunder notify on degradation of service and operational
+                    # changes.
+                    cache_key = 'horizon'
+                    try:
+                        self.redis_conn.setex(cache_key, 120, int(now))
+                    except Exception as e:
+                        logger.error('error :: horizon :: worker :: could not update the Redis %s key - %s' % (
+                            cache_key, e))
+                    metrics_received_count = 0
+                    try:
+                        metrics_received_count = self.redis_conn.scard('aet.horizon.metrics_received')
+                    except Exception as e:
+                        logger.error(traceback.format_exc())
+                        logger.error('%s :: error running redis_conn.scard(\'aet.horizon.metrics_received\') - %s' % (
+                            skyline_app, e))
+                    cache_key = 'thunder.horizon.worker.metrics_received'
+                    try:
+                        self.redis_conn.hset(cache_key, 'value', int(metrics_received_count))
+                        self.redis_conn.hset(cache_key, 'timestamp', int(now))
+                    except Exception as e:
+                        logger.error('error :: horizon :: worker :: could not update the Redis %s key - %s' % (
+                            cache_key, e))
+                    send_metric_name = '%s.metrics_received' % (
+                        skyline_app_graphite_namespace)
+                    send_graphite_metric(skyline_app, send_metric_name, metrics_received_count)
+
                 metrics_received = []
