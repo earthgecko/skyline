@@ -97,8 +97,13 @@
 
 # Only required if you are posting metrics to Skyline via HTTP
 #    location /flux/ {
-#      auth_basic "off";
-#      allow all;
+#      # You can uncomment this in order to turn authentication off
+#      # auth_basic "off";
+#      # allow all;
+#      # Limit the max body size as falcon does not, the json for 450 metrics
+#      # with LONG names and LONG values was 92K
+#      client_max_body_size 120K;
+#
 #      proxy_set_header Host $host;
 #      proxy_set_header Forwarded $proxy_add_forwarded;
 #      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
