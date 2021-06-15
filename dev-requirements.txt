@@ -480,6 +480,11 @@ gunicorn==20.0.4
 # @modified 20201229 - Task #3898: Test Python 3.8.6 and deps
 #pipdeptree==1.0.0
 pipdeptree==2.0.0
+# @added 20210614 - Task #4140: deps updates
+#                   Branch #1444: thunder
+# https://snyk.io/vuln/SNYK-PYTHON-PIP-1278135
+# Pin to 21.1.2 until pipdeptree updates
+pip==21.1.2
 
 # @added 20161119 - Branch #922: ionosphere
 ## tsfresh and deps
@@ -495,7 +500,11 @@ pipdeptree==2.0.0
 #scikit_learn==0.20.3
 # @modified 20201229 - Task #3898: Test Python 3.8.6 and deps
 #scikit-learn==0.23.1
-scikit-learn==0.24.0
+# @modified 20210614 - Task #4140: deps updates
+#                      Branch #1444: thunder
+# https://snyk.io/vuln/SNYK-PYTHON-SCIKITLEARN-1079100
+#scikit-learn==0.24.0
+scikit-learn==0.24.2
 
 # @modified 20190412 - Task #2926: Update dependencies
 #future==0.16.0
@@ -656,8 +665,11 @@ aiohttp==3.7.4
 #urllib3==1.25.9
 # @modified 20210324 - Support #3988: SNYK-PYTHON-URLLIB3-1085966
 #urllib3==1.26.2
-urllib3==1.26.4
-
+# @modified 20210614 - Task #4140: deps updates
+#                      Branch #1444: thunder
+# https://github.com/earthgecko/skyline/pull/431
+#urllib3==1.26.4
+urllib3==1.26.5
 # @added 201906025 - Branch #956: flux
 graphyte==1.6.0
 statsd==3.3.0
