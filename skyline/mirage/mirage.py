@@ -1466,6 +1466,30 @@ class Mirage(Thread):
         logger.info('algorithms analysis completed in %.2f seconds' % (
             analysis_run_time))
 
+        # @modified 20200728 - Bug #3652: Handle multiple metrics in base_name conversion
+        # base_name = metric.replace(settings.FULL_NAMESPACE, '', 1)
+        if metric.startswith(settings.FULL_NAMESPACE):
+            base_name = metric.replace(settings.FULL_NAMESPACE, '', 1)
+        else:
+            base_name = metric
+
+        # @added 20210505 - Bug #4048: Mirage - removing feedback metrics to be processed
+        feedback_cache_key_exists = False
+        feedback_cache_key = 'mirage.feedback_metric.checked.%s' % (base_name)
+        try:
+            feedback_cache_key_exists = self.redis_conn_decoded.get(feedback_cache_key)
+        except Exception as e:
+            logger.error('error :: failed to get %s key from Redis - %s' % (
+                str(feedback_cache_key), e))
+        if feedback_cache_key_exists:
+            feedback_processed_cache_key = 'mirage.feedback_metric.processed.%s' % (base_name)
+            logger.info('feedback metric processed adding Redis key with 600 TTL - %s' % feedback_processed_cache_key)
+            try:
+                self.redis_conn.setex(feedback_processed_cache_key, 600, int(analysis_start_time))
+            except Exception as e:
+                logger.error('error :: failed to add %s key to Redis - %s' % (
+                    str(feedback_processed_cache_key), e))
+
         # @added 20201208 - Feature #3866: MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
         #                   Task #3868: POC MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
         if high_resolution_analysis:
@@ -1490,12 +1514,6 @@ class Mirage(Thread):
             analyzer_waterfall_alerts.append(waterfall_alert)
 
         if not anomalous:
-            # @modified 20200728 - Bug #3652: Handle multiple metrics in base_name conversion
-            # base_name = metric.replace(settings.FULL_NAMESPACE, '', 1)
-            if metric.startswith(settings.FULL_NAMESPACE):
-                base_name = metric.replace(settings.FULL_NAMESPACE, '', 1)
-            else:
-                base_name = metric
 
             not_anomalous_metric = [datapoint, base_name]
             # @modified 20190522 - Task #3034: Reduce multiprocessing Manager list usage
@@ -1604,7 +1622,7 @@ class Mirage(Thread):
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: failed to add %s to mirage.anomalous_metrics Redis set' % (
-                    str(data), str(redis_set)))
+                    str(data)))
 
             # @modified 20201001 - Branch #3068: SNAB
             #                      Task #3748: POC SNAB
@@ -2123,7 +2141,7 @@ class Mirage(Thread):
             if base_name in MIRAGE_ALWAYS_METRICS:
                 remove_ionosphere_data_dir = True
         if not anomalous and periodic_mirage_check:
-                remove_ionosphere_data_dir = True
+            remove_ionosphere_data_dir = True
 
         # @added 20190408 - Feature #2882: Mirage - periodic_check
         # Remove the training_dir for mirage_periodic_check_metrics if not
@@ -2295,7 +2313,20 @@ class Mirage(Thread):
             while True:
 
                 # Report app up
-                self.redis_conn.setex(skyline_app, 120, now)
+                # @modified 20210524 - Branch #1444: thunder
+                # Report app AND Redis as up
+                # self.redis_conn.setex(skyline_app, 120, now)
+                try:
+                    redis_is_up = self.redis_conn.setex(skyline_app, 120, now)
+                    if redis_is_up:
+                        try:
+                            self.redis_conn.setex('redis', 120, now)
+                        except Exception as e:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: could not update the Redis redis key - %s' % (
+                                e))
+                except Exception as e:
+                    logger.error('error :: failed to update Redis key for %s up - %s' % (skyline_app, e))
 
                 # @added 20200604 - Mirage - populate_redis
                 # This functionality enables Mirage to populate the Skyline
@@ -2541,6 +2572,19 @@ class Mirage(Thread):
                                     logger.info('feedback metric identified as last processed %s seconds ago via Redis key %s' % (
                                         str(feedback_metric_last_processed_seconds_ago), feedback_cache_key))
                                     remove_feedback_metric_check = True
+
+                                    # @added 20210505 - Bug #4048: Mirage - removing feedback metrics to be processed
+                                    feedback_processed_cache_key = 'mirage.feedback_metric.processed.%s' % (base_name)
+                                    feedback_processed_cache_key_exists = None
+                                    try:
+                                        feedback_processed_cache_key_exists = self.redis_conn_decoded.get(feedback_processed_cache_key)
+                                    except Exception as e:
+                                        logger.error('error :: failed to get %s key from Redis - %s' % (
+                                            str(feedback_processed_cache_key), e))
+                                    if not feedback_processed_cache_key_exists:
+                                        remove_feedback_metric_check = False
+                                        logger.info('feedback metric Redis key %s does not exist, not removing metric' % feedback_processed_cache_key)
+
                                 if len(metric_var_files) > 10 and not feedback_cache_key_exists:
                                     logger.info('Mirage is busy removing feedback metric check')
                                     remove_feedback_metric_check = True
@@ -2549,7 +2593,8 @@ class Mirage(Thread):
                                 # else:
                                 #        try:
                                 #            self.redis_conn.setex(feedback_cache_key, 600, feedback_metric_process_time)
-                                if not feedback_cache_key_exists:
+                                # if not feedback_cache_key_exists:
+                                if not feedback_cache_key_exists and not remove_feedback_metric_check:
                                     logger.info('feedback metric identified as not processed in last 600 seconds adding Redis key with 600 TTL and processing - %s' % feedback_cache_key)
                                     try:
                                         self.redis_conn.setex(feedback_cache_key, 600, feedback_metric_process_time)
@@ -2628,7 +2673,7 @@ class Mirage(Thread):
                                             # break
                                         except:
                                             logger.error(traceback.format_exc())
-                                            logger.error('error :: failed to remove waterfall alert item for % %s at %s from Redis set %s' % (
+                                            logger.error('error :: failed to remove waterfall alert item for %s %s at %s from Redis set %s' % (
                                                 log_str, base_name, str(metric_timestamp), redis_set))
                                 # @added 20201128 - Feature #3734: waterfall alerts
                                 # If the check just done is new than an existing analyzer
@@ -2640,7 +2685,7 @@ class Mirage(Thread):
                                             log_str, redis_set, str(waterfall_alert)))
                                     except:
                                         logger.error(traceback.format_exc())
-                                        logger.error('error :: failed to remove waterfall alert item for % %s at %s from Redis set %s' % (
+                                        logger.error('error :: failed to remove waterfall alert item for %s %s at %s from Redis set %s' % (
                                             log_str, base_name, str(metric_timestamp), redis_set))
 
                 # Discover metric to analyze
@@ -3852,7 +3897,7 @@ class Mirage(Thread):
                                 logger.info('alert Redis key %s exists not alerting for %s' % (str(cache_key), metric[1]))
 
                         except Exception as e:
-                            logger.error('error :: could not query Redis for cache_key')
+                            logger.error('error :: could not query Redis for cache_key - %s' % e)
 
             # @added 20200916 - Branch #3068: SNAB
             #                   Task #3744: POC matrixprofile
