@@ -83,21 +83,23 @@
 #                           Branch #2270: luminosity
 # Return matches for the last 24 hours as the default -->
 		    <li><a href="?fp_matches=true&metric=all&limit=0&from_timestamp={{ matched_from_datetime }}&order=DESC">Matches</a></li>
+		    <li><a href="?motif_matches=true&metric=all&limit=100&from_timestamp={{ matched_from_datetime }}&order_by=DESC">Motif matches</a></li>
 		    <li><a href="?fp_validate=true&metric=all">Validate</a></li>
 			  <li><a href="/ionosphere?fp_view=true">List by metrics</a></li>
-			  <li class="active"><a href="?fp_view=true&a_dated_list=true">List by date</a></li>
+			  <li class="active"><a href="?fp_view=true&a_dated_list=true"><span class="logo"><span class="sky">List by</span> <span class="re">date</span></span></a></li>
   {% elif list_by == 'metric' %}
 			  <li><a href="/ionosphere?fp_search=true&metric=all&limit=10&order=DESC">Search</a></li>
 		    <li><a href="?fp_matches=true&metric=all&limit=0&from_timestamp={{ matched_from_datetime }}&order=DESC">Matches</a></li>
+		    <li><a href="?motif_matches=true&metric=all&limit=100&from_timestamp={{ matched_from_datetime }}&order_by=DESC">Motif matches</a></li>
 		    <li><a href="?fp_validate=true&metric=all">Validate</a></li>
-			  <li class="active"><a href="/ionosphere?fp_view=true">List by metrics</a></li>
+			  <li class="active"><a href="/ionosphere?fp_view=true"><span class="logo"><span class="sky">List by</span> <span class="re">metrics</span></span></a></li>
 			  <li><a href="?fp_view=true&a_dated_list=true">List by date</a></li>
-		    <li><a href="?fp_validate=true&metric=all">Validate</a></li>
   {% else %}
-			  <li class="active"><a href="?fp_search=true&metric=all&limit=10&order=DESC">Search</a></li>
+			  <li class="active"><a href="?fp_search=true&metric=all&limit=10&order=DESC"><span class="logo"><span class="sky">Search</span></span></a></li>
 		    <li><a href="?fp_matches=true&metric=all&limit=0&from_timestamp={{ matched_from_datetime }}&order=DESC">Matches</a></li>
+		    <li><a href="?motif_matches=true&metric=all&limit=100&from_timestamp={{ matched_from_datetime }}&order_by=DESC">Motif matches</a></li>
 		    <li><a href="?fp_validate=true&metric=all">Validate</a></li>
-			  <li class="active"><a href="/ionosphere?fp_view=true">List by metrics</a></li>
+			  <li><a href="/ionosphere?fp_view=true">List by metrics</a></li>
 			  <li><a href="?fp_view=true&a_dated_list=true">List by date</a></li>
   {% endif %}
 
@@ -342,7 +344,13 @@ you need to try and be quicker next time.
       <br>
   {% endif %}
 
-  {% if matched_fp_id or matched_layer_id %}
+<!-- # @added 20210414 - Feature #4014: Ionosphere - inference -->
+  {% if matched_motif_id %}
+      <center><h4><span class="logo"><span class="sky">Evaluating MATCH ::</span> <span class="re">motif ::</span> matched motif id - {{ matched_motif_id }} (ionosphere_matched_id: {{ ionosphere_matched_id }})</span></h4></center>
+      <br>
+  {% endif %}
+
+  {% if matched_fp_id or matched_layer_id or matched_motif_id %}
     {% if match_validated_db_value == 0 %}
       <center><h4><span class="logo"><span class="sky">Match :: </span> <span class="re">not validated yet</span></span></h4></center>
     {% elif match_validated_db_value == 1 %}
@@ -627,6 +635,46 @@ This affects LEARNING.  If you want to extend Skyline's description of the "Acti
     <br>
   {% endif %}
 
+<!-- # @added 20210414 - Feature #4014: Ionosphere - inference -->
+  {% if matched_motif_id %}
+    <h4><span class="logo"><span class="sky">MATCHED evaluating ::</span> <span class="re">matched_motif_id ::</span></span> {{ matched_motif_id }}  (ionosphere_matched_id: {{ ionosphere_matched_id }})</h4>
+		<pre>{{ matched_id_resources }}</pre>
+    {% if matched_graph_image_file %}
+    <center><h3><span class="logo"><span class="sky">motif ::</span> <span class="re">period ::</span></span> {{ matched_details_object['motif_period_minutes'] }} minutes  |  {{ matched_details_object['motif_period_seconds'] }} seconds</h3></center>
+    <img src="ionosphere_images?image={{ matched_graph_image_file }}" alt="{{ for_metric }} timeseries graph" class="img-responsive center-block" /><br>
+    {% endif %}
+    {% if graphite_matched_images %}
+        <img src="ionosphere_images?image={{ graphite_matched_images[0] }}" alt="{{ for_metric }} timeseries graph" class="img-responsive center-block" /"><br>
+    {% endif %}
+    <br>
+
+<!-- # @added 20190601 - Feature #3084: Ionosphere - validated matches -->
+    {% if match_validated_db_value == 0 %}
+  	  <h4><span class="logo"><span class="sky">Match ::</span> <span class="re">not validated</span></span></h4>
+	   <div class="alert alert-warning">
+      This match has not been validated, please review it and validate or invalidate it
+      <a href="?fp_view=true&fp_id={{ features_profile_id }}&metric={{ for_metric }}&timestamp={{ timestamp }}&matched_motif_id={{ matched_motif_id }}&match_validation=1&ionosphere_matched_id={{ ionosphere_matched_id }}">
+      <button type="button">Validate match</button></a>
+      <a href="?fp_view=true&fp_id={{ features_profile_id }}&metric={{ for_metric }}&timestamp={{ timestamp }}&matched_motif_id={{ matched_motif_id }}&match_validation=2&ionosphere_matched_id={{ ionosphere_matched_id }}">
+      <button type="button">Invalidate match</button></a>
+	   </div>
+    {% elif match_validated_db_value == 1 %}
+  	  <h4><span class="logo"><span class="sky">Match :: </span> <span class="re">validated ::</span></span> <code>True</code></h4>
+	   <div class="alert alert-warning">
+      If this match was incorrectly validated, you can invalidate it
+      <a href="?fp_view=true&fp_id={{ features_profile_id }}&metric={{ for_metric }}&timestamp={{ timestamp }}&matched_motif_id={{ matched_motif_id }}&match_validation=2&ionosphere_matched_id={{ ionosphere_matched_id }}">
+      <button type="button">Invalidate match</button></a>
+	   </div>
+    {% else %}
+  	  <h4><span class="logo"><span class="sky">Match :: </span> <span class="re">INVALID ::</span></span> True</h4>
+	   <div class="alert alert-warning">
+      If this match was incorrectly invalidated, you can validate it
+      <a href="?fp_view=true&fp_id={{ features_profile_id }}&metric={{ for_metric }}&timestamp={{ timestamp }}&matched_motif_id={{ matched_motif_id }}&match_validation=1&ionosphere_matched_id={{ ionosphere_matched_id }}">
+      <button type="button">Validate match</button></a>
+	   </div>
+    {% endif %}
+  {% endif %}
+
   {% if validated_match_successful %}
 	  <div class="alert alert-success">
 	    <strong>Success!</strong> The match has now been validated<br>
@@ -708,7 +756,7 @@ Image file: {{ image }}<br><br>
   {% else %}
     {% for image in metric_images %}
 <!-- # @modified 20210323 - Feature #3642: Anomaly type classification -->
-      {% if ((not '.redis.plot' in image) and (not '.matplotlib' in image) and (not 'luminosity.classify_anomaly' in image)) %}
+      {% if ((not '.redis.plot' in image) and (not '.matplotlib' in image) and (not 'luminosity.classify_anomaly' in image) and (not 'matched.motif_id-' in image)) %}
         {% if metric_second_order_resolution_hours != False %}
           {% if parent_id == 0 %}
       <h4><span class="logo"><span class="sky">Graphite ::</span> <span class="re">anomaly ::</span></span> graph at <strong>{{ metric_second_order_resolution_hours }} hours</strong></h4>

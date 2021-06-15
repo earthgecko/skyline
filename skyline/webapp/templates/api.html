@@ -715,7 +715,7 @@ Or if no metrics if no metrics are Ionosphere enabled metrics <code>{"data":{"me
   		    <tbody>
   		      <tr>
   		        <td>Description:</td>
-  		        <td>Returns the time series for a metric from Redis as a PJSON object.</td>
+  		        <td>Returns the time series for a metric from Redis as a PJSON object (or optionally as a json object).</td>
   		      </tr>
   		      <tr>
   		        <td>Endpoint:</td>
@@ -727,18 +727,22 @@ Or if no metrics if no metrics are Ionosphere enabled metrics <code>{"data":{"me
   		      </tr>
   		      <tr>
   		        <td>Parameters:</td>
-  		        <td>metric=[FULL_NAMESPACE + metric_name | str | <font color=red>required</font>]</br>
+  		        <td>metric=[FULL_NAMESPACE + metric_name OR metric name (without FULL_NAMESPACE)| str | <font color=red>required</font>]</br>
+  		        format=[json | str | optional]</br>
               </td>
   		      </tr>
   		      <tr>
   		        <td>Request examples:</td>
 		          <td><code>/api?metric=metrics.stats.statsd.graphiteStats.calculationtime</code><br>
+              <code>/api?metric=skyline.horizon.skyline-1.worker.queue_size&format=json</code><br>
               </td>
   		      </tr>
   		      <tr>
   		        <td>Responses:</td>
   		        <td>200 with PJSON response<br>
 <code>{"results": [[1580912307.0, 1.0], [1580912367.0, 1.0], ..., ..., , [1580999271.0, 0.0]]}</code><br>
+200 with json response<br>
+<code>{"data":{"metric":"skyline.horizon.skyline-1.worker.queue_size","timeseries":[[1618482596.0,8.0],[1618482609.0,64.0],...[1618569636.0,0.42857142857142855]]},"status":{...,"response":200}}<code><br>
               </td>
   		      </tr>
 		    </tbody>
@@ -775,7 +779,7 @@ Or if no metrics if no metrics are Ionosphere enabled metrics <code>{"data":{"me
   		      <tr>
   		        <td>Request example:</td>
 		          <td><code>/api?last_analyzed_timestamp&metric=stats.statsd.graphiteStats.calculationtime</code></br>
-		          <td><code>/api?last_analyzed_timestamp&metric=stats.statsd.graphiteStats.calculationtime&cluster_data=true</code> [optional for clustered Skyline]
+		          <code>/api?last_analyzed_timestamp&metric=stats.statsd.graphiteStats.calculationtime&cluster_data=true</code> [optional for clustered Skyline]<br>
               </td>
   		      </tr>
   		      <tr>
@@ -953,7 +957,8 @@ Or if no metrics with training data are present <code>{"data":{"metrics":[]},"st
   		    <tbody>
   		      <tr>
   		        <td>Description:</td>
-  		        <td>Returns a list of all metrics (with their FULL_NAMESPACE metric name) as a json object.</td>
+  		        <td>Returns a list of all metrics (with their FULL_NAMESPACE metric name) as a json object.
+              Optionally you can filter on namepsace elements and remove the FULL_NAMESPACE</td>
   		      </tr>
   		      <tr>
   		        <td>Endpoint:</td>
@@ -966,7 +971,9 @@ Or if no metrics with training data are present <code>{"data":{"metrics":[]},"st
   		      <tr>
   		        <td>Request example:</td>
 		          <td><code>/api?unique_metrics</code><br>
-              <code>/api?unique_metrics&cluster_data=true</code> [optional for clustered Skyline]
+              <code>/api?unique_metrics&cluster_data=true</code> [optional for clustered Skyline]<br>
+              <code>/api?unique_metrics&filter_namespace=[namespace elements]</code> [optional]<br>
+              <code>/api?unique_metrics&remove_full_namespace_prefix=true</code> [optional]<br>
               </td>
   		      </tr>
   		      <tr>

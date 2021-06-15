@@ -298,6 +298,52 @@ already matched a training data set -->
 		  <h4><span class="logo"><span class="sky">Layers ::</span> <span class="re">matched :: </span></span>True - layers_id {{ layers_id_matched }} has already <b><font color="green">MATCHED</font></b> this training data as <code>not anomalous</code></h4>
     {% endif %}
 
+<!-- # @added 20210419 - Feature #4014: Ionosphere - inference -->
+    {% if matched_motif_dict and matched_motif_id %}
+		  <h4><span class="logo"><span class="sky">Motif ::</span> <span class="re">matched :: </span></span>True - motif_id {{ matched_motif_dict['matched_motif_id'] }} has already <b><font color="green">MATCHED</font></b> this training data as <code>not anomalous</code></h4>
+      {% if matched_motif_dict['image']|default(None) %}
+      <img src="ionosphere_images?image={{ matched_motif_dict['image'] }}" alt="{{ for_metric }} motif graph" class="img-responsive center-block" /><br>
+      Image file: {{ matched_motif_dict['image'] }}<br><br>
+
+        {% if match_validated_db_value %}
+          {% if match_validated_db_value == 0 %}
+  	  <h4><span class="logo"><span class="sky">Motif match ::</span> <span class="re">not validated</span></span></h4>
+	   <div class="alert alert-warning">
+      This match has not been validated, please review it and validate or invalidate it
+      <a href="?fp_view=true&fp_id={{ matched_motif_dict['fp_id'] }}&metric={{ for_metric }}&timestamp={{ matched_motif_dict['timestamp'] }}&matched_motif_id={{ matched_motif_id }}&match_validation=1&ionosphere_matched_id={{ matched_motif_dict['ionosphere_matched_id'] }}">
+      <button type="button">Validate match</button></a>
+      <a href="?fp_view=true&fp_id={{ matched_motif_dict['fp_id'] }}&metric={{ for_metric }}&timestamp={{ matched_motif_dict['timestamp'] }}&matched_motif_id={{ matched_motif_id }}&match_validation=2&ionosphere_matched_id={{ matched_motif_dict['ionosphere_matched_id'] }}">
+      <button type="button">Invalidate match</button></a>
+	   </div>
+          {% elif match_validated_db_value == 1 %}
+  	  <h4><span class="logo"><span class="sky">Motif match :: </span> <span class="re">validated ::</span></span> <code>True</code></h4>
+	   <div class="alert alert-warning">
+      If this match was incorrectly validated, you can invalidate it
+      <a href="?fp_view=true&fp_id={{ matched_motif_dict['fp_id'] }}&metric={{ for_metric }}&timestamp={{ matched_motif_dict['timestamp'] }}&matched_motif_id={{ matched_motif_id }}&match_validation=2&ionosphere_matched_id={{ matched_motif_dict['ionosphere_matched_id'] }}">
+      <button type="button">Invalidate match</button></a>
+	   </div>
+          {% else %}
+  	  <h4><span class="logo"><span class="sky">Motif match :: </span> <span class="re">INVALID ::</span></span> True</h4>
+	   <div class="alert alert-warning">
+      If this match was incorrectly invalidated, you can validate it
+      <a href="?fp_view=true&fp_id={{ matched_motif_dict['fp_id'] }}&metric={{ for_metric }}&timestamp={{ matched_motif_dict['timestamp'] }}&matched_motif_id={{ matched_motif_id }}&match_validation=1&ionosphere_matched_id={{ matched_motif_dict['ionosphere_matched_id'] }}">
+      <button type="button">Validate match</button></a>
+	   </div>
+          {% endif %}
+        {% else %}
+  	  <h4><span class="logo"><span class="sky">Motif match ::</span> <span class="re">not validated</span></span></h4>
+	   <div class="alert alert-warning">
+      This match has not been validated, please review it and validate or invalidate it
+      <a href="?fp_view=true&fp_id={{ matched_motif_dict['fp_id'] }}&metric={{ for_metric }}&timestamp={{ matched_motif_dict['timestamp'] }}&matched_motif_id={{ matched_motif_id }}&match_validation=1&ionosphere_matched_id={{ matched_motif_dict['ionosphere_matched_id'] }}">
+      <button type="button">Validate match</button></a>
+      <a href="?fp_view=true&fp_id={{ matched_motif_dict['fp_id'] }}&metric={{ for_metric }}&timestamp={{ matched_motif_dict['timestamp'] }}&matched_motif_id={{ matched_motif_id }}&match_validation=2&ionosphere_matched_id={{ matched_motif_dict['ionosphere_matched_id'] }}">
+      <button type="button">Invalidate match</button></a>
+	   </div>
+        {% endif %}
+
+      {% endif %}
+    {% endif %}
+
     {% if metric_training_data_saved %}
       {% if saved_metric_td == False %}
 	  <div class="alert alert-success">
@@ -305,6 +351,121 @@ already matched a training data set -->
 	  </div>
       {% endif %}
     {% endif %}
+
+  		<div class="col-md-12">
+  		  <h4><span class="logo"><span class="sky">Similarity ::</span> <span class="re">search</span></span></h4>
+You can run this training data through the similarilty search to determine if similar patterns/shapelets (motifs) have been trained on.<br>
+Due to how long this can take run through all the training data the results are only a <strong>sample</strong> of the possible similar and
+not similar enough motifs.<br>
+The run time is capped at <strong>25 seconds</strong> and what has been discovered at that point will be return.<br>
+The creation of not_similar_enough plots is limited to 10, to give you an idea of what is not deemed to be similar enough to match.<br>
+  {% if not motif_analysis %}
+        <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#motif_analysis">Show similarity search options</button>
+        <div id="motif_analysis" class="collapse">
+  {% endif %}
+        <form action="ionosphere">
+        <input type="hidden" name="metric" value="{{ for_metric }}" />
+        <input type="hidden" name="timestamp" value="{{ timestamp }}" />
+        <input type="hidden" name="requested_timestamp" value="{{ timestamp }}" />
+  {% if saved_metric_td %}
+        <input type="hidden" name="saved_training_data" value="true" />
+  {% endif %}
+		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Match criteria</th>
+  		        <th>filter</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+  		        <td>Similarity search</td>
+  		        <td><select name="motif_analysis">
+                <option value="true">true</option>
+              </select></td>
+  		      </tr>
+  		      <tr>
+  		        <td>similarity</td>
+  		        <td><select name="similarity">
+                <option value="all">all</option>
+                <option value="matched">matched as similar</option>
+                <option value="not_matched">not_matched NOT similar enough</option>
+              </select></td>
+  		      </tr>
+  		      <tr>
+<!-- # @added 20210417 - Feature #4014: Ionosphere - inference
+# Allow the user to define the batch size, top_matches and max_distance per similarity search -->
+  		      <tr>
+  		        <td>batch_size</td>
+  		        <td><input type="number" name="batch_size" min="2" max="12000" value="5"> the
+                size of the motif/shapelet to be found, this is the number of data points the motif will be searched for.<br>
+                valid values 2 to 12000. The smaller the batch size the more likely a match will be found.</td>
+  		      </tr>
+  		      <tr>
+  		        <td>top_matches</td>
+  		        <td><input type="number" name="top_matches" min="1" max="1000" value="50"> the
+                top k similar motif/shapelet to be found.</td>
+  		      </tr>
+  		      <tr>
+  		        <td>max_distance</td>
+  		        <td><input type="number" name="max_distance" min="0" max="1000" value="1.0" step=".01"> the
+                max_distance is a float, this is how far the distance can be to be considered similar. 0.0 is exactly the same, anything above 1.0 is starting to become increasingly dissimilar (default is 1.0)</td>
+  		      </tr>
+  		      <tr>
+  		        <td>range_padding</td>
+  		        <td><input type="number" name="range_padding" min="0" max="100" value="10"> the
+                range_padding is how much padding to add to the max_y and min_y to be considered within an acceptable range to match, default 10.</td>
+  		      </tr>
+  		      <tr>
+  		        <td>max_area_percent_diff</td>
+  		        <td><input type="number" name="max_area_percent_diff" min="0" max="300" value="10.0" step=".01"> the
+                max_area_percent_diff is a float, this is the percentage that the area covered by the potentially anomalous shaplet differs
+                from the similar features profile motif (default is 10.0)</td>
+  		      </tr>
+  		      <tr>
+  		        <td>purge</td>
+  		        <td><select name="purge">
+                <option value="false">false</option>
+                <option value="true">true</option>
+              </select> if you train a metric and want to rerun analysis to find the exact match, set this to true<br>
+              <strong>NOTE</strong> purge will remove <strong>all</strong> previous motif data not just this batch_size and max_distance<br>
+              If you do not want to purge other motif data, just increment the max_distance by .01 and different data will be saved.</td>
+  		      </tr>
+  		    </tbody>
+  		  </table>
+        <br>
+        <input type="submit" value="Run similarity search">
+      </form>
+      <br>
+  {% if not motif_analysis %}
+<!-- collapse button div -->
+      </div>
+  {% endif %}
+  {% if motif_analysis %}
+	  <h4><span class="logo"><span class="sky">Motif ::</span> <span class="re">analysis ::</span></span> motif sample count - {{ motif_analysis[for_metric]['motifs']|length }} </h4>
+    exact_motifs: {{ motif_analysis[for_metric]['exact_motifs'] }}<br>
+    similar_motifs: {{ motif_analysis[for_metric]['similar_motifs'] }}<br>
+    distance_motifs: {{ motif_analysis[for_metric]['distance_motifs'] }}<br>
+    not_similar_motifs: {{ motif_analysis[for_metric]['not_similar_motifs'] }}<br>
+    not_similar_enough_sample: {{ motif_analysis[for_metric]['not_similar_enough_sample'] }}<br>
+    fps_checked: {{ motif_analysis[for_metric]['fps_checked'] }}<br>
+  {% for motif_id in motif_analysis_motif_id_by_distance %}
+      <code>fp_id: {{ motif_analysis[for_metric]['motifs'][motif_id]['fp_id'] }} |
+      index: {{ motif_analysis[for_metric]['motifs'][motif_id]['index'] }} |
+      size: {{ motif_analysis[for_metric]['motifs'][motif_id]['size'] }} |
+      match_type: {{ motif_analysis[for_metric]['motifs'][motif_id]['type'] }} |
+      distance: {{ motif_analysis[for_metric]['motifs'][motif_id]['distance'] }} |
+      max_distance: {{ motif_analysis[for_metric]['motifs'][motif_id]['max_distance']|default('not known') }}</code><br>
+      <code>motif_area: {{ motif_analysis[for_metric]['motifs'][motif_id]['motif_area'] }} |
+      fp_motif_area: {{ motif_analysis[for_metric]['motifs'][motif_id]['fp_motif_area'] }} |
+      area_percent_diff: {{ motif_analysis[for_metric]['motifs'][motif_id]['area_percent_diff'] }} |
+      max_area_percent_diff: {{ motif_analysis[for_metric]['motifs'][motif_id]['max_area_percent_diff'] }}</code><br>
+      <img src="ionosphere_images?image={{ motif_analysis[for_metric]['motifs'][motif_id]['image'] }}" alt="{{ for_metric }} motif graph" class="img-responsive center-block" /><br>
+Image file: {{ motif_analysis[for_metric]['motifs'][motif_id]['image'] }}<br><br>
+  {% endfor %}
+  {% endif %}
+    </div>
+  <br>
 
 <!-- # @modified 20170617 - Feature #2054: ionosphere.save.training_data
 # Do not render the create profiles options on a saved training data page -->
@@ -849,7 +1010,7 @@ Image file: {{ image }}<br><br>
 # operator of the Redis graph data points for comparison with any
 # Existing :: layers -->
   {% if last_i_ts_json %}
-	  <h4><span class="logo"><span class="sky">Last ::</span> <span class="re">30 datapoints ::</span></span></span> at FULL_DURATION of ({{ redis_full_duration }}) for reviewing the Redis data graph and comparing to any existing layers</h4>
+	  <h4><span class="logo"><span class="sky">Last ::</span> <span class="re">30 datapoints ::</span></span> at FULL_DURATION of ({{ redis_full_duration }}) for reviewing the Redis data graph and comparing to any existing layers</h4>
     {{ last_i_ts_json }}
   {% endif %}
 

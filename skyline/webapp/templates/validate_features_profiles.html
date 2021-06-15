@@ -40,7 +40,8 @@
 #                           Branch #2270: luminosity
 # Return matches for the last 24 hours as the default -->
 		  <li><a href="?fp_matches=true&metric=all&limit=0&from_timestamp={{ matched_from_datetime }}&order=DESC">Matches</a></li>
-		  <li class="active"><a href="?fp_validate=true&metric=all">Validate</a></li>
+		  <li><a href="?motif_matches=true&metric=all&limit=100&from_timestamp={{ matched_from_datetime }}&order_by=DESC">Motif matches</a></li>
+		  <li class="active"><a href="?fp_validate=true&metric=all"><span class="logo"><span class="sky">Validate</span></span></a></li>
 		  <li><a href="?performance=true">Performance</a></li>
 		  <li><a href="/ionosphere?fp_view=true">List by metrics</a></li>
 		  <li><a href="?fp_view=true&a_dated_list=true">List by date</a></li>
@@ -49,7 +50,7 @@
 
   		<div class="col-md-12">
 <!--  		<div class="container"> -->
-  		  <h4><span class="logo"><span class="sky">Search ::</span> <span class="re">features profiles to validate</span></span></span></h4>
+  		  <h4><span class="logo"><span class="sky">Search ::</span> <span class="re">features profiles to validate</span></span></h4>
   {% if fp_search_results %}
         <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#search_options">Show search options</button>
         <div id="search_options" class="collapse">

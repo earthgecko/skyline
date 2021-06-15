@@ -26,6 +26,9 @@
 <!-- # @added 20210107 - Feature #3934: ionosphere_performance -->
 {% elif performance %}
 		<li class="active"><span class="logo"><span class="sky">Features profiles</span> <span class="re">performance</span></span></li>
+<!-- # @added 20210413 - Feature #4014: Ionosphere - inference -->
+{% elif matched_motifs %}
+		<li class="active"><span class="logo"><span class="sky">Features</span> <span class="re">profiles</span></span></li>
 {% else %}
   {% if metric_files %}
 		<li><a href="/ionosphere?metric_td={{ for_metric }}">training data</a></li>
@@ -51,6 +54,9 @@
 <!-- # @added 20210107 - Feature #3934: ionosphere_performance -->
 {% elif performance %}
     {% include "ionosphere_performance.html" %}
+<!-- # @added 20210413 - Feature #4014: Ionosphere - inference -->
+{% elif matched_motifs %}
+    {% include "motif_matches.html" %}
 {% else %}
     {% include "training_data.html" %}
 {% endif %}

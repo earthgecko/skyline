@@ -16,7 +16,7 @@ logfile = '%s/%s.log' % (settings.LOG_PATH, skyline_app)
 try:
     ENABLE_WEBAPP_DEBUG = settings.ENABLE_WEBAPP_DEBUG
 except EnvironmentError as err:
-    logger.error('error :: cannot determine ENABLE_WEBAPP_DEBUG from settings')
+    logger.error('error :: cannot determine ENABLE_WEBAPP_DEBUG from settings - %s' % err)
     ENABLE_WEBAPP_DEBUG = False
 
 try:

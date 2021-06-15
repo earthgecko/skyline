@@ -106,12 +106,17 @@
 		  <table class="table table-hover">
 				<thead>
 					<tr>
-<!-- [human_date, match_id, matched_by, fp_id, layer_id, metric, uri_to_matched_page, validated, timestamp] -->
+<!-- # @modified 20210413 - Feature #4014: Ionosphere - inference
+#                           Branch #3590: inference
+# Added related_motifs_matched_id
+[human_date, match_id, matched_by, fp_id, layer_id, metric, uri_to_matched_page, validated, timestamp, matched_motif_id]
+-->
             <th>match id</th>
             <th>metric</th>
             <th>matched by</th>
             <th>fp_id</th>
             <th>layer_id</th>
+            <th>motif_id</th>
             <th>date</th>
 					</tr>
 				</thead>
@@ -144,6 +149,25 @@
         {% else %}
             <td><span class="logo"><span class="sky">{{ item[2] }}</span></span></td>
         {% endif %}
+
+<!-- # @modified 20210413 - Feature #4014: Ionosphere - inference -->
+      {% elif 'motif' in item[2] %}
+        {% if item[7] == 2 %}
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_motif_id={{ item[9] }}&match_validation=2'">
+              <a href="?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_motif_id={{ item[9] }}&match_validation=2">{{ item[1] }}</a>
+            </td>
+        {% elif item[7] == 1 %}
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_motif_id={{ item[9] }}&match_validation=1'">
+              <a href="?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_motif_id={{ item[9] }}&match_validation=1">{{ item[1] }}</a>
+            </td>
+        {% else %}
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_motif_id={{ item[9] }}'">
+              <a href="?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_motif_id={{ item[9] }}&matched_motif_id={{ item[9] }}">{{ item[1] }}</a>
+            </td>
+        {% endif %}
+            <td>{{ item[5] }}</td>
+            <td><span class="logo"><span class="re">{{ item[2] }}</span></span></td>
+
       {% else %}
         {% if item[7] == 2 %}
             <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}'">
@@ -171,6 +195,14 @@
       {% else %}
             <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}'">
               <a href="?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}">{{ item[4] }}</a>
+            </td>
+      {% endif %}
+<!-- # @modified 20210413 - Feature #4014: Ionosphere - inference -->
+      {% if item[9] == 0 %}
+            <td>None</td>
+      {% else %}
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_motif_id={{ item[9] }}'">
+              <a href="?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_motif_id={{ item[9] }}">{{ item[9] }}</a>
             </td>
       {% endif %}
 

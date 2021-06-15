@@ -1,0 +1,107 @@
+{% block thunder_test_block %}
+<!--
+# @added 20201212 - Feature #3880: webapp - utilities - match_metric
+ -->
+<!-- BEGIN /utilities thunder_test -->
+{% if print_debug == 'True' %}
+<code> DEBUG </code> :: /utilities thunder_test</br>
+{% endif %}
+
+{% if display_message %}
+<code> ERROR </code></br>
+<code> message </code>: {{ display_message }}<br>
+{% endif %}
+
+<div class="navbar-header" role="navigation">
+  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+    <span class="sr-only">Toggle navigation</span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+  </button>
+		<ul class="nav nav-tabs" role="view_tablist" id="view">
+		  <li><a href="/utilities"><span class="logo"><span class="sky">Match</span> <span class="re">metric</span> <span class="sky">name</span></span></a></li>
+      <li class="active"><a href="/utilities?thunder_testing=true"><span class="logo"><span class="sky">Thunder</span> <span class="re">tests</span></a></li>
+		</ul>
+		<div class="tab-content">
+	  	<div class="tab-pane active" id="view">
+	<br>
+  <div class="navbar-header" role="navigation">
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+  </div>
+
+	<div class="col-md-12">
+
+	  <h4><span class="logo"><span class="sky">Thunder ::</span> <span class="re">test</span></span></h4>
+
+  {% if thunder_no_data_test_key_added %}
+	  <div class="alert alert-success">
+	    <strong>Thunder no_data test key added</strong> :: {{ thunder_no_data_test_key_added }}<br>
+	  </div>
+  {% endif %}
+  {% if thunder_stale_metrics_test_key_added %}
+	  <div class="alert alert-success">
+	    <strong>Thunder stale_metrics test key added</strong> :: {{ thunder_stale_metrics_test_key_added }}<br>
+	  </div>
+  {% endif %}
+      Test Thunder alerting on stale_metrics from a top level namespace.<br>
+      This simulates a failure where Skyline stops receiving metric data from some metrics.<br>
+	    Select a top level namespace to test, the stale_period (number of seconds that data has not been received set this low like 0), an expiry time to test and the stale_count being the number of metrics you want to simulate as stale.<br>
+      This test runs via the analyzer/metrics_manager run which runs every 5 minutes, so if you use the default stale_period 0 and expiry 299<br>
+      a stale_metrics alert for the namespace should fire on the next analyzer/metrics_manager run and a recovered notice should trigger on the run thereafter<br>
+      <br>
+        <form action="thunder_test" method=post enctype=multipart/form-data>
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Parameter</th>
+  		        <th>Value</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+            <tr>
+  		        <td>test</td>
+              <td><select name="thunder_test_type">
+              <option value="no_data">no_data</option>
+              <option value="stale_metrics">stale_metrics</option>
+              </select> The type of Thunder test to run</td>
+  		      </tr>
+
+  		      <tr>
+  		        <td>namespace</td>
+              <td><select name="namespace">
+                {% for item in parent_namespaces %}
+                <option value="{{ item }}">{{ item }}</option>
+                {% endfor %}
+              </select></td>
+  		      </tr>
+            <tr>
+  		        <td>stale_count</td>
+  		        <td><input type="number" name="stale_count" value="10"> number of metrics to simulate as stale (only relevant for the stale_metrics Thunder test)</td>
+  		      </tr>
+  		      <tr>
+  		        <td>stale_period</td>
+  		        <td><input type="number" name="stale_period" value="0"> number of seconds to classify metrics as stale and not receiving data</td>
+  		      </tr>
+  		      <tr>
+  		        <td>expiry</td>
+  		        <td><input type="number" name="expiry" value="299"> number of seconds to expire the test alert</td>
+  		      </tr>
+  		    </tbody>
+  		  </table>
+        <br>
+        <input type="submit" value="Test thunder">
+      </form>
+      </div>
+  </div>
+
+	</div>
+	</div>
+	</div>
+
+<!-- END /match_metric block -->
+{% endblock %}
