@@ -4,16 +4,17 @@ from time import time
 import os.path
 import sys
 
-#from skyline.analyzer import algorithms
-#from skyline import settings
+# from skyline.analyzer import algorithms
+# from skyline import settings
 
 current_dir = os.path.dirname(os.path.realpath(__file__))
 parent_dir = os.path.join(os.path.dirname(os.path.realpath(current_dir)))
 skyline_dir = parent_dir + '/skyline'
 sys.path.append(skyline_dir)
 
-from analyzer import algorithms
-import settings
+if True:
+    from analyzer import algorithms
+    import settings
 
 
 class TestAlgorithms(unittest.TestCase):
@@ -90,7 +91,10 @@ class TestAlgorithms(unittest.TestCase):
         check_for_airgaps_only = False
         # @modified 20200604 - Feature #3566: custom_algorithms
         # Added algorithms_run
-        result, ensemble, datapoint, negatives_found, algorithms_run = algorithms.run_selected_algorithm(timeseries, 'test.metric', airgapped_metrics, airgapped_metrics_filled, run_negatives_present, check_for_airgaps_only)
+        # @modified 20210519 - Feature #4076: CUSTOM_STALE_PERIOD
+        # Added custom_stale_metrics_dict
+        custom_stale_metrics_dict = {}
+        result, ensemble, datapoint, negatives_found, algorithms_run = algorithms.run_selected_algorithm(timeseries, 'test.metric', airgapped_metrics, airgapped_metrics_filled, run_negatives_present, check_for_airgaps_only, custom_stale_metrics_dict)
 
         self.assertTrue(result)
         # @modified 20200808 - Bug #3666: Failing algorithm_tests on Python 3.8.3
