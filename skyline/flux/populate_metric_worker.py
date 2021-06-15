@@ -255,7 +255,10 @@ class PopulateMetricWorker(Process):
                     logger.info('populate_metric_worker :: metric from metricData set to %s' % metric)
                     logger.info('populate_metric_worker :: namespace_prefix from metricData set to %s' % namespace_prefix)
                     logger.info('populate_metric_worker :: key from metricData set to %s' % key)
-                    logger.info('populate_metric_worker :: token from metricData set to %s' % token)
+                    # @modified 20210421 - Task #4030: refactoring
+                    # semgrep - python-logger-credential-disclosure
+                    # logger.info('populate_metric_worker :: token from metricData set to %s' % token)
+                    logger.info('populate_metric_worker :: token from metricData was set (no discloure)')
                     logger.info('populate_metric_worker :: user from metricData set to %s' % user)
                     logger.info('populate_metric_worker :: password from metricData set to %s' % password)
                     logger.info('populate_metric_worker :: fetch_resolution_urls from metricData set to %s' % str(fetch_resolution_urls))
@@ -663,14 +666,19 @@ class PopulateMetricWorker(Process):
             # And set flux.last key is the returned value from the remote is
             # null so that time series that are mostly null do not keep on
             # getting added to flux populate_metric by Vista
-            if not timeseries:
+            # @modified 20210504 - Bug #3312: flux - populate_metric_worker - handle None in datapoints
+            # Added raw_timeseries to execute only if there is a raw_timeseries
+            if not timeseries and raw_timeseries:
                 set_flux_key = False
                 try:
                     sorted_raw_timeseries = sorted(raw_timeseries, key=lambda x: x[0])
-                    last_ts = sorted_raw_timeseries[-1][0]
-                    if int(last_ts) > (end_fecthing - 120):
-                        if sorted_raw_timeseries[-1][1] is None:
-                            set_flux_key = True
+                    # @modified 20210504 - Bug #3312: flux - populate_metric_worker - handle None in datapoints
+                    # Only determine the last_ts if there is a sorted_raw_timeseries
+                    if sorted_raw_timeseries:
+                        last_ts = sorted_raw_timeseries[-1][0]
+                        if int(last_ts) > (end_fecthing - 120):
+                            if sorted_raw_timeseries[-1][1] is None:
+                                set_flux_key = True
                 except:
                     logger.error(traceback.format_exc())
                     logger.error('error :: populate_metric_worker :: failed to determine if last value was null')
@@ -758,7 +766,11 @@ class PopulateMetricWorker(Process):
 
             # Resample
             resample_at = '1Min'
-            if resample_at:
+            # @modified 20210421 - Task #4030: refactoring
+            # semgrep - rule:python.lang.correctness.useless-comparison.no-strings-as-booleans
+            # if resample_at:
+            resample_data = True
+            if resample_data:
                 try:
                     df = pd.DataFrame(timeseries)
                     df.columns = ['timestamp', 'value']

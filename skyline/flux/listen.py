@@ -110,6 +110,8 @@ def validate_key(caller, apikey):
     # Added metric_namespace_prefix which is declared via the FLUX_API_KEYS
     metric_namespace_prefix = None
 
+    keyValid = False
+
     try:
         isAlNum = False
         isAlNum = apikey.isalnum()
@@ -119,14 +121,21 @@ def validate_key(caller, apikey):
                 # Check to determine if it is a valid API key
                 keyValid = True
             else:
-                logger.error('error :: %s :: invalid api key length of %s - %s' % (
-                    caller, str(keyLength), str(apikey)))
+                # @modified 20210421 - Task #4030: refactoring
+                # semgrep - python-logger-credential-disclosure
+                # logger.error('error :: %s :: invalid api key length of %s - %s' % (
+                #     caller, str(keyLength), str(apikey)))
+                logger.error('error :: %s :: invalid api key length' % (
+                    caller))
         # @added 20200818 - Feature #3694: flux - POST multiple metrics
         # Added validation of FLUX_API_KEYS
         if valid_keys:
             if apikey not in valid_keys:
-                logger.error('error :: %s :: invalid api key %s - not known' % (
-                    caller, str(keyLength), str(apikey)))
+                # @modified 20210421 - Task #4030: refactoring
+                # semgrep - python-logger-credential-disclosure
+                logger.error('error :: %s :: invalid api key - not known' % (
+                    # caller, str(keyLength), str(apikey)))
+                    caller))
                 keyValid = False
             if keyValid:
                 try:
@@ -136,16 +145,24 @@ def validate_key(caller, apikey):
                     pass
 
         if not keyValid:
-            logger.error('error :: %s :: invalid api key - %s' % (
-                caller, str(apikey)))
+            # @modified 20210421 - Task #4030: refactoring
+            # semgrep - python-logger-credential-disclosure
+            # logger.error('error :: %s :: invalid api key - %s' % (
+            #    caller, str(apikey)))
+            logger.error('error :: %s :: invalid api key' % (
+                caller))
             # resp.status = falcon.HTTP_400
             # @modified 20200818 - Feature #3694: flux - POST multiple metrics
             # Added metric_namespace_prefix
             return False, metric_namespace_prefix
     except:
         logger.error(traceback.format_exc())
-        logger.error('error :: %s :: failed to validate api key - %s' % (
-            caller, str(apikey)))
+        # @modified 20210421 - Task #4030: refactoring
+        # semgrep - python-logger-credential-disclosure
+        # logger.error('error :: %s :: failed to validate api key - %s' % (
+        #     caller, str(apikey)))
+        logger.error('error :: %s :: failed to validate api key' % (
+            caller))
         # resp.status = falcon.HTTP_400
         # @modified 20200818 - Feature #3694: flux - POST multiple metrics
         # Added metric_namespace_prefix
@@ -173,9 +190,9 @@ def validate_timestamp(caller, timestamp):
         # @added 20200107 - Task #3376: Enable vista and flux to deal with lower frequency data
         try:
             flux_max_age = settings.FLUX_MAX_AGE
-        except:
-            logger.error('error :: %s :: validate_timestamp FLUX_MAX_AGE is not set in settings.py, set to the default 3600' % (
-                caller))
+        except Exception as e:
+            logger.error('error :: %s :: validate_timestamp FLUX_MAX_AGE is not set in settings.py, set to the default 3600 - %s' % (
+                caller, e))
             flux_max_age = 3600
 
         # @modified 20200107 - Task #3376: Enable vista and flux to deal with lower frequency data
@@ -347,12 +364,32 @@ class MetricData(object):
                 if str(request_param_key) not in validGetArguments:
                     logger.error('error :: listen :: invalid key in request arguments - %s - %s' % (
                         str(request_param_key), str(req.query_string)))
+
+                    # @added 20210511 - Feature #4060: skyline.flux.worker.discarded metrics
+                    unique_value = '%s' % str(time())
+                    try:
+                        redis_conn.sadd('flux.listen.discarded.invalid_parameters', str(unique_value))
+                        if FLUX_VERBOSE_LOGGING:
+                            logger.info('listen :: added %s to Redis set flux.listen.discarded.invalid_parameters' % str(unique_value))
+                    except Exception as e:
+                        logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_parameters - %s' % e)
+
                     resp.status = falcon.HTTP_400
                     return
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: listen :: validating request arguments - %s' % (
                     str(req.query_string)))
+
+                # @added 20210511 - Feature #4060: skyline.flux.worker.discarded metrics
+                unique_value = '%s' % str(time())
+                try:
+                    redis_conn.sadd('flux.listen.discarded.invalid_parameters', str(unique_value))
+                    if FLUX_VERBOSE_LOGGING:
+                        logger.info('listen :: added %s to Redis set flux.listen.discarded.invalid_parameters' % str(unique_value))
+                except Exception as e:
+                    logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_parameters - %s' % e)
+
                 resp.status = falcon.HTTP_400
                 return
 
@@ -385,12 +422,30 @@ class MetricData(object):
                     if not keyValid:
                         logger.error('error :: listen :: invalid key in GET request arguments - %s - %s' % (
                             str(request_param_value), str(req.query_string)))
+
+                        # @added 20210511 - Feature #4060: skyline.flux.worker.discarded metrics
+                        unique_value = '%s' % str(time())
+                        try:
+                            redis_conn.sadd('flux.listen.discarded.invalid_key', str(unique_value))
+                            if FLUX_VERBOSE_LOGGING:
+                                logger.info('listen :: added %s to Redis set flux.listen.discarded.invalid_key' % str(unique_value))
+                        except Exception as e:
+                            logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_key - %s' % e)
+
                         resp.status = falcon.HTTP_400
                         return
             except:
                 logger.error(traceback.format_exc())
-                logger.error('error :: listen :: could not validate the key GET request argument - %s' % (
-                    str(req.query_string)))
+
+                # @added 20210511 - Feature #4060: skyline.flux.worker.discarded metrics
+                unique_value = '%s' % str(time())
+                try:
+                    redis_conn.sadd('flux.listen.discarded.invalid_key', str(unique_value))
+                    if FLUX_VERBOSE_LOGGING:
+                        logger.info('listen :: added %s to Redis set flux.listen.discarded.invalid_key' % str(unique_value))
+                except Exception as e:
+                    logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_key - %s' % e)
+
                 resp.status = falcon.HTTP_400
                 return
 
@@ -405,11 +460,43 @@ class MetricData(object):
                     if valid_timestamp:
                         timestamp = int(request_param_value)
                     else:
+                        # @added 20210511 - Feature #4060: skyline.flux.worker.discarded metrics
+                        unique_value = None
+                        for request_param_key, request_param_value in req.params.items():
+                            if str(request_param_key) == 'metric':
+                                metric = str(request_param_value)
+                        if not metric:
+                            metric = str(time())
+                        try:
+                            unique_value = '%s.%s' % (str(metric), str(request_param_value))
+                            redis_conn.sadd('flux.listen.discarded.invalid_timestamp', str(unique_value))
+                            if FLUX_VERBOSE_LOGGING:
+                                logger.info('listen :: added %s to Redis set flux.listen.discarded.invalid_timestamp' % str(unique_value))
+                        except Exception as e:
+                            logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_timestamp - %s' % e)
+
                         resp.status = falcon.HTTP_400
                         return
             except:
                 logger.error('error :: listen :: invalid timestamp value from the GET request argument - %s - %s' % (
                     str(request_param_value), str(req.query_string)))
+
+                # @added 20210511 - Feature #4060: skyline.flux.worker.discarded metrics
+                unique_value = None
+                if not metric:
+                    for request_param_key, request_param_value in req.params.items():
+                        if str(request_param_key) == 'metric':
+                            metric = str(request_param_value)
+                if not metric:
+                    metric = str(time())
+                try:
+                    unique_value = '%s.%s' % (str(metric), str(request_param_value))
+                    redis_conn.sadd('flux.listen.discarded.invalid_timestamp', str(unique_value))
+                    if FLUX_VERBOSE_LOGGING:
+                        logger.info('listen :: added %s to Redis set flux.listen.discarded.invalid_timestamp' % str(unique_value))
+                except Exception as e:
+                    logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_timestamp - %s' % e)
+
                 resp.status = falcon.HTTP_400
                 return
 
@@ -424,6 +511,17 @@ class MetricData(object):
                     valid_metric_name = False
 
                 if not valid_metric_name:
+
+                    # @added 20210511 - Feature #4060: skyline.flux.worker.discarded metrics
+                    if not metric:
+                        metric = str(time())
+                    try:
+                        redis_conn.sadd('flux.listen.discarded.metric_name', str(metric))
+                        if FLUX_VERBOSE_LOGGING:
+                            logger.info('listen :: added %s to Redis set flux.listen.discarded.metric_name' % str(metric))
+                    except Exception as e:
+                        logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.metric_name - %s' % e)
+
                     resp.status = falcon.HTTP_400
                     return
 
@@ -436,6 +534,18 @@ class MetricData(object):
                 except:
                     logger.error('error :: listen :: invalid value from GET request argument - %s - %s' % (
                         str(request_param_value), str(req.query_string)))
+
+                    # @added 20210511 - Feature #4060: skyline.flux.worker.discarded metrics
+                    if not metric:
+                        metric = str(time())
+                    unique_value = '%s.%s' % (str(metric), str(request_param_value))
+                    try:
+                        redis_conn.sadd('flux.listen.discarded.invalid_value', str(unique_value))
+                        if FLUX_VERBOSE_LOGGING:
+                            logger.info('listen :: added %s to Redis set flux.listen.discarded.invalid_value' % str(unique_value))
+                    except Exception as e:
+                        logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_value - %s' % e)
+
                     resp.status = falcon.HTTP_400
                     return
 
@@ -445,16 +555,48 @@ class MetricData(object):
         if not key:
             logger.error('error :: listen :: no key in the GET request arguments - %s - returning 400' % (
                 str(req.query_string)))
+
+            # @added 20210511 - Feature #4060: skyline.flux.worker.discarded metrics
+            unique_value = '%s' % str(time())
+            try:
+                redis_conn.sadd('flux.listen.discarded.invalid_key', str(unique_value))
+                if FLUX_VERBOSE_LOGGING:
+                    logger.info('listen :: added %s to Redis set flux.listen.discarded.invalid_key' % str(unique_value))
+            except Exception as e:
+                logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_key - %s' % e)
+
             resp.status = falcon.HTTP_400
             return
         if not metric:
             logger.error('error :: listen :: no metric in the GET request arguments - %s - returning 400' % (
                 str(req.query_string)))
+
+            # @added 20210511 - Feature #4060: skyline.flux.worker.discarded metrics
+            metric = str(time())
+            try:
+                redis_conn.sadd('flux.listen.discarded.metric_name', str(metric))
+                if FLUX_VERBOSE_LOGGING:
+                    logger.info('listen :: added %s to Redis set flux.listen.discarded.metric_name' % str(metric))
+            except Exception as e:
+                logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.metric_name - %s' % e)
+
             resp.status = falcon.HTTP_400
             return
         if not valid_value:
             logger.error('error :: listen :: no valid value in the GET request arguments - %s - returning 400' % (
                 str(req.query_string)))
+
+            # @added 20210511 - Feature #4060: skyline.flux.worker.discarded metrics
+            if not metric:
+                metric = str(time())
+            unique_value = '%s.%s' % (str(metric), str(time()))
+            try:
+                redis_conn.sadd('flux.listen.discarded.invalid_value', str(unique_value))
+                if FLUX_VERBOSE_LOGGING:
+                    logger.info('listen :: added %s to Redis set flux.listen.discarded.invalid_value' % str(unique_value))
+            except Exception as e:
+                logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_value - %s' % e)
+
             resp.status = falcon.HTTP_400
             return
 
@@ -474,6 +616,16 @@ class MetricData(object):
 
         if not timestamp:
             timestamp = int(time())
+
+        # @added 20210430 - Bug #4046: flux - metric_namespace_prefix on FLUX_SELF_API_KEY conflicting with FLUX_API_KEYS
+        # If metrics are being submitted to flux internally (vista) using
+        # the FLUX_SELF_API_KEY for a namespace if that namespace is added
+        # to FLUX_API_KEYS, flux will begin to also append the namespace
+        # prefix from the FLUX_API_KEYS for metrics submitted with the
+        # FLUX_SELF_API_KEY
+        if metric_namespace_prefix:
+            if metric.startswith(metric_namespace_prefix):
+                metric_namespace_prefix = None
 
         # @modified 20200818 - Feature #3694: flux - POST multiple metrics
         # Added metric_namespace_prefix which is declared via the FLUX_API_KEYS
@@ -531,6 +683,11 @@ class MetricData(object):
             logger.error('error :: listen :: failed to add GET request data to flux.httpMetricDataQueue - %s' % str(metric_data))
             resp.status = falcon.HTTP_500
             return
+        # @added 20210511 - Feature #4060: skyline.flux.worker.discarded metrics
+        try:
+            redis_conn.incr('flux.listen.added_to_queue')
+        except Exception as e:
+            logger.error('error :: listen :: failed to increment to Redis key flux.listen.added_to_queue - %s' % e)
 
         if LOCAL_DEBUG:
             try:
@@ -591,12 +748,22 @@ class MetricDataPost(object):
 
         """
         postData = None
-        try:
-            postData = json.loads(req.stream.read())
-        except:
-            logger.error(traceback.format_exc())
-            logger.error('error :: listen :: invalid post data')
 
+        # @added 20210512 - Feature #4060: skyline.flux.worker.discarded metrics
+        # Preserve the request for debugging
+        postData_obj = None
+        try:
+            postData_obj = req.stream.read()
+        except Exception as e:
+            logger.error('error :: listen :: req.stream.read() falied - %s' % e)
+
+        try:
+            # @added 20210512 - Feature #4060: skyline.flux.worker.discarded metrics
+            # postData = json.loads(req.stream.read())
+            postData = json.loads(postData_obj)
+        except Exception as e:
+            logger.error(traceback.format_exc())
+            logger.error('error :: listen :: invalid post data - %s' % e)
         if LOCAL_DEBUG:
             logger.debug('debug :: listen :: request arguments and POST data - %s - %s' % (
                 str(req.query_string), str(postData)))
@@ -604,6 +771,21 @@ class MetricDataPost(object):
         if not postData:
             if LOCAL_DEBUG:
                 logger.debug('debug :: listen :: no POST data recieved')
+
+            # @added 20210511 - Feature #4060: skyline.flux.worker.discarded metrics
+            unique_value = '%s' % str(time())
+            try:
+                redis_conn.sadd('flux.listen.discarded.invalid_parameters', str(unique_value))
+                if FLUX_VERBOSE_LOGGING:
+                    logger.info('listen :: added %s to Redis set flux.listen.discarded.invalid_parameters no POST data' % str(unique_value))
+            except Exception as e:
+                logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_parameters no POST data- %s' % e)
+
+            try:
+                redis_conn.set('flux.listen.discarded.invalid_post_data', str(postData_obj))
+            except Exception as e:
+                logger.error('error :: listen :: failed to data to Redis set flux.listen.discarded.invalid_post_data - %s' % e)
+
             resp.status = falcon.HTTP_400
             return
 
@@ -621,8 +803,8 @@ class MetricDataPost(object):
         status = None
         try:
             status = str(postData['status'])
-        except:
-            pass
+        except KeyError:
+            status = False
         if status:
             try:
                 logger.info('worker :: POST status - ok')
@@ -630,11 +812,11 @@ class MetricDataPost(object):
                 resp.body = json.dumps(body)
                 resp.status = falcon.HTTP_200
                 return
-            except:
+            except Exception as e:
                 logger.error(traceback.format_exc())
-                logger.error('error :: worker :: could not validate the status key POST request argument - %s' % (
-                    str(req.query_string)))
-                resp.status = falcon.HTTP_400
+                logger.error('error :: worker :: could not validate the status key POST request argument - %s - %s' % (
+                    str(req.query_string), e))
+                resp.status = falcon.HTTP_500
                 return
 
         # @added 20200818 - Feature #3694: flux - POST multiple metrics
@@ -648,14 +830,34 @@ class MetricDataPost(object):
             if not keyValid:
                 logger.error('error :: listen :: invalid key in POST data - %s - %s' % (
                     key, str(postData)))
+
+                # @added 20210511 - Feature #4060: skyline.flux.worker.discarded metrics
+                unique_value = '%s' % str(time())
+                try:
+                    redis_conn.sadd('flux.listen.discarded.invalid_key', str(unique_value))
+                    if FLUX_VERBOSE_LOGGING:
+                        logger.info('listen :: added %s to Redis set flux.listen.discarded.invalid_key' % str(unique_value))
+                except Exception as e:
+                    logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_key - %s' % e)
+
                 resp.status = falcon.HTTP_400
                 return
             if LOCAL_DEBUG:
                 logger.debug('debug :: listen :: valid key, metric_namespace_prefix set to %s' % str(metric_namespace_prefix))
-        except:
+        except Exception as e:
             logger.error(traceback.format_exc())
-            logger.error('error :: listen :: could not validate the key from POST data - %s' % (
-                str(postData)))
+            logger.error('error :: listen :: could not validate the key from POST data - %s - %s' % (
+                str(postData), e))
+
+            # @added 20210511 - Feature #4060: skyline.flux.worker.discarded metrics
+            unique_value = '%s' % str(time())
+            try:
+                redis_conn.sadd('flux.listen.discarded.invalid_key', str(unique_value))
+                if FLUX_VERBOSE_LOGGING:
+                    logger.info('listen :: added %s to Redis set flux.listen.discarded.invalid_key' % str(unique_value))
+            except Exception as e:
+                logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_key - %s' % e)
+
             resp.status = falcon.HTTP_400
             return
 
@@ -671,10 +873,19 @@ class MetricDataPost(object):
                     logger.debug('debug :: listen :: metrics item - metric - %s' % str(item['metric']))
         except KeyError:
             metrics = {}
-            pass
-        except Exception:
-            logger.error('error :: listen :: metrics was passed in the request POST data but an error was encountered - returned 400 - %s' % (
-                str(postData)))
+        except Exception as e:
+            logger.error('error :: listen :: metrics was passed in the request POST data but an error was encountered - returned 400 - %s - %s' % (
+                str(postData), e))
+
+            # @added 20210511 - Feature #4060: skyline.flux.worker.discarded metrics
+            unique_value = '%s' % str(time())
+            try:
+                redis_conn.sadd('flux.listen.discarded.invalid_parameters', str(unique_value))
+                if FLUX_VERBOSE_LOGGING:
+                    logger.info('listen :: added %s to Redis set flux.listen.discarded.invalid_parameters' % str(unique_value))
+            except Exception as e:
+                logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_parameters - %s' % e)
+
             resp.status = falcon.HTTP_400
             return
         if metrics:
@@ -700,6 +911,17 @@ class MetricDataPost(object):
                     # @added 20201006 - Feature #3764: flux validate metric name
                     valid_metric_name = validate_metric_name('listen :: MetricDataPOST POST multiple metrics', str(metric))
                     if not valid_metric_name:
+
+                        # @added 20210511 - Feature #4060: skyline.flux.worker.discarded metrics
+                        if not metric:
+                            metric = str(time())
+                        try:
+                            redis_conn.sadd('flux.listen.discarded.metric_name', str(metric))
+                            if FLUX_VERBOSE_LOGGING:
+                                logger.info('listen :: added %s to Redis set flux.listen.discarded.metric_name' % str(metric))
+                        except Exception as e:
+                            logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.metric_name - %s' % e)
+
                         resp.status = falcon.HTTP_400
                         return
 
@@ -708,6 +930,16 @@ class MetricDataPost(object):
                 except:
                     logger.error('error :: listen :: no valid metric in the request POST metrics data - returned 400 - %s' % (
                         str(postData)))
+
+                    # @added 20210511 - Feature #4060: skyline.flux.worker.discarded metrics
+                    metric = 'none.%s' % str(time())
+                    try:
+                        redis_conn.sadd('flux.listen.discarded.metric_name', str(metric))
+                        if FLUX_VERBOSE_LOGGING:
+                            logger.info('listen :: added %s to Redis set flux.listen.discarded.metric_name' % str(metric))
+                    except Exception as e:
+                        logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.metric_name - %s' % e)
+
                     resp.status = falcon.HTTP_400
                     return
                 try:
@@ -729,11 +961,35 @@ class MetricDataPost(object):
                         if valid_timestamp:
                             timestamp = int(timestamp_present)
                         else:
+                            # @added 20210511 - Feature #4060: skyline.flux.worker.discarded metrics
+                            unique_value = None
+                            if not metric:
+                                metric = str(time())
+                            try:
+                                unique_value = '%s.%s' % (str(metric), str(timestamp_present))
+                                redis_conn.sadd('flux.listen.discarded.invalid_timestamp', str(unique_value))
+                                if FLUX_VERBOSE_LOGGING:
+                                    logger.info('listen :: added %s to Redis set flux.listen.discarded.invalid_timestamp' % str(unique_value))
+                            except Exception as e:
+                                logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_timestamp - %s' % e)
+
                             resp.status = falcon.HTTP_400
                             return
                     except:
                         logger.error('error :: listen :: invalid timestamp value found in POST data - %s' % (
                             str(postData)))
+
+                        # @added 20210511 - Feature #4060: skyline.flux.worker.discarded metrics
+                        if not metric:
+                            metric = str(time())
+                        try:
+                            unique_value = '%s.%s' % (str(metric), str(timestamp_present))
+                            redis_conn.sadd('flux.listen.discarded.invalid_timestamp', str(unique_value))
+                            if FLUX_VERBOSE_LOGGING:
+                                logger.info('listen :: added %s to Redis set flux.listen.discarded.invalid_timestamp' % str(unique_value))
+                        except Exception as e:
+                            logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_timestamp - %s' % e)
+
                         resp.status = falcon.HTTP_400
                         return
                 try:
@@ -749,20 +1005,64 @@ class MetricDataPost(object):
                     except:
                         logger.error('error :: listen :: invalid value from POST data - %s' % (
                             str(postData)))
+
+                        # @added 20210511 - Feature #4060: skyline.flux.worker.discarded metrics
+                        if not metric:
+                            metric = str(time())
+                        unique_value = '%s.%s.%s' % (str(metric), str(timestamp_present), str(value_present))
+                        try:
+                            redis_conn.sadd('flux.listen.discarded.invalid_value', str(unique_value))
+                            if FLUX_VERBOSE_LOGGING:
+                                logger.info('listen :: added %s to Redis set flux.listen.discarded.invalid_value' % str(unique_value))
+                        except Exception as e:
+                            logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_value - %s' % e)
+
                         resp.status = falcon.HTTP_400
                         return
                 if not metric:
                     logger.error('error :: listen :: no metric in the POST data - %s - returning 400' % (
                         str(postData)))
+
+                    # @added 20210511 - Feature #4060: skyline.flux.worker.discarded metrics
+                    metric = 'none.%s' % str(time())
+                    try:
+                        redis_conn.sadd('flux.listen.discarded.metric_name', str(metric))
+                        if FLUX_VERBOSE_LOGGING:
+                            logger.info('listen :: added %s to Redis set flux.listen.discarded.metric_name' % str(metric))
+                    except Exception as e:
+                        logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.metric_name - %s' % e)
+
                     resp.status = falcon.HTTP_400
                     return
                 if not valid_value:
                     logger.error('error :: listen :: no valid value in the POST data - %s - returning 400' % (
                         str(postData)))
+
+                    # @added 20210511 - Feature #4060: skyline.flux.worker.discarded metrics
+                    if not metric:
+                        metric = str(time())
+                    unique_value = '%s.%s.%s' % (str(metric), str(timestamp_present), str(value_present))
+                    try:
+                        redis_conn.sadd('flux.listen.discarded.invalid_value', str(unique_value))
+                        if FLUX_VERBOSE_LOGGING:
+                            logger.info('listen :: added %s to Redis set flux.listen.discarded.invalid_value' % str(unique_value))
+                    except Exception as e:
+                        logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_value - %s' % e)
+
                     resp.status = falcon.HTTP_400
                     return
                 if not timestamp:
                     timestamp = int(time())
+
+                # @added 20210430 - Bug #4046: flux - metric_namespace_prefix on FLUX_SELF_API_KEY conflicting with FLUX_API_KEYS
+                # If metrics are being submitted to flux internally (vista) using
+                # the FLUX_SELF_API_KEY for a namespace if that namespace is added
+                # to FLUX_API_KEYS, flux will begin to also append the namespace
+                # prefix from the FLUX_API_KEYS for metrics submitted with the
+                # FLUX_SELF_API_KEY
+                if metric_namespace_prefix:
+                    if metric.startswith(metric_namespace_prefix):
+                        metric_namespace_prefix = None
 
                 # Added metric_namespace_prefix which is declared via the FLUX_API_KEYS
                 if metric_namespace_prefix:
@@ -776,8 +1076,8 @@ class MetricDataPost(object):
                     if FLUX_PERSIST_QUEUE and metric_data:
                         try:
                             redis_conn.sadd('flux.queue', str(metric_data))
-                        except:
-                            pass
+                        except Exception as e:
+                            logger.error('error :: listen :: failed adding data to Redis set flux.queue - %s' % e)
 
                     # @added 20210406 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES
                     if aggregate_metrics:
@@ -794,6 +1094,13 @@ class MetricDataPost(object):
                     # modified 20201016 - Feature #3788: snab_flux_load_test
                     if FLUX_VERBOSE_LOGGING:
                         logger.info('listen :: POST mulitple metric data added to flux.httpMetricDataQueue - %s' % str(metric_data))
+
+                    # @added 20210511 - Feature #4060: skyline.flux.worker.discarded metrics
+                    try:
+                        redis_conn.incr('flux.listen.added_to_queue')
+                    except Exception as e:
+                        logger.error('error :: listen :: failed to increment to Redis key flux.listen.added_to_queue - %s' % e)
+
                 except:
                     logger.error(traceback.format_exc())
                     logger.error('error :: listen :: adding POST metric_data to the flux.httpMetricDataQueue queue - %s' % str(metric_data))
@@ -807,6 +1114,17 @@ class MetricDataPost(object):
                 # @added 20201006 - Feature #3764: flux validate metric name
                 valid_metric_name = validate_metric_name('listen :: MetricDataPOST POST', str(metric))
                 if not valid_metric_name:
+
+                    # @added 20210511 - Feature #4060: skyline.flux.worker.discarded metrics
+                    if not metric:
+                        metric = str(time())
+                    try:
+                        redis_conn.sadd('flux.listen.discarded.metric_name', str(metric))
+                        if FLUX_VERBOSE_LOGGING:
+                            logger.info('listen :: added %s to Redis set flux.listen.discarded.metric_name' % str(metric))
+                    except Exception as e:
+                        logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.metric_name - %s' % e)
+
                     resp.status = falcon.HTTP_400
                     return
 
@@ -815,6 +1133,21 @@ class MetricDataPost(object):
             except:
                 logger.error('error :: listen :: no valid metric in request POST data - returned 400 - %s' % (
                     str(postData)))
+
+                # @added 20210511 - Feature #4060: skyline.flux.worker.discarded metrics
+                try:
+                    metric = str(postData['metric'])
+                except KeyError:
+                    if FLUX_VERBOSE_LOGGING:
+                        logger.info('listen :: no metric key in POST data using time() for flux.listen.discarded.metric_name entry')
+                    metric = str(time())
+                try:
+                    redis_conn.sadd('flux.listen.discarded.metric_name', str(metric))
+                    if FLUX_VERBOSE_LOGGING:
+                        logger.info('listen :: added %s to Redis set flux.listen.discarded.metric_name' % str(metric))
+                except Exception as e:
+                    logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.metric_name - %s' % e)
+
                 resp.status = falcon.HTTP_400
                 return
 
@@ -841,17 +1174,35 @@ class MetricDataPost(object):
                     if valid_timestamp:
                         timestamp = int(postData['timestamp'])
                     else:
+                        # @added 20210511 - Feature #4060: skyline.flux.worker.discarded metrics
+                        try:
+                            redis_conn.sadd('flux.listen.discarded.invalid_timestamp', str(metric))
+                            if FLUX_VERBOSE_LOGGING:
+                                logger.info('listen :: added %s to Redis set flux.listen.discarded.invalid_timestamp' % str(metric))
+                        except Exception as e:
+                            logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_timestamp - %s' % e)
+
                         resp.status = falcon.HTTP_400
                         return
                 except:
                     logger.error('error :: listen :: invalid timestamp value in POST data - %s' % (
                         str(postData)))
+
+                    # @added 20210511 - Feature #4060: skyline.flux.worker.discarded metrics
+                    try:
+                        redis_conn.sadd('flux.listen.discarded.invalid_timestamp', str(metric))
+                        if FLUX_VERBOSE_LOGGING:
+                            logger.info('listen :: added %s to Redis set flux.listen.discarded.invalid_timestamp' % str(metric))
+                    except Exception as e:
+                        logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_timestamp - %s' % e)
+
                     resp.status = falcon.HTTP_400
                     return
 
+            value_present = None
             try:
                 value_present = str(postData['value'])
-            except:
+            except KeyError:
                 value_present = False
             if value_present:
                 try:
@@ -862,27 +1213,84 @@ class MetricDataPost(object):
                 except:
                     logger.error('error :: listen :: invalid value from POST data - %s' % (
                         str(postData)))
+
+                    # @added 20210511 - Feature #4060: skyline.flux.worker.discarded metrics
+                    if not metric:
+                        try:
+                            metric = str(postData['metric'])
+                        except KeyError:
+                            if FLUX_VERBOSE_LOGGING:
+                                logger.info('listen :: no metric key in POST data using time() for flux.listen.discarded.invalid_value entry')
+                            metric = str(time())
+                    unique_value = '%s.%s.%s' % (str(metric), str(timestamp_present), str(value_present))
+                    try:
+                        redis_conn.sadd('flux.listen.discarded.invalid_value', str(unique_value))
+                        if FLUX_VERBOSE_LOGGING:
+                            logger.info('listen :: added %s to Redis set flux.listen.discarded.invalid_value' % str(unique_value))
+                    except Exception as e:
+                        logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_value - %s' % e)
+
                     resp.status = falcon.HTTP_400
                     return
 
             if not key:
                 logger.error('error :: listen :: no key in the POST data - %s - returning 400' % (
                     str(postData)))
+
+                # @added 20210511 - Feature #4060: skyline.flux.worker.discarded metrics
+                unique_value = '%s' % str(time())
+                try:
+                    redis_conn.sadd('flux.listen.discarded.invalid_key', str(unique_value))
+                    if FLUX_VERBOSE_LOGGING:
+                        logger.info('listen :: added %s to Redis set flux.listen.discarded.invalid_key' % str(unique_value))
+                except Exception as e:
+                    logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_key - %s' % e)
+
                 resp.status = falcon.HTTP_400
                 return
             if not metric:
                 logger.error('error :: listen :: no metric in the POST data - %s - returning 400' % (
                     str(postData)))
+
+                # @added 20210511 - Feature #4060: skyline.flux.worker.discarded metrics
+                unique_value = str(time())
+                try:
+                    redis_conn.sadd('flux.listen.discarded.metric_name', str(unique_value))
+                    if FLUX_VERBOSE_LOGGING:
+                        logger.info('listen :: added %s (no metric passed) to Redis set flux.listen.discarded.metric_name' % str(unique_value))
+                except Exception as e:
+                    logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.metric_name - %s' % e)
+
                 resp.status = falcon.HTTP_400
                 return
             if not valid_value:
                 logger.error('error :: listen :: no valid value in the POST data - %s - returning 400' % (
                     str(postData)))
+
+                # @added 20210511 - Feature #4060: skyline.flux.worker.discarded metrics
+                unique_value = '%s.%s.%s' % (str(metric), str(timestamp_present), str(value_present))
+                try:
+                    redis_conn.sadd('flux.listen.discarded.invalid_value', str(unique_value))
+                    if FLUX_VERBOSE_LOGGING:
+                        logger.info('listen :: added %s to Redis set flux.listen.discarded.invalid_value' % str(unique_value))
+                except Exception as e:
+                    logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_value - %s' % e)
+
                 resp.status = falcon.HTTP_400
                 return
 
             if not timestamp:
                 timestamp = int(time())
+
+            # @added 20210430 - Bug #4046: flux - metric_namespace_prefix on FLUX_SELF_API_KEY conflicting with FLUX_API_KEYS
+            # If metrics are being submitted to flux internally (vista) using
+            # the FLUX_SELF_API_KEY for a namespace if that namespace is added
+            # to FLUX_API_KEYS, flux will begin to also append the namespace
+            # prefix from the FLUX_API_KEYS for metrics submitted with the
+            # FLUX_SELF_API_KEY
+            if metric_namespace_prefix:
+                if metric.startswith(metric_namespace_prefix):
+                    metric_namespace_prefix = None
 
             # @added 20200818 - Feature #3694: flux - POST multiple metrics
             # Added metric_namespace_prefix which is declared via the FLUX_API_KEYS
@@ -899,8 +1307,8 @@ class MetricDataPost(object):
                 if FLUX_PERSIST_QUEUE and metric_data:
                     try:
                         redis_conn.sadd('flux.queue', str(metric_data))
-                    except:
-                        pass
+                    except Exception as e:
+                        logger.error('error :: listen :: failed adding data to Redis set flux.queue - %s' % e)
 
                 # @added 20210406 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES
                 # To reduce the overhead of making a redis query for every metric
@@ -921,6 +1329,13 @@ class MetricDataPost(object):
                 # modified 20201016 - Feature #3788: snab_flux_load_test
                 if FLUX_VERBOSE_LOGGING:
                     logger.info('listen :: POST data added to flux.httpMetricDataQueue - %s' % str(metric_data))
+
+                # @added 20210511 - Feature #4060: skyline.flux.worker.discarded metrics
+                try:
+                    redis_conn.incr('flux.listen.added_to_queue')
+                except Exception as e:
+                    logger.error('error :: listen :: failed to increment to Redis key flux.listen.added_to_queue - %s' % e)
+
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: listen :: adding POST metric_data to the flux.httpMetricDataQueue queue - %s' % str(metric_data))
