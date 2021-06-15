@@ -3838,7 +3838,7 @@ EXTERNAL_SETTINGS = {
         # Or a dict of the data to POST
         # 'post_data': {'data': {'token': '123456abcdef'}},
         # 'post_data': {'auth': {'id': 286, 'key': '123456abcdef'}},
-        'enabled': True
+        'enabled': False
     }
 }
 """
