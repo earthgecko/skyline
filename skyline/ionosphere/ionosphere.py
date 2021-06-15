@@ -29,6 +29,9 @@ from datetime import datetime
 
 # from redis import StrictRedis
 import traceback
+
+from timeit import default_timer as timer
+
 import mysql.connector
 # from mysql.connector import errorcode
 
@@ -91,7 +94,18 @@ from database import (
     # @added 20200516 - Bug #3546: Change ionosphere_enabled if all features profiles are disabled
     # Readded metrics_table to set ionosphere_enabled to 0 if a metric has no
     # fps enabled and has been willy nillied
-    metrics_table_meta)
+    metrics_table_meta,
+    # @added 20210412 - Feature #4014: Ionosphere - inference
+    #                   Branch #3590: inference
+    motifs_matched_table_meta,
+    # @added 20210414 - Feature #4014: Ionosphere - inference
+    #                   Branch #3590: inference
+    not_anomalous_motifs_table_meta,
+)
+
+# @added 20210425 - Task #4030: refactoring
+#                   Feature #4014: Ionosphere - inference
+from functions.numpy.percent_different import get_percent_different
 
 from tsfresh_feature_names import TSFRESH_FEATURES
 
@@ -199,6 +213,33 @@ try:
     IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR = settings.IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR
 except:
     IONOSPHERE_CUSTOM_KEEP_TRAINING_TIMESERIES_FOR = []
+
+# @added 20210412 - Feature #4014: Ionosphere - inference
+#                   Branch #3590: inference
+try:
+    IONOSPHERE_INFERENCE_MOTIFS_ENABLED = settings.IONOSPHERE_INFERENCE_MOTIFS_ENABLED
+except:
+    IONOSPHERE_INFERENCE_MOTIFS_ENABLED = True
+if IONOSPHERE_INFERENCE_MOTIFS_ENABLED:
+    from inference import ionosphere_motif_inference
+else:
+    ionosphere_motif_inference = None
+try:
+    IONOSPHERE_INFERENCE_MOTIFS_TEST_ONLY = settings.IONOSPHERE_INFERENCE_MOTIFS_TEST_ONLY
+except:
+    IONOSPHERE_INFERENCE_MOTIFS_TEST_ONLY = False
+# @added 20210419 - Feature #4014: Ionosphere - inference
+# Only store motif data in the database if specifically enabled
+try:
+    IONOSPHERE_INFERENCE_STORE_MATCHED_MOTIFS = settings.IONOSPHERE_INFERENCE_STORE_MATCHED_MOTIFS
+except:
+    IONOSPHERE_INFERENCE_STORE_MATCHED_MOTIFS = False
+
+# @added 20210512 - Feature #4064: VERBOSE_LOGGING
+try:
+    VERBOSE_LOGGING = settings.IONOSPHERE_VERBOSE_LOGGING
+except:
+    VERBOSE_LOGGING = False
 
 skyline_app_graphite_namespace = 'skyline.%s%s' % (skyline_app, SERVER_METRIC_PATH)
 
@@ -718,10 +759,9 @@ class Ionosphere(Thread):
                 pass
         return
 
-
-# @added 20161228 - Feature #1828: ionosphere - mirage Redis data features
-#                   Branch #922: Ionosphere
-# Bringing Ionosphere online - do alert on Ionosphere metrics
+    # @added 20161228 - Feature #1828: ionosphere - mirage Redis data features
+    #                   Branch #922: Ionosphere
+    # Bringing Ionosphere online - do alert on Ionosphere metrics
     def manage_ionosphere_unique_metrics(self):
         """
         - Create a Redis set of all Ionosphere enabled metrics.
@@ -1148,6 +1188,8 @@ class Ionosphere(Thread):
 
         """
 
+        dev_null = None
+
         def get_an_engine():
             try:
                 engine, log_msg, trace = get_engine(skyline_app)
@@ -1223,10 +1265,34 @@ class Ionosphere(Thread):
             except:
                 logger.error(traceback.format_exc())
                 logger.error(
-                    'error :: failed to add Redis key - %s - [%s, \'%s\', %s, %s, %s]' %
+                    'error :: failed to add Redis key - %s - [%s, \'%s\', %s, %s, %s, %s]' %
                     (cache_key, str(anomalous_value), base_name, str(int(metric_timestamp)),
                         str(triggered_algorithms), str(full_duration), str(algorithms_run)))
             return
+
+        # @added 20210429 - Feature #3994: Panorama - mirage not anomalous
+        # A hash is added to the ionosphere.panorama.not_anomalous_metrics for
+        # every metric that is found to be not anomalous.  This provides
+        # data for /panorama?not_anomalous and /panorama?not_anomalous_metric
+        # method which are used for plots in the webapp and json response.
+        # The ionosphere.panorama.not_anomalous_metrics Redis hash is managed in
+        # analyzer/metrics_manager
+        def add_not_anomalous_to_redis_hash(base_name, timestamp, value, full_duration):
+            redis_hash = 'ionosphere.panorama.not_anomalous_metrics'
+            try:
+                data = {
+                    base_name: {
+                        'timestamp': timestamp,
+                        'value': value,
+                        'hours_to_resolve': int(full_duration / 3600),
+                    }
+                }
+                self.redis_conn.hset(redis_hash, time(), str(data))
+                logger.info('added entry to the %s Redis hash' % redis_hash)
+            except Exception as e:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to add %s to Redis hash %s - %s' % (
+                    str(data), str(redis_hash), e))
 
         child_process_pid = os.getpid()
         logger.info('child_process_pid - %s' % str(child_process_pid))
@@ -1245,6 +1311,8 @@ class Ionosphere(Thread):
 
         engine = None
         anomalous_timeseries = False
+
+        dev_null = None
 
         check_file_name = os.path.basename(str(metric_check_file))
         if settings.ENABLE_IONOSPHERE_DEBUG:
@@ -1990,7 +2058,16 @@ class Ionosphere(Thread):
                 # Order by the latest features profile, this also results in the
                 # layers ids being ordered by latest too.
                 # stmt = select([ionosphere_table]).where(ionosphere_table.c.metric_id == metrics_id)
-                stmt = select([ionosphere_table]).where(ionosphere_table.c.metric_id == metrics_id).order_by(desc(ionosphere_table.c.id))
+                # @modified 20210429 - Feature #4014: Ionosphere - inference
+                #                      Task #2446: Optimize Ionosphere
+                # For efficiency order by the last fp matched, if there are
+                # multipe features profiles and one matches chances are the
+                # that the metric may be sent through for multiple time over
+                # a period.  When a features profilee matches, chances are it
+                # will match again multiple times for that incident period.
+                # stmt = select([ionosphere_table]).where(ionosphere_table.c.metric_id == metrics_id).order_by(desc(ionosphere_table.c.id))
+                stmt = select([ionosphere_table]).where(ionosphere_table.c.metric_id == metrics_id).order_by(desc(ionosphere_table.c.last_matched))
+
                 result = connection.execute(stmt)
                 # @added 20190326 - Feature #2484: FULL_DURATION feature profiles
                 # To be used for ionosphere_echo
@@ -2213,8 +2290,7 @@ class Ionosphere(Thread):
                 if check_age < 5:
                     sleep(5)
                 graphite_file_count = len([f for f in os.listdir(metric_training_data_dir)
-                                           if f.endswith('.png') and
-                                           os.path.isfile(os.path.join(metric_training_data_dir, f))])
+                                           if f.endswith('.png') and os.path.isfile(os.path.join(metric_training_data_dir, f))])
                 if graphite_file_count == 0:
                     logger.info('not calculating features no anomaly Graphite alert resources created in %s' % (metric_training_data_dir))
                     self.remove_metric_check_file(str(metric_check_file))
@@ -2234,6 +2310,305 @@ class Ionosphere(Thread):
                     return
                 else:
                     logger.info('anomaly Graphite alert resources found in %s' % (metric_training_data_dir))
+
+        # @added 20210412 - Feature #4014: Ionosphere - inference
+        #                   Branch #3590: inference
+        matched_motifs = {}
+        fps_checked_for_motifs = []
+        # @modified 20210426 - Feature #4014: Ionosphere - inference
+        # Do not run inference on ionosphere_learn jobs
+        if not training_metric and not added_by == 'ionosphere_learn':
+            if IONOSPHERE_INFERENCE_MOTIFS_ENABLED and fp_ids:
+                try:
+                    logger.info('calling inference to find matching similar motif')
+                    start_inference = timer()
+                    matched_motifs, fps_checked_for_motifs = ionosphere_motif_inference(base_name, metric_timestamp)
+                    end_inference = timer()
+                    logger.info('inference found %s matching similar motifs, checked %s fps in %6f seconds' % (
+                        str(len(matched_motifs)), str(len(fps_checked_for_motifs)),
+                        (end_inference - start_inference)))
+                except Exception as e:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed calling ionosphere_motif_inference - %s' % e)
+                    matched_motifs = {}
+                    fps_checked_for_motifs = []
+
+        # @added 20210412 - Feature #4014: Ionosphere - inference
+        #                   Branch #3590: inference
+        # Update the motif related columns of all the ionosphere fps
+        # that where checked
+        if len(fps_checked_for_motifs) > 0:
+            motif_checked_timestamp = int(time())
+            motif_checks_updated_count = 0
+            for fp_checked_for_motifs in fps_checked_for_motifs:
+                try:
+                    connection = engine.connect()
+                    connection.execute(
+                        ionosphere_table.update(
+                            ionosphere_table.c.id == fp_checked_for_motifs).
+                        values(motif_checked_count=ionosphere_table.c.motif_checked_count + 1,
+                               motif_last_checked=motif_checked_timestamp))
+                    connection.close()
+                    motif_checks_updated_count += 1
+                except Exception as e:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: could not update motif_checked_count and motif_last_checked for %s - %s' % (str(fp_checked_for_motifs), e))
+            logger.info('updated the motif_checked_count column and the motif_last_checked column to %s in ionosphere for %s fps' % (
+                str(motif_checked_timestamp), str(motif_checks_updated_count)))
+
+        if matched_motifs:
+            # Here we should update DB, clean up and return before incurring any
+            # features profiles calculations (unless in testing mode)
+            ordered_matched_motifs = []
+            matching_motif = []
+            for motif_id in list(matched_motifs.keys()):
+                try:
+                    motif_metric_id = matched_motifs[motif_id]['metric_id']
+                    motif_fp_id = matched_motifs[motif_id]['fp_id']
+                    motif_fp_index = matched_motifs[motif_id]['index']
+                    motif_dist = matched_motifs[motif_id]['distance']
+                    motif_size = matched_motifs[motif_id]['size']
+                    motif_matched_timestamp = matched_motifs[motif_id]['timestamp']
+                    match_type_id = matched_motifs[motif_id]['type_id']
+                    match_type = matched_motifs[motif_id]['type']
+                    motif_sequence = matched_motifs[motif_id]['motif_sequence']
+
+                    # @added 20210423 - Feature #4014: Ionosphere - inference
+                    # Compute the area using the composite trapezoidal rule.
+                    try:
+                        motif_area = matched_motifs[motif_id]['motif_area']
+                    except Exception as e:
+                        dev_null = e
+                        motif_area = 0
+                    try:
+                        fp_motif_area = matched_motifs[motif_id]['fp_motif_area']
+                    except Exception as e:
+                        dev_null = e
+                        fp_motif_area = 0
+                    # @added 20210427 - Feature #4014: Ionosphere - inference
+                    # Compute the area using the composite trapezoidal rule.
+                    try:
+                        area_percent_diff = matched_motifs[motif_id]['area_percent_diff']
+                    except Exception as e:
+                        dev_null = e
+                        area_percent_diff = 0
+
+                    # @added 20210428 - Feature #4014: Ionosphere - inference
+                    # Add time taken and fps checked
+                    try:
+                        fps_checked = matched_motifs[motif_id]['fps_checked']
+                    except Exception as e:
+                        dev_null = e
+                        fps_checked = 0
+                    try:
+                        runtime = matched_motifs[motif_id]['runtime']
+                    except Exception as e:
+                        dev_null = e
+                        runtime = 0
+
+                    ordered_matched_motifs.append([motif_metric_id, motif_fp_id, motif_fp_index, motif_dist, motif_size, motif_matched_timestamp, match_type_id, match_type, motif_sequence, motif_area, fp_motif_area, area_percent_diff, fps_checked, runtime])
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to determine ordered_matched_motifs item')
+            # Sort by the best dist
+            if ordered_matched_motifs:
+                sorted_matched_motifs = sorted(ordered_matched_motifs, key=lambda x: x[3])
+                matching_motif = sorted_matched_motifs[0]
+            if matching_motif:
+                if not IONOSPHERE_INFERENCE_MOTIFS_TEST_ONLY:
+                    redis_set = 'ionosphere.not_anomalous'
+                    data = base_name
+                    try:
+                        self.redis_conn.sadd(redis_set, data)
+                    except:
+                        logger.info(traceback.format_exc())
+                        logger.error('error :: failed to add %s to Redis set %s' % (
+                            str(data), str(redis_set)))
+                    redis_set = 'ionosphere.features_profiles_checked'
+                    data = str(matching_motif[1])
+                    try:
+                        self.redis_conn.sadd(redis_set, data)
+                    except:
+                        logger.info(traceback.format_exc())
+                        logger.error('error :: failed to add %s to Redis set %s' % (
+                            str(data), str(redis_set)))
+                if not engine:
+                    try:
+                        engine, log_msg, trace = get_an_engine()
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: could not get a MySQL engine to update matched details in db for %s' % (str(fp_id)))
+                if not engine:
+                    logger.error('error :: engine not obtained to update matched details in db for %s' % (str(fp_id)))
+                try:
+                    ionosphere_matched_table, log_msg, trace = ionosphere_matched_table_meta(skyline_app, engine)
+                    logger.info(log_msg)
+                    logger.info('motifs_matched_table OK')
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to get ionosphere_matched_table meta for %s' % base_name)
+                # Add all motif_matches to the DB
+                try:
+                    motifs_matched_table, log_msg, trace = motifs_matched_table_meta(skyline_app, engine)
+                    logger.info(log_msg)
+                    logger.info('motifs_matched_table OK')
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to get motifs_matched_table meta for %s' % base_name)
+
+                # @added 20210414 - Feature #4014: Ionosphere - inference
+                #                   Branch #3590: inference
+                # Store the not anomalous motifs
+                try:
+                    not_anomalous_motifs_table, log_msg, trace = not_anomalous_motifs_table_meta(skyline_app, engine)
+                    logger.info(log_msg)
+                    logger.info('not_anomalous_motifs_table OK')
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: failed to get not_anomalous_motifs_table meta for %s' % base_name)
+
+                new_motifs_matched_ids = []
+                for matched_motif in ordered_matched_motifs:
+                    primary_match = 0
+                    if matching_motif == matched_motif:
+                        primary_match = 1
+                    # Only a single ionosphere_matched record is created for
+                    # the most similar motif (primary_match=1) HOWEVER
+                    # DO NOTE that EVERY motif match that is surfaced is
+                    # in a run is recorded in the motifs_matched table.
+                    # ordered_matched_motifs.append([motif_metric_id, motif_fp_id, motif_fp_index, motif_dist, motif_size, motif_matched_timestamp, match_type_id, match_type, motif_sequence, motif_area, fp_motif_area, area_percent_diff])
+                    try:
+                        connection = engine.connect()
+                        ins = motifs_matched_table.insert().values(
+                            metric_id=int(matched_motif[0]),
+                            fp_id=int(matched_motif[1]),
+                            metric_timestamp=int(matched_motif[5]),
+                            primary_match=primary_match,
+                            index=int(matched_motif[2]),
+                            size=int(matched_motif[4]),
+                            distance=float(matched_motif[3]),
+                            type_id=int(matched_motif[6]),
+                            # @added 20210427 - Feature #4014: Ionosphere - inference
+                            # Compute the area using the composite trapezoidal rule.
+                            motif_area=float(matched_motif[9]),
+                            fp_motif_area=float(matched_motif[10]),
+                            area_percent_diff=float(matched_motif[11]),
+                            # @added 20210428 - Feature #4014: Ionosphere - inference
+                            # Add time taken and fps checked
+                            fps_checked=int(matched_motif[12]),
+                            runtime=float(matched_motif[13]))
+                        result = connection.execute(ins)
+                        connection.close()
+                        new_motif_matched_id = result.inserted_primary_key[0]
+                        new_motifs_matched_ids.append(new_motif_matched_id)
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: could not insert motifs_matched record into DB: %s' % str(matched_motif))
+                    # @added 20210414 - Feature #4014: Ionosphere - inference
+                    #                   Branch #3590: inference
+                    # Store the not anomalous motifs
+                    # @modified 20210419 - Feature #4014: Ionosphere - inference
+                    # Only store motif data in the database if specifically
+                    # enabled, inference.matched_motifs.dict file is always
+                    # saved to the training_data dir
+                    if new_motif_matched_id and IONOSPHERE_INFERENCE_STORE_MATCHED_MOTIFS:
+                        new_motif_sequence_ids = []
+                        try:
+                            connection = engine.connect()
+                            for motif_sequence_timestamp, motif_sequence_value in matched_motif[8]:
+                                try:
+                                    ins = not_anomalous_motifs_table.insert().values(
+                                        motif_id=int(new_motif_matched_id),
+                                        timestamp=int(motif_sequence_timestamp),
+                                        value=motif_sequence_value)
+                                    result = connection.execute(ins)
+                                    new_motif_sequence_id = result.inserted_primary_key[0]
+                                    new_motif_sequence_ids.append(new_motif_sequence_id)
+                                except:
+                                    logger.error(traceback.format_exc())
+                                    logger.error('error :: could not insert %s, %s into not_anomalous_motifs for matched_motif_id: %s' % (
+                                        str(motif_sequence_timestamp),
+                                        str(motif_sequence_value),
+                                        str(new_motif_matched_id)))
+                            connection.close()
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: could not insert timestamps and values for into not_anomalous_motifs table: %s' % (
+                                str(new_motif_matched_id)))
+                        logger.info('inserted %s new motif sequence records into the not_anomalous_motifs table for matched_motif_id: %s' % (
+                            str(len(new_motif_sequence_ids)), str(new_motif_matched_id)))
+
+                    # If in testing mode no ionosphere tables are updated
+                    if not IONOSPHERE_INFERENCE_MOTIFS_TEST_ONLY:
+                        if matching_motif == matched_motif:
+                            # Only a single ionosphere_matched record is created for
+                            # the most similar motif (primary_match=1) HOWEVER
+                            # DO NOTE that EVERY motif match that is surfaced is
+                            # in a run is recorded in the motifs_matched table.
+                            new_matched_id = 0
+                            try:
+                                connection = engine.connect()
+                                ins = ionosphere_matched_table.insert().values(
+                                    fp_id=int(matching_motif[1]),
+                                    metric_timestamp=int(matching_motif[5]),
+                                    motifs_matched_id=int(new_motif_matched_id))
+                                result = connection.execute(ins)
+                                connection.close()
+                                new_matched_id = result.inserted_primary_key[0]
+                                logger.info('new ionosphere_matched id: %s (for matched motif with matched_motif_id: %s' % (
+                                    str(new_matched_id), str(new_motif_matched_id)))
+                            except:
+                                logger.error(traceback.format_exc())
+                                logger.error(
+                                    'error :: could not create ionosphere_matched record for fp id %s and motif match with id %s for matching_motif: %s' % (
+                                        str(fp_id), str(new_motif_matched_id),
+                                        str(matching_motif)))
+                            # ONLY fp of the most similar motif match gets as having
+                            # been checked and matched
+                            if new_matched_id:
+                                # Update motif_matched_count in ionosphere_table
+                                motif_matched_timestamp = int(time())
+                                try:
+                                    connection = engine.connect()
+                                    connection.execute(
+                                        ionosphere_table.update(
+                                            ionosphere_table.c.id == matching_motif[1]).
+                                        values(motif_matched_count=ionosphere_table.c.motif_matched_count + 1,
+                                               motif_last_matched=motif_matched_timestamp))
+                                    connection.close()
+                                    logger.info('updated motif_matched_count and motif_last_matched for fp_id %s for dur to matched_motif_id: %s' % (
+                                        str(matching_motif[1]), str(new_matched_id)))
+                                except:
+                                    logger.error(traceback.format_exc())
+                                    logger.error('error :: could not update motif_matched_count and motif_last_matched for fp_id %s for dur to matched_motif_id: %s' % (
+                                        str(matching_motif[1]), str(new_matched_id)))
+
+                                # @added 20210429 - Feature #3994: Panorama - mirage not anomalous
+                                # A hash is added to the ionosphere.panorama.not_anomalous_metrics for
+                                # every metric that is found to be not anomalous.
+                                try:
+                                    add_not_anomalous_to_redis_hash(base_name, metric_timestamp, anomalous_value, full_duration)
+                                except Exception as e:
+                                    logger.error('error :: failed calling add_not_anomalous_to_redis_hash - %s' % e)
+
+                if not IONOSPHERE_INFERENCE_MOTIFS_TEST_ONLY:
+                    profile_id_matched_file = '%s/%s.profile_id_matched.fp_id' % (
+                        metric_training_data_dir, base_name)
+                    if not os.path.isfile(profile_id_matched_file):
+                        try:
+                            write_data_to_file(skyline_app, profile_id_matched_file, 'w', str(matching_motif[1]))
+                            logger.info('added matched fp_id %s - %s' % (
+                                str(matching_motif[1]), profile_id_matched_file))
+                        except:
+                            logger.info(traceback.format_exc())
+                            logger.error('error :: adding motif matched fp_id %s - %s' % (
+                                str(matching_motif[1]), profile_id_matched_file))
+                    remove_waterfall_alert(added_by, metric_timestamp, base_name)
+                    self.remove_metric_check_file(str(metric_check_file))
+                    if engine:
+                        engine_disposal(engine)
+                    return
+        # Continue with normal features profile matching if no motifs were matched
 
         context = skyline_app
         f_calc = None
@@ -2678,14 +3053,23 @@ class Ionosphere(Thread):
                 calc_sum_array = [sum_calc_values]
 
                 percent_different = 100
-                sums_array = np.array([sum_fp_values, sum_calc_values], dtype=float)
+                # @modified 20210425 - Task #4030: refactoring
+                #                      Feature #4014: Ionosphere - inference
+                # Use the common function added
+                # sums_array = np.array([sum_fp_values, sum_calc_values], dtype=float)
+                # try:
+                #     calc_percent_different = np.diff(sums_array) / sums_array[:-1] * 100.
+                #     percent_different = calc_percent_different[0]
+                #     logger.info('percent_different between common features sums - %s' % str(percent_different))
+                # except:
+                #     logger.error(traceback.format_exc())
+                #     logger.error('error :: failed to calculate percent_different')
+                #     continue
                 try:
-                    calc_percent_different = np.diff(sums_array) / sums_array[:-1] * 100.
-                    percent_different = calc_percent_different[0]
+                    percent_different = get_percent_different(sum_fp_values, sum_calc_values, True)
                     logger.info('percent_different between common features sums - %s' % str(percent_different))
-                except:
-                    logger.error(traceback.format_exc())
-                    logger.error('error :: failed to calculate percent_different')
+                except Exception as e:
+                    logger.error('error :: failed to calculate percent_different - %s' % e)
                     continue
 
                 almost_equal = None
@@ -3087,8 +3471,17 @@ class Ionosphere(Thread):
                                 try:
                                     new_datapoint = [float(datapoint[0]), float(datapoint[1])]
                                     converted.append(new_datapoint)
-                                except:  # nosec
+                                # @added 20210425 - Task #4030: refactoring
+                                except TypeError:
+                                    # This allows for the handling when the
+                                    # entry has a value of None
                                     continue
+                                # @modified 20210425 - Task #4030: refactoring
+                                # except:  # nosec
+                                except Exception as e:
+                                    logger.error('error :: could not create converted timeseries from minmax_fp_ts - %s' % e)
+                                    continue
+
                             del datapoints
                             if LOCAL_DEBUG:
                                 if len(converted) > 0:
@@ -3167,7 +3560,15 @@ class Ionosphere(Thread):
                                 try:
                                     new_datapoint = [float(datapoint[0]), float(datapoint[1])]
                                     converted.append(new_datapoint)
-                                except:  # nosec
+                                # @added 20210425 - Task #4030: refactoring
+                                except TypeError:
+                                    # This allows for the handling when the
+                                    # entry has a value of None
+                                    continue
+                                # @modified 20210425 - Task #4030: refactoring
+                                # except:  # nosec
+                                except Exception as e:
+                                    logger.error('error :: could not create converted timeseries from minmax_anomalous_ts - %s' % e)
                                     continue
                             del datapoints
                             for ts, value in converted:
@@ -3209,17 +3610,26 @@ class Ionosphere(Thread):
 
                     if minmax_fp_features_sum and minmax_anomalous_features_sum:
                         percent_different = None
+                        # @modified 20210425 - Task #4030: refactoring
+                        #                      Feature #4014: Ionosphere - inference
+                        # Use the common function added
+                        # try:
+                        #     fp_sum_array = [minmax_fp_features_sum]
+                        #     calc_sum_array = [minmax_anomalous_features_sum]
+                        #     percent_different = 100
+                        #     sums_array = np.array([minmax_fp_features_sum, minmax_anomalous_features_sum], dtype=float)
+                        #     calc_percent_different = np.diff(sums_array) / sums_array[:-1] * 100.
+                        #     percent_different = calc_percent_different[0]
+                        #     logger.info('percent_different between minmax scaled features sums - %s' % str(percent_different))
+                        # except Exception as e:
+                        #     logger.error(traceback.format_exc())
+                        #     logger.error('error :: failed to calculate percent_different from minmax scaled features sums - %s' % e)
+                        percent_different = 100
                         try:
-                            fp_sum_array = [minmax_fp_features_sum]
-                            calc_sum_array = [minmax_anomalous_features_sum]
-                            percent_different = 100
-                            sums_array = np.array([minmax_fp_features_sum, minmax_anomalous_features_sum], dtype=float)
-                            calc_percent_different = np.diff(sums_array) / sums_array[:-1] * 100.
-                            percent_different = calc_percent_different[0]
+                            percent_different = get_percent_different(minmax_fp_features_sum, minmax_anomalous_features_sum, True)
                             logger.info('percent_different between minmax scaled features sums - %s' % str(percent_different))
-                        except:
-                            logger.error(traceback.format_exc())
-                            logger.error('error :: failed to calculate percent_different from minmax scaled features sums')
+                        except Exception as e:
+                            logger.error('error :: failed to calculate percent_different between minmax scaled features sums- %s' % e)
 
                         if percent_different:
                             almost_equal = None
@@ -3455,6 +3865,14 @@ class Ionosphere(Thread):
                                 logger.error('error :: added matched fp_id %s - %s' % (
                                     str(fp_id), profile_id_matched_file))
 
+                        # @added 20210429 - Feature #3994: Panorama - mirage not anomalous
+                        # A hash is added to the ionosphere.panorama.not_anomalous_metrics for
+                        # every metric that is found to be not anomalous.
+                        try:
+                            add_not_anomalous_to_redis_hash(base_name, metric_timestamp, anomalous_value, full_duration)
+                        except Exception as e:
+                            logger.error('error :: failed calling add_not_anomalous_to_redis_hash - %s' % e)
+
                     # @added 20170115 - Feature #1854: Ionosphere learn - generations
                     # Stop on the first match
                     break
@@ -3680,6 +4098,15 @@ class Ionosphere(Thread):
                             logger.info(traceback.format_exc())
                             logger.error('error :: added matched layers_id %s - %s' % (
                                 str(matched_layers_id), layers_id_matched_file))
+
+                    # @added 20210429 - Feature #3994: Panorama - mirage not anomalous
+                    # A hash is added to the ionosphere.panorama.not_anomalous_metrics for
+                    # every metric that is found to be not anomalous.
+                    try:
+                        add_not_anomalous_to_redis_hash(base_name, metric_timestamp, anomalous_value, full_duration)
+                    except Exception as e:
+                        logger.error('error :: failed calling add_not_anomalous_to_redis_hash - %s' % e)
+
             else:
                 logger.info('no layers algorithm check required')
             # Ionosphere layers DONE
@@ -3842,6 +4269,10 @@ class Ionosphere(Thread):
                 return
 
         self.remove_metric_check_file(str(metric_check_file))
+
+        if dev_null:
+            del dev_null
+
         if engine:
             engine_disposal(engine)
         return
@@ -3911,10 +4342,21 @@ class Ionosphere(Thread):
 
             # Report app up
             try:
-                self.redis_conn.setex(skyline_app, 120, now)
-                logger.info('updated Redis key for %s up' % skyline_app)
-            except:
-                logger.error('error :: failed to update Redis key for %s up' % skyline_app)
+                # @modified 20210524 - Branch #1444: thunder
+                # Report app AND Redis as up
+                # self.redis_conn.setex(skyline_app, 120, now)
+                # logger.info('updated Redis key for %s up' % skyline_app)
+                redis_is_up = self.redis_conn.setex(skyline_app, 120, now)
+                if redis_is_up:
+                    logger.info('updated Redis key for %s up' % skyline_app)
+                    try:
+                        self.redis_conn.setex('redis', 120, now)
+                    except Exception as e:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: could not update the Redis redis key - %s' % (
+                            e))
+            except Exception as e:
+                logger.error('error :: failed to update Redis key for %s up - %s' % (skyline_app, e))
 
             # @modified 20200330 - Feature #3462: Add IONOSPHERE_MANAGE_PURGE
             # Wrapped purging up in a conditional to allow the user to offload
@@ -4478,13 +4920,13 @@ class Ionosphere(Thread):
                                 logger.error('error :: could not query Redis for cache_key: %s' % e)
                             if not check_done:
                                 logger.info('not removing feedback metric as no check has been done in last 600 seconds on %s' % base_name)
+                                remove_feedback_metric_check = False
                             else:
                                 logger.info('rate limiting feedback metric, removing check as %s has been checked in the last 600 seconds' % (
                                     base_name))
                                 remove_feedback_metric_check = True
                             if remove_feedback_metric_check:
                                 metric_check_file = '%s/%s' % (settings.IONOSPHERE_CHECK_PATH, i_metric_check_file)
-                                self.remove_metric_check_file(str(metric_check_file))
 
                                 # @added 20200907 - Feature #3734: waterfall alerts
                                 # Remove the metric from the waterfall_alerts Redis set
@@ -4534,6 +4976,7 @@ class Ionosphere(Thread):
                                                 logger.error(traceback.format_exc())
                                                 logger.error('error :: failed to remove feedback metric waterfall alert item for %s from Redis set %s' % (
                                                     base_name, redis_set))
+                                self.remove_metric_check_file(str(metric_check_file))
 
                     # Determine metric_var_files after possible feedback metric removals
                     metric_var_files = False
