@@ -686,3 +686,7 @@ matrixprofile==1.1.4
 #                   Feature #3978: luminosity - classify_metrics
 #                   Feature #3642: Anomaly type classification
 git+git://github.com/earthgecko/adtk@895c517#egg=adtk
+
+# @added 20210411 - Feature #4014: Ionosphere - inference
+#                   Branch #3590: inference
+mass-ts==0.1.4
