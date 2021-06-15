@@ -51,6 +51,12 @@ PID_PATH = '/var/run/skyline'
 :vartype PID_PATH: str
 """
 
+SKYLINE_DIR = '/opt/skyline'
+"""
+:var SKYLINE_DIR: The Skyline dir. All other Skyline.
+:vartype SKYLINE_DIR: str
+"""
+
 SKYLINE_TMP_DIR = '/tmp/skyline'
 """
 :var SKYLINE_TMP_DIR: The Skyline tmp dir. Do not include a trailing slash.
@@ -61,7 +67,7 @@ SKYLINE_TMP_DIR = '/tmp/skyline'
 
 FULL_NAMESPACE = 'metrics.'
 """
-:var FULL_NAMESPACE: Metrics will be prefixed with this value in Redis.
+:var FULL_NAMESPACE: Metrics must be prefixed with this value in Redis.
 :vartype FULL_NAMESPACE: str
 """
 
@@ -196,7 +202,7 @@ CARBON_HOST = GRAPHITE_HOST
 """
 :var CARBON_HOST: endpoint to send metrics that should reach graphite if
     the CARBON_HOST is a different host to the GRAPHITE_HOST set it here.
-:vartype CARBON_PORT: int
+:vartype CARBON_HOST: str
 """
 
 CARBON_PORT = 2003
@@ -251,7 +257,7 @@ SKYLINE_FEEDBACK_NAMESPACES = [SERVER_METRICS_NAME, GRAPHITE_HOST]
     the GRAPHITE_HOST, the Skyline mysql database metrics and Redis queries
     will all change substantially too.  Although Skyline can be trained and
     learn them, when Skyline is in a known busy state, the monitoring of its
-    own metrics and related metrics should take 2md priority.  In fact when the
+    own metrics and related metrics should take 2nd priority.  In fact when the
     ionosphere_busy state is determined, Skyline will rate limit the analysis of
     any metrics in the namespaces declared here.
     This list works in the same way that Horizon SKIP_LIST does, it matches in
@@ -311,7 +317,7 @@ PANDAS_VERSION = '0.18.1'
 ALERTERS_SETTINGS = True
 """
 .. note:: Alerters can be enabled alerters due to that fact that not everyone
-    will necessarily want all 3rd party alerters.  Enabled what 3rd alerters you
+    will necessarily want all 3rd party alerters.  Enable what 3rd alerters you
     require here.   This enables only the alerters that are required to be
     imported and means that not all alerter related modules in
     ``requirements.txt`` have to be installed, only those you require.
@@ -328,7 +334,7 @@ SYSLOG_ENABLED = True
 
 HIPCHAT_ENABLED = False
 """
-:var HIPCHAT_ENABLED: Enables the Hipchat alerter
+:var HIPCHAT_ENABLED: [DEPRECATED] Enables the Hipchat alerter
 :vartype HIPCHAT_ENABLED: boolean
 """
 
@@ -376,10 +382,19 @@ ANALYZER_ENABLED = True
 :vartype ANALYZER_ENABLED: boolean
 """
 
+ANALYZER_VERBOSE_LOGGING = True
+"""
+:var ANALYZER_VERBOSE_LOGGING: As of Skyline 3.0, apps log notice and errors
+    only.  To have addtional info logged set this to True.  Useful for debugging
+    but less verbose than LOCAL_DEBUG.
+:vartype ANALYZER_VERBOSE_LOGGING: boolean
+"""
+
 ANOMALY_DUMP = 'webapp/static/dump/anomalies.json'
 """
 :var ANOMALY_DUMP: This is the location the Skyline agent will write the
-    anomalies file to disk.  It needs to be in a location accessible to the webapp.
+    anomalies file to disk.  It needs to be in a location accessible to the
+    webapp.
 :vartype ANOMALY_DUMP: str
 """
 
@@ -431,6 +446,25 @@ STALE_PERIOD = 500
     'Staleness' means that a datapoint has not been added for STALE_PERIOD
     seconds.
 :vartype STALE_PERIOD: int
+"""
+
+CUSTOM_STALE_PERIOD = {}
+"""
+:var CUSTOM_STALE_PERIOD: This enables overriding the :mod:`settings.STALE_PERIOD`
+    per metric namespace to become 'stale' and for the analyzer/boundary to
+    ignore it until new datapoints are added.  'Staleness' means that a
+    datapoint has not been added for the defined number of seconds.  The
+    namespaces can be absolute metric names, substrings (dotted elements) of a
+    namespace or a regex of a namespace.  First match wins so ensure metrics
+    are not defined by multiple entries.
+:vartype CUSTOM_STALE_PERIOD: dict
+
+- **Example**::
+
+    CUSTOM_STALE_PERIOD = {
+        'cswellsurf.buoys': 7200,
+    }
+
 """
 
 ALERT_ON_STALE_METRICS = True
@@ -532,6 +566,7 @@ Example:
         'external_hosts.dc1',
     ]
 
+
 """
 
 SKIP_AIRGAPS = []
@@ -611,7 +646,7 @@ SKIP_CHECK_DATA_SPARSITY_NAMESPACES = []
 ANALYZER_CHECK_LAST_TIMESTAMP = False
 """
 :var ANALYZER_CHECK_LAST_TIMESTAMP: ADVANCED FEATURE - whether to make Analyzer
-    record the last analyzed timestamp per metric and only submit the metic to
+    record the last analyzed timestamp per metric and only submit the metric to
     be analysed if it has a new timestamp for the last (or is stale).  Where
     high frequency metrics are used, this is generally not required, however it
     is useful and can substantially reduce the amount of analysis run if you
@@ -697,7 +732,7 @@ ALGORITHMS = [
 :var ALGORITHMS: These are the algorithms that the Analyzer will run. To add a
     new algorithm, you must both define the algorithm in algorithms.py and add
     it's name here.
-:vartype ALGORITHMS: array
+:vartype ALGORITHMS: list
 """
 
 CONSENSUS = 6
@@ -742,6 +777,19 @@ ANALYZER_MAD_LOW_PRIORITY_METRICS = 0
     ANALYZER_MAD_LOW_PRIORITY_METRICS will be automatically set to 10 if it is
     set to 0 here.  ADVANCED FEATURE
 :vartype ANALYZER_MAD_LOW_PRIORITY_METRICS: int
+"""
+
+ANALYZER_SKIP = []
+"""
+:var ANALYZER_SKIP: Namespaces to not analyse.  These are metrics that you do
+    not want Analyzer to analyse.  It allows for disabling the analysis on
+    certain namespaces.  Works in the same way as SKIP_LIST works, it matches in
+    the string or dotted namespace elements.  If you never want to analyse a
+    namespace rather add it to SKIP_LIST.  ANALYZER_SKIP is more suited to allow
+    for temporarily disabling analysis on a namespace but the metrics time
+    series data still gets submitted to Redis.  Whereas metrics in SKIP_LIST
+    just get dropped.
+:vartype ANALYZER_SKIP: list
 """
 
 CUSTOM_ALGORITHMS = {}
@@ -991,10 +1039,10 @@ trigger again.
         # Wildcard namespaces can be used as well
         ('metric4.thing.*.requests', 'stmp', 900),
         # However beware of wildcards as the above wildcard should really be
-        ('metric4.thing\..*.\.requests', 'stmp', 900),
+        ('metric4.thing\\..*.\\.requests', 'stmp', 900),
         # mirage - SECOND_ORDER_RESOLUTION_HOURS - if added and Mirage is enabled
         ('metric5.thing.*.rpm', 'smtp', 900, 168),
-        # NOTE: all slack alert tuples MUST be declared AFTER smtp alert tuples
+        # NOTE: all other alert tuples MUST be declared AFTER smtp alert tuples
         ('metric3', 'slack', 600),
         ('stats.', 'http_alerter_external_endpoint', 30),
     )
@@ -1016,8 +1064,8 @@ trigger again.
 .. note:: Consider using the default skyline_test.alerters.test for testing
     alerts with.
 
-.. note:: All slack alerts must be declared AFTER smtp alerts as slack alerts
-    use the smtp resources to send to slack.
+.. note:: All other alerts must be declared AFTER smtp alerts as other alerts
+    rely on the smtp resources.
 
 """
 
@@ -1139,7 +1187,7 @@ HIPCHAT_OPTS = {
     'color': 'purple',
 }
 """
-:var HIPCHAT_OPTS: Your Hipchat settings.
+:var HIPCHAT_OPTS: [DEPRECATED] Your Hipchat settings.
 :vartype HIPCHAT_OPTS: dictionary
 
 HipChat alerts require python-simple-hipchat
@@ -1274,7 +1322,7 @@ WORKER_PROCESSES = 2
 :vartype WORKER_PROCESSES: int
 """
 
-HORIZON_IP = 'YOUR_SKYLINE_INTSANCE_IP_ADDRESS'
+HORIZON_IP = 'YOUR_SKYLINE_INSTANCE_IP_ADDRESS'
 """
 :var HORIZON_IP: The IP address for Horizon to bind to.  Skyline receives data
     from Graphite on this IP address.  This previously defaulted to
@@ -1306,7 +1354,7 @@ CHUNK_SIZE = 10
   setting this value a bit higher.
 """
 
-MAX_QUEUE_SIZE = 500
+MAX_QUEUE_SIZE = 50000
 """
 :var MAX_QUEUE_SIZE: Maximum allowable length of the processing queue
 :vartype MAX_QUEUE_SIZE: int
@@ -1314,15 +1362,16 @@ MAX_QUEUE_SIZE = 500
 This is the maximum allowable length of the processing queue before new chunks
 are prevented from being added. If you consistently fill up the processing
 queue, a higher MAX_QUEUE_SIZE will not save you. It most likely means that the
-workers do not have enough CPU alotted in order to process the queue on time.
-Try increasing :mod:`settings.CHUNK_SIZE` and decreasing
-:mod:`settings.ANALYZER_PROCESSES` or decreasing :mod:`settings.ROOMBA_PROCESSES`
+workers do not have enough CPU alotted in order to process the queue on time or
+there is too much I/O wait on the system.  Try increasing
+:mod:`settings.CHUNK_SIZE` and decreasing :mod:`settings.ANALYZER_PROCESSES` or
+decreasing :mod:`settings.ROOMBA_PROCESSES`
 """
 
 ROOMBA_PROCESSES = 1
 """
 :var ROOMBA_PROCESSES: This is the number of Roomba processes that will be
-    spawned to trim timeseries in order to keep them at
+    spawned by Horizon to trim timeseries in order to keep them at
     :mod:`settings.FULL_DURATION`. Keep this number small, as it is not
     important that metrics be exactly :mod:`settings.FULL_DURATION` all the time.
 :vartype ROOMBA_PROCESSES: int
@@ -1338,6 +1387,21 @@ Normally Roomba will clean up everything that is older than
 second, it can happen that you'll end up with INCOMPLETE metrics. With this
 setting Roomba will clean up evertyhing that is older than
 :mod:`settings.FULL_DURATION` + :mod:`settings.ROOMBA_GRACE_TIME`
+"""
+
+ROOMBA_OPTIMUM_RUN_DURATION = 60
+"""
+:var ROOMBA_OPTIMUM_RUN_DURATION: Timeout in seconds
+:vartype ROOMBA_OPTIMUM_RUN_DURATION: int
+
+This is how often Horizon should run roomba to run and prune the time series
+data in Redis to :mod:`settings.FULL_DURATION`.  Thus allows roomba to be tuned
+under heavy iowait conditions.  Under heavy iowait conditions, the default 60
+seconds can results in sustained CPU and IO on Redis and the horizon thread.
+Being able to adjust this to 300 allows for a reduction in IO under these
+conditions.
+Changing value can have an impact on Ionosphere echo features profiles.
+ADVANCED FEATURE if you need to use this you have a problem on your host.
 """
 
 ROOMBA_TIMEOUT = 100
@@ -1366,12 +1430,12 @@ this is set to True, analyzer_batch euthanizes batch metrics.
 
 ROOMBA_BATCH_METRICS_CUSTOM_DURATIONS = []
 """
-:var ROOMBA_BATCH_METRICS_CUSTOM_DURATIONS: A list of list of namespaces and
+:var ROOMBA_BATCH_METRICS_CUSTOM_DURATIONS: A list of lists of namespaces and
     and custom durations for batch metrics.  Advanced feature for development
     and testing.
-:vartype ROOMBA_BATCH_METRICS_CUSTOM_DURATIONS: tuple
+:vartype ROOMBA_BATCH_METRICS_CUSTOM_DURATIONS: list
 
-This allows for testing metrics via  analyzer_batch with a different
+This allows for testing metrics via analyzer_batch with a different
 FULL_DURATION.  It is only applied if
 :mod:`settings.ROOMBA_DO_NOT_PROCESS_BATCH_METRICS` is set to True.  It allows
 for a metric to be feed to Skyline with historical data that is not aligned with
@@ -1429,7 +1493,7 @@ HORIZON_SHARD_PICKLE_PORT = 2026
     for Graphite pickles over TCP, sent by Graphite's carbon-relay-b agent.
     When running Skyline clustered with multiple Horizon instances, an
     additional Graphite carbon-relay-b instances are required to be run to on
-    the remote Graphite servrs to forward metrics on to the remote Horizons.
+    the remote Graphite servers to forward metrics on to the remote Horizons.
     See https://earthgecko-skyline.readthedocs.io/en/latest/horizon.html#horizon-shards
 :vartype PICKLE_PORT: str
 """
@@ -1528,6 +1592,127 @@ matches in the string or dotted namespace elements.
 """
 
 """
+Thunder settings
+"""
+
+THUNDER_ENABLED = True
+"""
+:var THUNDER_ENABLED: Enable Thunder.  Thunder monitors the internals and
+    operational changes on the Skyline apps and metrics.  Although the user can
+    monitor Skyline metrics with Skyline, thunder is for convenience so that
+    Skyline has some default monitoring of important Skyline metrics and
+    operations without having to add specific alert tuples on Skyline metrics.
+    However this does not stop users from adding their on alerts on THEIR own
+    Skyline and other metrics once they have the system up and running an get to
+    know it.  WORK IN PROGRESS
+:vartype THUNDER_ENABLED: boolean
+"""
+
+THUNDER_CHECKS = {
+    # If not alert_via_ items are specified on a check it defaults to SMTP
+    'analyzer': {
+        'up': {  # Notifies if Analyzer changes UP states
+            'run': True, 'expiry': 900, 'alert_via_smtp': True,
+            'alert_via_slack': False, 'alert_via_pagerduty': False,
+        },
+        'run_time': {
+            'run': True, 'expiry': 900, 'after_overruns': 5,
+            'alert_via_smtp': True,
+            'alert_via_slack': False, 'alert_via_pagerduty': False,
+        },
+        # 'total_metrics': {  # Notifies if the Analyzer total_metrics significantly changes
+        #     'run': False, 'expiry': 900, 'alert_via_smtp': True,
+        #     'alert_via_slack': False, 'alert_via_pagerduty': False,
+        # },
+        # 'total_analyzed': {  # Notifies if the Analyzer total_analyzed significantly changes
+        #     'run': False, 'expiry': 900, 'alert_via_smtp': True,
+        #     'alert_via_slack': False, 'alert_via_pagerduty': False,
+        # },
+    },
+    'redis': {
+        'up': {  # Notifies if Redis changes UP states
+            'run': True, 'expiry': 900, 'alert_via_smtp': True,
+            'alert_via_slack': False, 'alert_via_pagerduty': False,
+        },
+    },
+    'horizon': {
+        'up': {
+            'run': True, 'expiry': 900, 'alert_via_smtp': True,
+            'alert_via_slack': False, 'alert_via_pagerduty': False,
+        },
+        # 'worker.metrics_received': {
+        #     'algorithm_source': '/opt/skyline/github/skyline/skyline/custom_algorithms/significant_change_window_percent_sustained.py',
+        #     'run': False, 'expiry': 900, 'significant_change_percentage': 10,
+        #     'significant_change_window': 600, 'significant_change_over': 3600,
+        #     'times_in_a_row': 10, 'alert_via_smtp': True,
+        #     'alert_via_slack': False, 'alert_via_pagerduty': False,
+        # },
+    },
+    'mirage': {
+        'up': {
+            'run': True, 'expiry': 900, 'alert_via_smtp': True,
+            'alert_via_slack': False, 'alert_via_pagerduty': False,
+        },
+    },
+    'panorama': {
+        'up': {
+            'run': True, 'expiry': 900, 'alert_via_smtp': True,
+            'alert_via_slack': False, 'alert_via_pagerduty': False,
+        },
+    },
+    'ionosphere': {
+        'up': {
+            'run': True, 'expiry': 900, 'alert_via_smtp': True,
+            'alert_via_slack': False, 'alert_via_pagerduty': False,
+        },
+    },
+    'luminosity': {
+        'up': {
+            'run': True, 'expiry': 900, 'alert_via_smtp': True,
+            'alert_via_slack': False, 'alert_via_pagerduty': False,
+        },
+    },
+    'webapp': {
+        'up': {
+            'run': True, 'expiry': 900, 'alert_via_smtp': True,
+            'alert_via_slack': False, 'alert_via_pagerduty': False,
+        },
+    },
+}
+"""
+:var THUNDER_CHECKS: Enable/disable the checks, configure alert expiry times and
+    define alert_via channels per Skyline app and check.  If no alert_via_ items
+    are defined the default is to alert_via_smtp for all thunder checks.  Think
+    of Thunder checks as built-in Skyline ALERTS and BOUNDARY_METRICS checks
+    specifically for your Skyline instance metrics and external applications,
+    without you have to know what Skyline metrics and things to watch and know
+    the values of to configure.  WORK IN PROGRESS
+:vartype THUNDER_CHECKS: dict
+"""
+
+THUNDER_OPTS = {
+    # SMTP ALERTS
+    'alert_via_smtp': True,
+    # This is a list of email addresses to send thunder alerts to, it can
+    # contain a single email in the list.
+    'smtp_recipients': ['you@your_domain.com', 'them@your_domain.com'],
+    # 'smtp_recipients': [],
+    # SLACK ALERTS (uses settings.SLACK_OPTS)
+    'alert_via_slack': False,
+    'slack_channel': '#skyline',
+    # PAGERDUTY ALERTS (uses settings.PAGERDUTY_OPTS)
+    'alert_via_pagerduty': False,
+}
+"""
+:var THUNDER_OPTS: Thunder can alert via any combination of the following routes
+    SMTP, Slack and Pagerduty.  These settings are very similar to Analyzer and
+    Boundary alert related settings and the values may be the same. However
+    Thunder alerts are meant for the Skyline administrator/s whereas Analyzer
+    and Boundary related alerts can be routed to many different parties.
+:vartype THUNDER_ENABLED: boolean
+"""
+
+"""
 Panorama settings
 """
 
@@ -1571,7 +1756,6 @@ PANORAMA_DBPORT = '3306'
 """
 
 PANORAMA_DBUSER = 'skyline'
-
 """
 :var PANORAMA_DBUSER: The database user
 :vartype PANORAMA_DBUSER: str
@@ -2053,7 +2237,7 @@ BOUNDARY_HIPCHAT_OPTS = {
     'graphite_graph_line_color': 'pink',
 }
 """
-:var BOUNDARY_HIPCHAT_OPTS: Your Hipchat settings.
+:var BOUNDARY_HIPCHAT_OPTS: [DEPRECATED] Your Hipchat settings.
 :vartype BOUNDARY_HIPCHAT_OPTS: dictionary
 
 HipChat alerts require python-simple-hipchat
@@ -2297,6 +2481,14 @@ IONOSPHERE_ENABLED = True
 """
 :var IONOSPHERE_ENABLED: Enable Ionosphere
 :vartype IONOSPHERE_ENABLED: boolean
+"""
+
+IONOSPHERE_VERBOSE_LOGGING = False
+"""
+:var IONOSPHERE_VERBOSE_LOGGING: As of Skyline 3.0, apps log notice and errors
+    only.  To have addtional info logged set this to True.  Useful for debugging
+    but less verbose than LOCAL_DEBUG.
+:vartype IONOSPHERE_VERBOSE_LOGGING: boolean
 """
 
 IONOSPHERE_PROCESSES = 1
@@ -2647,12 +2839,12 @@ to 0
         #  LEARN_VALID_TIMESERIES_OLDER_THAN_SECONDS, MAX_GENERATIONS,
         #  MAX_PERCENT_DIFF_FROM_ORIGIN),
         # Wildcard namespaces can be used as well
-        ('metric3.thing\..*', 90, 3661, 16, 100.0),
-        ('metric4.thing\..*.\.requests', 14, 3661, 16, 100.0),
+        ('metric3.thing\\..*', 90, 3661, 16, 100.0),
+        ('metric4.thing\\..*.\\.requests', 14, 3661, 16, 100.0),
         # However beware of wildcards as the above wildcard should really be
-        ('metric4.thing\..*.\.requests', 14, 7261, 3, 7.0),
+        ('metric4.thing\\..*.\\.requests', 14, 7261, 3, 7.0),
         # Disable learning on a namespace
-        ('metric5.thing\..*.\.rpm', 0, 3661, 5, 7.0),
+        ('metric5.thing\\..*.\\.rpm', 0, 3661, 5, 7.0),
         # Learn all Ionosphere enabled metrics at 30 days
         ('.*', 30, 3661, 16, 100.0),
     )
@@ -2741,6 +2933,102 @@ IONOSPHERE_PERFORMANCE_DATA_POPULATE_CACHE_DEPTH = 0
 :vartype IONOSPHERE_PERFORMANCE_DATA_POPULATE_CACHE_DEPTH: int
 """
 
+IONOSPHERE_INFERENCE_MOTIFS_ENABLED = True
+"""
+:var IONOSPHERE_INFERENCE_MOTIFS_ENABLED: Whether to have Ionosphere use the
+    motif similarily matching method, based on mass-ts.
+:vartype IONOSPHERE_INFERENCE_MOTIFS_ENABLED: boolean
+"""
+
+IONOSPHERE_INFERENCE_MOTIFS_SETTINGS = {
+    'default_inference_batch_sizes': {
+        1440: {'top_matches': 50, 'max_distance': 30, 'max_area_percent_diff': 20.0, 'range_padding_percent': 10.0, 'find_exact_matches': False},
+        720: {'top_matches': 50, 'max_distance': 25, 'max_area_percent_diff': 20.0},
+        360: {'top_matches': 50, 'max_distance': 23, 'max_area_percent_diff': 20.0},
+        180: {'top_matches': 50, 'max_distance': 22, 'max_area_percent_diff': 20.0, 'find_exact_matches': False},
+    },
+}
+"""
+:var IONOSPHERE_INFERENCE_MOTIFS_SETTINGS: variables required for motif analysis
+    can be added per namespace.  Each variable is explained below.  If
+    :mod:`settings.IONOSPHERE_INFERENCE_MOTIFS_ENABLED` is enabled a
+    default_inference_batch_sizes must exist defining the default variables for
+    all namespaces.  Additional namespaces can be added with different variables
+    if the defaults are not applicable to the namespace.  It is important to
+    note that the minimum batch_size should not be less than 180 data points so
+    as to represent a large enough sample of the data to exclude repetitive
+    volatility shifts.  Any batch_size setting of less that 180 **can** result
+    in false negatives.
+:vartype IONOSPHERE_INFERENCE_MOTIFS_SETTINGS: dict
+
+    IONOSPHERE_INFERENCE_MOTIFS_SETTINGS = {
+        'default_inference_batch_sizes': {
+            1440: {'top_matches': 50, 'max_distance': 30, 'max_area_percent_diff': 20.0, 'find_exact_matches': False},
+            720: {'top_matches': 50, 'max_distance': 25, 'max_area_percent_diff': 20.0},
+            360: {'top_matches': 50, 'max_distance': 23, 'max_area_percent_diff': 20.0},
+            180: {'top_matches': 50, 'max_distance': 22, 'max_area_percent_diff': 20.0, 'find_exact_matches': True},
+        },
+        'telegraf.server1': {
+            360: {'top_matches': 50, 'max_distance': 30, 'max_area_percent_diff': 20.0},
+            180: {'top_matches': 10, 'max_distance': 15, 'max_area_percent_diff': 20.0},
+        },
+    }
+
+"""
+
+IONOSPHERE_INFERENCE_MOTIFS_TOP_MATCHES = 50
+"""
+:var IONOSPHERE_INFERENCE_MOTIFS_TOP_MATCHES: The total number of similar motifs
+    to return. 10 is too little, 100 does not surface more, so 50 it is. Default
+    if not defined.
+:vartype IONOSPHERE_INFERENCE_MOTIFS_TOP_MATCHES: int
+"""
+
+IONOSPHERE_INFERENCE_MASS_TS_MAX_DISTANCE = 20.0
+"""
+:var IONOSPHERE_INFERENCE_MASS_TS_MAX_DISTANCE: The maximum mass-ts distance
+    value to consider a motif as similar.  Any motif with a distance value above
+    this is not similar enough to be used.  0.0 being exactly the same. Default
+    if not defined.
+:vartype IONOSPHERE_INFERENCE_MASS_TS_MAX_DISTANCE: float
+"""
+
+IONOSPHERE_INFERENCE_MOTIFS_RANGE_PADDING = 10.0
+"""
+:var IONOSPHERE_INFERENCE_MOTIFS_RANGE_PADDING: The amount of padding to be
+    added to found similar motifs in terms of percentage of the max(y) and
+    min(y) in the motif.  If the values in a potentially anomalous motif fall
+    within the padded range, the motif is matched as not anomalous.  A lower
+    value will result in less matches, a too high values will result in false
+    negatives (not desirable).  Default if not defined.
+:vartype IONOSPHERE_INFERENCE_MOTIFS_RANGE_PADDING: float
+"""
+
+IONOSPHERE_INFERENCE_MOTIFS_SINGLE_MATCH = True
+"""
+:var IONOSPHERE_INFERENCE_MOTIFS_SINGLE_MATCH: ADVANCED FEATURE.  By default
+    Ionosphere returns as not_anomalous on the best matching motif/shapelet
+    that is found.  However if this setting is set to False, Ionosphere
+    return as not anomalous with ALL the matched shapelets.  This is useful for
+    testing and debugging when using
+    :mod:`settings.IONOSPHERE_INFERENCE_MOTIFS_TEST_ONLY`
+:vartype IONOSPHERE_INFERENCE_MOTIFS_SINGLE_MATCH: boolean
+"""
+
+IONOSPHERE_INFERENCE_MOTIFS_TEST_ONLY = False
+"""
+:var IONOSPHERE_INFERENCE_MOTIFS_TEST: ADVANCED FEATURE.  If this is set to
+    True, inference will only record results for testing purposes, Ionosphere
+    will not classify any checks as not anomalous even if similar motifs were
+    found, inference will simply record the results in the database as normal in
+    the motif_matched database table, no updated will be made to the ionosphere
+    or the ionosphere_matched.  If you do wish to run inference in test mode you
+    can set the above IONOSPHERE_INFERENCE_MOTIFS_SINGLE_MATCH setting to False
+    as well to enable inference to check ALL trained data at all durations and
+    record all valid similar motifs and not return on the first match on found.
+:vartype IONOSPHERE_INFERENCE_MOTIFS_TEST_ONLY: boolean
+"""
+
 MEMCACHE_ENABLED = False
 """
 :var MEMCACHE_ENABLED: Enables the use of memcache in Ionosphere to optimise
@@ -2817,7 +3105,7 @@ ALTERNATIVE_SKYLINE_URLS = ['http://skyline-na.example.com:8080','http://skyline
 
 REMOTE_SKYLINE_INSTANCES = []
 """
-:var REMOTE_SKYLINE_INSTANCES: ADVANCE FEATURE - This a nested list of any remote
+:var REMOTE_SKYLINE_INSTANCES: ADVANCED FEATURE - This a nested list of any remote
     instances that Skyline should query for correlation time series this is ONLY
     applicable if there are multiple Skyline instances each with their own
     Redis data.  This is for Skyline Luminosity to query other Skyline instances
@@ -2892,7 +3180,7 @@ LUMINOSITY_CORRELATE_NAMESPACES_ONLY = []
     mod:`settings.LUMINOSITY_CORRELATION_MAPS` method.
 :vartype LUMINOSITY_CORRELATE_NAMESPACES_ONLY: list
 
-- **Dictionary example**::
+- **List example**::
 
     LUMINOSITY_CORRELATE_NAMESPACES_ONLY = [
         'aws.euw1',
@@ -3269,6 +3557,16 @@ FLUX_AGGREGATE_NAMESPACES = {}
     }
 """
 
+FLUX_EXTERNAL_AGGREGATE_NAMESPACES = False
+"""
+:var FLUX_EXTERNAL_AGGREGATE_NAMESPACES: If there are aggrgegate metrics
+    defined in any external settings and there are none defined in the above
+    FLUX_AGGREGATE_NAMESPACES the setting can force flux to check for aggregate
+    metrics from the metrics_manager.
+:vartype FLUX_EXTERNAL_AGGREGATE_NAMESPACES: boolean
+"""
+
+
 FLUX_SEND_TO_STATSD = False
 """
 :var FLUX_SEND_TO_STATSD: Whether to send metrics recieved by flux to statsd.
@@ -3297,6 +3595,14 @@ VISTA_ENABLED = False
 """
 :var VISTA_ENABLED: Enables Skyline vista
 :vartype VISTA_ENABLED: boolean
+"""
+
+VISTA_VERBOSE_LOGGING = False
+"""
+:var VISTA_VERBOSE_LOGGING: As of Skyline 3.0, apps log notice and errors
+    only.  To have addtional info logged set this to True.  Useful for debugging
+    but less verbose than LOCAL_DEBUG.
+:vartype VISTA_VERBOSE_LOGGING: boolean
 """
 
 VISTA_FETCHER_PROCESSES = 1
@@ -3445,7 +3751,7 @@ SNAB_anomalyScore = {}
         'analyzer': ['telegraf.test-server1'],
         'analyzer_batch': ['telegraf.test-server1', 'test_batch_metrics.'],
         'mirage': ['telegraf.test-server1', 'test_batch_metrics.'],
-        'SNAB': ['\.'],
+        'SNAB': ['\\.'],
     }
 
     SNAB_anomalyScore = {
@@ -3459,7 +3765,7 @@ SNAB_anomalyScore = {}
 
 SNAB_CHECKS = {}
 """
-:var SNAB_CHECKS: This is an advanced feature.  A dictionary that defines the
+:var SNAB_CHECKS: ADVANCED FEATURE.  A dictionary that defines the
     any SNAB checks for apps (mirage only) in terms of what namespaces should
     be submitted to snab to be checked by which algortihm/s.
     EXPERIMENTAL.
@@ -3520,4 +3826,25 @@ SNAB_FLUX_LOAD_TEST_NAMESPACE_PREFIX = 'test.snab.flux_load_test'
     namespace for the test metrics. This is the namespace that will appear in
     Graphite with randomly generated metric names. NO trailing dot is required.
 :vartype SNAB_FLUX_LOAD_TEST_NAMESPACE_PREFIX: str
+"""
+
+"""
+External settings
+"""
+EXTERNAL_SETTINGS = {
+    'mock_api_external_settings': {
+        'endpoint': 'http://127.0.0.1:1500/mock_api?test_external_settings',
+        'post_data': {'token': None},
+        # Or a dict of the data to POST
+        # 'post_data': {'data': {'token': '123456abcdef'}},
+        # 'post_data': {'auth': {'id': 286, 'key': '123456abcdef'}},
+        'enabled': True
+    }
+}
+"""
+:var EXTERNAL_SETTINGS: ADVANCED FEATURE.  Skyline can fetch settings for
+    namespaces from an external source. For full details of this functionality
+    please see the External Settings documentation page at:
+    https://earthgecko-skyline.readthedocs.io/en/latest/external_settings.html
+:vartype EXTERNAL_SETTINGS: dict
 """
