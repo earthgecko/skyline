@@ -1346,6 +1346,19 @@ class Analyzer(Thread):
             logger.error(traceback.format_exc())
             logger.error('error :: failed to create custom_stale_metrics_dict from Redis hash key %s - %s' % (
                 custom_stale_metrics_hash_key, e))
+        # @added 20210616 - Branch #1444: thunder
+        #                   Feature #4076: CUSTOM_STALE_PERIOD
+        # Surface the last_timeseries_timestamp Redis hash key so that the
+        # timestamps can be compared as Thunder stale_metrics requires all
+        # timestamps for all metrics
+        metrics_last_timeseries_timestamp_dict = {}
+        metrics_last_timeseries_timestamp_hash_key = 'analyzer.metrics.last_timeseries_timestamp'
+        try:
+            metrics_last_timeseries_timestamp_dict = self.redis_conn_decoded.hgetall(metrics_last_timeseries_timestamp_hash_key)
+        except Exception as e:
+            logger.error(traceback.format_exc())
+            logger.error('error :: failed to create metrics_last_timeseries_timestamp_dict from Redis hash key %s - %s' % (
+                metrics_last_timeseries_timestamp_hash_key, e))
 
         logger.info('checking %s assigned_metrics' % str(len(assigned_metrics)))
 
@@ -1488,7 +1501,24 @@ class Analyzer(Thread):
             # hash key is pruned in metrics_manager when an entry has a
             # timestamp older that now - FULL_DURATION
             if last_timeseries_timestamp:
-                if last_timeseries_timestamp > (int(spin_start) - 260):
+                # @modified 20210616 - Branch #1444: thunder
+                #                      Feature #4076: CUSTOM_STALE_PERIOD
+                # Thunder stale_metrics check requires all metrics to have their
+                # timestamps recorded in the hash key
+                update_last_timestamp_hash_key = False
+                if metrics_last_timeseries_timestamp_dict:
+                    last_hash_key_timestamp = None
+                    try:
+                        last_hash_key_timestamp = int(float(metrics_last_timeseries_timestamp_dict[base_name]))
+                    except KeyError:
+                        update_last_timestamp_hash_key = True
+                    except:
+                        update_last_timestamp_hash_key = True
+                    if last_hash_key_timestamp:
+                        if last_hash_key_timestamp < last_timeseries_timestamp:
+                            update_last_timestamp_hash_key = True
+                # if last_timeseries_timestamp > (int(spin_start) - 260):
+                if update_last_timestamp_hash_key:
                     try:
                         self.redis_conn.hset('analyzer.metrics.last_timeseries_timestamp', base_name, last_timeseries_timestamp)
                         metrics_updated_in_last_timeseries_timestamp_hash_key_count += 1
