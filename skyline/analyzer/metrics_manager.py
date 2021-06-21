@@ -2144,6 +2144,9 @@ class Metrics_Manager(Thread):
             metrics_resolutions_dict = {}
         # Set check_metrics before CHECK_DATA_SPARSITY
         check_metrics = list(unique_metrics)
+        # @added 20210621 - Feature #4148: analyzer.metrics_manager.resolutions
+        #                   Bug #4146: check_data_sparsity - incorrect on low fidelity and inconsistent metrics
+        metrics_with_unknown_resolution = []
 
         # @added 20201209 - Feature #3870: metrics_manager - check_data_sparsity
         if CHECK_DATA_SPARSITY:
@@ -2338,6 +2341,14 @@ class Metrics_Manager(Thread):
                         if last_known_metric_resolution:
                             if int(float(last_known_metric_resolution)) == metric_resolution:
                                 update_metrics_resolutions_key = False
+
+                    # @added 20210621 - Feature #4148: analyzer.metrics_manager.resolutions
+                    #                   Bug #4146: check_data_sparsity - incorrect on low fidelity and inconsistent metrics
+                    if not metric_resolution:
+                        if update_metrics_resolutions_key:
+                            update_metrics_resolutions_key = False
+                        metrics_with_unknown_resolution.append(base_name)
+
                     if update_metrics_resolutions_key:
                         if last_known_metric_resolution is not None:
                             logger.info('metrics_manager :: update_metrics_resolutions_key - updating %s resolution from %s to %s' % (
@@ -2350,7 +2361,6 @@ class Metrics_Manager(Thread):
                             self.redis_conn.hset(
                                 metrics_resolutions_hash_key,
                                 base_name, int(metric_resolution))
-                            # added_data_sparsity_keys += 1
                         except Exception as e:
                             if not check_sparsity_error_log:
                                 logger.error(traceback.format_exc())
@@ -2640,6 +2650,14 @@ class Metrics_Manager(Thread):
                     if last_known_metric_resolution:
                         if int(float(last_known_metric_resolution)) == metric_resolution:
                             update_metrics_resolutions_key = False
+
+                # @added 20210621 - Feature #4148: analyzer.metrics_manager.resolutions
+                #                   Bug #4146: check_data_sparsity - incorrect on low fidelity and inconsistent metrics
+                if not metric_resolution:
+                    if update_metrics_resolutions_key:
+                        update_metrics_resolutions_key = False
+                    metrics_with_unknown_resolution.append(base_name)
+
                 if update_metrics_resolutions_key:
                     if last_known_metric_resolution is not None:
                         logger.info('metrics_manager :: update_metrics_resolutions_key - updating %s resolution from %s to %s' % (
@@ -2667,6 +2685,11 @@ class Metrics_Manager(Thread):
             str(added_metric_resolution_keys), metrics_resolutions_hash_key))
         logger.info('metrics_manager :: update_metrics_resolutions_key - updated %s metric resolution in %s Redis hash key' % (
             str(updated_metric_resolution_keys), metrics_resolutions_hash_key))
+
+        # @added 20210621 - Feature #4148: analyzer.metrics_manager.resolutions
+        #                   Bug #4146: check_data_sparsity - incorrect on low fidelity and inconsistent metrics
+        logger.info('metrics_manager :: update_metrics_resolutions_key - %s metrics have unknown resolution' % (
+            str(len(metrics_with_unknown_resolution))))
 
         # @added 20201212 - Feature #3884: ANALYZER_CHECK_LAST_TIMESTAMP
         if ANALYZER_CHECK_LAST_TIMESTAMP:
