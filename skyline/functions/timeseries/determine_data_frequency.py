@@ -30,6 +30,7 @@ def determine_data_frequency(current_skyline_app, timeseries, log=False):
     """
     function_str = 'functions.timeseries.determine_data_frequency'
     metric_resolution = None
+    timestamp_resolutions_count = {}
     current_logger = None
     if log:
         current_skyline_app_logger = current_skyline_app + 'Log'

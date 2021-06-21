@@ -52,8 +52,9 @@ def determine_data_sparsity(
                 # expected_datapoints = timeseries_full_duration / metric_resolution
                 expected_datapoints = FULL_DURATION / metric_resolution
             except Exception as e:
-                current_logger.error('error :: %s :: failed to determine expected_datapoints for timeseries - %s' % (
-                    function_str, e))
+                if log:
+                    current_logger.error('error :: %s :: failed to determine expected_datapoints for timeseries - %s' % (
+                        function_str, e))
         if expected_datapoints and timeseries:
             try:
                 datapoints_present = len(timeseries)
