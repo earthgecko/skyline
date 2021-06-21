@@ -376,6 +376,9 @@ def thunder_stale_metrics(current_skyline_app, log=True):
                                         sparsely_populated_metrics.append(base_name)
                                         continue
                         except Exception as e:
+                            if not log:
+                                current_skyline_app_logger = current_skyline_app + 'Log'
+                                current_logger = logging.getLogger(current_skyline_app_logger)
                             current_logger.error('error :: %s :: get_sparsity failed for %s - %s' % (
                                 function_str, base_name, e))
 
@@ -475,8 +478,9 @@ def thunder_stale_metrics(current_skyline_app, log=True):
                     current_logger.error('error :: %s :: failed to get Redis key %s - %s' % (
                         function_str, thunder_no_data_alert_key, e))
                 if thunder_no_data_alert_key_exists:
-                    current_logger.info('%s :: skipping sending thunder event for stale metrics on %s as thunder no_data alert key exists for the namespace' % (
-                        function_str, parent_namespace))
+                    if log:
+                        current_logger.info('%s :: skipping sending thunder event for stale metrics on %s as thunder no_data alert key exists for the namespace' % (
+                            function_str, parent_namespace))
                     continue
 
                 # Check if there is a thunder.alert.analyzer.up.alert Redis key for the
@@ -493,8 +497,9 @@ def thunder_stale_metrics(current_skyline_app, log=True):
                     current_logger.error('error :: %s :: failed to get Redis key %s - %s' % (
                         function_str, thunder_analyzer_alert_key, e))
                 if thunder_analyzer_alert_key_exists:
-                    current_logger.info('%s :: skipping sending thunder event for stale metrics on %s as thunder analyzer alert key exists' % (
-                        function_str, parent_namespace))
+                    if log:
+                        current_logger.info('%s :: skipping sending thunder event for stale metrics on %s as thunder analyzer alert key exists' % (
+                            function_str, parent_namespace))
                     continue
 
                 level = 'alert'
