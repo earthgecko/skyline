@@ -110,11 +110,31 @@ def custom_stale_period(
     if not custom_stale_period_namespaces:
         return stale_period
 
+    # @added 20210620 - Branch #1444: thunder
+    #                   Feature #4076: CUSTOM_STALE_PERIOD
+    # Handle multi level namespaces
+    # Sort the list by the namespaces with the most elements to the least as
+    # first match wins
+    custom_stale_period_namespaces_elements_list = []
+    for custom_stale_period_namespace in custom_stale_period_namespaces:
+        namespace_elements = len(custom_stale_period_namespace.split('.'))
+        custom_stale_period_namespaces_elements_list.append([custom_stale_period_namespace, namespace_elements])
+    sorted_custom_stale_period_namespaces = sorted(custom_stale_period_namespaces_elements_list, key=lambda x: (x[1]), reverse=True)
+    if sorted_custom_stale_period_namespaces:
+        custom_stale_period_namespaces = [x[0] for x in sorted_custom_stale_period_namespaces]
+
     pattern_match, matched_by = matched_or_regexed_in_list(current_skyline_app, base_name, custom_stale_period_namespaces, False)
     if pattern_match:
         try:
             matched_namespace = matched_by['matched_namespace']
             custom_stale_period = int(float(custom_stale_period_dict[matched_namespace]))
+            if log:
+                if current_skyline_app == 'analyzer':
+                    current_logger.info('metrics_manager :: %s :: custom_stale_period found for %s: %s' % (
+                        function_str, base_name, str(custom_stale_period)))
+                else:
+                    current_logger.info('%s :: custom_stale_period found for %s: %s' % (
+                        function_str, base_name, str(custom_stale_period)))
         except ValueError:
             custom_stale_period = stale_period
         except Exception as e:

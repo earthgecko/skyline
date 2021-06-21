@@ -4,7 +4,8 @@ import os
 
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 sys.path.insert(0, os.path.dirname(__file__))
-import settings
+if True:
+    import settings
 
 
 def validate_settings_variables(current_skyline_app):
@@ -2040,6 +2041,30 @@ def validate_settings_variables(current_skyline_app):
         invalid_variables = True
     except Exception as e:
         print('error :: the EXTERNAL_SETTINGS dict is not defined in settings.py - %s' % e)
+        invalid_variables = True
+
+    # @added 20210619 - Feature #4148: analyzer.metrics_manager.resolutions
+    #                   Bug #4146: check_data_sparsity - incorrect on low fidelity and inconsistent metrics
+    #                   Feature #3870: metrics_manager - check_data_sparsity
+    try:
+        if not isinstance(settings.FULLY_POPULATED_PERCENTAGE, float):
+            print('error :: FULLY_POPULATED_PERCENTAGE in settings.py is not a float')
+            invalid_variables = True
+    except AttributeError:
+        print('error :: FULLY_POPULATED_PERCENTAGE is not defined in settings.py')
+        invalid_variables = True
+    except Exception as e:
+        print('error :: FULLY_POPULATED_PERCENTAGE is not defined in settings.py - %s' % e)
+        invalid_variables = True
+    try:
+        if not isinstance(settings.SPARSELY_POPULATED_PERCENTAGE, float):
+            print('error :: SPARSELY_POPULATED_PERCENTAGE in settings.py is not a float')
+            invalid_variables = True
+    except AttributeError:
+        print('error :: SPARSELY_POPULATED_PERCENTAGE is not defined in settings.py')
+        invalid_variables = True
+    except Exception as e:
+        print('error :: SPARSELY_POPULATED_PERCENTAGE is not defined in settings.py - %s' % e)
         invalid_variables = True
 
     if current_skyline_app == 'test_settings':

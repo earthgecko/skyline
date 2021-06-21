@@ -53,6 +53,11 @@ from functions.database.queries.metric_id_from_base_name import metric_id_from_b
 from functions.database.queries.metric_ids_from_metric_like import metric_ids_from_metric_like
 from functions.database.queries.latest_anomalies import latest_anomalies as db_latest_anomalies
 
+# @added 20210617 - Feature #4144: webapp - stale_metrics API endpoint
+#                   Feature #4076: CUSTOM_STALE_PERIOD
+#                   Branch #1444: thunder
+from functions.thunder.stale_metrics import thunder_stale_metrics
+
 import skyline_version
 skyline_version = skyline_version.__absolute_version__
 
@@ -959,9 +964,16 @@ def get_cluster_data(api_endpoint, data_required, only_host='all', endpoint_para
                     logger.error('error :: get_cluster_data :: failed to build remote_data from %s on %s' % (
                         str(data_required), str(item)))
             if remote_data:
-                logger.info('get_cluster_data :: got %s %s from %s' % (
-                    str(len(remote_data)), str(data_required), str(item[0])))
-                data = data + remote_data
+                # @modified 20210617 - Feature #4144: webapp - stale_metrics API endpoint
+                # Handle list and dic items
+                if isinstance(remote_data, list):
+                    logger.info('get_cluster_data :: got %s %s from %s' % (
+                        str(len(remote_data)), str(data_required), str(item[0])))
+                    data = data + remote_data
+                if isinstance(remote_data, dict):
+                    logger.info('get_cluster_data :: got %s %s from %s' % (
+                        str(len(remote_data)), str(data_required), str(item[0])))
+                    data.append(remote_data)
     return data
 
 
@@ -1732,3 +1744,133 @@ def plot_not_anomalous_metric(not_anomalous_dict, anomalies_dict, plot_type):
             logger.error('error :: plot_not_anomalous_metric :: failed to set save_to_file in Redis hash - panorama.not_anomalous_plots')
 
     return save_to_file
+
+
+# @added 20210617 - Feature #4144: webapp - stale_metrics API endpoint
+#                   Feature #4076: CUSTOM_STALE_PERIOD
+#                   Branch #1444: thunder
+def namespace_stale_metrics(namespace, cluster_data, exclude_sparsely_populated):
+    """
+    Plot the metric not anomalous or anomalies graph and return the file path
+
+    :param not_anomalous_dict: the dictionary of not anomalous events for the
+        metric
+    :param anomalies_dict: the dictionary of anomalous events for the
+        metric
+    :type not_anomalous_dict: dict
+    :type anomalies_dict: dict
+    :type plot_type: str ('not_anomalous' or 'anomalies')
+    :return: path and filename
+    :rtype: str
+
+    """
+
+    fail_msg = None
+    trace = None
+
+    namespaces_namespace_stale_metrics_dict = {}
+    namespaces_namespace_stale_metrics_dict['stale_metrics'] = {}
+
+    unique_base_names = []
+    try:
+        REDIS_CONN_DECODED = get_redis_conn_decoded(skyline_app)
+        unique_base_names = list(REDIS_CONN_DECODED.smembers('aet.analyzer.unique_base_names'))
+        logger.info('%s namespaces checked for stale metrics discovered with thunder_stale_metrics' % (
+            str(len(unique_base_names))))
+    except Exception as e:
+        fail_msg = 'error :: Webapp error with api?stale_metrics - %s' % e
+        logger.error(fail_msg)
+        raise
+
+    now = int(time.time())
+    namespace_stale_metrics_dict = {}
+    namespace_recovered_metrics_dict = {}
+    try:
+        namespace_stale_metrics_dict, namespace_recovered_metrics_dict = thunder_stale_metrics(skyline_app, log=True)
+    except Exception as e:
+        fail_msg = 'error :: Webapp error with api?stale_metrics - %s' % e
+        logger.error(fail_msg)
+        raise
+    logger.info('%s namespaces checked for stale metrics discovered with thunder_stale_metrics' % (
+        str(len(namespace_stale_metrics_dict))))
+
+    remote_stale_metrics_dicts = []
+    if settings.REMOTE_SKYLINE_INSTANCES and cluster_data:
+        exclude_sparsely_populated_str = 'false'
+        if exclude_sparsely_populated:
+            exclude_sparsely_populated_str = 'true'
+        remote_namespaces_namespace_stale_metrics_dicts = []
+        stale_metrics_uri = 'stale_metrics=true&namespace=%s&exclude_sparsely_populated=%s' % (
+            str(namespace), str(exclude_sparsely_populated_str))
+        try:
+            remote_namespaces_namespace_stale_metrics_dicts = get_cluster_data(stale_metrics_uri, 'stale_metrics')
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: Webapp could not get remote_namespaces_namespace_stale_metrics_dict from the remote Skyline instances')
+        if remote_namespaces_namespace_stale_metrics_dicts:
+            logger.info('got %s remote namespace_stale_metrics_dicts instances from the remote Skyline instances' % str(len(remote_namespaces_namespace_stale_metrics_dicts)))
+            remote_stale_metrics_dicts = remote_namespaces_namespace_stale_metrics_dicts
+
+    stale_metrics_count = 0
+    total_metrics_count = len(unique_base_names)
+    if namespace == 'all':
+        namespaces_namespace_stale_metrics_dict['stale_metrics']['namespace'] = 'all'
+        if remote_stale_metrics_dicts:
+            for remote_stale_metrics_dict in remote_stale_metrics_dicts:
+                total_metrics_count = total_metrics_count + remote_stale_metrics_dict['total_metrics_count']
+        namespaces_namespace_stale_metrics_dict['stale_metrics']['total_metrics_count'] = total_metrics_count
+        namespaces_namespace_stale_metrics_dict['stale_metrics']['stale_metrics'] = {}
+        if namespace_stale_metrics_dict:
+            for parent_namespace in list(namespace_stale_metrics_dict.keys()):
+                for base_name in list(namespace_stale_metrics_dict[parent_namespace]['metrics'].keys()):
+                    stale_metrics_count += 1
+                    namespaces_namespace_stale_metrics_dict['stale_metrics']['stale_metrics'][base_name] = {}
+                    last_timestamp = namespace_stale_metrics_dict[parent_namespace]['metrics'][base_name]
+                    stale_for = now - int(float(last_timestamp))
+                    namespaces_namespace_stale_metrics_dict['stale_metrics']['stale_metrics'][base_name]['last_timestamp'] = last_timestamp
+                    namespaces_namespace_stale_metrics_dict['stale_metrics']['stale_metrics'][base_name]['stale_for'] = stale_for
+        if remote_stale_metrics_dicts:
+            for remote_stale_metrics_dict in remote_stale_metrics_dicts:
+                for base_name in list(remote_stale_metrics_dict['stale_metrics'].keys()):
+                    stale_metrics_count += 1
+                    namespaces_namespace_stale_metrics_dict['stale_metrics']['stale_metrics'][base_name] = {}
+                    last_timestamp = remote_stale_metrics_dict['stale_metrics'][base_name]['last_timestamp']
+                    stale_for = remote_stale_metrics_dict['stale_metrics'][base_name]['stale_for']
+                    namespaces_namespace_stale_metrics_dict['stale_metrics']['stale_metrics'][base_name]['last_timestamp'] = last_timestamp
+                    namespaces_namespace_stale_metrics_dict['stale_metrics']['stale_metrics'][base_name]['stale_for'] = stale_for
+        namespaces_namespace_stale_metrics_dict['stale_metrics']['stale_metrics_count'] = stale_metrics_count
+
+    if namespace_stale_metrics_dict and namespace != 'all':
+        namespaces_namespace_stale_metrics_dict['stale_metrics']['namespace'] = namespace
+        total_metrics_count = len([base_name for base_name in unique_base_names if base_name.startswith(namespace)])
+        if remote_stale_metrics_dicts:
+            for remote_stale_metrics_dict in remote_stale_metrics_dicts:
+                total_metrics_count = total_metrics_count + remote_stale_metrics_dict['total_metrics_count']
+        namespaces_namespace_stale_metrics_dict['stale_metrics']['total_metrics_count'] = total_metrics_count
+        namespaces_namespace_stale_metrics_dict['stale_metrics']['stale_metrics'] = {}
+        top_level_namespace = namespace.split('.')[0]
+        if namespace_stale_metrics_dict:
+            for parent_namespace in list(namespace_stale_metrics_dict.keys()):
+                if parent_namespace != top_level_namespace:
+                    continue
+                for base_name in list(namespace_stale_metrics_dict[parent_namespace]['metrics'].keys()):
+                    if not base_name.startswith(namespace):
+                        continue
+                    stale_metrics_count += 1
+                    namespaces_namespace_stale_metrics_dict['stale_metrics']['stale_metrics'][base_name] = {}
+                    last_timestamp = namespace_stale_metrics_dict[parent_namespace]['metrics'][base_name]
+                    stale_for = now - int(float(last_timestamp))
+                    namespaces_namespace_stale_metrics_dict['stale_metrics']['stale_metrics'][base_name]['last_timestamp'] = last_timestamp
+                    namespaces_namespace_stale_metrics_dict['stale_metrics']['stale_metrics'][base_name]['stale_for'] = stale_for
+        if remote_stale_metrics_dicts:
+            for remote_stale_metrics_dict in remote_stale_metrics_dicts:
+                for base_name in list(remote_stale_metrics_dict['stale_metrics'].keys()):
+                    stale_metrics_count += 1
+                    namespaces_namespace_stale_metrics_dict['stale_metrics']['stale_metrics'][base_name] = {}
+                    last_timestamp = remote_stale_metrics_dict['stale_metrics'][base_name]['last_timestamp']
+                    stale_for = remote_stale_metrics_dict['stale_metrics'][base_name]['stale_for']
+                    namespaces_namespace_stale_metrics_dict['stale_metrics']['stale_metrics'][base_name]['last_timestamp'] = last_timestamp
+                    namespaces_namespace_stale_metrics_dict['stale_metrics']['stale_metrics'][base_name]['stale_for'] = stale_for
+        namespaces_namespace_stale_metrics_dict['stale_metrics']['stale_metrics_count'] = stale_metrics_count
+
+    return namespaces_namespace_stale_metrics_dict

@@ -271,7 +271,7 @@ def ionosphere_motif_inference(metric, timestamp):
         logger.info('inference :: load_timeseries_json in %.6f seconds' % (
             (end_load_timeseries_json - start_load_timeseries_json)))
 
-        metric_resolution = determine_data_frequency(skyline_app, timeseries)
+        metric_resolution = determine_data_frequency(skyline_app, timeseries, False)
         logger.info('inference :: looking for similar motifs in trained fps of full_duration: %s' % str(full_duration))
 
         for fp_id in full_duration_fp_ids:

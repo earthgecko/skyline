@@ -7319,6 +7319,23 @@ class Analyzer(Thread):
                             logger.error('error :: metrics_manager :: could not send send_graphite_metric %s %s: %s' % (
                                 send_metric_name, str(last_avg_sparsity), e))
 
+                    # @added 20210619 - Feature #4148: analyzer.metrics_manager.resolutions
+                    send_metric_name = skyline_app_graphite_namespace + '.metrics_manager_run_time'
+                    metrics_manager_run_time = None
+                    try:
+                        metrics_manager_run_time_data = self.redis_conn_decoded.get('analyzer.metrics_manager.run_time')
+                        if metrics_manager_run_time_data:
+                            metrics_manager_run_time = float(metrics_manager_run_time_data)
+                    except Exception as e:
+                        logger.error('error :: failed to determine run_time from Redis key analyzer.metrics_manager.run_time: %s' % e)
+                    if metrics_manager_run_time or metrics_manager_run_time == 0:
+                        try:
+                            send_graphite_metric(skyline_app, send_metric_name, str(metrics_manager_run_time))
+                            logger.info('sent Graphite metric for metrics_manager - %s %s' % (send_metric_name, str(metrics_manager_run_time)))
+                        except Exception as e:
+                            logger.error('error :: metrics_manager :: could not send send_graphite_metric %s %s: %s' % (
+                                send_metric_name, str(metrics_manager_run_time), e))
+
             # Sleep if it went too fast
             # if time() - now < 5:
             #    logger.info('sleeping due to low run time...')

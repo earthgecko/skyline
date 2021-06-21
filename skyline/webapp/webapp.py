@@ -141,6 +141,10 @@ if True:
         get_mirage_not_anomalous_metrics,
         # @added 20210328 - Feature #3994: Panorama - mirage not anomalous
         plot_not_anomalous_metric,
+        # @added 20210617 - Feature #4144: webapp - stale_metrics API endpoint
+        #                   Feature #4076: CUSTOM_STALE_PERIOD
+        #                   Branch #1444: thunder
+        namespace_stale_metrics,
     )
     from ionosphere_backend import (
         ionosphere_data, ionosphere_metric_data,
@@ -230,6 +234,12 @@ if True:
 
     # @added 20210604 - Branch #1444: thunder
     from functions.metrics.get_top_level_namespaces import get_top_level_namespaces
+
+    # @added 20210617 - Feature #4144: webapp - stale_metrics API endpoint
+    #                   Feature #4076: CUSTOM_STALE_PERIOD
+    #                   Branch #1444: thunder
+    from functions.redis.get_metric_timeseries import get_metric_timeseries
+    from functions.timeseries.determine_data_sparsity import determine_data_sparsity
 
 # @added 20200516 - Feature #3538: webapp - upload_data endoint
 file_uploads_enabled = False
@@ -771,6 +781,479 @@ def api():
         except:
             logger.error('error :: /api request with invalid cluster_data argument')
             return 'Bad Request', 400
+
+    # @added 20210619 - Feature #4148: analyzer.metrics_manager.resolutions
+    #                   Bug #4146: check_data_sparsity - incorrect on low fidelity and inconsistent metrics
+    #                   Feature #4144: webapp - stale_metrics API endpoint
+    #                   Feature #4076: CUSTOM_STALE_PERIOD
+    #                   Branch #1444: thunder
+    if 'metrics_resolutions' in request.args:
+        logger.info('/api?metrics_resolutions')
+        start_metrics_resolution = timer()
+        namespace = 'all'
+        try:
+            namespace = request.args.get('namespace', 'all')
+        except KeyError:
+            namespace = 'all'
+        except Exception as e:
+            trace = traceback.format_exc()
+            fail_msg = 'error :: Webapp error with api?metrics_resolutions - %s' % e
+            logger.error(fail_msg)
+            return internal_error(fail_msg, trace)
+        logger.info('/api?metrics_resolutions - namespace: %s' % namespace)
+        remove_prefix = False
+        try:
+            remove_prefix_str = request.args.get('remove_prefix', 'false')
+            if remove_prefix_str != 'false':
+                remove_prefix = remove_prefix_str
+        except KeyError:
+            remove_prefix = False
+        except Exception as e:
+            trace = traceback.format_exc()
+            fail_msg = 'error :: Webapp error with api?metrics_resolutions - %s' % e
+            logger.error(fail_msg)
+            return internal_error(fail_msg, trace)
+        logger.info('/api?metrics_resolutions - remove_prefix: %s' % str(remove_prefix))
+
+        less_than = False
+        try:
+            less_than_str = request.args.get('less_than', 'false')
+            if less_than_str != 'false':
+                less_than = int(less_than_str)
+        except KeyError:
+            less_than = False
+        except Exception as e:
+            trace = traceback.format_exc()
+            fail_msg = 'error :: Webapp error with api?metrics_resolutions - %s' % e
+            logger.error(fail_msg)
+            return internal_error(fail_msg, trace)
+        logger.info('/api?metrics_resolutions - less_than: %s' % str(less_than))
+        greater_than = False
+        try:
+            greater_than_str = request.args.get('greater_than', 'false')
+            if greater_than_str != 'false':
+                greater_than = int(greater_than_str)
+        except KeyError:
+            greater_than = False
+        except Exception as e:
+            trace = traceback.format_exc()
+            fail_msg = 'error :: Webapp error with api?metrics_resolutions - %s' % e
+            logger.error(fail_msg)
+            return internal_error(fail_msg, trace)
+        logger.info('/api?metrics_resolutions - greater_than: %s' % str(greater_than))
+        count_by_resolution = False
+        try:
+            count_by_resolution_str = request.args.get('count_by_resolution', 'false')
+            if count_by_resolution_str == 'true':
+                count_by_resolution = True
+        except KeyError:
+            greater_than = False
+        except Exception as e:
+            trace = traceback.format_exc()
+            fail_msg = 'error :: Webapp error with api?metrics_resolutions - %s' % e
+            logger.error(fail_msg)
+            return internal_error(fail_msg, trace)
+        logger.info('/api?metrics_resolutions - count_by_resolution: %s' % str(count_by_resolution))
+
+        redis_hash_key = 'analyzer.metrics_manager.resolutions'
+        resolutions_dict = {}
+        try:
+            resolutions_dict = REDIS_CONN.hgetall(redis_hash_key)
+        except Exception as e:
+            trace = traceback.format_exc()
+            logger.error(trace)
+            fail_msg = 'error :: /api?metrics_resolutions fail to query Redis hash key %s - %s' % (
+                redis_hash_key, e)
+            logger.error(fail_msg)
+            return internal_error(fail_msg, trace)
+
+        if settings.REMOTE_SKYLINE_INSTANCES and cluster_data:
+            remote_resolutions_dicts = []
+            redis_metric_data_uri = 'metrics_resolutions'
+            try:
+                remote_resolutions_dicts = get_cluster_data(redis_metric_data_uri, 'resolutions')
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: Webapp could not get resolution from the remote Skyline instances')
+            if remote_resolutions_dicts:
+                for remote_resolutions_dict in remote_resolutions_dicts:
+                    logger.info('got remote_resolutions_dict of length %s from a remote Skyline instances' % str(len(remote_resolutions_dict)))
+                    new_resolutions_dict = {**resolutions_dict, **remote_resolutions_dict}
+                    resolutions_dict = new_resolutions_dict.copy()
+                    del new_resolutions_dict
+            else:
+                logger.warn('warning :: failed to get remote_resolutions_dicts from the remote Skyline instances')
+        logger.info('%s resolutions determined' % (
+            str(len(resolutions_dict))))
+        filtered_discarded = 0
+        filtered_resolutions_dict = {}
+        for metric in list(resolutions_dict.keys()):
+            metric_data = resolutions_dict[metric]
+            use_metric = metric.replace(settings.FULL_NAMESPACE, '')
+            if greater_than:
+                if int(float(metric_data)) <= greater_than:
+                    filtered_discarded += 1
+                    continue
+            if less_than:
+                if int(float(metric_data)) >= less_than:
+                    filtered_discarded += 1
+                    continue
+            if namespace != 'all':
+                if not use_metric.startswith(namespace):
+                    filtered_discarded += 1
+                    continue
+            if remove_prefix:
+                if not remove_prefix.endswith('.'):
+                    remove_prefix = '%s.' % str(remove_prefix)
+                use_metric = metric.replace(remove_prefix, '')
+            filtered_resolutions_dict[use_metric] = float(metric_data)
+        resolutions_dict = filtered_resolutions_dict
+        if remove_prefix:
+            logger.info('removed prefix %s from all metrics' % str(remove_prefix))
+        if namespace != 'all':
+            logger.info('filtered out %s metrics from the response that did not match namespace %s' % (
+                str(filtered_discarded), namespace))
+        resolutions_count = len(resolutions_dict)
+        if count_by_resolution:
+            resolutions_count_dict = {}
+            resolutions = []
+            metric_resolutions = []
+            for metric in list(resolutions_dict.keys()):
+                resolutions.append(resolutions_dict[metric])
+                metric_resolutions.append([metric, resolutions_dict[metric]])
+            unique_resolutions = list(set(resolutions))
+            for resolution in unique_resolutions:
+                int_resolution = int(resolution)
+                resolutions_count_dict[int_resolution] = {}
+                metrics_matching_resolution = [metric for metric, res in metric_resolutions if res == resolution]
+                resolutions_count_dict[int_resolution]['metrics'] = metrics_matching_resolution
+                resolutions_count_dict[int_resolution]['count'] = len(metrics_matching_resolution)
+            resolutions_dict = resolutions_count_dict
+
+        end_metrics_resolution = timer()
+        metrics_resolution_time = (end_metrics_resolution - start_metrics_resolution)
+        if resolutions_dict:
+            data_dict = {"status": {"cluster_data": cluster_data, "request_time": metrics_resolution_time, "response": 200}, "data": {'resolutions': resolutions_dict, 'resolution_results_count': resolutions_count}}
+            return jsonify(data_dict), 200
+        else:
+            data_dict = {"status": {"cluster_data": cluster_data, "request_time": metrics_resolution_time, "response": 404}, "data": {"resolutions": 'null', 'resolution_results_count': 0}}
+            return jsonify(data_dict), 404
+
+    # @added 20210618 - Bug #4146: check_data_sparsity - incorrect on low fidelity and inconsistent metrics
+    #                   Feature #4144: webapp - stale_metrics API endpoint
+    #                   Feature #4076: CUSTOM_STALE_PERIOD
+    #                   Branch #1444: thunder
+    if 'metrics_sparsity' in request.args:
+        logger.info('/api?metrics_sparsity')
+        start_metrics_sparsity = timer()
+        namespace = 'all'
+        try:
+            namespace = request.args.get('namespace', 'all')
+        except KeyError:
+            namespace = 'all'
+        except Exception as e:
+            trace = traceback.format_exc()
+            fail_msg = 'error :: Webapp error with api?metrics_sparsity - %s' % e
+            logger.error(fail_msg)
+            return internal_error(fail_msg, trace)
+        logger.info('/api?metrics_sparsity - namespace: %s' % namespace)
+        remove_prefix = False
+        try:
+            remove_prefix_str = request.args.get('remove_prefix', 'false')
+            if remove_prefix_str != 'false':
+                remove_prefix = remove_prefix_str
+        except KeyError:
+            remove_prefix = False
+        except Exception as e:
+            trace = traceback.format_exc()
+            fail_msg = 'error :: Webapp error with api?metrics_sparsity - %s' % e
+            logger.error(fail_msg)
+            return internal_error(fail_msg, trace)
+        logger.info('/api?metrics_sparsity - remove_prefix: %s' % str(remove_prefix))
+
+        below = False
+        try:
+            below_str = request.args.get('below', 'false')
+            if below_str != 'false':
+                below = float(below_str)
+        except KeyError:
+            below = False
+        except Exception as e:
+            trace = traceback.format_exc()
+            fail_msg = 'error :: Webapp error with api?metrics_sparsity - %s' % e
+            logger.error(fail_msg)
+            return internal_error(fail_msg, trace)
+        logger.info('/api?metrics_sparsity - below: %s' % str(remove_prefix))
+
+        redis_hash_key = 'analyzer.metrics_manager.hash_key.metrics_data_sparsity'
+        sparsity_dict = {}
+        try:
+            sparsity_dict = REDIS_CONN.hgetall(redis_hash_key)
+        except Exception as e:
+            trace = traceback.format_exc()
+            logger.error(trace)
+            fail_msg = 'error :: /api?metrics_sparsity fail to query Redis hash key %s - %s' % (
+                redis_hash_key, e)
+            logger.error(fail_msg)
+            return internal_error(fail_msg, trace)
+
+        if settings.REMOTE_SKYLINE_INSTANCES and cluster_data:
+            remote_sparsity_dicts = []
+            redis_metric_data_uri = 'metrics_sparsity'
+            try:
+                remote_sparsity_dicts = get_cluster_data(redis_metric_data_uri, 'sparsity')
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: Webapp could not get timeseries from the remote Skyline instances')
+            if remote_sparsity_dicts:
+                for remote_sparsity_dict in remote_sparsity_dicts:
+                    logger.info('got remote_sparsity_dict of length %s from a remote Skyline instances' % str(len(remote_sparsity_dict)))
+                    new_sparsity_dict = {**sparsity_dict, **remote_sparsity_dict}
+                    sparsity_dict = new_sparsity_dict.copy()
+                    del new_sparsity_dict
+            else:
+                logger.warn('warning :: failed to get remote_sparsity_dicts from the remote Skyline instances')
+        logger.info('%s sparsity determined' % (
+            str(len(sparsity_dict))))
+        filtered_discarded = 0
+        filtered_sparsity_dict = {}
+        for metric in list(sparsity_dict.keys()):
+            metric_data = sparsity_dict[metric]
+            use_metric = metric.replace(settings.FULL_NAMESPACE, '')
+            if below:
+                if float(metric_data) > below:
+                    filtered_discarded += 1
+                    continue
+            if namespace != 'all':
+                if not use_metric.startswith(namespace):
+                    filtered_discarded += 1
+                    continue
+            if remove_prefix:
+                if not remove_prefix.endswith('.'):
+                    remove_prefix = '%s.' % str(remove_prefix)
+                use_metric = metric.replace(remove_prefix, '')
+            filtered_sparsity_dict[use_metric] = float(metric_data)
+        sparsity_dict = filtered_sparsity_dict
+        if remove_prefix:
+            logger.info('removed prefix %s from all metrics' % str(remove_prefix))
+        if namespace != 'all':
+            logger.info('filtered out %s metrics from the response that did not match namespace %s' % (
+                str(filtered_discarded), namespace))
+        sparsity_count = len(sparsity_dict)
+
+        end_metrics_sparsity = timer()
+        metrics_sparsity_time = (end_metrics_sparsity - start_metrics_sparsity)
+        if sparsity_dict:
+            data_dict = {"status": {"cluster_data": cluster_data, "request_time": metrics_sparsity_time, "response": 200}, "data": {'sparsity': sparsity_dict, 'sparsity_results_count': sparsity_count}}
+            return jsonify(data_dict), 200
+        else:
+            data_dict = {"status": {"cluster_data": cluster_data, "request_time": metrics_sparsity_time, "response": 404}, "data": {"sparsity": 'null', 'sparsity_results_count': 0}}
+            return jsonify(data_dict), 404
+
+    # @added 20210617 - Feature #4144: webapp - stale_metrics API endpoint
+    #                   Feature #4076: CUSTOM_STALE_PERIOD
+    #                   Branch #1444: thunder
+    if 'metrics_timestamp_resolutions' in request.args:
+        logger.info('/api?metrics_timestamp_resolutions')
+        start_metrics_timestamp_resolutions = timer()
+        namespace = 'all'
+        try:
+            namespace = request.args.get('namespace', 'all')
+        except KeyError:
+            namespace = 'all'
+        except Exception as e:
+            trace = traceback.format_exc()
+            fail_msg = 'error :: Webapp error with api?metrics_timestamp_resolutions - %s' % e
+            logger.error(fail_msg)
+            return internal_error(fail_msg, trace)
+        logger.info('/api?metrics_timestamp_resolutions - namespace: %s' % namespace)
+        remove_prefix = False
+        try:
+            remove_prefix_str = request.args.get('remove_prefix', 'false')
+            if remove_prefix_str != 'false':
+                remove_prefix = remove_prefix_str
+        except KeyError:
+            remove_prefix = False
+        except Exception as e:
+            trace = traceback.format_exc()
+            fail_msg = 'error :: Webapp error with api?metrics_timestamp_resolutions - %s' % e
+            logger.error(fail_msg)
+            return internal_error(fail_msg, trace)
+        logger.info('/api?metrics_timestamp_resolutions - remove_prefix: %s' % str(remove_prefix))
+        redis_hash_key = 'analyzer.metrics_manager.hash_key.metrics_timestamp_resolutions'
+        timestamp_resolutions_dict = {}
+        try:
+            timestamp_resolutions_dict = REDIS_CONN.hgetall(redis_hash_key)
+        except Exception as e:
+            trace = traceback.format_exc()
+            logger.error(trace)
+            fail_msg = 'error :: /api?metrics_timestamp_resolutions fail to query Redis hash key %s - %s' % (
+                redis_hash_key, e)
+            logger.error(fail_msg)
+            return internal_error(fail_msg, trace)
+
+        if settings.REMOTE_SKYLINE_INSTANCES and cluster_data:
+            remote_timestamp_resolutions_dict = {}
+            redis_metric_data_uri = 'metrics_timestamp_resolutions'
+            try:
+                remote_timestamp_resolutions_dicts = get_cluster_data(redis_metric_data_uri, 'timestamp_resolutions')
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: Webapp could not get timeseries from the remote Skyline instances')
+            if remote_timestamp_resolutions_dicts:
+                for remote_timestamp_resolutions_dict in remote_timestamp_resolutions_dicts:
+                    logger.info('got remote_timestamp_resolutions_dict of length %s from a remote Skyline instances' % str(len(remote_timestamp_resolutions_dict)))
+                    new_timestamp_resolutions_dict = {**timestamp_resolutions_dict, **remote_timestamp_resolutions_dict}
+                    timestamp_resolutions_dict = new_timestamp_resolutions_dict.copy()
+                    del new_timestamp_resolutions_dict
+            else:
+                logger.warn('warning :: failed to get remote_timestamp_resolutions_dicts from the remote Skyline instances')
+        logger.info('%s timestamp_resolutions determined' % (
+            str(len(timestamp_resolutions_dict))))
+        filtered_discarded = 0
+        filtered_timestamp_resolutions_dict = {}
+        for metric in list(timestamp_resolutions_dict.keys()):
+            metric_data = timestamp_resolutions_dict[metric]
+            use_metric = metric.replace(settings.FULL_NAMESPACE, '')
+            if namespace != 'all':
+                if not use_metric.startswith(namespace):
+                    filtered_discarded += 1
+                    continue
+            if remove_prefix:
+                if not remove_prefix.endswith('.'):
+                    remove_prefix = '%s.' % str(remove_prefix)
+                use_metric = metric.replace(remove_prefix, '')
+            filtered_timestamp_resolutions_dict[use_metric] = metric_data
+        timestamp_resolutions_dict = filtered_timestamp_resolutions_dict
+        if remove_prefix:
+            logger.info('removed prefix %s from all metrics' % str(remove_prefix))
+        if namespace != 'all':
+            logger.info('filtered out %s metrics from the response that did not match namespace %s' % (
+                str(filtered_discarded), namespace))
+
+        end_metrics_timestamp_resolutions = timer()
+        metrics_timestamp_resolutions_time = (end_metrics_timestamp_resolutions - start_metrics_timestamp_resolutions)
+        if timestamp_resolutions_dict:
+            data_dict = {"status": {"cluster_data": cluster_data, "request_time": metrics_timestamp_resolutions_time, "response": 200}, "data": {'timestamp_resolutions': timestamp_resolutions_dict}}
+            return jsonify(data_dict), 200
+        else:
+            data_dict = {"status": {"cluster_data": cluster_data, "request_time": metrics_timestamp_resolutions_time, "response": 404}, "data": {"timestamp_resolutions": 'null'}}
+            return jsonify(data_dict), 404
+
+    # @added 20210617 - Feature #4144: webapp - stale_metrics API endpoint
+    #                   Feature #4076: CUSTOM_STALE_PERIOD
+    #                   Branch #1444: thunder
+    if 'determine_data_sparsity' in request.args:
+        logger.info('/api?determine_data_sparsity')
+        start_stale_metrics = timer()
+        base_name = None
+        try:
+            base_name = request.args.get('metric')
+            logger.info('/api?determine_data_sparsity with metric: %s' % base_name)
+        except Exception as e:
+            logger.error('error :: api determine_data_sparsity request no metric argument - %s' % e)
+            return 'Bad Request', 400
+        if not base_name:
+            return 'Bad Request', 400
+        timeseries = []
+        try:
+            timeseries = get_metric_timeseries(skyline_app, base_name)
+        except Exception as e:
+            trace = traceback.format_exc()
+            fail_msg = 'error :: Webapp error with api?determine_data_sparsity - %s' % e
+            logger.error(fail_msg)
+            return internal_error(fail_msg, trace)
+
+        if not timeseries:
+            if settings.REMOTE_SKYLINE_INSTANCES and cluster_data:
+                redis_metric_data_uri = 'metric=%s&format=json' % str(base_name)
+                try:
+                    timeseries = get_cluster_data(redis_metric_data_uri, 'timeseries')
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: Webapp could not get timeseries from the remote Skyline instances')
+                if timeseries:
+                    logger.info('got timeseries of length %s from the remote Skyline instances' % str(len(timeseries)))
+                else:
+                    logger.warn('warning :: failed to get timeseries from the remote Skyline instances')
+        if not timeseries:
+            data_dict = {"status": {"cluster_data": cluster_data, "response": 404}, "data": {"sparsity": 'null'}}
+            return jsonify(data_dict), 404
+
+        sparsity = None
+        if timeseries:
+            try:
+                sparsity = determine_data_sparsity(skyline_app, timeseries, None, True)
+            except Exception as e:
+                trace = traceback.format_exc()
+                fail_msg = 'error :: Webapp error with api?determine_data_sparsity - %s' % e
+                logger.error(fail_msg)
+                return internal_error(fail_msg, trace)
+
+        if sparsity is not None:
+            data_dict = {"status": {"cluster_data": cluster_data, "response": 200}, "data": {"sparsity": {base_name: sparsity}}}
+            return jsonify(data_dict), 200
+        else:
+            data_dict = {"status": {"cluster_data": cluster_data, "response": 404}, "data": {"sparsity": {base_name: 'null'}}}
+            return jsonify(data_dict), 404
+
+    # @added 20210617 - Feature #4144: webapp - stale_metrics API endpoint
+    #                   Feature #4076: CUSTOM_STALE_PERIOD
+    #                   Branch #1444: thunder
+    if 'stale_metrics' in request.args:
+        logger.info('/api?stale_metrics')
+        start_stale_metrics = timer()
+        namespace = 'all'
+        try:
+            namespace = request.args.get('namespace', 'all')
+        except KeyError:
+            namespace = 'all'
+        except Exception as e:
+            trace = traceback.format_exc()
+            fail_msg = 'error :: Webapp error with api?stale_metrics - %s' % e
+            logger.error(fail_msg)
+            return internal_error(fail_msg, trace)
+        exclude_sparsely_populated = False
+        try:
+            exclude_sparsely_populated_str = request.args.get('exclude_sparsely_populated', 'false')
+            if exclude_sparsely_populated_str == 'true':
+                exclude_sparsely_populated = True
+        except KeyError:
+            exclude_sparsely_populated = False
+        except Exception as e:
+            trace = traceback.format_exc()
+            fail_msg = 'error :: Webapp error with api?stale_metrics - %s' % e
+            logger.error(fail_msg)
+            return internal_error(fail_msg, trace)
+        # Add a key that functions.thunder.stale_metrics uses to determine if
+        # webapp requests should include sparsely_populated_metrics or not
+        if exclude_sparsely_populated:
+            try:
+                REDIS_CONN.setex('webapp.stale_metrics.exclude_sparsely_populated', 2, str(exclude_sparsely_populated))
+            except Exception as e:
+                trace = traceback.format_exc()
+                fail_msg = 'error :: Webapp error with api?stale_metrics - %s' % e
+                logger.error(fail_msg)
+                return internal_error(fail_msg, trace)
+
+        namespaces_namespace_stale_metrics_dict = {}
+        try:
+            namespaces_namespace_stale_metrics_dict = namespace_stale_metrics(namespace, cluster_data, exclude_sparsely_populated)
+        except Exception as e:
+            trace = traceback.format_exc()
+            fail_msg = 'error :: Webapp error with api?stale_metrics - %s' % e
+            logger.error(fail_msg)
+            return internal_error(fail_msg, trace)
+        logger.info('%s namespaces checked for stale metrics discovered with thunder_stale_metrics' % (
+            str(len(namespaces_namespace_stale_metrics_dict))))
+        end_stale_metrics = timer()
+        stale_metrics_time = (end_stale_metrics - start_stale_metrics)
+        if namespaces_namespace_stale_metrics_dict:
+            data_dict = {"status": {"cluster_data": cluster_data, "request_time": stale_metrics_time, "response": 200}, "data": namespaces_namespace_stale_metrics_dict}
+            return jsonify(data_dict), 200
+        else:
+            data_dict = {"status": {"cluster_data": cluster_data, "request_time": stale_metrics_time, "response": 404}, "data": {"stale_metrics": 'null'}}
+            return jsonify(data_dict), 404
 
     # @added 20210601 - Branch #1444: thunder
     if 'thunder_stale_metrics' in request.args:

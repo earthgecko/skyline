@@ -129,13 +129,34 @@ def thunder_no_data(current_skyline_app, log=True):
 
     parent_namespaces = list(set(parent_namespaces))
 
+    # @added 20210620 - Branch #1444: thunder
+    #                   Feature #4076: CUSTOM_STALE_PERIOD
+    # Handle multi level namespaces
+    # Sort the list by the namespaces with the most elements to the least as
+    # first match wins
+    parent_namespace_metrics_processed = []
+    custom_stale_period_namespaces = []
+    if settings.CUSTOM_STALE_PERIOD:
+        custom_stale_period_namespaces = list(settings.CUSTOM_STALE_PERIOD.keys())
+        custom_stale_period_namespaces_elements_list = []
+        for custom_stale_period_namespace in custom_stale_period_namespaces:
+            namespace_elements = len(custom_stale_period_namespace.split('.'))
+            custom_stale_period_namespaces_elements_list.append([custom_stale_period_namespace, namespace_elements])
+        sorted_custom_stale_period_namespaces = sorted(custom_stale_period_namespaces_elements_list, key=lambda x: (x[1]), reverse=True)
+        if sorted_custom_stale_period_namespaces:
+            custom_stale_period_namespaces = [x[0] for x in sorted_custom_stale_period_namespaces]
+    # Order by setting priority
+    parent_namespaces = external_parent_namespaces + custom_stale_period_namespaces + parent_namespaces
+
     for parent_namespace in parent_namespaces:
         stale_period = int(settings.STALE_PERIOD)
 
         # Determine if there is a CUSTOM_STALE_PERIOD for the namespace
         namespace_stale_period = 0
         try:
-            namespace_stale_period = custom_stale_period(current_skyline_app, parent_namespace, external_settings, log=False)
+            # DEBUG
+            # namespace_stale_period = custom_stale_period(current_skyline_app, parent_namespace, external_settings, log=False)
+            namespace_stale_period = custom_stale_period(current_skyline_app, parent_namespace, external_settings, log=True)
             if namespace_stale_period:
                 if namespace_stale_period != stale_period:
                     if log:
@@ -158,8 +179,38 @@ def thunder_no_data(current_skyline_app, log=True):
         # If there is an external_settings entry for the namespace determine the
         # stale_period and expiry
         if parent_namespace in external_parent_namespaces:
-            stale_period = external_parent_namespaces[parent_namespace]['stale_period']
-            expiry = external_parent_namespaces[parent_namespace]['expiry']
+            try:
+                stale_period = external_parent_namespaces[parent_namespace]['stale_period']
+            except KeyError:
+                stale_period = int(settings.STALE_PERIOD)
+                if not log:
+                    current_skyline_app_logger = current_skyline_app + 'Log'
+                    current_logger = logging.getLogger(current_skyline_app_logger)
+                current_logger.warn('warning :: %s :: failed to get the stale_period for %s from external_settings, using default' % (
+                    function_str, parent_namespace))
+            except Exception as e:
+                if not log:
+                    current_skyline_app_logger = current_skyline_app + 'Log'
+                    current_logger = logging.getLogger(current_skyline_app_logger)
+                current_logger.error(traceback.format_exc())
+                current_logger.error('error :: %s :: failed to get stale_period for %s from external_settings - %s' % (
+                    function_str, parent_namespace, e))
+            try:
+                expiry = external_parent_namespaces[parent_namespace]['expiry']
+            except KeyError:
+                expiry = 1800
+                if not log:
+                    current_skyline_app_logger = current_skyline_app + 'Log'
+                    current_logger = logging.getLogger(current_skyline_app_logger)
+                current_logger.warn('warning :: %s :: failed to get the expiry for %s from external_settings, using default' % (
+                    function_str, str(expiry)))
+            except Exception as e:
+                if not log:
+                    current_skyline_app_logger = current_skyline_app + 'Log'
+                    current_logger = logging.getLogger(current_skyline_app_logger)
+                current_logger.error(traceback.format_exc())
+                current_logger.error('error :: %s :: failed to get expiry for %s from external_settings - %s' % (
+                    function_str, parent_namespace, e))
             if log:
                 current_logger.info('%s :: \'%s.\' namespace using external_setting stale_period of %s and expiry of %s' % (
                     function_str, parent_namespace, str(stale_period),
@@ -195,6 +246,22 @@ def thunder_no_data(current_skyline_app, log=True):
 
         # metrics that are in the parent namespace
         parent_namespace_metrics = [item for item in metrics_last_timestamps if str(item[0]).startswith(parent_namespace)]
+
+        # @added 20210620 - Branch #1444: thunder
+        #                   Feature #4076: CUSTOM_STALE_PERIOD
+        # Handle multi level namespaces by filtering out metrics that have
+        # already been processed in a longer parent_namespace
+        if log:
+            current_logger.info('%s :: parent_namespace_metrics has %s metrics' % (
+                function_str, str(len(parent_namespace_metrics))))
+        parent_namespace_metrics = [item for item in parent_namespace_metrics if item[0] not in parent_namespace_metrics_processed]
+        if parent_namespace_metrics:
+            parent_namespace_metric_names = [item[0] for item in parent_namespace_metrics]
+            parent_namespace_metrics_processed = parent_namespace_metrics_processed + parent_namespace_metric_names
+        if log:
+            current_logger.info('%s :: parent_namespace_metrics has %s metrics after filetring out processed metrics' % (
+                function_str, str(len(parent_namespace_metrics))))
+
         total_metrics = len(parent_namespace_metrics)
         if parent_namespace_metrics:
             parent_namespace_metrics_timestamps = [int(item[1]) for item in parent_namespace_metrics]
@@ -329,7 +396,7 @@ def thunder_no_data(current_skyline_app, log=True):
                     function_str, e))
             if submitted:
                 if log:
-                    current_logger.info('%s :: send thunder event forno_data on namespace %s' % (
+                    current_logger.info('%s :: send thunder event for no_data on namespace %s' % (
                         function_str, parent_namespace))
 
     return namespaces_no_data_dict

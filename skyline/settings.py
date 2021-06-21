@@ -642,6 +642,28 @@ SKIP_CHECK_DATA_SPARSITY_NAMESPACES = []
 :vartype SKIP_CHECK_DATA_SPARSITY_NAMESPACES: list
 """
 
+FULLY_POPULATED_PERCENTAGE = 94.0
+"""
+:var FULLY_POPULATED_PERCENTAGE: ADVANCED FEATURE - the percent of data
+    points required in a time series for it to be considered as fully populated
+    at :mod:`settings.FULL_DURATION`.  Any time series with more than this is
+    considered fully populated.  Skyline calculates this value based on the
+    metric resolution/frequency from the time series data that Skyline
+    automatically calculates.
+:vartype FULLY_POPULATED_PERCENTAGE: float
+"""
+
+SPARSELY_POPULATED_PERCENTAGE = 40.0
+"""
+:var SPARSELY_POPULATED_PERCENTAGE: ADVANCED FEATURE - the percent of data
+    points required in a time series for it to be considered as sparse populated
+    at :mod:`settings.FULL_DURATION`.  Any time series with less than this is
+    considered sparsely populate.  Skyline calculates this value based on the
+    metric resolution/frequency from the time series data that Skyline
+    automatically calculates.
+:vartype SPARSELY_POPULATED_PERCENTAGE: float
+"""
+
 # @added 20201212 - Feature #3884: ANALYZER_CHECK_LAST_TIMESTAMP
 ANALYZER_CHECK_LAST_TIMESTAMP = False
 """

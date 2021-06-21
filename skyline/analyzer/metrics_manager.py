@@ -13,7 +13,7 @@ from timeit import default_timer as timer
 
 # @added 20201209 - Feature #3870: metrics_manager - check_data_sparsity
 from msgpack import Unpacker
-from collections import Counter
+# from collections import Counter
 
 # @added 20201213 - Feature #3890: metrics_manager - sync_cluster_files
 import requests
@@ -42,6 +42,13 @@ from functions.settings.get_external_settings import get_external_settings
 from functions.thunder.manage_thunder_alerted_on_stale_metrics_hash_key import manage_thunder_alerted_on_stale_metrics_hash_key
 from functions.redis.prune_metrics_timestamp_hash_key import prune_metrics_timestamp_hash_key
 from functions.thunder.no_data import thunder_no_data
+
+# @added 20210619 - Feature #4148: analyzer.metrics_manager.resolutions
+#                   Bug #4146: check_data_sparsity - incorrect on low fidelity and inconsistent metrics
+#                   Feature #3870: metrics_manager - check_data_sparsity
+# Use common functions
+from functions.timeseries.determine_data_frequency import determine_data_frequency
+from functions.timeseries.determine_data_sparsity import determine_data_sparsity
 
 skyline_app = 'analyzer'
 skyline_app_logger = '%sLog' % skyline_app
@@ -2121,6 +2128,23 @@ class Metrics_Manager(Thread):
                         logger.info('metrics_manager :: no metrics need to be removed from the Redis hash key %s' % (
                             low_priority_metrics_hash_key))
 
+        # @added 20210619 - Feature #4148: analyzer.metrics_manager.resolutions
+        #                   Bug #4146: check_data_sparsity - incorrect on low fidelity and inconsistent metrics
+        # Surface the Redis hash key data
+        added_metric_resolution_keys = 0
+        updated_metric_resolution_keys = 0
+        metrics_resolutions_hash_key = 'analyzer.metrics_manager.resolutions'
+        metrics_resolutions_dict = {}
+        try:
+            metrics_resolutions_dict = self.redis_conn_decoded.hgetall(metrics_resolutions_hash_key)
+        except Exception as e:
+            logger.error(traceback.format_exc())
+            logger.error('error :: metrics_manager :: failed to get %s Redis hash key - %s' % (
+                metrics_resolutions_hash_key, e))
+            metrics_resolutions_dict = {}
+        # Set check_metrics before CHECK_DATA_SPARSITY
+        check_metrics = list(unique_metrics)
+
         # @added 20201209 - Feature #3870: metrics_manager - check_data_sparsity
         if CHECK_DATA_SPARSITY:
             check_data_sparsity_start = time()
@@ -2201,6 +2225,16 @@ class Metrics_Manager(Thread):
                 logger.error(traceback.format_exc())
                 logger.error('error :: metrics_manager :: failed to delete analyzer.metrics_manager.hash_key.metrics_data_sparsity')
 
+            # @added 20210617 - Feature #3870: metrics_manager - check_data_sparsity
+            #                   Branch ##1444: thunder
+            metrics_timestamp_resolutions_count_dict = {}
+            try:
+                metrics_timestamp_resolutions_count_dict = self.redis_conn_decoded.hgetall('analyzer.metrics_manager.hash_key.metrics_timestamp_resolutions')
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: metrics_manager :: failed to get analyzer.metrics_manager.hash_key.metrics_timestamp_resolutions Redis hash key')
+                metrics_timestamp_resolutions_count_dict = {}
+
             check_sparsity_error_log = False
             check_sparsity_error_count = 0
             added_data_sparsity_keys = 0
@@ -2227,158 +2261,153 @@ class Metrics_Manager(Thread):
                     except:
                         timeseries = []
 
-                    timeseries_full_duration = 0
-                    if timeseries:
-                        first_timeseries_timestamp = 0
-                        try:
-                            first_timeseries_timestamp = int(timeseries[0][0])
-                        except:
-                            pass
-                        last_timeseries_timestamp = 0
-                        try:
-                            last_timeseries_timestamp = int(timeseries[-1][0])
-                        except:
-                            pass
-                        timeseries_full_duration = last_timeseries_timestamp - first_timeseries_timestamp
-                        # @modified 20201216 - Feature #3870: metrics_manager - check_data_sparsity
-                        # If roomba has not pruned some data in minutes
-                        if first_timeseries_timestamp < (last_timeseries_timestamp - settings.FULL_DURATION):
-                            timeseries_full_duration = settings.FULL_DURATION
+                    # @added 20210619 - Feature #4148: analyzer.metrics_manager.resolutions
+                    #                   Bug #4146: check_data_sparsity - incorrect on low fidelity and inconsistent metrics
+                    # Populate Redis hash key data with the base_name
+                    metric_name = str(metric_name)
+                    if metric_name.startswith(settings.FULL_NAMESPACE):
+                        base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+                    else:
+                        base_name = metric_name
 
-                        # @added 20210602 - Feature #3870: metrics_manager - check_data_sparsity
-                        #                   Feature #4076: CUSTOM_STALE_PERIOD
-                        #                   Feature #4000: EXTERNAL_SETTINGS
-                        #                   Branch #1444: thunder
-                        # Prevent calculating an incorrect metric_resolution on
-                        # periodic and infrequently sparsely populated metrics
-                        if timeseries_full_duration < 3600:
-                            timeseries_full_duration = settings.FULL_DURATION
-
-                    if timeseries_full_duration:
-                        if last_timeseries_timestamp < (int(check_data_sparsity_start) - settings.STALE_PERIOD):
-                            metrics_stale.append(metric_name)
-                            # @modified 20201210 - Feature #3870: metrics_manager - check_data_sparsity
-                            # Keep stale metrics in the so that when metrics
-                            # become stale they do not cause a level shift via
-                            # their removal and suggest that things are
-                            # recovering
-                            # continue
-                        if last_timeseries_timestamp < (int(check_data_sparsity_start) - inactive_after):
-                            metrics_inactive.append(metric_name)
-                            continue
-
+                    # @added 20210619 - Feature #4148: analyzer.metrics_manager.resolutions
+                    #                   Bug #4146: check_data_sparsity - incorrect on low fidelity and inconsistent metrics
+                    # Use determine_data_frequency function
                     metric_resolution = 0
-                    if timeseries_full_duration:
-                        try:
-                            # Determine resolution from the last 30 data points
-                            resolution_timestamps = []
+                    timestamp_resolutions_count = {}
+                    try:
+                        metric_resolution, timestamp_resolutions_count = determine_data_frequency(skyline_app, timeseries, False)
+                    except Exception as e:
+                        if not check_sparsity_error_log:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: metrics_manager :: determine_data_frequency failed for %s - %s' % (
+                                base_name, e))
+                            check_sparsity_error_log = True
+                        check_sparsity_error_count += 1
 
-                            # @modified 20201215 - Feature #3870: metrics_manager - check_data_sparsity
-                            # The last 30 measures for uploaded data to flux
-                            # seemed sufficient, however from real time metrics
-                            # there is more variance, so using a larger sample
-                            # for metric_datapoint in timeseries[-30:]:
-                            for metric_datapoint in timeseries[-100:]:
-                                timestamp = int(metric_datapoint[0])
-                                resolution_timestamps.append(timestamp)
-                            timestamp_resolutions = []
-                            if resolution_timestamps:
-                                last_timestamp = None
-                                for timestamp in resolution_timestamps:
-                                    if last_timestamp:
-                                        resolution = timestamp - last_timestamp
-                                        timestamp_resolutions.append(resolution)
-                                        last_timestamp = timestamp
-                                    else:
-                                        last_timestamp = timestamp
-                                try:
-                                    del resolution_timestamps
-                                except:
-                                    pass
-                            if timestamp_resolutions:
-                                try:
-                                    timestamp_resolutions_count = Counter(timestamp_resolutions)
-                                    ordered_timestamp_resolutions_count = timestamp_resolutions_count.most_common()
-                                    metric_resolution = int(ordered_timestamp_resolutions_count[0][0])
-                                except:
-                                    if not check_sparsity_error_log:
-                                        logger.error(traceback.format_exc())
-                                        logger.error('error :: metrics_manager :: failed to determine metric_resolution from timeseries')
-                                        check_sparsity_error_log = True
-                                    check_sparsity_error_count += 1
-                                try:
-                                    del timestamp_resolutions
-                                except:
-                                    pass
-                        except:
-                            # @added 20201215 - Feature #3870: metrics_manager - check_data_sparsity
+                    update_metric_timestamp_resolutions_key = False
+                    metric_timestamp_resolutions_count_str = None
+                    try:
+                        metric_timestamp_resolutions_count_str = metrics_timestamp_resolutions_count_dict[metric_name]
+                    except KeyError:
+                        metric_timestamp_resolutions_count_str = None
+                        update_metric_timestamp_resolutions_key = True
+                    except Exception as e:
+                        if not check_sparsity_error_log:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: metrics_manager :: failed to get entry from metrics_timestamp_resolutions_count_dict for - %s - %s' % (
+                                str(metric_name), e))
+                            check_sparsity_error_log = True
+                        metric_timestamp_resolutions_count_str = None
+                        update_metric_timestamp_resolutions_key = True
+                    if metric_timestamp_resolutions_count_str:
+                        if metric_timestamp_resolutions_count_str != str(dict(timestamp_resolutions_count)):
+                            update_metric_timestamp_resolutions_key = True
+                    if update_metric_timestamp_resolutions_key:
+                        try:
+                            self.redis_conn.hset(
+                                'analyzer.metrics_manager.hash_key.metrics_timestamp_resolutions',
+                                metric_name, str(dict(timestamp_resolutions_count)))
+                        except Exception as e:
                             if not check_sparsity_error_log:
                                 logger.error(traceback.format_exc())
-                                logger.error('error :: metrics_manager :: resolution_error - failed to determine metric_resolution')
+                                logger.error('error :: metrics_manager :: failed to add entry in analyzer.metrics_manager.hash_key.metrics_timestamp_resolutions for - %s - %s' % (
+                                    str(metric_name), e))
+                                check_sparsity_error_log = True
+
+                    # @added 20210619 - Feature #4148: analyzer.metrics_manager.resolutions
+                    #                   Bug #4146: check_data_sparsity - incorrect on low fidelity and inconsistent metrics
+                    #                   Feature #4144: webapp - stale_metrics API endpoint
+                    #                   Feature #4076: CUSTOM_STALE_PERIOD
+                    update_metrics_resolutions_key = True
+                    last_known_metric_resolution = None
+                    if metric_resolution and metrics_resolutions_dict:
+                        try:
+                            last_known_metric_resolution = metrics_resolutions_dict[base_name]
+                        except KeyError:
+                            update_metrics_resolutions_key = True
+                            last_known_metric_resolution = None
+                        except Exception as e:
+                            if not check_sparsity_error_log:
+                                logger.error(traceback.format_exc())
+                                logger.error('error :: metrics_manager :: update_metrics_resolutions_key - failed to determine metric resolution for %s - %s' % (
+                                    base_name, e))
                                 check_sparsity_error_log = True
                             check_sparsity_error_count += 1
-                        expected_datapoints = 0
+                            last_known_metric_resolution = None
+                        if last_known_metric_resolution:
+                            if int(float(last_known_metric_resolution)) == metric_resolution:
+                                update_metrics_resolutions_key = False
+                    if update_metrics_resolutions_key:
+                        if last_known_metric_resolution is not None:
+                            logger.info('metrics_manager :: update_metrics_resolutions_key - updating %s resolution from %s to %s' % (
+                                base_name, str(last_known_metric_resolution),
+                                str(metric_resolution)))
+                            updated_metric_resolution_keys += 1
+                        else:
+                            added_metric_resolution_keys += 1
+                        try:
+                            self.redis_conn.hset(
+                                metrics_resolutions_hash_key,
+                                base_name, int(metric_resolution))
+                            # added_data_sparsity_keys += 1
+                        except Exception as e:
+                            if not check_sparsity_error_log:
+                                logger.error(traceback.format_exc())
+                                logger.error('error :: metrics_manager :: failed to add entry in analyzer.metrics_manager.hash_key.metrics_data_sparsity for - %s - %s' % (
+                                    str(metric_name), e))
+                                check_sparsity_error_log = True
+                            check_sparsity_error_count += 1
 
-                        # @added 20201215 - Feature #3870: metrics_manager - check_data_sparsity
-                        # Handle the slight variances that occur in real time
-                        # metric streams
-                        if metric_resolution in range(57, 63):
-                            metric_resolution = 60
+                    if metric_resolution:
+                        try:
+                            data_sparsity = determine_data_sparsity(skyline_app, timeseries, resolution=metric_resolution, log=False)
+                        except Exception as e:
+                            if not check_sparsity_error_log:
+                                logger.error('error :: metrics_manager :: determine_data_sparsity failed during check_data_sparsity - %s' % str(e))
+                                check_sparsity_error_log = True
+                            check_sparsity_error_count += 1
 
-                        if metric_resolution:
-                            try:
-                                expected_datapoints = timeseries_full_duration / metric_resolution
-                            except:
-                                pass
-                        data_sparsity = 0
-                        if expected_datapoints:
-                            try:
-                                datapoints_present = len(timeseries)
-                                data_sparsity = round(datapoints_present / expected_datapoints * 100, 2)
-                            except Exception as e:
-                                if not check_sparsity_error_log:
-                                    logger.error('error :: metrics_manager :: an error occurred during check_data_sparsity - %s' % str(e))
-                                    check_sparsity_error_log = True
-                                check_sparsity_error_count += 1
-                        previous_sparsity = 0
-                        if last_metrics_data_sparsity:
-                            try:
-                                previous_sparsity = float(last_metrics_data_sparsity[metric_name])
-                            except:
-                                pass
-                        if data_sparsity or data_sparsity == 0:
-                            try:
-                                self.redis_conn.hset(
-                                    'analyzer.metrics_manager.hash_key.metrics_data_sparsity',
-                                    metric_name, data_sparsity)
-                                added_data_sparsity_keys += 1
-                            except Exception as e:
-                                if not check_sparsity_error_log:
-                                    logger.error(traceback.format_exc())
-                                    logger.error('error :: metrics_manager :: failed to add entry in analyzer.metrics_manager.hash_key.metrics_data_sparsity for - %s - %s' % (
-                                        str(metric_name), e))
-                                    check_sparsity_error_log = True
-                                check_sparsity_error_count += 1
-                            sparsity_change = 0
-                            if data_sparsity >= 100:
-                                metrics_fully_populated.append(metric_name)
-                            else:
-                                if previous_sparsity < data_sparsity:
-                                    metrics_sparsity_decreasing.append(metric_name)
-                                    sparsity_change = previous_sparsity - data_sparsity
-                                if previous_sparsity > data_sparsity:
-                                    metrics_sparsity_increasing.append(metric_name)
-                                    sparsity_change = previous_sparsity - data_sparsity
-                            metric_sparsity_dict = {
-                                'metric': metric_name,
-                                'timestamp': last_timeseries_timestamp,
-                                'resolution': metric_resolution,
-                                'data_sparsity': data_sparsity,
-                                'last_data_sparsity': previous_sparsity,
-                                'change': sparsity_change,
-                            }
-                            metrics_sparsity.append(str(metric_sparsity_dict))
-                            sparsities.append(data_sparsity)
+                    previous_sparsity = 0
+                    if last_metrics_data_sparsity:
+                        try:
+                            previous_sparsity = float(last_metrics_data_sparsity[metric_name])
+                        except:
+                            pass
+                    if data_sparsity or data_sparsity == 0:
+                        try:
+                            self.redis_conn.hset(
+                                'analyzer.metrics_manager.hash_key.metrics_data_sparsity',
+                                metric_name, data_sparsity)
+                            added_data_sparsity_keys += 1
+                        except Exception as e:
+                            if not check_sparsity_error_log:
+                                logger.error(traceback.format_exc())
+                                logger.error('error :: metrics_manager :: failed to add entry in analyzer.metrics_manager.hash_key.metrics_data_sparsity for - %s - %s' % (
+                                    str(metric_name), e))
+                                check_sparsity_error_log = True
+                            check_sparsity_error_count += 1
+                        sparsity_change = 0
+                        # if data_sparsity >= 100:
+                        if data_sparsity >= settings.FULLY_POPULATED_PERCENTAGE:
+                            metrics_fully_populated.append(metric_name)
+                        else:
+                            if previous_sparsity < data_sparsity:
+                                metrics_sparsity_decreasing.append(metric_name)
+                                sparsity_change = previous_sparsity - data_sparsity
+                            if previous_sparsity > data_sparsity:
+                                metrics_sparsity_increasing.append(metric_name)
+                                sparsity_change = previous_sparsity - data_sparsity
+                        metric_sparsity_dict = {
+                            'metric': metric_name,
+                            'timestamp': int(timeseries[-1][0]),
+                            'resolution': metric_resolution,
+                            'data_sparsity': data_sparsity,
+                            'last_data_sparsity': previous_sparsity,
+                            'change': sparsity_change,
+                        }
+                        metrics_sparsity.append(str(metric_sparsity_dict))
+                        sparsities.append(data_sparsity)
                 except Exception as e:
                     if not check_sparsity_error_log:
                         logger.error('error :: metrics_manager :: an error occurred during check_data_sparsity - %s' % str(e))
@@ -2386,6 +2415,7 @@ class Metrics_Manager(Thread):
                     check_sparsity_error_count += 1
             logger.info('metrics_manager :: check_data_sparsity added %s metrics of %s total metrics to analyzer.metrics_manager.hash_key.metrics_data_sparsity Redis hash key' % (
                 str(added_data_sparsity_keys), str(len(unique_metrics))))
+
             if metrics_fully_populated:
                 metrics_fully_populated_count = len(metrics_fully_populated)
                 try:
@@ -2407,7 +2437,7 @@ class Metrics_Manager(Thread):
                 send_metric_name = metrics_sparsity_use_namespace + '.metrics_fully_populated'
                 try:
                     send_graphite_metric(skyline_app, send_metric_name, str(metrics_fully_populated_count))
-                    logger.info('metrics_manager - sent Graphite metric - %s %s' % (send_metric_name, str(metrics_fully_populated_count)))
+                    logger.info('metrics_manager :: sent Graphite metric - %s %s' % (send_metric_name, str(metrics_fully_populated_count)))
                 except Exception as e:
                     logger.error('error :: metrics_manager :: could not send send_graphite_metric %s %s: %s' % (
                         send_metric_name, str(metrics_fully_populated_count), e))
@@ -2433,7 +2463,7 @@ class Metrics_Manager(Thread):
                 send_metric_name = metrics_sparsity_use_namespace + '.metrics_sparsity_decreasing'
                 try:
                     send_graphite_metric(skyline_app, send_metric_name, str(metrics_sparsity_decreasing_count))
-                    logger.info('metrics_manager - sent Graphite metric - %s %s' % (send_metric_name, str(metrics_sparsity_decreasing_count)))
+                    logger.info('metrics_manager :: sent Graphite metric - %s %s' % (send_metric_name, str(metrics_sparsity_decreasing_count)))
                 except Exception as e:
                     logger.error('error :: metrics_manager :: could not send send_graphite_metric %s %s: %s' % (
                         send_metric_name, str(metrics_sparsity_decreasing_count), e))
@@ -2458,7 +2488,7 @@ class Metrics_Manager(Thread):
                 send_metric_name = metrics_sparsity_use_namespace + '.metrics_sparsity_increasing'
                 try:
                     send_graphite_metric(skyline_app, send_metric_name, str(metrics_sparsity_increasing_count))
-                    logger.info('metrics_manager - sent Graphite metric - %s %s' % (send_metric_name, str(metrics_sparsity_increasing_count)))
+                    logger.info('metrics_manager :: sent Graphite metric - %s %s' % (send_metric_name, str(metrics_sparsity_increasing_count)))
                 except Exception as e:
                     logger.error('error :: metrics_manager :: could not send send_graphite_metric %s %s: %s' % (
                         send_metric_name, str(metrics_sparsity_increasing_count), e))
@@ -2498,7 +2528,7 @@ class Metrics_Manager(Thread):
                 send_metric_name = metrics_sparsity_use_namespace + '.avg_sparsity'
                 try:
                     send_graphite_metric(skyline_app, send_metric_name, str(avg_sparsity))
-                    logger.info('metrics_manager - sent Graphite metric - %s %s' % (send_metric_name, str(avg_sparsity)))
+                    logger.info('metrics_manager :: sent Graphite metric - %s %s' % (send_metric_name, str(avg_sparsity)))
                 except Exception as e:
                     logger.error('error :: metrics_manager :: could not send send_graphite_metric %s %s: %s' % (
                         send_metric_name, str(avg_sparsity), e))
@@ -2520,6 +2550,123 @@ class Metrics_Manager(Thread):
                 str(len(unique_metrics)), str(len(metrics_inactive))))
             check_data_sparsity_time = time() - check_data_sparsity_start
             logger.info('metrics_manager :: check data sparsity took %.2f seconds' % check_data_sparsity_time)
+
+        # @added 20210619 - Feature #4148: analyzer.metrics_manager.resolutions
+        #                   Bug #4146: check_data_sparsity - incorrect on low fidelity and inconsistent metrics
+        # Also determine resolution of metrics that were not checked for data
+        # sparsity
+        unique_metrics_set = set(list(unique_metrics))
+        check_metrics_set = set(check_metrics)
+        set_difference = unique_metrics_set.difference(check_metrics_set)
+        unchecked_resolution_metrics = list(set_difference)
+        logger.info('metrics_manager :: update_metrics_resolutions_key - determining resolution of %s metric which were skipped from sparsity check' % (
+            str(len(unchecked_resolution_metrics))))
+        unchecked_raw_assigned = None
+        if unchecked_resolution_metrics:
+            try:
+                unchecked_raw_assigned = self.redis_conn.mget(unchecked_resolution_metrics)
+            except Exception as e:
+                logger.error(traceback.format_exc())
+                logger.error('error :: metrics_manager :: failed to get unchecked_resolution_metrics from Redis - %s' % e)
+                unchecked_raw_assigned = []
+        for i, metric_name in enumerate(unchecked_resolution_metrics):
+            try:
+                try:
+                    raw_series = unchecked_raw_assigned[i]
+                    unpacker = Unpacker(use_list=False)
+                    unpacker.feed(raw_series)
+                    timeseries = list(unpacker)
+                except:
+                    timeseries = []
+                metric_name = str(metric_name)
+                if metric_name.startswith(settings.FULL_NAMESPACE):
+                    base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+                else:
+                    base_name = metric_name
+                metric_resolution = 0
+                timestamp_resolutions_count = {}
+                try:
+                    metric_resolution, timestamp_resolutions_count = determine_data_frequency(skyline_app, timeseries, False)
+                except Exception as e:
+                    if not check_sparsity_error_log:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: metrics_manager :: unchecked_resolution_metrics - determine_data_frequency failed for %s - %s' % (
+                            base_name, e))
+                        check_sparsity_error_log = True
+                update_metric_timestamp_resolutions_key = False
+                metric_timestamp_resolutions_count_str = None
+                try:
+                    metric_timestamp_resolutions_count_str = metrics_timestamp_resolutions_count_dict[metric_name]
+                except KeyError:
+                    metric_timestamp_resolutions_count_str = None
+                    update_metric_timestamp_resolutions_key = True
+                except Exception as e:
+                    if not check_sparsity_error_log:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: metrics_manager :: unchecked_resolution_metrics - failed to get entry from metrics_timestamp_resolutions_count_dict for - %s - %s' % (
+                            str(metric_name), e))
+                        check_sparsity_error_log = True
+                    metric_timestamp_resolutions_count_str = None
+                    update_metric_timestamp_resolutions_key = True
+                if metric_timestamp_resolutions_count_str:
+                    if metric_timestamp_resolutions_count_str != str(dict(timestamp_resolutions_count)):
+                        update_metric_timestamp_resolutions_key = True
+                if update_metric_timestamp_resolutions_key:
+                    try:
+                        self.redis_conn.hset(
+                            'analyzer.metrics_manager.hash_key.metrics_timestamp_resolutions',
+                            metric_name, str(dict(timestamp_resolutions_count)))
+                    except Exception as e:
+                        if not check_sparsity_error_log:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: metrics_manager :: failed to add entry in analyzer.metrics_manager.hash_key.metrics_timestamp_resolutions for - %s - %s' % (
+                                str(metric_name), e))
+                            check_sparsity_error_log = True
+                update_metrics_resolutions_key = True
+                last_known_metric_resolution = None
+                if metric_resolution and metrics_resolutions_dict:
+                    try:
+                        last_known_metric_resolution = metrics_resolutions_dict[base_name]
+                    except KeyError:
+                        update_metrics_resolutions_key = True
+                        last_known_metric_resolution = None
+                    except Exception as e:
+                        if not check_sparsity_error_log:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: metrics_manager :: update_metrics_resolutions_key - failed to determine metric resolution for %s - %s' % (
+                                base_name, e))
+                            check_sparsity_error_log = True
+                        last_known_metric_resolution = None
+                    if last_known_metric_resolution:
+                        if int(float(last_known_metric_resolution)) == metric_resolution:
+                            update_metrics_resolutions_key = False
+                if update_metrics_resolutions_key:
+                    if last_known_metric_resolution is not None:
+                        logger.info('metrics_manager :: update_metrics_resolutions_key - updating %s resolution from %s to %s' % (
+                            base_name, str(last_known_metric_resolution),
+                            str(metric_resolution)))
+                        updated_metric_resolution_keys += 1
+                    else:
+                        added_metric_resolution_keys += 1
+                    try:
+                        self.redis_conn.hset(
+                            metrics_resolutions_hash_key,
+                            base_name, int(metric_resolution))
+                    except Exception as e:
+                        if not check_sparsity_error_log:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: metrics_manager :: failed to add entry in analyzer.metrics_manager.hash_key.metrics_data_sparsity for - %s - %s' % (
+                                str(metric_name), e))
+                            check_sparsity_error_log = True
+            except Exception as e:
+                if not check_sparsity_error_log:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: metrics_manager :: failed unchecked_resolution_metrics - %s' % e)
+                    check_sparsity_error_log = True
+        logger.info('metrics_manager :: update_metrics_resolutions_key - added %s metric resolutions to %s Redis hash key' % (
+            str(added_metric_resolution_keys), metrics_resolutions_hash_key))
+        logger.info('metrics_manager :: update_metrics_resolutions_key - updated %s metric resolution in %s Redis hash key' % (
+            str(updated_metric_resolution_keys), metrics_resolutions_hash_key))
 
         # @added 20201212 - Feature #3884: ANALYZER_CHECK_LAST_TIMESTAMP
         if ANALYZER_CHECK_LAST_TIMESTAMP:
@@ -2716,6 +2863,21 @@ class Metrics_Manager(Thread):
                 logger.error('error :: metrics_manager :: failed to add multiple members to the analyzer.metrics_manager.db.metrics_fully_populated Redis set - %s' % e)
 
         spin_end = time() - spin_start
+
+        # @added 20210619 - Feature #4148: analyzer.metrics_manager.resolutions
+        try:
+            self.redis_conn.set(
+                'analyzer.metrics_manager.run_time', spin_end)
+        except Exception as e:
+            logger.error('error :: metrics_manager :: could not set Redis analyzer.metrics_manager.run_time: %s' % e)
+        send_metric_name = '%s.metrics_manager_run_time' % skyline_app_graphite_namespace
+        try:
+            send_graphite_metric(skyline_app, send_metric_name, str(spin_end))
+            logger.info('metrics_manager :: sent Graphite metric - %s %s' % (send_metric_name, str(spin_end)))
+        except Exception as e:
+            logger.error('error :: metrics_manager :: could not send send_graphite_metric %s %s: %s' % (
+                send_metric_name, str(spin_end), e))
+
         logger.info('metrics_manager :: metric_management_process took %.2f seconds' % spin_end)
         return
 

@@ -8,6 +8,7 @@ from skyline_functions import get_redis_conn_decoded
 from functions.redis.get_metric_timeseries import get_metric_timeseries
 from functions.thunder.send_event import thunder_send_event
 from functions.timeseries.determine_data_sparsity import determine_data_sparsity
+from functions.settings.get_external_settings import get_external_settings
 
 
 # @added 20210518 - Branch #1444: thunder
@@ -24,7 +25,11 @@ def thunder_stale_metrics(current_skyline_app, log=True):
 
     """
 
-    function_str = 'metrics_manager :: functions.thunder.thunder_stale_metrics'
+    if current_skyline_app == 'analyzer':
+        function_str = 'metrics_manager :: functions.thunder.thunder_stale_metrics'
+    if current_skyline_app == 'webapp':
+        function_str = 'functions.thunder.thunder_stale_metrics'
+
     if log:
         current_skyline_app_logger = current_skyline_app + 'Log'
         current_logger = logging.getLogger(current_skyline_app_logger)
@@ -47,7 +52,7 @@ def thunder_stale_metrics(current_skyline_app, log=True):
         sparsity = None
         if timeseries:
             try:
-                sparsity = determine_data_sparsity(current_skyline_app, timeseries)
+                sparsity = determine_data_sparsity(current_skyline_app, timeseries, None, False)
             except Exception as e:
                 if not log:
                     current_skyline_app_logger = current_skyline_app + 'Log'
@@ -111,9 +116,28 @@ def thunder_stale_metrics(current_skyline_app, log=True):
                 base_name = metric_name
             base_names_of_known_sparsity.append(base_name)
             sparsity = metrics_sparsity_dict[metric_name]
-            if float(sparsity) < 70:
+            if float(sparsity) < settings.SPARSELY_POPULATED_PERCENTAGE:
                 sparsely_populated_metrics.append(base_name)
         del metrics_sparsity_dict
+
+    # @added 20210617 - Feature #4144: webapp - stale_metrics API endpoint
+    # On webapp report on sparsely populated metrics as well
+    exclude_sparsely_populated = False
+    if current_skyline_app == 'webapp':
+        try:
+            exclude_sparsely_populated = redis_conn_decoded.get('webapp.stale_metrics.exclude_sparsely_populated')
+            if log:
+                current_logger.info('%s :: Redis key webapp.stale_metrics.exclude_sparsely_populated - %s' % (
+                    function_str, str(exclude_sparsely_populated)))
+        except Exception as e:
+            if not log:
+                current_skyline_app_logger = current_skyline_app + 'Log'
+                current_logger = logging.getLogger(current_skyline_app_logger)
+            current_logger.error(traceback.format_exc())
+            current_logger.error('error :: %s :: failed to get Redis key webapp.stale_metrics.exclude_sparsely_populated - %s' % (
+                function_str, e))
+        if not exclude_sparsely_populated:
+            sparsely_populated_metrics = []
 
     # Get all alerted on stale metrics
     alerted_on_stale_metrics_hash_key = 'thunder.alerted_on.stale_metrics'
@@ -129,6 +153,11 @@ def thunder_stale_metrics(current_skyline_app, log=True):
     alerted_on_stale_metrics = []
     if alerted_on_stale_metrics_dict:
         alerted_on_stale_metrics = list(alerted_on_stale_metrics_dict.keys())
+
+    # @added 20210617 - Feature #4144: webapp - stale_metrics API endpoint
+    # On webapp report on alerted on metrics as well
+    if current_skyline_app == 'webapp':
+        alerted_on_stale_metrics = []
 
     # Get all the known custom stale periods
     custom_stale_metrics_dict = {}
@@ -177,10 +206,67 @@ def thunder_stale_metrics(current_skyline_app, log=True):
     test_stale_metrics_namespaces = []
 
     parent_namespaces = list(set(parent_namespaces))
+
+    # @added 20210620 - Branch #1444: thunder
+    #                   Feature #4076: CUSTOM_STALE_PERIOD
+    # Handle multi level namespaces
+    external_settings = {}
+    try:
+        external_settings = get_external_settings(current_skyline_app)
+    except Exception as e:
+        if not log:
+            current_skyline_app_logger = current_skyline_app + 'Log'
+            current_logger = logging.getLogger(current_skyline_app_logger)
+        current_logger.error(traceback.format_exc())
+        current_logger.error('error :: %s :: get_external_settings failed - %s' % (
+            function_str, e))
+    external_parent_namespaces_stale_periods = {}
+    if external_settings:
+        for config_id in list(external_settings.keys()):
+            no_data_stale_period = None
+            try:
+                alert_on_no_data = external_settings[config_id]['alert_on_no_data']['enabled']
+            except KeyError:
+                alert_on_no_data = False
+            if alert_on_no_data:
+                try:
+                    no_data_stale_period = external_settings[config_id]['alert_on_no_data']['stale_period']
+                except KeyError:
+                    no_data_stale_period = False
+            namespace = None
+            if no_data_stale_period:
+                try:
+                    namespace = external_settings[config_id]['namespace']
+                except KeyError:
+                    namespace = False
+            try:
+                expiry = external_settings[config_id]['alert_on_no_data']['expiry']
+            except KeyError:
+                expiry = 1800
+            if namespace and no_data_stale_period and expiry:
+                external_parent_namespaces_stale_periods[parent_namespace] = {}
+                external_parent_namespaces_stale_periods[parent_namespace]['stale_period'] = int(no_data_stale_period)
+                external_parent_namespaces_stale_periods[parent_namespace]['expiry'] = int(expiry)
+    external_parent_namespaces = []
+    if external_parent_namespaces:
+        external_parent_namespaces = list(external_parent_namespaces.keys())
+    parent_namespace_metrics_processed = []
+    custom_stale_period_namespaces = []
+    # Sort the list by the namespaces with the most elements to the least as
+    # first match wins
+    if settings.CUSTOM_STALE_PERIOD:
+        custom_stale_period_namespaces = list(settings.CUSTOM_STALE_PERIOD.keys())
+        custom_stale_period_namespaces_elements_list = []
+        for custom_stale_period_namespace in custom_stale_period_namespaces:
+            namespace_elements = len(custom_stale_period_namespace.split('.'))
+            custom_stale_period_namespaces_elements_list.append([custom_stale_period_namespace, namespace_elements])
+        sorted_custom_stale_period_namespaces = sorted(custom_stale_period_namespaces_elements_list, key=lambda x: (x[1]), reverse=True)
+        if sorted_custom_stale_period_namespaces:
+            custom_stale_period_namespaces = [x[0] for x in sorted_custom_stale_period_namespaces]
+    # Order by setting priority
+    parent_namespaces = external_parent_namespaces + custom_stale_period_namespaces + parent_namespaces
+
     for parent_namespace in parent_namespaces:
-        if log:
-            current_logger.info('%s :: checking stale metrics in the \'%s.\' namespace' % (
-                function_str, parent_namespace))
         parent_namespace_stale_metrics_count = 0
         namespace_stale_metrics_dict[parent_namespace] = {}
         namespace_stale_metrics_dict[parent_namespace]['metrics'] = {}
@@ -190,6 +276,19 @@ def thunder_stale_metrics(current_skyline_app, log=True):
 
         # metrics that are in the parent namespace
         parent_namespace_metrics = [item for item in metrics_last_timestamps if str(item[0]).startswith(parent_namespace)]
+        unfiltered_parent_namespace_metrics_count = len(parent_namespace_metrics)
+        # @added 20210620 - Branch #1444: thunder
+        #                   Feature #4076: CUSTOM_STALE_PERIOD
+        # Handle multi level namespaces by filtering out metrics that have
+        # already been processed in a longer parent_namespace
+        parent_namespace_metrics = [item for item in parent_namespace_metrics if str(item[0]) not in parent_namespace_metrics_processed]
+        if parent_namespace_metrics:
+            parent_namespace_metric_names = [item[0] for item in parent_namespace_metrics]
+            parent_namespace_metrics_processed = parent_namespace_metrics_processed + parent_namespace_metric_names
+        if log:
+            current_logger.info('%s :: checking stale metrics in the \'%s.\' namespace on %s metrics (of %s filtered by processed)' % (
+                function_str, parent_namespace, str(len(parent_namespace_metrics)),
+                str(unfiltered_parent_namespace_metrics_count)))
 
         # Now check metrics that are default STALE_PERIOD metrics and are not
         # CUSTOM_STALE_PERIOD metrics
@@ -214,9 +313,13 @@ def thunder_stale_metrics(current_skyline_app, log=True):
                         try:
                             sparsity = get_sparsity(base_name)
                             if sparsity is not None:
-                                if float(sparsity) < 82:
-                                    sparsely_populated_metrics.append(base_name)
-                                    continue
+                                if float(sparsity) < settings.SPARSELY_POPULATED_PERCENTAGE:
+                                    if current_skyline_app == 'analyzer':
+                                        sparsely_populated_metrics.append(base_name)
+                                        continue
+                                    if current_skyline_app == 'webapp' and exclude_sparsely_populated:
+                                        sparsely_populated_metrics.append(base_name)
+                                        continue
                         except Exception as e:
                             if not log:
                                 current_skyline_app_logger = current_skyline_app + 'Log'
@@ -263,9 +366,15 @@ def thunder_stale_metrics(current_skyline_app, log=True):
                         try:
                             sparsity = get_sparsity(base_name)
                             if sparsity is not None:
-                                if float(sparsity) < 82:
-                                    sparsely_populated_metrics.append(base_name)
-                                    continue
+                                if float(sparsity) < settings.SPARSELY_POPULATED_PERCENTAGE:
+                                    # @modified 20210617 - Feature #4144: webapp - stale_metrics API endpoint
+                                    # On webapp report on sparsely_populated_metrics on metrics as well
+                                    if current_skyline_app == 'analyzer':
+                                        sparsely_populated_metrics.append(base_name)
+                                        continue
+                                    if current_skyline_app == 'webapp' and exclude_sparsely_populated:
+                                        sparsely_populated_metrics.append(base_name)
+                                        continue
                         except Exception as e:
                             current_logger.error('error :: %s :: get_sparsity failed for %s - %s' % (
                                 function_str, base_name, e))
@@ -343,7 +452,10 @@ def thunder_stale_metrics(current_skyline_app, log=True):
         current_logger.info('%s :: skipped checking %s sparsely_populated_metrics' % (
             function_str, str(len(sparsely_populated_metrics))))
 
-    if namespace_stale_metrics_dict:
+    # @modified 20210617 - Feature #4144: webapp - stale_metrics API endpoint
+    # On webapp request do not send thunder events
+    # if namespace_stale_metrics_dict:
+    if namespace_stale_metrics_dict and current_skyline_app == 'analyzer':
         parent_namespaces = list(namespace_stale_metrics_dict.keys())
         for parent_namespace in parent_namespaces:
             stale_metrics = list(namespace_stale_metrics_dict[parent_namespace]['metrics'].keys())
@@ -424,7 +536,10 @@ def thunder_stale_metrics(current_skyline_app, log=True):
                             function_str, str(len(stale_metrics)),
                             parent_namespace))
 
-    if namespace_recovered_metrics_dict and total_recovered_metrics_count:
+    # @modified 20210617 - Feature #4144: webapp - stale_metrics API endpoint
+    # On webapp request do not send thunder events
+    # if namespace_recovered_metrics_dict and total_recovered_metrics_count:
+    if namespace_recovered_metrics_dict and total_recovered_metrics_count and current_skyline_app == 'analyzer':
         parent_namespaces = list(namespace_recovered_metrics_dict.keys())
         for parent_namespace in parent_namespaces:
             stale_metrics = list(namespace_recovered_metrics_dict[parent_namespace]['metrics'].keys())
