@@ -102,7 +102,7 @@ def run():
         print('Algorithm %s deprecated or not defined; check settings.ALGORITHMS' % e)
         sys.exit(1)
     except Exception as e:
-        print('Algorithm test run failed.')
+        print('Algorithm test run failed - %s' % e)
         traceback.print_exc()
         sys.exit(1)
 

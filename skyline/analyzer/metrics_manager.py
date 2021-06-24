@@ -24,7 +24,9 @@ from skyline_functions import (
     # Added send_graphite_metric
     get_redis_conn, get_redis_conn_decoded, send_graphite_metric,
     # @added 20201213 - Feature #3890: metrics_manager - sync_cluster_files
-    mkdir_p)
+    mkdir_p,
+    # @added 20210624 - Feature #4150: metrics_manager - roomba batch processing metrics
+    sort_timeseries)
 from matched_or_regexed_in_list import matched_or_regexed_in_list
 
 # @added 20210430 - Task #4030: refactoring
@@ -2884,6 +2886,104 @@ class Metrics_Manager(Thread):
             except Exception as e:
                 logger.error(traceback.format_exc())
                 logger.error('error :: metrics_manager :: failed to add multiple members to the analyzer.metrics_manager.db.metrics_fully_populated Redis set - %s' % e)
+
+        # @added 20210624 - Feature #4150: metrics_manager - roomba batch processing metrics
+        #                   Feature #3650: ROOMBA_DO_NOT_PROCESS_BATCH_METRICS
+        #                   Feature #3480: batch_processing
+        # When there are batch processing metrics and ROOMBA_DO_NOT_PROCESS_BATCH_METRICS
+        # is enabled analyzer_batch only roombas metrics when they are received.
+        # If batch metrics stop, they never get roomba'ed again and will remain
+        # in Redis and never get purged.
+        # Once an hour make metrics_manager just remove any batch processing
+        # metrics that are older than FULL_DURATION + (FULL_DURATION / 2)
+        if settings.BATCH_PROCESSING:
+            inactive_batch_metrics_timestamp = int(time()) - (settings.FULL_DURATION + (settings.FULL_DURATION / 2))
+            roomba_cleaned = False
+            roomba_cache_key = 'analyzer.metrics_manager.roomba.batch_metrics'
+            try:
+                roomba_cleaned = self.redis_conn.get(roomba_cache_key)
+                if roomba_cleaned:
+                    logger.info('metrics_manager :: roomba batch_processing_metrics Redis key %s exists, nothing to do' % (
+                        roomba_cache_key))
+            except Exception as e:
+                logger.error(traceback.format_exc())
+                logger.error('error :: metrics_manager :: roomba batch_processing_metrics failed to get Redis key %s - %s' % (
+                    roomba_cache_key, e))
+            batch_processing_base_names = []
+            if not roomba_cleaned:
+                try:
+                    batch_processing_base_names = list(self.redis_conn_decoded.smembers('aet.analyzer.batch_processing_metrics'))
+                except Exception as e:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: metrics_manager :: roomba batch_processing_metrics failed to get Redis set aet.analyzer.batch_processing_metrics - %s' % (
+                        e))
+            batch_processing_metrics = []
+            if batch_processing_base_names:
+                for base_name in batch_processing_base_names:
+                    metric_name = '%s%s' % (settings.FULL_NAMESPACE, base_name)
+                    batch_processing_metrics.append(metric_name)
+            raw_assigned = None
+            if batch_processing_metrics:
+                logger.info('metrics_manager :: roomba checking %s batch_processing_metrics' % (
+                    str(len(batch_processing_metrics))))
+                try:
+                    raw_assigned = self.redis_conn.mget(batch_processing_metrics)
+                except Exception as e:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: metrics_manager :: roomba batch_processing_metrics failed to get raw_assigned from Redis - %s' % e)
+            roomba_removed = []
+            if raw_assigned:
+                # Distill timeseries strings into lists
+                for i, metric_name in enumerate(batch_processing_metrics):
+                    timeseries = []
+                    try:
+                        raw_series = raw_assigned[i]
+                        unpacker = Unpacker(use_list=False)
+                        unpacker.feed(raw_series)
+                        timeseries = list(unpacker)
+                    except Exception as e:
+                        logger.error('error :: metrics_manager :: roomba batch_processing_metrics failed to unpack %s timeseries - %s' % (
+                            str(metric_name), e))
+                        timeseries = []
+                    # To ensure that there are no unordered timestamps in the time
+                    # series which are artefacts of the collector or carbon-relay, sort
+                    # all time series by timestamp before analysis.
+                    original_timeseries = timeseries
+                    if original_timeseries:
+                        try:
+                            timeseries = sort_timeseries(original_timeseries)
+                            del original_timeseries
+                        except Exception as e:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: metrics_manager :: roomba batch_processing_metrics failed to determine whther to remove %s timeseries - %s' % (
+                                metric_name, e))
+                    remove_timeseries = False
+                    if timeseries:
+                        try:
+                            last_timeseries_timestamp = int(timeseries[-1][0])
+                            if last_timeseries_timestamp < inactive_batch_metrics_timestamp:
+                                remove_timeseries = True
+                        except Exception as e:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: metrics_manager :: roomba batch_processing_metrics failed to determine whther to remove %s timeseries - %s' % (
+                                metric_name, e))
+                    if remove_timeseries:
+                        try:
+                            self.redis_conn.delete(metric_name)
+                            logger.info('metrics_manager :: roomba removed batch processing metric %s' % metric_name)
+                            roomba_removed.append(metric_name)
+                        except Exception as e:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: metrics_manager :: roomba falied to remove batch processing metric %s - %s' % (
+                                metric_name, e))
+                        # TODO - set inactive
+            if not roomba_cleaned:
+                try:
+                    self.redis_conn.setex(roomba_cache_key, 3600, str(roomba_removed))
+                except Exception as e:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: metrics_manager :: failed to set Redis key %s - %s' % (
+                        roomba_cache_key, e))
 
         spin_end = time() - spin_start
 
