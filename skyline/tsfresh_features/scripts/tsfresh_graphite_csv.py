@@ -73,6 +73,10 @@ if __name__ == '__main__':
     fname_in = str(sys.argv[1])
     if os.path.isfile(fname_in):
         print(colored('notice: processing %s', 'cyan') % (fname_in))
+        # @added 20210504  - Task #4030: refactoring
+        file_path = os.path.dirname(fname_in)
+        file_name = os.path.basename(fname_in)
+        open_file = '%s/%s' % (file_path, file_name)
     else:
         print(colored('error: file not found - %s', 'red') % (fname_in))
 
@@ -95,11 +99,17 @@ if __name__ == '__main__':
     # Convert the Graphite csv %Y-%m-%d %H:%M:%S datetime to UTC epoch
     # timestamped csv
     print(colored('notice: converting the Graphite csv %Y-%m-%d %H:%M:%S datetime to UTC epoch', 'cyan'))
-    tmp_csv = '%s.tmp' % fname_in
+
+    # @modified 20210504  - Task #4030: refactoring
+    # tmp_csv = '%s.tmp' % fname_in
+    tmp_csv = '%s.tmp' % open_file
+
     if os.path.isfile(tmp_csv):
         os.remove(tmp_csv)
 
-    with open(fname_in, 'rb') as fr:
+    # @modified 20210504  - Task #4030: refactoring
+    # with open(fname_in, 'rb') as fr:
+    with open(open_file, 'rb') as fr:
         reader = csv.reader(fr, delimiter=',')
         for i, line in enumerate(reader):
             metric = str(line[0])

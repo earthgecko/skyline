@@ -1,9 +1,7 @@
 import logging
-from os import path, walk
-import string
+from os import path
 import operator
 import time
-import re
 
 import traceback
 
@@ -34,7 +32,7 @@ from skyline_functions import (
     # nonNegativeDerivative, in_list, is_derivative_metric,
     # @added 20200507 - Feature #3532: Sort all time series
     # Added sort_timeseries and removed unused in_list
-    nonNegativeDerivative, is_derivative_metric, sort_timeseries,
+    nonNegativeDerivative, sort_timeseries,
     # @added 20201123 - Feature #3824: get_cluster_data
     #                   Feature #2464: luminosity_remote_data
     #                   Bug #3266: py3 Redis binary objects not strings
@@ -44,6 +42,21 @@ from skyline_functions import (
     get_graphite_metric,
     # @added 20210328 - Feature #3994: Panorama - mirage not anomalous
     filesafe_metricname, mkdir_p)
+
+# @added 20210420  - Task #4022: Move mysql_select calls to SQLAlchemy
+# from database_queries import (
+#    db_query_metric_id_from_base_name, db_query_latest_anomalies,
+#    db_query_metric_ids_from_metric_like)
+# @added 20210420  - Task #4022: Move mysql_select calls to SQLAlchemy
+#                    Task #4030: refactoring
+from functions.database.queries.metric_id_from_base_name import metric_id_from_base_name
+from functions.database.queries.metric_ids_from_metric_like import metric_ids_from_metric_like
+from functions.database.queries.latest_anomalies import latest_anomalies as db_latest_anomalies
+
+# @added 20210617 - Feature #4144: webapp - stale_metrics API endpoint
+#                   Feature #4076: CUSTOM_STALE_PERIOD
+#                   Branch #1444: thunder
+from functions.thunder.stale_metrics import thunder_stale_metrics
 
 import skyline_version
 skyline_version = skyline_version.__absolute_version__
@@ -73,8 +86,8 @@ REQUEST_ARGS = ['from_date',
 # long string otherwise.
 try:
     ENABLE_WEBAPP_DEBUG = settings.ENABLE_WEBAPP_DEBUG
-except:
-    logger.error('error :: cannot determine ENABLE_WEBAPP_DEBUG from settings')
+except Exception as e:
+    logger.error('error :: cannot determine ENABLE_WEBAPP_DEBUG from settings - %s' % e)
     ENABLE_WEBAPP_DEBUG = False
 
 # @added 20180720 - Feature #2464: luminosity_remote_data
@@ -133,18 +146,19 @@ def panorama_request():
         latest_anomalies = True
 
     metric = False
-    if metric:
-        logger.info('Getting db id for %s' % metric)
-        # @modified 20170913 - Task #2160: Test skyline with bandit
-        # Added nosec to exclude from bandit tests
-        query = 'select id from metrics WHERE metric=\'%s\'' % metric  # nosec
-        try:
-            result = mysql_select(skyline_app, query)
-        except:
-            logger.error('error :: failed to get id from db: %s' % traceback.format_exc())
-            result = 'metric id not found in database'
-
-        return str(result[0][0])
+    # @modified 20210504  - Task #4030: refactoring
+    #                       Task #4022: Move mysql_select calls to SQLAlchemy
+    # if metric
+    #     logger.info('Getting db id for %s' % metric)
+    #     # @modified 20170913 - Task #2160: Test skyline with bandit
+    #     # Added nosec to exclude from bandit tests
+    #     query = 'select id from metrics WHERE metric=\'%s\'' % metric  # nosec
+    #     try:
+    #         result = mysql_select(skyline_app, query)
+    #     except:
+    #         logger.error('error :: failed to get id from db: %s' % traceback.format_exc())
+    #         result = 'metric id not found in database'
+    #     return str(result[0][0])
 
     search_request = True
     count_request = False
@@ -154,9 +168,17 @@ def panorama_request():
         # @modified 20191108 - Feature #3306: Record the anomaly_end_timestamp
         #                      Branch #3262: py3
         # query = 'select id, metric_id, anomalous_datapoint, anomaly_timestamp, full_duration, created_timestamp from anomalies ORDER BY id DESC LIMIT 10'
-        query = 'select id, metric_id, anomalous_datapoint, anomaly_timestamp, full_duration, created_timestamp, anomaly_end_timestamp from anomalies ORDER BY id DESC LIMIT 10'
+        # @modified 20210420  - Task #4022: Move mysql_select calls to SQLAlchemy
+        # query = 'select id, metric_id, anomalous_datapoint, anomaly_timestamp, full_duration, created_timestamp, anomaly_end_timestamp from anomalies ORDER BY id DESC LIMIT 10'
+        # try:
+        #     rows = mysql_select(skyline_app, query)
+        # except:
+        #     logger.error('error :: failed to get anomalies from db: %s' % traceback.format_exc())
+        #     rows = []
+        # @added 20210420  - Task #4022: Move mysql_select calls to SQLAlchemy
+        rows = []
         try:
-            rows = mysql_select(skyline_app, query)
+            rows = db_latest_anomalies(skyline_app)
         except:
             logger.error('error :: failed to get anomalies from db: %s' % traceback.format_exc())
             rows = []
@@ -171,21 +193,35 @@ def panorama_request():
         needs_and = False
 
         # If we have to '' a string we cannot escape the query it seems...
-        do_not_escape = False
+        # do_not_escape = False
         if 'metric' in request.args:
             metric = request.args.get('metric', None)
-            if metric and metric != 'all':
+            # if metric and metric != 'all':
+            if isinstance(metric, str) and metric != 'all':
                 # @modified 20170913 - Task #2160: Test skyline with bandit
                 # Added nosec to exclude from bandit tests
-                query = "select id from metrics WHERE metric='%s'" % (metric)  # nosec
+                # @modified 20210420  - Task #4022: Move mysql_select calls to SQLAlchemy
+                # query = "select id from metrics WHERE metric='%s'" % (metric)  # nosec
+                # try:
+                #     found_id = mysql_select(skyline_app, query)
+                # except:
+                #     logger.error('error :: failed to get app ids from db: %s' % traceback.format_exc())
+                #     found_id = None
+                # @added 20210420  - Task #4022: Move mysql_select calls to SQLAlchemy
+                found_id = None
+                if metric.startswith(settings.FULL_NAMESPACE):
+                    base_name = metric.replace(settings.FULL_NAMESPACE, '', 1)
+                else:
+                    base_name = str(metric)
                 try:
-                    found_id = mysql_select(skyline_app, query)
+                    # found_id = db_query_metric_id_from_base_name(skyline_app, base_name)
+                    found_id = metric_id_from_base_name(skyline_app, base_name)
                 except:
-                    logger.error('error :: failed to get app ids from db: %s' % traceback.format_exc())
+                    logger.error('error :: failed to get metric id from db: %s' % traceback.format_exc())
                     found_id = None
-
                 if found_id:
-                    target_id = str(found_id[0][0])
+                    # target_id = str(found_id[0][0])
+                    target_id = str(found_id)
                     if needs_and:
                         new_query_string = '%s AND metric_id=%s' % (query_string, target_id)
                     else:
@@ -193,36 +229,68 @@ def panorama_request():
                     query_string = new_query_string
                     needs_and = True
 
+        # in_ids_str = None
         if 'metric_like' in request.args:
             metric_like = request.args.get('metric_like', None)
-            if metric_like and metric_like != 'all':
+            metrics_like_str = None
+            # if metric_like and metric_like != 'all':
+            if isinstance(metric_like, str) and metric_like != 'all':
                 # @modified 20170913 - Task #2160: Test skyline with bandit
                 # Added nosec to exclude from bandit tests
-                query = 'select id from metrics WHERE metric LIKE \'%s\'' % (str(metric_like))  # nosec
-                try:
-                    rows = mysql_select(skyline_app, query)
-                except:
-                    logger.error('error :: failed to get metric ids from db: %s' % traceback.format_exc())
-                    return False
-
                 rows_returned = None
-                try:
-                    rows_returned = rows[0]
-                    if ENABLE_WEBAPP_DEBUG:
-                        logger.info('debug :: rows - rows[0] - %s' % str(rows[0]))
-                except:
-                    rows_returned = False
-                    if ENABLE_WEBAPP_DEBUG:
-                        logger.info('debug :: no rows returned')
+                # @modified 20210420  - Task #4022: Move mysql_select calls to SQLAlchemy
+                # query = 'select id from metrics WHERE metric LIKE \'%s\'' % (str(metric_like))  # nosec
+                # try:
+                #     rows = mysql_select(skyline_app, query)
+                # except:
+                #     logger.error('error :: failed to get metric ids from db: %s' % traceback.format_exc())
+                #     return False
+                # rows_returned = None
+                # try:
+                #     rows_returned = rows[0]
+                #     if ENABLE_WEBAPP_DEBUG:
+                #         logger.info('debug :: rows - rows[0] - %s' % str(rows[0]))
+                # except:
+                #     rows_returned = False
+                #     if ENABLE_WEBAPP_DEBUG:
+                #         logger.info('debug :: no rows returned')
 
-                if rows_returned:
-                    ids = get_ids_from_rows('metric', rows)
+                # @added 20210420  - Task #4022: Move mysql_select calls to SQLAlchemy
+                metrics_like_str = str(metric_like)
+                db_metric_ids = None
+                try:
+                    db_metric_ids = metric_ids_from_metric_like(skyline_app, metrics_like_str)
+                except Exception as e:
+                    logger.error('error :: failed to get metric ids from db: %s' % e)
+                    return False
+                use_db_metric_ids = True
+                if db_metric_ids and use_db_metric_ids:
+                    rows_returned = False
+                    ids = ''
+                    for db_metric_id in db_metric_ids:
+                        if ids == '':
+                            ids = '%s' % str(db_metric_id)
+                        else:
+                            ids = '%s, %s' % (ids, str(db_metric_id))
                     new_query_string = '%s WHERE metric_id IN (%s)' % (query_string, str(ids))
                 else:
                     # Get nothing
                     new_query_string = '%s WHERE metric_id IN (0)' % (query_string)
                     if ENABLE_WEBAPP_DEBUG:
                         logger.info('debug :: no rows returned using new_query_string - %s' % new_query_string)
+                if not use_db_metric_ids:
+                    if rows_returned:
+                        ids = get_ids_from_rows('metric', rows)
+                        new_query_string = '%s WHERE metric_id IN (%s)' % (query_string, str(ids))
+
+                        logger.info('debug :: id is %s chars long after adding get_ids_from_rows, new_query_string: %s' % (
+                            str(len(ids)), new_query_string))
+
+                    else:
+                        # Get nothing
+                        new_query_string = '%s WHERE metric_id IN (0)' % (query_string)
+                        if ENABLE_WEBAPP_DEBUG:
+                            logger.info('debug :: no rows returned using new_query_string - %s' % new_query_string)
 
                 query_string = new_query_string
                 needs_and = True
@@ -276,9 +344,20 @@ def panorama_request():
         if 'app' in request.args:
             app = request.args.get('app', None)
             if app and app != 'all':
+                # @added 20210504  - Task #4030: refactoring
+                #                    Task #4022: Move mysql_select calls to SQLAlchemy
+                # Sanitise variable
+                if isinstance(app, str):
+                    for_app = str(app)
+                else:
+                    for_app = 'none'
+
                 # @modified 20170913 - Task #2160: Test skyline with bandit
                 # Added nosec to exclude from bandit tests
-                query = 'select id from apps WHERE app=\'%s\'' % (str(app))  # nosec
+                # @modified 20210504  - Task #4030: refactoring
+                #                       Task #4022: Move mysql_select calls to SQLAlchemy
+                # query = 'select id from apps WHERE app=\'%s\'' % (str(app))  # nosec
+                query = 'select id from apps WHERE app=\'%s\'' % (str(for_app))
                 try:
                     found_id = mysql_select(skyline_app, query)
                 except:
@@ -298,9 +377,21 @@ def panorama_request():
         if 'source' in request.args:
             source = request.args.get('source', None)
             if source and source != 'all':
+
+                # @added 20210504  - Task #4030: refactoring
+                #                    Task #4022: Move mysql_select calls to SQLAlchemy
+                # Sanitise variable
+                if isinstance(source, str):
+                    for_source = str(source)
+                else:
+                    for_source = 'none'
+
                 # @modified 20170913 - Task #2160: Test skyline with bandit
                 # Added nosec to exclude from bandit tests
-                query = 'select id from sources WHERE source=\'%s\'' % (str(source))  # nosec
+                # @modified 20210504  - Task #4030: refactoring
+                #                       Task #4022: Move mysql_select calls to SQLAlchemy
+                # query = 'select id from sources WHERE source=\'%s\'' % (str(source))  # nosec
+                query = 'select id from sources WHERE source=\'%s\'' % (str(for_source))
                 try:
                     found_id = mysql_select(skyline_app, query)
                 except:
@@ -323,10 +414,27 @@ def panorama_request():
             # DISABLED as it is difficult match algorithm_id in the
             # triggered_algorithms csv list
             algorithm = 'all'
-            if algorithm and algorithm != 'all':
+            # @modified 20210421 - Task #4030: refactoring
+            # semgrep - python.lang.correctness.useless-comparison.no-strings-as-booleans
+            # if algorithm and algorithm != 'all':
+            use_all_for_algorithm = True
+            if use_all_for_algorithm and algorithm != 'all':
+
+                # @added 20210504  - Task #4030: refactoring
+                #                    Task #4022: Move mysql_select calls to SQLAlchemy
+                # Sanitise variable
+                if isinstance(algorithm, str):
+                    for_algorithm = str(algorithm)
+                else:
+                    for_algorithm = 'none'
+
                 # @modified 20170913 - Task #2160: Test skyline with bandit
                 # Added nosec to exclude from bandit tests
-                query = 'select id from algorithms WHERE algorithm LIKE \'%s\'' % (str(algorithm))  # nosec
+                # @modified 20210504  - Task #4030: refactoring
+                #                       Task #4022: Move mysql_select calls to SQLAlchemy
+                # query = 'select id from algorithms WHERE algorithm LIKE \'%s\'' % (str(algorithm))  # nosec
+                query = 'select id from algorithms WHERE algorithm LIKE \'%s\'' % (str(for_algorithm))
+
                 try:
                     rows = mysql_select(skyline_app, query)
                 except:
@@ -345,9 +453,21 @@ def panorama_request():
         if 'host' in request.args:
             host = request.args.get('host', None)
             if host and host != 'all':
+
+                # @added 20210504  - Task #4030: refactoring
+                #                    Task #4022: Move mysql_select calls to SQLAlchemy
+                # Sanitise variable
+                if isinstance(host, str):
+                    for_host = str(host)
+                else:
+                    for_host = 'none'
+
                 # @modified 20170913 - Task #2160: Test skyline with bandit
                 # Added nosec to exclude from bandit tests
-                query = 'select id from hosts WHERE host=\'%s\'' % (str(host))  # nosec
+                # @modified 20210504  - Task #4030: refactoring
+                #                       Task #4022: Move mysql_select calls to SQLAlchemy
+                # query = 'select id from hosts WHERE host=\'%s\'' % (str(host))  # nosec
+                query = 'select id from hosts WHERE host=\'%s\'' % (str(for_host))
                 try:
                     found_id = mysql_select(skyline_app, query)
                 except:
@@ -364,17 +484,32 @@ def panorama_request():
                     needs_and = True
 
         if 'limit' in request.args:
-            limit = request.args.get('limit', '10')
+            # @modified 20210504  - Task #4030: refactoring
+            #                       Task #4022: Move mysql_select calls to SQLAlchemy
+            # limit = request.args.get('limit', '10')
+            limit_str = request.args.get('limit', '10')
+            try:
+                limit = int(limit_str) + 0
+            except Exception as e:
+                logger.error('error :: limit parameter not an int: %s' % e)
+                limit = 10
         else:
             limit = '10'
 
         if 'order' in request.args:
-            order = request.args.get('order', 'DESC')
+            # @modified 20210504  - Task #4030: refactoring
+            #                       Task #4022: Move mysql_select calls to SQLAlchemy
+            # order = request.args.get('order', 'DESC')
+            order_str = request.args.get('order', 'DESC')
+            if order_str == 'ASC':
+                order = 'ASC'
+            else:
+                order = 'DESC'
         else:
             order = 'DESC'
 
         search_query = '%s ORDER BY id %s LIMIT %s' % (
-            query_string, order, limit)
+            query_string, order, str(limit))
 
         if 'count_by_metric' in request.args:
             count_by_metric = request.args.get('count_by_metric', None)
@@ -430,7 +565,7 @@ def panorama_request():
             # anomaly_data = (anomaly_id, metric, anomalous_datapoint, anomaly_timestamp, full_duration, created_timestamp)
             # anomalies.append([int(anomaly_id), str(metric), anomalous_datapoint, anomaly_timestamp, full_duration, created_timestamp])
             anomaly_end_timestamp = str(row[6])
-            anomaly_data = (anomaly_id, metric, anomalous_datapoint, anomaly_timestamp, full_duration, created_timestamp, anomaly_end_timestamp)
+            # anomaly_data = (anomaly_id, metric, anomalous_datapoint, anomaly_timestamp, full_duration, created_timestamp, anomaly_end_timestamp)
             anomalies.append([int(anomaly_id), str(metric), anomalous_datapoint, anomaly_timestamp, full_duration, created_timestamp, anomaly_end_timestamp])
             anomalous_metrics.append(str(metric))
 
@@ -438,7 +573,7 @@ def panorama_request():
             limit_argument = anomaly_count
             if int(anomaly_count) > 100:
                 limit_argument = 100
-            anomaly_data = (int(anomaly_count), metric, str(limit_argument))
+            # anomaly_data = (int(anomaly_count), metric, str(limit_argument))
             anomalies.append([int(anomaly_count), str(metric), str(limit_argument)])
 
     anomalies.sort(key=operator.itemgetter(int(0)))
@@ -472,11 +607,11 @@ def get_list(thing):
     # @modified 20170913 - Task #2160: Test skyline with bandit
     # Added nosec to exclude from bandit tests
     query = 'select %s from %s' % (thing, table)  # nosec
-    logger.info('select %s from %s' % (thing, table))  # nosec
-    got_results = False
+    logger.info('get_list :: select %s from %s' % (thing, table))  # nosec
+    # got_results = False
     try:
         results = mysql_select(skyline_app, query)
-        got_results = True
+        # got_results = True
     except:
         logger.error('error :: failed to get list of %ss from %s' % (thing, table))
         results = None
@@ -485,15 +620,22 @@ def get_list(thing):
     results_array_valid = False
     try:
         test_results = results[0]
-        results_array_valid = True
+        if test_results:
+            results_array_valid = True
     except:
         logger.error('error :: invalid results array for get list of %ss from %s' % (thing, table))
 
+    # @modified 20210415 - Feature #4014: Ionosphere - inference
+    # Stop logging results in webapp
+
     if results_array_valid:
-        logger.info('results: %s' % str(results))
-        for result in results:
-            things.append(str(result[0]))
-        logger.info('things: %s' % str(things))
+        # @modified 20210415 - Feature #4014: Ionosphere - inference
+        # Stop logging results in webapp
+        # logger.info('results: %s' % str(results))
+        # for result in results:
+        #     things.append(str(result[0]))
+        # logger.info('things: %s' % str(things))
+        logger.info('get_list :: returned valid result: %s' % str(results_array_valid))
 
     return things
 
@@ -822,9 +964,16 @@ def get_cluster_data(api_endpoint, data_required, only_host='all', endpoint_para
                     logger.error('error :: get_cluster_data :: failed to build remote_data from %s on %s' % (
                         str(data_required), str(item)))
             if remote_data:
-                logger.info('get_cluster_data :: got %s %s from %s' % (
-                    str(len(remote_data)), str(data_required), str(item[0])))
-                data = data + remote_data
+                # @modified 20210617 - Feature #4144: webapp - stale_metrics API endpoint
+                # Handle list and dic items
+                if isinstance(remote_data, list):
+                    logger.info('get_cluster_data :: got %s %s from %s' % (
+                        str(len(remote_data)), str(data_required), str(item[0])))
+                    data = data + remote_data
+                if isinstance(remote_data, dict):
+                    logger.info('get_cluster_data :: got %s %s from %s' % (
+                        str(len(remote_data)), str(data_required), str(item[0])))
+                    data.append(remote_data)
     return data
 
 
@@ -905,6 +1054,11 @@ def get_yhat_values(
         for item in anomalies_index:
             anomaly_timestamps_indices.append(item[0])
             anomalies.append(item[1])
+
+    top = []
+    bottom = []
+    left = []
+    right = []
 
     if timeseries:
         try:
@@ -1123,6 +1277,7 @@ def get_mirage_not_anomalous_metrics(
         anomalies=False):
     """
     Determine mirage not anomalous metrics from mirage.panorama.not_anomalous_metrics
+    and ionosphere.panorama.not_anomalous_metrics
 
     :param metric: base_name
     :param from_timestamp: the from_timestamp
@@ -1139,13 +1294,13 @@ def get_mirage_not_anomalous_metrics(
 
     import datetime
 
-    fail_msg = None
-    trace = None
+    # fail_msg = None
+    # trace = None
 
     current_date = datetime.datetime.now().date()
     current_date_str = '%s 00:00' % str(current_date)
-    from_timestamp_date_str = current_date_str
-    until_timestamp_date_str = current_date_str
+    # from_timestamp_date_str = current_date_str
+    # until_timestamp_date_str = current_date_str
     until_timestamp = str(int(time.time()))
 
     base_name = None
@@ -1159,37 +1314,37 @@ def get_mirage_not_anomalous_metrics(
     if not from_timestamp and 'from_timestamp' in request.args:
         from_timestamp = request.args.get('from_timestamp', None)
         if from_timestamp == 'today':
-            from_timestamp_date_str = current_date_str
+            # from_timestamp_date_str = current_date_str
             new_from_timestamp = time.mktime(datetime.datetime.strptime(current_date_str, '%Y-%m-%d %H:%M').timetuple())
             from_timestamp = str(int(new_from_timestamp))
         if from_timestamp and from_timestamp != 'today':
             if ":" in from_timestamp:
-                try:
-                    datetime_object = datetime.datetime.strptime(from_timestamp, '%Y-%m-%d %H:%M')
-                except:
-                    # Handle old format
-                    datetime_object = datetime.datetime.strptime(from_timestamp, '%Y%m%d %H:%M')
-                from_timestamp_date_str = str(datetime_object.date())
+                # try:
+                #     datetime_object = datetime.datetime.strptime(from_timestamp, '%Y-%m-%d %H:%M')
+                # except:
+                #     # Handle old format
+                #     datetime_object = datetime.datetime.strptime(from_timestamp, '%Y%m%d %H:%M')
+                # from_timestamp_date_str = str(datetime_object.date())
                 new_from_timestamp = time.mktime(datetime.datetime.strptime(from_timestamp, '%Y-%m-%d %H:%M').timetuple())
                 from_timestamp = str(int(new_from_timestamp))
     else:
-        from_timestamp_date_str = current_date_str
+        # from_timestamp_date_str = current_date_str
         new_from_timestamp = time.mktime(datetime.datetime.strptime(current_date_str, '%Y-%m-%d %H:%M').timetuple())
         from_timestamp = str(int(new_from_timestamp))
 
     if not until_timestamp and 'until_timestamp' in request.args:
         until_timestamp = request.args.get('until_timestamp', None)
         if until_timestamp == 'all':
-            until_timestamp_date_str = current_date_str
+            # until_timestamp_date_str = current_date_str
             until_timestamp = str(int(time.time()))
         if until_timestamp and until_timestamp != 'all':
             if ":" in until_timestamp:
-                datetime_object = datetime.datetime.strptime(until_timestamp, '%Y-%m-%d %H:%M')
-                until_timestamp_date_str = str(datetime_object.date())
+                # datetime_object = datetime.datetime.strptime(until_timestamp, '%Y-%m-%d %H:%M')
+                # until_timestamp_date_str = str(datetime_object.date())
                 new_until_timestamp = time.mktime(datetime.datetime.strptime(until_timestamp, '%Y-%m-%d %H:%M').timetuple())
                 until_timestamp = str(int(new_until_timestamp))
     else:
-        until_timestamp_date_str = current_date_str
+        # until_timestamp_date_str = current_date_str
         until_timestamp = str(int(time.time()))
 
     get_anomalies = False
@@ -1259,6 +1414,63 @@ def get_mirage_not_anomalous_metrics(
 
     logger.info(
         'get_mirage_not_anomalous_metrics - not_anomalous_count: %s, for base_name: %s' % (
+            str(not_anomalous_count), str(base_name)))
+
+    # @added 20210429 - Feature #3994: Panorama - mirage not anomalous
+    # A hash is added to the ionosphere.panorama.not_anomalous_metrics for
+    # every metric that is found to be not anomalous.
+    redis_hash = 'ionosphere.panorama.not_anomalous_metrics'
+    ionosphere_panorama_not_anomalous = {}
+    try:
+        REDIS_CONN_DECODED = get_redis_conn_decoded(skyline_app)
+        ionosphere_panorama_not_anomalous = REDIS_CONN_DECODED.hgetall(redis_hash)
+        logger.info('get_mirage_not_anomalous_metrics :: %s entries to check in the %s Redis hash key' % (
+            str(len(ionosphere_panorama_not_anomalous)), redis_hash))
+    except:
+        logger.error(traceback.format_exc())
+        logger.error('error :: get_mirage_not_anomalous_metrics :: failed to get Redis hash key %s' % redis_hash)
+        ionosphere_panorama_not_anomalous = {}
+    ionosphere_all_timestamp_float_strings = []
+    if ionosphere_panorama_not_anomalous:
+        ionosphere_all_timestamp_float_strings = list(ionosphere_panorama_not_anomalous.keys())
+    ionosphere_timestamp_floats = []
+    if all_timestamp_float_strings:
+        for timestamp_float_string in ionosphere_all_timestamp_float_strings:
+            if int(float(timestamp_float_string)) >= int(from_timestamp):
+                if int(float(timestamp_float_string)) <= int(until_timestamp):
+                    ionosphere_timestamp_floats.append(timestamp_float_string)
+    for timestamp_float_string in ionosphere_timestamp_floats:
+        try:
+            timestamp_float_dict = literal_eval(ionosphere_panorama_not_anomalous[timestamp_float_string])
+            for i_metric in list(timestamp_float_dict.keys()):
+                if base_name:
+                    if base_name != i_metric:
+                        continue
+                try:
+                    metric_dict = not_anomalous_dict[i_metric]
+                except:
+                    metric_dict = {}
+                    not_anomalous_dict[i_metric] = {}
+                    not_anomalous_dict[i_metric]['from'] = int(from_timestamp)
+                    not_anomalous_dict[i_metric]['until'] = int(until_timestamp)
+                    not_anomalous_dict[i_metric]['timestamps'] = {}
+                del metric_dict
+                metric_timestamp = timestamp_float_dict[i_metric]['timestamp']
+                try:
+                    metric_timestamp_dict = not_anomalous_dict[i_metric]['timestamps'][metric_timestamp]
+                except:
+                    not_anomalous_dict[i_metric]['timestamps'][metric_timestamp] = {}
+                    metric_timestamp_dict = {}
+                if not metric_timestamp_dict:
+                    not_anomalous_dict[i_metric]['timestamps'][metric_timestamp]['value'] = timestamp_float_dict[i_metric]['value']
+                    not_anomalous_dict[i_metric]['timestamps'][metric_timestamp]['hours_to_resolve'] = timestamp_float_dict[i_metric]['hours_to_resolve']
+                    not_anomalous_count += 1
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: get_mirage_not_anomalous_metrics :: failed iterate ionosphere_panorama_not_anomalous entry')
+
+    logger.info(
+        'get_mirage_not_anomalous_metrics - not_anomalous_count: %s (with ionosphere), for base_name: %s' % (
             str(not_anomalous_count), str(base_name)))
 
     anomalies_dict = {}
@@ -1532,3 +1744,133 @@ def plot_not_anomalous_metric(not_anomalous_dict, anomalies_dict, plot_type):
             logger.error('error :: plot_not_anomalous_metric :: failed to set save_to_file in Redis hash - panorama.not_anomalous_plots')
 
     return save_to_file
+
+
+# @added 20210617 - Feature #4144: webapp - stale_metrics API endpoint
+#                   Feature #4076: CUSTOM_STALE_PERIOD
+#                   Branch #1444: thunder
+def namespace_stale_metrics(namespace, cluster_data, exclude_sparsely_populated):
+    """
+    Plot the metric not anomalous or anomalies graph and return the file path
+
+    :param not_anomalous_dict: the dictionary of not anomalous events for the
+        metric
+    :param anomalies_dict: the dictionary of anomalous events for the
+        metric
+    :type not_anomalous_dict: dict
+    :type anomalies_dict: dict
+    :type plot_type: str ('not_anomalous' or 'anomalies')
+    :return: path and filename
+    :rtype: str
+
+    """
+
+    fail_msg = None
+    trace = None
+
+    namespaces_namespace_stale_metrics_dict = {}
+    namespaces_namespace_stale_metrics_dict['stale_metrics'] = {}
+
+    unique_base_names = []
+    try:
+        REDIS_CONN_DECODED = get_redis_conn_decoded(skyline_app)
+        unique_base_names = list(REDIS_CONN_DECODED.smembers('aet.analyzer.unique_base_names'))
+        logger.info('%s namespaces checked for stale metrics discovered with thunder_stale_metrics' % (
+            str(len(unique_base_names))))
+    except Exception as e:
+        fail_msg = 'error :: Webapp error with api?stale_metrics - %s' % e
+        logger.error(fail_msg)
+        raise
+
+    now = int(time.time())
+    namespace_stale_metrics_dict = {}
+    namespace_recovered_metrics_dict = {}
+    try:
+        namespace_stale_metrics_dict, namespace_recovered_metrics_dict = thunder_stale_metrics(skyline_app, log=True)
+    except Exception as e:
+        fail_msg = 'error :: Webapp error with api?stale_metrics - %s' % e
+        logger.error(fail_msg)
+        raise
+    logger.info('%s namespaces checked for stale metrics discovered with thunder_stale_metrics' % (
+        str(len(namespace_stale_metrics_dict))))
+
+    remote_stale_metrics_dicts = []
+    if settings.REMOTE_SKYLINE_INSTANCES and cluster_data:
+        exclude_sparsely_populated_str = 'false'
+        if exclude_sparsely_populated:
+            exclude_sparsely_populated_str = 'true'
+        remote_namespaces_namespace_stale_metrics_dicts = []
+        stale_metrics_uri = 'stale_metrics=true&namespace=%s&exclude_sparsely_populated=%s' % (
+            str(namespace), str(exclude_sparsely_populated_str))
+        try:
+            remote_namespaces_namespace_stale_metrics_dicts = get_cluster_data(stale_metrics_uri, 'stale_metrics')
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: Webapp could not get remote_namespaces_namespace_stale_metrics_dict from the remote Skyline instances')
+        if remote_namespaces_namespace_stale_metrics_dicts:
+            logger.info('got %s remote namespace_stale_metrics_dicts instances from the remote Skyline instances' % str(len(remote_namespaces_namespace_stale_metrics_dicts)))
+            remote_stale_metrics_dicts = remote_namespaces_namespace_stale_metrics_dicts
+
+    stale_metrics_count = 0
+    total_metrics_count = len(unique_base_names)
+    if namespace == 'all':
+        namespaces_namespace_stale_metrics_dict['stale_metrics']['namespace'] = 'all'
+        if remote_stale_metrics_dicts:
+            for remote_stale_metrics_dict in remote_stale_metrics_dicts:
+                total_metrics_count = total_metrics_count + remote_stale_metrics_dict['total_metrics_count']
+        namespaces_namespace_stale_metrics_dict['stale_metrics']['total_metrics_count'] = total_metrics_count
+        namespaces_namespace_stale_metrics_dict['stale_metrics']['stale_metrics'] = {}
+        if namespace_stale_metrics_dict:
+            for parent_namespace in list(namespace_stale_metrics_dict.keys()):
+                for base_name in list(namespace_stale_metrics_dict[parent_namespace]['metrics'].keys()):
+                    stale_metrics_count += 1
+                    namespaces_namespace_stale_metrics_dict['stale_metrics']['stale_metrics'][base_name] = {}
+                    last_timestamp = namespace_stale_metrics_dict[parent_namespace]['metrics'][base_name]
+                    stale_for = now - int(float(last_timestamp))
+                    namespaces_namespace_stale_metrics_dict['stale_metrics']['stale_metrics'][base_name]['last_timestamp'] = last_timestamp
+                    namespaces_namespace_stale_metrics_dict['stale_metrics']['stale_metrics'][base_name]['stale_for'] = stale_for
+        if remote_stale_metrics_dicts:
+            for remote_stale_metrics_dict in remote_stale_metrics_dicts:
+                for base_name in list(remote_stale_metrics_dict['stale_metrics'].keys()):
+                    stale_metrics_count += 1
+                    namespaces_namespace_stale_metrics_dict['stale_metrics']['stale_metrics'][base_name] = {}
+                    last_timestamp = remote_stale_metrics_dict['stale_metrics'][base_name]['last_timestamp']
+                    stale_for = remote_stale_metrics_dict['stale_metrics'][base_name]['stale_for']
+                    namespaces_namespace_stale_metrics_dict['stale_metrics']['stale_metrics'][base_name]['last_timestamp'] = last_timestamp
+                    namespaces_namespace_stale_metrics_dict['stale_metrics']['stale_metrics'][base_name]['stale_for'] = stale_for
+        namespaces_namespace_stale_metrics_dict['stale_metrics']['stale_metrics_count'] = stale_metrics_count
+
+    if namespace_stale_metrics_dict and namespace != 'all':
+        namespaces_namespace_stale_metrics_dict['stale_metrics']['namespace'] = namespace
+        total_metrics_count = len([base_name for base_name in unique_base_names if base_name.startswith(namespace)])
+        if remote_stale_metrics_dicts:
+            for remote_stale_metrics_dict in remote_stale_metrics_dicts:
+                total_metrics_count = total_metrics_count + remote_stale_metrics_dict['total_metrics_count']
+        namespaces_namespace_stale_metrics_dict['stale_metrics']['total_metrics_count'] = total_metrics_count
+        namespaces_namespace_stale_metrics_dict['stale_metrics']['stale_metrics'] = {}
+        top_level_namespace = namespace.split('.')[0]
+        if namespace_stale_metrics_dict:
+            for parent_namespace in list(namespace_stale_metrics_dict.keys()):
+                if parent_namespace != top_level_namespace:
+                    continue
+                for base_name in list(namespace_stale_metrics_dict[parent_namespace]['metrics'].keys()):
+                    if not base_name.startswith(namespace):
+                        continue
+                    stale_metrics_count += 1
+                    namespaces_namespace_stale_metrics_dict['stale_metrics']['stale_metrics'][base_name] = {}
+                    last_timestamp = namespace_stale_metrics_dict[parent_namespace]['metrics'][base_name]
+                    stale_for = now - int(float(last_timestamp))
+                    namespaces_namespace_stale_metrics_dict['stale_metrics']['stale_metrics'][base_name]['last_timestamp'] = last_timestamp
+                    namespaces_namespace_stale_metrics_dict['stale_metrics']['stale_metrics'][base_name]['stale_for'] = stale_for
+        if remote_stale_metrics_dicts:
+            for remote_stale_metrics_dict in remote_stale_metrics_dicts:
+                for base_name in list(remote_stale_metrics_dict['stale_metrics'].keys()):
+                    stale_metrics_count += 1
+                    namespaces_namespace_stale_metrics_dict['stale_metrics']['stale_metrics'][base_name] = {}
+                    last_timestamp = remote_stale_metrics_dict['stale_metrics'][base_name]['last_timestamp']
+                    stale_for = remote_stale_metrics_dict['stale_metrics'][base_name]['stale_for']
+                    namespaces_namespace_stale_metrics_dict['stale_metrics']['stale_metrics'][base_name]['last_timestamp'] = last_timestamp
+                    namespaces_namespace_stale_metrics_dict['stale_metrics']['stale_metrics'][base_name]['stale_for'] = stale_for
+        namespaces_namespace_stale_metrics_dict['stale_metrics']['stale_metrics_count'] = stale_metrics_count
+
+    return namespaces_namespace_stale_metrics_dict

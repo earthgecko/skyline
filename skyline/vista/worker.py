@@ -51,6 +51,12 @@ try:
 except:
     FLUX_CHECK_LAST_TIMESTAMP = True
 
+# @added 20210512 - Feature #4064: VERBOSE_LOGGING
+try:
+    VERBOSE_LOGGING = settings.VISTA_VERBOSE_LOGGING
+except:
+    VERBOSE_LOGGING = False
+
 skyline_app_graphite_namespace = 'skyline.%s%s.worker' % (parent_skyline_app, SERVER_METRIC_PATH)
 
 python_version = int(version_info[0])
@@ -393,8 +399,9 @@ class Worker(Process):
                             str(metric_data)))
                         delete_set_record = True
                 if not timeseries:
-                    logger.info('worker :: after processing, there were no valid data points in %s' % (
-                        str(metric_data)))
+                    if VERBOSE_LOGGING:
+                        logger.info('worker :: after processing, there were no valid data points in %s' % (
+                            str(metric_data)))
                     delete_set_record = True
                 if not have_data and timeseries:
                     logger.error('error :: worker :: failed to determine last_timestamp_with_data from %s' % (
@@ -406,7 +413,7 @@ class Worker(Process):
                         self.redis_conn.srem(redis_set, str_metric_data)
                     except:
                         logger.error(traceback.format_exc())
-                        logger.error('error :: worker :: failed to delete data from Redis set %s, data - ' % (
+                        logger.error('error :: worker :: failed to delete data from Redis set %s, data - %s' % (
                             str(redis_set), str(str_metric_data)))
                     continue
 
@@ -498,8 +505,9 @@ class Worker(Process):
                         # @modified 20191011 - Task #3258: Reduce vista logging
                         # logger.info('worker :: data submitted to flux OK, removing data from Redis set %s' % (
                         #     redis_set))
-                        logger.info('worker :: %s data points submitted to flux OK for %s' % (
-                            str(timeseries_length), metric))
+                        if VERBOSE_LOGGING:
+                            logger.info('worker :: %s data points submitted to flux OK for %s' % (
+                                str(timeseries_length), metric))
                         try:
                             self.redis_conn.srem(redis_set, str_metric_data)
                         except:

@@ -386,7 +386,7 @@ def alert_smtp(datapoint, metric_name, expiration_time, metric_trigger, algorith
         # msg['Subject'] = '[Skyline alert] ' + 'Boundary ALERT - ' + alert_context + ' - ' + datapoint + ' - ' + metric_name
         # @modified 20201207 - Task #3878: Add metric_trigger and alert_threshold to Boundary alerts
         # msg['Subject'] = '[' + main_alert_title + ' alert] ' + app_alert_context + ' ALERT - ' + alert_context + ' - ' + datapoint + ' - ' + metric_name
-        email_subject = '[%s alert] %s ALERT - %s' % (
+        email_subject = '[%s alert] %s ALERT - %s - %s' % (
             main_alert_title, app_alert_context, alert_context, metric_name)
         msg['Subject'] = email_subject
         msg['From'] = sender

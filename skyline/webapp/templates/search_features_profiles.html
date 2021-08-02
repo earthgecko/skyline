@@ -34,12 +34,13 @@
 <!--	<div class="col-md-9 col-md-pull-3"> -->
 	<div class="col-md-12">
 		<ul class="nav nav-tabs" role="tablist" id="list_by-tabs">
-		  <li class="active"><a href="?fp_search=true&metric=all&limit=10&order=DESC">Search</a></li>
+		  <li class="active"><a href="?fp_search=true&metric=all&limit=10&order=DESC"><span class="logo"><span class="sky">Search</span></span></a></li>
 <!-- # @added 20170917 - Feature #1996: Ionosphere - matches page -->
 <!-- # @modified 20180419 - Feature #1996: Ionosphere - matches page
 #                           Branch #2270: luminosity
 # Return matches for the last 24 hours as the default -->
 		  <li><a href="?fp_matches=true&metric=all&limit=0&from_timestamp={{ matched_from_datetime }}&order=DESC">Matches</a></li>
+	    <li><a href="?motif_matches=true&metric=all&limit=100&from_timestamp={{ matched_from_datetime }}&order_by=DESC">Motif matches</a></li>
 		  <li><a href="?fp_validate=true&metric=all">Validate</a></li>
 		  <li><a href="/ionosphere?fp_view=true">List by metrics</a></li>
 		  <li><a href="?performance=true">Performance</a></li>
@@ -49,7 +50,7 @@
 
   		<div class="col-md-12">
 <!--  		<div class="container"> -->
-  		  <h4><span class="logo"><span class="sky">Search ::</span> <span class="re">features profiles</span></span></span></h4>
+  		  <h4><span class="logo"><span class="sky">Search ::</span> <span class="re">features profiles</span></span></h4>
   {% if fp_search_results %}
         <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#search_options">Show search options</button>
         <div id="search_options" class="collapse">
@@ -348,7 +349,6 @@ count
       <h5><span class="logo"><span class="sky">Validate ::</span> <span class="re">metric features profiles :: </span></span></span>
         <a href="?fp_validate=true&metric={{ for_metric }}&validated_equals=false&limit=0&order=DESC"><span class="logo">{{ for_metric }}</a></h5>
 
-
 			<table class="table table-hover">
 				<thead>
 					<tr>
@@ -356,7 +356,13 @@ count
       tsfresh_version5, calc_time6, features_count7, features_sum8, deleted9,
       matched_count10, human_date11, created_timestamp12, checked_count13,
       checked_human_date14, parent_id15, generation16, validated17, ...,
-      full_duration_image24, redis_image25],
+      # @modified 20210415 - Feature #4014: Ionosphere - inference
+      # The addition of motif related items shuffles image items
+      # full_duration_image24, redis_image25,
+      motifs matched count24, motifs last matched25, motifs last checked26,
+      motifs checked27,
+      full_duration_image28, redis_image29,
+
 # @added 20180917 - Feature #2602: Graphs in search_features_profiles
  -->
             <th>fp id</th>
@@ -373,15 +379,17 @@ count
             <th>created</th>
 <!-- # @added 20171020 - Feature #2184: features profiles by performance-->
             <th>fp efficiency</th>
-            <th>match count</th>
-            <th>last matched</th>
-            <th>checked count</th>
-            <th>last checked</th>
+<!-- # @added 20171020 - Feature #2184: features profiles by performance-->
+            <th>layer efficiency</th>
+<!-- # @added 20210416 - Feature #4014: Ionosphere - inference -->
+            <th>motifs efficiency</th>
+            <th>fp match count</th>
+            <th>fp last matched</th>
+            <th>fp checked count</th>
+            <th>fp last checked</th>
 <!-- # @added 20170402 - Feature #2000: Ionosphere - validated -->
             <th>validated</th>
             <th>layer id</th>
-<!-- # @added 20171020 - Feature #2184: features profiles by performance-->
-            <th>layer efficiency</th>
 <!-- @added 20170322 - Feature #1960: ionosphere_layers
 # Added layers information to the features profiles search results -->
             <th>layer matched count</th>
@@ -389,6 +397,13 @@ count
             <th>layer checked</th>
             <th>layer last checked</th>
             <th>layer label</th>
+<!-- # @added 20210415 - Feature #4014: Ionosphere - inference
+#                        Branch #3590: inference
+# Added motif related columns -->
+            <th>motifs matched count</th>
+            <th>motifs last matched</th>
+            <th>motifs checked</th>
+            <th>motifs last checked</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -406,18 +421,22 @@ count
       {% set fullDurationHoursInt = fullDurationHours|int %}
       {% set fullDurationHoursString = '.' + fullDurationHoursInt|string + 'h.' %}
 <!-- # @modified 20180918 - Feature #2602: Graphs in search_features_profiles -->
-      {% if item[24] %}
-        {% if item[24] == 'No full duration graph' %}
+<!-- # @modified 20210415 - Feature #4014: Ionosphere - inference
+# Change item[24] to item[28] -->
+      {% if item[28] %}
+        {% if item[28] == 'No full duration graph' %}
             <td>No full duration image</td>
         {% else %}
-            <td><img src="ionosphere_images?image={{ item[24] }}" alt="{{ for_metric }} timeseries graph" height="310" width="580" /></td>
+            <td><img src="ionosphere_images?image={{ item[28] }}" alt="{{ for_metric }} timeseries graph" height="310" width="580" /></td>
         {% endif %}
       {% endif %}
-      {% if item[25] %}
-        {% if item[25] == 'No Redis data graph' %}
+<!-- # @modified 20210415 - Feature #4014: Ionosphere - inference
+# Change item[25] to item[29] -->
+      {% if item[29] %}
+        {% if item[29] == 'No Redis data graph' %}
             <td>No Redis image</td>
         {% else %}
-            <td><img src="ionosphere_images?image={{ item[25] }}" alt="{{ for_metric }} timeseries graph" height="310" width="580" /></td>
+            <td><img src="ionosphere_images?image={{ item[29] }}" alt="{{ for_metric }} timeseries graph" height="310" width="580" /></td>
         {% endif %}
       {% endif %}
     {% endif %}
@@ -450,12 +469,6 @@ count
     {% else %}
             <td>{{ (item[10] / item[13] * 100)|round(1, 'common')}} %</td>
     {% endif %}
-            <td>{{ item[10] }}</td>
-            <td>{{ item[11] }}</td>
-            <td>{{ item[13] }}</td>
-            <td>{{ item[14] }}</td>
-            <td>{{ item[17] }}</td>
-            <td>{{ item[18] }}</td>
 <!-- # @added 20171106 - Feature #2184: features profiles by performance
 Handle if no layers in results, not ideal but works.  If item[19] do not exist
 for any of the returned features profiles the layers column values will be blank -->
@@ -463,20 +476,43 @@ for any of the returned features profiles the layers column values will be blank
 <!-- # @added 20171020 - Feature #2184: features profiles by performance -->
       {% if item[19] == 0 %}
             <td>0 %</td>
-            <td>{{ item[19] }}</td>
+<!--            <td>{{ item[19] }}</td> -->
       {% else %}
             <td>{{ (item[19] / item[21] * 100)|round(1, 'common')}} %</td>
-            <td>{{ item[19] }}</td>
+<!--            <td>{{ item[19] }}</td> -->
       {% endif %}
     {% else %}
             <td>0 %</td>
-            <td>{{ item[19] }}</td>
+<!--          <td>{{ item[19] }}</td> -->
     {% endif %}
-<!--            <td>{{ item[19] }}</td> -->
+<!-- # @added 20210416 - Feature #4014: Ionosphere - inference -->
+    {% if item[24] %}
+      {% if item[24] == 0 %}
+            <td>0 %</td>
+      {% else %}
+            <td>{{ (item[24] / item[27] * 100)|round(1, 'common')}} %</td>
+      {% endif %}
+    {% else %}
+            <td>0 %</td>
+    {% endif %}
+            <td>{{ item[10] }}</td>
+            <td>{{ item[11] }}</td>
+            <td>{{ item[13] }}</td>
+            <td>{{ item[14] }}</td>
+            <td>{{ item[17] }}</td>
+            <td>{{ item[18] }}</td>
+            <td>{{ item[19] }}</td>
             <td>{{ item[20] }}</td>
             <td>{{ item[21] }}</td>
             <td>{{ item[22] }}</td>
             <td>{{ item[23] }}</td>
+<!-- # @added 20210415 - Feature #4014: Ionosphere - inference
+#                        Branch #3590: inference
+# Added motif related columns -->
+            <td>{{ item[24] }}</td>
+            <td>{{ item[25] }}</td>
+            <td>{{ item[27] }}</td>
+            <td>{{ item[26] }}</td>
           </tr>
   {% endfor %}
 				</tbody>

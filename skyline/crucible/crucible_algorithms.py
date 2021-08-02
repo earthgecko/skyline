@@ -36,6 +36,17 @@ if True:
         # @added 20190611 - Feature #3106: crucible - skyline.consensus.anomalies.png
         CONSENSUS,
     )
+
+    # @added 20200603 - Feature #3566: custom_algorithms
+    try:
+        CUSTOM_ALGORITHMS = settings.CUSTOM_ALGORITHMS.copy()
+    except:
+        CUSTOM_ALGORITHMS = None
+    try:
+        DEBUG_CUSTOM_ALGORITHMS = settings.DEBUG_CUSTOM_ALGORITHMS
+    except:
+        DEBUG_CUSTOM_ALGORITHMS = False
+
     from skyline_functions import write_data_to_file
 
 skyline_app = 'crucible'
@@ -340,7 +351,11 @@ def histogram_bins(timeseries, end_timestamp, full_duration):
         int_start_timestamp = int(timeseries[0][0])
         int_full_duration = int_end_timestamp - int_start_timestamp
 
-        series = scipy.array([x[1] for x in timeseries])
+        # @modified 20210420 - Support #4026: Change from scipy array to numpy array
+        # Deprecation of scipy.array
+        # series = scipy.array([x[1] for x in timeseries])
+        series = np.array([x[1] for x in timeseries])
+
         t = tail_avg(timeseries, int_end_timestamp, int_full_duration)
         h = np.histogram(series, bins=15)
         bins = h[1]
@@ -383,8 +398,12 @@ def ks_test(timeseries, end_timestamp, full_duration):
         ten_datapoints_ago = int_end_timestamp - ten_data_point_seconds
         sixty_data_point_seconds = resolution * 60
         sixty_datapoints_ago = int_end_timestamp - sixty_data_point_seconds
-        reference = scipy.array([x[1] for x in timeseries if x[0] >= sixty_datapoints_ago and x[0] < ten_datapoints_ago])
-        probe = scipy.array([x[1] for x in timeseries if x[0] >= ten_datapoints_ago])
+        # @modified 20210420 - Support #4026: Change from scipy array to numpy array
+        # Deprecation of scipy.array
+        # reference = scipy.array([x[1] for x in timeseries if x[0] >= sixty_datapoints_ago and x[0] < ten_datapoints_ago])
+        # probe = scipy.array([x[1] for x in timeseries if x[0] >= ten_datapoints_ago])
+        reference = np.array([x[1] for x in timeseries if x[0] >= sixty_datapoints_ago and x[0] < ten_datapoints_ago])
+        probe = np.array([x[1] for x in timeseries if x[0] >= ten_datapoints_ago])
 
         if reference.size < 20 or probe.size < 20:
             return False
@@ -421,7 +440,11 @@ def detect_drop_off_cliff(timeseries, end_timestamp, full_duration):
         ten_data_point_seconds = resolution * 10
         ten_datapoints_ago = int_end_timestamp - ten_data_point_seconds
 
-        ten_datapoint_array = scipy.array([x[1] for x in timeseries if x[0] <= int_end_timestamp and x[0] > ten_datapoints_ago])
+        # @modified 20210420 - Support #4026: Change from scipy array to numpy array
+        # Deprecation of scipy.array
+        # ten_datapoint_array = scipy.array([x[1] for x in timeseries if x[0] <= int_end_timestamp and x[0] > ten_datapoints_ago])
+        ten_datapoint_array = np.array([x[1] for x in timeseries if x[0] <= int_end_timestamp and x[0] > ten_datapoints_ago])
+
         ten_datapoint_array_len = len(ten_datapoint_array)
         if ten_datapoint_array_len > 3:
             # DO NOT handle if negative integers in range, where is the bottom of
@@ -458,7 +481,12 @@ def detect_drop_off_cliff(timeseries, end_timestamp, full_duration):
                 trigger = 7
             # Filter low rate and variable between 0 and 100 metrics
             if ten_datapoint_value <= 1 and ten_datapoint_array_sum < 100 and ten_datapoint_array_sum > 1:
-                all_datapoints_array = scipy.array([x[1] for x in timeseries])
+
+                # @modified 20210420 - Support #4026: Change from scipy array to numpy array
+                # Deprecation of scipy.array
+                # all_datapoints_array = scipy.array([x[1] for x in timeseries])
+                all_datapoints_array = np.array([x[1] for x in timeseries])
+
                 all_datapoints_max_value = np.amax(all_datapoints_array)
                 if all_datapoints_max_value < 100:
                     # print "max_value for all datapoints at - " + str(int_end_timestamp) + " - " + str(all_datapoints_max_value)

@@ -4,9 +4,11 @@ version info
 # @modified 20170109 - Feature #1854: Ionosphere learn
 # Added learn
 # __version_info__ = ('1', '1', '0')
+# @modified 20210614 - Branch #1444: thunder
+# __version_info__ = ('2', '1', '0')
 __version_info__ = ('2', '1', '0')
-__branch__ = 'master'
-__version_tag__ = 'stable'
+__branch__ = 'SNAB'
+__version_tag__ = 'thunder'
 
 __version__ = '.'.join(__version_info__)
 # @modified 20190117 - release #2748: v1.2.11

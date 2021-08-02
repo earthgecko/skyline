@@ -697,6 +697,11 @@ class Luminosity(Thread):
                     # Check MySQL
                     now = int(time())
                     after = now - 600
+                    # @modified 20210525 - https://github.com/earthgecko/skyline/pull/429
+                    #                      Task #4102: Merge luminosity.PR429
+                    # More efficient query, although it is only getting a few rows from the DB
+                    # every little helps (thanks @ashemez)
+                    # query = 'SELECT * FROM anomalies WHERE anomaly_timestamp > \'%s\'' % str(after)  # nosec
                     query = 'SELECT id FROM anomalies WHERE anomaly_timestamp > \'%s\'' % str(after)  # nosec
                     results = None
                     try:
@@ -718,6 +723,11 @@ class Luminosity(Thread):
                 if str(last_processed_anomaly_id) == 'None':
                     last_processed_anomaly_id = 0
 
+			          # @modified 20210525 - https://github.com/earthgecko/skyline/pull/429
+		      	    #                      Task #4102: Merge luminosity.PR429
+                # More efficient query, although it is only getting a few rows from the DB
+          			# every little helps (thanks @ashemez)
+                # query = 'SELECT * FROM anomalies WHERE id > \'%s\'' % str(last_processed_anomaly_id)  # nosec
                 query = 'SELECT id FROM anomalies WHERE id > \'%s\'' % str(last_processed_anomaly_id)  # nosec
                 results = None
                 try:

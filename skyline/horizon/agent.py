@@ -18,10 +18,10 @@ sys.path.insert(0, os.path.dirname(__file__))
 # This prevents flake8 E402 - module level import not at top of file
 if True:
     import settings
-    from validate_settings import validate_settings_variables
     from listen import Listen
     from roomba import Roomba
     from worker import Worker
+    from validate_settings import validate_settings_variables
 
 skyline_app = 'horizon'
 skyline_app_logger = '%sLog' % skyline_app

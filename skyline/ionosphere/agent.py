@@ -23,8 +23,8 @@ sys.path.insert(0, os.path.dirname(__file__))
 # This prevents flake8 E402 - module level import not at top of file
 if True:
     import settings
-    from validate_settings import validate_settings_variables
     from ionosphere import Ionosphere
+    from validate_settings import validate_settings_variables
 
 skyline_app = 'ionosphere'
 skyline_app_logger = skyline_app + 'Log'
@@ -42,7 +42,7 @@ try:
               'database': settings.PANORAMA_DATABASE,
               'raise_on_warnings': True}
 except:
-    print ('error: failed to determine database settings from settings.py')
+    print('error: failed to determine database settings from settings.py')
     sys.exit(1)
 
 
@@ -90,15 +90,15 @@ if __name__ == "__main__":
     Start the Ionosphere agent.
     """
     if not isdir(settings.PID_PATH):
-        print ('pid directory does not exist at %s' % settings.PID_PATH)
+        print('pid directory does not exist at %s' % settings.PID_PATH)
         sys.exit(1)
 
     if not isdir(settings.LOG_PATH):
-        print ('log directory does not exist at %s' % settings.LOG_PATH)
+        print('log directory does not exist at %s' % settings.LOG_PATH)
         sys.exit(1)
 
     if not isdir(settings.IONOSPHERE_CHECK_PATH):
-        print ('Panorama check directory does not exist at %s' % settings.IONOSPHERE_CHECK_PATH)
+        print('Panorama check directory does not exist at %s' % settings.IONOSPHERE_CHECK_PATH)
         sys.exit(1)
 
     logger.setLevel(logging.DEBUG)
@@ -119,7 +119,7 @@ if __name__ == "__main__":
     valid_settings = validate_settings_variables(skyline_app)
 
     if not valid_settings:
-        print ('error :: invalid variables in settings.py - cannot start')
+        print('error :: invalid variables in settings.py - cannot start')
         sys.exit(1)
 
     # @added 20191031 - Feature #3310: gracefully handle db failure
@@ -153,11 +153,11 @@ if __name__ == "__main__":
             if configuration_error:
                 logger.error(traceback.format_exc())
                 logger.error('error :: The database is not available')
-                print ('The database is not available')
+                print('The database is not available')
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: The database is not available')
-            print ('The database is not available')
+            print('The database is not available')
         # @modified 20191031 - Feature #3310: gracefully handle db failure
         #                      Branch 3262: py3
         # sys.exit(1)

@@ -393,7 +393,18 @@ class Roomba(Thread):
             # in the vacuum def also roomba is quite CPU intensive so we only
             # what to run roomba once every minute
             process_runtime = time() - now
-            roomba_optimum_run_duration = 60
+
+            # @added 20210513 - Feature #4066: ROOMBA_OPTIMUM_RUN_DURATION
+            try:
+                ROOMBA_OPTIMUM_RUN_DURATION = int(settings.ROOMBA_OPTIMUM_RUN_DURATION)
+            except Exception as e:
+                logger.warn('%s :: roomba failed to determine ROOMBA_OPTIMUM_RUN_DURATION from settings, defaulting to 60 - %s' % (
+                    skyline_app, e))
+                ROOMBA_OPTIMUM_RUN_DURATION = 60
+
+            # @modified 20210513 - Feature #4066: ROOMBA_OPTIMUM_RUN_DURATION
+            # roomba_optimum_run_duration = 60
+            roomba_optimum_run_duration = ROOMBA_OPTIMUM_RUN_DURATION
             if process_runtime < roomba_optimum_run_duration:
                 sleep_for = (roomba_optimum_run_duration - process_runtime)
                 logger.info('%s :: sleeping %.2f for due to low run time' % (skyline_app, sleep_for))

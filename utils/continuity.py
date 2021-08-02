@@ -23,7 +23,7 @@ def check_continuity(metric, mini=False):
         raw_series = r.get(settings.FULL_NAMESPACE + metric)
 
     if raw_series is None:
-        print 'key not found at %s ' + metric
+        print('key not found at %s ' % metric)
         return 0, 0, 0, 0, 0
 
     unpacker = msgpack.Unpacker()

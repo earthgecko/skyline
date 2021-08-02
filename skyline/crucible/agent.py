@@ -10,11 +10,12 @@ from logging.handlers import TimedRotatingFileHandler, MemoryHandler
 import os.path
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 sys.path.insert(0, os.path.dirname(__file__))
-import settings
-from validate_settings import validate_settings_variables
 
-from crucible import Crucible
-from crucible_algorithms import run_algorithms
+if True:
+    import settings
+    from crucible import Crucible
+    from crucible_algorithms import run_algorithms
+    from validate_settings import validate_settings_variables
 
 python_version = int(sys.version_info[0])
 
@@ -51,11 +52,11 @@ def run():
     creating the crucible directories if they do not exist
     """
     if not isdir(settings.PID_PATH):
-        print ('pid directory does not exist at %s' % settings.PID_PATH)
+        print('pid directory does not exist at %s' % settings.PID_PATH)
         sys.exit(1)
 
     if not isdir(settings.LOG_PATH):
-        print ('log directory does not exist at %s' % settings.LOG_PATH)
+        print('log directory does not exist at %s' % settings.LOG_PATH)
         sys.exit(1)
 
     # Make sure the required directories exists
@@ -63,14 +64,14 @@ def run():
         try:
             os.makedirs(settings.CRUCIBLE_CHECK_PATH, mode=0o755)
         except:
-            print ('failed to create directory - %s' % settings.CRUCIBLE_CHECK_PATH)
+            print('failed to create directory - %s' % settings.CRUCIBLE_CHECK_PATH)
             sys.exit(1)
 
     if not os.path.exists(settings.CRUCIBLE_DATA_FOLDER):
         try:
             os.makedirs(settings.CRUCIBLE_DATA_FOLDER, mode=0o755)
         except:
-            print ('failed to create directory - %s' % settings.CRUCIBLE_DATA_FOLDER)
+            print('failed to create directory - %s' % settings.CRUCIBLE_DATA_FOLDER)
             sys.exit(1)
 
     failed_checks_dir = settings.CRUCIBLE_DATA_FOLDER + '/failed_checks'
@@ -78,7 +79,7 @@ def run():
         try:
             os.makedirs(failed_checks_dir, mode=0o755)
         except:
-            print ('failed to create directory - %s' % failed_checks_dir)
+            print('failed to create directory - %s' % failed_checks_dir)
             sys.exit(1)
 
     logger.setLevel(logging.DEBUG)
@@ -96,10 +97,14 @@ def run():
     logger.addHandler(memory_handler)
 
     # Validate settings variables
-    valid_settings = validate_settings_variables(skyline_app)
+    try:
+        valid_settings = validate_settings_variables(skyline_app)
+    except Exception as e:
+        print('error :: validate_settings_variables failed - %s' % e)
+        sys.exit(1)
 
     if not valid_settings:
-        print ('error :: invalid variables in settings.py - cannot start')
+        print('error :: invalid variables in settings.py - cannot start')
         sys.exit(1)
 
     crucible = CrucibleAgent()

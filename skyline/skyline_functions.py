@@ -121,7 +121,7 @@ def get_redis_conn(current_skyline_app):
             else:
                 REDIS_CONN = StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
         except:
-            current_logger.info(traceback.format_exc())
+            current_logger.error(traceback.format_exc())
             current_logger.error('error :: %s - redis connection failed' % current_skyline_app)
             return None
     return REDIS_CONN
@@ -187,7 +187,7 @@ def get_redis_conn_decoded(current_skyline_app):
                         unix_socket_path=settings.REDIS_SOCKET_PATH,
                         charset='utf-8', decode_responses=True)
         except:
-            current_logger.info(traceback.format_exc())
+            current_logger.error(traceback.format_exc())
             current_logger.error('error :: %s - redis decoded connection failed' % current_skyline_app)
             return None
     return REDIS_CONN_DECODED
@@ -333,29 +333,12 @@ def get_graphite_graph_image(current_skyline_app, url=None, image_file=None):
     :rtype:  boolean
 
     """
-    try:
-        python_version
-    except:
-        from sys import version_info
-        python_version = int(version_info[0])
-    try:
-        urllib.urlretrieve
-    except:
-        try:
-            import urllib
-        except:
-            # For backwards compatibility with py2 load urlib.request as urllib so
-            # that urllib.urlretrieve is available to both as the same module.
-            # from urllib import request as urllib
-            import urllib.request
-            import urllib.error
-
     current_skyline_app_logger = str(current_skyline_app) + 'Log'
     current_logger = logging.getLogger(current_skyline_app_logger)
 
     if not url:
         fail_msg = 'error :: %s :: get_graphite_graph_image :: URL - %s' % (
-            str(current_skyline_app), str(url), str(image_file))
+            str(current_skyline_app), str(url))
         current_logger.error(fail_msg)
         return False
     if not image_file:
@@ -382,34 +365,27 @@ def get_graphite_graph_image(current_skyline_app, url=None, image_file=None):
     try:
         current_logger.info('%s :: get_graphite_graph_image :: saving %s to %s' % (
             str(current_skyline_app), str(url), str(image_file)))
-        if python_version == 2:
-            # @modified 20200808 - Task #3608: Update Skyline to Python 3.8.3 and deps
-            # Added nosec for bandit [B310:blacklist] Audit url open for
-            # permitted schemes. Allowing use of file:/ or custom schemes is
-            # often unexpected.
-            if url.lower().startswith('http'):
-                urllib.urlretrieve(url, image_file)  # nosec
-                os.chmod(image_file, 0o644)
-            else:
-                current_logger.error(
-                    'error :: %s :: get_graphite_graph_image - url does not start with http - %s' % (str(url)))
-        if python_version == 3:
-            # @modified 20200808 - Task #3608: Update Skyline to Python 3.8.3 and deps
-            # Added nosec for bandit [B310:blacklist] Audit url open for
-            # permitted schemes. Allowing use of file:/ or custom schemes is
-            # often unexpected.
-            if url.lower().startswith('http'):
-                urllib.request.urlretrieve(url, image_file)  # nosec
-                os.chmod(image_file, mode=0o644)
-            else:
-                current_logger.error(
-                    'error :: %s :: get_graphite_graph_image - url does not start with http - %s' % (str(url)))
+        # @modified 20200808 - Task #3608: Update Skyline to Python 3.8.3 and deps
+        # Added nosec for bandit [B310:blacklist] Audit url open for
+        # permitted schemes. Allowing use of file:/ or custom schemes is
+        # often unexpected.
+        if url.lower().startswith('http'):
+            # @modified 20210423 - Task #4030: refactoring
+            # Use requests
+            # urllib.request.urlretrieve(url, image_file)  # nosec
+            # os.chmod(image_file, mode=0o644)
+            r = requests.get(url)
+            with open(image_file, 'wb') as f:
+                f.write(r.content)
+        else:
+            current_logger.error(
+                'error :: %s :: get_graphite_graph_image - url does not start with http - %s' % (str(url)))
         current_logger.info('%s :: get_graphite_graph_image :: saved %s to %s' % (
             str(current_skyline_app), str(url), str(image_file)))
-    except:
+    except Exception as e:
         current_logger.error(traceback.format_exc())
-        fail_msg = 'error :: %s :: get_graphite_graph_image :: failed to save %s to %s' % (
-            str(current_skyline_app), str(url), str(image_file))
+        fail_msg = 'error :: %s :: get_graphite_graph_image :: failed to save %s to %s - %s' % (
+            str(current_skyline_app), str(url), str(image_file), e)
         current_logger.error(fail_msg)
         if current_skyline_app == 'webapp':
             # Raise to webbapp
@@ -457,7 +433,7 @@ def load_metric_vars(current_skyline_app, metric_vars_file):
                 metric_vars = imp.load_source('metric_vars', '', f)
                 metric_vars_got = True
             except:
-                current_logger.info(traceback.format_exc())
+                current_logger.error(traceback.format_exc())
                 msg = 'failed to import metric variables - metric_check_file'
                 current_logger.error(
                     'error :: %s - %s' % (msg, str(metric_vars_file)))
@@ -570,7 +546,7 @@ def fail_check(current_skyline_app, failed_check_dir, check_file_to_fail):
             current_logger.info(
                 'created failed_check_dir - %s' % str(failed_check_dir))
         except:
-            current_logger.info(traceback.format_exc())
+            current_logger.error(traceback.format_exc())
             current_logger.error(
                 'error :: failed to create failed_check_dir - %s' %
                 str(failed_check_dir))
@@ -870,6 +846,14 @@ def get_graphite_metric(
                         unencoded_graph_title = 'fp_id %s matched - %s at %s hours' % (
                             str(matched_fp_id), str(human_date),
                             str(int_hours))
+                        # @added 20210421 - Feature #4014: Ionosphere - inference
+                        # Add motif_id to Graph title
+                        if 'motif_id-' in output_object:
+                            tail_piece = re.sub('.*\.motif_id-', '', output_object)
+                            motif_id = re.sub('\..*', '', tail_piece)
+                            unencoded_graph_title = 'fp_id %s (motif_id %s) matched - %s for the trailing period' % (
+                                str(matched_fp_id), str(motif_id), str(human_date))
+
                     if 'matched.layers.fp_id' in output_object:
                         # layers_id
                         tail_piece = re.sub('.*\.layers_id-', '', output_object)
@@ -915,10 +899,10 @@ def get_graphite_metric(
         try:
             image_data = get_graphite_graph_image(
                 current_skyline_app, image_url, graphite_image_file)
-        except:
+        except Exception as e:
             current_logger.error(traceback.format_exc())
-            fail_msg = 'error :: %s :: get_graphite_metric :: failed to get_graphite_graph_image(%s, %s, %s)' % (
-                str(current_skyline_app), str(url), str(graphite_image_file))
+            fail_msg = 'error :: %s :: get_graphite_metric :: failed to get_graphite_graph_image(%s, %s) - %s' % (
+                str(current_skyline_app), str(url), str(graphite_image_file), e)
             current_logger.error(fail_msg)
 
         # if image_data is not None:
@@ -1182,7 +1166,7 @@ def send_anomalous_metric_to(
             write_data_to_file(str(current_skyline_app), anomaly_file, 'w', anomaly_data)
             current_logger.info('added %s anomaly file :: %s' % (str(send_to_app), anomaly_file))
         except:
-            current_logger.info(traceback.format_exc())
+            current_logger.error(traceback.format_exc())
             current_logger.error(
                 'error :: failed to add %s anomaly file :: %s' %
                 (str(send_to_app), anomaly_file))
@@ -1197,7 +1181,7 @@ def send_anomalous_metric_to(
             current_logger.error(
                 'error :: failed to add %s timeseries file :: %s' %
                 (str(send_to_app), json_file))
-            current_logger.info(traceback.format_exc())
+            current_logger.error(traceback.format_exc())
 
     # Create a check file
     try:
@@ -1206,7 +1190,7 @@ def send_anomalous_metric_to(
             'added %s check :: %s,%s' % (
                 str(send_to_app), str(base_name), str(metric_timestamp)))
     except:
-        current_logger.info(traceback.format_exc())
+        current_logger.error(traceback.format_exc())
         current_logger.error('error :: failed to add %s check file :: %s' % (str(send_to_app), check_file))
 
 
@@ -1688,7 +1672,7 @@ def move_file(current_skyline_app, dest_dir, file_to_move):
             current_logger.info(
                 'created dest_dir - %s' % str(dest_dir))
         except:
-            current_logger.info(traceback.format_exc())
+            current_logger.error(traceback.format_exc())
             current_logger.error(
                 'error :: failed to create dest_dir - %s' %
                 str(dest_dir))
@@ -1707,7 +1691,7 @@ def move_file(current_skyline_app, dest_dir, file_to_move):
         current_logger.info('moved file to - %s' % moved_file)
         return True
     except OSError:
-        current_logger.info(traceback.format_exc())
+        current_logger.error(traceback.format_exc())
         msg = 'failed to move file to - %s' % moved_file
         current_logger.error('error :: %s' % msg)
         pass
@@ -1857,7 +1841,7 @@ def set_metric_as_derivative(current_skyline_app, base_name):
         REDIS_CONN.sadd('derivative_metrics', metric_name)
         current_logger.info('set_metric_as_derivative :: %s added to derivative_metrics Redis set' % str(metric_name))
     except:
-        current_logger.info(traceback.format_exc())
+        current_logger.error(traceback.format_exc())
         current_logger.error('error :: failed to add metric to Redis derivative_metrics set')
         return_boolean = False
 
@@ -1989,7 +1973,7 @@ def get_user_details(current_skyline_app, desired_value, key, value):
             str(current_skyline_app), select_field, str(desired_value),
             str(key), str(value))
         current_logger.info('%s :: get_user_details :: determined %s of %s for users.%s = %s' % (
-            select_field, str(result), select_where), str(value))
+            str(current_skyline_app), select_field, str(result), select_where, str(value)))
     if select_field == 'id':
         return True, int(result)
     return True, str(result)
@@ -2721,3 +2705,167 @@ def get_anomaly_type(current_skyline_app, anomaly_id):
             if int(id) in anomaly_type_id_list:
                 anomaly_type_list.append(anomaly_type)
     return (anomaly_type_list, anomaly_type_id_list)
+
+
+def mirage_load_metric_vars(current_skyline_app, metric_vars_file, return_dict=False):
+    """
+    Load the mirage metric variables for a check from a metric check variables
+    file
+
+    :param metric_vars_file: the path and filename to the metric variables files
+    :type metric_vars_file: str
+    :return: the metric_vars list or ``False``
+    :rtype: list
+
+    """
+    try:
+        current_skyline_app_logger = str(current_skyline_app) + 'Log'
+        current_logger = logging.getLogger(current_skyline_app_logger)
+    except:
+        pass
+
+    if os.path.isfile(metric_vars_file):
+        current_logger.info(
+            'loading the mirage metric variables from metric_check_file - %s' % (
+                str(metric_vars_file)))
+    else:
+        current_logger.error(
+            'error :: loading metric variables from metric_check_file - file not found - %s' % (
+                str(metric_vars_file)))
+        return False
+
+    metric_vars = []
+    with open(metric_vars_file) as f:
+        for line in f:
+            no_new_line = line.replace('\n', '')
+            no_equal_line = no_new_line.replace(' = ', ',')
+            array = str(no_equal_line.split(',', 1))
+            add_line = literal_eval(array)
+            metric_vars.append(add_line)
+
+    # Allow the check file to already hold a valid python list on one line
+    # so that a check can be added by simply echoing to debug metric_vars
+    # line from to log for any failed checks into a new Mirage check file
+    # The original above pattern is still the default, this is for the check
+    # files to be added by the operator from the log or for debugging.
+    try_literal_eval = False
+    if metric_vars:
+        if isinstance(metric_vars, list):
+            pass
+        else:
+            try_literal_eval = True
+            # current_logger.info('metric_vars is not a list, set to try_literal_eval')
+        if len(metric_vars) < 2:
+            try_literal_eval = True
+            # current_logger.info('metric_vars is not a list of lists, set to try_literal_eval')
+    else:
+        try_literal_eval = True
+        # current_logger.info('metric_vars is not defined, set to try_literal_eval')
+    if try_literal_eval:
+        try:
+            with open(metric_vars_file) as f:
+                for line in f:
+                    metric_vars = literal_eval(line)
+                    if metric_vars:
+                        break
+        except:
+            current_logger.error(traceback.format_exc())
+            current_logger.error('metric_vars not loaded with literal_eval')
+            metric_vars = []
+
+    string_keys = ['metric', 'added_by']
+    float_keys = ['value']
+    int_keys = [
+        'hours_to_resolve', 'metric_timestamp', 'full_duration',
+        'from_timestamp', 'parent_id', 'added_at']
+    # @added 20200916 - Branch #3068: SNAB
+    #                   Task #3744: POC matrixprofile
+    boolean_keys = ['snab_only_check', 'graphite_metric', 'run_crucible_tests']
+
+    # @added 20210304 - Feature #3642: Anomaly type classification
+    #                   Feature #3970: custom_algorithm - adtk_level_shift
+    # Added triggered_algorithms to mirage_check_file
+    list_keys = ['triggered_algorithms', 'algorithms', 'algorithms_run']
+
+    metric_vars_array = []
+    for var_array in metric_vars:
+        # @modified 20181023 - Feature #2618: alert_slack
+        # Wrapped in try except for debugging issue where the
+        # hours_to_resolve was interpolating to hours_to_resolve = "t"
+        try:
+            key = None
+            value = None
+            if var_array[0] in string_keys:
+                key = var_array[0]
+                _value_str = str(var_array[1]).replace("'", '')
+                value_str = str(_value_str).replace('"', '')
+                value = str(value_str)
+                if var_array[0] == 'metric':
+                    metric = value
+            if var_array[0] in float_keys:
+                key = var_array[0]
+                _value_str = str(var_array[1]).replace("'", '')
+                value_str = str(_value_str).replace('"', '')
+                value = float(value_str)
+            if var_array[0] in int_keys:
+                key = var_array[0]
+                _value_str = str(var_array[1]).replace("'", '')
+                value_str = str(_value_str).replace('"', '')
+                value = int(float(value_str))
+            # @added 20200916 - Branch #3068: SNAB
+            #                   Task #3744: POC matrixprofile
+            # Handle new snab_only_check boolean
+            if var_array[0] in boolean_keys:
+                key = var_array[0]
+                # current_logger.debug(
+                #     'debug :: boolean key - key: %s, value: %s' % (
+                #         str(var_array[0]), str(var_array[1])))
+                if str(var_array[1]) == '"True"':
+                    value = True
+                else:
+                    value = False
+
+            # @added 20210304 - Feature #3642: Anomaly type classification
+            #                   Feature #3970: custom_algorithm - adtk_level_shift
+            # Added triggered_algorithms to mirage_check_file
+            if var_array[0] in list_keys:
+                key = var_array[0]
+                # current_logger.debug(
+                #     'debug :: list key - key: %s, value: %s' % (
+                #         str(var_array[0]), str(var_array[1])))
+                _value_str = str(var_array[1]).replace("'", '')
+                try:
+                    value = literal_eval(var_array[1])
+                except Exception as e:
+                    current_logger.error(
+                        'error :: loading metric variables - failed to literal_eval list for %s, %s - %s' % (
+                            str(key), str(var_array[1]), e))
+                    value = []
+
+            if key:
+                metric_vars_array.append([key, value])
+
+            if len(metric_vars_array) == 0:
+                current_logger.error(
+                    'error :: loading metric variables - none found - %s' % (
+                        str(metric_vars_file)))
+                return False
+        except:
+            current_logger.error(traceback.format_exc())
+            current_logger.error('error :: failed to load metric variables from check file - %s' % (metric_vars_file))
+            return False
+
+    # current_logger.debug('debug :: metric_vars for %s' % str(metric))
+    # current_logger.debug('debug :: %s' % str(metric_vars_array))
+
+    if return_dict:
+        metric_vars_dict = {}
+        metric_vars_dict['metric_vars'] = {}
+        for item in metric_vars_array:
+            variable = item[0]
+            value = item[1]
+            metric_vars_dict['metric_vars'][variable] = value
+        current_logger.debug('debug :: metric_vars_dict: %s' % str(metric_vars_dict))
+        return metric_vars_dict
+
+    return metric_vars_array

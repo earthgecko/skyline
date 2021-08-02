@@ -1,6 +1,7 @@
 from __future__ import division
 import numpy as np
-import scipy
+# @modified 20210518 - Support #4026: Change from scipy array to numpy array
+# import scipy
 import traceback
 import logging
 from time import time
@@ -22,8 +23,14 @@ if True:
         BOREDOM_SET_SIZE,
         ENABLE_BOUNDARY_DEBUG,
         REDIS_PASSWORD,
+        # @added 20210518 - Feature #4076: CUSTOM_STALE_PERIOD
+        CUSTOM_STALE_PERIOD,
+        # @added 20210603 - Feature #4000: EXTERNAL_SETTINGS
+        EXTERNAL_SETTINGS,
     )
     from algorithm_exceptions import (TooShort, Stale, Boring)
+    # @added 20210518 - Feature #4076: CUSTOM_STALE_PERIOD
+    from functions.settings.get_custom_stale_period import custom_stale_period
 
 skyline_app = 'boundary'
 skyline_app_logger = '%sLog' % skyline_app
@@ -78,7 +85,7 @@ def autoaggregate_ts(timeseries, autoaggregate_value):
             valid_timestamps = True
     except Exception as e:
         logger.error('Algorithm error: %s' % traceback.format_exc())
-        logger.error('error: %e' % e)
+        logger.error('error: %s' % e)
         aggregated_timeseries = []
         return aggregated_timeseries
 
@@ -86,7 +93,11 @@ def autoaggregate_ts(timeseries, autoaggregate_value):
         try:
             # Check sane variables otherwise we can just hang here in a while loop
             while int(next_timestamp) > int(start_timestamp):
-                value = np.sum(scipy.array([int(x[1]) for x in timeseries if x[0] <= last_timestamp and x[0] > next_timestamp]))
+                # @modified 20210420 - Support #4026: Change from scipy array to numpy array
+                # Deprecation of scipy.array
+                # value = np.sum(scipy.array([int(x[1]) for x in timeseries if x[0] <= last_timestamp and x[0] > next_timestamp]))
+                value = np.sum(np.array([int(x[1]) for x in timeseries if x[0] <= last_timestamp and x[0] > next_timestamp]))
+
                 aggregated_timeseries += ((last_timestamp, value),)
                 last_timestamp = next_timestamp
                 next_timestamp = last_timestamp - autoaggregate_value
@@ -94,7 +105,7 @@ def autoaggregate_ts(timeseries, autoaggregate_value):
             return aggregated_timeseries
         except Exception as e:
             logger.error('Algorithm error: %s' % traceback.format_exc())
-            logger.error('error: %e' % e)
+            logger.error('error: %s' % e)
             aggregated_timeseries = []
             return aggregated_timeseries
     else:
@@ -104,9 +115,9 @@ def autoaggregate_ts(timeseries, autoaggregate_value):
 
 
 def less_than(timeseries, metric_name, metric_expiration_time, metric_min_average, metric_min_average_seconds, metric_trigger):
-        # timeseries, metric_name, metric_expiration_time, metric_min_average,
-        # metric_min_average_seconds, metric_trigger, autoaggregate,
-        # autoaggregate_value):
+    # timeseries, metric_name, metric_expiration_time, metric_min_average,
+    # metric_min_average_seconds, metric_trigger, autoaggregate,
+    # autoaggregate_value):
     """
     A timeseries is anomalous if the datapoint is less than metric_trigger
     """
@@ -168,7 +179,11 @@ def detect_drop_off_cliff(timeseries, metric_name, metric_expiration_time, metri
         ten_data_point_seconds = resolution * 10
         ten_datapoints_ago = int_end_timestamp - ten_data_point_seconds
 
-        ten_datapoint_array = scipy.array([x[1] for x in timeseries if x[0] <= int_end_timestamp and x[0] > ten_datapoints_ago])
+        # @modified 20210420 - Support #4026: Change from scipy array to numpy array
+        # Deprecation of scipy.array
+        # ten_datapoint_array = scipy.array([x[1] for x in timeseries if x[0] <= int_end_timestamp and x[0] > ten_datapoints_ago])
+        ten_datapoint_array = np.array([x[1] for x in timeseries if x[0] <= int_end_timestamp and x[0] > ten_datapoints_ago])
+
         ten_datapoint_array_len = len(ten_datapoint_array)
     except:
         return None
@@ -224,7 +239,12 @@ def detect_drop_off_cliff(timeseries, metric_name, metric_expiration_time, metri
         try:
             twenty_data_point_seconds = resolution * 20
             twenty_datapoints_ago = int_end_timestamp - twenty_data_point_seconds
-            twenty_datapoint_array = scipy.array([x[1] for x in timeseries if x[0] <= int_end_timestamp and x[0] > twenty_datapoints_ago])
+
+            # @modified 20210420 - Support #4026: Change from scipy array to numpy array
+            # Deprecation of scipy.array
+            # twenty_datapoint_array = scipy.array([x[1] for x in timeseries if x[0] <= int_end_timestamp and x[0] > twenty_datapoints_ago])
+            twenty_datapoint_array = np.array([x[1] for x in timeseries if x[0] <= int_end_timestamp and x[0] > twenty_datapoints_ago])
+
             number_of_similar_datapoints_in_twenty = len(np.where(twenty_datapoint_array <= ten_datapoint_min_value))
             if number_of_similar_datapoints_in_twenty > 2:
                 return False
@@ -246,9 +266,14 @@ def detect_drop_off_cliff(timeseries, metric_name, metric_expiration_time, metri
                 min_average = metric_min_average
                 min_average_seconds = metric_min_average_seconds
                 min_average_data_point_seconds = resolution * min_average_seconds
-    #            min_average_datapoints_ago = int_end_timestamp - (resolution * min_average_seconds)
+                # min_average_datapoints_ago = int_end_timestamp - (resolution * min_average_seconds)
                 min_average_datapoints_ago = int_end_timestamp - min_average_seconds
-                min_average_array = scipy.array([x[1] for x in timeseries if x[0] <= int_end_timestamp and x[0] > min_average_datapoints_ago])
+
+                # @modified 20210420 - Support #4026: Change from scipy array to numpy array
+                # Deprecation of scipy.array
+                # min_average_array = scipy.array([x[1] for x in timeseries if x[0] <= int_end_timestamp and x[0] > min_average_datapoints_ago])
+                min_average_array = np.array([x[1] for x in timeseries if x[0] <= int_end_timestamp and x[0] > min_average_datapoints_ago])
+
                 min_average_array_average = np.sum(min_average_array) / len(min_average_array)
                 if min_average_array_average < min_average:
                     return False
@@ -309,8 +334,25 @@ def run_selected_algorithm(
                 logger.debug('debug :: TooShort - %s, %s' % (metric_name, algorithm))
             raise TooShort()
 
+    # @added 20210518 - Feature #4076: CUSTOM_STALE_PERIOD
+    # In Boundary the direct settings CUSTOM_STALE_PERIOD dict is checked for
+    # a custom stale period.  In Analyzer the metrics_manager Redis hask key is
+    # used
+    stale_period = STALE_PERIOD
+    if CUSTOM_STALE_PERIOD or EXTERNAL_SETTINGS:
+        try:
+            stale_period = custom_stale_period(skyline_app, metric_name, log=False)
+            if stale_period != STALE_PERIOD:
+                if ENABLE_BOUNDARY_DEBUG:
+                    logger.debug('debug :: CUSTOM_STALE_PERIOD found - %s, %s' % (
+                        metric_name, str(stale_period)))
+        except Exception as e:
+            logger.error('error :: failed running custom_stale_period - %s' % e)
+
     # Get rid of stale series
-    if time() - timeseries[-1][0] > STALE_PERIOD:
+    # @modified 20210518 - Feature #4076: CUSTOM_STALE_PERIOD
+    # if time() - timeseries[-1][0] > STALE_PERIOD:
+    if time() - timeseries[-1][0] > stale_period:
         if ENABLE_BOUNDARY_DEBUG:
             logger.debug('debug :: Stale - %s, %s' % (metric_name, algorithm))
         raise Stale()
@@ -335,7 +377,7 @@ def run_selected_algorithm(
             agg_timeseries = []
             if ENABLE_BOUNDARY_DEBUG:
                 logger.error('Algorithm error: %s' % traceback.format_exc())
-                logger.error('error: %e' % e)
+                logger.error('error: %s' % e)
                 logger.debug('debug error - autoaggregate excpection %s for %s' % (metric_name, algorithm))
 
         if len(agg_timeseries) > 10:

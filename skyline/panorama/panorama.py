@@ -1700,7 +1700,7 @@ class Panorama(Thread):
                     determined_id = int(results[0][0])
                 except Exception as e:
                     logger.error(traceback.format_exc())
-                    logger.error('error :: determined_id is not an int')
+                    logger.error('error :: determined_id is not an int - %s' % e)
                     determined_id = 0
 
             if determined_id > 0:
@@ -1712,8 +1712,8 @@ class Panorama(Thread):
                             query_cache_key, str(determined_id)))
                     except Exception as e:
                         logger.error(traceback.format_exc())
-                        logger.error('error :: failed to set query_cache_key - %s - id: %s' % (
-                            query_cache_key, str(determined_id)))
+                        logger.error('error :: failed to set query_cache_key - %s - id: %s - %s' % (
+                            query_cache_key, str(determined_id), e))
                 return int(determined_id)
 
             # @added 20170115 - Feature #1854: Ionosphere learn - generations
@@ -2518,6 +2518,14 @@ class Panorama(Thread):
                                 logger.info('%s :: timed out, killing all update_slack_thread_ts processes' % (skyline_app))
                                 for p in pids:
                                     p.terminate()
+
+                # @added 20210612 - Branch #1444: thunder
+                # Report app up
+                try:
+                    self.redis_conn.setex(skyline_app, 120, int(time()))
+                    logger.info('updated Redis key for %s up' % skyline_app)
+                except:
+                    logger.error('error :: failed to update Redis key for %s up' % skyline_app)
 
                 # @added 20200825 - Feature #3704: Add alert to anomalies
                 # Check if any Redis keys exist with anomaly alerts to update

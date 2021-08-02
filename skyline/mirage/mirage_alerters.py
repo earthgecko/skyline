@@ -1468,7 +1468,7 @@ def alert_slack(alert, metric, second_order_resolution_seconds, context, trigger
         #                      Feature #3970: custom_algorithm - adtk_level_shift
         # Added type
         if 'adtk_level_shift' in triggered_algorithms:
-            slack_title = '*%s %s - Level shit ALERT* on %s at %s hours - %s' % (
+            slack_title = '*%s %s - Level shift ALERT* on %s at %s hours - %s' % (
                 main_alert_title, alert_context, str(metric[1]), str(int(second_order_resolution_in_hours)),
                 str(metric[0]))
             logger.info('adtk_level_shift alert - %s' % slack_title)

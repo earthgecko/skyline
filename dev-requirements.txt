@@ -500,10 +500,6 @@ pip==21.1.2
 #scikit_learn==0.20.3
 # @modified 20201229 - Task #3898: Test Python 3.8.6 and deps
 #scikit-learn==0.23.1
-# @modified 20200701 - Task #3608: Update Skyline to Python 3.8.3 and deps
-#scikit_learn==0.20.3
-# @modified 20201229 - Task #3898: Test Python 3.8.6 and deps
-#scikit-learn==0.23.1
 # @modified 20210614 - Task #4140: deps updates
 #                      Branch #1444: thunder
 # https://snyk.io/vuln/SNYK-PYTHON-SCIKITLEARN-1079100
@@ -703,3 +699,7 @@ matrixprofile==1.1.4
 #                   Feature #3978: luminosity - classify_metrics
 #                   Feature #3642: Anomaly type classification
 git+git://github.com/earthgecko/adtk@895c517#egg=adtk
+
+# @added 20210411 - Feature #4014: Ionosphere - inference
+#                   Branch #3590: inference
+mass-ts==0.1.4

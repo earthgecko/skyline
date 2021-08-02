@@ -291,7 +291,11 @@ def run_layer_algorithms(base_name, layers_id, timeseries, layers_count, layers_
             try:
                 # Check sane variables otherwise we can just hang here in a while loop
                 while int(next_timestamp) > int(start_timestamp):
-                    value = np.sum(scipy.array([int(x[1]) for x in timeseries if x[0] <= last_timestamp and x[0] > next_timestamp]))
+                    # @modified 20210420 - Support #4026: Change from scipy array to numpy array
+                    # Deprecation of scipy.array
+                    # value = np.sum(scipy.array([int(x[1]) for x in timeseries if x[0] <= last_timestamp and x[0] > next_timestamp]))
+                    value = np.sum(np.array([int(x[1]) for x in timeseries if x[0] <= last_timestamp and x[0] > next_timestamp]))
+
                     aggregated_timeseries += ((last_timestamp, value),)
                     last_timestamp = next_timestamp
                     next_timestamp = last_timestamp - autoaggregate_value

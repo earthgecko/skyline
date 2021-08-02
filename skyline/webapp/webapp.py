@@ -30,6 +30,9 @@ from datetime import timedelta
 import os
 import base64
 
+# @added 20210415 - Feature #4014: Ionosphere - inference
+from shutil import rmtree
+
 # flask things for rebrow
 # @modified 20180918 - Feature #2602: Graphs in search_features_profiles
 # from flask import session, g, url_for, flash, Markup, json
@@ -73,14 +76,25 @@ from ast import literal_eval
 from flask import after_this_request
 # from cStringIO import StringIO as IO
 import gzip
+# @added 20180721 - Feature #2464: luminosity_remote_data
+# Use a gzipped response as the response as raw preprocessed time series
+# added cStringIO to implement Gzip for particular views
+# http://flask.pocoo.org/snippets/122/
+import io as IO
+
 import functools
 
-from logging.handlers import TimedRotatingFileHandler, MemoryHandler
+# @modified 20210421 - Task #4030: refactoring
+# from logging.handlers import TimedRotatingFileHandler, MemoryHandler
 
 import os.path
 # @added 20190116 - Cross-Site Scripting Security Vulnerability #85
 #                   Bug #2816: Cross-Site Scripting Security Vulnerability
 from flask import escape as flask_escape
+
+# @added 20191029 - Task #3302: Handle csv.reader in py3
+#                   Branch #3262: py3
+import codecs
 
 if True:
     sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
@@ -127,6 +141,10 @@ if True:
         get_mirage_not_anomalous_metrics,
         # @added 20210328 - Feature #3994: Panorama - mirage not anomalous
         plot_not_anomalous_metric,
+        # @added 20210617 - Feature #4144: webapp - stale_metrics API endpoint
+        #                   Feature #4076: CUSTOM_STALE_PERIOD
+        #                   Branch #1444: thunder
+        namespace_stale_metrics,
     )
     from ionosphere_backend import (
         ionosphere_data, ionosphere_metric_data,
@@ -172,9 +190,21 @@ if True:
         label_anomalies,
         # @added 20201213 - Feature #3890: metrics_manager - sync_cluster_files
         expected_features_profiles_dirs,
-        # @added 20210107 - Feature #3934: ionosphere_performance
-        get_ionosphere_performance,
+        # @added 20210413 - Feature #4014: Ionosphere - inference
+        #                   Branch #3590: inference
+        get_matched_motifs,
+        # @added 20210419 - Feature #4014: Ionosphere - inference
+        get_matched_motif_id,
     )
+
+    # @added 20210107 - Feature #3934: ionosphere_performance
+    from ionosphere_performance import get_ionosphere_performance
+
+    # @added 20210415 - Feature #4014: Ionosphere - inference
+    from on_demand_motif_analysis import on_demand_motif_analysis
+
+    # @added 20210419 - Feature #4014: Ionosphere - inference
+    from motif_plots import plot_motif_match
 
     # from utilites import alerts_matcher
     # @added 20201212 - Feature #3880: webapp - utilities - match_metric
@@ -201,6 +231,15 @@ if True:
     # @added 20210317 - Feature #3978: luminosity - classify_metrics
     #                   Feature #3642: Anomaly type classification
     from luminosity_backend import get_classify_metrics
+
+    # @added 20210604 - Branch #1444: thunder
+    from functions.metrics.get_top_level_namespaces import get_top_level_namespaces
+
+    # @added 20210617 - Feature #4144: webapp - stale_metrics API endpoint
+    #                   Feature #4076: CUSTOM_STALE_PERIOD
+    #                   Branch #1444: thunder
+    from functions.redis.get_metric_timeseries import get_metric_timeseries
+    from functions.timeseries.determine_data_sparsity import determine_data_sparsity
 
 # @added 20200516 - Feature #3538: webapp - upload_data endoint
 file_uploads_enabled = False
@@ -285,33 +324,24 @@ access_logger = logging.getLogger('werkzeug')
 
 python_version = int(version_info[0])
 
-# @added 20180721 - Feature #2464: luminosity_remote_data
-# Use a gzipped response as the response as raw preprocessed time series
-# added cStringIO to implement Gzip for particular views
-# http://flask.pocoo.org/snippets/122/
-if python_version == 2:
-    from StringIO import StringIO as IO
-if python_version == 3:
-    import io as IO
-
 # @modified 20180519 - Feature #2378: Add redis auth to Skyline and rebrow
 # @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
 #                      Branch #3262: py3
 # Use get_redis_conn and get_redis_conn_decoded
 # if settings.REDIS_PASSWORD:
-    # @modified 20190130 - Bug #3266: py3 Redis binary objects not strings
-    #                      Branch #3262: py3
-    # REDIS_CONN = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
-    # REDIS_CONN = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
-    # @added 20191015 - Bug #3266: py3 Redis binary objects not strings
-    #                   Branch #3262: py3
-    # REDIS_CONN_UNDECODE = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+#    # @modified 20190130 - Bug #3266: py3 Redis binary objects not strings
+#    #                      Branch #3262: py3
+#    # REDIS_CONN = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
+#    # REDIS_CONN = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
+#    # @added 20191015 - Bug #3266: py3 Redis binary objects not strings
+#    #                   Branch #3262: py3
+#    # REDIS_CONN_UNDECODE = redis.StrictRedis(password=settings.REDIS_PASSWORD, unix_socket_path=settings.REDIS_SOCKET_PATH)
 # else:
-    # REDIS_CONN = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
-    # REDIS_CONN = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
-    # @added 20191015 - Bug #3266: py3 Redis binary objects not strings
-    #                   Branch #3262: py3
-    # REDIS_CONN_UNDECODE = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+#    # REDIS_CONN = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
+#    # REDIS_CONN = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
+#    # @added 20191015 - Bug #3266: py3 Redis binary objects not strings
+#    #                   Branch #3262: py3
+#    # REDIS_CONN_UNDECODE = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH)
 
 # @added 20191030 - Bug #3266: py3 Redis binary objects not strings
 #                   Branch #3262: py3
@@ -729,6 +759,8 @@ def version():
 # def data():
 def api():
 
+    start = time.time()
+
     # @added 20201110 - Feature #3824: get_cluster_data
     # Allow for the cluster_data argument to be added to certain api requests
     # to allow for data from all remote Skyline instances to be concatenated
@@ -750,6 +782,511 @@ def api():
             logger.error('error :: /api request with invalid cluster_data argument')
             return 'Bad Request', 400
 
+    # @added 20210619 - Feature #4148: analyzer.metrics_manager.resolutions
+    #                   Bug #4146: check_data_sparsity - incorrect on low fidelity and inconsistent metrics
+    #                   Feature #4144: webapp - stale_metrics API endpoint
+    #                   Feature #4076: CUSTOM_STALE_PERIOD
+    #                   Branch #1444: thunder
+    if 'metrics_resolutions' in request.args:
+        logger.info('/api?metrics_resolutions')
+        start_metrics_resolution = timer()
+        namespace = 'all'
+        try:
+            namespace = request.args.get('namespace', 'all')
+        except KeyError:
+            namespace = 'all'
+        except Exception as e:
+            trace = traceback.format_exc()
+            fail_msg = 'error :: Webapp error with api?metrics_resolutions - %s' % e
+            logger.error(fail_msg)
+            return internal_error(fail_msg, trace)
+        logger.info('/api?metrics_resolutions - namespace: %s' % namespace)
+        remove_prefix = False
+        try:
+            remove_prefix_str = request.args.get('remove_prefix', 'false')
+            if remove_prefix_str != 'false':
+                remove_prefix = remove_prefix_str
+        except KeyError:
+            remove_prefix = False
+        except Exception as e:
+            trace = traceback.format_exc()
+            fail_msg = 'error :: Webapp error with api?metrics_resolutions - %s' % e
+            logger.error(fail_msg)
+            return internal_error(fail_msg, trace)
+        logger.info('/api?metrics_resolutions - remove_prefix: %s' % str(remove_prefix))
+
+        less_than = False
+        try:
+            less_than_str = request.args.get('less_than', 'false')
+            if less_than_str != 'false':
+                less_than = int(less_than_str)
+        except KeyError:
+            less_than = False
+        except Exception as e:
+            trace = traceback.format_exc()
+            fail_msg = 'error :: Webapp error with api?metrics_resolutions - %s' % e
+            logger.error(fail_msg)
+            return internal_error(fail_msg, trace)
+        logger.info('/api?metrics_resolutions - less_than: %s' % str(less_than))
+        greater_than = False
+        try:
+            greater_than_str = request.args.get('greater_than', 'false')
+            if greater_than_str != 'false':
+                greater_than = int(greater_than_str)
+        except KeyError:
+            greater_than = False
+        except Exception as e:
+            trace = traceback.format_exc()
+            fail_msg = 'error :: Webapp error with api?metrics_resolutions - %s' % e
+            logger.error(fail_msg)
+            return internal_error(fail_msg, trace)
+        logger.info('/api?metrics_resolutions - greater_than: %s' % str(greater_than))
+        count_by_resolution = False
+        try:
+            count_by_resolution_str = request.args.get('count_by_resolution', 'false')
+            if count_by_resolution_str == 'true':
+                count_by_resolution = True
+        except KeyError:
+            greater_than = False
+        except Exception as e:
+            trace = traceback.format_exc()
+            fail_msg = 'error :: Webapp error with api?metrics_resolutions - %s' % e
+            logger.error(fail_msg)
+            return internal_error(fail_msg, trace)
+        logger.info('/api?metrics_resolutions - count_by_resolution: %s' % str(count_by_resolution))
+
+        redis_hash_key = 'analyzer.metrics_manager.resolutions'
+        resolutions_dict = {}
+        try:
+            resolutions_dict = REDIS_CONN.hgetall(redis_hash_key)
+        except Exception as e:
+            trace = traceback.format_exc()
+            logger.error(trace)
+            fail_msg = 'error :: /api?metrics_resolutions fail to query Redis hash key %s - %s' % (
+                redis_hash_key, e)
+            logger.error(fail_msg)
+            return internal_error(fail_msg, trace)
+
+        if settings.REMOTE_SKYLINE_INSTANCES and cluster_data:
+            remote_resolutions_dicts = []
+            redis_metric_data_uri = 'metrics_resolutions'
+            try:
+                remote_resolutions_dicts = get_cluster_data(redis_metric_data_uri, 'resolutions')
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: Webapp could not get resolution from the remote Skyline instances')
+            if remote_resolutions_dicts:
+                for remote_resolutions_dict in remote_resolutions_dicts:
+                    logger.info('got remote_resolutions_dict of length %s from a remote Skyline instances' % str(len(remote_resolutions_dict)))
+                    new_resolutions_dict = {**resolutions_dict, **remote_resolutions_dict}
+                    resolutions_dict = new_resolutions_dict.copy()
+                    del new_resolutions_dict
+            else:
+                logger.warn('warning :: failed to get remote_resolutions_dicts from the remote Skyline instances')
+        logger.info('%s resolutions determined' % (
+            str(len(resolutions_dict))))
+        filtered_discarded = 0
+        filtered_resolutions_dict = {}
+        for metric in list(resolutions_dict.keys()):
+            metric_data = resolutions_dict[metric]
+            use_metric = metric.replace(settings.FULL_NAMESPACE, '')
+            if greater_than:
+                if int(float(metric_data)) <= greater_than:
+                    filtered_discarded += 1
+                    continue
+            if less_than:
+                if int(float(metric_data)) >= less_than:
+                    filtered_discarded += 1
+                    continue
+            if namespace != 'all':
+                if not use_metric.startswith(namespace):
+                    filtered_discarded += 1
+                    continue
+            if remove_prefix:
+                if not remove_prefix.endswith('.'):
+                    remove_prefix = '%s.' % str(remove_prefix)
+                use_metric = metric.replace(remove_prefix, '')
+            filtered_resolutions_dict[use_metric] = float(metric_data)
+        resolutions_dict = filtered_resolutions_dict
+        if remove_prefix:
+            logger.info('removed prefix %s from all metrics' % str(remove_prefix))
+        if namespace != 'all':
+            logger.info('filtered out %s metrics from the response that did not match namespace %s' % (
+                str(filtered_discarded), namespace))
+        resolutions_count = len(resolutions_dict)
+        if count_by_resolution:
+            resolutions_count_dict = {}
+            resolutions = []
+            metric_resolutions = []
+            for metric in list(resolutions_dict.keys()):
+                resolutions.append(resolutions_dict[metric])
+                metric_resolutions.append([metric, resolutions_dict[metric]])
+            unique_resolutions = list(set(resolutions))
+            for resolution in unique_resolutions:
+                int_resolution = int(resolution)
+                resolutions_count_dict[int_resolution] = {}
+                metrics_matching_resolution = [metric for metric, res in metric_resolutions if res == resolution]
+                resolutions_count_dict[int_resolution]['metrics'] = metrics_matching_resolution
+                resolutions_count_dict[int_resolution]['count'] = len(metrics_matching_resolution)
+            resolutions_dict = resolutions_count_dict
+
+        end_metrics_resolution = timer()
+        metrics_resolution_time = (end_metrics_resolution - start_metrics_resolution)
+        if resolutions_dict:
+            data_dict = {"status": {"cluster_data": cluster_data, "request_time": metrics_resolution_time, "response": 200}, "data": {'resolutions': resolutions_dict, 'resolution_results_count': resolutions_count}}
+            return jsonify(data_dict), 200
+        else:
+            data_dict = {"status": {"cluster_data": cluster_data, "request_time": metrics_resolution_time, "response": 404}, "data": {"resolutions": 'null', 'resolution_results_count': 0}}
+            return jsonify(data_dict), 404
+
+    # @added 20210618 - Bug #4146: check_data_sparsity - incorrect on low fidelity and inconsistent metrics
+    #                   Feature #4144: webapp - stale_metrics API endpoint
+    #                   Feature #4076: CUSTOM_STALE_PERIOD
+    #                   Branch #1444: thunder
+    if 'metrics_sparsity' in request.args:
+        logger.info('/api?metrics_sparsity')
+        start_metrics_sparsity = timer()
+        namespace = 'all'
+        try:
+            namespace = request.args.get('namespace', 'all')
+        except KeyError:
+            namespace = 'all'
+        except Exception as e:
+            trace = traceback.format_exc()
+            fail_msg = 'error :: Webapp error with api?metrics_sparsity - %s' % e
+            logger.error(fail_msg)
+            return internal_error(fail_msg, trace)
+        logger.info('/api?metrics_sparsity - namespace: %s' % namespace)
+        remove_prefix = False
+        try:
+            remove_prefix_str = request.args.get('remove_prefix', 'false')
+            if remove_prefix_str != 'false':
+                remove_prefix = remove_prefix_str
+        except KeyError:
+            remove_prefix = False
+        except Exception as e:
+            trace = traceback.format_exc()
+            fail_msg = 'error :: Webapp error with api?metrics_sparsity - %s' % e
+            logger.error(fail_msg)
+            return internal_error(fail_msg, trace)
+        logger.info('/api?metrics_sparsity - remove_prefix: %s' % str(remove_prefix))
+
+        below = False
+        try:
+            below_str = request.args.get('below', 'false')
+            if below_str != 'false':
+                below = float(below_str)
+        except KeyError:
+            below = False
+        except Exception as e:
+            trace = traceback.format_exc()
+            fail_msg = 'error :: Webapp error with api?metrics_sparsity - %s' % e
+            logger.error(fail_msg)
+            return internal_error(fail_msg, trace)
+        logger.info('/api?metrics_sparsity - below: %s' % str(remove_prefix))
+
+        redis_hash_key = 'analyzer.metrics_manager.hash_key.metrics_data_sparsity'
+        sparsity_dict = {}
+        try:
+            sparsity_dict = REDIS_CONN.hgetall(redis_hash_key)
+        except Exception as e:
+            trace = traceback.format_exc()
+            logger.error(trace)
+            fail_msg = 'error :: /api?metrics_sparsity fail to query Redis hash key %s - %s' % (
+                redis_hash_key, e)
+            logger.error(fail_msg)
+            return internal_error(fail_msg, trace)
+
+        if settings.REMOTE_SKYLINE_INSTANCES and cluster_data:
+            remote_sparsity_dicts = []
+            redis_metric_data_uri = 'metrics_sparsity'
+            try:
+                remote_sparsity_dicts = get_cluster_data(redis_metric_data_uri, 'sparsity')
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: Webapp could not get timeseries from the remote Skyline instances')
+            if remote_sparsity_dicts:
+                for remote_sparsity_dict in remote_sparsity_dicts:
+                    logger.info('got remote_sparsity_dict of length %s from a remote Skyline instances' % str(len(remote_sparsity_dict)))
+                    new_sparsity_dict = {**sparsity_dict, **remote_sparsity_dict}
+                    sparsity_dict = new_sparsity_dict.copy()
+                    del new_sparsity_dict
+            else:
+                logger.warn('warning :: failed to get remote_sparsity_dicts from the remote Skyline instances')
+        logger.info('%s sparsity determined' % (
+            str(len(sparsity_dict))))
+        filtered_discarded = 0
+        filtered_sparsity_dict = {}
+        for metric in list(sparsity_dict.keys()):
+            metric_data = sparsity_dict[metric]
+            use_metric = metric.replace(settings.FULL_NAMESPACE, '')
+            if below:
+                if float(metric_data) > below:
+                    filtered_discarded += 1
+                    continue
+            if namespace != 'all':
+                if not use_metric.startswith(namespace):
+                    filtered_discarded += 1
+                    continue
+            if remove_prefix:
+                if not remove_prefix.endswith('.'):
+                    remove_prefix = '%s.' % str(remove_prefix)
+                use_metric = metric.replace(remove_prefix, '')
+            filtered_sparsity_dict[use_metric] = float(metric_data)
+        sparsity_dict = filtered_sparsity_dict
+        if remove_prefix:
+            logger.info('removed prefix %s from all metrics' % str(remove_prefix))
+        if namespace != 'all':
+            logger.info('filtered out %s metrics from the response that did not match namespace %s' % (
+                str(filtered_discarded), namespace))
+        sparsity_count = len(sparsity_dict)
+
+        end_metrics_sparsity = timer()
+        metrics_sparsity_time = (end_metrics_sparsity - start_metrics_sparsity)
+        if sparsity_dict:
+            data_dict = {"status": {"cluster_data": cluster_data, "request_time": metrics_sparsity_time, "response": 200}, "data": {'sparsity': sparsity_dict, 'sparsity_results_count': sparsity_count}}
+            return jsonify(data_dict), 200
+        else:
+            data_dict = {"status": {"cluster_data": cluster_data, "request_time": metrics_sparsity_time, "response": 404}, "data": {"sparsity": 'null', 'sparsity_results_count': 0}}
+            return jsonify(data_dict), 404
+
+    # @added 20210617 - Feature #4144: webapp - stale_metrics API endpoint
+    #                   Feature #4076: CUSTOM_STALE_PERIOD
+    #                   Branch #1444: thunder
+    if 'metrics_timestamp_resolutions' in request.args:
+        logger.info('/api?metrics_timestamp_resolutions')
+        start_metrics_timestamp_resolutions = timer()
+        namespace = 'all'
+        try:
+            namespace = request.args.get('namespace', 'all')
+        except KeyError:
+            namespace = 'all'
+        except Exception as e:
+            trace = traceback.format_exc()
+            fail_msg = 'error :: Webapp error with api?metrics_timestamp_resolutions - %s' % e
+            logger.error(fail_msg)
+            return internal_error(fail_msg, trace)
+        logger.info('/api?metrics_timestamp_resolutions - namespace: %s' % namespace)
+        remove_prefix = False
+        try:
+            remove_prefix_str = request.args.get('remove_prefix', 'false')
+            if remove_prefix_str != 'false':
+                remove_prefix = remove_prefix_str
+        except KeyError:
+            remove_prefix = False
+        except Exception as e:
+            trace = traceback.format_exc()
+            fail_msg = 'error :: Webapp error with api?metrics_timestamp_resolutions - %s' % e
+            logger.error(fail_msg)
+            return internal_error(fail_msg, trace)
+        logger.info('/api?metrics_timestamp_resolutions - remove_prefix: %s' % str(remove_prefix))
+        redis_hash_key = 'analyzer.metrics_manager.hash_key.metrics_timestamp_resolutions'
+        timestamp_resolutions_dict = {}
+        try:
+            timestamp_resolutions_dict = REDIS_CONN.hgetall(redis_hash_key)
+        except Exception as e:
+            trace = traceback.format_exc()
+            logger.error(trace)
+            fail_msg = 'error :: /api?metrics_timestamp_resolutions fail to query Redis hash key %s - %s' % (
+                redis_hash_key, e)
+            logger.error(fail_msg)
+            return internal_error(fail_msg, trace)
+
+        if settings.REMOTE_SKYLINE_INSTANCES and cluster_data:
+            remote_timestamp_resolutions_dict = {}
+            redis_metric_data_uri = 'metrics_timestamp_resolutions'
+            try:
+                remote_timestamp_resolutions_dicts = get_cluster_data(redis_metric_data_uri, 'timestamp_resolutions')
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: Webapp could not get timeseries from the remote Skyline instances')
+            if remote_timestamp_resolutions_dicts:
+                for remote_timestamp_resolutions_dict in remote_timestamp_resolutions_dicts:
+                    logger.info('got remote_timestamp_resolutions_dict of length %s from a remote Skyline instances' % str(len(remote_timestamp_resolutions_dict)))
+                    new_timestamp_resolutions_dict = {**timestamp_resolutions_dict, **remote_timestamp_resolutions_dict}
+                    timestamp_resolutions_dict = new_timestamp_resolutions_dict.copy()
+                    del new_timestamp_resolutions_dict
+            else:
+                logger.warn('warning :: failed to get remote_timestamp_resolutions_dicts from the remote Skyline instances')
+        logger.info('%s timestamp_resolutions determined' % (
+            str(len(timestamp_resolutions_dict))))
+        filtered_discarded = 0
+        filtered_timestamp_resolutions_dict = {}
+        for metric in list(timestamp_resolutions_dict.keys()):
+            metric_data = timestamp_resolutions_dict[metric]
+            use_metric = metric.replace(settings.FULL_NAMESPACE, '')
+            if namespace != 'all':
+                if not use_metric.startswith(namespace):
+                    filtered_discarded += 1
+                    continue
+            if remove_prefix:
+                if not remove_prefix.endswith('.'):
+                    remove_prefix = '%s.' % str(remove_prefix)
+                use_metric = metric.replace(remove_prefix, '')
+            filtered_timestamp_resolutions_dict[use_metric] = metric_data
+        timestamp_resolutions_dict = filtered_timestamp_resolutions_dict
+        if remove_prefix:
+            logger.info('removed prefix %s from all metrics' % str(remove_prefix))
+        if namespace != 'all':
+            logger.info('filtered out %s metrics from the response that did not match namespace %s' % (
+                str(filtered_discarded), namespace))
+
+        end_metrics_timestamp_resolutions = timer()
+        metrics_timestamp_resolutions_time = (end_metrics_timestamp_resolutions - start_metrics_timestamp_resolutions)
+        if timestamp_resolutions_dict:
+            data_dict = {"status": {"cluster_data": cluster_data, "request_time": metrics_timestamp_resolutions_time, "response": 200}, "data": {'timestamp_resolutions': timestamp_resolutions_dict}}
+            return jsonify(data_dict), 200
+        else:
+            data_dict = {"status": {"cluster_data": cluster_data, "request_time": metrics_timestamp_resolutions_time, "response": 404}, "data": {"timestamp_resolutions": 'null'}}
+            return jsonify(data_dict), 404
+
+    # @added 20210617 - Feature #4144: webapp - stale_metrics API endpoint
+    #                   Feature #4076: CUSTOM_STALE_PERIOD
+    #                   Branch #1444: thunder
+    if 'determine_data_sparsity' in request.args:
+        logger.info('/api?determine_data_sparsity')
+        start_stale_metrics = timer()
+        base_name = None
+        try:
+            base_name = request.args.get('metric')
+            logger.info('/api?determine_data_sparsity with metric: %s' % base_name)
+        except Exception as e:
+            logger.error('error :: api determine_data_sparsity request no metric argument - %s' % e)
+            return 'Bad Request', 400
+        if not base_name:
+            return 'Bad Request', 400
+        timeseries = []
+        try:
+            timeseries = get_metric_timeseries(skyline_app, base_name)
+        except Exception as e:
+            trace = traceback.format_exc()
+            fail_msg = 'error :: Webapp error with api?determine_data_sparsity - %s' % e
+            logger.error(fail_msg)
+            return internal_error(fail_msg, trace)
+
+        if not timeseries:
+            if settings.REMOTE_SKYLINE_INSTANCES and cluster_data:
+                redis_metric_data_uri = 'metric=%s&format=json' % str(base_name)
+                try:
+                    timeseries = get_cluster_data(redis_metric_data_uri, 'timeseries')
+                except:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: Webapp could not get timeseries from the remote Skyline instances')
+                if timeseries:
+                    logger.info('got timeseries of length %s from the remote Skyline instances' % str(len(timeseries)))
+                else:
+                    logger.warn('warning :: failed to get timeseries from the remote Skyline instances')
+        if not timeseries:
+            data_dict = {"status": {"cluster_data": cluster_data, "response": 404}, "data": {"sparsity": 'null'}}
+            return jsonify(data_dict), 404
+
+        sparsity = None
+        if timeseries:
+            try:
+                sparsity = determine_data_sparsity(skyline_app, timeseries, None, True)
+            except Exception as e:
+                trace = traceback.format_exc()
+                fail_msg = 'error :: Webapp error with api?determine_data_sparsity - %s' % e
+                logger.error(fail_msg)
+                return internal_error(fail_msg, trace)
+
+        if sparsity is not None:
+            data_dict = {"status": {"cluster_data": cluster_data, "response": 200}, "data": {"sparsity": {base_name: sparsity}}}
+            return jsonify(data_dict), 200
+        else:
+            data_dict = {"status": {"cluster_data": cluster_data, "response": 404}, "data": {"sparsity": {base_name: 'null'}}}
+            return jsonify(data_dict), 404
+
+    # @added 20210617 - Feature #4144: webapp - stale_metrics API endpoint
+    #                   Feature #4076: CUSTOM_STALE_PERIOD
+    #                   Branch #1444: thunder
+    if 'stale_metrics' in request.args:
+        logger.info('/api?stale_metrics')
+        start_stale_metrics = timer()
+        namespace = 'all'
+        try:
+            namespace = request.args.get('namespace', 'all')
+        except KeyError:
+            namespace = 'all'
+        except Exception as e:
+            trace = traceback.format_exc()
+            fail_msg = 'error :: Webapp error with api?stale_metrics - %s' % e
+            logger.error(fail_msg)
+            return internal_error(fail_msg, trace)
+        exclude_sparsely_populated = False
+        try:
+            exclude_sparsely_populated_str = request.args.get('exclude_sparsely_populated', 'false')
+            if exclude_sparsely_populated_str == 'true':
+                exclude_sparsely_populated = True
+        except KeyError:
+            exclude_sparsely_populated = False
+        except Exception as e:
+            trace = traceback.format_exc()
+            fail_msg = 'error :: Webapp error with api?stale_metrics - %s' % e
+            logger.error(fail_msg)
+            return internal_error(fail_msg, trace)
+        # Add a key that functions.thunder.stale_metrics uses to determine if
+        # webapp requests should include sparsely_populated_metrics or not
+        if exclude_sparsely_populated:
+            try:
+                REDIS_CONN.setex('webapp.stale_metrics.exclude_sparsely_populated', 2, str(exclude_sparsely_populated))
+            except Exception as e:
+                trace = traceback.format_exc()
+                fail_msg = 'error :: Webapp error with api?stale_metrics - %s' % e
+                logger.error(fail_msg)
+                return internal_error(fail_msg, trace)
+
+        namespaces_namespace_stale_metrics_dict = {}
+        try:
+            namespaces_namespace_stale_metrics_dict = namespace_stale_metrics(namespace, cluster_data, exclude_sparsely_populated)
+        except Exception as e:
+            trace = traceback.format_exc()
+            fail_msg = 'error :: Webapp error with api?stale_metrics - %s' % e
+            logger.error(fail_msg)
+            return internal_error(fail_msg, trace)
+        logger.info('%s namespaces checked for stale metrics discovered with thunder_stale_metrics' % (
+            str(len(namespaces_namespace_stale_metrics_dict))))
+        end_stale_metrics = timer()
+        stale_metrics_time = (end_stale_metrics - start_stale_metrics)
+        if namespaces_namespace_stale_metrics_dict:
+            data_dict = {"status": {"cluster_data": cluster_data, "request_time": stale_metrics_time, "response": 200}, "data": namespaces_namespace_stale_metrics_dict}
+            return jsonify(data_dict), 200
+        else:
+            data_dict = {"status": {"cluster_data": cluster_data, "request_time": stale_metrics_time, "response": 404}, "data": {"stale_metrics": 'null'}}
+            return jsonify(data_dict), 404
+
+    # @added 20210601 - Branch #1444: thunder
+    if 'thunder_stale_metrics' in request.args:
+        logger.info('/api?thunder_stale_metrics')
+        start_thunder_stale_metrics = timer()
+        try:
+            timestamp = request.args.get('timestamp')
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: /api?thunder_stale_metrics request with no timestamp argument')
+            timestamp = None
+        if not timestamp:
+            data_dict = {"status": {"error": "no timestamp passed"}}
+            return jsonify(data_dict), 400
+        redis_key = 'thunder.stale_metrics.alert.%s' % str(timestamp)
+        stale_metrics_dict = {}
+        try:
+            stale_metrics_raw = REDIS_CONN.get(redis_key)
+            if stale_metrics_raw:
+                stale_metrics_dict = literal_eval(stale_metrics_raw)
+        except Exception as e:
+            logger.error(traceback.format_exc())
+            logger.error('error :: /api?thunder_stale_metrics fail to query Redis key %s  %s' % (redis_key, e))
+            stale_metrics_dict = {}
+        end_thunder_stale_metrics = timer()
+        thunder_stale_metrics_time = (end_thunder_stale_metrics - start_thunder_stale_metrics)
+        if stale_metrics_dict:
+            data_dict = {"status": {"request_time": thunder_stale_metrics_time, "response": 200}, "data": stale_metrics_dict}
+            return jsonify(data_dict), 200
+        else:
+            data_dict = {"status": {"request_time": thunder_stale_metrics_time, "response": 404}, "data": {"metrics": 'null'}}
+            return jsonify(data_dict), 404
+
     # @added 20210211 - Feature - last_analyzed_timestamp
     # @added 20210211 - Feature #3968: webapp - last_analyzed_timestamp API endpoint
     if 'last_analyzed_timestamp' in request.args:
@@ -759,7 +1296,7 @@ def api():
             metric = request.args.get('metric')
         except:
             logger.error(traceback.format_exc())
-            logger.error('error :: /api?yhat_values request with invalid metric argument')
+            logger.error('error :: /api?last_analyzed_timestamp request with invalid metric argument')
             metric = None
         if not metric:
             data_dict = {"status": {"error": "no metric passed"}}
@@ -770,7 +1307,7 @@ def api():
             last_analyzed_timestamp = REDIS_CONN.hget(redis_hash_key, metric)
         except Exception as e:
             logger.error(traceback.format_exc())
-            logger.error('error :: /api?last_analyzed_timestamp fail to query Redis hash key %s for %s' % (redis_hash_key, metric))
+            logger.error('error :: /api?last_analyzed_timestamp fail to query Redis hash key %s for %s - %s' % (redis_hash_key, metric, e))
             last_analyzed_timestamp = None
         if not last_analyzed_timestamp:
             redis_hash_key = 'analyzer.low_priority_metrics.last_analyzed_timestamp'
@@ -779,7 +1316,7 @@ def api():
                 last_analyzed_timestamp = REDIS_CONN.hget(redis_hash_key, redis_metric_name)
             except Exception as e:
                 logger.error(traceback.format_exc())
-                logger.error('error :: /api?last_analyzed_timestamp fail to query Redis hash key %s for %s' % (redis_hash_key, redis_metric_name))
+                logger.error('error :: /api?last_analyzed_timestamp fail to query Redis hash key %s for %s - %s' % (redis_hash_key, redis_metric_name, e))
                 last_analyzed_timestamp = None
         if last_analyzed_timestamp:
             end_last_analyzed_timestamp = timer()
@@ -832,7 +1369,7 @@ def api():
         # @added 20201126 - Feature #3850: webapp - yhat_values API endoint
         start_yhat = timer()
         try:
-            metric = request.args.get('metric', '0')
+            metric = request.args.get('metric', 0)
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: /api?yhat_values request with invalid metric argument')
@@ -988,7 +1525,7 @@ def api():
                     remove_prefix = '%s.' % remove_prefix_str
                 metric = metric.replace(remove_prefix, '')
             except Exception as e:
-                logger.error('error :: failed to remove prefix %s from %s' % (str(remove_prefix_str), metric))
+                logger.error('error :: failed to remove prefix %s from %s - %s' % (str(remove_prefix_str), metric, e))
 
         if yhat_dict:
             if include_anomalous_periods:
@@ -1017,9 +1554,13 @@ def api():
         analyzer_last_status = None
         try:
             analyzer_last_status = int(float(str(REDIS_CONN.get('analyzer'))))
-        except:
+        # @added 20210511 - Feature #3770: webapp - analyzer_last_status API endoint
+        # Handle a None result as a warning not an error
+        except ValueError as e:
+            logger.warn('warning :: Webapp could not get the analyzer key from Redis - %s' % e)
+        except Exception as e:
             logger.error(traceback.format_exc())
-            logger.error('error :: Webapp could not get the analyzer key from Redis')
+            logger.error('error :: Webapp could not get the analyzer key from Redis - %s' % e)
         logger.info('/api?analyzer_last_status responding with %s' % str(analyzer_last_status))
         data_dict = {"status": {}, "data": {"timestamp": analyzer_last_status}}
         if not analyzer_last_status:
@@ -1153,7 +1694,7 @@ def api():
         anomaly_id = None
         if 'id' in request.args:
             try:
-                anomaly_id = int(request.args.get('id', None))
+                anomaly_id = int(request.args.get('id', 0))
             except:
                 logger.error('error :: /api?anomaly id parameter sent is not an int')
                 anomaly_id = False
@@ -1222,14 +1763,20 @@ def api():
             if len(related_matches) == 1:
                 # @modified 20200908 - Feature #3740: webapp - anomaly API endpoint
                 # Added match_anomaly_timestamp
-                for related_human_date, related_match_id, related_matched_by, related_fp_id, related_layer_id, related_metric, related_uri_to_matched_page, related_validated, match_anomaly_timestamp in related_matches:
+                # @modified 20210413 - Feature #4014: Ionosphere - inference
+                #                      Branch #3590: inference
+                # Added related_motifs_matched_id
+                for related_human_date, related_match_id, related_matched_by, related_fp_id, related_layer_id, related_metric, related_uri_to_matched_page, related_validated, match_anomaly_timestamp, related_motifs_matched_id in related_matches:
                     if related_matched_by == 'no matches were found':
                         related_matches = []
             if related_matches:
                 logger.info('%s possible related matches found' % (str(len(related_matches))))
                 # @modified 20200908 - Feature #3740: webapp - anomaly API endpoint
                 # Added match_anomaly_timestamp
-                for related_human_date, related_match_id, related_matched_by, related_fp_id, related_layer_id, related_metric, related_uri_to_matched_page, related_validated, match_anomaly_timestamp in related_matches:
+                # @modified 20210413 - Feature #4014: Ionosphere - inference
+                #                      Branch #3590: inference
+                # Added related_motifs_matched_id
+                for related_human_date, related_match_id, related_matched_by, related_fp_id, related_layer_id, related_metric, related_uri_to_matched_page, related_validated, match_anomaly_timestamp, related_motifs_matched_id in related_matches:
                     # @added 20201202- Feature #3858: skyline_functions - correlate_or_relate_with
                     # Filter only related matches that are in correlations group
                     correlate_or_relate = correlate_or_relate_with(skyline_app, metric, related_metric)
@@ -1241,7 +1788,11 @@ def api():
                         'timestamp': match_anomaly_timestamp,
                         'matched by': related_matched_by,
                         'fp id': related_fp_id,
-                        'layer id': related_layer_id
+                        'layer id': related_layer_id,
+                        # @modified 20210413 - Feature #4014: Ionosphere - inference
+                        #                      Branch #3590: inference
+                        # Added motifs_matched_id
+                        'motif id': related_motifs_matched_id,
                     }
                     matchesDict[related_match_id] = metric_dict
 
@@ -1331,8 +1882,8 @@ def api():
             REDIS_CONN.sadd(test_alert_redis_key, metric)
         except Exception as e:
             logger.error(traceback.format_exc())
-            logger.error('error :: could not add %s to %s Redis set' % (
-                test_skyline_app, metric))
+            logger.error('error :: could not add %s to %s Redis set - %s' % (
+                test_skyline_app, metric, e))
             return 'Internal Server Error', 500
         test_alert_dict = {
             'skyline_app': test_skyline_app,
@@ -1366,7 +1917,7 @@ def api():
                 return flask_escape(resp), 404
         except Exception as e:
             logger.error(traceback.format_exc())
-            logger.error('error :: could not get the %s from Redis' % upload_status_redis_key)
+            logger.error('error :: could not get the %s from Redis - %s' % (upload_status_redis_key, e))
             logger.error('error :: /api?upload_status request')
             return 'Internal Server Error', 500
         upload_status_dict = {}
@@ -1541,9 +2092,9 @@ def api():
         alerting_metrics = []
         try:
             alerting_metrics = list(REDIS_CONN.smembers('aet.analyzer.smtp_alerter_metrics'))
-        except:
+        except Exception as e:
             logger.error(traceback.format_exc())
-            logger.error('error :: Webapp could not get the aet.analyzer.smtp_alerter_metrics list from Redis')
+            logger.error('error :: Webapp could not get the aet.analyzer.smtp_alerter_metrics list from Redis - %s' % e)
             return 'Internal Server Error', 500
 
         # @added 20201103 - Feature #3824: get_cluster_data
@@ -1884,8 +2435,52 @@ def api():
                 unique_metrics_list = unique_metrics + remote_unique_metrics
                 unique_metrics = list(set(unique_metrics_list))
 
+        # @added 20210416 - Feature #3252: webapp api - unique_metrics
+        # Allow to filter by namespace and remove_full_namespace_prefix
+        total_unique_metrics = len(unique_metrics)
+        filtered = False
+        filter_namespace = None
+        if 'filter_namespace' in request.args:
+            filtered_unique_metrics = []
+            filter_namespace_str = request.args.get('filter_namespace', '')
+            logger.info('/api?unique_metrics filter_namespace passed filtering: %s' % filter_namespace_str)
+            filter_namespace = [filter_namespace_str]
+            for metric_name in unique_metrics:
+                pattern_match, matched_by = matched_or_regexed_in_list(skyline_app, metric_name, filter_namespace, False)
+                if pattern_match:
+                    filtered_unique_metrics.append(metric_name)
+            logger.info('/api?unique_metrics filtered_namespace found %s metrics from the %s unique_metrics' % (
+                str(len(filtered_unique_metrics)), str(total_unique_metrics)))
+            unique_metrics = filtered_unique_metrics
+            filtered = True
+        remove_full_namespace_prefix = False
+        if 'remove_full_namespace_prefix' in request.args:
+            filtered_unique_metrics = []
+            remove_full_namespace_prefix_str = request.args.get('remove_full_namespace_prefix', 'false')
+            if remove_full_namespace_prefix_str == 'true':
+                remove_full_namespace_prefix = True
+                logger.info('/api?unique_metrics remove_full_namespace_prefix passed stripping: %s' % settings.FULL_NAMESPACE)
+            if remove_full_namespace_prefix:
+                basename_unique_metrics = []
+                for metric_name in unique_metrics:
+                    if metric_name.startswith(settings.FULL_NAMESPACE):
+                        base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+                    else:
+                        base_name = metric_name
+                    basename_unique_metrics.append(base_name)
+            logger.info('/api?unique_metrics stripped: %s' % settings.FULL_NAMESPACE)
+            unique_metrics = basename_unique_metrics
+        duration = (time.time() - start)
+
         data_dict = {
-            "status": {"cluster_data": cluster_data},
+            "status": {
+                "cluster_data": cluster_data,
+                "filtered": filtered,
+                "filter_namespace": filter_namespace,
+                "remove_full_namespace_prefix": remove_full_namespace_prefix,
+                "response": 200,
+                "request_time": duration
+            },
             "data": {
                 "metrics": unique_metrics
             }
@@ -2029,6 +2624,9 @@ def api():
             # raw_series = REDIS_CONN.get(metric)
             raw_series = REDIS_CONN_UNDECODE.get(metric)
             if not raw_series:
+                metric_name = '%s%s' % (settings.FULL_NAMESPACE, metric)
+                raw_series = REDIS_CONN_UNDECODE.get(metric_name)
+            if not raw_series:
                 resp = json.dumps(
                     {'results': 'Error: No metric by that name - try /api?metric=' + settings.FULL_NAMESPACE + 'metric_namespace'})
                 return resp, 404
@@ -2042,6 +2640,32 @@ def api():
                 # Replace redefinition of item from line 1338
                 # timeseries = [item[:2] for item in unpacker]
                 timeseries = [ts_item[:2] for ts_item in unpacker]
+                # @added 20210416
+                remove_full_namespace_prefix = False
+                if 'remove_full_namespace_prefix' in request.args:
+                    remove_full_namespace_prefix_str = request.args.get('remove_full_namespace_prefix', 'false')
+                    if remove_full_namespace_prefix_str == 'true':
+                        remove_full_namespace_prefix = True
+                        if metric.startswith(settings.FULL_NAMESPACE):
+                            metric = metric.replace(settings.FULL_NAMESPACE, '', 1)
+                if 'format' in request.args:
+                    format = request.args.get(str('format'), 'pjson')
+                    if format == 'json':
+                        duration = (time.time() - start)
+                        data_dict = {
+                            "status": {
+                                "cluster_data": cluster_data,
+                                "format": format,
+                                "response": 200,
+                                "request_time": duration,
+                                "remove_full_namespace_prefix": remove_full_namespace_prefix
+                            },
+                            "data": {
+                                "metric": metric,
+                                "timeseries": timeseries
+                            }
+                        }
+                        return jsonify(data_dict), 200
                 resp = json.dumps({'results': timeseries})
                 return resp, 200
         except Exception as e:
@@ -2203,7 +2827,10 @@ def mock_api():
                 token = str(post_data['data']['token'])
             except:
                 logger.error(traceback.format_exc())
-                logger.error('error :: Webapp could not get token from the alert_config POST request, returning 400 - %s' % str(request.form))
+                # @modified 20210421 - Task #4030: refactoring
+                # semgrep - python-logger-credential-disclosure
+                # logger.error('error :: Webapp could not get token from the alert_config POST request, returning 400 - %s' % str(request.form))
+                logger.error('error :: Webapp could not get token from the alert_config POST request, returning 400')
         if not token:
             error_msg = 'no token found'
             logger.error('error :: %s, returning 400' % error_msg)
@@ -2211,7 +2838,10 @@ def mock_api():
             return jsonify(data_dict), 400
         if token != settings.FLUX_SELF_API_KEY:
             error_msg = 'no token found'
-            logger.error('error :: the token %s does not match settings.FLUX_SELF_API_KEY, returning 401' % str(token))
+            # @modified 20210421 - Task #4030: refactoring
+            # semgrep - python-logger-credential-disclosure
+            # logger.error('error :: the token %s does not match settings.FLUX_SELF_API_KEY, returning 401' % str(token))
+            logger.error('error :: the token does not match settings.FLUX_SELF_API_KEY, returning 401')
             return 'Unauthorized', 401
         count = 1
         alerts_dict = {}
@@ -2268,6 +2898,36 @@ def mock_api():
             'learn_days': '30'
         }
         data_dict = {"status": {}, "data": alerts_dict}
+        return jsonify(data_dict), 200
+
+    # @added 20210601 - Feature #4000: EXTERNAL_SETTINGS
+    if 'test_external_settings' in request.args:
+        settings_dict = {
+            'id': 'test_external_settings',
+            'namespace': 'skyline-test-external-settings',
+            'retention_1_resolution_seconds': 60,
+            'retention_1_period_seconds': 604800,
+            'retention_2_resolution_seconds': 600,
+            'retention_2_period_seconds': 63072000,
+            'full_duration': 86400,
+            'second_order_resolution_seconds': 604800,
+            'learn_full_duration_seconds': 2592000,
+            'flux_token': None,
+            "thunder_alert_endpoint": 'http://127.0.0.1:1500/mock_api?alert_reciever',
+            'thunder_alert_token': None,
+            'alert_on_no_data': {
+                'enabled': True,
+                'stale_period': 300,
+                'expiry': 1800,
+            },
+            'alert_on_stale_metrics': {
+                'enabled': True,
+                'stale_period': 900,
+                'expiry': 0,
+            },
+        }
+        namespaces = [settings_dict]
+        data_dict = {"status": {}, "data": {"namespaces": namespaces}}
         return jsonify(data_dict), 200
 
 
@@ -2475,7 +3135,7 @@ def panorama():
 
         if not not_anomalous_dict:
             logger.info('not_anomalous_dict data not found in Redis')
-            logger.info('calling get_mirage_not_anomalous_metrics(%s, %s, %s)' % (
+            logger.info('calling get_mirage_not_anomalous_metrics(%s, %s, %s, %s)' % (
                 str(base_name), str(from_timestamp), str(until_timestamp),
                 str(anomalies)))
             try:
@@ -2647,7 +3307,7 @@ def panorama():
                 user_id = int(user_id)
             except:
                 logger.error(traceback.format_exc())
-                logger.error('error :: /panorama get_user_details(%s) did not return an int' % (
+                logger.error('error :: /panorama get_user_details(%s, %s) did not return an int' % (
                     str(user), str(user_id)))
                 return 'Internal Server Error - ref: p - user_id not int', 500
 
@@ -3139,7 +3799,7 @@ def crucible():
                 except:
                     logger.error(traceback.format_exc())
                     logger.error('error :: /crucible get_user_details() with %s did not return an int' % (
-                        str(user), str(user_id)))
+                        str(user)))
                     return 'Internal Server Error - ref: i - user_id not int', 500
 
     if process_metrics_request:
@@ -3425,7 +4085,7 @@ def ionosphere():
             except:
                 logger.error(traceback.format_exc())
                 logger.error('error :: /ionosphere get_user_details() with %s did not return an int' % (
-                    str(user), str(user_id)))
+                    str(user)))
                 return 'Internal Server Error - ref: i - user_id not int', 500
 
     logger.info('request.url: %s' % str(request.url))
@@ -3457,6 +4117,310 @@ def ionosphere():
     echo_hdate = False
 
     metric_id = False
+
+    # @added 20210417 - Feature #4014: Ionosphere - inference
+    #                   Branch #3590: inference
+    batch_size = None
+    top_matches = None
+    max_distance = None
+    saved_training_data = None
+
+    # @added 20210415 - Feature #4014: Ionosphere - inference
+    #                   Branch #3590: inference
+    motif_analysis_images = None
+    motif_analysis = None
+
+    # @added 20210419 - Feature #4014: Ionosphere - inference
+    inference_match_motif_dict = None
+    inference_match_motif_image = None
+
+    # @added 20210422 - Feature #4014: Ionosphere - inference
+    # Allow user to specify the range_padding
+    motif_range_padding = None
+
+    # @added 20210425 - Feature #4014: Ionosphere - inference
+    # Allow user to specify the difference between the areas under the
+    # curve
+    motif_max_area_percent_diff = None
+
+    # This allows to plot best first, just makes an ordered list of the motif_id
+    # in the dict ordered by dist, just to add some order to a dict :)
+    motif_analysis_motif_id_by_distance = []
+    motif_analysis_images = []
+    if 'motif_analysis' in request.args:
+        MOTIF_ANALYSIS_ARGS = [
+            'motif_analysis', 'metric', 'timestamp', 'requested_timestamp',
+            'similarity', 'purge',
+            # @added 20210417 - Feature #4014: Ionosphere - inference
+            # Allow the user to define the batch_size per similarity search
+            'batch_size', 'top_matches', 'max_distance',
+            # @added 20210418 - Feature #4014: Ionosphere - inference
+            # Allow for the similarity search on saved_training_data
+            'saved_training_data',
+            # @added 20210422 - Feature #4014: Ionosphere - inference
+            # Allow user to specify the range_padding
+            'range_padding',
+            # @added 20210425 - Feature #4014: Ionosphere - inference
+            # Allow user to specify the difference between the areas under the
+            # curve
+            'max_area_percent_diff',
+        ]
+        motif_purge = False
+        for i in request.args:
+            key = str(i)
+            if key not in MOTIF_ANALYSIS_ARGS:
+                error_string = 'error :: invalid request argument - %s' % (key)
+                logger.error('%s - not in MOTIF_ANALYSIS_ARGS' % (error_string))
+                resp = json.dumps(
+                    {'400 Bad Request': error_string})
+                return flask_escape(resp), 400
+            value = request.args.get(key, 0)
+            logger.info('request argument - %s=%s' % (key, str(value)))
+            if key == 'metric':
+                metric = str(value)
+            if key == 'timestamp':
+                timestamp = str(value)
+            if key == 'requested_timestamp':
+                requested_timestamp = str(value)
+            if key == 'similarity':
+                similarity = str(value)
+            if key == 'purge':
+                if str(value) == 'true':
+                    motif_purge = True
+            # @added 20210417 - Feature #4014: Ionosphere - inference
+            # Allow the user to define the batch_size per similarity search
+            if key == 'batch_size':
+                batch_size = int(value)
+            if key == 'top_matches':
+                top_matches = int(value)
+            if key == 'max_distance':
+                max_distance = float(value)
+            # @added 20210418 - Feature #4014: Ionosphere - inference
+            # Allow for the similarity search on saved_training_data
+            if key == 'saved_training_data':
+                if str(value) == 'true':
+                    saved_training_data = True
+            # @added 20210422 - Feature #4014: Ionosphere - inference
+            # Allow user to specify the range_padding
+            if key == 'range_padding':
+                motif_range_padding = int(value)
+            # @added 20210425 - Feature #4014: Ionosphere - inference
+            # Allow user to specify the difference between the areas under the
+            # curve
+            if key == 'max_area_percent_diff':
+                max_area_percent_diff = float(value)
+
+        if not timestamp and not metric and not similarity and not batch_size and not top_matches and not max_distance and not motif_range_padding and not max_area_percent_diff:
+            error_string = 'error :: invalid request'
+            logger.error(error_string)
+            resp = json.dumps(
+                {'400 Bad Request': error_string})
+            return flask_escape(resp), 400
+        # Use previous if they exist
+        motif_metricname_dir = metric.replace('.', '/')
+
+        # @modified 20210419 - Feature #4014: Ionosphere - inference
+        # Create a unique dir for each batch_size, top_matches and max_distance
+        # motif_metric_dir = '%s/%s/%s/motifs' % (
+        #     settings.IONOSPHERE_DATA_FOLDER, str(timestamp), motif_metricname_dir)
+        motif_metric_dir = '%s/%s/%s/motifs/batch_size.%s/top_matches.%s/max_distance.%s/range_padding.%s/max_area_percent_diff.%s' % (
+            settings.IONOSPHERE_DATA_FOLDER, str(timestamp),
+            motif_metricname_dir, str(batch_size), str(top_matches),
+            str(max_distance), str(motif_range_padding),
+            str(max_area_percent_diff))
+
+        # @added 20210418 - Feature #4014: Ionosphere - inference
+        # Allow for the similarity search on saved_training_data
+        if saved_training_data:
+            try:
+                # saved_motif_metric_dir = '%s_saved/%s/%s/motifs' % (
+                #    settings.IONOSPHERE_DATA_FOLDER, str(timestamp), motif_metricname_dir)
+                saved_data_dir = '%s_saved' % settings.IONOSPHERE_DATA_FOLDER
+                saved_motif_metric_dir = motif_metric_dir.replace(settings.IONOSPHERE_DATA_FOLDER, saved_data_dir)
+                if os.path.exists(saved_motif_metric_dir):
+                    motif_metric_dir = saved_motif_metric_dir
+                    logger.info('motif_analysis - using saved training_data dir - %s' % (saved_motif_metric_dir))
+            except Exception as e:
+                error_string = 'error :: saved_training_data dir not found - %s/%s - %s' % (
+                    str(timestamp), motif_metricname_dir, e)
+                logger.error(error_string)
+                resp = json.dumps(
+                    {'400 Bad Request': error_string})
+                return flask_escape(resp), 400
+
+        # @modified 20210419 - Feature #4014: Ionosphere - inference
+        # Create a unique dir for each batch_size, top_matches and max_distance
+        # metric_motif_analysis_file = '%s/motif.analysis.%s.%s.%s.dict' % (
+        #     motif_metric_dir, similarity, str(batch_size), str(max_distance))
+        metric_motif_analysis_file = '%s/motif.analysis.similarity_%s.batch_size_%s.top_matches_%s.max_distance_%s.range_padding_%s.max_area_percent_diff_%s.dict' % (
+            motif_metric_dir, similarity, str(batch_size), str(top_matches),
+            str(max_distance), str(motif_range_padding),
+            str(max_area_percent_diff))
+
+        if motif_purge:
+            if os.path.exists(motif_metric_dir):
+                try:
+                    rmtree(motif_metric_dir)
+                    logger.info('motif_analysis - purge true - removed - %s' % (motif_metric_dir))
+                except Exception as e:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: motif_analysis - purge true - failed to rmtree %s - %s' % (motif_metric_dir, e))
+        if os.path.isfile(metric_motif_analysis_file):
+            try:
+                with open(metric_motif_analysis_file, 'r') as f:
+                    motif_analysis_str = f.read()
+                motif_analysis = literal_eval(motif_analysis_str)
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: failed to evaluate motif_analysis from %s' % metric_motif_analysis_file)
+                motif_analysis = None
+        else:
+            logger.info('no previous motif_analysis file found %s, running analysis' % metric_motif_analysis_file)
+
+        if not motif_analysis:
+            # @modified 20210417 - Feature #4014: Ionosphere - inference
+            # Allow the user to define the batch_size per similarity search
+            # @modified 20210425 - Feature #4014: Ionospher - inference
+            # Added max_area_percent_diff
+            motif_analysis, fail_msg, trace = on_demand_motif_analysis(
+                metric, timestamp, similarity, batch_size, top_matches,
+                max_distance, motif_range_padding, max_area_percent_diff)
+        else:
+            logger.info('previous motif_analysis loaded from %s' % metric_motif_analysis_file)
+        if motif_analysis:
+            motif_ids_found = list(motif_analysis[metric]['motifs'].keys())
+            motif_id_and_distance = []
+            for motif_id_found in motif_ids_found:
+                motif_id_and_distance.append([motif_id_found, motif_analysis[metric]['motifs'][motif_id_found]['distance']])
+                try:
+                    if motif_analysis[metric]['motifs'][motif_id_found]['image']:
+                        motif_analysis_images.append(motif_analysis[metric]['motifs'][motif_id_found]['image'])
+                except Exception as e:
+                    logger.error('error :: failed to append motif to motif_id_and_distance for motif_id_found: %s - %s' % (str(motif_id_found), e))
+            ordered_motif_id_by_distance = sorted(motif_id_and_distance, key=lambda x: x[1])
+            all_motif_analysis_motif_id_by_distance = [item[0] for item in ordered_motif_id_by_distance]
+            # Now only add the one which have images
+            for motif_id_found in all_motif_analysis_motif_id_by_distance:
+                try:
+                    has_image = motif_analysis[metric]['motifs'][motif_id_found]['image']
+                    if has_image in motif_analysis_images:
+                        motif_analysis_motif_id_by_distance.append(motif_id_found)
+                except Exception as e:
+                    # logger.error(traceback.format_exc())
+                    logger.error('error :: failed to evaluate if has image for motif_id_found: %s - %s' % (str(motif_id_found), e))
+        # logger.debug('debug :: motif_analysis_motif_id_by_distance: %s' % str(motif_analysis_motif_id_by_distance))
+        # logger.debug('debug :: motif_analysis: %s' % str(motif_analysis))
+
+    # @added 20210413 - Feature #4014: Ionosphere - inference
+    #                   Branch #3590: inference
+    motif_matches_req = False
+    if 'motif_matches' in request.args:
+        motif_matches_req = True
+        MOTIF_MATCHES_ARGS = [
+            'motif_matches', 'metric', 'metric_like', 'from_timestamp',
+            'until_timestamp', 'validated_equals', 'limit', 'format',
+            'primary_match',
+            # @added 20210415 - Feature #4014: Ionosphere - inference
+            #                   Branch #3590: inference
+            'sort_by', 'order_by',
+        ]
+        metric = None
+        metric_like = None
+        from_timestamp = 'all'
+        until_timestamp = 'all'
+        limit = 100
+        format = 'normal'
+
+        # Validate a metric or metric_like parameter with all known metrics in
+        # the DB not just Redis.  These parameters are validated as they are
+        # passed to a database query in get_matched_motifs
+        known_db_metrics = []
+        try:
+            known_db_metrics = list(REDIS_CONN.smembers('aet.analyzer.metrics_manager.db.metric_names'))
+        except Exception as e:
+            logger.error('error :: failed to known_db_metrics from Redis set aet.analyzer.metrics_manager.db.metric_names - %s' % (e))
+
+        for i in request.args:
+            key = str(i)
+            if key not in MOTIF_MATCHES_ARGS:
+                error_string = 'error :: invalid request argument - %s' % (key)
+                logger.error(error_string)
+                resp = json.dumps(
+                    {'400 Bad Request': error_string})
+                return flask_escape(resp), 400
+            value = request.args.get(key, None)
+            logger.info('request argument - %s=%s' % (key, str(value)))
+            if key == 'metric':
+                metric_str = str(value)
+                if metric_str == 'all':
+                    metric = 'all'
+                else:
+                    if metric_str in known_db_metrics:
+                        metric = metric_str
+
+            if key == 'metric_like':
+                metric_like_str = str(value)
+                if metric_like_str == 'all':
+                    metric_like = 'all'
+                else:
+                    metric_like_namespace_str = metric_like_str.replace('%', '')
+                    for i_metric in known_db_metrics:
+                        if metric_like_namespace_str in i_metric:
+                            metric_like = metric_like_str
+
+            if key == 'from_timestamp':
+                from_timestamp = str(value)
+            if key == 'until_timestamp':
+                until_timestamp = str(value)
+            if key == 'validated_equals':
+                validated_equals = str(value)
+            if key == 'format':
+                format = str(value)
+            # @added 20210415 - Feature #4014: Ionosphere - inference
+            #                   Branch #3590: inference
+            # Allow to sort_by, to enable sorting by distance as the larger the distance
+            # the less similar
+            sort_by = None
+            valid_sort_by_columns = [
+                'id', 'metric_id', 'fp_id', 'metric_timestamp', 'distance',
+                'size',
+            ]
+            if 'sort_by' in request.args:
+                sort_by = request.args.get('sort_by', 'none')
+                if sort_by == 'none':
+                    sort_by = None
+                if sort_by not in valid_sort_by_columns:
+                    error_string = 'error :: invalid request argument - %s: %s' % (key, str(value))
+                    logger.error(error_string)
+                    resp = json.dumps(
+                        {'400 Bad Request': error_string})
+                    return flask_escape(resp), 400
+            if 'order_by' in request.args:
+                valid_order_by = ['DESC', 'ASC']
+                order_by = request.args.get('order_by', 'DESC')
+                if order_by not in valid_order_by:
+                    error_string = 'error :: invalid request argument - %s: %s' % (key, str(value))
+                    logger.error(error_string)
+                    resp = json.dumps(
+                        {'400 Bad Request': error_string})
+                    return flask_escape(resp), 400
+
+        matched_motifs, fail_msg, trace = get_matched_motifs(metric, metric_like, from_timestamp, until_timestamp, sort_by)
+        if matched_motifs is False:
+            return internal_error(fail_msg, trace)
+
+        data_dict = {"status": {"response": 200, "request_time": (time.time() - start)}, "data": {"metric": metric, "metric_like": metric_like, "matched_motifs": matched_motifs}}
+        if not matched_motifs:
+            data_dict = {"status": {"response": 204, "request_time": (time.time() - start)}, "data": {"metric": metric, "metric_like": metric_like, "matched_motifs": matched_motifs, "success": False, "reason": "no data for query"}}
+        if format == 'json':
+            logger.info('ionosphere motif_matches returned json with %s matched_motifs elements listed' % str(len(matched_motifs)))
+            return jsonify(data_dict), 200
+        return render_template(
+            'ionosphere.html', motif_matches=motif_matches_req,
+            matched_motifs=matched_motifs, for_metric=metric,
+            matched_from_datetime=matched_from_datetime,
+            version=skyline_version, user=user,
+            duration=(time.time() - start), print_debug=False), 200
 
     # @added 20180812 - Feature #2430: Ionosphere validate learnt features profiles page
     features_profiles_to_validate = []
@@ -4397,6 +5361,23 @@ def ionosphere():
         #                   Feature #2516: Add label to features profile
         # Allow the user_id to be passed as a request argument
         'user_id',
+        # @added 20210413 - Feature #4014: Ionosphere - inference
+        #                   Branch #3590: inference
+        'matched_motif_id',
+        # @added 20210415 - Feature #4014: Ionosphere - inference
+        'motif_analysis', 'similarity', 'purge',
+        # @added 20210416 - Feature #4014: Ionosphere - inference
+        'ionosphere_matched_id',
+        # @added 20210417 - Feature #4014: Ionosphere - inference
+        # Allow the user to define the batch_size per similarity search
+        'batch_size', 'top_matches', 'max_distance',
+        # @added 20210422 - Feature #4014: Ionosphere - inference
+        # Allow the user to specify the range_padding
+        'range_padding',
+        # @added 20210425 - Feature #4014: Ionosphere - inference
+        # Allow user to specify the difference between the areas under the
+        # curve
+        'max_area_percent_diff',
     ]
 
     # @modified 20190503 - Branch #2646: slack - linting
@@ -4436,6 +5417,13 @@ def ionosphere():
     # @added 20170917 - Feature #1996: Ionosphere - matches page
     matched_fp_id = False
     matched_layer_id = False
+
+    # @added 20210413 - Feature #4014: Ionosphere - inference
+    #                   Branch #3590: inference
+    matched_motif_id = False
+    # @added 20210416 - Feature #4014: Ionosphere - inference
+    ionosphere_matched_id = False
+
     # @added 20190601 - Feature #3084: Ionosphere - validated matches
     match_validated = 0
 
@@ -4444,6 +5432,10 @@ def ionosphere():
 
     # @added 20191210 - Feature #3348: fp creation json response
     response_format = None
+
+    # @added 20210422 - Feature #4014: Ionosphere - inference
+    # Allow the user to specify the range_padding
+    motif_range_padding = None
 
     try:
         if request_args_present:
@@ -4476,6 +5468,28 @@ def ionosphere():
                                 {'results': error_string})
                             return flask_escape(resp), 400
 
+                # @added 20210413 - Feature #4014: Ionosphere - inference
+                #                   Branch #3590: inference
+                if 'matched_motif_id' in request.args:
+                    matched_motif_id = request.args.get(str('matched_motif_id'), 0)
+                    logger.info('matched_motif_id: %s' % str(matched_motif_id))
+                    # @added 20210422 - Feature #4014: Ionosphere - inference
+                    # Allow the user to specify the range_padding
+                    if 'range_padding' in request.args:
+                        motif_range_padding = request.args.get('range_padding', 10)
+                        logger.info('range_padding: %s' % str(motif_range_padding))
+                    # @added 20210425 - Feature #4014: Ionosphere - inference
+                    # Allow user to specify the difference between the areas under the
+                    # curve
+                    if 'max_area_percent_diff' in request.args:
+                        motif_max_area_percent_diff = request.args.get('max_area_percent_diff', 10)
+                        logger.info('max_area_percent_diff: %s' % str(motif_max_area_percent_diff))
+
+                # @added 20210416 - Feature #4014: Ionosphere - inference
+                if 'ionosphere_matched_id' in request.args:
+                    ionosphere_matched_id = request.args.get(str('ionosphere_matched_id'), 0)
+                    logger.info('matched_motif_id: %s' % str(matched_motif_id))
+
                 # @added 20170122 - Feature #1872: Ionosphere - features profile page by id only
                 # Determine the features profile dir path for a fp_id
                 if 'fp_id' in request.args:
@@ -4497,7 +5511,7 @@ def ionosphere():
                             {'results': error_string})
                         return flask_escape(resp), 400
 
-                    fp_id = request.args.get(str('fp_id'), None)
+                    fp_id = request.args.get(str('fp_id'), 0)
 
                     # @modified 20190503 - Branch #2646: slack - linting
                     # metric_timestamp = 0
@@ -4603,6 +5617,7 @@ def ionosphere():
                         return flask_escape(resp), 400
 
                     redirect_url = '%s/ionosphere?fp_view=true&timestamp=%s&metric=%s' % (settings.SKYLINE_URL, str(use_timestamp), base_name)
+                    logger.info('base redirect_url - %s' % redirect_url)
 
                     # @added 20180815 - Feature #2430: Ionosphere validate learnt features profiles page
                     validate_fp_req = False
@@ -4637,8 +5652,24 @@ def ionosphere():
                                 settings.SKYLINE_URL, str(use_timestamp), base_name,
                                 str(matched_layer_id))
 
+                    # @added 20210413 - Feature #4014: Ionosphere - inference
+                    #                   Branch #3590: inference
+                    if matched_motif_id:
+                        redirect_url = '%s/ionosphere?fp_view=true&timestamp=%s&metric=%s&matched_motif_id=%s' % (
+                            settings.SKYLINE_URL, str(use_timestamp), base_name,
+                            str(matched_motif_id))
+                        logger.info('redirecting fp_id matched_motif_id request')
+                    # @added 20210416 - Feature #4014: Ionosphere - inference
+                    if ionosphere_matched_id:
+                        ionosphere_matched_id_redirect_url = '%s&ionosphere_matched_id=%s' % (
+                            redirect_url, str(ionosphere_matched_id))
+                        redirect_url = ionosphere_matched_id_redirect_url
+
                     # @added 20190601 - Feature #3084: Ionosphere - validated matches
-                    if matched_fp_id or matched_layer_id:
+                    # @modified 20210413 Feature #4014: Ionosphere - inference
+                    #                    Branch #3590: inference
+                    # Added matched_motif_id
+                    if matched_fp_id or matched_layer_id or matched_motif_id:
                         if 'match_validation' in request.args:
                             if match_validated > 0:
                                 validate_matched_redirect_url = '%s&match_validation=%s' % (
@@ -5478,14 +6509,6 @@ def ionosphere():
                 return internal_error(fail_msg, traceback_format_exc)
 
             if os.path.isfile(str(fp_csv)):
-                # @added 20191029 - Task #3302: Handle csv.reader in py3
-                #                      Branch #3262: py3
-                if python_version == 3:
-                    try:
-                        codecs
-                    except:
-                        import codecs
-
                 features = []
                 try:
                     with open(fp_csv, 'rb') as fr:
@@ -5573,6 +6596,7 @@ def ionosphere():
                     return internal_error(fail_msg, 'no traceback available')
 
         fp_details = None
+        fp_details_object = None
 
         # @added 20170305  - Feature #1960: ionosphere_layers
         l_id = None
@@ -5808,7 +6832,8 @@ def ionosphere():
 
             # Determine the parent_id and generation as they were added to the
             # fp_details_object
-            if fp_details:
+            # if fp_details:
+            if fp_details_object:
                 try:
                     par_id = int(fp_details_object['parent_id'])
                     gen = int(fp_details_object['generation'])
@@ -5822,6 +6847,9 @@ def ionosphere():
                     try:
                         echo_fp_value = int(fp_details_object['echo_fp'])
                     except:
+                        trace = traceback.format_exc()
+                        fail_msg = 'error :: Webapp failed to determine the echo_hdate from the fp_anomaly_timestamp'
+                        logger.error(fail_msg)
                         pass
 
                     # @added 20190619 - Feature #2990: Add metrics id to relevant web pages
@@ -5985,12 +7013,23 @@ def ionosphere():
             # @added 20170917 - Feature #1996: Ionosphere - matches page
             matched_id_resources = None
             matched_graph_image_file = None
+
+            # @added 20210415 - Feature #4014: Ionosphere - inference
+            #                   Branch #3590: inference
+            # Noow that the matched_details_object is being used set the default
+            matched_details_object = None
+
             if matched_fp_id:
                 if matched_fp_id != 'False':
                     matched_id_resources, successful, fail_msg, trace, matched_details_object, matched_graph_image_file = get_matched_id_resources(int(matched_fp_id), 'features_profile', base_name, requested_timestamp)
             if matched_layer_id:
                 if matched_layer_id != 'False':
                     matched_id_resources, successful, fail_msg, trace, matched_details_object, matched_graph_image_file = get_matched_id_resources(int(matched_layer_id), 'layers', base_name, requested_timestamp)
+
+            # @added 20210413 - Feature #4014: Ionosphere - inference
+            #                   Branch #3590: inference
+            if matched_motif_id:
+                matched_id_resources, successful, fail_msg, trace, matched_details_object, matched_graph_image_file = get_matched_id_resources(int(matched_motif_id), 'motif', base_name, requested_timestamp)
 
             # @added 20180620 - Feature #2404: Ionosphere - fluid approximation
             # Added minmax scaling
@@ -6003,7 +7042,9 @@ def ionosphere():
             # Update the DB that the match has been validated or invalidated
             validated_match_successful = None
             match_validated_db_value = None
-            if matched_fp_id or matched_layer_id:
+            # @modified 20210413 - Feature #4014: Ionosphere - inference
+            # Added matched_motif_id
+            if matched_fp_id or matched_layer_id or matched_motif_id:
                 match_validated_db_value = matched_details_object['validated']
                 logger.info('the match_validated_db_value is set to %s' % str(match_validated_db_value))
                 logger.info('the match_validated is set to %s' % str(match_validated))
@@ -6025,6 +7066,11 @@ def ionosphere():
                             if matched_layer_id:
                                 match_id = matched_layer_id
                                 validate_context = 'ionosphere_layers_matched'
+                            # @added 20210414 - Feature #4014: Ionosphere - inference
+                            #                   Branch #3590: inference
+                            if matched_motif_id:
+                                match_id = matched_motif_id
+                                validate_context = 'matched_motifs'
                             try:
                                 # @modified 20190920 -
                                 # Added user_id
@@ -6158,7 +7204,10 @@ def ionosphere():
                 if len(related_matches) == 1:
                     # @modified 20200908 - Feature #3740: webapp - anomaly API endpoint
                     # Added match_anomaly_timestamp
-                    for related_human_date, related_match_id, related_matched_by, related_fp_id, related_layer_id, related_metric, related_uri_to_matched_page, related_validated, match_anomaly_timestamp in related_matches:
+                    # @modified 20210413 - Feature #4014: Ionosphere - inference
+                    #                      Branch #3590: inference
+                    # Added related_motifs_matched_id
+                    for related_human_date, related_match_id, related_matched_by, related_fp_id, related_layer_id, related_metric, related_uri_to_matched_page, related_validated, match_anomaly_timestamp, related_motifs_matched_id in related_matches:
                         if related_matched_by == 'no matches were found':
                             related_matches = []
                 if related_matches:
@@ -6205,6 +7254,101 @@ def ionosphere():
                 if update_slack:
                     slack_updated = webapp_update_slack_thread(base_name, requested_timestamp, None, 'training_data_viewed')
                     logger.info('slack_updated for training_data_viewed %s' % str(slack_updated))
+
+            show_motif_match = False
+            if context == 'saved_training_data':
+                inference_file = '%s/%s.%s.inference.matched_motifs.dict' % (
+                    ionosphere_data_dir, str(requested_timestamp), base_name)
+                if os.path.isfile(inference_file):
+                    show_motif_match = True
+
+            # @added 20210419 - Feature #4014: Ionosphere - inference
+            # Plot the macthed motif
+            if context == 'training_data' or context == 'saved_training_data' and matched_motif_id:
+                show_motif_match = True
+            if show_motif_match:
+                inference_file = '%s/%s.%s.inference.matched_motifs.dict' % (
+                    ionosphere_data_dir, str(requested_timestamp), base_name)
+                matched_motifs_dict = {}
+                if os.path.isfile(inference_file):
+                    try:
+                        with open(inference_file, 'r') as f:
+                            matched_motifs_dict_str = f.read()
+                        matched_motifs_dict = literal_eval(matched_motifs_dict_str)
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to evaluate matched_motifs_dict from %s' % inference_file)
+                        matched_motifs_dict = {}
+                matched_motif = None
+                if matched_motifs_dict:
+                    try:
+                        matched_motif = list(matched_motifs_dict.keys())[0]
+                        inference_match_motif_dict = matched_motifs_dict[matched_motif]
+                        matched_motif_fp_id = matched_motifs_dict[matched_motif]['fp_id']
+                        f_id_matched = matched_motif_fp_id
+                        matched_motif_timestamp = matched_motifs_dict[matched_motif]['timestamp']
+                        matched_motif_fp_index = matched_motifs_dict[matched_motif]['index']
+                        matched_motif_size = matched_motifs_dict[matched_motif]['size']
+                        # Add the id to the dictionery, inference does not know
+                        # the id when the dict is created
+                        matched_motif_id, motif_validated, ionosphere_matched_id = get_matched_motif_id(
+                            matched_motif_fp_id, matched_motif_timestamp,
+                            matched_motif_fp_index, matched_motif_size)
+                        inference_match_motif_dict['matched_motif_id'] = matched_motif_id
+                        inference_match_motif_dict['ionosphere_matched_id'] = ionosphere_matched_id
+                        inference_match_motif_dict['validated'] = motif_validated
+                        match_validated_db_value = motif_validated
+                        try:
+                            matched_motif_distance = matched_motifs_dict[matched_motif]['dist']
+                        except:
+                            matched_motif_distance = matched_motifs_dict[matched_motif]['distance']
+                        matched_motif_type_id = matched_motifs_dict[matched_motif]['type_id']
+                        matched_motif_type = matched_motifs_dict[matched_motif]['type']
+                        matched_motif_full_duration = matched_motifs_dict[matched_motif]['full_duration']
+                        matched_motif_sequence = matched_motifs_dict[matched_motif]['motif_sequence']
+                        matched_motif_fp_generation = matched_motifs_dict[matched_motif]['generation']
+                        if matched_motif_fp_generation == 0:
+                            generation_str = 'trained'
+                        else:
+                            generation_str = 'LEARNT'
+                        relate_dataset = [item[1] for item in matched_motifs_dict[matched_motif]['fp_motif_sequence']]
+                    except:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to determine plot parameters from matched_motifs_dict')
+                if matched_motif:
+                    motif_graph_image_file = '%s/%s.%s.matched_motif.%s.fp_id.%s.index.%s.size.%s.%s.png' % (
+                        ionosphere_data_dir, str(matched_motif_timestamp), base_name,
+                        str(matched_motif_id), str(matched_motif_fp_id),
+                        str(matched_motif_fp_index), str(matched_motif_size),
+                        str(matched_motif_type))
+                    # Plot an invalid motif with a red line
+                    if motif_validated == 2:
+                        motif_graph_image_file = '%s/%s.%s.matched_motif.%s.fp_id.%s.index.%s.size.%s.%s.INVALIDATED.png' % (
+                            ionosphere_data_dir, str(matched_motif_timestamp), base_name,
+                            str(matched_motif_id), str(matched_motif_fp_id),
+                            str(matched_motif_fp_index), str(matched_motif_size),
+                            str(matched_motif_type))
+                        # Use type_id as 5 to indicate invalidated
+                        matched_motif_type_id = 5
+
+                    plotted_motif_image = False
+                    if not path.isfile(motif_graph_image_file):
+                        use_on_demand_motif_analysis = False
+                        plotted_motif_image, inference_match_motif_image = plot_motif_match(
+                            skyline_app, base_name, matched_motif_timestamp, matched_motif_fp_id,
+                            matched_motif_full_duration,
+                            generation_str, matched_motif_id,
+                            matched_motif_fp_index, int(matched_motif_size),
+                            matched_motif_distance, matched_motif_type_id,
+                            relate_dataset, matched_motif_sequence,
+                            motif_graph_image_file, use_on_demand_motif_analysis)
+                        inference_match_motif_dict['image'] = inference_match_motif_image
+                    else:
+                        plotted_motif_image = True
+                        inference_match_motif_image = motif_graph_image_file
+                        logger.info('plot already exists - %s - %s' % (
+                            str(plotted_motif_image), str(motif_graph_image_file)))
+                        inference_match_motif_dict['image'] = inference_match_motif_image
 
             # @added 20191210 - Feature #3348: fp creation json response
             if create_feature_profile and fp_id:
@@ -6337,6 +7481,30 @@ def ionosphere():
                 historical_training_data=historical_training_data,
                 # @added 20210324 - Feature #3642: Anomaly type classification
                 anomaly_types=anomaly_types, anomaly_type_ids=anomaly_type_ids,
+                # @added 20210413 - Feature #4014: Ionosphere - inference
+                #                   Branch #3590: inference
+                matched_motif_id=matched_motif_id,
+                # @added 20210415 - Feature #4014: Ionosphere - inference
+                #                   Branch #3590: inference
+                matched_details_object=matched_details_object,
+                motif_analysis=motif_analysis,
+                motif_analysis_images=motif_analysis_images,
+                motif_analysis_motif_id_by_distance=motif_analysis_motif_id_by_distance,
+                # @added 20210416 - Feature #4014: Ionosphere - inference
+                ionosphere_matched_id=ionosphere_matched_id,
+                # @added 20210417 - Feature #4014: Ionosphere - inference
+                batch_size=batch_size, top_matches=top_matches,
+                max_distance=max_distance,
+                # @added 20210419 - Feature #4014: Ionosphere - inference
+                matched_motif_dict=inference_match_motif_dict,
+                inference_match_motif_image=inference_match_motif_image,
+                # @added 20210422 - Feature #4014: Ionosphere - inference
+                # Allow the user to specify the range_padding
+                motif_range_padding=motif_range_padding,
+                # @added 20210425 - Feature #4014: Ionosphere - inference
+                # Allow user to specify the difference between the areas under the
+                # curve
+                motif_max_area_percent_diff=motif_max_area_percent_diff,
                 version=skyline_version, duration=(time.time() - start),
                 print_debug=debug_on), 200
         except:
@@ -6686,13 +7854,84 @@ def ionosphere_file():
 @requires_auth
 def utilities():
     start = time.time()
+
+    # @added 20210604 - Branch #1444: thunder
+    metrics_match = True
+    thunder_testing = False
+    thunder_no_data_test = False
+    thunder_no_data_test_key_added = False
+
+    thunder_stale_metrics_test = False
+    thunder_stale_metrics_test_key_added = False
+
+    parent_namespaces = []
+    try:
+        request_args_len = len(request.args)
+    except:
+        request_args_len = 0
+    UTILITIES_REQUEST_ARGS = [
+        'metric', 'settings_list', 'match_with', 'thunder_testing',
+        'thunder_no_data_test', 'namespace', 'stale_period', 'expiry',
+        'thunder_no_data_test_key_added', 'thunder_stale_metrics_test',
+        'thunder_stale_metrics_test_key_added',
+    ]
+    if request_args_len:
+        for i in request.args:
+            key = str(i)
+            if key not in UTILITIES_REQUEST_ARGS:
+                logger.error('error :: invalid request argument - %s=%s' % (key, str(i)))
+                error_string = 'error :: invalid request argument - %s=%s' % (key, str(i))
+                logger.error(error_string)
+                resp = json.dumps(
+                    {'400 Bad Request': error_string})
+                return flask_escape(resp), 400
+            value = request.args.get(key, None)
+            logger.info('request argument - %s=%s' % (key, str(value)))
+            if key == 'thunder_testing':
+                thunder_testing = True
+                metrics_match = False
+                logger.info('thunder_testing running get_top_level_namespaces')
+                try:
+                    parent_namespaces = get_top_level_namespaces(skyline_app, True)
+                except Exception as e:
+                    message = 'get_top_level_namespaces failed: %s' % e
+                    trace = traceback.format_exc()
+                    return internal_error(message, trace)
+            if key == 'thunder_no_data_test':
+                thunder_no_data_test = True
+                metrics_match = False
+                logger.info('thunder_no_data_test running get_top_level_namespaces')
+                try:
+                    parent_namespaces = get_top_level_namespaces(skyline_app, True)
+                except Exception as e:
+                    message = 'get_top_level_namespaces failed: %s' % e
+                    trace = traceback.format_exc()
+                    return internal_error(message, trace)
+            if key == 'thunder_stale_metrics_test':
+                thunder_stale_metrics_test = True
+                metrics_match = False
+                logger.info('thunder_stale_metrics_test running get_top_level_namespaces')
+                try:
+                    parent_namespaces = get_top_level_namespaces(skyline_app, True)
+                except Exception as e:
+                    message = 'get_top_level_namespaces failed: %s' % e
+                    trace = traceback.format_exc()
+                    return internal_error(message, trace)
+
     try:
         return render_template(
-            'utilities.html', version=skyline_version, duration=(time.time() - start)), 200
-    except:
-        error_string = traceback.format_exc()
-        logger.error('error :: failed to render utilities.html: %s' % str(error_string))
-        return 'Uh oh ... a Skyline 500 :(', 500
+            'utilities.html', metrics_match=metrics_match,
+            thunder_testing=thunder_testing,
+            thunder_no_data_test=thunder_no_data_test,
+            parent_namespaces=parent_namespaces,
+            thunder_no_data_test_key_added=thunder_no_data_test_key_added,
+            thunder_stale_metrics_test=thunder_stale_metrics_test,
+            thunder_stale_metrics_test_key_added=thunder_stale_metrics_test_key_added,
+            version=skyline_version, duration=(time.time() - start)), 200
+    except Exception as e:
+        trace = traceback.format_exc()
+        message = 'failed to render utilities.html: %s' % e
+        return internal_error(message, trace)
 
 
 # @added 20200516 - Feature #3538: webapp - upload_data endpoint
@@ -7164,7 +8403,7 @@ def upload_data():
         try:
             REDIS_CONN.setex(upload_status_redis_key, 2592000, str(upload_data_dict))
             logger.info('added Redis key %s with new status' % upload_status_redis_key)
-        except:
+        except Exception as e:
             trace = traceback.format_exc()
             message = 'could not add item to flux.uploaded_data Redis set - %s' % str(e)
             logger.error(trace)
@@ -7265,6 +8504,104 @@ def match_metric():
                 'utilities.html', match_metric=True, metric=metric,
                 settings_list=settings_list, match_with=match_with,
                 pattern_match=pattern_match, matched_by=matched_by,
+                version=skyline_version, duration=(time.time() - start),
+                print_debug=False), 200
+        except Exception as e:
+            trace = traceback.format_exc()
+            message = 'could not render_template utilities.html - error - %s' % (e)
+            logger.error(trace)
+            logger.error('error :: %s' % message)
+            return internal_error(message, trace)
+
+
+# @added 20210604 - Branch #1444: thunder
+@app.route("/thunder_test", methods=['POST'])
+def thunder_test():
+    start = time.time()
+    logger.info('/thunder_test request')
+
+    thunder_test_type = None
+    namespace = None
+    stale_period = None
+    expiry = None
+    stale_count = None
+    thunder_no_data_test = False
+    thunder_stale_metrics_test = False
+    thunder_no_data_test_key_added = None
+    thunder_stale_metrics_test_key_added = None
+
+    if request.method != 'POST':
+        logger.error('error :: not a POST requests, returning 405')
+        return 'Method Not Allowed', 405
+
+    if request.method == 'POST':
+        logger.info('handling thunder_test POST request')
+        if 'thunder_test_type' in request.form:
+            thunder_test_type = request.form['thunder_test_type']
+            logger.info('handling thunder_test POST with variable thunder_test - %s' % str(thunder_test_type))
+        if not thunder_test_type:
+            logger.info('handling thunder_test, return 400 no thunder_test')
+            return 'Bad request', 400
+        if 'namespace' in request.form:
+            namespace = request.form['namespace']
+            logger.info('handling thunder_test POST with variable namespace - %s' % str(namespace))
+        if not namespace:
+            logger.info('handling thunder_test, return 400 no namespace')
+            return 'Bad request', 400
+        if 'stale_period' in request.form:
+            stale_period = int(request.form['stale_period'])
+            logger.info('handling thunder_test POST with variable stale_period - %s' % str(stale_period))
+        if not stale_period:
+            if stale_period != 0:
+                logger.info('handling thunder_test, return 400 no stale_period')
+                return 'Bad request', 400
+        if 'stale_count' in request.form:
+            stale_count = int(request.form['stale_count'])
+            logger.info('handling stale_count POST with variable stale_count - %s' % str(stale_count))
+        if not stale_count:
+            if stale_count != 0:
+                logger.info('handling thunder_test, return 400 no stale_count')
+                return 'Bad request', 400
+        if 'expiry' in request.form:
+            expiry = int(request.form['expiry'])
+            logger.info('handling thunder_test POST with variable expiry - %s' % str(expiry))
+        if not expiry:
+            if expiry != 0:
+                logger.info('handling thunder_test, return 400 no expiry')
+                return 'Bad request', 400
+        if thunder_test_type == 'no_data':
+            thunder_test_alert_key = 'thunder.test.alert.no_data.%s' % namespace
+            data_dict = {'stale_period': stale_period, 'expiry': expiry}
+        if thunder_test_type == 'stale_metrics':
+            thunder_test_alert_key = 'thunder.test.alert.stale_metrics.%s' % namespace
+            data_dict = {'stale_count': stale_count, 'stale_period': stale_period, 'expiry': expiry}
+
+        thunder_test_key_added = False
+        try:
+            thunder_test_key_added = REDIS_CONN.setex(thunder_test_alert_key, expiry, str(data_dict))
+            if thunder_test_key_added:
+                thunder_test_key_added = thunder_test_alert_key
+                if thunder_test_type == 'no_data':
+                    thunder_no_data_test_key_added = thunder_test_alert_key
+                    thunder_no_data_test = True
+                if thunder_test_type == 'stale_metrics':
+                    thunder_stale_metrics_test_key_added = thunder_test_alert_key
+                    thunder_stale_metrics_test = True
+            logger.info('added Redis key %s' % thunder_test_alert_key)
+        except Exception as e:
+            trace = traceback.format_exc()
+            message = 'could not add Redis key %s - %s' % (thunder_test_alert_key, e)
+            logger.error(trace)
+            logger.error('error :: %s' % message)
+            return internal_error(message, trace)
+        try:
+            return render_template(
+                'utilities.html', match_metric=False,
+                thunder_testing=True,
+                thunder_no_data_test=thunder_no_data_test,
+                thunder_no_data_test_key_added=thunder_no_data_test_key_added,
+                thunder_stale_metrics_test=thunder_stale_metrics_test,
+                thunder_stale_metrics_test_key_added=thunder_stale_metrics_test_key_added,
                 version=skyline_version, duration=(time.time() - start),
                 print_debug=False), 200
         except Exception as e:
@@ -7414,6 +8751,32 @@ def luminosity():
         message = 'Uh oh ... a Skyline 500 :('
         trace = traceback.format_exc()
         return internal_error(message, trace)
+
+
+# @added 20210612 - Branch #1444: thunder
+@app.route('/webapp_up', methods=['GET'])
+def webapp_up():
+
+    logger.info('/webapp_up request')
+    start = time.time()
+    timestamp = int(time.time())
+    thunder_key_set = None
+    try:
+        thunder_key_set = REDIS_CONN.setex('webapp', 120, timestamp)
+        logger.info('added Redis key webapp')
+    except Exception as e:
+        trace = traceback.format_exc()
+        message = 'could not add item to flux.uploaded_data Redis set - %s' % str(e)
+        logger.error(trace)
+        logger.error('error :: %s' % message)
+    end = timer()
+    request_time = (end - start)
+    if thunder_key_set:
+        data_dict = {"status": {"request_time": request_time, "response": 200}, "data": {'up': True, 'timestamp': timestamp}}
+        return jsonify(data_dict), 200
+    else:
+        data_dict = {"status": {"request_time": request_time, "response": 404}, "data": {'up': False, 'timestamp': timestamp}}
+        return jsonify(data_dict), 404
 
 
 # @added 20160703 - Feature #1464: Webapp Redis browser
@@ -7599,12 +8962,19 @@ def get_client_details():
         # @modified 20200808 - Task #3608: Update Skyline to Python 3.8.3 and deps
         # Added nosec for bandit [B303:blacklist] Use of insecure MD2, MD4, MD5,
         # or SHA1 hash function.  For internal use only.
-        client_id = hashlib.md5(client_id).hexdigest()  # nosec
+        # @modified 20210421 - Task #4030: refactoring
+        # semgrep - python.lang.security.insecure-hash-algorithms.insecure-hash-algorithm-md5
+        # client_id = hashlib.md5(client_id).hexdigest()  # nosec
+        client_id = hashlib.sha256(client_id).hexdigest()
     else:
         # @modified 20200808 - Task #3608: Update Skyline to Python 3.8.3 and deps
         # Added nosec for bandit [B303:blacklist] Use of insecure MD2, MD4, MD5,
         # or SHA1 hash function.  For internal use only.
-        client_id = hashlib.md5(client_id.encode('utf-8')).hexdigest()  # nosec
+        # @modified 20210421 - Task #4030: refactoring
+        # semgrep - python.lang.security.insecure-hash-algorithms.insecure-hash-algorithm-md5
+        # client_id = hashlib.md5(client_id.encode('utf-8')).hexdigest()  # nosec
+        client_id = hashlib.sha256(client_id.encode('utf-8')).hexdigest()
+
     logger.info('rebrow access :: %s has client_id %s' % (str(client_ip), str(client_id)))
 
     if request.headers.getlist('X-Forwarded-Proto'):
@@ -7635,13 +9005,19 @@ def decode_token(client_id):
     fail_msg = False
     trace = False
     token = False
-    logger.info('decode_token for client_id - %s' % str(client_id))
+    # @modified 20210421 - Task #4030: refactoring
+    # semgrep - python-logger-credential-disclosure
+    # logger.info('decode_token for client_id - %s' % str(client_id))
+    logger.info('decode_token for client_id OK')
 
     if not request.args.getlist('token'):
         fail_msg = 'No token url parameter was passed, please log into Redis again through rebrow'
     else:
         token = request.args.get('token', type=str)
-        logger.info('token found in request.args - %s' % str(token))
+        # @modified 20210421 - Task #4030: refactoring
+        # semgrep - python-logger-credential-disclosure
+        # logger.info('token found in request.args - %s' % str(token))
+        logger.info('token found in request.args - OK')
 
     if not token:
         client_id, protocol, proxied = get_client_details()
@@ -7674,10 +9050,16 @@ def decode_token(client_id):
     #                      Branch #3262: py3
     # if client_token_data is not None:
     if client_token_data:
-        logger.info('client_token_data retrieved from Redis - %s' % str(client_token_data))
+        # @modified 20210421 - Task #4030: refactoring
+        # semgrep - python-logger-credential-disclosure
+        # logger.info('client_token_data retrieved from Redis - %s' % str(client_token_data))
+        logger.info('client_token_data retrieved from Redis - OK')
         try:
             client_data = literal_eval(client_token_data)
-            logger.info('client_token_data - %s' % str(client_token_data))
+            # @modified 20210421 - Task #4030: refactoring
+            # semgrep - python-logger-credential-disclosure
+            # logger.info('client_token_data - %s' % str(client_token_data))
+            logger.info('client_token_data - OK')
             client_data_client_id = str(client_data[0])
             logger.info('client_data_client_id - %s' % str(client_data_client_id))
         except:
@@ -7690,8 +9072,11 @@ def decode_token(client_id):
 
         if client_data_client_id != client_id:
             logger.error(
-                'rebrow access :: error :: the client_id does not match the client_id of the token - %s - %s' %
-                (str(client_data_client_id), str(client_id)))
+                # @modified 20210421 - Task #4030: refactoring
+                # semgrep - python-logger-credential-disclosure
+                # 'rebrow access :: error :: the client_id does not match the client_id of the token - %s - %s' %
+                # (str(client_data_client_id), str(client_id)))
+                'rebrow access :: error :: the client_id does not match the client_id of the token')
             try:
                 if settings.REDIS_PASSWORD:
                     # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
@@ -7703,7 +9088,10 @@ def decode_token(client_id):
                     redis_conn = redis.StrictRedis(unix_socket_path=settings.REDIS_SOCKET_PATH, charset='utf-8', decode_responses=True)
                 key = 'rebrow.token.%s' % token
                 redis_conn.delete(key)
-                logger.info('due to possible attempt at unauthorised use of the token, deleted the Redis key - %s' % str(key))
+                # @modified 20210421 - Task #4030: refactoring
+                # semgrep - python-logger-credential-disclosure
+                # logger.info('due to possible attempt at unauthorised use of the token, deleted the Redis key - %s' % str(key))
+                logger.info('due to possible attempt at unauthorised use of the token, deleted the Redis key')
             except:
                 pass
             fail_msg = 'The request data did not match the token data, due to possible attempt at unauthorised use of the token it has been deleted.'
@@ -7802,7 +9190,11 @@ def rebrow():
         # HERE WE WANT TO PUT THIS INTO REDIS with a TTL key and give the key
         # a salt and have the client use that as their token
         client_token = str(uuid.uuid4())
-        logger.info('rebrow access :: generated client_token %s for client_id %s' % (client_token, client_id))
+        # @modified 20210421 - Task #4030: refactoring
+        # semgrep - python-logger-credential-disclosure
+        # logger.info('rebrow access :: generated client_token %s for client_id %s' % (client_token, client_id))
+        logger.info('rebrow access :: generated client_token for client_id OK')
+
         try:
             if settings.REDIS_PASSWORD:
                 # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
@@ -8065,11 +9457,12 @@ def rebrow_key(host, port, db, key):
     except:
         logger.error(traceback.format_exc())
         logger.error('error :: rebrow access :: failed to login to Redis with token')
-    try:
-        r_d = get_redis(host, port, db, redis_password, True)
-    except:
-        logger.error(traceback.format_exc())
-        logger.error('error :: rebrow access :: failed to login to Redis with token')
+    # @modified 20210504 -
+    # try:
+    #    r_d = get_redis(host, port, db, redis_password, True)
+    # except:
+    #     logger.error(traceback.format_exc())
+    #     logger.error('error :: rebrow access :: failed to login to Redis with token')
 
     try:
         # @modified 20191014 - Bug #3266: py3 Redis binary objects not strings
@@ -8282,11 +9675,11 @@ def run():
     Start the Webapp server
     """
     if not isdir(settings.PID_PATH):
-        print ('pid directory does not exist at %s' % settings.PID_PATH)
+        print('pid directory does not exist at %s' % settings.PID_PATH)
         sys.exit(1)
 
     if not isdir(settings.LOG_PATH):
-        print ('log directory does not exist at %s' % settings.LOG_PATH)
+        print('log directory does not exist at %s' % settings.LOG_PATH)
         sys.exit(1)
 
     logger.setLevel(logging.DEBUG)
@@ -8308,56 +9701,56 @@ def run():
     valid_settings = validate_settings_variables(skyline_app)
 
     if not valid_settings:
-        print ('error :: invalid variables in settings.py - cannot start')
+        print('error :: invalid variables in settings.py - cannot start')
         sys.exit(1)
 
     try:
         settings.WEBAPP_SERVER
     except:
         logger.error('error :: failed to determine %s from settings.py' % str('WEBAPP_SERVER'))
-        print ('Failed to determine %s from settings.py' % str('WEBAPP_SERVER'))
+        print('Failed to determine %s from settings.py' % str('WEBAPP_SERVER'))
         sys.exit(1)
     try:
         settings.WEBAPP_IP
     except:
         logger.error('error :: failed to determine %s from settings.py' % str('WEBAPP_IP'))
-        print ('Failed to determine %s from settings.py' % str('WEBAPP_IP'))
+        print('Failed to determine %s from settings.py' % str('WEBAPP_IP'))
         sys.exit(1)
     try:
         settings.WEBAPP_PORT
     except:
         logger.error('error :: failed to determine %s from settings.py' % str('WEBAPP_PORT'))
-        print ('Failed to determine %s from settings.py' % str('WEBAPP_PORT'))
+        print('Failed to determine %s from settings.py' % str('WEBAPP_PORT'))
         sys.exit(1)
     try:
         settings.WEBAPP_AUTH_ENABLED
     except:
         logger.error('error :: failed to determine %s from settings.py' % str('WEBAPP_AUTH_ENABLED'))
-        print ('Failed to determine %s from settings.py' % str('WEBAPP_AUTH_ENABLED'))
+        print('Failed to determine %s from settings.py' % str('WEBAPP_AUTH_ENABLED'))
         sys.exit(1)
     try:
         settings.WEBAPP_IP_RESTRICTED
     except:
         logger.error('error :: failed to determine %s from settings.py' % str('WEBAPP_IP_RESTRICTED'))
-        print ('Failed to determine %s from settings.py' % str('WEBAPP_IP_RESTRICTED'))
+        print('Failed to determine %s from settings.py' % str('WEBAPP_IP_RESTRICTED'))
         sys.exit(1)
     try:
         settings.WEBAPP_AUTH_USER
     except:
         logger.error('error :: failed to determine %s from settings.py' % str('WEBAPP_AUTH_USER'))
-        print ('Failed to determine %s from settings.py' % str('WEBAPP_AUTH_USER'))
+        print('Failed to determine %s from settings.py' % str('WEBAPP_AUTH_USER'))
         sys.exit(1)
     try:
         settings.WEBAPP_AUTH_USER_PASSWORD
     except:
         logger.error('error :: failed to determine %s from settings.py' % str('WEBAPP_AUTH_USER_PASSWORD'))
-        print ('Failed to determine %s from settings.py' % str('WEBAPP_AUTH_USER_PASSWORD'))
+        print('Failed to determine %s from settings.py' % str('WEBAPP_AUTH_USER_PASSWORD'))
         sys.exit(1)
     try:
         settings.WEBAPP_ALLOWED_IPS
     except:
         logger.error('error :: failed to determine %s from settings.py' % str('WEBAPP_ALLOWED_IPS'))
-        print ('Failed to determine %s from settings.py' % str('WEBAPP_ALLOWED_IPS'))
+        print('Failed to determine %s from settings.py' % str('WEBAPP_ALLOWED_IPS'))
         sys.exit(1)
 
     webapp = App()

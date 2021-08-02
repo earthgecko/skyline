@@ -166,16 +166,16 @@ def get_external_alert_configs(current_skyline_app):
                     str(external_alert_config), str(external_alert_config_url),
                     str(external_alert_config_method)))
                 if external_alert_config_method == 'GET':
-                    r = requests.get(external_alert_config_url, timeout=2)
+                    r = requests.get(external_alert_config_url, timeout=10)
                 if external_alert_config_method == 'POST':
                     header = {"content-type": "application/json"}
                     if external_alert_config_post_data:
                         r = requests.post(external_alert_config_url,
                                           data=json.dumps(external_alert_config_post_data),
-                                          headers=header, timeout=2)
+                                          headers=header, timeout=10)
                     else:
                         r = requests.post(external_alert_config_url, headers=header,
-                                          timeout=2)
+                                          timeout=10)
                 external_alert_json = r.json()
             except:
                 current_logger.error(traceback.format_exc())

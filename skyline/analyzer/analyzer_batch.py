@@ -1285,14 +1285,14 @@ class AnalyzerBatch(Thread):
                                 logger.info(
                                     'add Redis alert key - %s - %s' %
                                     (cache_key, str(cache_key_value)))
-                            except:
+                            except Exception as e:
                                 logger.error(traceback.format_exc())
                                 logger.error(
-                                    'error :: failed to add Redis key - %s - [%s, \'%s\', %s, %s, %s, %s]' %
+                                    'error :: failed to add Redis key - %s - [%s, \'%s\', %s, %s, %s] - %s' %
                                     (cache_key, str(datapoint), base_name,
                                         str(int(metric_timestamp)),
                                         str(triggered_algorithms),
-                                        str(algorithms_run)))
+                                        str(algorithms_run), e))
 
                 # It could have been deleted by the Roomba
                 except TypeError:

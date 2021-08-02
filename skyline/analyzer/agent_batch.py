@@ -16,8 +16,8 @@ sys.path.insert(0, os.path.dirname(__file__))
 
 if True:
     import settings
-    from validate_settings import validate_settings_variables
     from analyzer_batch import AnalyzerBatch
+    from validate_settings import validate_settings_variables
 
 skyline_app = 'analyzer_batch'
 skyline_app_logger = '%sLog' % skyline_app
@@ -83,7 +83,7 @@ def run():
     valid_settings = validate_settings_variables(skyline_app)
 
     if not valid_settings:
-        print ('error :: invalid variables in settings.py - cannot start')
+        print('error :: invalid variables in settings.py - cannot start')
         sys.exit(1)
 
     # Make sure we can run all the algorithms
@@ -99,10 +99,10 @@ def run():
 
         ensemble = [getattr(algorithms, algorithm)(timeseries) for algorithm in settings.ALGORITHMS]
     except KeyError as e:
-        print ('Algorithm %s deprecated or not defined; check settings.ALGORITHMS' % e)
+        print('Algorithm %s deprecated or not defined; check settings.ALGORITHMS' % e)
         sys.exit(1)
     except Exception as e:
-        print ('Algorithm test run failed.')
+        print('Algorithm test run failed - %s' % e)
         traceback.print_exc()
         sys.exit(1)
 

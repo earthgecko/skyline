@@ -16,8 +16,8 @@
     <span class="icon-bar"></span>
   </button>
 		<ul class="nav nav-tabs" role="view_tablist" id="view">
-		  <li><a href="/ionosphere"><span class="logo"><span class="sky">Training</span> <span class="re">data</span></span></span></a></li>
-		  <li class="active"><a href="?fp_view=true"><span class="logo"><span class="sky">Features</span> <span class="re">profiles</span></span></span></a></li>
+		  <li><a href="/ionosphere"><span class="logo"><span class="sky">Training</span> <span class="re">data</span></span></a></li>
+		  <li class="active"><a href="?fp_view=true"><span class="logo"><span class="sky">Features</span> <span class="re">profiles</span></span></a></li>
 		</ul>
 		<div class="tab-content">
 	  	<div class="tab-pane active" id="view">
@@ -38,7 +38,8 @@
 <!-- # @modified 20180419 - Feature #1996: Ionosphere - matches page
 #                           Branch #2270: luminosity
 # Return matches for the last 24 hours as the default -->
-		  <li class="active"><a href="?fp_matches=true&metric=all&limit=0&from_timestamp={{ matched_from_datetime }}&order=DESC">Matches</a></li>
+		  <li class="active"><a href="?fp_matches=true&metric=all&limit=0&from_timestamp={{ matched_from_datetime }}&order=DESC"><span class="logo"><span class="re">Matches</span></span></a></li>
+		  <li><a href="?motif_matches=true&metric=all&limit=100&from_timestamp={{ matched_from_datetime }}&order_by=DESC">Motif matches</a></li>
 	    <li><a href="?fp_validate=true&metric=all">Validate</a></li>
 		  <li><a href="?performance=true">Performance</a></li>
 		  <li><a href="/ionosphere?fp_view=true">List by metrics</a></li>
@@ -138,7 +139,7 @@ count
 			<table class="table table-hover">
 				<thead>
 					<tr>
-<!-- [human_date, match_id, matched_by, fp_id, layer_id, metric, uri_to_matched_page, validated] -->
+<!-- [human_date, match_id, matched_by, fp_id, layer_id, metric, uri_to_matched_page, validated, motif_matched_id] -->
             <th>date</th>
             <th>metric</th>
             <th>match id</th>
@@ -148,6 +149,8 @@ count
 <!-- # @modified 20190601 - Feature #3084: Ionosphere - validated matches
 # Changed to validated
             <th>uri_to_matched_page</th> -->
+<!-- # @added 20210413 - Feature #4014: Ionosphere - inference -->
+            <th>motif id</th>
             <th>validated</th>
 					</tr>
 				</thead>
@@ -186,6 +189,22 @@ count
         {% else %}
             <td><span class="logo"><span class="sky">{{ item[2] }}</span></span></td>
         {% endif %}
+<!-- # @added 20210413 - Feature #4014: Ionosphere - inference -->
+      {% elif 'motif' in item[2] %}
+        {% if item[7] == 2 %}
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_motif_id={{ item[9] }}&match_validation=2&ionosphere_matched_id={{ item[1] }}'">
+              <a href="?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_motif_id={{ item[9] }}&match_validation=2&ionosphere_matched_id={{ item[1] }}">{{ item[1] }}</a>
+            </td>
+        {% elif item[7] == 1 %}
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_motif_id={{ item[9] }}&match_validation=1&ionosphere_matched_id={{ item[1] }}'">
+              <a href="?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_motif_id={{ item[9] }}&match_validation=1&ionosphere_matched_id={{ item[1] }}">{{ item[1] }}</a>
+            </td>
+        {% else %}
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_motif_id={{ item[9] }}&ionosphere_matched_id={{ item[1] }}'">
+              <a href="?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_motif_id={{ item[9] }}&ionosphere_matched_id={{ item[1] }}">{{ item[1] }}</a>
+            </td>
+        {% endif %}
+            <td><span class="logo"><span class="re">{{ item[2] }}</span></span></td>
       {% else %}
 <!-- # @modified 20190601 - Feature #3084: Ionosphere - validated matches
             <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}'">
@@ -215,6 +234,14 @@ count
       {% else %}
             <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}'">
               <a href="?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}">{{ item[4] }}</a>
+            </td>
+      {% endif %}
+<!-- # @added 20210413 - Feature #4014: Ionosphere - inference -->
+      {% if item[9] == 0 %}
+            <td>None</td>
+      {% else %}
+            <td onclick="window.location='?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_motif_id={{ item[9] }}'">
+              <a href="?fp_view=true&fp_id={{ item[3] }}&metric={{ item[5] }}&matched_motif_id={{ item[9] }}">{{ item[9] }}</a>
             </td>
       {% endif %}
 <!-- # @modified 20190601 - Feature #3084: Ionosphere - validated matches

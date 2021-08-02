@@ -441,7 +441,10 @@ def histogram_bins(timeseries):
     """
 
     try:
-        series = scipy.array([x[1] for x in timeseries])
+        # @modified 20210420 - Support #4026: Change from scipy array to numpy array
+        # Deprecation of scipy.array
+        # series = scipy.array([x[1] for x in timeseries])
+        series = np.array([x[1] for x in timeseries])
         t = tail_avg(timeseries)
         h = np.histogram(series, bins=15)
         bins = h[1]
@@ -453,7 +456,7 @@ def histogram_bins(timeseries):
                         return True
                 # Is it in the current bin?
                 elif t >= bins[index] and t < bins[index + 1]:
-                        return True
+                    return True
 
         return False
     except:
@@ -474,8 +477,12 @@ def ks_test(timeseries):
     try:
         hour_ago = time() - 3600
         ten_minutes_ago = time() - 600
-        reference = scipy.array([x[1] for x in timeseries if x[0] >= hour_ago and x[0] < ten_minutes_ago])
-        probe = scipy.array([x[1] for x in timeseries if x[0] >= ten_minutes_ago])
+        # @modified 20210420 - Support #4026: Change from scipy array to numpy array
+        # Deprecation of scipy.array
+        # reference = scipy.array([x[1] for x in timeseries if x[0] >= hour_ago and x[0] < ten_minutes_ago])
+        # probe = scipy.array([x[1] for x in timeseries if x[0] >= ten_minutes_ago])
+        reference = np.array([x[1] for x in timeseries if x[0] >= hour_ago and x[0] < ten_minutes_ago])
+        probe = np.array([x[1] for x in timeseries if x[0] >= ten_minutes_ago])
 
         if reference.size < 20 or probe.size < 20:
             return False
@@ -874,9 +881,8 @@ def is_anomalously_anomalous(metric_name, ensemble, datapoint):
     trigger_history = unpackb(raw_trigger_history)
 
     # Are we (probably) triggering on the same data?
-    if (new_trigger[1] == trigger_history[-1][1] and
-            new_trigger[0] - trigger_history[-1][0] <= 300):
-                return False
+    if (new_trigger[1] == trigger_history[-1][1] and new_trigger[0] - trigger_history[-1][0] <= 300):
+        return False
 
     # Update the history
     trigger_history.append(new_trigger)
@@ -906,15 +912,55 @@ def is_anomalously_anomalous(metric_name, ensemble, datapoint):
 # @modified 20200501 - Feature #3400: Identify air gaps in the metric data
 # Added airgapped_metrics_filled and check_for_airgaps_only
 # def run_selected_algorithm(timeseries, metric_name, airgapped_metrics, run_negatives_present):
-def run_selected_algorithm(timeseries, metric_name, airgapped_metrics, airgapped_metrics_filled, run_negatives_present, check_for_airgaps_only):
+# @modified 20210519 - Feature #4076: CUSTOM_STALE_PERIOD
+# Added custom_stale_metrics_dict
+def run_selected_algorithm(
+        timeseries, metric_name, airgapped_metrics, airgapped_metrics_filled,
+        run_negatives_present, check_for_airgaps_only,
+        custom_stale_metrics_dict):
     """
-    Filter timeseries and run selected algorithm.
+    Run selected algorithm if not Stale, Boring or TooShort
+
+    :param timeseries: the time series data
+    :param metric_name: the full Redis metric name
+    :param airgapped_metrics: a list of airgapped metrics
+    :param airgapped_metrics_filled: a list of filled airgapped metrics
+    :param run_negatives_present: whether to determine if there are negative
+        values in the time series
+    :param check_for_airgaps_only: whether to only check for airgaps in the
+        time series and NOT do analysis
+    :param custom_stale_metrics_dict: the dictionary containing the
+        CUSTOM_STALE_PERIOD to metrics with a custom stale period defined
+    :type timeseries: list
+    :type metric_name: str
+    :type airgapped_metrics: list
+    :type airgapped_metrics_filled: list
+    :type run_negatives_present: boolean
+    :type check_for_airgap_only: boolean
+    :type custom_stale_metrics_dict: dict
+    :return: anomalous, ensemble, datapoint, negatives_found, algorithms_run
+    :rtype: (boolean, list, float, boolean, list)
+
     """
 
     # @added 20180807 - Feature #2492: alert on stale metrics
     # Determine if a metric has stopped sending data and if so add to the
     # analyzer.alert_on_stale_metrics Redis set
     add_to_alert_on_stale_metrics = False
+
+    # @added 20210519 - Feature #4076: CUSTOM_STALE_PERIOD
+    # Added custom_stale_metrics_dict
+    USE_STALE_PERIOD = False
+    USE_ALERT_ON_STALE_PERIOD = False
+    if custom_stale_metrics_dict:
+        try:
+            metric_name = str(metric_name)
+            base_name = metric_name.replace(FULL_NAMESPACE, '', 1)
+            USE_STALE_PERIOD = float(custom_stale_metrics_dict[base_name])
+            USE_ALERT_ON_STALE_PERIOD = USE_STALE_PERIOD - int(USE_STALE_PERIOD / 4)
+        except:
+            pass
+
     if ALERT_ON_STALE_METRICS:
         # @modified 20180816 - Feature #2492: alert on stale metrics
         # Added try and except to prevent some errors that are encounter between
@@ -926,15 +972,25 @@ def run_selected_algorithm(timeseries, metric_name, airgapped_metrics, airgapped
         # if int(time()) - int(timeseries[-1][0]) >= ALERT_ON_STALE_PERIOD:
         # IndexError: list index out of range
         try:
-            if int(time()) - int(timeseries[-1][0]) >= ALERT_ON_STALE_PERIOD:
-                add_to_alert_on_stale_metrics = True
+            # @modified 20210519 - Feature #4076: CUSTOM_STALE_PERIOD
+            if USE_ALERT_ON_STALE_PERIOD:
+                if int(time()) - int(timeseries[-1][0]) >= USE_ALERT_ON_STALE_PERIOD:
+                    add_to_alert_on_stale_metrics = True
+            else:
+                if int(time()) - int(timeseries[-1][0]) >= ALERT_ON_STALE_PERIOD:
+                    add_to_alert_on_stale_metrics = True
         except:
             # @modified 20180816 -
             #                      Feature #2492: alert on stale metrics
             add_to_alert_on_stale_metrics = False
         try:
-            if int(time()) - int(timeseries[-1][0]) >= STALE_PERIOD:
-                add_to_alert_on_stale_metrics = False
+            # @modified 20210519 - Feature #4076: CUSTOM_STALE_PERIOD
+            if USE_STALE_PERIOD:
+                if int(time()) - int(timeseries[-1][0]) >= USE_STALE_PERIOD:
+                    add_to_alert_on_stale_metrics = False
+            else:
+                if int(time()) - int(timeseries[-1][0]) >= STALE_PERIOD:
+                    add_to_alert_on_stale_metrics = False
         except:
             add_to_alert_on_stale_metrics = False
 
@@ -1009,8 +1065,13 @@ def run_selected_algorithm(timeseries, metric_name, airgapped_metrics, airgapped
             raise TooShort()
 
         # Get rid of stale series
-        if time() - timeseries[-1][0] > STALE_PERIOD:
-            raise Stale()
+        # @modified 20210519 - Feature #4076: CUSTOM_STALE_PERIOD
+        if USE_STALE_PERIOD:
+            if time() - timeseries[-1][0] > USE_STALE_PERIOD:
+                raise Stale()
+        else:
+            if time() - timeseries[-1][0] > STALE_PERIOD:
+                raise Stale()
 
         # Get rid of boring series
         if len(set(item[1] for item in timeseries[-MAX_TOLERABLE_BOREDOM:])) == BOREDOM_SET_SIZE:

@@ -96,7 +96,6 @@ def abs_stddev_from_median(current_skyline_app, parent_pid, timeseries, algorith
         # anything to the log, so the pythonic except is used to "sample" any
         # algorithm errors to a tmp file and report once per run rather than
         # spewing tons of errors into the log e.g. analyzer.log
-        pass
         return (None, None)
     except:
         record_algorithm_error(current_skyline_app, parent_pid, algorithm_name, traceback.format_exc())

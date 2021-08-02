@@ -34,7 +34,11 @@
 
         <div class="container main_container">
           <div class="container search_container">
-            <h4><span class="logo"><span class="sky">Search</span> <span class="re">not anomalous</span></span></h4>
+            <h4><span class="logo"><span class="sky">Search</span> <span class="re">not anomalous</span></span> last 7 days only (Mirage ONLY)</h4>
+            When Mirage analysis determines a metric is not anomalous
+            the timestamp of the event is stored for 7 days.<br>
+            Analyzer not anomalous events are <strong>not stored</strong> because this would result in the plot just being mostly filled with green lines.<br>
+            Select the count beside the metric to render a plot of the not anomalous instances (and anomlous instances) of the metric for the time period<br>
             <form action="panorama">
 			        <input type="hidden" name="not_anomalous" value="true" />
               <label>metric:</label><input type="text" name="metric" value="all" /><br>
