@@ -2,8 +2,8 @@
 Mirage
 ######
 
-The Mirage service is responsible for analyzing selected timeseries at custom
-time ranges when a timeseries seasonality does not fit within
+The Mirage service is responsible for analyzing selected time series at custom
+time ranges when a time series seasonality does not fit within
 :mod:`settings.FULL_DURATION`.  Mirage allows for testing of real time data
 and algorithms in parallel to Analyzer.  Mirage was inspired by Abe Stanway's
 Crucible and the desire to extend the temporal data pools available to Skyline
@@ -13,10 +13,16 @@ specifically on seasonal metrics.
 An overview of Mirage
 =====================
 
-- Mirage is fed specific user defined metrics by Analyzer.
-- Mirage gets timeseries data for metrics from Graphite.
-- Mirage does not have its own ``ALERTS`` settings it uses :mod:`settings.ALERTS`
-  just like Analyzer does.
+- Mirage is fed specific user defined metrics by Analyzer when Analyzer triggers
+  them as anomalous over a 24 hour period.
+- Mirage gets 7 days of time series data for the metric from Graphite and
+  analyses the time series with the same 9 three-sigma algortihms as Analyzer
+  does (and any additional custom algorithms).
+- If the instance is still found to be anomalous, Mirage forwards on any trained
+  metrics to Ionosphere for further analysis or alerts if the metric is not
+  trained.
+- Mirage does not have its own ``ALERTS`` settings it uses the same
+  :mod:`settings.ALERTS` as Analyzer.
 - Mirage also sends anomaly details to Panorama, like Analyzer does.
 
 .. figure:: images/crucible/mirage/skyline.mirage.overview.png
@@ -64,8 +70,8 @@ consumption in an office building is a good example of a multi-seasonal data set
 
 For now let us just consider the daily and weekly seasonality.
 
-The difference between the Analyzer and Mirage views of a timeseries
---------------------------------------------------------------------
+The difference between the Analyzer and Mirage views of a time series
+---------------------------------------------------------------------
 
 .. plot::
 
@@ -322,7 +328,7 @@ To enable Analyzer to send the metric to Mirage we append the metric alert tuple
 in :mod:`settings.ALERTS` with the ``SECOND_ORDER_RESOLUTION_HOURS`` value.
 Below we have used 168 hours to get Mirage to analyze **any** anomalous metric
 in the 'stats_counts.http.rpm.publishers.*' namespace using using 7 days worth
-of timeseries data from Graphite:
+of time series data from Graphite:
 
 .. code-block:: python
 
@@ -395,7 +401,7 @@ Rate limited
 
 Mirage is rate limited to analyze 30 metrics per minute, this is by design and
 desired. Surfacing data from Graphite and analyzing ~1000 data points in a
-timeseries takes less than 1 second and is much less CPU intensive than
+time series takes less than 1 second and is much less CPU intensive than
 Analyzer in general, but it is probably sufficient to have 30 calls to Graphite
 per minute.  If a large number of metrics went anomalous, even with Mirage
 discarding :mod:`settings.MIRAGE_STALE_SECONDS` checks due to processing limit,
@@ -460,9 +466,9 @@ What Mirage does
 - When a check is found, Mirage determines what the configured
   ``SECOND_ORDER_RESOLUTION_HOURS`` is for the metric from the tuple in
   :mod:`settings.ALERTS`
-- Mirage queries graphite to surface the json data for the metric timeseries at
+- Mirage queries graphite to surface the json data for the metric time series at
   ``SECOND_ORDER_RESOLUTION_HOURS``.
-- Mirage then analyses the retrieved metric timeseries against the configured
+- Mirage then analyses the retrieved metric time series against the configured
   :mod:`settings.MIRAGE_ALGORITHMS`.
 - If a metric is an Ionosphere enabled metric, then Mirage does not alert,
   but hands the metric off to Ionosphere by adding an Ionosphere check

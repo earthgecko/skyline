@@ -13,6 +13,7 @@ Contents:
   :maxdepth: 1
 
   overview
+  anomify-cutting-edge-skyline
   requirements
   getting-started
   running-in-python-virtualenv
@@ -34,10 +35,12 @@ Contents:
   webapp
   ionosphere
   ionosphere_echo
+  ionosphere_inference
   tsfresh
   luminosity
   flux
   upload-data-to-flux
+  thunder/index.rst
   vista
   SNAB
   redis-integration
@@ -47,6 +50,7 @@ Contents:
   logging
   tuning-tips
   monitoring-skyline
+  troubleshooting
   deprecated-docs/index.rst
   releases
   whats-new
@@ -61,7 +65,12 @@ Indices and tables
 * :ref:`modindex`
 * :ref:`search`
 
-.. |docs| image:: https://earthgecko-skyline.readthedocs.io/en/latest/?badge=latest
+.. |docs| image:: https://readthedocs.org/projects/earthgecko-skyline/badge/?version=latest
     :alt: Documentation Status
     :scale: 100%
-    :target: http://earthgecko-skyline.readthedocs.io/en/latest/?badge=latest
+    :target: https://readthedocs.org/projects/earthgecko-skyline/badge/?version=latest
+
+.. |anomify| image:: https://readthedocs.org/projects/earthgecko-skyline/badge/?version=latest
+    :alt: anomify.ai/skyline
+    :scale: 100%
+    :target: https://anomify.ai/skyline

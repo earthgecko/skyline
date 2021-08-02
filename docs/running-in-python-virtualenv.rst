@@ -62,38 +62,17 @@ This is using your **system** pip at this point only to install virtualenv.
     # Ubuntu 16.04 and 18.04
     pip install virtualenv==16.7.9
 
-
-openssl (optional)
-~~~~~~~~~~~~~~~~~~
-
-Depending on your OS if it is a bit older you may need to compile Python with a
-newer version of openssl.
-
-.. code-block:: bash
-
-    openssl_version="1.1.1g"
-    mkdir /opt/openssl
-    mkdir -p "/usr/local/openssl/openssl-${openssl_version}"
-    cd /opt/openssl
-    wget -q "https://www.openssl.org/source/openssl-${openssl_version}.tar.gz"
-    tar -zxvf "openssl-${openssl_version}.tar.gz"
-    cd "/opt/openssl/openssl-${openssl_version}"
-    /opt/openssl/openssl-${openssl_version}/config --prefix=/usr/local/openssl/openssl-${openssl_version} --openssldir=/usr/local/openssl/openssl-${openssl_version}
-    make
-    make install
-
-
 Python version
 ~~~~~~~~~~~~~~
 
 Below we use the path ``/opt/python_virtualenv``, which you can substitute
-with any path you choose.  We are going to use the Python-3.8.3 source and
-build and install an isolated Python-3.8.3, this has no effect on your system
+with any path you choose.  We are going to use the Python-3.8.10 source and
+build and install an isolated Python-3.8.10, this has no effect on your system
 Python:
 
 .. code-block:: bash
 
-    PYTHON_VERSION="3.8.3"
+    PYTHON_VERSION="3.8.10"
     PYTHON_MAJOR_VERSION="3.8"
     PYTHON_VIRTUALENV_DIR="/opt/python_virtualenv"
 
@@ -106,18 +85,7 @@ Python:
 
     cd ${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}/Python-${PYTHON_VERSION}
 
-    # TAKE NOTE THERE ARE 2 DIFFERENT ./configure options depending on which
-    # openssl your are using
-
-    # 1. CONFIGURE with system openssl
     ./configure --prefix=${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}
-
-    # 2. SELF COMPILED OPENSSL ONLY
-    # If you want to compile with a version of openssl that you compiled use the
-    # following configure command instead
-    with_openssl_configure="--with-openssl=/usr/local/openssl/openssl-${openssl_version} "
-    echo "SSL=/usr/local/openssl/openssl-${openssl_version}" >> Modules/Setup.local
-    LDFLAGS=-Wl,-rpath=${with_openssl}/lib ./configure --prefix=${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION} ${with_openssl_configure}
 
     make
 
@@ -126,20 +94,21 @@ Python:
 
     make altinstall
 
-You will now have a Python-3.8.3 environment with the Python
-executable: ``/opt/python_virtualenv/versions/3.8.3/bin/python3.8``
+
+You will now have a Python-3.8.10 environment with the Python
+executable: ``/opt/python_virtualenv/versions/3.8.10/bin/python3.8``
 
 Create a Skyline Python virtualenv
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Once again using Python-3.8.3:
+Once again using Python-3.8.10:
 
 .. code-block:: bash
 
-    PYTHON_VERSION="3.8.3"
+    PYTHON_VERSION="3.8.10"
     PYTHON_MAJOR_VERSION="3.8"
     PYTHON_VIRTUALENV_DIR="/opt/python_virtualenv"
-    PROJECT="skyline-py383"
+    PROJECT="skyline-py3810"
 
     cd "${PYTHON_VIRTUALENV_DIR}/projects"
     virtualenv --python="${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}/bin/python${PYTHON_MAJOR_VERSION}" "$PROJECT"

@@ -36,3 +36,9 @@ is that implementing a monitor script on your `carbon.relays.*.fullQueueDrops`
 metrics means that if carbon-cache itself has a pickle issue, it should be
 resolved by a carbon-relay restart, just like Skyline Horizon is fixed by its
 monitor.
+
+Thunder
+=======
+
+The Skyline Thunder app monitors the basic Skyline internals and is a WORK IN
+PROGRESS.  See the `Thunder <thunder/index.html>`__ section.

@@ -4,15 +4,15 @@ Requirements
 
 The requirements are:
 
-- First you need an instance of Graphite running
-- Then you need some things feeding Graphite metrics (see statsd, sensu,
-  telegraf, nc)
+- A Graphite instance being populated with metric data from telegraf, sensu,
+  prometheus remote_storage_adapter, et al or whatever your preferred metric
+  collector is. Skyline use Graphite as its long term time series database.
 - Linux (and probably any environment that supports Python virtualenv
   and bash)
 - virtualenv
-- Python >= 3.8.3 (running in an isolated vitualenv)
+- Python >= 3.8.10 (running in an isolated vitualenv)
 - Redis
-- MySQL/mariadb
+- mariadb
 - memcached (optional)
 
 ``requirements.txt``

@@ -2,12 +2,13 @@
 Alerts
 ======
 
-Alerts in Skyline are configured via two sets of settings.  There are the
+Alerts in Skyline are configured via multiple sets of settings.  There are the
 Analyzer (Mirage and Ionosphere) related settings and the Boundary related
 alert settings.  This is due to the two classes of alerts being different,
 with Analyzer, Mirage and Ionosphere alerts being related to anomalies and
 Boundary alerts being related to breaches of the static and dynamic thresholds
-defined for Boundary metrics.
+defined for Boundary metrics.  Further to this there are alert related settings
+for each alert output route, namely smtp, slack, pagerduty and sms.
 
 Required smtp alerter for Analyzer and Mirage metrics
 =====================================================
@@ -36,13 +37,15 @@ and :mod:`settings.SMTP_OPTS` would need to look like this.
 .. code-block:: python
 
   ALERTS = (
-    ('carbon', 'smtp', 3600),  # Analyzer metric, only analysed at FULL_DURATION
+    ('carbon', 'smtp', 3600),  # Analyzer metric, only analysed at FULL_DURATION - Mirage NOT enabled
     ('skyline', 'smtp', 3600, 168),  # Mirage enabled as 168 is passed as SECOND_ORDER_RESOLUTION_HOURS
     ('stats', 'smtp', 1800, 168),  # Mirage enabled as 168 is passed as SECOND_ORDER_RESOLUTION_HOURS
+    ('telegraf', 'smtp', 3600, 168),  # Mirage enabled as 168 is passed as SECOND_ORDER_RESOLUTION_HOURS
     # smtp alert tuples MUST be declared first
     ('carbon', 'slack', 3600),
     ('skyline', 'slack', 3600),
     ('stats', 'slack', 1800),
+    ('telegraf', 'slack', 3600),
   )
   SMTP_OPTS = {
       # This specifies the sender of email alerts.
@@ -50,15 +53,33 @@ and :mod:`settings.SMTP_OPTS` would need to look like this.
       # recipients is a dictionary mapping metric names
       # (exactly matching those listed in ALERTS) to an array of e-mail addresses
       'recipients': {
-          'stats': ['no_email'],
-          'skyline': ['no_email'],
           'carbon': ['no_email'],
+          'skyline': ['no_email'],
+          'stats': ['no_email'],
+          'telegraf': ['no_email'],
       },
       # This is the default recipient which acts as a catchall for alert tuples
       # that do not have a matching namespace defined in recipients
       'default_recipient': ['no_email'],
       'embed-images': True,
   }
+
+Smart alerting
+==============
+
+Due to the nature of analysing lots of time series, there are times when LOTS
+of events do happen, something changes and causes lots of change, things like
+cloud provider failures or reboots or a bad deployment, these things happen.
+When they do lots and lots of metrics can be submitted for further analysis,
+although Skyline is fast, getting through lots of complex analysis on 100s of
+metrics takes the time it takes.  At times like these Skyline starts waterfall
+alerting, this means if Analyzer sent 100 metrics to Mirage to check and after
+5 minutes there are still 30 pending, Analyzer will remove the items from the
+Mirage queue and just alert on them.  The same is true for checks submitted to
+Ionosphere by Mirage, any check sent upstream will be alerted on by the parent
+app if the result of further analysis is not available after a defined period.
+This way alerts are not missed, although under these conditions, there will be
+some false positives.
 
 Alert settings
 ==============
@@ -71,6 +92,8 @@ the alerter:
 - :mod:`settings.PAGERDUTY_ENABLED`
 - :mod:`settings.SLACK_ENABLED`
 - :mod:`settings.HTTP_ALERTERS_ENABLED`
+- :mod:`settings.AWS_SNS_SMS_ALERTS_ENABLED`
+- :mod:`settings.SMS_ALERT_OPTS`
 
 Analyzer, Mirage and Ionosphere related alert settings (anomaly detection) are:
 
@@ -90,6 +113,12 @@ Analyzer, Mirage and Ionosphere related alert settings (anomaly detection) are:
   alerts to a http endpoint
 - :mod:`settings.MIRAGE_ENABLE_ALERTS` - must be set to `True` to enable alerts
   from Mirage
+- :mod:`settings.AWS_SNS_SMS_ALERTS_ENABLED` - must be set to `True` if you want
+  to send alerts via SMS.  boto3 also needs to be set up and AWS/IAM resource
+  that boto3 uses needs permissions to publish to AWS SNS.  See boto3
+  documentation - https://github.com/boto/boto3)
+- :mod:`settings.SMS_ALERT_OPTS` - must be defined if you want to send SMS
+  alerts.
 
 Boundary related alert settings (static and dynamic thresholds) are:
 
@@ -107,6 +136,19 @@ Boundary related alert settings (static and dynamic thresholds) are:
   Slack
 - :mod:`settings.BOUNDARY_HTTP_ALERTERS_OPTS` - must be defined if you want to
   push alerts to a http endpoint
+- :mod:`settings.AWS_SNS_SMS_ALERTS_ENABLED` - must be set to `True` if you want
+  to send alerts via SMS.  boto3 also needs to be set up and AWS/IAM resource
+  that boto3 uses needs permissions to publish to AWS SNS.  See boto3
+  documentation - https://github.com/boto/boto3)
+- :mod:`settings.SMS_ALERT_OPTS` - must be defined if you want to send SMS
+  alerts.
+
+SMS alerts
+==========
+
+Skyline can send SMS via AWS SNS.  The set up of AWS SNS is beyond the scope of
+this documentation, see AWS SNS documentation (
+https://docs.aws.amazon.com/sns/latest/dg/sms_publish-to-phone.html).
 
 http_alerter alerts
 ===================
