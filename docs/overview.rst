@@ -83,6 +83,9 @@ expected norm within the time series.  Very similar to being able to describe
 the Active Brownian Motion of a time series -
 https://github.com/blue-yonder/tsfresh/pull/143#issuecomment-272314801
 
+In addition to these two methods of similarity search Skline also uses `mass_ts`
+to find similar motifs in trained patterns.
+
 This results in an anomaly detection/deflection system which enables the user to
 very simply label time series and train Skyline on the peaks and troughs and the
 expected Active Brownian Motion or best effort thereof.
@@ -118,15 +121,14 @@ Skyline may have interest to the data science community.
 Too much effort?
 ----------------
 
-Try our managed service.  We offer a managed version of Skyline for people that
-do not have a vast amount of time to spare.  You'll get access to unreleased
-features and support from developers that have honed numerous Skyline
-integrations to alert on important metrics.
+`anomify`_ offer a managed version of Skyline for people that do not have a vast
+amount of time to spare.  You'll get access to unreleased features and support
+from developers that have honed numerous Skyline integrations to alert on
+important metrics.
 
-We are looking for test partners as the product is currently in beta phase.
-Send us an email at beta@anomalarm.io
-
-Places are filling up quickly!
+Anomify are looking for further test partners with various types of data and
+data sources, if you think you may have interesting metrics send an email to
+hello@anomify.ai and get in touch.
 
 A brief history
 ---------------
@@ -162,7 +164,8 @@ space.
   created more noise from the noise." https://blog.outlyer.com/what-good-is-anomaly-detection
 
 This is still true of Skyline today, it will still detect the 10000 anomalies
-and it **should**.
+and it **should**.  Detecting anomalies and alerting are two entirely different
+things.
 
 So why continue developing Skyline?
 
@@ -211,7 +214,7 @@ following ways:
 And...
 
 The architecture/pipeline works very well at doing what it does.  It is solid
-and battle tested..
+and battle tested.
 
 Skyline is **FAST**!!!  Faster enough to handle 10s of 1000s of time series in
 near real time.  In the world of Python, data analysis, R and most machine
@@ -304,6 +307,11 @@ Skyline uses to following technologies and libraries at its core:
 10. **pymemcache** - `pymemcache`_ - A comprehensive, fast, pure-Python memcached client
 11. **luminol** - `luminol`_ - Anomaly Detection and Correlation library
 12. **falcon** - `falcon`_ - bare-metal web API framework for Python
+13. **adtk** - `adtk`_ - Anomaly detection toolkit
+14. **matrixprofile** - `matrixprofile`_ - time series data mining tasks,
+    utilizing matrix profile algorithms
+15. **mass-ts** - `mass_ts`_ - MASS (Mueen's Algorithm for Similarity Search) -
+    library for searching time series sub-sequences under z-normalized Euclidean distance for similarity.
 
 .. _Etsy: https://www.etsy.com/
 .. _github/etsy: https://github.com/etsy/skyline
@@ -321,3 +329,7 @@ Skyline uses to following technologies and libraries at its core:
 .. _pymemcache: https://github.com/pinterest/pymemcache
 .. _luminol: https://github.com/linkedin/luminol
 .. _falcon: https://falconframework.org
+.. _mass-ts: https://github.com/matrix-profile-foundation/mass-ts
+.. _matrixprofile: https://github.com/matrix-profile-foundation/matrixprofile
+.. _adtk: https://github.com/arundo/adtk
+.. _anomify: https://anomify.ai

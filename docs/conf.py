@@ -98,7 +98,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Skyline'
-copyright = u'2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2020, Gary Wilson'
+copyright = u'2013-2014, Etsy Inc; 2015, Abe Stanway; 2015-2021, Gary Wilson'
 author = u'etsy, astanway, earthgecko'
 
 # The version info for the project you're documenting, acts as replacement for

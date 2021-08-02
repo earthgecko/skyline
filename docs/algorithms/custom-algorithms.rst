@@ -2,7 +2,7 @@
 Custom algorithms
 =================
 
-**EXPERIMENTAL - py3 only**
+**py3 only**
 
 This section describes the process, steps and resources required to run custom
 algorithms in Skyline. Adding a custom algorithm or algorithms is easier and

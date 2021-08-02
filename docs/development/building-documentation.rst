@@ -85,7 +85,8 @@ Build
 
   PYTHON_MAJOR_VERSION="3.8"
   PYTHON_VIRTUALENV_DIR="/opt/python_virtualenv"
-  PROJECT="skyline-py383"
+  PROJECT="skyline-py386"
+  CURRENT_BRANCH="SNAB"
 
   cd "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}"
   source bin/activate
@@ -174,8 +175,8 @@ Build
 
   # Usage: build_docs <app_dir>
   # e.g.
-  # cd /opt/python_virtualenv/projects/skyline-py383/
-  # build_docs /home/gary/sandbox/of/github/earthgecko/skyline/ionosphere/skyline
+  # cd /opt/python_virtualenv/projects/skyline-py386/
+  # build_docs /home/gary/sandbox/of/github/earthgecko/skyline/$CURRENT_BRANCH/skyline
 
 
 Auto generating .rst files

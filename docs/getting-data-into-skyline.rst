@@ -31,7 +31,7 @@ points as possible.
 
 Although collectd is great it ships via UDP, which is not great.  So ensure that
 your metric pipeline is fully TCP transported.  statsd now has a TCP listener,
-sensu is good for server metrics and there are lots of options.
+there is telegraf, sensu, etc there are lots of options.
 
 Now getting the data in
 =======================
@@ -112,7 +112,7 @@ sorry if did you not get that.
 Flux
 ~~~~
 
-Metrics to be submitted to Flux via HTTP/S which feeds Graphite with pickles to
+Metrics can be submitted to Flux via HTTP/S which feeds Graphite with pickles to
 Skyline, see the `Flux <flux.html>`__ page.
 
 upload_data to Flux
@@ -129,7 +129,7 @@ Metrics to be fetched by Vista which submits to Flux, see the
 Adding a Listener
 =================
 
-If neither of these listeners are acceptable, it's easy enough to extend
+If none of these methods are acceptable, it's easy enough to extend
 them. Add a method in listen.py and add a line in the horizon-agent that
 points to your new listener.
 

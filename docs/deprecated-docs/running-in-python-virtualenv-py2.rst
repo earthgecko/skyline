@@ -64,6 +64,25 @@ This is using your **system** pip at this point only to install virtualenv.
 
     pip install 'virtualenv==15.2.0'
 
+openssl (optional)
+~~~~~~~~~~~~~~~~~~
+
+Depending on your OS if it is a bit older you may need to compile Python with a
+newer version of openssl.
+
+.. code-block:: bash
+
+    openssl_version="1.1.1g"
+    mkdir /opt/openssl
+    mkdir -p "/usr/local/openssl/openssl-${openssl_version}"
+    cd /opt/openssl
+    wget -q "https://www.openssl.org/source/openssl-${openssl_version}.tar.gz"
+    tar -zxvf "openssl-${openssl_version}.tar.gz"
+    cd "/opt/openssl/openssl-${openssl_version}"
+    /opt/openssl/openssl-${openssl_version}/config --prefix=/usr/local/openssl/openssl-${openssl_version} --openssldir=/usr/local/openssl/openssl-${openssl_version}
+    make
+    make install
+
 Python version
 ~~~~~~~~~~~~~~
 

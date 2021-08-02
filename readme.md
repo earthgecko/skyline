@@ -1,31 +1,14 @@
 ## Skyline
 
-Skyline is a near real time anomaly detection system, built to enable
-passive monitoring of hundreds of thousands of metrics, without the need
-to configure a model/thresholds for each one, as you might do with Nagios.
-It is designed to be used wherever there are a large quantity of
-high-resolution time series which need constant monitoring. Once a metrics
-stream is set up from Graphite, additional metrics are automatically added to
-Skyline for analysis. Skyline's easily extended algorithms attempt to
+Skyline is a real time anomaly detection, time series analysis and performance
+monitoring system, built to enable passive monitoring on metrics, without the
+need to configure a model/thresholds for each one.  It is designed to be used
+wherever there are a large quantity of high-resolution time series which need
+constant monitoring. Once a metrics stream is set up additional metrics are
+automatically added to Skyline for analysis. Skyline's algorithms attempt to
 automatically detect what it means for each metric to be anomalous.  Once set up
 and running, Skyline allows the user to train it what is not anomalous on a per
 metric basis.
-
-## Improvements to the original Etsy Skyline
-
-- Improving the anomaly detection methodologies used in the 3-sigma context to
-  vastly increase performance.
-- Extending Skyline's 3-sigma methodology to enable the operator and Skyline to
-  handle seasonality in metrics.
-- The addition of an anomalies database for learning and root cause analysis.
-- Adding the ability for the operator to train Skyline and have Skyline learn
-  things that are NOT anomalous using a time series similarities comparison
-  method based on features extraction and comparison using the tsfresh
-  package.
-- Adding the ability to Skyline to determine what other metrics are related to
-  an anomaly event using cross correlation analysis of all the metrics using
-  Linkedin's luminol library when an anomaly event is triggered and
-  recording these in the database to assist in root cause analysis.
 
 ## Documentation
 
@@ -35,17 +18,21 @@ The documentation for your version is also viewable in a clone locally in your
 browser at `file://<PATH_TO_YOUR_CLONE>/docs/_build/html/index.html` and via the
 the Skyline Webapp frontend via the docs tab.
 
-## Managed service
+## Free Managed Service
 
-We offer a managed version of Skyline and custom UI for people that do not have
-a vast amount of time to spare.  You'll get access to unreleased features and
-support from developers that have honed numerous Skyline integrations and
-trained thousands upon thousands of metrics to improve alerting.
+Anomify is cutting edge version Skyline, built and managed by the team behind
+Skyline.  With a brand new dashboard, full spec API, and intuitive UI, it will
+help you and your organisation unlock the full power of Skyline and more.
+Currently, we’re offering it as a free service for Skyline users.
+Find out more at https://anomify.ai/skyline
 
-We are looking for test partners as the product is currently in beta phase.
-Send us an email at beta@anomalarm.io
+## master branch - (currently work in progress)
 
-Places are filling up quickly!
+If you clone from master be aware it is currently not deemed stable and is in a
+state of change.
+
+The last known stable master is https://github.com/earthgecko/skyline/commit/bc19690e0298f4020367649b55dfaafcd2baf262
+or the SNAB branch at https://github.com/earthgecko/skyline/commit/a1d21a2123f2f25aeb32cbe49874859966958ced
 
 ## Other
 

@@ -107,58 +107,110 @@ As below.
   for char in string.digits:
       ALLOWED_CHARS.append(char)
 
+Webserver configuration to limit content size on flux POST requests
+-------------------------------------------------------------------
+
+Because flux uses falcon, you should consider limiting the content length in
+your webserver configuration, because falcon (being a bare-metal web API
+framework) does not check content length.  See a basic nginx example using
+``client_max_body_size`` in the location /flux/ block in
+https://github.com/earthgecko/skyline/blob/master/etc/skyline.nginx.conf.d.example
 
 POST request
 ------------
 
 The POST endpoint is `/flux/metric_data_post` and this accepts JSON data.  The
 json can have data for a single metric or for multiple metrics in a single POST.
+POST requests which submit multiple metrics **should be limited** to a maximum
+of **450 metrics per request**.
 
 A successful POST will respond with no content and a 204 HTTP response code.
 
-Here is an example of the data a sinlge metric POST requires and an example POST
+Here is an example of the data a single metric POST requires and an example POST
 request.
 
 .. code-block:: json
 
   {
+  	"key": "YOURown32charSkylineAPIkeySecret",
   	"metric": "vista.nodes.skyline-1.cpu.user",
   	"timestamp": 1478021700,
-  	"value": 1.0,
-  	"key": "YOURown32charSkylineAPIkeySecret"
+  	"value": 1.0
   }
 
 .. code-block:: bash
 
-  curl -vvv -u username:password -d '{"metric":"vista.nodes.skyline-1.cpu.user","timestamp":1478021700,"value":1.0,"key":"YOURown32charSkylineAPIkeySecret"}' -H "Content-Type: application/json" -X POST https://skyline.example.org/flux/metric_data_post
+  curl -vvv -u username:password -d '{"key":"YOURown32charSkylineAPIkeySecret","metric":"vista.nodes.skyline-1.cpu.user","timestamp":1478021700,"value":1.0}' -H "Content-Type: application/json" -X POST https://skyline.example.org/flux/metric_data_post
 
 Here is an example of the data a multiple metrics POST requires and an example
 POST request for multiple metrics:
 
-.. warning:: When submitting multiple metrics in a POST, if any one element of
-  any metric is not valid the entire POST will be rejected.
+.. warning:: When submitting multiple metrics in a POST, if **any** one element
+  of any metric is not valid the entire POST will be rejected.
 
 .. code-block:: json
 
   {
-  	"key": "YOURown32charSkylineAPIkeySecret"
+  	"key": "YOURown32charSkylineAPIkeySecret",
     "metrics": [
       {
       	"metric": "vista.nodes.skyline-1.cpu.user",
       	"timestamp": 1478021700,
-      	"value": 1.0,
+      	"value": 1.0
       },
       {
       	"metric": "vista.nodes.skyline-1.cpu.system",
       	"timestamp": 1478021700,
-      	"value": 0.2,
+      	"value": 0.2
       }
     ]
   }
 
 .. code-block:: bash
 
-  curl -vvv -u username:password -d '{"key":"YOURown32charSkylineAPIkeySecret","metrics":[{"metric":"vista.nodes.skyline-1.cpu.user","timestamp":1478021700,"value":1.0},{"metric":"vista.nodes.skyline-1.cpu.system","timestamp":1478021700,"value":0.2}]}' -H "Content-Type: application/json" -X POST https://skyline.example.org/flux/metric_data_post
+  curl -v -u username:password -d '{"key":"YOURown32charSkylineAPIkeySecret","metrics":[{"metric":"vista.nodes.skyline-1.cpu.user","timestamp":1478021700,"value":1.0},{"metric":"vista.nodes.skyline-1.cpu.system","timestamp":1478021700,"value":0.2}]}' -H "Content-Type: application/json" -X POST https://skyline.example.org/flux/metric_data_post
+
+It is possible to backfill old data via flux, using the ``"fill": "true"``
+element in the json.  By default flux checks timestamps to see if they are
+sensible and valid, however if ``"fill": "true"`` is present in the metric
+json, these checks will be skipped and the data will be submitted to Graphite
+as is.  For example:
+
+.. code-block:: json
+
+  {
+  	"key": "YOURown32charSkylineAPIkeySecret",
+    "metrics": [
+      {
+      	"metric": "vista.nodes.skyline-1.cpu.user",
+      	"timestamp": 1374341700,
+      	"value": 1.5,
+        "fill": "true"
+      },
+      {
+      	"metric": "vista.nodes.skyline-1.cpu.system",
+      	"timestamp": 1374341700,
+      	"value": 0.5,
+        "fill": "true"
+      }
+    ]
+  }
+
+
+**HOWEVER** be aware that if you are back filling old data, ensure that Graphite
+does not have multiple retentions for the namespace and that the single
+retention is sufficient to hold all the data at the resolution it is being
+submitted at.  Once the metrics have been back filled you can use the Graphite
+whisper-resize.py to resize the metric whispers files to the desired retentions
+and update the Graphite storage-schema.conf to reflect the desired retentions.
+
+Also to note is that when back filling via flux, although Graphite will pickle
+the data to Horizon, Horizon will not submit data older though
+:mod:`settings.FULL_DURATION` to Redis, because that is how Horizon is supposed
+to work.  When the back fill timestamps are within the :mod:`settings.FULL_DURATION`
+period, Horizon will then add the last days worth of data to Redis as normal and
+the metrics will begin to be analysed as soon as real time data for the metrics
+comes in.
 
 GET request
 -----------
@@ -176,7 +228,7 @@ parameters as defined below:
 
   # /flux/metric_data?metric=<metric|str>&timestamp=<timestamp|int>&value=<value|float>&key=<key|str>
   # For example:
-  curl -vvv -u username:password "https://skyline.example.org/flux/metric_data?metric=vista.nodes.skyline-1.cpu.user&timestamp=1478021700&value=1.0&key=YOURown32charSkylineAPIkeySecret"
+  curl -v -u username:password "https://skyline.example.org/flux/metric_data?metric=vista.nodes.skyline-1.cpu.user&timestamp=1478021700&value=1.0&key=YOURown32charSkylineAPIkeySecret"
 
 populate_metric endpoint
 ------------------------

@@ -48,9 +48,9 @@ in the json response), continue with the next upload, etc.
 
 Skyline automates the conversion of SIMPLE columnar data into time series data,
 however seeing as not all data is defined or created equally, some information
-about the data needs to be passed with the data file/s to inform Skyline about
-the metric structure.  This makes setting up a upload process more work, but if
-you are uploading frequently then it is one off work.
+about the data needs to be passed *info.json) with the data file/s to inform
+Skyline about the metric structure.  This makes setting up a upload process more
+work, but if you are uploading frequently then it is one off work.
 
 To ensure that naive data in the datetime column  can be handled, meaning not
 timezone aware date times e.g. `16-05-2020 11:00` you always need to pass a
@@ -85,27 +85,14 @@ lets call it 2020-05-16-11.device_id.012383.csv
 This data informs us of the times and values and things, but it does not tell us
 what metrics they should represent.  Skyline also needs to be informed about the
 header row and rows to ignore.  A info file is used to inform Skyline how to
-read and metric the data, take 2020-05-16-11.device_id.012383.info.json
-Note, in processing rows are 0-indexed
+read and metric the data, take the info.json example below that would describe
+the 2020-05-16-11.device_id.012383.csv data above.
 
-Your mileage may vary on different date formats, use as acceptable pandas date
-formats.  Tested date formats known to work:
-
-::
-
-    16-05-2020 11:00     # %d-%m-%Y %H:%M
-    16-05-2020 11:00:00  # %d-%m-%Y %H:%M:%S
-    2020/05/16 11:00:00  # %Y/%m/%d %H:%M:%S
-    1589623200           # unix timestamp
-
-Known incapable date format, this date format has failed to be interpreted as a
-naive date column in the ``pandas.to_datetime`` conversion:
-
-::
-
-    2020-05-16 11:00:00  # %Y-%m-%d %H:%M:%S
+.. note:: in processing rows are 0-indexed
 
 **info.json**
+
+The info.json file that would need to be uploaded with the
 
 ::
 
@@ -118,7 +105,26 @@ naive date column in the ``pandas.to_datetime`` conversion:
       "columns_to_metrics": "date,roof,floor"
     }
 
-Your date time column MUST be named date in the columns_to_metrics mapping.
+``parent_metric_namespace`` tells Skyline what metric names should be created.
+In this example the would result in metrics:
+
+- temp_monitoring.warehouse.2.012383.roof
+- temp_monitoring.warehouse.2.012383.floor
+
+Only alphanumeric chars and '.', '_', '-' are allowed in the metric name, e.g.
+the ``parent_metric_namespace`` and ``columns_to_metrics`` that you pass.
+
+.. note:: xlsx files **are** 0-indexed, csv files **are not** 0-indexed
+
+``skip_rows`` tells Skyline to ignore rows 1, 2, 3, 4, 5 (but if it were
+0-indexed in a xlsx ``skip_rows`` would be set to 4).
+
+``header_row`` tells Skyline to use row 0 as the header row, e.g. the column
+names. Note that if you ``skip_rows`` your header row **must** be 0.
+
+``columns_to_metrics`` tells Skyline how to map the column names to metric
+names.  A one to one mapping is required for every column.  Your date time
+column **must** be named ``date`` in the ``columns_to_metrics`` mapping.
 
 For convenience sake you can also add additional elements to the info.json:
 
@@ -134,26 +140,8 @@ For convenience sake you can also add additional elements to the info.json:
   Graphite retention (old data) this will not have the desired affect as
   Graphite down sampling (aggregation) will already have occurred.
 
-This tells Skyline what the parent metric namespace should be which would
-result in metrics:
-
-- temp_monitoring.warehouse.2.012383.roof
-- temp_monitoring.warehouse.2.012383.floor
-
-xlsx files are 0-indexed, csv files are not 0-indexed.
-
-It tells Skyline to ignore rows 1, 2, 3, 4, 5 (but if it were 0-indexed skip_row
-would be set to 4).
-It tells Skyline to use row 0 as the header row, e.g. column names. Note that
-if you skip_rows your header row must be 0.
-It tells Skyline how to map the column names to metric names.  A one to one
-mapping it required for every column.  Once again, your date time column MUST be
-named date in the columns_to_metrics mapping.
-
-Only alphanumeric chars and '.', '_', '-' are allowed in the metric name, e.g.
-the parent_metric_namespace and columns_to_metrics that you pass.
-
-Requirements of the data file.  The data file must have a header row.
+Requirements of the data file.  The data file must have a header row e.g column
+names and must have at least one date time column and at least one value column.
 
 The required information elements are in the POST variables are:
 
@@ -170,7 +158,7 @@ The required information elements are in the POST variables are:
 - info_file (file)
 - json_response
 
-An example of how to POST the above csv and info.csv with curl be would be as
+An example of how to POST the above csv and info.json with curl be would be as
 follows.  Note that in this instance you would need a your
 :mod:`settings.FLUX_UPLOADS_KEYS` to be set with:
 
@@ -198,3 +186,24 @@ curl request.
          -F "info_file=@<FULL_PATH_TO_FILE>/info.json" \
          -F "json_response=true" \
          https://$SKYLINE_HOST/upload_data
+
+
+A note on date formats
+~~~~~~~~~~~~~~~~~~~~~~
+
+Your mileage may vary on different date formats, use as acceptable pandas date
+formats.  Tested date formats known to work:
+
+::
+
+    16-05-2020 11:00     # %d-%m-%Y %H:%M
+    16-05-2020 11:00:00  # %d-%m-%Y %H:%M:%S
+    2020/05/16 11:00:00  # %Y/%m/%d %H:%M:%S
+    1589623200           # unix timestamp
+
+Known incapable date format, this date format has failed to be interpreted as a
+naive date column in the ``pandas.to_datetime`` conversion:
+
+::
+
+    2020-05-16 11:00:00  # %Y-%m-%d %H:%M:%S
