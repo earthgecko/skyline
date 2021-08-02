@@ -26,7 +26,7 @@ help you and your organisation unlock the full power of Skyline and more.
 Currently, we’re offering it as a free service for Skyline users.
 Find out more at https://anomify.ai/skyline
 
-## master branch - (currently work in progress)
+## master branch - (currently a work in progress)
 
 If you clone from master be aware it is currently not deemed stable and is in a
 state of change.
