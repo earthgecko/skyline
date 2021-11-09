@@ -1150,7 +1150,9 @@ def ionosphere_learn(timestamp):
                     # @modified 20191030 - Bug #3266: py3 Redis binary objects not strings
                     #                      Branch #3262: py3
                     # derivative_metrics = list(redis_conn.smembers('derivative_metrics'))
-                    derivative_metrics = list(redis_conn_decoded.smembers('derivative_metrics'))
+                    # @modified 20211012 - Feature #4280: aet.metrics_manager.derivative_metrics Redis hash
+                    # derivative_metrics = list(redis_conn_decoded.smembers('derivative_metrics'))
+                    derivative_metrics = list(redis_conn_decoded.smembers('aet.metrics_manager.derivative_metrics'))
                 except:
                     derivative_metrics = []
                 if metric in derivative_metrics:

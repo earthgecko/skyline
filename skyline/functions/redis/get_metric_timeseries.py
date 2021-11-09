@@ -2,7 +2,8 @@ import logging
 
 from msgpack import Unpacker
 from settings import FULL_NAMESPACE
-from skyline_functions import get_redis_conn
+from skyline_functions import (
+    get_redis_conn, get_redis_conn_decoded, nonNegativeDerivative)
 
 
 # @added 20210525 - Branch #1444: thunder
@@ -69,4 +70,37 @@ def get_metric_timeseries(current_skyline_app, metric_name, log=True):
             current_logger = logging.getLogger(current_skyline_app_logger)
         current_logger.error('error :: failed to unpack %s time series from Redis data - %s' % (metric_name, e))
         timeseries = []
+
+    try:
+        redis_conn_decoded = get_redis_conn_decoded(current_skyline_app)
+    except Exception as e:
+        if not log:
+            current_skyline_app_logger = current_skyline_app + 'Log'
+            current_logger = logging.getLogger(current_skyline_app_logger)
+        current_logger.error('error :: %s :: failed to connect to Redis to get derivative_metrics - %s' % (
+            function_str, e))
+    derivative_metrics = []
+    try:
+        # @modified 20211012 - Feature #4280: aet.metrics_manager.derivative_metrics Redis hash
+        # derivative_metrics = list(redis_conn_decoded.smembers('derivative_metrics'))
+        derivative_metrics = list(redis_conn_decoded.smembers('aet.metrics_manager.derivative_metrics'))
+    except Exception as e:
+        if not log:
+            current_skyline_app_logger = current_skyline_app + 'Log'
+            current_logger = logging.getLogger(current_skyline_app_logger)
+        current_logger.error('error :: %s :: failed to connect to Redis for smembers of derivative_metrics - %s' % (
+            function_str, e))
+        derivative_metrics = []
+    if metric_name in derivative_metrics:
+        if len(timeseries) > 3:
+            try:
+                derivative_timeseries = nonNegativeDerivative(timeseries)
+                timeseries = derivative_timeseries
+            except Exception as e:
+                if not log:
+                    current_skyline_app_logger = current_skyline_app + 'Log'
+                    current_logger = logging.getLogger(current_skyline_app_logger)
+                current_logger.error('error :: %s :: nonNegativeDerivative failed - %s' % (
+                    function_str, e))
+
     return timeseries
