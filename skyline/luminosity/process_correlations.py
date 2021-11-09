@@ -31,6 +31,10 @@ from skyline_functions import (
     # @added 20201207 - Feature #3858: skyline_functions - correlate_or_relate_with
     correlate_or_relate_with)
 
+# @added 20210820 - Task #4030: refactoring
+#                   Feature #4164: luminosity - cloudbursts
+from functions.timeseries.determine_data_frequency import determine_data_frequency
+
 # @added 20200428 - Feature #3510: Enable Luminosity to handle correlating namespaces only
 #                   Feature #3512: matched_or_regexed_in_list function
 from matched_or_regexed_in_list import matched_or_regexed_in_list
@@ -279,7 +283,12 @@ def get_anomalous_ts(base_name, anomaly_timestamp):
 
     # @added 20201203 - Feature #3860: luminosity - handle low frequency data
     # Determine data resolution
-    resolution = determine_resolution(timeseries)
+    # @modified 20210820 - Feature #3860: luminosity - handle low frequency data
+    #                      Task #4030: refactoring
+    #                      Feature #4164: luminosity - cloudbursts
+    # Use common determine_data_frequency function
+    # resolution = determine_resolution(timeseries)
+    resolution = determine_data_frequency(skyline_app, timeseries, False)
 
     # Sample the time series
     # @modified 20180720 - Feature #2464: luminosity_remote_data
@@ -420,7 +429,7 @@ def get_assigned_metrics(i, base_name):
                 if i_metric_name not in unique_metrics:
                     unique_metrics.append(i_metric_name)
             logger.info('get_correlations :: appended %s metrics to unique_metrics to be correlated' % (
-                str(len(also_correlate)), str(len(correlate_with_metrics))))
+                str(len(also_correlate))))
 
     # Discover assigned metrics
     # @modified 20180720 - Feature #2464: luminosity_remote_data
@@ -569,7 +578,12 @@ def get_correlations(
 
     # @added 20201203 - Feature #3860: luminosity - handle low frequency data
     # Determine data resolution
-    resolution = determine_resolution(anomalous_ts)
+    # @modified 20210820 - Feature #3860: luminosity - handle low frequency data
+    #                      Task #4030: refactoring
+    #                      Feature #4164: luminosity - cloudbursts
+    # Use common determine_data_frequency function
+    # resolution = determine_resolution(anomalous_ts)
+    resolution = determine_data_frequency(skyline_app, anomalous_ts, False)
 
     # Sample the time series
     # @modified 20180720 - Feature #2464: luminosity_remote_data
@@ -666,7 +680,12 @@ def get_correlations(
 
         # @added 20201203 - Feature #3860: luminosity - handle low frequency data
         # Determine data resolution
-        resolution = determine_resolution(timeseries)
+        # @modified 20210820 - Feature #3860: luminosity - handle low frequency data
+        #                      Task #4030: refactoring
+        #                      Feature #4164: luminosity - cloudbursts
+        # Use common determine_data_frequency function
+        # resolution = determine_resolution(timeseries)
+        resolution = determine_data_frequency(skyline_app, timeseries, False)
 
         for ts, value in timeseries:
             if int(ts) < from_timestamp:
@@ -788,7 +807,12 @@ def get_correlations(
 
         # @added 20201203 - Feature #3860: luminosity - handle low frequency data
         # Determine data resolution
-        resolution = determine_resolution(timeseries)
+        # @modified 20210820 - Feature #3860: luminosity - handle low frequency data
+        #                      Task #4030: refactoring
+        #                      Feature #4164: luminosity - cloudbursts
+        # Use common determine_data_frequency function
+        # resolution = determine_resolution(timeseries)
+        resolution = determine_data_frequency(skyline_app, timeseries, False)
 
         correlate_ts = []
         for ts, value in timeseries:
@@ -934,7 +958,12 @@ def process_correlations(i, anomaly_id):
 
     # @added 20201203 - Feature #3860: luminosity - handle low frequency data
     # Determine data resolution
-    resolution = determine_resolution(anomalous_ts)
+    # @modified 20210820 - Feature #3860: luminosity - handle low frequency data
+    #                      Task #4030: refactoring
+    #                      Feature #4164: luminosity - cloudbursts
+    # Use common determine_data_frequency function
+    # resolution = determine_resolution(anomalous_ts)
+    resolution = determine_data_frequency(skyline_app, anomalous_ts, False)
 
     raw_assigned = redis_conn.mget(assigned_metrics)
     # @added 20180720 - Feature #2464: luminosity_remote_data
