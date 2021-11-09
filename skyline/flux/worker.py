@@ -522,8 +522,10 @@ class Worker(Process):
                                 skyline_metric, str(metrics_sent_to_graphite)))
 
                         # @added 20210511 - Feature #4060: skyline.flux.worker.discarded metrics
-                        use_backfill = False
-                        timestamp_for_metrics = int(time())
+                        # @modified 20210729 - Feature #4060: skyline.flux.worker.discarded metrics
+                        # Send to the Graphite that collects skyline metrics not
+                        # use_backfill = False
+                        # timestamp_for_metrics = int(time())
                         discarded_already_received = 0
                         skyline_metric = '%s.discarded.already_received' % skyline_app_graphite_namespace
                         try:
@@ -532,12 +534,25 @@ class Worker(Process):
                         except Exception as e:
                             logger.error('error :: worker :: failed to get Redis set flux.workers.discarded.already_received - %s' % e)
                         logger.info('worker :: discarded_already_received in last 60 seconds (in empty queue block) - %s' % str(discarded_already_received))
-                        skyline_metric_data = [skyline_metric, discarded_already_received, timestamp_for_metrics, use_backfill]
+                        # @modified 20210729 - Feature #4060: skyline.flux.worker.discarded metrics
+                        # Send to the Graphite that collects skyline metrics not
+                        # via flux queue which could send to a different Graphite
+                        # skyline_metric_data = [skyline_metric, discarded_already_received, timestamp_for_metrics, use_backfill]
+                        # try:
+                        #     self.q.put(skyline_metric_data, block=False)
+                        # except Exception as e:
+                        #     logger.error('error :: worker :: failed to add data %s to send to Graphite to flux.httpMetricDataQueue - %s' % (
+                        #         str(metric_data), e))
+                        # @added 20210729 - Feature #4060: skyline.flux.worker.discarded metrics
+                        # Send to the Graphite that collects skyline metrics not
+                        # via flux queue which could send to a different Graphite
                         try:
-                            self.q.put(skyline_metric_data, block=False)
+                            send_graphite_metric(skyline_app, skyline_metric, discarded_already_received)
                         except Exception as e:
-                            logger.error('error :: worker :: failed to add data %s to send to Graphite to flux.httpMetricDataQueue - %s' % (
-                                str(metric_data), e))
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: worker :: failed to send_graphite_metric %s with %s - %s' % (
+                                skyline_metric, str(discarded_already_received), e))
+
                         listen_discarded_invalid_timestamp = 0
                         skyline_metric = '%s.discarded.invalid_timestamp' % listen_graphite_namespace
                         try:
@@ -546,12 +561,25 @@ class Worker(Process):
                         except Exception as e:
                             logger.error('error :: worker :: failed to get Redis set flux.listen.discarded.invalid_timestamp - %s' % e)
                         logger.info('worker :: listen_discarded_invalid_timestamp in last 60 seconds (in empty queue block) - %s' % str(listen_discarded_invalid_timestamp))
-                        skyline_metric_data = [skyline_metric, listen_discarded_invalid_timestamp, timestamp_for_metrics, use_backfill]
+                        # @modified 20210729 - Feature #4060: skyline.flux.worker.discarded metrics
+                        # Send to the Graphite that collects skyline metrics not
+                        # via flux queue which could send to a different Graphite
+                        # skyline_metric_data = [skyline_metric, listen_discarded_invalid_timestamp, timestamp_for_metrics, use_backfill]
+                        # try:
+                        #     self.q.put(skyline_metric_data, block=False)
+                        # except Exception as e:
+                        #     logger.error('error :: worker :: failed to add data %s to send to Graphite to flux.httpMetricDataQueue - %s' % (
+                        #         str(metric_data), e))
+                        # @added 20210729 - Feature #4060: skyline.flux.worker.discarded metrics
+                        # Send to the Graphite that collects skyline metrics not
+                        # via flux queue which could send to a different Graphite
                         try:
-                            self.q.put(skyline_metric_data, block=False)
+                            send_graphite_metric(skyline_app, skyline_metric, listen_discarded_invalid_timestamp)
                         except Exception as e:
-                            logger.error('error :: worker :: failed to add data %s to send to Graphite to flux.httpMetricDataQueue - %s' % (
-                                str(metric_data), e))
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: worker :: failed to send_graphite_metric %s with %s - %s' % (
+                                skyline_metric, str(listen_discarded_invalid_timestamp), e))
+
                         listen_discarded_metric_name = 0
                         skyline_metric = '%s.discarded.metric_name' % listen_graphite_namespace
                         try:
@@ -560,12 +588,25 @@ class Worker(Process):
                         except Exception as e:
                             logger.error('error :: worker :: failed to get Redis set flux.listen.discarded.metric_name - %s' % e)
                         logger.info('worker :: listen_discarded_metric_name in last 60 seconds (in empty queue block) - %s' % str(listen_discarded_metric_name))
-                        skyline_metric_data = [skyline_metric, listen_discarded_metric_name, timestamp_for_metrics, use_backfill]
+                        # @modified 20210729 - Feature #4060: skyline.flux.worker.discarded metrics
+                        # Send to the Graphite that collects skyline metrics not
+                        # via flux queue which could send to a different Graphite
+                        # skyline_metric_data = [skyline_metric, listen_discarded_metric_name, timestamp_for_metrics, use_backfill]
+                        # try:
+                        #     self.q.put(skyline_metric_data, block=False)
+                        # except Exception as e:
+                        #     logger.error('error :: worker :: failed to add data %s to send to Graphite to flux.httpMetricDataQueue - %s' % (
+                        #         str(metric_data), e))
+                        # @added 20210729 - Feature #4060: skyline.flux.worker.discarded metrics
+                        # Send to the Graphite that collects skyline metrics not
+                        # via flux queue which could send to a different Graphite
                         try:
-                            self.q.put(skyline_metric_data, block=False)
+                            send_graphite_metric(skyline_app, skyline_metric, listen_discarded_metric_name)
                         except Exception as e:
-                            logger.error('error :: worker :: failed to add data %s to send to Graphite to flux.httpMetricDataQueue - %s' % (
-                                str(metric_data), e))
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: worker :: failed to send_graphite_metric %s with %s - %s' % (
+                                skyline_metric, str(listen_discarded_metric_name), e))
+
                         listen_discarded_invalid_value = 0
                         skyline_metric = '%s.discarded.invalid_value' % listen_graphite_namespace
                         try:
@@ -574,12 +615,26 @@ class Worker(Process):
                         except Exception as e:
                             logger.error('error :: worker :: failed to get Redis set flux.listen.discarded.invalid_value - %s' % e)
                         logger.info('worker :: listen_discarded_invalid_value in last 60 seconds (in empty queue block) - %s' % str(listen_discarded_invalid_value))
-                        skyline_metric_data = [skyline_metric, listen_discarded_invalid_value, timestamp_for_metrics, use_backfill]
+                        # @modified 20210729 - Feature #4060: skyline.flux.worker.discarded metrics
+                        # Send to the Graphite that collects skyline metrics not
+                        # via flux queue which could send to a different Graphite
+                        # skyline_metric_data = [skyline_metric, listen_discarded_metric_name, timestamp_for_metrics, use_backfill]
+                        # skyline_metric_data = [skyline_metric, listen_discarded_invalid_value, timestamp_for_metrics, use_backfill]
+                        # try:
+                        #     self.q.put(skyline_metric_data, block=False)
+                        # except Exception as e:
+                        #     logger.error('error :: worker :: failed to add data %s to send to Graphite to flux.httpMetricDataQueue - %s' % (
+                        #         str(metric_data), e))
+                        # @added 20210729 - Feature #4060: skyline.flux.worker.discarded metrics
+                        # Send to the Graphite that collects skyline metrics not
+                        # via flux queue which could send to a different Graphite
                         try:
-                            self.q.put(skyline_metric_data, block=False)
+                            send_graphite_metric(skyline_app, skyline_metric, listen_discarded_invalid_value)
                         except Exception as e:
-                            logger.error('error :: worker :: failed to add data %s to send to Graphite to flux.httpMetricDataQueue - %s' % (
-                                str(metric_data), e))
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: worker :: failed to send_graphite_metric %s with %s - %s' % (
+                                skyline_metric, str(listen_discarded_invalid_value), e))
+
                         listen_discarded_invalid_key = 0
                         skyline_metric = '%s.discarded.invalid_key' % listen_graphite_namespace
                         try:
@@ -588,12 +643,25 @@ class Worker(Process):
                         except Exception as e:
                             logger.error('error :: worker :: failed to get Redis set flux.listen.discarded.invalid_key - %s' % e)
                         logger.info('worker :: listen_discarded_invalid_key in last 60 seconds (in empty queue block) - %s' % str(listen_discarded_invalid_key))
-                        skyline_metric_data = [skyline_metric, listen_discarded_invalid_key, timestamp_for_metrics, use_backfill]
+                        # @modified 20210729 - Feature #4060: skyline.flux.worker.discarded metrics
+                        # Send to the Graphite that collects skyline metrics not
+                        # via flux queue which could send to a different Graphite
+                        # skyline_metric_data = [skyline_metric, listen_discarded_invalid_key, timestamp_for_metrics, use_backfill]
+                        # try:
+                        #     self.q.put(skyline_metric_data, block=False)
+                        # except Exception as e:
+                        #     logger.error('error :: worker :: failed to add data %s to send to Graphite to flux.httpMetricDataQueue - %s' % (
+                        #         str(metric_data), e))
+                        # @added 20210729 - Feature #4060: skyline.flux.worker.discarded metrics
+                        # Send to the Graphite that collects skyline metrics not
+                        # via flux queue which could send to a different Graphite
                         try:
-                            self.q.put(skyline_metric_data, block=False)
+                            send_graphite_metric(skyline_app, skyline_metric, listen_discarded_invalid_key)
                         except Exception as e:
-                            logger.error('error :: worker :: failed to add data %s to send to Graphite to flux.httpMetricDataQueue - %s' % (
-                                str(metric_data), e))
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: worker :: failed to send_graphite_metric %s with %s - %s' % (
+                                skyline_metric, str(listen_discarded_invalid_key), e))
+
                         listen_discarded_invalid_parameters = 0
                         skyline_metric = '%s.discarded.invalid_parameters' % listen_graphite_namespace
                         try:
@@ -602,12 +670,25 @@ class Worker(Process):
                         except Exception as e:
                             logger.error('error :: worker :: failed to get Redis set flux.listen.discarded.invalid_parameters - %s' % e)
                         logger.info('worker :: listen_discarded_invalid_parameters in last 60 seconds (in empty queue block) - %s' % str(listen_discarded_invalid_parameters))
-                        skyline_metric_data = [skyline_metric, listen_discarded_invalid_parameters, timestamp_for_metrics, use_backfill]
+                        # @modified 20210729 - Feature #4060: skyline.flux.worker.discarded metrics
+                        # Send to the Graphite that collects skyline metrics not
+                        # via flux queue which could send to a different Graphite
+                        # skyline_metric_data = [skyline_metric, listen_discarded_invalid_parameters, timestamp_for_metrics, use_backfill]
+                        # try:
+                        #     self.q.put(skyline_metric_data, block=False)
+                        # except Exception as e:
+                        #     logger.error('error :: worker :: failed to add data %s to send to Graphite to flux.httpMetricDataQueue - %s' % (
+                        #         str(metric_data), e))
+                        # @added 20210729 - Feature #4060: skyline.flux.worker.discarded metrics
+                        # Send to the Graphite that collects skyline metrics not
+                        # via flux queue which could send to a different Graphite
                         try:
-                            self.q.put(skyline_metric_data, block=False)
+                            send_graphite_metric(skyline_app, skyline_metric, listen_discarded_invalid_parameters)
                         except Exception as e:
-                            logger.error('error :: worker :: failed to add data %s to send to Graphite to flux.httpMetricDataQueue - %s' % (
-                                str(metric_data), e))
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: worker :: failed to send_graphite_metric %s with %s - %s' % (
+                                skyline_metric, str(listen_discarded_invalid_parameters), e))
+
                         listen_added_to_queue = 0
                         skyline_metric = '%s.added_to_queue' % listen_graphite_namespace
                         try:
@@ -618,12 +699,24 @@ class Worker(Process):
                         except Exception as e:
                             logger.error('error :: worker :: failed to get Redis set flux.listen.added_to_queue - %s' % e)
                         logger.info('worker :: listen_added_to_queue in last 60 seconds (in empty queue block) - %s' % str(listen_added_to_queue))
-                        skyline_metric_data = [skyline_metric, listen_added_to_queue, timestamp_for_metrics, use_backfill]
+                        # @modified 20210729 - Feature #4060: skyline.flux.worker.discarded metrics
+                        # Send to the Graphite that collects skyline metrics not
+                        # via flux queue which could send to a different Graphite
+                        # skyline_metric_data = [skyline_metric, listen_added_to_queue, timestamp_for_metrics, use_backfill]
+                        # try:
+                        #     self.q.put(skyline_metric_data, block=False)
+                        # except Exception as e:
+                        #     logger.error('error :: worker :: failed to add data %s to send to Graphite to flux.httpMetricDataQueue - %s' % (
+                        #         str(metric_data), e))
+                        # @added 20210729 - Feature #4060: skyline.flux.worker.discarded metrics
+                        # Send to the Graphite that collects skyline metrics not
+                        # via flux queue which could send to a different Graphite
                         try:
-                            self.q.put(skyline_metric_data, block=False)
+                            send_graphite_metric(skyline_app, skyline_metric, listen_added_to_queue)
                         except Exception as e:
-                            logger.error('error :: worker :: failed to add data %s to send to Graphite to flux.httpMetricDataQueue - %s' % (
-                                str(metric_data), e))
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: worker :: failed to send_graphite_metric %s with %s - %s' % (
+                                skyline_metric, str(listen_added_to_queue), e))
 
                     metric_data_queue_size = 0
                     try:
@@ -1113,8 +1206,11 @@ class Worker(Process):
                             skyline_metric, str(metrics_sent_to_graphite)))
 
                     # @added 20210511 - Feature #4060: skyline.flux.worker.discarded metrics
-                    use_backfill = False
-                    timestamp_for_metrics = int(time())
+                    # @modified 20210729 - Feature #4060: skyline.flux.worker.discarded metrics
+                    # Send to the Graphite that collects skyline metrics not
+                    # use_backfill = False
+                    # timestamp_for_metrics = int(time())
+
                     discarded_already_received = 0
                     skyline_metric = '%s.discarded.already_received' % skyline_app_graphite_namespace
                     try:
@@ -1122,13 +1218,26 @@ class Worker(Process):
                         self.redis_conn.delete('flux.workers.discarded.already_received')
                     except Exception as e:
                         logger.error('error :: worker :: failed to get Redis set flux.workers.discarded.already_received - %s' % e)
-                    logger.info('worker :: discarded_already_received in last 60 seconds - %s' % str(discarded_already_received))
-                    skyline_metric_data = [skyline_metric, discarded_already_received, timestamp_for_metrics, use_backfill]
+                    logger.info('worker :: discarded_already_received in last 60 seconds (in empty queue block) - %s' % str(discarded_already_received))
+                    # @modified 20210729 - Feature #4060: skyline.flux.worker.discarded metrics
+                    # Send to the Graphite that collects skyline metrics not
+                    # via flux queue which could send to a different Graphite
+                    # skyline_metric_data = [skyline_metric, discarded_already_received, timestamp_for_metrics, use_backfill]
+                    # try:
+                    #     self.q.put(skyline_metric_data, block=False)
+                    # except Exception as e:
+                    #     logger.error('error :: worker :: failed to add data %s to send to Graphite to flux.httpMetricDataQueue - %s' % (
+                    #         str(metric_data), e))
+                    # @added 20210729 - Feature #4060: skyline.flux.worker.discarded metrics
+                    # Send to the Graphite that collects skyline metrics not
+                    # via flux queue which could send to a different Graphite
                     try:
-                        self.q.put(skyline_metric_data, block=False)
+                        send_graphite_metric(skyline_app, skyline_metric, discarded_already_received)
                     except Exception as e:
-                        logger.error('error :: worker :: failed to add data %s to send to Graphite to flux.httpMetricDataQueue - %s' % (
-                            str(metric_data), e))
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: worker :: failed to send_graphite_metric %s with %s - %s' % (
+                            skyline_metric, str(discarded_already_received), e))
+
                     listen_discarded_invalid_timestamp = 0
                     skyline_metric = '%s.discarded.invalid_timestamp' % listen_graphite_namespace
                     try:
@@ -1136,13 +1245,26 @@ class Worker(Process):
                         self.redis_conn.delete('flux.listen.discarded.invalid_timestamp')
                     except Exception as e:
                         logger.error('error :: worker :: failed to get Redis set flux.listen.discarded.invalid_timestamp - %s' % e)
-                    logger.info('worker :: listen_discarded_invalid_timestamp in last 60 seconds - %s' % str(listen_discarded_invalid_timestamp))
-                    skyline_metric_data = [skyline_metric, listen_discarded_invalid_timestamp, timestamp_for_metrics, use_backfill]
+                    logger.info('worker :: listen_discarded_invalid_timestamp in last 60 seconds (in empty queue block) - %s' % str(listen_discarded_invalid_timestamp))
+                    # @modified 20210729 - Feature #4060: skyline.flux.worker.discarded metrics
+                    # Send to the Graphite that collects skyline metrics not
+                    # via flux queue which could send to a different Graphite
+                    # skyline_metric_data = [skyline_metric, listen_discarded_invalid_timestamp, timestamp_for_metrics, use_backfill]
+                    # try:
+                    #     self.q.put(skyline_metric_data, block=False)
+                    # except Exception as e:
+                    #     logger.error('error :: worker :: failed to add data %s to send to Graphite to flux.httpMetricDataQueue - %s' % (
+                    #         str(metric_data), e))
+                    # @added 20210729 - Feature #4060: skyline.flux.worker.discarded metrics
+                    # Send to the Graphite that collects skyline metrics not
+                    # via flux queue which could send to a different Graphite
                     try:
-                        self.q.put(skyline_metric_data, block=False)
+                        send_graphite_metric(skyline_app, skyline_metric, listen_discarded_invalid_timestamp)
                     except Exception as e:
-                        logger.error('error :: worker :: failed to add data %s to send to Graphite to flux.httpMetricDataQueue - %s' % (
-                            str(metric_data), e))
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: worker :: failed to send_graphite_metric %s with %s - %s' % (
+                            skyline_metric, str(listen_discarded_invalid_timestamp), e))
+
                     listen_discarded_metric_name = 0
                     skyline_metric = '%s.discarded.metric_name' % listen_graphite_namespace
                     try:
@@ -1150,13 +1272,26 @@ class Worker(Process):
                         self.redis_conn.delete('flux.listen.discarded.metric_name')
                     except Exception as e:
                         logger.error('error :: worker :: failed to get Redis set flux.listen.discarded.metric_name - %s' % e)
-                    logger.info('worker :: listen_discarded_metric_name in last 60 seconds - %s' % str(listen_discarded_metric_name))
-                    skyline_metric_data = [skyline_metric, listen_discarded_metric_name, timestamp_for_metrics, use_backfill]
+                    logger.info('worker :: listen_discarded_metric_name in last 60 seconds (in empty queue block) - %s' % str(listen_discarded_metric_name))
+                    # @modified 20210729 - Feature #4060: skyline.flux.worker.discarded metrics
+                    # Send to the Graphite that collects skyline metrics not
+                    # via flux queue which could send to a different Graphite
+                    # skyline_metric_data = [skyline_metric, listen_discarded_metric_name, timestamp_for_metrics, use_backfill]
+                    # try:
+                    #     self.q.put(skyline_metric_data, block=False)
+                    # except Exception as e:
+                    #     logger.error('error :: worker :: failed to add data %s to send to Graphite to flux.httpMetricDataQueue - %s' % (
+                    #         str(metric_data), e))
+                    # @added 20210729 - Feature #4060: skyline.flux.worker.discarded metrics
+                    # Send to the Graphite that collects skyline metrics not
+                    # via flux queue which could send to a different Graphite
                     try:
-                        self.q.put(skyline_metric_data, block=False)
+                        send_graphite_metric(skyline_app, skyline_metric, listen_discarded_metric_name)
                     except Exception as e:
-                        logger.error('error :: worker :: failed to add data %s to send to Graphite to flux.httpMetricDataQueue - %s' % (
-                            str(metric_data), e))
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: worker :: failed to send_graphite_metric %s with %s - %s' % (
+                            skyline_metric, str(listen_discarded_metric_name), e))
+
                     listen_discarded_invalid_value = 0
                     skyline_metric = '%s.discarded.invalid_value' % listen_graphite_namespace
                     try:
@@ -1164,13 +1299,27 @@ class Worker(Process):
                         self.redis_conn.delete('flux.listen.discarded.invalid_value')
                     except Exception as e:
                         logger.error('error :: worker :: failed to get Redis set flux.listen.discarded.invalid_value - %s' % e)
-                    logger.info('worker :: listen_discarded_invalid_value in last 60 seconds - %s' % str(listen_discarded_invalid_value))
-                    skyline_metric_data = [skyline_metric, listen_discarded_invalid_value, timestamp_for_metrics, use_backfill]
+                    logger.info('worker :: listen_discarded_invalid_value in last 60 seconds (in empty queue block) - %s' % str(listen_discarded_invalid_value))
+                    # @modified 20210729 - Feature #4060: skyline.flux.worker.discarded metrics
+                    # Send to the Graphite that collects skyline metrics not
+                    # via flux queue which could send to a different Graphite
+                    # skyline_metric_data = [skyline_metric, listen_discarded_metric_name, timestamp_for_metrics, use_backfill]
+                    # skyline_metric_data = [skyline_metric, listen_discarded_invalid_value, timestamp_for_metrics, use_backfill]
+                    # try:
+                    #     self.q.put(skyline_metric_data, block=False)
+                    # except Exception as e:
+                    #     logger.error('error :: worker :: failed to add data %s to send to Graphite to flux.httpMetricDataQueue - %s' % (
+                    #         str(metric_data), e))
+                    # @added 20210729 - Feature #4060: skyline.flux.worker.discarded metrics
+                    # Send to the Graphite that collects skyline metrics not
+                    # via flux queue which could send to a different Graphite
                     try:
-                        self.q.put(skyline_metric_data, block=False)
+                        send_graphite_metric(skyline_app, skyline_metric, listen_discarded_invalid_value)
                     except Exception as e:
-                        logger.error('error :: worker :: failed to add data %s to send to Graphite to flux.httpMetricDataQueue - %s' % (
-                            str(metric_data), e))
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: worker :: failed to send_graphite_metric %s with %s - %s' % (
+                            skyline_metric, str(listen_discarded_invalid_value), e))
+
                     listen_discarded_invalid_key = 0
                     skyline_metric = '%s.discarded.invalid_key' % listen_graphite_namespace
                     try:
@@ -1178,13 +1327,26 @@ class Worker(Process):
                         self.redis_conn.delete('flux.listen.discarded.invalid_key')
                     except Exception as e:
                         logger.error('error :: worker :: failed to get Redis set flux.listen.discarded.invalid_key - %s' % e)
-                    logger.info('worker :: listen_discarded_invalid_key in last 60 seconds - %s' % str(listen_discarded_invalid_key))
-                    skyline_metric_data = [skyline_metric, listen_discarded_invalid_key, timestamp_for_metrics, use_backfill]
+                    logger.info('worker :: listen_discarded_invalid_key in last 60 seconds (in empty queue block) - %s' % str(listen_discarded_invalid_key))
+                    # @modified 20210729 - Feature #4060: skyline.flux.worker.discarded metrics
+                    # Send to the Graphite that collects skyline metrics not
+                    # via flux queue which could send to a different Graphite
+                    # skyline_metric_data = [skyline_metric, listen_discarded_invalid_key, timestamp_for_metrics, use_backfill]
+                    # try:
+                    #     self.q.put(skyline_metric_data, block=False)
+                    # except Exception as e:
+                    #     logger.error('error :: worker :: failed to add data %s to send to Graphite to flux.httpMetricDataQueue - %s' % (
+                    #         str(metric_data), e))
+                    # @added 20210729 - Feature #4060: skyline.flux.worker.discarded metrics
+                    # Send to the Graphite that collects skyline metrics not
+                    # via flux queue which could send to a different Graphite
                     try:
-                        self.q.put(skyline_metric_data, block=False)
+                        send_graphite_metric(skyline_app, skyline_metric, listen_discarded_invalid_key)
                     except Exception as e:
-                        logger.error('error :: worker :: failed to add data %s to send to Graphite to flux.httpMetricDataQueue - %s' % (
-                            str(metric_data), e))
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: worker :: failed to send_graphite_metric %s with %s - %s' % (
+                            skyline_metric, str(listen_discarded_invalid_key), e))
+
                     listen_discarded_invalid_parameters = 0
                     skyline_metric = '%s.discarded.invalid_parameters' % listen_graphite_namespace
                     try:
@@ -1192,13 +1354,54 @@ class Worker(Process):
                         self.redis_conn.delete('flux.listen.discarded.invalid_parameters')
                     except Exception as e:
                         logger.error('error :: worker :: failed to get Redis set flux.listen.discarded.invalid_parameters - %s' % e)
-                    logger.info('worker :: listen_discarded_invalid_parameters in last 60 seconds - %s' % str(listen_discarded_invalid_parameters))
-                    skyline_metric_data = [skyline_metric, listen_discarded_invalid_parameters, timestamp_for_metrics, use_backfill]
+                    logger.info('worker :: listen_discarded_invalid_parameters in last 60 seconds (in empty queue block) - %s' % str(listen_discarded_invalid_parameters))
+                    # @modified 20210729 - Feature #4060: skyline.flux.worker.discarded metrics
+                    # Send to the Graphite that collects skyline metrics not
+                    # via flux queue which could send to a different Graphite
+                    # skyline_metric_data = [skyline_metric, listen_discarded_invalid_parameters, timestamp_for_metrics, use_backfill]
+                    # try:
+                    #     self.q.put(skyline_metric_data, block=False)
+                    # except Exception as e:
+                    #     logger.error('error :: worker :: failed to add data %s to send to Graphite to flux.httpMetricDataQueue - %s' % (
+                    #         str(metric_data), e))
+                    # @added 20210729 - Feature #4060: skyline.flux.worker.discarded metrics
+                    # Send to the Graphite that collects skyline metrics not
+                    # via flux queue which could send to a different Graphite
                     try:
-                        self.q.put(skyline_metric_data, block=False)
+                        send_graphite_metric(skyline_app, skyline_metric, listen_discarded_invalid_parameters)
                     except Exception as e:
-                        logger.error('error :: worker :: failed to add data %s to send to Graphite to flux.httpMetricDataQueue - %s' % (
-                            str(metric_data), e))
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: worker :: failed to send_graphite_metric %s with %s - %s' % (
+                            skyline_metric, str(listen_discarded_invalid_parameters), e))
+
+                    listen_added_to_queue = 0
+                    skyline_metric = '%s.added_to_queue' % listen_graphite_namespace
+                    try:
+                        listen_added_to_queue_str = None
+                        listen_added_to_queue_str = self.redis_conn_decoded.getset('flux.listen.added_to_queue', 0)
+                        if listen_added_to_queue_str:
+                            listen_added_to_queue = int(listen_added_to_queue_str)
+                    except Exception as e:
+                        logger.error('error :: worker :: failed to get Redis set flux.listen.added_to_queue - %s' % e)
+                    logger.info('worker :: listen_added_to_queue in last 60 seconds (in empty queue block) - %s' % str(listen_added_to_queue))
+                    # @modified 20210729 - Feature #4060: skyline.flux.worker.discarded metrics
+                    # Send to the Graphite that collects skyline metrics not
+                    # via flux queue which could send to a different Graphite
+                    # skyline_metric_data = [skyline_metric, listen_added_to_queue, timestamp_for_metrics, use_backfill]
+                    # try:
+                    #     self.q.put(skyline_metric_data, block=False)
+                    # except Exception as e:
+                    #     logger.error('error :: worker :: failed to add data %s to send to Graphite to flux.httpMetricDataQueue - %s' % (
+                    #         str(metric_data), e))
+                    # @added 20210729 - Feature #4060: skyline.flux.worker.discarded metrics
+                    # Send to the Graphite that collects skyline metrics not
+                    # via flux queue which could send to a different Graphite
+                    try:
+                        send_graphite_metric(skyline_app, skyline_metric, listen_added_to_queue)
+                    except Exception as e:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: worker :: failed to send_graphite_metric %s with %s - %s' % (
+                            skyline_metric, str(listen_added_to_queue), e))
 
                 metric_data_queue_size = 0
                 try:
