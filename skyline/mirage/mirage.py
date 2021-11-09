@@ -197,6 +197,12 @@ except:
     except:
         SKYLINE_FEEDBACK_NAMESPACES = [this_host]
 
+# @added 20210701 - Feature #4152: DO_NOT_SKIP_SKYLINE_FEEDBACK_NAMESPACES
+try:
+    DO_NOT_SKIP_SKYLINE_FEEDBACK_NAMESPACES = list(settings.DO_NOT_SKIP_SKYLINE_FEEDBACK_NAMESPACES)
+except:
+    DO_NOT_SKIP_SKYLINE_FEEDBACK_NAMESPACES = []
+
 # @added 20201208 - Feature #3866: MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
 #                   Task #3868: POC MIRAGE_ENABLE_HIGH_RESOLUTION_ANALYSIS
 try:
@@ -1239,7 +1245,9 @@ class Mirage(Thread):
             # @modified 20191022 - Bug #3266: py3 Redis binary objects not strings
             #                      Branch #3262: py3
             # derivative_metrics = list(self.redis_conn.smembers('derivative_metrics'))
-            derivative_metrics = list(self.redis_conn_decoded.smembers('derivative_metrics'))
+            # @modified 20211012 - Feature #4280: aet.metrics_manager.derivative_metrics Redis hash
+            # derivative_metrics = list(self.redis_conn_decoded.smembers('derivative_metrics'))
+            derivative_metrics = list(self.redis_conn_decoded.smembers('aet.metrics_manager.derivative_metrics'))
         except:
             derivative_metrics = []
         redis_metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(metric))
@@ -2560,11 +2568,28 @@ class Mirage(Thread):
                             feedback_cache_key_exists = False
                             feedback_cache_key = 'mirage.feedback_metric.checked.%s' % (base_name)
                             feedback_metric_process_time = int(time())
+
+                            # @added 20210701 - Feature #4152: DO_NOT_SKIP_SKYLINE_FEEDBACK_NAMESPACES
+                            if feedback_metric:
+                                for do_not_skip in DO_NOT_SKIP_SKYLINE_FEEDBACK_NAMESPACES:
+                                    pattern_match = False
+                                    try:
+                                        pattern_match, metric_matched_by = matched_or_regexed_in_list(skyline_app, base_name, DO_NOT_SKIP_SKYLINE_FEEDBACK_NAMESPACES)
+                                        del metric_matched_by
+                                    except Exception as e:
+                                        logger.error(traceback.format_exc())
+                                        logger.error('error :: matched_or_regexed_in_list failed checking %s in DO_NOT_SKIP_SKYLINE_FEEDBACK_NAMESPACES - %s' % (
+                                            base_name, e))
+                                        pattern_match = False
+                                    if pattern_match:
+                                        feedback_metric = False
+                                        logger.info('%s matched DO_NOT_SKIP_SKYLINE_FEEDBACK_NAMESPACES, will analyse' % base_name)
+
                             if feedback_metric:
                                 try:
                                     feedback_cache_key_exists = self.redis_conn_decoded.get(feedback_cache_key)
                                 except:
-                                    logger.info(traceback.format_exc())
+                                    logger.error(traceback.format_exc())
                                     logger.error('error :: failed to get %s key from Redis' % (
                                         str(feedback_cache_key)))
                                 if feedback_cache_key_exists:
@@ -2631,9 +2656,9 @@ class Mirage(Thread):
                                     alerted_on_seconds_ago = int(time()) - alerted_on_at
                                     if alerted_on_seconds_ago >= settings.PANORAMA_EXPIRY_TIME:
                                         remove_alerted_on_metric_check = False
-                                except:
+                                except Exception as e:
+                                    logger.error('error :: failed determining if alerted more than PANORAMA_EXPIRY_TIME seconds ago - %s' % str(e))
                                     remove_alerted_on_metric_check = True
-                                    pass
                         if remove_feedback_metric_check or remove_alerted_on_metric_check:
                             if remove_feedback_metric_check:
                                 log_str = 'feedback metric'
@@ -3201,7 +3226,7 @@ class Mirage(Thread):
                     try:
                         self.redis_conn.setex(redis_waterfall_alert_key, 300, waterfall_alert_check_timestamp)
                     except:
-                        logger.info(traceback.format_exc())
+                        logger.error(traceback.format_exc())
                         logger.error('error :: failed to add Redis key - %s for waterfall alert' % (
                             redis_waterfall_alert_key))
 
@@ -3626,6 +3651,18 @@ class Mirage(Thread):
                                                     str(snab_panorama_details)))
                                                 panorama_three_sigma_snab_added.append(snab_panorama_details)
 
+                                # @added 20210801 - Feature #4214: alert.paused
+                                alert_paused = False
+                                try:
+                                    cache_key = 'alert.paused.%s.%s' % (alert[1], base_name)
+                                    alert_paused = self.redis_conn_decoded.get(cache_key)
+                                except Exception as e:
+                                    logger.error('error :: alert_paused check failed: %s' % str(e))
+                                    alert_paused = False
+                                if alert_paused:
+                                    logger.info('alert_paused for %s %s until %s' % (
+                                        alert[1], base_name, str(alert_paused)))
+
                                 # trigger_alert(alert, metric, second_order_resolution_seconds, context)
                                 try:
 
@@ -3741,33 +3778,40 @@ class Mirage(Thread):
                                         #                      Branch #3068: SNAB
                                         # Use the appropriate alert context
                                         if new_alert:
-                                            logger.info('trigger_alert :: alert: %s, metric: %s, second_order_resolution_seconds: %s, context: %s' % (
-                                                str(new_alert), str(metric),
-                                                str(second_order_resolution_seconds),
-                                                str(alert_context)))
-                                            # @modified 20210304 - Feature #3642: Anomaly type classification
-                                            #                      Feature #3970: custom_algorithm - adtk_level_shift
-                                            # Added triggered_algorithms
-                                            trigger_alert(new_alert, metric, second_order_resolution_seconds, alert_context, triggered_algorithms)
+                                            # @added 20210801 - Feature #4214: alert.paused
+                                            if not alert_paused:
+                                                logger.info('trigger_alert :: alert: %s, metric: %s, second_order_resolution_seconds: %s, context: %s' % (
+                                                    str(new_alert), str(metric),
+                                                    str(second_order_resolution_seconds),
+                                                    str(alert_context)))
+                                                # @modified 20210304 - Feature #3642: Anomaly type classification
+                                                #                      Feature #3970: custom_algorithm - adtk_level_shift
+                                                # Added triggered_algorithms
+                                                trigger_alert(new_alert, metric, second_order_resolution_seconds, alert_context, triggered_algorithms)
                                         else:
-                                            logger.info('trigger_alert :: alert: %s, metric: %s, second_order_resolution_seconds: %s, context: %s' % (
+                                            # @added 20210801 - Feature #4214: alert.paused
+                                            if not alert_paused:
+                                                logger.info('trigger_alert :: alert: %s, metric: %s, second_order_resolution_seconds: %s, context: %s' % (
+                                                    str(alert), str(metric),
+                                                    str(second_order_resolution_seconds),
+                                                    str(alert_context)))
+                                                # @modified 20210304 - Feature #3642: Anomaly type classification
+                                                #                      Feature #3970: custom_algorithm - adtk_level_shift
+                                                # Added triggered_algorithms
+                                                trigger_alert(alert, metric, second_order_resolution_seconds, alert_context, triggered_algorithms)
+                                    else:
+                                        # @added 20210801 - Feature #4214: alert.paused
+                                        if not alert_paused:
+                                            logger.info('smtp_trigger_alert :: alert: %s, metric: %s, second_order_resolution_seconds: %s, context: %s' % (
                                                 str(alert), str(metric),
                                                 str(second_order_resolution_seconds),
                                                 str(alert_context)))
                                             # @modified 20210304 - Feature #3642: Anomaly type classification
                                             #                      Feature #3970: custom_algorithm - adtk_level_shift
                                             # Added triggered_algorithms
-                                            trigger_alert(alert, metric, second_order_resolution_seconds, alert_context, triggered_algorithms)
-                                    else:
-                                        logger.info('smtp_trigger_alert :: alert: %s, metric: %s, second_order_resolution_seconds: %s, context: %s' % (
-                                            str(alert), str(metric),
-                                            str(second_order_resolution_seconds),
-                                            str(alert_context)))
-                                        # @modified 20210304 - Feature #3642: Anomaly type classification
-                                        #                      Feature #3970: custom_algorithm - adtk_level_shift
-                                        # Added triggered_algorithms
-                                        smtp_trigger_alert(alert, metric, second_order_resolution_seconds, alert_context, triggered_algorithms)
-                                    logger.info('sent %s alert: For %s' % (alert[1], metric[1]))
+                                            smtp_trigger_alert(alert, metric, second_order_resolution_seconds, alert_context, triggered_algorithms)
+                                    if not alert_paused:
+                                        logger.info('sent %s alert: For %s' % (alert[1], metric[1]))
                                 except Exception as e:
                                     logger.error('error :: could not send %s alert for %s: %s' % (alert[1], metric[1], e))
 
