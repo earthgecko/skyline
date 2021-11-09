@@ -6,6 +6,7 @@ import traceback
 from multiprocessing import Queue
 from logger import set_up_logging
 import string
+from ast import literal_eval
 
 import falcon
 
@@ -90,6 +91,7 @@ for char in string.digits:
 
 # @added 20201018 - Feature #3798: FLUX_PERSIST_QUEUE
 redis_conn = get_redis_conn('flux')
+redis_conn_decoded = None
 
 # @added 20210406 - Feature #4004: flux - aggregator.py and FLUX_AGGREGATE_NAMESPACES
 aggregate_metrics = []
@@ -102,6 +104,25 @@ if FLUX_AGGREGATE_NAMESPACES or FLUX_EXTERNAL_AGGREGATE_NAMESPACES:
     except Exception as e:
         logger.error('error :: listen :: could get Redis set metrics_manager.flux.aggregate_metrics - %s' % str(e))
         aggregate_metrics = []
+
+external_flux_keys = {}
+skyline_external_settings = {}
+if not redis_conn_decoded:
+    redis_conn_decoded = get_redis_conn_decoded('flux')
+try:
+    skyline_external_settings_raw = redis_conn_decoded.get('skyline.external_settings')
+    if skyline_external_settings_raw:
+        skyline_external_settings = literal_eval(skyline_external_settings_raw)
+except Exception as e:
+    logger.error('error :: listen :: could get Redis set skyline.external_settings - %s' % str(e))
+    skyline_external_settings = {}
+if skyline_external_settings:
+    for settings_key in list(skyline_external_settings.keys()):
+        if 'flux_token' in list(skyline_external_settings[settings_key].keys()):
+            flux_token = skyline_external_settings[settings_key]['flux_token']
+            if flux_token:
+                valid_keys.append(str(flux_token))
+                external_flux_keys[flux_token] = skyline_external_settings[settings_key]['namespace']
 
 
 def validate_key(caller, apikey):
@@ -142,7 +163,11 @@ def validate_key(caller, apikey):
                     metric_namespace_prefix = settings.FLUX_API_KEYS[apikey]
                 except:
                     metric_namespace_prefix = None
-                    pass
+            if apikey in list(external_flux_keys.keys()):
+                try:
+                    metric_namespace_prefix = external_flux_keys[apikey]
+                except:
+                    metric_namespace_prefix = None
 
         if not keyValid:
             # @modified 20210421 - Task #4030: refactoring
@@ -224,8 +249,8 @@ def validate_timestamp(caller, timestamp):
 
 # @added 20201006 - Feature #3764: flux validate metric name
 def validate_metric_name(caller, metric):
-    for char in metric:
-        if char not in ALLOWED_CHARS:
+    for vchar in metric:
+        if vchar not in ALLOWED_CHARS:
             logger.error('error :: %s :: invalid char in metric - %s' % (
                 caller, str(metric)))
             return False
@@ -294,6 +319,21 @@ def add_to_aggregate_metric_queue(metric, metric_data, aggregate_metrics):
                         aggregate_metric_timestamp = None
         except:
             pass
+
+    # @added 20210718
+    # Added aggregate
+    aggregate_passed = False
+    try:
+        aggregate_passed = metric_data[4]
+        if aggregate_passed:
+            aggregate_metric = True
+    except IndexError:
+        aggregate_passed = False
+    except Exception as e:
+        if LOCAL_DEBUG:
+            logger.error('error :: listen :: add_to_aggregate_metric_queue could determine aggregate from metric_data for %s - %s' % (metric, str(e)))
+        aggregate_passed = False
+
     # Add the metric to the flux/aggregator queue
     if aggregate_metric:
         try:
@@ -432,7 +472,10 @@ class MetricData(object):
                         except Exception as e:
                             logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_key - %s' % e)
 
-                        resp.status = falcon.HTTP_400
+                        # @modified 20210909
+                        # Return 401 if bad key
+                        # resp.status = falcon.HTTP_400
+                        resp.status = falcon.HTTP_401
                         return
             except:
                 logger.error(traceback.format_exc())
@@ -446,7 +489,10 @@ class MetricData(object):
                 except Exception as e:
                     logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_key - %s' % e)
 
-                resp.status = falcon.HTTP_400
+                # @modified 20210909
+                # Return 401 if bad key
+                # resp.status = falcon.HTTP_400
+                resp.status = falcon.HTTP_401
                 return
 
             try:
@@ -462,9 +508,9 @@ class MetricData(object):
                     else:
                         # @added 20210511 - Feature #4060: skyline.flux.worker.discarded metrics
                         unique_value = None
-                        for request_param_key, request_param_value in req.params.items():
-                            if str(request_param_key) == 'metric':
-                                metric = str(request_param_value)
+                        for r_param_key, r_param_value in req.params.items():
+                            if str(r_param_key) == 'metric':
+                                metric = str(r_param_value)
                         if not metric:
                             metric = str(time())
                         try:
@@ -484,9 +530,9 @@ class MetricData(object):
                 # @added 20210511 - Feature #4060: skyline.flux.worker.discarded metrics
                 unique_value = None
                 if not metric:
-                    for request_param_key, request_param_value in req.params.items():
-                        if str(request_param_key) == 'metric':
-                            metric = str(request_param_value)
+                    for r_param_key, r_param_value in req.params.items():
+                        if str(r_param_key) == 'metric':
+                            metric = str(r_param_value)
                 if not metric:
                     metric = str(time())
                 try:
@@ -798,6 +844,20 @@ class MetricDataPost(object):
         # @added 20200206 - Feature #3444: Allow flux to backfill
         backfill = False
 
+        # @added 20210718
+        aggregate = False
+
+        # @added 20211018 - Feature #4284: flux - telegraf
+        # Allow the key to be passed as a HTTP header rather than in the json
+        # payload
+        header_apikey = None
+        try:
+            header_apikey = req.get_header('apikey')
+        except Exception as err:
+            logger.error('listen :: get_header(\'apikey\') error - %s' % str(err))
+        if header_apikey:
+            logger.info('debug :: listen :: get_header(\'apikey\') - %s' % str(header_apikey))
+
         # @added 20200115 - Feature #3394: flux health check
         # Added status parameter so that the flux listen process can be monitored
         status = None
@@ -807,14 +867,14 @@ class MetricDataPost(object):
             status = False
         if status:
             try:
-                logger.info('worker :: POST status - ok')
+                logger.info('listen :: POST status - ok')
                 body = {"status": "ok"}
                 resp.body = json.dumps(body)
                 resp.status = falcon.HTTP_200
                 return
             except Exception as e:
                 logger.error(traceback.format_exc())
-                logger.error('error :: worker :: could not validate the status key POST request argument - %s - %s' % (
+                logger.error('error :: listen :: could not validate the status key POST request argument - %s - %s' % (
                     str(req.query_string), e))
                 resp.status = falcon.HTTP_500
                 return
@@ -822,8 +882,25 @@ class MetricDataPost(object):
         # @added 20200818 - Feature #3694: flux - POST multiple metrics
         metric_namespace_prefix = None
 
+        # @added 20211018 - Feature #4284: flux - telegraf
+        # Allow the key to be passed as a HTTP header rather than in the json
+        # payload
+        if header_apikey:
+            key = header_apikey
+        else:
+            key = None
+            try:
+                key = str(postData['key'])
+            except Exception as e:
+                logger.error(traceback.format_exc())
+                logger.error('error :: listen :: could not determine the key from POST data - %s - %s' % (
+                    str(postData), e))
+
         try:
-            key = str(postData['key'])
+            # @modified 20211018 - Feature #4284: flux - telegraf
+            # Allow the key to be passed as a HTTP header or in the json payload
+            # key = str(postData['key'])
+
             # @modified 20200818 - Feature #3694: flux - POST multiple metrics
             # Added metric_namespace_prefix
             keyValid, metric_namespace_prefix = validate_key('listen :: MetricDataPOST POST', key)
@@ -840,7 +917,11 @@ class MetricDataPost(object):
                 except Exception as e:
                     logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_key - %s' % e)
 
-                resp.status = falcon.HTTP_400
+                # @modified 20210909
+                # Return 401 if bad key
+                # resp.status = falcon.HTTP_400
+                resp.status = falcon.HTTP_401
+
                 return
             if LOCAL_DEBUG:
                 logger.debug('debug :: listen :: valid key, metric_namespace_prefix set to %s' % str(metric_namespace_prefix))
@@ -858,8 +939,32 @@ class MetricDataPost(object):
             except Exception as e:
                 logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_key - %s' % e)
 
-            resp.status = falcon.HTTP_400
+            # @modified 20210909
+            # Return 401 if bad key
+            # resp.status = falcon.HTTP_400
+            resp.status = falcon.HTTP_401
             return
+
+        # @added 20211103 - Feature #4316: flux - validate_key
+        validated_key = False
+        try:
+            validated_key = postData['validate_key']
+            logger.info('debug :: listen :: validate_key: %s' % str(validated_key))
+        except KeyError:
+            validated_key = False
+        except Exception as err:
+            logger.error(traceback.format_exc())
+            logger.error('error :: listen :: failed to determine validated_key - %s' % str(err))
+        if validated_key:
+            try:
+                body = {"status": "key valid"}
+                resp.body = json.dumps(body)
+                logger.info('debug :: listen :: validate_key returning 200')
+                resp.status = falcon.HTTP_200
+                return
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: listen :: failed to response to validate_key request - %s' % str(err))
 
         # @added 20200818 - Feature #3694: flux - POST multiple metrics
         # Determine if the POST data is for a single metric or multiple metrics
@@ -888,6 +993,30 @@ class MetricDataPost(object):
 
             resp.status = falcon.HTTP_400
             return
+
+        # @added 20211018 - Feature #4284: flux - telegraf
+        # Allow the key to be passed as a HTTP header rather than in the json
+        # payload
+        telegraf_payload = False
+        telegraf_keys_list = ['fields', 'name', 'tags', 'timestamp']
+        if metrics:
+            if isinstance(metrics, list):
+                if len(metrics) > 0:
+                    if isinstance(metrics[0], dict):
+                        if sorted(list(metrics[0].keys())) == telegraf_keys_list:
+                            telegraf_payload = True
+        telegraf_metrics = []
+        if telegraf_payload:
+            for telegraf_metric_dict in metrics:
+                # Create metric name
+                # TODO
+                # metric = '%s.'  % (
+                #     telegraf_metric_dict['tags']['host'],
+                #     telegraf_metric_dict['tags']['host'],
+                # )
+                metric = None
+                telegraf_metrics.append(metric)
+
         if metrics:
             # added 20201211 - Feature #3694: flux - POST multiple metrics
             # Added metric count
@@ -1159,6 +1288,16 @@ class MetricDataPost(object):
             except:
                 backfill = False
 
+            # @added 20210718
+            try:
+                aggregate = postData['aggregate']
+                if aggregate == 'true':
+                    aggregate = True
+            except KeyError:
+                aggregate = False
+            except:
+                aggregate = False
+
             try:
                 timestamp_present = str(postData['timestamp'])
             except:
@@ -1234,7 +1373,7 @@ class MetricDataPost(object):
                     return
 
             if not key:
-                logger.error('error :: listen :: no key in the POST data - %s - returning 400' % (
+                logger.error('error :: listen :: no key in the POST data - %s - returning 401' % (
                     str(postData)))
 
                 # @added 20210511 - Feature #4060: skyline.flux.worker.discarded metrics
@@ -1246,7 +1385,10 @@ class MetricDataPost(object):
                 except Exception as e:
                     logger.error('error :: listen :: failed to add entry to Redis set flux.listen.discarded.invalid_key - %s' % e)
 
-                resp.status = falcon.HTTP_400
+                # @modified 20210909
+                # Return 401 if bad key
+                # resp.status = falcon.HTTP_400
+                resp.status = falcon.HTTP_401
                 return
             if not metric:
                 logger.error('error :: listen :: no metric in the POST data - %s - returning 400' % (
@@ -1301,7 +1443,9 @@ class MetricDataPost(object):
             try:
                 # @modified 20200206 - Feature #3444: Allow flux to backfill
                 # Added backfill
-                metric_data = [metric, value, timestamp, backfill]
+                # @modified 20210718
+                # Added aggregate
+                metric_data = [metric, value, timestamp, backfill, aggregate]
                 # @added 20201018 - Feature #3798: FLUX_PERSIST_QUEUE
                 # Add to data to the flux.queue Redis set
                 if FLUX_PERSIST_QUEUE and metric_data:
@@ -1316,7 +1460,10 @@ class MetricDataPost(object):
                 # aggregate_metrics list, if not found in there then the elements of the
                 # metric name are checked to see if element could any possible match an
                 # aggregation namespace, only then is Redis queried.
-                if aggregate_metrics:
+                # @modified 20210718
+                # Added aggregate
+                # if aggregate_metrics:
+                if aggregate_metrics or aggregate:
                     added_to_aggregation_queue, return_status_code = add_to_aggregate_metric_queue(metric, metric_data, aggregate_metrics)
                     if added_to_aggregation_queue:
                         if return_status_code == 500:
@@ -1336,9 +1483,12 @@ class MetricDataPost(object):
                 except Exception as e:
                     logger.error('error :: listen :: failed to increment to Redis key flux.listen.added_to_queue - %s' % e)
 
-            except:
+            except Exception as err:
                 logger.error(traceback.format_exc())
-                logger.error('error :: listen :: adding POST metric_data to the flux.httpMetricDataQueue queue - %s' % str(metric_data))
+                # logger.error('error :: listen :: adding POST metric_data to the flux.httpMetricDataQueue queue - %s' % str(metric_data))
+                logger.error('error :: listen :: adding POST metric_data to the flux.httpMetricDataQueue queue - [%s, %s, %s, %s, %s] - %s' % (
+                    str(metric), str(value), str(timestamp), str(backfill),
+                    str(aggregate), err))
                 resp.status = falcon.HTTP_500
                 return
 
