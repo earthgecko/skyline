@@ -1,0 +1,106 @@
+{% block metric_related_to_metrics_block %}
+<!-- BEGIN /luminosity?metric_related_to_metrics=true block -->
+{% if print_debug == 'True' %}
+<code> DEBUG </code> :: /luminosity metric_related_to_metrics block</br>
+{% endif %}
+
+{% if display_message %}
+<code> ERROR </code></br>
+<code> message </code>: {{ display_message }}<br>
+{% endif %}
+
+<div class="navbar-header" role="navigation">
+  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+    <span class="sr-only">Toggle navigation</span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+  </button>
+		<ul class="nav nav-tabs" role="view_tablist" id="view">
+		  <li><a href="?classify_metrics=true"><span class="logo"><span class="sky">Classify</span> <span class="re">metrics</span></span></a></li>
+		  <li><a href="?cloudbursts=true"><span class="logo"><span class="sky">Cloud</span><span class="re">bursts</span></span></a></li>
+		  <li class="active"><a href="?related_metrics=true"><span class="logo"><span class="sky">Related</span><span class="re"> metrics</span></span></a></li>
+		</ul>
+		<div class="tab-content">
+	  	<div class="tab-pane active" id="view">
+	<br>
+  <div class="navbar-header" role="navigation">
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+  </div>
+
+  <div class="tab-pane active" id="related_metrics">
+
+	<div class="col-md-12">
+		<ul class="nav nav-tabs" role="tablist" id="list_by-tabs">
+		  <li><a href="?related_metrics=true"><span class="logo"><span class="sky">Related</span></a></li>
+		  <li class="active"><a href="?related_to_metrics=true"><span class="logo"><span class="sky">Related</span> <span class="re">to metrics</span></span></a></li>
+		</ul>
+		<div class="tab-content">
+	<div class="col-md-12">
+
+    <h4><span class="logo"><span class="sky">Related ::</span> <span class="re">to metrics :: </span></span>{{ metric }} (with metric id {{ metric_id }})</h4>
+    <p>
+  {% if related_to_metrics[metric]['related_to_metrics']|length > 0 %}
+    <code>{{ metric }}</code> has been found to correlate in the following metric groups and occurs as a related metric to the metrics listed below.<br>
+    The confidence score shown is the score of the metric within the metric group itself.<br>
+    A confidence score of >= 0.7 indicates a high level of confidence that the metrics are related.<br>
+    The link on each metric goes to page for that metric_group.<br>
+  {% else %}
+    <code>{{ metric }}</code> has not been found in any metric groups.<br>
+  {% endif %}
+    </p>
+		<table class="table table-hover">
+			<thead>
+				<tr>
+            <th>metric</th>
+{% for key in related_to_metrics_keys %}
+            <th>{{ key }}</th>
+{% endfor %}
+				</tr>
+			</thead>
+			<tbody>
+{% for related_to_metric in related_to_metrics[metric]['related_to_metrics'] %}
+          <tr>
+            <td onclick="window.location='?metric_related_metrics=true&metric={{ related_to_metric }}'">
+              <a href="?metric_related_metrics=true&metric={{ related_to_metric }}">{{ related_to_metric }}</a>
+            </td>
+  {% for key in related_to_metrics_keys %}
+    {% set value = related_to_metrics[metric]['related_to_metrics'][related_to_metric][key] %}
+            <td>
+    {% if key == 'confidence' %}
+      {% if value >= 0.7 %}
+              <font color="green"><strong>{{ value }}</strong></font>
+      {% elif value < 0.7 and value >= 0.5 %}
+              <font color="orange"><strong>{{ value }}</strong></font>
+      {% else %}
+              <font color="red">{{ value }}</font>
+      {% endif %}
+    {% else %}
+              {{ value }}
+    {% endif %}
+            </td>
+  {% endfor %}
+          </tr>
+{% endfor %}
+			</tbody>
+		</table>
+	</div>
+
+    </div> <!-- END div class="col-md-12" -->
+
+	</div>
+	</div>
+	</div>
+  </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- END /luminosity?metric_related_to_metrics=true block block -->
+{% endblock %}
