@@ -34,6 +34,17 @@ if True:
     if flux_process_uploads:
         from uploaded_data_worker import UploadedDataWorker
 
+    # @added 20211026 - Branch #4300: prometheus
+    prometheus_settings = {}
+    try:
+        prometheus_settings = settings.PROMETHEUS_SETTINGS
+    except AttributeError:
+        prometheus_settings = {}
+    except Exception as err:
+        prometheus_settings = {}
+    if prometheus_settings:
+        from prometheus import PrometheusMetricDataPost
+
 # @added 20201018 - Feature #3798: FLUX_PERSIST_QUEUE
 try:
     FLUX_PERSIST_QUEUE = settings.FLUX_PERSIST_QUEUE
@@ -129,6 +140,13 @@ httpMetricData = MetricData()
 populateMetric = PopulateMetric()
 httpMetricDataPost = MetricDataPost()
 
+# @added 20211026 - Branch #4300: prometheus
+if prometheus_settings:
+    prometheusMetricDataPost = PrometheusMetricDataPost()
+
 api.add_route('/metric_data', httpMetricData)
 api.add_route('/populate_metric', populateMetric)
 api.add_route('/metric_data_post', httpMetricDataPost)
+# @added 20211026 - Branch #4300: prometheus
+if prometheus_settings:
+    api.add_route('/prometheus/write', prometheusMetricDataPost)
