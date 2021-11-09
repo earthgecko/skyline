@@ -357,7 +357,7 @@ class Metrics_Manager(Thread):
             logger.error('error :: metrics_manager :: sync_cluster_files - failed to get %s from %s' % (
                 str(endpoint), str(remote_skyline_instance[0])))
         if not r:
-            logger.warn('warning :: metrics_manager :: sync_cluster_files - no r from %s on %s' % (
+            logger.warning('warning :: metrics_manager :: sync_cluster_files - no r from %s on %s' % (
                 endpoint, str(remote_skyline_instance[0])))
             return data
         if r:
@@ -371,14 +371,12 @@ class Metrics_Manager(Thread):
                     if not os.path.isfile(save_file):
                         logger.error('error :: metrics_manager :: sync_cluster_files - failed to save_file %s from %s' % (
                             str(save_file), str(remote_skyline_instance[0])))
-                        return False
                     else:
                         file_saved = True
                 except:
                     logger.error(traceback.format_exc())
                     logger.error('error :: metrics_manager :: sync_cluster_files - failed to get %s from %s' % (
                         endpoint, str(remote_skyline_instance[0])))
-                    return False
                 return file_saved
 
             js = None
@@ -470,7 +468,7 @@ class Metrics_Manager(Thread):
 
         for remote_skyline_instance in REMOTE_SKYLINE_INSTANCES:
             if training_data_fetched >= max_training_data_to_fetch:
-                logger.warn('warning :: metrics_manager :: fetched training data has reached the limit of %s, not continuing to fetch more this run' % str(max_training_data_to_fetch))
+                logger.warning('warning :: metrics_manager :: fetched training data has reached the limit of %s, not continuing to fetch more this run' % str(max_training_data_to_fetch))
                 break
             remote_training_data = []
             data_required = 'metrics'
@@ -668,7 +666,7 @@ class Metrics_Manager(Thread):
         if get_features_profile_dirs:
             for fp_id in get_features_profile_dirs:
                 if fps_fetched >= max_fps_to_fetch:
-                    logger.warn('warning :: metrics_manager :: get_features_profile_dirs has reached the limit of %s, not continuing to fetch more this run' % str(max_fps_to_fetch))
+                    logger.warning('warning :: metrics_manager :: get_features_profile_dirs has reached the limit of %s, not continuing to fetch more this run' % str(max_fps_to_fetch))
                     break
                 features_profile_dir = None
                 endpoint = None
@@ -2032,6 +2030,69 @@ class Metrics_Manager(Thread):
         else:
             logger.info('metrics_manager :: thunder_no_data - all namespaces receiving data OK')
 
+        # @added 20210720 - Feature #4188: metrics_manager.boundary_metrics
+        if settings.BOUNDARY_METRICS:
+            # Build boundary metrics
+            boundary_metrics_hash_key = 'metrics_manager.boundary_metrics'
+            boundary_metrics = {}
+            for base_name in unique_base_names:
+                try:
+                    for metric in settings.BOUNDARY_METRICS:
+                        pattern_match, metric_matched_by = matched_or_regexed_in_list(skyline_app, base_name, [metric[0]])
+                        if pattern_match:
+                            boundary_metrics[base_name] = {}
+                            algorithm = metric[1]
+                            boundary_metrics[base_name][algorithm] = {}
+                            boundary_metrics[base_name][algorithm]['expiry'] = metric[2]
+                            boundary_metrics[base_name][algorithm]['min_average'] = metric[3]
+                            boundary_metrics[base_name][algorithm]['min_average_seconds'] = metric[4]
+                            boundary_metrics[base_name][algorithm]['trigger_value'] = metric[5]
+                            boundary_metrics[base_name][algorithm]['alert_threshold'] = metric[6]
+                            boundary_metrics[base_name][algorithm]['alert_vias'] = metric[7]
+                except Exception as e:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: metrics_manager :: failed to determine boundary_metrics - %s' % e)
+            boundary_metrics_redis_dict = {}
+            boundary_metrics_base_names = []
+            logger.info('metrics_manager :: %s boundary_metrics identified from the %s unique_base_names' % (
+                str(len(boundary_metrics)), str(len(unique_base_names))))
+            boundary_metrics_keys_updated = 0
+            if boundary_metrics:
+                boundary_metrics_base_names = list(boundary_metrics.keys())
+                try:
+                    boundary_metrics_redis_dict = self.redis_conn_decoded.hgetall(boundary_metrics_hash_key)
+                except Exception as e:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: metrics_manager :: failed to get Redis hash key %s - %s' % (
+                        boundary_metrics_hash_key, e))
+                for base_name in boundary_metrics_base_names:
+                    try:
+                        self.redis_conn.hset(
+                            boundary_metrics_hash_key, base_name,
+                            str(boundary_metrics[base_name]))
+                        boundary_metrics_keys_updated += 1
+                    except Exception as e:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: metrics_manager :: failed to add entry to %s for - %s - %s' % (
+                            boundary_metrics_hash_key, base_name, e))
+
+            # Remove entries not defined in BOUNDARY_METRICS
+            boundary_metrics_keys_removed = 0
+            if boundary_metrics and boundary_metrics_redis_dict:
+                for base_name in list(boundary_metrics_redis_dict.keys()):
+                    if base_name not in boundary_metrics_base_names:
+                        try:
+                            self.redis_conn.hdel(boundary_metrics_hash_key, base_name)
+                            boundary_metrics_keys_removed += 1
+                        except Exception as e:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: metrics_manager :: failed to delete entry in %s for - %s - %s' % (
+                                boundary_metrics_hash_key, base_name, e))
+            if boundary_metrics:
+                logger.info('metrics_manager :: updated: %s, removed: %s entries in the Redis hash key %s' % (
+                    str(boundary_metrics_keys_updated),
+                    str(boundary_metrics_keys_removed), boundary_metrics_hash_key))
+
         del unique_base_names
 
         # @added 20201030 - Feature #3808: ANALYZER_DYNAMICALLY_ANALYZE_LOW_PRIORITY_METRICS
@@ -2256,10 +2317,10 @@ class Metrics_Manager(Thread):
             # @modified 20201210 - Feature #3870: metrics_manager - check_data_sparsity
             # Allow SKIP_CHECK_DATA_SPARSITY_NAMESPACES
             # for i, metric_name in enumerate(unique_metrics):
-            for i, metric_name in enumerate(check_metrics):
+            for check_metric_index, metric_name in enumerate(check_metrics):
                 try:
                     try:
-                        raw_series = raw_assigned[i]
+                        raw_series = raw_assigned[check_metric_index]
                         unpacker = Unpacker(use_list=False)
                         unpacker.feed(raw_series)
                         timeseries = list(unpacker)
@@ -2351,6 +2412,16 @@ class Metrics_Manager(Thread):
                             update_metrics_resolutions_key = False
                         metrics_with_unknown_resolution.append(base_name)
 
+                    # @added 20210702 - Feature #4148: analyzer.metrics_manager.resolutions
+                    #                   Bug #4146: check_data_sparsity - incorrect on low fidelity and inconsistent metrics
+                    # Never set the metric_resolution to a negative int
+                    if update_metrics_resolutions_key:
+                        if int(metric_resolution) < 1:
+                            logger.info('metrics_manager :: update_metrics_resolutions_key - not updating %s resolution from %s to %s (invalid resolution)' % (
+                                base_name, str(last_known_metric_resolution),
+                                str(metric_resolution)))
+                            update_metrics_resolutions_key = False
+
                     if update_metrics_resolutions_key:
                         if last_known_metric_resolution is not None:
                             logger.info('metrics_manager :: update_metrics_resolutions_key - updating %s resolution from %s to %s' % (
@@ -2370,6 +2441,11 @@ class Metrics_Manager(Thread):
                                     str(metric_name), e))
                                 check_sparsity_error_log = True
                             check_sparsity_error_count += 1
+
+                    # @added 20210702 - Feature #4148: analyzer.metrics_manager.resolutions
+                    #                   Bug #4146: check_data_sparsity - incorrect on low fidelity and inconsistent metrics
+                    # Explicitly set data_sparsity
+                    data_sparsity = None
 
                     if metric_resolution:
                         try:
@@ -2702,7 +2778,7 @@ class Metrics_Manager(Thread):
                         str(len(metrics_last_timestamp_dict)),
                         metrics_last_timestamp_hash_key))
                 else:
-                    logger.warn('warning :: ANALYZER_CHECK_LAST_TIMESTAMP enabled but got no data from the %s Redis hash key' % (
+                    logger.warning('warning :: ANALYZER_CHECK_LAST_TIMESTAMP enabled but got no data from the %s Redis hash key' % (
                         metrics_last_timestamp_hash_key))
             except:
                 logger.error(traceback.format_exc())
@@ -2863,17 +2939,61 @@ class Metrics_Manager(Thread):
                 logger.error('error :: metrics_manager :: failed to %s remove entries from Redis hash key %s' % (
                     str(len(timestamp_floats_to_remove)), redis_hash))
         else:
+            logger.info('metrics_manager :: there are no entries that need to be removed from Redis hash %s' % (
+                redis_hash))
+
+        # @added 20210803 - Feature #4164: luminosity - cloudbursts
+        # Manage the luminosity.cloudbursts.anomalies_processed Redis hash and
+        # remove keys that are older than 24 hours
+        redis_hash = 'luminosity.cloudbursts.anomalies_processed'
+        remove_before = int(time()) - 86400
+        luminosity_cloudburst_anomalies_processed = {}
+        try:
+            luminosity_cloudburst_anomalies_processed = self.redis_conn_decoded.hgetall(redis_hash)
+            logger.info('metrics_manager :: %s entries to check in the %s Redis hash key' % (
+                str(len(luminosity_cloudburst_anomalies_processed)), redis_hash))
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: metrics_manager :: failed to get Redis hash key %s' % redis_hash)
+            luminosity_cloudburst_anomalies_processed = {}
+        remove_keys = []
+        for key in list(luminosity_cloudburst_anomalies_processed.keys()):
+            try:
+                if luminosity_cloudburst_anomalies_processed[key] < remove_before:
+                    remove_keys.append(key)
+            except Exception as e:
+                logger.error('error :: metrics_manager :: failed to determine timestamp from %s entry from Redis hash key %s - %s' % (
+                    key, redis_hash, e))
+        if remove_keys:
+            # Remove entries from the hash
+            try:
+                self.redis_conn.hdel(redis_hash, *set(remove_keys))
+                logger.info('metrics_manager :: %s entries were removed from Redis hash %s' % (
+                    str(len(set(remove_keys))), redis_hash))
+            except Exception as e:
+                logger.error(traceback.format_exc())
+                logger.error('error :: metrics_manager :: failed to %s remove entries from Redis hash key %s - %s' % (
+                    str(len(remove_keys)), redis_hash, e))
+        else:
             logger.info('metrics_manager :: there are no entries or files that need to be removed from Redis hash %s' % (
                 redis_hash))
+
+        # @added 20210825 - Feature #4164: luminosity - cloudbursts
+        metric_names_with_ids = {}
+        # @added 20211004 - Feature #4264: luminosity - cross_correlation_relationships
+        ids_with_metric_names = {}
 
         # @added 20210430 - Task #4030: refactoring
         metric_names = []
         try:
-            metric_names = get_all_db_metric_names(skyline_app)
-        except Exception as e:
+            # @modified 20210825 - Feature #4164: luminosity - cloudbursts
+            # metric_names = get_all_db_metric_names(skyline_app)
+            with_ids = True
+            metric_names, metric_names_with_ids = get_all_db_metric_names(skyline_app, with_ids)
+        except Exception as err:
             logger.error(traceback.format_exc())
             logger.error('error :: metrics_manager :: failed to get_all_db_metric_names - %s' % (
-                e))
+                err))
         if metric_names:
             try:
                 self.redis_conn.rename('analyzer.metrics_manager.db.metric_names', 'aet.analyzer.metrics_manager.db.metric_names')
@@ -2886,6 +3006,152 @@ class Metrics_Manager(Thread):
             except Exception as e:
                 logger.error(traceback.format_exc())
                 logger.error('error :: metrics_manager :: failed to add multiple members to the analyzer.metrics_manager.db.metrics_fully_populated Redis set - %s' % e)
+
+        # @added 20211011 - Feature #4278: luminosity - related_namespaces
+        # Create and manage the metrics_manager.namespaces Redis hash but only
+        # update it if new data
+        if metric_names_with_ids:
+            update_namespaces = False
+            aet_metric_names_with_ids = {}
+            try:
+                aet_metric_names_with_ids = self.redis_conn_decoded.hgetall('aet.metrics_manager.metric_names_with_ids')
+                logger.info('metrics_manager :: got last aet.metrics_manager.metric_names_with_ids from Redis to check namespaces')
+            except Exception as err:
+                logger.error('metrics_manager :: failed to hgetall aet.metrics_manager.metric_names_with_ids to check namespace - %s' % err)
+            namespaces = {}
+            try:
+                namespaces = self.redis_conn_decoded.hgetall('metrics_manager.namespaces')
+                logger.info('metrics_manager :: got metrics_manager.namespaces from Redis to check namespaces')
+            except Exception as err:
+                logger.error('metrics_manager :: failed to hgetall metrics_manager.namespaces to check namespaces - %s' % err)
+            if not namespaces:
+                update_namespaces = True
+                logger.info('metrics_manager :: no known namespaces updating namespaces')
+            if aet_metric_names_with_ids:
+                last_metric_names = list(set(list(aet_metric_names_with_ids.keys())))
+                if metric_names:
+                    current_metric_names = list(set(list(aet_metric_names_with_ids.keys())))
+                if current_metric_names != last_metric_names:
+                    update_namespaces = True
+                    logger.info('metrics_manager :: metrics changes updating namespaces')
+            if not update_namespaces:
+                logger.info('metrics_manager :: no changes to metrics not updating namespaces')
+            if update_namespaces:
+                namespaces_list = []
+                for base_name in current_metric_names:
+                    namespace_elements = base_name.split('.')
+                    namespaces_list.append('.'.join(namespace_elements[0:-1]))
+                namespaces = {}
+                for namespace in namespaces_list:
+                    if namespace == '':
+                        continue
+                    namespace_element_count = 0
+                    for r_base_name in current_metric_names:
+                        if namespace in r_base_name:
+                            namespace_element_count += 1
+                    if namespace_element_count:
+                        namespaces[namespace] = namespace_element_count
+                sorted_namespaces = {}
+                for namespace in sorted(list(namespaces.keys())):
+                    sorted_namespaces[namespace] = namespaces[namespace]
+                if sorted_namespaces:
+                    try:
+                        self.redis_conn.hset('metrics_manager.namespaces', mapping=sorted_namespaces)
+                        logger.info('metrics_manager :: set %s namespaces in metrics_manager.namespaces Redis hash' % str(len(list(sorted_namespaces.keys()))))
+                    except Exception as err:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: metrics_manager :: failed to create metrics_manager.namespaces Redis hash - %s' % str(err))
+
+        if metric_names_with_ids:
+            try:
+                self.redis_conn.rename('metrics_manager.metric_names_with_ids', 'aet.metrics_manager.metric_names_with_ids')
+                logger.info('metrics_manager :: created the aet.metrics_manager.metric_names_with_ids Redis set')
+            except Exception as err:
+                logger.error('metrics_manager :: failed to created the aet.metrics_manager.metric_names_with_ids Redis set - %s' % err)
+            try:
+                self.redis_conn.hset('metrics_manager.metric_names_with_ids', mapping=metric_names_with_ids)
+                logger.info('metrics_manager :: created and added %s metrics to the metrics_manager.metric_names_with_ids Redis hash' % str(len(metric_names_with_ids)))
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: metrics_manager :: failed to create metrics_manager.metric_names_with_ids Redis hash - %s' % err)
+
+            # @added 20211004 - Feature #4264: luminosity - cross_correlation_relationships
+            ids_with_metric_names = {}
+            for c_metric_name in list(metric_names_with_ids.keys()):
+                c_metric_id = int(str(metric_names_with_ids[c_metric_name]))
+                ids_with_metric_names[c_metric_id] = c_metric_name
+            try:
+                self.redis_conn.rename('metrics_manager.ids_with_metric_names', 'aet.metrics_manager.ids_with_metric_names')
+                logger.info('metrics_manager :: created the aet.metrics_manager.ids_with_metric_names Redis set')
+            except Exception as err:
+                logger.error('metrics_manager :: failed to created the aet.metrics_manager.ids_with_metric_names Redis set - %s' % err)
+            try:
+                self.redis_conn.hset('metrics_manager.ids_with_metric_names', mapping=ids_with_metric_names)
+                logger.info('metrics_manager :: created and added %s metrics to the metrics_manager.ids_with_metric_names Redis hash' % str(len(ids_with_metric_names)))
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: metrics_manager :: failed to create metrics_manager.ids_with_metric_names Redis hash - %s' % err)
+
+        # @added 20211012 - Feature #4280: aet.metrics_manager.derivative_metrics Redis hash
+        current_derivative_metrics = []
+        try:
+            current_derivative_metrics = list(self.redis_conn_decoded.smembers('derivative_metrics'))
+        except Exception as err:
+            logger.error('metrics_manager :: failed to get derivative_metrics Redis set - %s' % str(err))
+        add_derivative_metrics = {}
+        derivative_metric_timestamp = int(time())
+        for derivative_metric in current_derivative_metrics:
+            add_derivative_metrics[derivative_metric] = derivative_metric_timestamp
+        if add_derivative_metrics:
+            try:
+                self.redis_conn.hset('aet.metrics_manager.derivative_metrics.timestamps', mapping=add_derivative_metrics)
+                logger.info('metrics_manager :: set %s namespaces in aet.metrics_manager.derivative_metrics.timestamps Redis hash' % str(len(list(add_derivative_metrics.keys()))))
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: metrics_manager :: failed to create aet.metrics_manager.derivative_metrics.timestamps Redis hash - %s' % str(err))
+        aet_metrics_manager_derivative_metrics_timestamps = {}
+        try:
+            aet_metrics_manager_derivative_metrics_timestamps = self.redis_conn_decoded.hgetall('aet.metrics_manager.derivative_metrics.timestamps')
+            logger.info('metrics_manager :: got aet.metrics_manager.derivative_metrics.timestamps from Redis to check derivative_metric timestamps')
+        except Exception as err:
+            logger.error('metrics_manager :: failed to hgetall aet.metrics_manager.derivative_metrics.timestamps to check derivative_metric timestamps - %s' % str(err))
+        derivative_metrics_to_remove = []
+        new_current_derivative_metrics = []
+        remove_derivative_metric_older_than = derivative_metric_timestamp - 3600
+        if aet_metrics_manager_derivative_metrics_timestamps:
+            for derivative_metric in list(aet_metrics_manager_derivative_metrics_timestamps.keys()):
+                try:
+                    derivative_metric_last_updated = int(str(aet_metrics_manager_derivative_metrics_timestamps[derivative_metric]))
+                    if derivative_metric_last_updated < remove_derivative_metric_older_than:
+                        derivative_metrics_to_remove.append(derivative_metric)
+                    else:
+                        new_current_derivative_metrics.append(derivative_metric)
+                except Exception as err:
+                    logger.error('metrics_manager :: failed to determine derivative_metric_last_updated - %s' % str(err))
+        if not derivative_metrics_to_remove:
+            logger.info('metrics_manager :: not removing any metrics from aet.metrics_manager.derivative_metrics.timestamps Redis hash as all have been updated in last hour')
+        if derivative_metrics_to_remove:
+            logger.info('metrics_manager :: removing %s metrics from aet.metrics_manager.derivative_metrics.timestamps Redis hash as older than 1 hour' % str(len(derivative_metrics_to_remove)))
+            try:
+                self.redis_conn.hdel('aet.metrics_manager.derivative_metrics.timestamps', *set(derivative_metrics_to_remove))
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: metrics_manager :: failed to remove %s metrics from the Redis hash key aet.metrics_manager.derivative_metrics.timestamps - %s' % (
+                    str(len(derivative_metrics_to_remove)), str(err)))
+            logger.info('metrics_manager :: removing %s metrics from aet.metrics_manager.derivative_metrics Redis set as older than 1 hour' % str(len(derivative_metrics_to_remove)))
+            try:
+                self.redis_conn.srem('aet.metrics_manager.derivative_metrics', *set(derivative_metrics_to_remove))
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: metrics_manager :: failed to remove %s metrics from the Redis hash key aet.metrics_manager.derivative_metrics - %s' % (
+                    str(len(derivative_metrics_to_remove)), str(err)))
+        if new_current_derivative_metrics:
+            logger.info('metrics_manager :: adding %s metrics to aet.metrics_manager.derivative_metrics Redis set' % str(len(new_current_derivative_metrics)))
+            try:
+                self.redis_conn.sadd('aet.metrics_manager.derivative_metrics', *set(new_current_derivative_metrics))
+            except:
+                logger.error(traceback.format_exc())
+                logger.error('error :: metrics_manager :: failed to add multiple members to the aet.metrics_manager.derivative_metrics Redis set')
 
         # @added 20210624 - Feature #4150: metrics_manager - roomba batch processing metrics
         #                   Feature #3650: ROOMBA_DO_NOT_PROCESS_BATCH_METRICS
@@ -3041,7 +3307,7 @@ class Metrics_Manager(Thread):
                 SERVER_METRIC_PATH = ''
         except Exception as e:
             SERVER_METRIC_PATH = ''
-            logger.warn('warning :: metrics_manager :: settings.SERVER_METRICS_NAME is not declared in settings.py, defaults to \'\' - %s' % e)
+            logger.warning('warning :: metrics_manager :: settings.SERVER_METRICS_NAME is not declared in settings.py, defaults to \'\' - %s' % e)
         try:
             ANALYZER_ENABLED = settings.ANALYZER_ENABLED
             logger.info('metrics_manager :: ANALYZER_ENABLED is set to %s' % str(ANALYZER_ENABLED))
