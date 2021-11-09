@@ -79,6 +79,9 @@ if True:
         add_panorama_alert,
         # @added 20201013 - Feature #3780: skyline_functions - sanitise_graphite_url
         encode_graphite_metric_name)
+    # @added 20210724 - Feature #4196: functions.aws.send_sms
+    from functions.aws.send_sms import send_sms
+    from functions.settings.get_sms_recipients import get_sms_recipients
 
 # @added 20201127 - Feature #3820: HORIZON_SHARDS
 try:
@@ -222,7 +225,9 @@ def alert_smtp(datapoint, metric_name, expiration_time, metric_trigger, algorith
     # @modified 20191022 - Bug #3266: py3 Redis binary objects not strings
     #                      Branch #3262: py3
     try:
-        derivative_metrics = list(REDIS_ALERTER_CONN.smembers('derivative_metrics'))
+        # @modified 20211012 - Feature #4280: aet.metrics_manager.derivative_metrics Redis hash
+        # derivative_metrics = list(REDIS_ALERTER_CONN.smembers('derivative_metrics'))
+        derivative_metrics = list(REDIS_ALERTER_CONN.smembers('aet.metrics_manager.derivative_metrics'))
     except:
         derivative_metrics = []
     redis_metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(metric_name))
@@ -951,11 +956,15 @@ def alert_slack(datapoint, metric_name, expiration_time, metric_trigger, algorit
                 if not slack_file_upload['ok']:
                     logger.error('error :: alert_slack - failed to send slack message with file upload')
                     logger.error('error :: alert_slack - slack_file_upload - %s' % str(slack_file_upload))
-                try:
-                    os.remove(image_file)
-                except OSError:
-                    logger.error('error - failed to remove %s, continuing' % image_file)
-                    pass
+                # @modified 20210708 - Bug #4166: Allow boundary to send same image to multiple slack channels
+                # If there are multiple slack channels for an alert, the
+                # image_file is removed after posting to the first channel and
+                # subsequent channel posts fail.  Moved to outside the loop.
+                # try:
+                #     os.remove(image_file)
+                # except OSError:
+                #     logger.error('error - failed to remove %s, continuing' % image_file)
+                #     pass
             else:
                 send_text = initial_comment + '  ::  error :: there was no graph image to upload'
                 send_message = sc.api_call(
@@ -978,6 +987,14 @@ def alert_slack(datapoint, metric_name, expiration_time, metric_trigger, algorit
                 logger.error(
                     'error :: failed to add Panorama alert event - panorama.alert.%s.%s' % (
                         str(metric_timestamp), metric_name))
+
+    # @added 20210708 - Bug #4166: Allow boundary to send same image to multiple slack channels
+    # Move from inside the channels loop above.
+    try:
+        os.remove(image_file)
+    except OSError:
+        logger.error('error - failed to remove %s, continuing' % image_file)
+        pass
 
 
 # @added 20200122: Feature #3396: http_alerter
@@ -1206,6 +1223,47 @@ def alert_http(alerter, datapoint, metric_name, expiration_time, metric_trigger,
     else:
         logger.info('alert_http :: settings.HTTP_ALERTERS_ENABLED not enabled nothing to do')
         return
+
+
+# @added 20210724 - Feature #4196: functions.aws.send_sms
+def alert_sms(datapoint, metric_name, expiration_time, metric_trigger, algorithm, metric_timestamp, alert_threshold):
+    """
+    Called by :func:`~trigger_alert` and sends anomalies to a SMS endpoint.
+
+    """
+    if not settings.AWS_SNS_SMS_ALERTS_ENABLED:
+        logger.error('error :: alert_sms recieved but settings.AWS_SNS_SMS_ALERTS_ENABLED not enabled - metric %s' % (
+            str(metric_name)))
+        return
+    if metric_name.startswith(settings.FULL_NAMESPACE):
+        base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+    else:
+        base_name = metric_name
+    if alert_threshold == 0:
+        alert_threshold = 1
+    message = '[Skyline alert] Boundary - %s: %s triggered %s %s times' % (
+        base_name, str(datapoint), algorithm, str(alert_threshold))
+    sms_recipients = []
+    try:
+        sms_recipients = get_sms_recipients(skyline_app, base_name)
+    except Exception as e:
+        logger.error(traceback.format_exc())
+        logger.error('error :: get_sms_recipients failed checking %s - %s' % (
+            base_name, e))
+    logger.info('sending SMS alert to %s' % str(sms_recipients))
+    for sms_number in sms_recipients:
+        success = False
+        response = None
+        try:
+            success, response = send_sms(skyline_app, sms_number, message)
+        except Exception as e:
+            logger.error(traceback.format_exc())
+            logger.error('error :: failed to determine number for SMS recipient %s - %s' % (
+                sms_number, e))
+        if success:
+            logger.info('sent SMS alert to %s' % sms_number)
+        else:
+            logger.warn('warning :: falied to send SMS alert to %s' % sms_number)
 
 
 # @modified 20201207 - Task #3878: Add metric_trigger and alert_threshold to Boundary alerts
