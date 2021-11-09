@@ -5374,6 +5374,18 @@ class Analyzer(Thread):
                                 # is sent to Mirage.
                                 if settings.ENABLE_FULL_DURATION_ALERTS:
 
+                                    # @added 20210801 - Feature #4214: alert.paused
+                                    alert_paused = False
+                                    try:
+                                        cache_key = 'alert.paused.%s.%s' % (alert[1], base_name)
+                                        alert_paused = self.redis_conn_decoded.get(cache_key)
+                                    except Exception as e:
+                                        logger.error('error :: alert_paused check failed: %s' % str(e))
+                                    if alert_paused:
+                                        logger.info('alert_paused for %s %s until %s' % (
+                                            alert[1], base_name, str(alert_paused)))
+                                        continue
+
                                     # @modified 20200413 - Feature #3486: analyzer_batch
                                     #                      Feature #3480: batch_processing
                                     # Change the last_alert cache key to hold the
@@ -5614,6 +5626,19 @@ class Analyzer(Thread):
                                     logger.info(
                                         'debug :: Memory usage in run before triggering alert: %s (kb)' %
                                         resource.getrusage(resource.RUSAGE_SELF).ru_maxrss)
+
+                                # @added 20210801 - Feature #4214: alert.paused
+                                alert_paused = False
+                                try:
+                                    cache_key = 'alert.paused.%s.%s' % (alert[1], base_name)
+                                    alert_paused = self.redis_conn_decoded.get(cache_key)
+                                except Exception as e:
+                                    logger.error('error :: alert_paused check failed: %s' % str(e))
+                                    alert_paused = False
+                                if alert_paused:
+                                    logger.info('alert_paused for %s %s until %s' % (
+                                        alert[1], base_name, str(alert_paused)))
+
                                 try:
                                     if alert[1] != 'smtp':
 
@@ -5664,19 +5689,25 @@ class Analyzer(Thread):
                                         #                      Feature #3734: waterfall alerts
                                         #                      Branch #3068: SNAB
                                         if new_alert:
-                                            trigger_alert(new_alert, metric, context)
-                                            logger.info('trigger_alert :: alert: %s, metric: %s, context: %s' % (
-                                                str(new_alert), str(metric), str(context)))
+                                            # @added 20210801 - Feature #4214: alert.paused
+                                            if not alert_paused:
+                                                trigger_alert(new_alert, metric, context)
+                                                logger.info('trigger_alert :: alert: %s, metric: %s, context: %s' % (
+                                                    str(new_alert), str(metric), str(context)))
                                         else:
-                                            trigger_alert(alert, metric, context)
-                                            logger.info('trigger_alert :: alert: %s, metric: %s, context: %s' % (
-                                                str(alert), str(metric), str(context)))
+                                            # @added 20210801 - Feature #4214: alert.paused
+                                            if not alert_paused:
+                                                trigger_alert(alert, metric, context)
+                                                logger.info('trigger_alert :: alert: %s, metric: %s, context: %s' % (
+                                                    str(alert), str(metric), str(context)))
                                     else:
-                                        smtp_trigger_alert(alert, metric, context)
-                                        logger.info('smtp_trigger_alert :: alert: %s, metric: %s, context: %s' % (
-                                            str(alert), str(metric), str(context)))
-                                        if LOCAL_DEBUG:
-                                            logger.debug('debug :: smtp_trigger_alert spawned')
+                                        # @added 20210801 - Feature #4214: alert.paused
+                                        if not alert_paused:
+                                            smtp_trigger_alert(alert, metric, context)
+                                            logger.info('smtp_trigger_alert :: alert: %s, metric: %s, context: %s' % (
+                                                str(alert), str(metric), str(context)))
+                                            if LOCAL_DEBUG:
+                                                logger.debug('debug :: smtp_trigger_alert spawned')
                                     if LOCAL_DEBUG:
                                         logger.info(
                                             'debug :: Memory usage in run after triggering alert: %s (kb)' %
