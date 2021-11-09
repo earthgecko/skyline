@@ -249,7 +249,9 @@ class AnalyzerBatch(Thread):
         # In order to convert monotonic, incrementing metrics to a deriative
         # metric
         try:
-            derivative_metrics = list(self.redis_conn_decoded.smembers('derivative_metrics'))
+            # @modified 20211012 - Feature #4280: aet.metrics_manager.derivative_metrics Redis hash
+            # derivative_metrics = list(self.redis_conn_decoded.smembers('derivative_metrics'))
+            derivative_metrics = list(self.redis_conn_decoded.smembers('aet.metrics_manager.derivative_metrics'))
         except:
             derivative_metrics = []
         try:

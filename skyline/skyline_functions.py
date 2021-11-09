@@ -706,7 +706,9 @@ def get_graphite_metric(
 #            current_logger.error('error :: %s - redis connection failed' % current_skyline_app)
 
     try:
-        derivative_metrics = list(REDIS_CONN_DECODED.smembers('derivative_metrics'))
+        # @modified 20211012 - Feature #4280: aet.metrics_manager.derivative_metrics Redis hash
+        # derivative_metrics = list(REDIS_CONN_DECODED.smembers('derivative_metrics'))
+        derivative_metrics = list(REDIS_CONN_DECODED.smembers('aet.metrics_manager.derivative_metrics'))
     except:
         derivative_metrics = []
     redis_metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(metric))
@@ -1742,7 +1744,9 @@ def is_derivative_metric(current_skyline_app, base_name):
         current_logger.error('error :: known_derivative_metric - get_redis_conn failed')
 
     try:
-        derivative_metrics = list(REDIS_CONN_DECODED.smembers('derivative_metrics'))
+        # @modified 20211012 - Feature #4280: aet.metrics_manager.derivative_metrics Redis hash
+        # derivative_metrics = list(REDIS_CONN_DECODED.smembers('derivative_metrics'))
+        derivative_metrics = list(REDIS_CONN_DECODED.smembers('aet.metrics_manager.derivative_metrics'))
     except:
         derivative_metrics = []
     try:
@@ -2607,7 +2611,7 @@ def get_anomaly_id(current_skyline_app, base_name, timestamp):
     # additional lags.  Panorama will not add multiple anomalies from the same
     # metric in the time window so there is no need to consider the possibility
     # of there being multiple anomaly ids being returned.
-    grace_from_timestamp = int(timestamp) - 120
+    grace_from_timestamp = int(timestamp) - 300
     grace_until_timestamp = int(timestamp) + 120
     url = '%s/panorama?metric=%s&from_timestamp=%s&until_timestamp=%s&panorama_anomaly_id=true' % (
         settings.SKYLINE_URL, str(base_name), str(grace_from_timestamp),

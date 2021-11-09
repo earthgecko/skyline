@@ -311,7 +311,18 @@ def panorama_request():
                 if ":" in from_timestamp:
                     import time
                     import datetime
-                    new_from_timestamp = time.mktime(datetime.datetime.strptime(from_timestamp, '%Y%m%d %H:%M').timetuple())
+                    # @modified 20211021 - handle multiple date formats
+                    try:
+                        new_from_timestamp = time.mktime(datetime.datetime.strptime(from_timestamp, '%Y%m%d %H:%M').timetuple())
+                    except ValueError:
+                        new_from_timestamp = time.mktime(datetime.datetime.strptime(from_timestamp, '%Y-%m-%d %H:%M').timetuple())
+                    except Exception as err:
+                        trace = traceback.format_exc()
+                        logger.error('%s' % trace)
+                        fail_msg = 'error :: panorama_request :: failed to unix timestamp from from_timestamp - %s' % str(err)
+                        logger.error('%s' % fail_msg)
+                        raise  # to webapp to return in the UI
+
                     from_timestamp = str(int(new_from_timestamp))
 
                 if needs_and:
@@ -329,7 +340,18 @@ def panorama_request():
                 if ":" in until_timestamp:
                     import time
                     import datetime
-                    new_until_timestamp = time.mktime(datetime.datetime.strptime(until_timestamp, '%Y%m%d %H:%M').timetuple())
+                    # @modified 20211021 - handle multiple date formats
+                    try:
+                        new_until_timestamp = time.mktime(datetime.datetime.strptime(until_timestamp, '%Y%m%d %H:%M').timetuple())
+                    except ValueError:
+                        new_until_timestamp = time.mktime(datetime.datetime.strptime(until_timestamp, '%Y-%m-%d %H:%M').timetuple())
+                    except Exception as err:
+                        trace = traceback.format_exc()
+                        logger.error('%s' % trace)
+                        fail_msg = 'error :: panorama_request :: failed to unix timestamp from until_timestamp - %s' % str(err)
+                        logger.error('%s' % fail_msg)
+                        raise  # to webapp to return in the UI
+
                     until_timestamp = str(int(new_until_timestamp))
 
                 if needs_and:
@@ -698,7 +720,9 @@ def luminosity_remote_data(anomaly_timestamp, resolution):
     # we just trust the Redis derivative_metrics list.  This increases
     # performance on 1267 metrics from 6.442009 seconds to 1.473067 seconds
     try:
-        derivative_metrics = list(REDIS_CONN_DECODED.smembers('derivative_metrics'))
+        # @modified 20211012 - Feature #4280: aet.metrics_manager.derivative_metrics Redis hash
+        # derivative_metrics = list(REDIS_CONN_DECODED.smembers('derivative_metrics'))
+        derivative_metrics = list(REDIS_CONN_DECODED.smembers('aet.metrics_manager.derivative_metrics'))
     except:
         derivative_metrics = []
 
@@ -1315,7 +1339,18 @@ def get_mirage_not_anomalous_metrics(
         from_timestamp = request.args.get('from_timestamp', None)
         if from_timestamp == 'today':
             # from_timestamp_date_str = current_date_str
-            new_from_timestamp = time.mktime(datetime.datetime.strptime(current_date_str, '%Y-%m-%d %H:%M').timetuple())
+            # @modified 20211021 - handle multiple date formats
+            try:
+                new_from_timestamp = time.mktime(datetime.datetime.strptime(current_date_str, '%Y-%m-%d %H:%M').timetuple())
+            except ValueError:
+                new_from_timestamp = time.mktime(datetime.datetime.strptime(current_date_str, '%Y-%m-%d %H:%M').timetuple())
+            except Exception as err:
+                trace = traceback.format_exc()
+                logger.error('%s' % trace)
+                fail_msg = 'error :: panorama_request :: failed to unix timestamp from current_date_str - %s' % str(err)
+                logger.error('%s' % fail_msg)
+                raise  # to webapp to return in the UI
+
             from_timestamp = str(int(new_from_timestamp))
         if from_timestamp and from_timestamp != 'today':
             if ":" in from_timestamp:
@@ -1325,11 +1360,33 @@ def get_mirage_not_anomalous_metrics(
                 #     # Handle old format
                 #     datetime_object = datetime.datetime.strptime(from_timestamp, '%Y%m%d %H:%M')
                 # from_timestamp_date_str = str(datetime_object.date())
-                new_from_timestamp = time.mktime(datetime.datetime.strptime(from_timestamp, '%Y-%m-%d %H:%M').timetuple())
+                # @modified 20211021 - handle multiple date formats
+                try:
+                    new_from_timestamp = time.mktime(datetime.datetime.strptime(from_timestamp, '%Y-%m-%d %H:%M').timetuple())
+                except ValueError:
+                    new_from_timestamp = time.mktime(datetime.datetime.strptime(from_timestamp, '%Y%m%d %H:%M').timetuple())
+                except Exception as err:
+                    trace = traceback.format_exc()
+                    logger.error('%s' % trace)
+                    fail_msg = 'error :: panorama_request :: failed to unix timestamp from from_timestamp - %s' % str(err)
+                    logger.error('%s' % fail_msg)
+                    raise  # to webapp to return in the UI
+
                 from_timestamp = str(int(new_from_timestamp))
     else:
         # from_timestamp_date_str = current_date_str
-        new_from_timestamp = time.mktime(datetime.datetime.strptime(current_date_str, '%Y-%m-%d %H:%M').timetuple())
+        # @modified 20211021 - handle multiple date formats
+        try:
+            new_from_timestamp = time.mktime(datetime.datetime.strptime(current_date_str, '%Y-%m-%d %H:%M').timetuple())
+        except ValueError:
+            new_from_timestamp = time.mktime(datetime.datetime.strptime(current_date_str, '%Y%m%d %H:%M').timetuple())
+        except Exception as err:
+            trace = traceback.format_exc()
+            logger.error('%s' % trace)
+            fail_msg = 'error :: panorama_request :: failed to unix timestamp from current_date_str - %s' % str(err)
+            logger.error('%s' % fail_msg)
+            raise  # to webapp to return in the UI
+
         from_timestamp = str(int(new_from_timestamp))
 
     if not until_timestamp and 'until_timestamp' in request.args:
@@ -1341,7 +1398,18 @@ def get_mirage_not_anomalous_metrics(
             if ":" in until_timestamp:
                 # datetime_object = datetime.datetime.strptime(until_timestamp, '%Y-%m-%d %H:%M')
                 # until_timestamp_date_str = str(datetime_object.date())
-                new_until_timestamp = time.mktime(datetime.datetime.strptime(until_timestamp, '%Y-%m-%d %H:%M').timetuple())
+                # @modified 20211021 - handle multiple date formats
+                try:
+                    new_until_timestamp = time.mktime(datetime.datetime.strptime(until_timestamp, '%Y-%m-%d %H:%M').timetuple())
+                except ValueError:
+                    new_until_timestamp = time.mktime(datetime.datetime.strptime(until_timestamp, '%Y%m%d %H:%M').timetuple())
+                except Exception as err:
+                    trace = traceback.format_exc()
+                    logger.error('%s' % trace)
+                    fail_msg = 'error :: panorama_request :: failed to unix timestamp from until_timestamp - %s' % str(err)
+                    logger.error('%s' % fail_msg)
+                    raise  # to webapp to return in the UI
+
                 until_timestamp = str(int(new_until_timestamp))
     else:
         # until_timestamp_date_str = current_date_str
