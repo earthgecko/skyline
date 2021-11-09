@@ -1,0 +1,150 @@
+{% block cloudbursts_block %}
+<!-- BEGIN /luminosity?cloudbursts=true block -->
+{% if print_debug == 'True' %}
+<code> DEBUG </code> :: /luminosity cloudbursts block</br>
+{% endif %}
+
+{% if display_message %}
+<code> ERROR </code></br>
+<code> message </code>: {{ display_message }}<br>
+{% endif %}
+
+<div class="navbar-header" role="navigation">
+  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+    <span class="sr-only">Toggle navigation</span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+  </button>
+		<ul class="nav nav-tabs" role="view_tablist" id="view">
+		  <li><a href="?classify_metrics=true"><span class="logo"><span class="sky">Classify</span> <span class="re">metrics</span></span></a></li>
+		  <li class="active"><a href="?cloudbursts=true"><span class="logo"><span class="sky">Cloud</span><span class="re">bursts</span></span></a></li>
+		  <li><a href="?related_metrics=true"><span class="logo"><span class="sky">Related</span><span class="re"> metrics</span></span></a></li>
+		</ul>
+		<div class="tab-content">
+	  	<div class="tab-pane active" id="view">
+	<br>
+  <div class="navbar-header" role="navigation">
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+  </div>
+
+<!--	<div class="col-md-9 col-md-pull-3"> -->
+	<div class="col-md-12">
+		<ul class="nav nav-tabs" role="tablist" id="list_by-tabs">
+		  <li class="active"><a href="?cloudbursts=true">Search</a></li>
+		  <li><a href="?cloudbursts_plot=true"><span class="logo"><span class="sky">Plot</span> <span class="re">cloudbursts</span></span></a></li>
+		</ul>
+		<div class="tab-content">
+
+  		<div class="col-md-12">
+<!--  		<div class="container"> -->
+  		  <h4><span class="logo"><span class="sky">Search ::</span> <span class="re">cloudbursts</span></span></h4>
+  {% if cloudbursts_dict %}
+        <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#search_options">Show search options</button>
+        <div id="search_options" class="collapse">
+  {% endif %}
+        <form action="luminosity">
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Search criteria</th>
+  		        <th>filter</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+  		        <td>Cloudbursts search</td>
+  		        <td><select name="cloudbursts">
+                <option value="true">true</option>
+              </select></td>
+  		      </tr>
+  		      <tr>
+  		        <td>metric:</td>
+  		        <td><input type="text" name="metric" value="all" /></td>
+  		      </tr>
+  		      <tr>
+  		        <td>namespaces:</td>
+  		        <td><input type="text" name="namespaces" value="all" /></td>
+  		      </tr>
+  		      <tr>
+  		        <td>from_timestamp</td>
+  		        <td><input type="text" name="from_timestamp" value="all"> (unix timestamp or %Y%m%d %H:%M)</td>
+  		      </tr>
+  		      <tr>
+  		        <td>until_timestamp</td>
+  		        <td><input type="text" name="until_timestamp" value="all"> (unix timestamp or %Y%m%d %H:%M)</td>
+  		      </tr>
+  		    </tbody>
+  		  </table>
+        <br>
+        <input type="submit" value="Search">
+      </form>
+  {% if cloudbursts_dict %}
+<!-- collapse button div -->
+      </div>
+  {% endif %}
+      </div>
+
+  {% if cloudbursts_dict %}
+	  <div class="tab-pane active" id="search">
+      <h4><span class="logo"><span class="sky">Cloudbursts ::</span> <span class="re">found</span></span> {{ cloudbursts_dict|length }}</h4>
+	  <div class="alert alert-info">
+	    A cloudburst represents a significant changepoint on a metric.  These are not necessarily anomalies, they are simply significant sustained changespoints
+	  </div>
+
+			<table class="table table-hover">
+				<thead>
+					<tr>
+    {% for key in cloudburst_keys %}
+            <th>{{ key }}</th>
+    {% endfor %}
+            <th>lag (hrs)</th>
+					</tr>
+				</thead>
+				<tbody>
+    {% for cloudburst_id in cloudbursts_dict %}
+          <tr>
+      {% for key in cloudburst_keys %}
+        {% set value = cloudbursts_dict[cloudburst_id][key] %}
+          {% if key == 'id' %}
+            <td onclick="window.location='?plot_cloudburst=true&cloudburst_id={{ value }}&metric={{ cloudbursts_dict[cloudburst_id]['metric'] }}'">
+              <a href="?plot_cloudburst=true&cloudburst_id={{ value }}&metric={{ cloudbursts_dict[cloudburst_id]['metric'] }}">{{ value }}</a>
+          {% else %}
+            <td>
+              {{ value }}
+          {% endif %}
+            </td>
+      {% endfor %}
+            <td>
+      {% set value = (cloudbursts_dict[cloudburst_id]['added_at'] - cloudbursts_dict[cloudburst_id]['timestamp']) / 60 / 60 %}
+      {% if value|int == 0 %}
+              {{ value }}
+      {% else %}
+              {{ value|int }}
+      {% endif %}
+            </td>
+          </tr>
+    {% endfor %}
+				</tbody>
+			</table>
+		</div>
+  {% endif %}
+
+    </div> <!-- END div class="col-md-12" -->
+
+	</div>
+	</div>
+	</div>
+  </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- END /luminosity?cloudbursts=true block -->
+{% endblock %}

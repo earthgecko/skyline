@@ -1,0 +1,100 @@
+{% block related_to_metrics_block %}
+<!-- BEGIN /luminosity?related_to_metrics=true block -->
+{% if print_debug == 'True' %}
+<code> DEBUG </code> :: /luminosity related_to_metrics block</br>
+{% endif %}
+
+{% if display_message %}
+<code> ERROR </code></br>
+<code> message </code>: {{ display_message }}<br>
+{% endif %}
+
+<div class="navbar-header" role="navigation">
+  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+    <span class="sr-only">Toggle navigation</span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+  </button>
+		<ul class="nav nav-tabs" role="view_tablist" id="view">
+		  <li><a href="?classify_metrics=true"><span class="logo"><span class="sky">Classify</span> <span class="re">metrics</span></span></a></li>
+		  <li><a href="?cloudbursts=true"><span class="logo"><span class="sky">Cloud</span><span class="re">bursts</span></span></a></li>
+		  <li class="active"><a href="?related_metrics=true"><span class="logo"><span class="sky">Related</span><span class="re"> metrics</span></span></a></li>
+		</ul>
+		<div class="tab-content">
+	  	<div class="tab-pane active" id="view">
+	<br>
+  <div class="navbar-header" role="navigation">
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+  </div>
+
+  <div class="tab-pane active" id="related_to_metrics">
+
+	<div class="col-md-12">
+		<ul class="nav nav-tabs" role="tablist" id="list_by-tabs">
+		  <li><a href="?related_metrics=true"><span class="logo"><span class="sky">Related</span></a></li>
+		  <li class="active"><a href="?related_to_metrics=true"><span class="logo"><span class="sky">Related</span> <span class="re">to metrics</span></span></a></li>
+		</ul>
+		<div class="tab-content">
+	<div class="col-md-12">
+
+  {% if metric %}
+  <h4><span class="logo"><span class="sky">Related ::</span> <span class="re"> to metrics :: </span></span>{{ related_to_metrics|length }} metrics found which this metric is related to</h4>
+  {% else %}
+  <h4><span class="logo"><span class="sky">Related ::</span> <span class="re"> to metrics</span></span></h4>
+  {% endif %}
+
+  {% if related_to_metrics and metric %}
+        <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#search_options">Show search options</button>
+        <div id="search_options" class="collapse">
+  {% endif %}
+  <p>
+  Find what related metrics groups a metric occurs in.
+  </p>
+        <form action="luminosity">
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Search criteria</th>
+  		        <th>filter</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+  		        <td>Related to metrics search</td>
+  		        <td><select name="related_to_metrics">
+                <option value="true">true</option>
+              </select></td>
+  		      </tr>
+  		      <tr>
+  		        <td>metric:</td>
+  		        <td><input type="text" name="metric" value="" /></td>
+  		      </tr>
+  		    </tbody>
+  		  </table>
+        <br>
+        <input type="submit" value="Search">
+      </form>
+  {% if related_to_metrics %}
+<!-- collapse button div -->
+      </div>
+  {% endif %}
+
+    </div> <!-- END div class="col-md-12" -->
+
+	</div>
+	</div>
+	</div>
+  </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- END /ionosphere?fp_validate=true block -->
+{% endblock %}

@@ -1,0 +1,145 @@
+{% block related_metrics_block %}
+<!-- BEGIN /luminosity?related_metrics=true block -->
+{% if print_debug == 'True' %}
+<code> DEBUG </code> :: /luminosity related_metrics block</br>
+{% endif %}
+
+{% if display_message %}
+<code> ERROR </code></br>
+<code> message </code>: {{ display_message }}<br>
+{% endif %}
+
+<div class="navbar-header" role="navigation">
+  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+    <span class="sr-only">Toggle navigation</span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+  </button>
+		<ul class="nav nav-tabs" role="view_tablist" id="view">
+		  <li><a href="?classify_metrics=true"><span class="logo"><span class="sky">Classify</span> <span class="re">metrics</span></span></a></li>
+		  <li><a href="?cloudbursts=true"><span class="logo"><span class="sky">Cloud</span><span class="re">bursts</span></span></a></li>
+		  <li class="active"><a href="?related_metrics=true"><span class="logo"><span class="sky">Related</span><span class="re"> metrics</span></span></a></li>
+		</ul>
+		<div class="tab-content">
+	  	<div class="tab-pane active" id="view">
+	<br>
+  <div class="navbar-header" role="navigation">
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+  </div>
+
+  <div class="tab-pane active" id="related_metrics">
+
+	<div class="col-md-12">
+		<ul class="nav nav-tabs" role="tablist" id="list_by-tabs">
+		  <li class="active"><a href="?related_metrics=true"><span class="logo"><span class="sky">Related</span></a></li>
+		  <li><a href="?related_to_metrics=true"><span class="logo"><span class="sky">Related</span> <span class="re">to metrics</span></span></a></li>
+		</ul>
+		<div class="tab-content">
+	<div class="col-md-12">
+
+  {% if namespaces %}
+    <h4><span class="logo"><span class="sky">Related ::</span> <span class="re">metrics :: </span></span>{{ related_metrics|length }} metrics with related metrics found for namespaces</h4>
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Filtered on namespaces</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+  		        <td><code>{{ namespaces }}</code></td>
+  		      </tr>
+  		    </tbody>
+  		  </table>
+  {% else %}
+    <h4><span class="logo"><span class="sky">Related ::</span> <span class="re">metrics :: </span></span>{{ related_metrics|length }} metrics with related metrics found</h4>
+  {% endif %}
+
+  <p>
+  These metrics each have a metric_group which contains metrics which have related and/or correlated with the metric <strong>frequently</strong> and <strong>significantly</strong> over time and are deemed as related metrics.<br>
+  Only metrics that have been found to have <strong>frequent</strong> and <strong>significant</strong> correlations get assigned a metric_group, not all metrics have a metric_group<br>
+  A metric can occur in multiple metric_groups and not have its own metric_group<br>
+  To find what metric_groups a metric occurs in use the <span class="logo"><span class="sky">Related</span> <span class="re">to metrics</span></span> tab.<br>
+  </p>
+
+  {% if related_metrics %}
+        <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#search_options">Show search options</button>
+        <div id="search_options" class="collapse">
+  {% endif %}
+        <form action="luminosity">
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Search criteria</th>
+  		        <th>filter</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+  		        <td>Related metrics search</td>
+  		        <td><select name="related_metrics">
+                <option value="true">true</option>
+              </select></td>
+  		      </tr>
+  		      <tr>
+  		        <td>namespaces:</td>
+  		        <td><input type="text" name="namespaces" value="all" /> a comma separated list of namespaces to filter on</td>
+  		      </tr>
+  		    </tbody>
+  		  </table>
+        <br>
+        <input type="submit" value="Search">
+      </form>
+  {% if related_metrics %}
+<!-- collapse button div -->
+      </div>
+  {% endif %}
+
+
+		<table class="table table-hover">
+			<thead>
+				<tr>
+{% for key in related_metrics_keys %}
+            <th>{{ key }}</th>
+{% endfor %}
+				</tr>
+			</thead>
+			<tbody>
+{% for metric_id in related_metrics %}
+          <tr>
+  {% for key in related_metrics_keys %}
+    {% set value = related_metrics[metric_id][key] %}
+      {% if key == 'metric_id' %}
+            <td onclick="window.location='?metric_related_metrics=true&metric_id={{ value }}&metric={{ related_metrics[metric_id]['metric'] }}'">
+              <a href="?metric_related_metrics=true&metric_id={{ value }}&metric={{ related_metrics[metric_id]['metric'] }}">{{ value }}</a>
+      {% else %}
+            <td>
+              {{ value }}
+      {% endif %}
+            </td>
+  {% endfor %}
+          </tr>
+{% endfor %}
+			</tbody>
+		</table>
+	</div>
+
+    </div> <!-- END div class="col-md-12" -->
+
+	</div>
+	</div>
+	</div>
+  </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- END /ionosphere?fp_validate=true block -->
+{% endblock %}
