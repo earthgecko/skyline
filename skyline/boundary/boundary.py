@@ -317,7 +317,7 @@ class Boundary(Thread):
                                 algorithm = False
                                 algo_pattern_matched = True
                                 # algorithm = metric[1]
-                                algorithm = boundary_alerter[1]
+                                algorithm = str(boundary_alerter[1])
                                 try:
                                     if metric[2]:
                                         metric_expiration_time = metric[2]
@@ -335,6 +335,10 @@ class Boundary(Thread):
                                     metric_min_average_seconds = 1200
                                 try:
                                     if metric[5]:
+                                        metric_trigger = metric[5]
+                                    # @modified 20210708 - Bug #4166: Allow boundary to send same image to multiple slack channels
+                                    # If the trigger is 0 set it as 0 rather than False
+                                    if metric[5] == 0:
                                         metric_trigger = metric[5]
                                 except:
                                     metric_trigger = False
@@ -381,7 +385,7 @@ class Boundary(Thread):
                 metric_trigger = metric_and_algo[5]
                 alert_threshold = metric_and_algo[6]
                 metric_alerters = metric_and_algo[7]
-                algorithm = metric_and_algo[8]
+                algorithm = str(metric_and_algo[8])
 
                 if ENABLE_BOUNDARY_DEBUG:
                     logger.debug('debug :: unpacking timeseries for %s - %s' % (metric_name, str(raw_assigned_id)))
@@ -509,7 +513,7 @@ class Boundary(Thread):
                             logger.info('boundary_metric_tuple: %s' % str(boundary_metric_tuple))
 
                 if ENABLE_BOUNDARY_DEBUG:
-                    logger.info('WOULD RUN run_selected_algorithm = %s' % run_tupple)
+                    logger.info('WOULD RUN run_selected_algorithm - %s' % run_tupple)
 
                 if run_tupple:
                     # @added 20181126 - Task #2742: Update Boundary
@@ -521,7 +525,9 @@ class Boundary(Thread):
                         # @modified 20191022 - Bug #3266: py3 Redis binary objects not strings
                         #                      Branch #3262: py3
                         # derivative_metrics = list(self.redis_conn.smembers('derivative_metrics'))
-                        derivative_metrics = list(self.redis_conn_decoded.smembers('derivative_metrics'))
+                        # @modified 20211012 - Feature #4280: aet.metrics_manager.derivative_metrics Redis hash
+                        # derivative_metrics = list(self.redis_conn_decoded.smembers('derivative_metrics'))
+                        derivative_metrics = list(self.redis_conn_decoded.smembers('aet.metrics_manager.derivative_metrics'))
                     except:
                         derivative_metrics = []
                     redis_metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(base_name))
@@ -670,7 +676,7 @@ class Boundary(Thread):
                         # Added algorithm as it is required if the metric has
                         # multiple rules covering a number of algorithms
                         tmp_panaroma_anomaly_file = '%s/%s.%s.%s.panorama_anomaly.txt' % (
-                            settings.SKYLINE_TMP_DIR, added_at, str(algorithm),
+                            settings.SKYLINE_TMP_DIR, str(added_at), str(algorithm),
                             base_name)
                         try:
                             write_data_to_file(
@@ -923,24 +929,43 @@ class Boundary(Thread):
                     if ENABLE_BOUNDARY_DEBUG:
                         logger.debug('debug :: pattern matching %s against BOUNDARY_METRICS %s' % (
                             str(metric_name), str(metric)))
+                    use_old_pattern = False
+                    if use_old_pattern:
+                        try:
+                            CHECK_MATCH_PATTERN = metric[0]
+                            check_match_pattern = re.compile(CHECK_MATCH_PATTERN)
+
+                            # @added 20191021 - Branch #3262: py3
+                            metric_name = str(metric_name)
+
+                            # @modified 20200728 - Bug #3652: Handle multiple metrics in base_name conversion
+                            # base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+                            if metric_name.startswith(settings.FULL_NAMESPACE):
+                                base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+                            else:
+                                base_name = metric_name
+
+                            pattern_match = check_match_pattern.match(base_name)
+                        except:
+                            logger.error(traceback.format_exc())
+                            logger.error('error :: pattern matching - %s, %s' % (str(metric_name), str(metric)))
+
+                    # @modified 20210718 - Task #3586: Change all alert pattern checks to matched_or_regexed_in_list
+                    #                      Feature #3512: matched_or_regexed_in_list function
                     try:
-                        CHECK_MATCH_PATTERN = metric[0]
-                        check_match_pattern = re.compile(CHECK_MATCH_PATTERN)
-
-                        # @added 20191021 - Branch #3262: py3
-                        metric_name = str(metric_name)
-
-                        # @modified 20200728 - Bug #3652: Handle multiple metrics in base_name conversion
-                        # base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
                         if metric_name.startswith(settings.FULL_NAMESPACE):
                             base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
                         else:
                             base_name = metric_name
-
-                        pattern_match = check_match_pattern.match(base_name)
+                        pattern_match, metric_matched_by = matched_or_regexed_in_list(skyline_app, base_name, [metric[0]])
+                        if ENABLE_BOUNDARY_DEBUG and pattern_match:
+                            logger.debug('debug :: %s matched alert - %s' % (base_name, metric[0]))
+                        try:
+                            del metric_matched_by
+                        except:
+                            pass
                     except:
-                        logger.error(traceback.format_exc())
-                        logger.error('error :: pattern matching - %s, %s' % (str(metric_name), str(metric)))
+                        pattern_match = False
 
                     if pattern_match:
                         if ENABLE_BOUNDARY_DEBUG:
@@ -1013,6 +1038,12 @@ class Boundary(Thread):
 
             # Grab data from the queue and populate dictionaries
             exceptions = dict()
+
+            # @added 20211107 - send default values
+            exceptions['Boring'] = 0
+            exceptions['Stale'] = 0
+            exceptions['TooShort'] = 0
+
             anomaly_breakdown = dict()
             while 1:
                 try:
@@ -1058,7 +1089,7 @@ class Boundary(Thread):
                 for not_anomalous_metric in boundary_not_anomalous_metrics:
                     metric_name = not_anomalous_metric[1]
                     base_name = metric_name.replace(FULL_NAMESPACE, '', 1)
-                    algorithm = not_anomalous_metric[8]
+                    algorithm = str(not_anomalous_metric[8])
                     if ENABLE_BOUNDARY_DEBUG:
                         logger.info("debug :: not_anomalous_metric - " + str(not_anomalous_metric))
                     anomaly_cache_key_expiration_time = 1
@@ -1087,7 +1118,7 @@ class Boundary(Thread):
                     # Added algorithm as it is required if the metric has
                     # multiple rules covering a number of algorithms
                     tmp_panaroma_anomaly_file = '%s/%s.%s.%s.panorama_anomaly.txt' % (
-                        settings.SKYLINE_TMP_DIR, added_at, algorithm, base_name)
+                        settings.SKYLINE_TMP_DIR, str(added_at), str(algorithm), base_name)
                     if ENABLE_BOUNDARY_DEBUG:
                         logger.debug('debug :: set tmp_panaroma_anomaly_file to - %s' % (str(tmp_panaroma_anomaly_file)))
                     if os.path.isfile(tmp_panaroma_anomaly_file):
@@ -1132,7 +1163,7 @@ class Boundary(Thread):
                     metric_trigger = str(anomalous_metric[5])
                     alert_threshold = int(anomalous_metric[6])
                     metric_alerters = anomalous_metric[7]
-                    algorithm = anomalous_metric[8]
+                    algorithm = str(anomalous_metric[8])
                     # @added 20200122 - Feature #3396: http_alerter
                     # Add the metric timestamp for the http_alerter resend queue
                     metric_timestamp = anomalous_metric[9]
@@ -1201,16 +1232,16 @@ class Boundary(Thread):
 
                         # @added 20171216 - Task #2236: Change Boundary to only send to Panorama on alert
                         tmp_panaroma_anomaly_file = '%s/%s.%s.%s.panorama_anomaly.txt' % (
-                            settings.SKYLINE_TMP_DIR, added_at,
+                            settings.SKYLINE_TMP_DIR, str(added_at),
                             # @modified 20171228 - Task #2236: Change Boundary to only send to Panorama on alert
                             # Added algorithm as it is required if the metric has
                             # multiple rules covering a number of algorithms
-                            algorithm, base_name)
+                            str(algorithm), base_name)
                         if ENABLE_BOUNDARY_DEBUG:
                             logger.debug('debug :: tmp_panaroma_anomaly_file - %s' % (str(tmp_panaroma_anomaly_file)))
                         if os.path.isfile(tmp_panaroma_anomaly_file):
                             panaroma_anomaly_file = '%s/%s.%s.txt' % (
-                                settings.PANORAMA_CHECK_PATH, added_at, base_name)
+                                settings.PANORAMA_CHECK_PATH, str(added_at), base_name)
                             logger.info('moving tmp_panaroma_anomaly_file - %s to panaroma_anomaly_file %s' % (str(tmp_panaroma_anomaly_file), str(panaroma_anomaly_file)))
                             # @modified 20171228 - Task #2236: Change Boundary to only send to Panorama on alert
                             # Added skyline_app
@@ -1226,14 +1257,14 @@ class Boundary(Thread):
                             # Rename moved file as the filename is used in Panorama
                             try:
                                 tmp_panaroma_anomaly_file_to_rename = '%s/%s.%s.%s.panorama_anomaly.txt' % (
-                                    settings.PANORAMA_CHECK_PATH, added_at,
-                                    algorithm, base_name)
+                                    settings.PANORAMA_CHECK_PATH, str(added_at),
+                                    str(algorithm), base_name)
                                 os.rename(tmp_panaroma_anomaly_file_to_rename, panaroma_anomaly_file)
                             except:
                                 logger.info(traceback.format_exc())
                                 logger.error('error :: failed to rename tmp_panaroma_anomaly_filename to panaroma_anomaly_filename')
                         else:
-                            logger.error('error :: tmp_panaroma_anomaly_file does not exist')
+                            logger.warning('warning :: tmp_panaroma_anomaly_file does not exist')
 
                         for alerter in metric_alerters.split("|"):
                             # Determine alerter limits
@@ -1304,6 +1335,18 @@ class Boundary(Thread):
                                         logger.info("debug :: alerts_sent %s is less than alerter_limit %s" % (str(alerts_sent), str(alerter_limit)))
                                         logger.info("debug :: send_alert set to %s" % str(send_alert))
 
+                            # @added 20210801 - Feature #4214: alert.paused
+                            alert_paused = False
+                            try:
+                                cache_key = 'alert.paused.%s.%s' % (alerter, base_name)
+                                alert_paused = self.redis_conn_decoded.get(cache_key)
+                            except Exception as e:
+                                logger.error('error :: alert_paused check failed: %s' % str(e))
+                            if alert_paused:
+                                send_alert = False
+                                logger.info('alert_paused for %s %s until %s' % (
+                                    alerter, base_name, str(alert_paused)))
+
                             # Send alert
                             alerter_alert_sent = False
                             if send_alert:
@@ -1335,7 +1378,8 @@ class Boundary(Thread):
                                             trigger_alert('syslog', datapoint, base_name, expiration_time, metric_trigger, algorithm, metric_timestamp, alert_threshold)
                                     else:
                                         if ENABLE_BOUNDARY_DEBUG:
-                                            logger.info("debug :: cache_key exists not alerting via %s for %s is less than alerter_limit %s" % (alerter, cache_key))
+                                            logger.debug("debug :: cache_key exists not alerting via %s for %s is less than alerter_limit %s" % (
+                                                alerter, cache_key, str(alert_threshold)))
                                         # @modified 20201207 - Task #3878: Add metric_trigger and alert_threshold to Boundary alerts
                                         # trigger_alert("syslog", datapoint, base_name, expiration_time, metric_trigger, algorithm, metric_timestamp, alert_threshold)
                                         trigger_alert("syslog", datapoint, base_name, expiration_time, metric_trigger, algorithm, metric_timestamp, times_seen)
@@ -1382,7 +1426,8 @@ class Boundary(Thread):
                     tmp_panaroma_anomaly_file = '%s/%s.%s.%s.panorama_anomaly.txt' % (
                         # @modified 20171228 - Task #2236: Change Boundary to only send to Panorama on alert
                         # Added algorithm
-                        settings.SKYLINE_TMP_DIR, added_at, algorithm, base_name)
+                        settings.SKYLINE_TMP_DIR, str(added_at), str(algorithm),
+                        base_name)
                     if os.path.isfile(tmp_panaroma_anomaly_file):
                         try:
                             os.remove(str(tmp_panaroma_anomaly_file))
