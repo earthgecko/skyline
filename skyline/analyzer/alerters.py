@@ -100,6 +100,9 @@ if True:
         add_panorama_alert,
         # @added 20201013 - Feature #3780: skyline_functions - sanitise_graphite_url
         encode_graphite_metric_name)
+    # @added 20210724 - Feature #4196: functions.aws.send_sms
+    from functions.aws.send_sms import send_sms
+    from functions.settings.get_sms_recipients import get_sms_recipients
 
 # @added 20201127 - Feature #3820: HORIZON_SHARDS
 try:
@@ -2582,6 +2585,47 @@ def alert_http(alert, metric, context):
     else:
         logger.info('alert_http :: settings.HTTP_ALERTERS_ENABLED not enabled nothing to do')
         return
+
+
+# @added 20210724 - Feature #4196: functions.aws.send_sms
+def alert_sms(alert, metric, context):
+    """
+    Called by :func:`~trigger_alert` and sends anomalies to a SMS endpoint.
+
+    """
+    if not settings.AWS_SNS_SMS_ALERTS_ENABLED:
+        logger.error('error :: alert_sms recieved but settings.AWS_SNS_SMS_ALERTS_ENABLED not enabled for alert - %s and metric %s' % (
+            str(alert), str(metric)))
+        return
+    metric_name = str(metric[1])
+    if metric_name.startswith(settings.FULL_NAMESPACE):
+        base_name = metric_name.replace(settings.FULL_NAMESPACE, '', 1)
+    else:
+        base_name = metric_name
+
+    message = '[Skyline alert] Analyzer - %s: %s' % (base_name, str(metric[0]))
+    sms_recipients = []
+    try:
+        sms_recipients = get_sms_recipients(skyline_app, base_name)
+    except Exception as e:
+        logger.error(traceback.format_exc())
+        logger.error('error :: get_sms_recipients failed checking %s - %s' % (
+            base_name, e))
+    logger.info('sending SMS alert to %s' % str(sms_recipients))
+    for sms_number in sms_recipients:
+        success = False
+        response = None
+        try:
+            success, response = send_sms(skyline_app, sms_number, message)
+        except Exception as e:
+            logger.error(traceback.format_exc())
+            logger.error('error :: failed to determine number for SMS recipient %s - %s' % (
+                sms_number, e))
+        if success:
+            logger.info('sent SMS alert to %s' % sms_number)
+        else:
+            logger.warn('warning :: falied to send SMS alert to %s' % sms_number)
+    return
 
 
 def trigger_alert(alert, metric, context):
