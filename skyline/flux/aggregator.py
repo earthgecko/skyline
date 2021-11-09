@@ -19,6 +19,8 @@ if True:
     import flux
     from skyline_functions import (
         get_redis_conn, get_redis_conn_decoded)
+    # @added 20210718 - skyline-syslog
+    from matched_or_regexed_in_list import matched_or_regexed_in_list
 
 logger = set_up_logging(None)
 
@@ -208,21 +210,43 @@ class Aggregator(Process):
                     if not last_metric_flush:
                         # Handle new metric without throwing an error if they do
                         # not have an entry in the hash
-                        logger.info('aggregator :: probable new metric - no last_metric_flush found in flux.aggregate_metrics.last_flush Redis hash for %s usinf last_flush' % metric)
+                        logger.info('aggregator :: probable new metric - no last_metric_flush found in flux.aggregate_metrics.last_flush Redis hash for %s using last_flush' % metric)
                         last_metric_flush = last_flush
                     metric_aggregation_settings = {}
                     try:
                         metric_aggregation_settings_str = self.redis_conn_decoded.hget('metrics_manager.flux.aggregate_namespaces.settings', metric)
-                        metric_aggregation_settings = literal_eval(metric_aggregation_settings_str)
+                        # @modified 20210718
+                        if metric_aggregation_settings_str:
+                            metric_aggregation_settings = literal_eval(metric_aggregation_settings_str)
+                        else:
+                            metric_aggregation_settings = {}
                     except:
                         logger.error(traceback.format_exc())
                         logger.error('error :: failed to determine aggregation_settings from metrics_manager.flux.aggregate_namespaces.settings Redis hash for %s' % metric)
+
+                    # @added 20210718
+                    # Handle newly added metrics that have not been added to
+                    # metrics_manager.flux.aggregate_namespaces.settings due to
+                    # to the chicken or the egg problem
+                    if not metric_aggregation_settings:
+                        logger.info('aggregator :: probable new metric - %s not found in metrics_manager.flux.aggregate_namespaces.settings Redis hash' % metric)
+                        aggregate_namespaces = list(settings.FLUX_AGGREGATE_NAMESPACES.keys())
+                        pattern_match, metric_matched_by = matched_or_regexed_in_list('flux', metric, aggregate_namespaces)
+                        if pattern_match:
+                            matched_namespace = metric_matched_by['matched_namespace']
+                            metric_aggregation_settings = settings.FLUX_AGGREGATE_NAMESPACES[matched_namespace]
+                            logger.info('aggregator :: new metric - %s detemined metric_aggregation_settings from FLUX_AGGREGATE_NAMESPACES - %s' % (
+                                metric, str(metric_aggregation_settings)))
+                        else:
+                            logger.error('error :: aggregator :: new metric - %s could not detemine metric_aggregation_settings from FLUX_AGGREGATE_NAMESPACES' % (
+                                metric))
+
                     interval = 60
                     try:
                         interval = int(metric_aggregation_settings['interval'])
                     except:
-                        logger.error(traceback.format_exc())
-                        logger.error('error :: failed to get interval from metric_aggregation_settings for %s' % metric)
+                        # logger.error(traceback.format_exc())
+                        logger.error('error :: failed to get interval from metric_aggregation_settings for %s, setting to default 60' % metric)
                         interval = 60
                     if (time_now - last_metric_flush) < interval:
                         continue
