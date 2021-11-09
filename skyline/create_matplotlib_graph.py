@@ -17,7 +17,12 @@ if True:
 
 # @added 20200512 - Bug #2534: Ionosphere - fluid approximation - IONOSPHERE_MINMAX_SCALING_RANGE_TOLERANCE on low ranges
 #                   Feature #2404: Ionosphere - fluid approximation
-def create_matplotlib_graph(current_skyline_app, output_file, graph_title, timeseries):
+# @modified 20211103 - Branch #3068: SNAB
+#                      Bug #4308: matrixprofile - fN on big drops
+# Added anomalies
+def create_matplotlib_graph(
+        current_skyline_app, output_file, graph_title, timeseries,
+        anomalies=[]):
     """
     Creates a png graph image using the features profile time series data
     provided or from the features profile time seires data in the DB if an empty
@@ -28,10 +33,12 @@ def create_matplotlib_graph(current_skyline_app, output_file, graph_title, times
         to be saved to
     :param graph_title: the graph image title
     :param timeseries: the time series
+    :param anomalies: the anomaly timestamps [optional to plot anomalies]
     :type current_skyline_app: str
     :type output_file: str
     :type graph_title: str
     :type timeseries: list
+    :type anomalies: list
     :return: (status, file)
     :rtype: (boolean, str)
 
@@ -46,6 +53,31 @@ def create_matplotlib_graph(current_skyline_app, output_file, graph_title, times
 
     try:
         current_logger.info('create_matplotlib_graph - creating graph image - %s' % output_file)
+
+        # @added 20211103 - Branch #3068: SNAB
+        #                      Bug #4308: matrixprofile - fN on big drops
+        # Added anomalies
+        anomalies_indices = []
+        if anomalies:
+            last_timestamp = None
+            for index, item in enumerate(timeseries):
+                anomaly_in_period = 0
+                if not last_timestamp:
+                    last_timestamp = int(item[0])
+                    continue
+                for anomaly_ts in anomalies:
+                    if anomaly_ts < last_timestamp:
+                        continue
+                    if anomaly_ts > item[0]:
+                        continue
+                    if anomaly_ts in list(range(last_timestamp, int(item[0]))):
+                        anomaly_in_period = 1
+                        break
+                if anomaly_in_period:
+                    anomalies_indices.append(index)
+                last_timestamp = int(item[0])
+
+
         timeseries_x = [float(item[0]) for item in timeseries]
         timeseries_y = [item[1] for item in timeseries]
         values = pd.Series([x[1] for x in timeseries])
@@ -91,6 +123,13 @@ def create_matplotlib_graph(current_skyline_app, output_file, graph_title, times
         if sigma3_lower_bound > 0:
             sigma3_lower_label = '%s lower - %s' % (str(sigma3_text), str(sigma3_lower_bound))
             ax.plot(datetimes, sigma3_lower_series, lw=1, label=sigma3_lower_label, color='r', ls='solid', zorder=4)
+
+        # @added 20211103 - Branch #3068: SNAB
+        #                   Bug #4308: matrixprofile - fN on big drops
+        # Added anomalies
+        for index in anomalies_indices:
+            ax.axvline(x=datetimes[index], color='r', ls='--', lw=6, alpha=0.3, zorder=5)
+
         ax.get_yaxis().get_major_formatter().set_useOffset(False)
         ax.get_yaxis().get_major_formatter().set_scientific(False)
         box = ax.get_position()
