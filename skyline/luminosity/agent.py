@@ -23,6 +23,15 @@ if True:
     import settings
     from luminosity import Luminosity
     from validate_settings import validate_settings_variables
+    # @added 20210730 - Feature #4164: luminosity - cloudbursts
+    if settings.LUMINOSITY_CLOUDBURST_ENABLED:
+        from cloudburst import Cloudburst
+        # @added 20210806 - Feature #4164: luminosity - cloudbursts
+        from cloudbursts import Cloudbursts
+
+    # @added 20210929 - Feature #4264: luminosity - cross_correlation_relationships
+    if settings.LUMINOSITY_RELATED_METRICS:
+        from related_metrics import RelatedMetrics
 
 skyline_app = 'luminosity'
 skyline_app_logger = skyline_app + 'Log'
@@ -64,6 +73,35 @@ class LuminosityAgent():
     def run(self):
         logger.info('agent :: starting Skyline Luminosity')
         Luminosity(getpid()).start()
+
+        # @added 20210730 - Feature #4164: luminosity - cloudbursts
+        if settings.LUMINOSITY_CLOUDBURST_ENABLED:
+            logger.info('agent starting Cloudburst')
+            try:
+                Cloudburst(getpid()).start()
+            except Exception as e:
+                logger.info(traceback.format_exc())
+                logger.error('error :: agent failed to start Cloudburst - %s' % e)
+
+            # @added 20210806 - Feature #4164: luminosity - cloudbursts
+            logger.info('agent starting Cloudbursts')
+            try:
+                Cloudbursts(getpid()).start()
+            except Exception as e:
+                logger.info(traceback.format_exc())
+                logger.error('error :: agent failed to start Cloudbursts - %s' % e)
+        else:
+            logger.info('agent not starting Cloudburst because LUMINOSITY_CLOUDBURST_ENABLED is %s' % str(settings.LUMINOSITY_CLOUDBURST_ENABLED))
+
+        if settings.LUMINOSITY_RELATED_METRICS:
+            logger.info('agent starting RelatedMetrics')
+            try:
+                RelatedMetrics(getpid()).start()
+            except Exception as e:
+                logger.info(traceback.format_exc())
+                logger.error('error :: agent failed to start RelatedMetrics - %s' % e)
+        else:
+            logger.info('agent not starting RelatedMetrics because LUMINOSITY_RELATED_METRICS is %s' % str(settings.LUMINOSITY_RELATED_METRICS))
 
         while 1:
             sleep(100)
@@ -142,7 +180,7 @@ if __name__ == "__main__":
         #                      Branch 3262: py3
         # sys.exit(1)
         if start_if_no_db:
-            logger.warn('warning :: mysql_up is %s but START_IF_NO_DB is %s, so starting' % (
+            logger.warning('warning :: mysql_up is %s but START_IF_NO_DB is %s, so starting' % (
                 str(mysql_up), str(start_if_no_db)))
             mysql_up = True
         else:
@@ -152,7 +190,7 @@ if __name__ == "__main__":
     #                   Branch 3262: py3
     if start_if_no_db:
         if not mysql_up:
-            logger.warn('warning :: mysql_up is %s but START_IF_NO_DB is %s, so starting' % (
+            logger.warning('warning :: mysql_up is %s but START_IF_NO_DB is %s, so starting' % (
                 str(mysql_up), str(start_if_no_db)))
             mysql_up = True
 

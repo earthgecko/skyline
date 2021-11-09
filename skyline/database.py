@@ -291,3 +291,79 @@ def not_anomalous_motifs_table_meta(current_skyline_app, engine):
         fail_msg = 'error :: failed to reflect the not_anomalous_motifs table meta'
         current_logger.error('%s' % fail_msg)
         return False, fail_msg, trace
+
+
+# @added 20210805 - Feature #4164: luminosity - cloudbursts
+def cloudburst_table_meta(current_skyline_app, engine):
+
+    current_skyline_app_logger = current_skyline_app + 'Log'
+    current_logger = logging.getLogger(current_skyline_app_logger)
+
+    # Create the cloudburst table MetaData
+    try:
+        cloudburst_meta = MetaData()
+        cloudburst_table = Table('cloudburst', cloudburst_meta, autoload=True, autoload_with=engine)
+        return cloudburst_table, 'cloudburst meta reflected OK', 'none'
+    except:
+        trace = traceback.format_exc()
+        current_logger.error('%s' % trace)
+        fail_msg = 'error :: failed to reflect the cloudburst table meta'
+        current_logger.error('%s' % fail_msg)
+        return False, fail_msg, trace
+
+
+# @added 20210805 - Feature #4164: luminosity - cloudbursts
+def cloudbursts_table_meta(current_skyline_app, engine):
+
+    current_skyline_app_logger = current_skyline_app + 'Log'
+    current_logger = logging.getLogger(current_skyline_app_logger)
+
+    # Create the cloudbursts table MetaData
+    try:
+        cloudbursts_meta = MetaData()
+        cloudbursts_table = Table('cloudbursts', cloudbursts_meta, autoload=True, autoload_with=engine)
+        return cloudbursts_table, 'cloudbursts meta reflected OK', 'none'
+    except:
+        trace = traceback.format_exc()
+        current_logger.error('%s' % trace)
+        fail_msg = 'error :: failed to reflect the cloudbursts table meta'
+        current_logger.error('%s' % fail_msg)
+        return False, fail_msg, trace
+
+
+# @added 20210929 - Feature #4264: luminosity - cross_correlation_relationships
+def metric_group_table_meta(current_skyline_app, engine):
+
+    current_skyline_app_logger = current_skyline_app + 'Log'
+    current_logger = logging.getLogger(current_skyline_app_logger)
+
+    # Create the metric_group table MetaData
+    try:
+        metric_group_meta = MetaData()
+        metric_group_table = Table('metric_group', metric_group_meta, autoload=True, autoload_with=engine)
+        return metric_group_table, 'metric_group meta reflected OK', 'none'
+    except:
+        trace = traceback.format_exc()
+        current_logger.error('%s' % trace)
+        fail_msg = 'error :: failed to reflect the metric_group table meta'
+        current_logger.error('%s' % fail_msg)
+        return False, fail_msg, trace
+
+
+# @added 20210929 - Feature #4264: luminosity - cross_correlation_relationships
+def metric_group_info_table_meta(current_skyline_app, engine):
+
+    current_skyline_app_logger = current_skyline_app + 'Log'
+    current_logger = logging.getLogger(current_skyline_app_logger)
+
+    # Create the metric_group_info table MetaData
+    try:
+        metric_group_info_meta = MetaData()
+        metric_group_info_table = Table('metric_group_info', metric_group_info_meta, autoload=True, autoload_with=engine)
+        return metric_group_info_table, 'metric_group_info meta reflected OK', 'none'
+    except:
+        trace = traceback.format_exc()
+        current_logger.error('%s' % trace)
+        fail_msg = 'error :: failed to reflect the metric_group_info table meta'
+        current_logger.error('%s' % fail_msg)
+        return False, fail_msg, trace

@@ -268,6 +268,13 @@ def adtk_level_shift(current_skyline_app, parent_pid, timeseries, algorithm_para
         current_logger.debug('debug :: algorithm_parameters :: %s' % (
             str(algorithm_parameters)))
 
+    # @added 20210714 - Feature #4164: luminosity - cloudbursts
+    min_periods = None
+    try:
+        min_periods = algorithm_parameters['min_periods']
+    except KeyError:
+        min_periods = None
+
     # @added 20210308 - Feature #3978: luminosity - classify_metrics
     #                   Feature #3642: Anomaly type classification
     try:
@@ -625,7 +632,9 @@ def adtk_level_shift(current_skyline_app, parent_pid, timeseries, algorithm_para
             df = df.set_index(datetime_index)
             df.drop('date', axis=1, inplace=True)
             s = validate_series(df)
-            level_shift_ad = LevelShiftAD(c=c, side=side, window=window)
+            # @modified 20210714 - Feature #4164: luminosity - cloudbursts
+            # level_shift_ad = LevelShiftAD(c=c, side=side, window=window)
+            level_shift_ad = LevelShiftAD(c=c, side=side, window=window, min_periods=min_periods)
             anomaly_df = level_shift_ad.fit_detect(s)
             anomalies = anomaly_df.loc[anomaly_df['value'] > 0]
             anomalous = False
@@ -723,7 +732,11 @@ def adtk_level_shift(current_skyline_app, parent_pid, timeseries, algorithm_para
 
             # @added 20210318 - Feature #3978: luminosity - classify_metrics
             #                   Feature #3642: Anomaly type classification
-            if anomalies and run_PersistAD and not realtime_analysis:
+            # @modified 20210627 - Feature #3978: luminosity - classify_metrics
+            # Handle ValueError by testing the length of the anomalies DataFrame
+            # ValueError: The truth value of a DataFrame is ambiguous. Use a.empty, a.bool(), a.item(), a.any() or a.all()
+            # if anomalies and run_PersistAD and not realtime_analysis:
+            if len(anomalies) > 0 and run_PersistAD and not realtime_analysis:
                 persist_ad_algorithm_parameters = {}
                 try:
                     persist_ad_algorithm_parameters = algorithm_parameters['persist_ad_algorithm_parameters']
