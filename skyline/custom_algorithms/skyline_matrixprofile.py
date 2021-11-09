@@ -33,10 +33,7 @@ import numpy as np
 # ALWAYS WRAP YOUR ALGORITHM IN try and except
 def skyline_matrixprofile(current_skyline_app, parent_pid, timeseries, algorithm_parameters):
     """
-    The last_same_hours algorithm determines the data points for the same hour
-    and minute as the current timestamp from the last x days and calculates the
-    mean of those values and determines whether the current data point is within
-    3 standard deviations of the mean.
+    The skyline_matrixprofile algorithm uses matrixprofile to identify discords.
 
     :param current_skyline_app: the Skyline app executing the algorithm.  This
         will be passed to the algorithm by Skyline.  This is **required** for
@@ -412,7 +409,9 @@ def skyline_matrixprofile(current_skyline_app, parent_pid, timeseries, algorithm
                     break
             anonamlous_period_indices = []
             for index, item in enumerate(timeseries):
-                if index in range((anomaly_index - 10), anomaly_index):
+                # @modified 20210630
+                # if index in range((anomaly_index - 10), anomaly_index):
+                if index in range((anomaly_index - windows), anomaly_index):
                     anonamlous_period_indices.append(index)
             anomalous = False
             discord_anomalies = []
