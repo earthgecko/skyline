@@ -124,6 +124,9 @@ from common_functions import (
 # @added 20190327 - Feature #2484
 from echo import ionosphere_echo
 
+# @added 20210702 - Feature #4152: DO_NOT_SKIP_SKYLINE_FEEDBACK_NAMESPACES
+from matched_or_regexed_in_list import matched_or_regexed_in_list
+
 skyline_app = 'ionosphere'
 skyline_app_logger = '%sLog' % skyline_app
 logger = logging.getLogger(skyline_app_logger)
@@ -184,6 +187,12 @@ except:
         SKYLINE_FEEDBACK_NAMESPACES = [settings.SERVER_METRICS_NAME, graphite_hostname]
     except:
         SKYLINE_FEEDBACK_NAMESPACES = [this_host]
+
+# @added 20210702 - Feature #4152: DO_NOT_SKIP_SKYLINE_FEEDBACK_NAMESPACES
+try:
+    DO_NOT_SKIP_SKYLINE_FEEDBACK_NAMESPACES = list(settings.DO_NOT_SKIP_SKYLINE_FEEDBACK_NAMESPACES)
+except:
+    DO_NOT_SKIP_SKYLINE_FEEDBACK_NAMESPACES = []
 
 # @added 20200330 - Feature #3462: Add IONOSPHERE_MANAGE_PURGE
 try:
@@ -1791,6 +1800,23 @@ class Ionosphere(Thread):
                 if len(elements_matched) == len(to_skip_namespace_elements):
                     feedback_metric = True
                     break
+
+            # @added 20210702 - Feature #4152: DO_NOT_SKIP_SKYLINE_FEEDBACK_NAMESPACES
+            if feedback_metric:
+                for do_not_skip in DO_NOT_SKIP_SKYLINE_FEEDBACK_NAMESPACES:
+                    pattern_match = False
+                    try:
+                        pattern_match, metric_matched_by = matched_or_regexed_in_list(skyline_app, base_name, DO_NOT_SKIP_SKYLINE_FEEDBACK_NAMESPACES)
+                        del metric_matched_by
+                    except Exception as e:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: matched_or_regexed_in_list failed checking %s in DO_NOT_SKIP_SKYLINE_FEEDBACK_NAMESPACES - %s' % (
+                            base_name, e))
+                        pattern_match = False
+                    if pattern_match:
+                        feedback_metric = False
+                        logger.info('%s matched DO_NOT_SKIP_SKYLINE_FEEDBACK_NAMESPACES, will analyse' % base_name)
+
             if feedback_metric:
                 cache_key = 'ionosphere.feedback_metric.checked.%s' % (base_name)
                 logger.info('feedback metric identified adding Redis key with 600 TTL - %s' % cache_key)
@@ -2180,6 +2206,15 @@ class Ionosphere(Thread):
 
             else:
                 fp_ids_found = True
+
+            # TODO
+            # @added 20210814 - Feature #4232: ionosphere_shared features profiles
+            # Get the fp_ids from the ionosphere_shared table and append them
+            # to the fp_ids.  Consider layers and echo fps
+            # Considerations
+            # * layers
+            # * echo fps, specifically in the creation, so that the same ionosphere_shared entries are created for echo fps
+            # TODO
 
             if not fp_ids_found:
                 logger.info('no fp ids were found for %s at %s' % (base_name, str(full_duration)))
