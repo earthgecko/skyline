@@ -8,8 +8,8 @@
       <span class="icon-bar"></span>
     </button>
 			<ul class="nav nav-tabs" role="view_tablist" id="view">
-			  <li class="active"><a href="/ionosphere"><span class="logo"><span class="sky">Training</span> <span class="re">data</span></span></span></a></li>
-			  <li><a href="?fp_search=true&metric=all&limit=10&order=DESC"><span class="logo"><span class="sky">Features</span> <span class="re">profiles</span></span></span></a></li>
+			  <li class="active"><a href="/ionosphere"><span class="logo"><span class="sky">Training</span> <span class="re">data</span></span></a></li>
+			  <li><a href="?fp_search=true&metric=all&limit=10&order=DESC"><span class="logo"><span class="sky">Features</span> <span class="re">profiles</span></span></a></li>
 			</ul>
 			<div class="tab-content">
   	  	<div class="tab-pane active" id="view">
@@ -44,7 +44,7 @@
 {% endif %}
 
 {% if print_debug == 'True' %}
-  <code> DEBUG </code></br>
+  <code> DEBUG </code><br>
   {% if requested_timestamp %}
   <code> requested_timestamp </code>: {{ requested_timestamp }}<br>
   {% else %}
@@ -53,7 +53,7 @@
 {% endif %}
 
 {% if display_message %}
-  <code> ERROR </code></br>
+  <code> ERROR </code><br>
   <code> message </code>: {{ display_message }}<br>
 {% endif %}
 
@@ -79,25 +79,35 @@
   {% if list_by == 'date' or list_by == 'metric_td_dirs' %}
 			  <li><a href="/ionosphere">List by metrics</a></li>
 			  <li class="active"><a href="?a_dated_list=true">List by date</a></li>
+			  <li><a href="?ionosphere_saved_training=true">Saved training_data</a></li>
+  {% elif saved_training_data_page %}
+			  <li><a href="/ionosphere">List by metrics</a></li>
+			  <li><a href="?a_dated_list=true">List by date</a></li>
+			  <li class="active"><a href="?ionosphere_saved_training=true"><span class="logo"><span class="sky">Saved</span> <span class="re">training_data</span></span></a></li>
   {% else %}
 			  <li class="active"><a href="/ionosphere">List by metrics</a></li>
 			  <li><a href="?a_dated_list=true">List by date</a></li>
+			  <li><a href="?ionosphere_saved_training=true">Saved training_data</a></li>
   {% endif %}
 			</ul>
 			<div class="tab-content">
+{% endif %}
+
+{% if saved_training_data_page %}
+    {% include "saved_training_data.html" %}
 {% endif %}
 
 {% if unique_metrics %}
   {% if list_by == 'metric' or list_by == 'timestamp_td_dirs' %}
 <!-- BEGIN /ionosphere list_by 'metric' and 'timestamp_td_dirs' block -->
     {% if print_debug == 'True' %}
-<code> DEBUG </code> :: /ionosphere list_by 'metric' and 'timestamp_td_dirs' block</br>
+<code> DEBUG </code> :: /ionosphere list_by 'metric' and 'timestamp_td_dirs' block<br>
     {% endif %}
-      <h3><span class="logo"><span class="sky">Ionosphere ::</span> <span class="re">usage notes :: </span></span></span> read at least once</h3>
+      <h3><span class="logo"><span class="sky">Ionosphere ::</span> <span class="re">usage notes :: </span></span> read at least once</h3>
 Be aware that...<br>
 And...<br>
   	  <div class="tab-pane active" id="by_metric">
-        <h4><span class="logo"><span class="sky">Metrics ::</span> <span class="re">training data :: </span></span></span> {{ td_files|length }} data sets to review</h4>
+        <h4><span class="logo"><span class="sky">Metrics ::</span> <span class="re">training data :: </span></span> {{ td_files|length }} data sets to review</h4>
   			<table class="table table-hover">
   				<thead>
   					<tr>
@@ -122,10 +132,10 @@ And...<br>
   {% if list_by == 'date' or list_by == 'metric_td_dirs' %}
 <!-- BEGIN /ionosphere list_by 'date' and 'metric_td_dirs' block -->
     {% if print_debug == 'True' %}
-<code> DEBUG </code> :: /ionosphere list_by 'date' and 'metric_td_dirs' block</br>
+<code> DEBUG </code> :: /ionosphere list_by 'date' and 'metric_td_dirs' block<br>
     {% endif %}
   <div class="tab-pane active" id="by_date">
-    <h4><span class="logo"><span class="sky">Timestamps ::</span> <span class="re">training data :: </span></span></span> {{ td_files|length }} data sets to review</h4>
+    <h4><span class="logo"><span class="sky">Timestamps ::</span> <span class="re">training data :: </span></span> {{ td_files|length }} data sets to review</h4>
 		<table class="table table-hover">
 			<thead>
 				<tr>
@@ -166,20 +176,20 @@ And...<br>
   {% if list_by == 'metric_td_dirs' %}
 <!-- BEGIN /ionosphere list_by 'metric_td_dirs' block -->
     {% if print_debug == 'True' %}
-<code> DEBUG </code> :: /ionosphere list_by 'metric_td_dirs' block</br>
+<code> DEBUG </code> :: /ionosphere list_by 'metric_td_dirs' block<br>
     {% endif %}
 
   <div class="tab-pane active" id="by_date">
 
       {% if print_debug == 'True' %}
         {% for unique_ts,hdates in metric_td_dirs %}
-  <code> DEBUG </code> :: unique_ts :: {{ unique_ts }}</br>
+  <code> DEBUG </code> :: unique_ts :: {{ unique_ts }}<br>
   <code> requested_timestamp</code> :: {{ requested_timestamp }}<br>
-  <code> hdates</code>:: {{ hdates }}</br>
-  <code> unique_ts</code>:: {{ unique_ts }}</br>
+  <code> hdates</code>:: {{ hdates }}<br>
+  <code> unique_ts</code>:: {{ unique_ts }}<br>
         {% endfor %}
       {% endif %}
-    <h4><span class="logo"><span class="sky">Training ::</span> <span class="re">data :: </span></span></span>{{ for_metric }} :: {{ td_files|length }} data sets</h4>
+    <h4><span class="logo"><span class="sky">Training ::</span> <span class="re">data :: </span></span>{{ for_metric }} :: {{ td_files|length }} data sets</h4>
 If you arrived here via an initial List by date route, your selected date is the <code>highlighted</code> entry
 below.<br>
 Please note: be advised that tracking the timestamp and metric through Flask
@@ -230,7 +240,7 @@ Also note:
 {% if metric_files %}
 <!-- BEGIN /ionosphere 'metric_files' block -->
     {% if print_debug == 'True' %}
-<code> DEBUG </code> :: /ionosphere metric_files block</br>
+<code> DEBUG </code> :: /ionosphere metric_files block<br>
     {% endif %}
 <!-- # @added 20170617 - Feature #2054: ionosphere.save.training_data
 # Allow the operator to save a training_data set -->
@@ -249,23 +259,23 @@ Also note:
 		<div class="container">
 <!-- # @modified 20170122 - Feature #1876: Ionosphere - training_data learn countdown -->
     {% if print_debug == True %}
-<code> DEBUG </code> :: countdown :: {{ countdown }}</br>
+<code> DEBUG </code> :: countdown :: {{ countdown }}<br>
     {% endif %}
 
     {% if fp_id_created %}
       {% if fp_generation > 1 %}
-		    <h4><span class="logo"><span class="sky">LEARNT ::</span> <span class="re">not anomalous :: </span></span></span>this training data has been learnt and created <b><a href="?fp_view=true&fp_id={{ fp_id_created }}&metric={{ for_metric }}">fp_id {{ fp_id_created }}</a></b></h4>
+		    <h4><span class="logo"><span class="sky">LEARNT ::</span> <span class="re">not anomalous :: </span></span>this training data has been learnt and created <b><a href="?fp_view=true&fp_id={{ fp_id_created }}&metric={{ for_metric }}">fp_id {{ fp_id_created }}</a></b></h4>
     	  <div class="alert alert-success">
     	    <strong>LEARNT</strong> this training data has been learnt and created <b><a href="?fp_view=true&fp_id={{ fp_id_created }}&metric={{ for_metric }}">fp_id {{ fp_id_created }}</a></b>
     	  </div>
       {% else %}
-		    <h4><span class="logo"><span class="sky">TRAINED ::</span> <span class="re">not anomalous :: </span></span></span>trained and created <b><a href="?fp_view=true&fp_id={{ fp_id_created }}&metric={{ for_metric }}">fp_id {{ fp_id_created }}</a></b></h4>
+		    <h4><span class="logo"><span class="sky">TRAINED ::</span> <span class="re">not anomalous :: </span></span>trained and created <b><a href="?fp_view=true&fp_id={{ fp_id_created }}&metric={{ for_metric }}">fp_id {{ fp_id_created }}</a></b></h4>
     	  <div class="alert alert-warning">
     	    <strong>Trained</strong> this training data has already been used to create <b><a href="?fp_view=true&fp_id={{ fp_id_created }}&metric={{ for_metric }}">fp_id {{ fp_id_created }}</a></b>
     	  </div>
       {% endif %}
     {% else %}
-		  <h4><span class="logo"><span class="sky">Train ::</span> <span class="re"><code>if not anomalous :: </code></span></span></span> (aka: "That's not what I call an anomaly")</h4>
+		  <h4><span class="logo"><span class="sky">Train ::</span> <span class="re"><code>if not anomalous :: </code></span></span> (aka: "That's not what I call an anomaly")</h4>
     {% endif %}
 
     {% if saved_metric_td == False %}
@@ -397,9 +407,10 @@ The creation of not_similar_enough plots is limited to 10, to give you an idea o
 # Allow the user to define the batch size, top_matches and max_distance per similarity search -->
   		      <tr>
   		        <td>batch_size</td>
-  		        <td><input type="number" name="batch_size" min="2" max="12000" value="5"> the
+  		        <td><input type="number" name="batch_size" min="2" max="12000" value="180"> the
                 size of the motif/shapelet to be found, this is the number of data points the motif will be searched for.<br>
-                valid values 2 to 12000. The smaller the batch size the more likely a match will be found.</td>
+                valid values 2 to 12000. The smaller the batch size the more likely a match will be found.<br>
+                Skyline analysis by default does not use a batch_size less that 180 (e.g. 180 minutes is 1 mintuely data).</td>
   		      </tr>
   		      <tr>
   		        <td>top_matches</td>
@@ -408,8 +419,8 @@ The creation of not_similar_enough plots is limited to 10, to give you an idea o
   		      </tr>
   		      <tr>
   		        <td>max_distance</td>
-  		        <td><input type="number" name="max_distance" min="0" max="1000" value="1.0" step=".01"> the
-                max_distance is a float, this is how far the distance can be to be considered similar. 0.0 is exactly the same, anything above 1.0 is starting to become increasingly dissimilar (default is 1.0)</td>
+  		        <td><input type="number" name="max_distance" min="0" max="1000" value="22" step=".01"> the
+                max_distance is a float, this is how far the distance can be to be considered similar. 0.0 is exactly the same and starting to become increasingly dissimilar the higher the value (dependent on batch_size) (default is 22 on 180 batch_size)</td>
   		      </tr>
   		      <tr>
   		        <td>range_padding</td>
@@ -418,9 +429,9 @@ The creation of not_similar_enough plots is limited to 10, to give you an idea o
   		      </tr>
   		      <tr>
   		        <td>max_area_percent_diff</td>
-  		        <td><input type="number" name="max_area_percent_diff" min="0" max="300" value="10.0" step=".01"> the
+  		        <td><input type="number" name="max_area_percent_diff" min="0" max="300" value="20.0" step=".01"> the
                 max_area_percent_diff is a float, this is the percentage that the area covered by the potentially anomalous shaplet differs
-                from the similar features profile motif (default is 10.0)</td>
+                from the similar features profile motif (default is 20.0)</td>
   		      </tr>
   		      <tr>
   		        <td>purge</td>
@@ -483,7 +494,7 @@ Image file: {{ motif_analysis[for_metric]['motifs'][motif_id]['image'] }}<br><br
 		        <td>Extract features</td>
 		        <td>First extract the features from this timeseries with tsfresh, saves and displays only</td>
   {% if extracted_features %}
-		        <td><b><span class="logo"><span class="sky">features ::</span> <span class="re">extracted</span></span></span></b>
+		        <td><b><span class="logo"><span class="sky">features ::</span> <span class="re">extracted</span></span></b>
 						</td>
 	{% else %}
 		        <td><a href="?timestamp={{ timestamp }}&metric={{ for_metric }}&requested_timestamp={{ timestamp }}&calc_features=true&learn=true">
@@ -491,9 +502,9 @@ Image file: {{ motif_analysis[for_metric]['motifs'][motif_id]['image'] }}<br><br
 		      </tr>
 	{% endif %}
 		      <tr>
-		        <td>Create features profile and <b><span class="logo"><span class="re">DO NOT</span> <span class="sky">LEARN</span></span></span> at {{ use_full_duration_days }} days</b></td>
+		        <td>Create features profile and <b><span class="logo"><span class="re">DO NOT</span> <span class="sky">LEARN</span></span> at {{ use_full_duration_days }} days</b></td>
 		        <td>Then create the extracted features profile as <strong>NOT anomalous</strong>
-            and <span class="logo"><span class="re">DO NOT</span> <span class="sky">LEARN</span></span></span> at {{ use_full_duration_days }} days</strong> or,</td>
+            and <span class="logo"><span class="re">DO NOT</span> <span class="sky">LEARN</span></span> at <strong>{{ use_full_duration_days }} days</strong> or,</td>
   {% if extracted_features %}
     {% if not features_profile_id %}
 <!--
@@ -515,7 +526,7 @@ Image file: {{ motif_analysis[for_metric]['motifs'][motif_id]['image'] }}<br><br
               </form>
             </td>
     {% else %}
-            <td><b><span class="logo"><span class="sky">profile ::</span> <span class="re">created</span></span></span></b>
+            <td><b><span class="logo"><span class="sky">profile ::</span> <span class="re">created</span></span></b>
             </td>
     {% endif %}
   {% else %}
@@ -531,9 +542,9 @@ Image file: {{ motif_analysis[for_metric]['motifs'][motif_id]['image'] }}<br><br
 # not want to add that to be learnt.
 -->
 		      <tr>
-		        <td>Create features profile and <b><span class="logo"><span class="re">DO</span> <span class="sky">LEARN</span></span></span> at {{ use_full_duration_days }} days</b></td>
+		        <td>Create features profile and <b><span class="logo"><span class="re">DO</span> <span class="sky">LEARN</span></span> at {{ use_full_duration_days }} days</b></td>
 		        <td>Or create a features profile as <strong>NOT anomalous</strong>
-            and <span class="logo"><span class="re">DO</span> <span class="sky">LEARN</span></span></span> at {{ use_full_duration_days }} days</strong></td>
+            and <span class="logo"><span class="re">DO</span> <span class="sky">LEARN</span></span> at <strong>{{ use_full_duration_days }} days</strong></td>
     {% if not features_profile_id %}
       {% if extracted_features %}
 <!--
@@ -561,9 +572,9 @@ Image file: {{ motif_analysis[for_metric]['motifs'][motif_id]['image'] }}<br><br
     {% else %}
             <td>
       {% if learn %}
-            <b><span class="logo"><span class="sky">profile ::</span> <span class="re">created and learning</span></span></span></b>
+            <b><span class="logo"><span class="sky">profile ::</span> <span class="re">created and learning</span></span></b>
       {% else %}
-            <b><span class="logo"><span class="sky">profile ::</span> <span class="re">created and NOT learning</span></span></span></b>
+            <b><span class="logo"><span class="sky">profile ::</span> <span class="re">created and NOT learning</span></span></b>
       {% endif %}
             </td>
 	 {% endif %}
@@ -571,7 +582,7 @@ Image file: {{ motif_analysis[for_metric]['motifs'][motif_id]['image'] }}<br><br
 		    </tbody>
 		  </table>
     {% else %}
-          <h4><b><span class="logo"><span class="sky">SAVED ::</span> <span class="re">training data</span></span></span></b></h4>
+          <h4><b><span class="logo"><span class="sky">SAVED ::</span> <span class="re">training data</span></span></b></h4>
       {% if saved_metric_td_details %}
           <pre>{{ saved_metric_td_details }}</pre>
       {% endif %}
@@ -585,9 +596,9 @@ Ionosphere is working on a metric.  This could be a table insert like Existing
 layers, but big tables may hinder easy navigation in the training page, so a
 link and new tab is ok.
 -->
-	  <h4><span class="logo"><span class="sky">Existing ::</span> <span class="re">features profiles page link ::</span></span></span> <a href="?fp_search=true&metric={{ for_metric}}&limit=0&order=DESC" target="_blank">existing features profile page for {{ for_metric }}</a></h4>
+	  <h4><span class="logo"><span class="sky">Existing ::</span> <span class="re">features profiles page link ::</span></span> <a href="?fp_search=true&metric={{ for_metric}}&limit=0&order=DESC" target="_blank">existing features profile page for {{ for_metric }}</a></h4>
 <!-- # @added 20180918 - Feature #2602: Graphs in search_features_profiles -->
-	  <h5><span class="logo"><span class="sky">Existing ::</span> <span class="re">features profiles page link with graphs ::</span></span></span> <a href="?fp_search=true&metric={{ for_metric}}&limit=0&order=DESC&show_graphs=true" target="_blank">existing features profile page with graphs for {{ for_metric }}</a></h5>
+	  <h5><span class="logo"><span class="sky">Existing ::</span> <span class="re">features profiles page link with graphs ::</span></span> <a href="?fp_search=true&metric={{ for_metric}}&limit=0&order=DESC&show_graphs=true" target="_blank">existing features profile page with graphs for {{ for_metric }}</a></h5>
 
 <!-- # @added 20170308 - Feature #1960: ionosphere_layers
 # To present the operator with the existing layers and algorithms for the metric
@@ -623,7 +634,7 @@ But if you wait too long Ionosphere might remove it, so try and act decisively.
   {% endif %}
 
   {% if features_profile_id %}
-	  <h4><span class="logo"><span class="sky">Features ::</span> <span class="re">profile ::</span></span></span> id {{ features_profile_id }} created OK</h4>
+	  <h4><span class="logo"><span class="sky">Features ::</span> <span class="re">profile ::</span></span> id {{ features_profile_id }} created OK</h4>
     {% if not features_profile_exists %}
 	  <div class="alert alert-success">
 	    <strong>Success!</strong> The features profile was created with id {{ features_profile_id }}
@@ -639,7 +650,7 @@ But if you wait too long Ionosphere might remove it, so try and act decisively.
 	  </div>
     {% endif %}
 
-	  <h3><span class="logo"><span class="sky">Trained ::</span> <span class="re">profile :: </span></span></span>{{ for_metric }}</h3>
+	  <h3><span class="logo"><span class="sky">Trained ::</span> <span class="re">profile :: </span></span>{{ for_metric }}</h3>
 
   {% endif %}
 
@@ -647,7 +658,7 @@ But if you wait too long Ionosphere might remove it, so try and act decisively.
 <!-- @added 20170303 - Feature #1960: ionosphere_layers -->
   {% if features_profile_id %}
     {% if layer_id %}
-	  <h3><span class="logo"><span class="sky">Trained ::</span> <span class="re">layers :: </span></span></span>{{ for_metric }}</h3>
+	  <h3><span class="logo"><span class="sky">Trained ::</span> <span class="re">layers :: </span></span>{{ for_metric }}</h3>
       {% if layers_algorithms_ids %}
   	  <div class="alert alert-success">
   	    <strong>Success!</strong> The features profile layers were created with id {{ layer_id }}<br>
@@ -660,7 +671,7 @@ But if you wait too long Ionosphere might remove it, so try and act decisively.
   	  </div>
       {% endif %}
     {% else %}
-	  <h3><span class="logo"><span class="sky">Train ::</span> <span class="re">layers :: </span></span></span>[optional] - {{ for_metric }}</h3>
+	  <h3><span class="logo"><span class="sky">Train ::</span> <span class="re">layers :: </span></span>[optional] - {{ for_metric }}</h3>
 Optionally you now can create an Ionosphere layers profile which allows you to specify conditions that are <code>not anomalous</code> at <b>FULL_DURATION</b>.<br>
 This does not stop Skyline learning, it reduces Ionosphere alerts and enables the creation of custom Boundary type algorithms per metric and profile<br>
 For Ionosphere to determine that the timeseries is <code>not anomalous</code> <b>every enabled</b> layer must be matched (or not matched in terms of layers D and D1).
@@ -862,15 +873,15 @@ you need to try and be quicker next time.
   {% endif %}
 <!-- # @modified 20190510 - Feature #2990: Add metrics id to relevant Ionosphere pages
 # Added the metric id -->
-      <h4><span class="logo"><span class="sky">Details ::</span> <span class="re">anomaly ::</span></span></span> {{ for_metric }} with metrics id {{ metric_id }}</h4>
+      <h4><span class="logo"><span class="sky">Details ::</span> <span class="re">anomaly ::</span></span> {{ for_metric }} with metrics id {{ metric_id }}</h4>
       {{ metric_vars }}<br>
   {% if panorama_anomaly_id != False %}
-      <h4><span class="logo"><span class="sky">Panorama ::</span> <span class="re">anomaly ::</span></span></span> id {{ panorama_anomaly_id }}</h4>
+      <h4><span class="logo"><span class="sky">Panorama ::</span> <span class="re">anomaly ::</span></span> id {{ panorama_anomaly_id }}</h4>
   {% elif panorama_anomaly_id == 'None' %}
-      <h4><span class="logo"><span class="sky">Panorama ::</span> <span class="re">anomaly ::</span></span></span> id {{ panorama_anomaly_id }}</h4>
+      <h4><span class="logo"><span class="sky">Panorama ::</span> <span class="re">anomaly ::</span></span> id {{ panorama_anomaly_id }}</h4>
 {{ for_metric }} has no Panorama anomaly recorded at this timestamp
   {% else %}
-      <h4><span class="logo"><span class="sky">Panorama ::</span> <span class="re">anomaly ::</span></span></span> id {{ panorama_anomaly_id }}</h4>
+      <h4><span class="logo"><span class="sky">Panorama ::</span> <span class="re">anomaly ::</span></span> id {{ panorama_anomaly_id }}</h4>
   {% endif %}
   {% if panorama_anomaly_id == None %}
     {% if layers_id_matched %}

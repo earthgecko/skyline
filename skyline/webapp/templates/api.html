@@ -339,6 +339,55 @@ Or if no batch processing metrics are present <code>{"data":{"metrics":[]},"stat
 		    </tbody>
 		  </table>
 
+	  <h4><span class="logo"><span class="sky">API method ::</span> <span class="re">/api?boundary_metrics</span></span></h4>
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Name</th>
+  		        <th>Description</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+  		        <td>Description:</td>
+  		        <td>Returns a list of all boundary metrics and their algorithm and alert settings (optionally that match metric or namespace patterns) as a json object.
+              Optionally you can filter on namepsace patterns as well, passing them as a </td>
+  		      </tr>
+  		      <tr>
+  		        <td>Endpoint:</td>
+  		        <td><a target='_blank' href="/api?boundary_metrics">/api?boundary_metrics</a></td>
+  		      </tr>
+  		      <tr>
+  		        <td>Method:</td>
+  		        <td>GET</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Request example:</td>
+		          <td><code>/api?boundary_metrics</code><br>
+              <code>/api?boundary_metrics&cluster_data=true</code> [optional for clustered Skyline]<br>
+              <code>/api?boundary_metrics&metric=[metric_name]</code> [optional]<br>
+              <code>/api?boundary_metrics&namespaces=[comma separated namespace patterns]</code> [optional]<br>
+              <code>/api?boundary_metrics&namespaces=carbon,cswellsurf</code> e.g.<br>
+              </td>
+  		      </tr>
+  		      <tr>
+  		        <td>Responses:</td>
+  		        <td>200 - json response, example
+                  <code>
+{
+  "data": {
+    "metrics": {
+      "metrics.test.metric": {},
+      "metrics.vista.nodes.skyline-1.cpu.user": {}
+    }
+  },
+  "status": {}
+}</code><br>
+              </td>
+  		      </tr>
+		    </tbody>
+		  </table>
+
 	  <h4><span class="logo"><span class="sky">API method ::</span> <span class="re">/api?derivative_metrics</span></span></h4>
   		  <table class="table table-hover">
   		    <thead>
@@ -1176,6 +1225,179 @@ Or if no metrics if all metrics are set to alert <code>{"data":{"metrics":[]},"s
   }
 }</code><br>
 Or if no stale metrics exists <code>{"data":{"stale_metrics":{"namespace":"cswellsurf","stale_metrics":{},"stale_metrics_count":0,"total_metrics_count":25}},"status":{"cluster_data":false,"request_time":0.0713842399418354,"response":200}}</code><br>
+              </td>
+  		      </tr>
+		    </tbody>
+		  </table>
+
+	  <h4><span class="logo"><span class="sky">API method ::</span> <span class="re">/api?related_metrics</span></span></h4>
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Name</th>
+  		        <th>Description</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+  		        <td>Description:</td>
+  		        <td>This method returns any discovered related metrics for a metric or metric_id.  Optionally a full_details parameter can be passed to return verbose info on the related_metrics<br>
+              When the full_details parameter is passed the results are sorted by avg_coefficient, when full_details is not passed, the returned metric list is <strong>NOT ORDERED</strong>.
+              </td>
+  		      </tr>
+  		      <tr>
+  		        <td>Endpoint:</td>
+  		        <td>/api?related_metrics</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Method:</td>
+  		        <td>GET</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Request example:</td>
+		          <td><code>/api?related_metrics&metric=[metric]</code><br>
+              </td>
+  		      </tr>
+
+  		      <tr>
+  		        <td>Request examples:</td>
+		          <td><code>/api?related_metrics&metric=[metric_name]</code><br>
+                  <code>/api?related_metrics&metric=[metric_name]&full_details=true</code><br>
+                  <code>/api?related_metrics&metric=[metric_name]&metric_id=[metric_id]</code><br>
+                  <code>/api?related_metrics&metric=[metric_name]&cluster_data=true</code> [optional for clustered Skyline]
+              </td>
+  		      </tr>
+
+  		      <tr>
+  		        <td>Response:</td>
+  		        <td>200 - json response, example: /api?related_metrics&metric=telegraf.26820.sda1.diskio.reads<br>
+                  <code>
+{
+  "data": {
+    "metric": "telegraf.26820.sda1.diskio.reads",
+    "metric_id": 1160,
+    "related_metrics": [
+      "telegraf.26820.kernel.processes_forked",
+      "telegraf.26820.cpu-total.cpu.usage_user",
+      ...,
+      "telegraf.26820.sda1.ext4.rw.-.disk.inodes_used"
+    ],
+    "status": {
+      "code": 200
+    }
+  },
+  "status": {
+    "cluster_data": false,
+    "request_time": 0.017428806982934475,
+    "response": 200
+  }
+}</code><br>
+              </td>
+  		      </tr>
+
+  		      <tr>
+  		        <td><code>full_details</code> Response:</td>
+  		        <td>200 - json response, example: /api?related_metrics&metric=telegraf.26820.sda1.diskio.reads&full_details=true<br>
+                  <code>
+{
+  "data": {
+    "metric": "telegraf.26820.sda1.diskio.reads",
+    "metric_id": 1160,
+    "related_metrics": {
+      "telegraf.26820.kernel.processes_forked": {
+        "avg_coefficient": 0.99661,
+        "avg_ppscore": null,
+        "avg_shifted_coefficient": 0.99661,
+        "created_timestamp": "2021-09-30 15:29:42",
+        "metric_id": 1160,
+        "related_metric_id": 1077,
+        "shifted_counts": {
+          "0": 250
+        },
+        "timestamp": 1633015780
+      },
+      "telegraf.26820.cpu-total.cpu.usage_user": {
+        "avg_coefficient": 0.99678,
+        "avg_ppscore": null,
+        "avg_shifted_coefficient": 0.99678,
+        "created_timestamp": "2021-09-30 15:29:42",
+        "metric_id": 1160,
+        "related_metric_id": 1080,
+        "shifted_counts": {
+          "0": 226
+        },
+        "timestamp": 1633015780
+      },
+      ...,
+      "telegraf.26820.sda1.ext4.rw.-.disk.inodes_used": {
+        "avg_coefficient": 0.99203,
+        "avg_ppscore": null,
+        "avg_shifted_coefficient": 0.99203,
+        "created_timestamp": "2021-10-01 15:55:56",
+        "metric_id": 1160,
+        "related_metric_id": 2364,
+        "shifted_counts": {
+          "0": 139
+        },
+        "timestamp": 1633103756
+      }
+    },
+    "related_metrics_list": [
+      "telegraf.26820.kernel.processes_forked",
+      "telegraf.26820.cpu-total.cpu.usage_user",
+      ...,
+      "telegraf.26820.sda1.ext4.rw.-.disk.inodes_used"
+    ]
+  },
+  "status": {
+    "cluster_data": false,
+    "request_time": 0.890580702573061,
+    "response": 200
+  }
+}</code><br>
+              </td>
+  		      </tr>
+		    </tbody>
+		  </table>
+
+	  <h4><span class="logo"><span class="sky">API method ::</span> <span class="re">/api?thunder_no_data_remove_namespace</span></span></h4>
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Name</th>
+  		        <th>Description</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+  		        <td>Description:</td>
+  		        <td>This is a <strong>ADMIN</strong> method to remove a top level namespace for the thunder no_data check.  Internal this removes all metrics starting with the passed namespace from the <code>analyzer.metrics.last_timeseries_timestamp</code> Redis hash key.
+              If metrics stop for a top level namespace and they are expected to have stopped, the namespace can be removed to silence the no_data Thunder alerts in the next Thunder run.</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Endpoint:</td>
+  		        <td>/api?thunder_no_data_remove_namespace</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Method:</td>
+  		        <td>GET</td>
+  		      </tr>
+  		      <tr>
+  		        <td>Request example:</td>
+		          <td><code>/api?thunder_no_data_remove_namespace&namespace=[top_level_namespace]</code><br>
+              </td>
+  		      </tr>
+  		      <tr>
+  		        <td>Responses:</td>
+  		        <td>200 - json response, example
+                  <code>
+{
+  "data": {
+    "namespace": "test123",
+    "remove_namespace_from_no_data_check": true
+  },
+  "status": {}
+}</code><br>
               </td>
   		      </tr>
 		    </tbody>

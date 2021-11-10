@@ -31,12 +31,12 @@
 {% endif %}
 
 {% if print_debug == 'True' %}
-<code> DEBUG </code> :: /ionosphere metric_files block</br>
+<code> DEBUG </code> :: /ionosphere metric_files block<br>
 {% endif %}
 
 
 {% if print_debug == 'True' %}
-<code> DEBUG </code></br>
+<code> DEBUG </code><br>
   {% if requested_timestamp %}
 <code> requested_timestamp </code>: {{ requested_timestamp }}<br>
   {% else %}
@@ -45,7 +45,7 @@
 {% endif %}
 
 {% if display_message %}
-<code> ERROR </code></br>
+<code> ERROR </code><br>
 <code> message </code>: {{ display_message }}<br>
 {% endif %}
 
@@ -111,7 +111,7 @@
   {% if list_by == 'metric' or list_by == 'timestamp_td_dirs' %}
 <!-- BEGIN /ionosphere list_by 'metric' and 'timestamp_td_dirs' block -->
     {% if print_debug == 'True' %}
-<code> DEBUG </code> :: /ionosphere list_by 'metric' and 'timestamp_td_dirs' block</br>
+<code> DEBUG </code> :: /ionosphere list_by 'metric' and 'timestamp_td_dirs' block<br>
     {% endif %}
   	  <div class="tab-pane active" id="by_metric">
         <h4><span class="logo"><span class="sky">Metrics ::</span> <span class="re">features profiles :: </span></span> {{ td_files|length }} data sets</h4>
@@ -139,7 +139,7 @@
   {% if list_by == 'date' or list_by == 'metric_td_dirs' %}
 <!-- BEGIN /ionosphere list_by 'date' and 'metric_td_dirs' block -->
     {% if print_debug == 'True' %}
-<code> DEBUG </code> :: /ionosphere list_by 'date' and 'metric_td_dirs' block</br>
+<code> DEBUG </code> :: /ionosphere list_by 'date' and 'metric_td_dirs' block<br>
     {% endif %}
       <div class="tab-pane active" id="by_date">
         <h4><span class="logo"><span class="sky">Timestamps ::</span> <span class="re">features profiles :: </span></span> {{ td_files|length }} data sets</h4>
@@ -184,17 +184,17 @@
   {% if list_by == 'metric_td_dirs' %}
 <!-- BEGIN /ionosphere list_by 'metric_td_dirs' block -->
     {% if print_debug == 'True' %}
-<code> DEBUG </code> :: /ionosphere list_by 'metric_td_dirs' block</br>
+<code> DEBUG </code> :: /ionosphere list_by 'metric_td_dirs' block<br>
     {% endif %}
 
   <div class="tab-pane active" id="by_date">
 
       {% if print_debug == 'True' %}
         {% for unique_ts,hdates in metric_td_dirs %}
-  <code> DEBUG </code> :: unique_ts :: {{ unique_ts }}</br>
+  <code> DEBUG </code> :: unique_ts :: {{ unique_ts }}<br>
   <code> requested_timestamp</code> :: {{ requested_timestamp }}<br>
-  <code> hdates</code>:: {{ hdates }}</br>
-  <code> unique_ts</code>:: {{ unique_ts }}</br>
+  <code> hdates</code>:: {{ hdates }}<br>
+  <code> unique_ts</code>:: {{ unique_ts }}<br>
         {% endfor %}
       {% endif %}
     <h4><span class="logo"><span class="sky">Features ::</span> <span class="re">profiles :: </span></span>{{ for_metric }} :: {{ td_files|length }} data sets</h4>
@@ -254,7 +254,7 @@ Also note:
 {% if metric_files %}
 <!-- BEGIN /ionosphere 'metric_files' block -->
     {% if print_debug == 'True' %}
-<code> DEBUG </code> :: /ionosphere?fp_view=true metric_files block</br>
+<code> DEBUG </code> :: /ionosphere?fp_view=true metric_files block<br>
     {% endif %}
 <!-- # @added 20190328 - Feature #2484: FULL_DURATION feature profiles
      # Added ionosphere_echo -->

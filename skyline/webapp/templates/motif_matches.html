@@ -48,7 +48,7 @@
 		<div class="tab-content">
 
   		<div class="col-md-12">
-  		  <h4><span class="logo"><span class="sky">Matches ::</span> <span class="re">motifs</span></span></span></h4>
+  		  <h4><span class="logo"><span class="sky">Matches ::</span> <span class="re">motifs</span></span></h4>
   {% if matched_motifs %}
         <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#match_options">Show match options</button>
         <div id="match_options" class="collapse">
@@ -135,7 +135,7 @@
       </div>
   {% if matched_motifs %}
 	  <div class="tab-pane active" id="motif_matches">
-      <h4><span class="logo"><span class="sky">Matches ::</span> <span class="re">motif :: </span></span></span>{{ for_metric }} -
+      <h4><span class="logo"><span class="sky">Matches ::</span> <span class="re">motif :: </span></span>{{ for_metric }} -
           limited by {{ matched_motifs|length }} motif matches</h4>
 			<table class="table table-hover">
 				<thead>
