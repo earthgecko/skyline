@@ -3,6 +3,7 @@ import logging
 import os
 from ast import literal_eval
 import traceback
+from time import time
 
 import settings
 import skyline_version
@@ -23,8 +24,7 @@ try:
     luminosity_data_folder = settings.LUMINOSITY_DATA_FOLDER
 except:
     luminosity_data_folder = '/opt/skyline/luminosity'
-classify_metrics_dir = '%s/classify_metrics' % luminosity_data_folder
-
+# classify_metrics_dir = '%s/classify_metrics' % luminosity_data_folder
 
 this_host = str(os.uname()[1])
 
@@ -86,13 +86,46 @@ def get_classify_metrics(base_name, timestamp, algorithm, significant):
         'get_classify_metrics - base_name: %s, timestamp: %s, algorithm: %s, significant: %s' % (
             str(base_name), str(timestamp), str(algorithm), str(significant)))
 
+    start = int(time())
+
+    # @added 20211001 - reduce os.walk
+    classify_metrics_dir = '%s/classify_metrics' % luminosity_data_folder
+    if algorithm != 'all':
+        classify_metrics_dir = '%s/classify_metrics/%s' % (luminosity_data_folder, algorithm)
+        if base_name != 'all':
+            metric_dir_str = base_name.replace('.', '/')
+            classify_metrics_dir = '%s/%s' % (classify_metrics_dir, metric_dir_str)
+
     classified_metrics = []
     metrics = []
     classify_metrics_dict = {}
     for root, dirs, files in os.walk(classify_metrics_dir):
+
+        # @added 20211001 - limit default results
+        if base_name != 'all':
+            root_str = root.replace('/', '.')
+            if base_name not in root_str:
+                continue
+        if base_name == 'all':
+            if len(classify_metrics_dict) == 10:
+                break
+#        if int(time()) > (start + 24):
+#            logger.info(
+#                'get_classify_metrics - breaking from os.walk due to run time')
+#            break
+
         data_dict = None
         if files:
             for file in files:
+                # @added 20211001 - limit default results
+                if base_name == 'all':
+                    if len(classify_metrics_dict) == 10:
+                        break
+#                if int(time()) > (start + 24):
+#                    logger.info(
+#                        'get_classify_metrics - breaking from files in os.walk due to run time')
+#                    break
+
                 try:
                     if file == 'data.txt':
                         data_dict = None
