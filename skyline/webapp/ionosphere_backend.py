@@ -106,6 +106,7 @@ full_duration_in_hours = full_duration_seconds / 60 / 60
 exclude_redis_json = 'redis.%sh.json' % str(int(full_duration_in_hours))
 
 # @added 20190502 - Branch #2646: slack
+channel_id = None
 try:
     SLACK_ENABLED = settings.SLACK_ENABLED
 except:
@@ -491,7 +492,7 @@ def ionosphere_metric_data(requested_timestamp, data_for_metric, context, fp_id)
         string_keys = ['metric', 'anomaly_dir', 'added_by', 'app', 'source']
         float_keys = ['value']
         int_keys = ['from_timestamp', 'metric_timestamp', 'added_at', 'full_duration']
-        array_keys = ['algorithms', 'triggered_algorithms']
+        array_keys = ['algorithms', 'triggered_algorithms', 'algorithms_run']
         boolean_keys = ['graphite_metric', 'run_crucible_tests']
 
         metric_vars_array = []
@@ -2307,7 +2308,7 @@ def ionosphere_search(default_query, search_query):
 
                 # stmt = select([ionosphere_table]).where(ionosphere_table.c.metric_id == int(metric_id))
                 stmt = select([ionosphere_table]).where(ionosphere_table.c.metric_id == int(metrics_id))
-                logger.debug('debug :: stmt - is abstracted')
+                logger.debug('debug :: stmt - is abstracted - for metric_id: %s' % str(int(metrics_id)))
             else:
 
                 # @added 20200404 - Task #3464: Optimise ionosphere_backend ionosphere_search queries
@@ -2354,7 +2355,7 @@ def ionosphere_search(default_query, search_query):
                     # [SQL: SELECT * FROM metrics WHERE id in ()]
                     if select_metric_ids == '':
                         select_metric_ids_stmt = 'SELECT * FROM metrics WHERE id=0'
-                        logger.warn('warn :: determined 0 metrics with features profiles for the default Ionosphere search')
+                        logger.warning('warn :: determined 0 metrics with features profiles for the default Ionosphere search')
 
                     try:
                         metrics_result = connection.execute(select_metric_ids_stmt)
@@ -4224,7 +4225,12 @@ def save_training_data_dir(timestamp, base_name, label, hdate):
 
     # Create a label file
     try:
-        saved_training_data_details = '[[label: \'%s\'], [saved_date: \'%s\']]' % (str(label), str(hdate))
+        # @modified 20210727 - Feature #4206: webapp - saved_training_data page
+        # Make it a list of dicts so literal_eval can be applied to it. It was
+        # only ever created to use as plaintext in HTML <code>, this change
+        # makes no difference to its original usage.
+        # saved_training_data_details = '[[label: \'%s\'], [saved_date: \'%s\']]' % (str(label), str(hdate))
+        saved_training_data_details = "[{'label': '%s'}, {'saved_date': '%s'}]" % (str(label), str(hdate))
         write_data_to_file(skyline_app, details_file, 'w', saved_training_data_details)
     except:
         trace = traceback.format_exc()
@@ -5837,10 +5843,18 @@ def get_features_profiles_to_validate(base_name):
         if int(fp_full_duration) > int(minimum_full_duration):
             get_parent_parent = True
 
+        logger.debug('debug :: ionosphere_backend :: get_features_profiles_to_validate :: get_parent_parent: %s' % str(get_parent_parent))
+
         try:
             parent_parent_fp_id = parent_fp_details_object['parent_id']
-        except:
+        except Exception as err:
+            logger.error(traceback.format_exc())
+            logger.error('error :: %s :: failed to get parent_parent_fp_id from parent_fp_details_object[\'parent_id\'] - %s' % (
+                function_str, err))
             parent_parent_fp_id = 0
+
+        logger.debug('debug :: ionosphere_backend :: get_features_profiles_to_validate :: parent_parent_fp_id: %s' % str(parent_parent_fp_id))
+
         if int(parent_parent_fp_id) == 0:
             get_parent_parent = False
 
@@ -5851,6 +5865,7 @@ def get_features_profiles_to_validate(base_name):
                 parent_parent_fp_details, success, fail_msg, trace, parent_parent_fp_details_object = features_profile_details(parent_parent_fp_id)
                 parent_parent_full_duration = parent_parent_fp_details_object['full_duration']
                 parent_parent_anomaly_timestamp = parent_parent_fp_details_object['anomaly_timestamp']
+                logger.debug('debug :: ionosphere_backend :: get_features_profiles_to_validate :: parent_parent_full_duration: %s' % str(parent_parent_full_duration))
             except:
                 trace = traceback.format_exc()
                 fail_msg = 'error :: %s :: failed to get parent_parent_fp_details_object from features_profile_details for parent parent fp_id %s' % (
@@ -6038,7 +6053,20 @@ def ionosphere_show_graphs(requested_timestamp, data_for_metric, fp_id):
         settings.IONOSPHERE_PROFILES_FOLDER, timeseries_dir,
         str(requested_timestamp))
 
-    td_files = listdir(metric_data_dir)
+    # @modified 20210710 - Bug #4168: webapp/ionosphere_backend.py - handle old features profile dir not been found
+    # Circa 2017 there was a bug that was related to features_profile dir not
+    # using the anomaly_timestamp but using it offset with max +60
+    try:
+        td_files = listdir(metric_data_dir)
+    except Exception as e:
+        logger.error(traceback.format_exc())
+        logger.error('error :: ionosphere_show_graphs :: td_files dir - %s' % e)
+        image_404_path = 'webapp/static/images/skyline.ionosphere.image.404.png'
+        image_404_file = path.abspath(
+            path.join(path.dirname(__file__), '..', image_404_path))
+        images.append(str(image_404_file))
+        td_files = []
+
     for i_file in td_files:
         metric_file = path.join(metric_data_dir, i_file)
         if i_file.endswith('.png'):
@@ -6700,6 +6728,7 @@ def label_anomalies(start_timestamp, end_timestamp, metrics, namespaces, label):
         logger.info('label_anomalies :: %s metric ids determined from passed namespaces' % str(len(metric_ids)))
 
     logger.info('label_anomalies :: %s namespaces passed' % str(len(namespaces)))
+
     if namespaces:
         metrics_like_query = text("""SELECT id FROM metrics WHERE metric LIKE :like_string""")
         for namespace in namespaces:
@@ -6708,7 +6737,13 @@ def label_anomalies(start_timestamp, end_timestamp, metrics, namespaces, label):
                 # Added missing namespace_like
                 namespace_str = namespace.rstrip('.')
                 wildcard = '%'
-                namespace_like = '%s.%s' % (namespace_str, wildcard)
+                # @modified 20210703 - Ideas #2476: Label and relate anomalies
+                # Do not append double wildcard if already specified
+                # namespace_like = '%s.%s' % (namespace_str, wildcard)
+                if '%' not in list(namespace_str):
+                    namespace_like = '%s.%s' % (namespace_str, wildcard)
+                else:
+                    namespace_like = namespace_str
 
                 connection = engine.connect()
                 # @modified 20200425 - Ideas #2476: Label and relate anomalies
@@ -6783,6 +6818,44 @@ def label_anomalies(start_timestamp, end_timestamp, metrics, namespaces, label):
             if engine:
                 engine_disposal(engine)
             raise
+
+    # @added 20210826 - Feature #4246: label_anomalies - update slack thread
+    slack_threads_to_update_with_label = {}
+    if update_slack_thread:
+        for anomaly_id in anomaly_ids_to_label:
+            try:
+                connection = engine.connect()
+                stmt = select([anomalies_table.c.slack_thread_ts]).\
+                    where(anomalies_table.c.id == anomaly_id)
+                result = connection.execute(stmt)
+                for row in result:
+                    slack_thread_ts = row['slack_thread_ts']
+                    break
+                if slack_thread_ts > 0:
+                    message = '*LABELLED* - %s' % str(label)
+                    slack_threads_to_update_with_label[slack_thread_ts] = message
+                connection.close()
+            except:
+                trace = traceback.format_exc()
+                logger.error(trace)
+                logger.error('error :: could not determine slack_thread_ts or create slack thread update message for anomaly_id %s ' % str(anomaly_id))
+    for slack_thread_ts in list(slack_threads_to_update_with_label.keys()):
+        slack_response = {'ok': False}
+        message = slack_threads_to_update_with_label[slack_thread_ts]
+        try:
+            slack_response = slack_post_message(skyline_app, channel_id, str(slack_thread_ts), message)
+        except:
+            trace = traceback.format_exc()
+            logger.error(trace)
+            fail_msg = 'error :: label_anomalies :: failed to slack_post_message - %s' % message
+            logger.error('%s' % fail_msg)
+        if not slack_response['ok']:
+            fail_msg = 'error :: label_anomalies :: failed to slack_post_message, slack dict output follows'
+            logger.error('%s' % fail_msg)
+            logger.error('%s' % str(slack_response))
+        else:
+            logger.info('label_anomalies :: posted slack update to %s, anomaly_id %s labelled - %s' % (
+                channel_id, str(anomaly_id), message))
 
     if engine:
         engine_disposal(engine)
