@@ -11,11 +11,45 @@
 		<li class="active"><span class="logo"><span class="sky">Classify</span> <span class="re">metrics</span></span></li>
   </div>
 </ol>
+{% elif cloudbursts %}
+<ol class="breadcrumb">
+	<div class="breadcrumb">
+		<li><a href="/">Home</a></li>
+		<li><a href="/luminosity">Luminosity</a></li>
+		<li class="active"><span class="logo"><span class="sky">Cloud</span><span class="re">bursts</span></span></li>
+  </div>
+</ol>
+{% elif plot_cloudburst %}
+<ol class="breadcrumb">
+	<div class="breadcrumb">
+		<li><a href="/">Home</a></li>
+		<li><a href="/luminosity">Luminosity</a></li>
+		<li><span class="logo"><span class="sky">Cloud</span><span class="re">bursts</span></span></li>
+		<li class="active"><span class="logo"><span class="sky">Plot</span> <span class="re">Cloudburst</span></span></li>
+  </div>
+</ol>
+{% elif related_metrics %}
+<ol class="breadcrumb">
+	<div class="breadcrumb">
+		<li><a href="/">Home</a></li>
+		<li><a href="/luminosity">Luminosity</a></li>
+		<li><span class="logo"><span class="sky">Related</span><span class="re"> metrics</span></span></li>
+  </div>
+</ol>
+{% elif related_to_metrics %}
+<ol class="breadcrumb">
+	<div class="breadcrumb">
+		<li><a href="/">Home</a></li>
+		<li><a href="/luminosity">Luminosity</a></li>
+		<li><span class="logo"><span class="sky">Related</span><span class="re"> to metrics</span></span></li>
+  </div>
+</ol>
 {% else %}
 <ol class="breadcrumb">
 	<div class="breadcrumb">
 		<li><a href="/">Home</a></li>
 		<li class="active"><span class="logo"><span class="sky">Luminosity</span></span></li>
+		<li><span class="logo"><span class="sky">Classify</span> <span class="re">metrics</span></span></li>
   </div>
 </ol>
 {% endif %}
@@ -30,6 +64,32 @@
 
 {% if classify_metric %}
   {% include "classify_metric.html" %}
+{% endif %}
+
+{% if cloudbursts %}
+  {% include "cloudbursts.html" %}
+{% endif %}
+
+{% if plot_cloudburst %}
+  {% include "plot_cloudburst.html" %}
+{% endif %}
+
+{% if related_metrics %}
+  {% include "related_metrics.html" %}
+{% endif %}
+
+{% if metric_related_metrics %}
+  {% include "metric_related_metrics.html" %}
+{% endif %}
+
+{% if related_to_metrics %}
+	{% if not metric %}
+  	{% include "related_to_metrics.html" %}
+	{% endif %}
+{% endif %}
+
+{% if related_to_metrics and metric %}
+  {% include "metric_related_to_metrics.html" %}
 {% endif %}
 
 <!-- END /luminosity block -->
