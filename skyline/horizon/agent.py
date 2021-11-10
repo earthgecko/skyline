@@ -22,6 +22,8 @@ if True:
     from roomba import Roomba
     from worker import Worker
     from validate_settings import validate_settings_variables
+    # @added 20211026 - Branch #4300: prometheus
+    from prometheus import PrometheusMetrics
 
 skyline_app = 'horizon'
 skyline_app_logger = '%sLog' % skyline_app
@@ -97,6 +99,18 @@ class Horizon():
         Listen(settings.PICKLE_PORT, listen_queue, pid, type="pickle").start()
         logger.info('%s :: starting Listen - udp' % skyline_app)
         Listen(settings.UDP_PORT, listen_queue, pid, type="udp").start()
+
+        # @added 20211026 - Branch #4300: prometheus
+        prometheus_settings = {}
+        try:
+            prometheus_settings = settings.PROMETHEUS_SETTINGS
+        except AttributeError:
+            prometheus_settings = {}
+        except:
+            prometheus_settings = {}
+        if prometheus_settings:
+            logger.info('%s :: starting PrometheusMetrics' % skyline_app)
+            PrometheusMetrics(listen_queue, pid).start()
 
         # @added 20201122 - Feature #3820: HORIZON_SHARDS
         # Add an additional listen process on a different port for the shard
