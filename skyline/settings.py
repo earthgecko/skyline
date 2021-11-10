@@ -13,7 +13,7 @@ http://earthgecko-skyline.readthedocs.io/en/latest/skyline.html#module-settings
 
 REDIS_SOCKET_PATH = '/tmp/redis.sock'
 """
-:var REDIS_SOCKET_PATH: The path for the Redis unix socket
+:var REDIS_SOCKET_PATH: The path for the Redis unix socket [USER_DEFINED]
 :vartype REDIS_SOCKET_PATH: str
 """
 
@@ -22,7 +22,7 @@ REDIS_PASSWORD = None
 """
 :var REDIS_PASSWORD: The password for Redis, even though Skyline uses socket it
     is still advisable to set a password for Redis.  If this is set to the
-    boolean None Skyline will not use Redis AUTH
+    boolean None Skyline will not use Redis AUTH [USER_DEFINED]
 :vartype REDIS_PASSWORD: str
 
 .. note:: Please ensure that you do enable Redis authentication by setting the
@@ -135,20 +135,20 @@ GRAPHITE_HOST = 'YOUR_GRAPHITE_HOST.example.com'
 """
 :var GRAPHITE_HOST: If you have a Graphite host set up, set this variable to get
     graphs on Skyline and Horizon. Don't include http:// since this can be used
-    for CARBON_HOST as well.
+    for CARBON_HOST as well.  [USER_DEFINED]
 :vartype GRAPHITE_HOST: str
 """
 
 GRAPHITE_PROTOCOL = 'http'
 """
-:var GRAPHITE_PROTOCOL: Graphite host protocol - http or https
+:var GRAPHITE_PROTOCOL: Graphite host protocol - http or https [USER_DEFINED]
 :vartype GRAPHITE_PROTOCOL: str
 """
 
 GRAPHITE_PORT = '80'
 """
 :var GRAPHITE_PORT: Graphite host port - for a specific port if graphite runs on
-    a port other than 80, e.g. '8888'
+    a port other than 80, e.g. '8888' [USER_DEFINED]
 :vartype GRAPHITE_PORT: str
 """
 
@@ -208,6 +208,7 @@ CARBON_HOST = GRAPHITE_HOST
 CARBON_PORT = 2003
 """
 :var CARBON_PORT: If you have a Graphite host set up, set its Carbon port.
+    [USER_DEFINED]
 :vartype CARBON_PORT: int
 """
 
@@ -239,7 +240,7 @@ OCULUS_HOST = ''
 
 SERVER_METRICS_NAME = 'YOUR_HOSTNAME'
 """
-:var SERVER_METRICS_NAME: The hostname of the Skyline.
+:var SERVER_METRICS_NAME: The hostname of the Skyline. [USER_DEFINED]
 :vartype SERVER_METRICS_NAME: str
 
 - This is to allow for multiple Skyline nodes to send metrics to a Graphite
@@ -261,7 +262,7 @@ SKYLINE_FEEDBACK_NAMESPACES = [SERVER_METRICS_NAME, GRAPHITE_HOST]
     ionosphere_busy state is determined, Skyline will rate limit the analysis of
     any metrics in the namespaces declared here.
     This list works in the same way that Horizon SKIP_LIST does, it matches in
-    the string or dotted namespace elements.
+    the string or dotted namespace elements. [USER_DEFINED]
     **For example**::
 
         SKYLINE_FEEDBACK_NAMESPACES = [
@@ -270,6 +271,29 @@ SKYLINE_FEEDBACK_NAMESPACES = [SERVER_METRICS_NAME, GRAPHITE_HOST]
             'stats.skyline-mysql']
 
 :vartype SKYLINE_FEEDBACK_NAMESPACES: list
+"""
+
+DO_NOT_SKIP_SKYLINE_FEEDBACK_NAMESPACES = []
+"""
+:var DO_NOT_SKIP_SKYLINE_FEEDBACK_NAMESPACES: This is a list of namespaces or metrics
+    that may be in the SKYLINE_FEEDBACK_NAMESPACES that you DO NOT want to skip
+    as feedback metrics but always want analysed.  [USER_DEFINED]
+    Metrics will be evaluated against namespaces in this list using
+    :func:`.matched_or_regexed_in_list` which determines if a pattern is in a
+    list as a:
+    1) absolute match
+    2) match by dotted elements
+    3) matched by a regex
+
+    **For example**::
+
+        DO_NOT_SKIP_SKYLINE_FEEDBACK_NAMESPACES = [
+            'nginx',
+            'disk.used_percent',
+            'system.load15'
+        ]
+
+:vartype DO_NOT_SKIP_SKYLINE_FEEDBACK_NAMESPACES: list
 """
 
 MIRAGE_CHECK_PATH = '/opt/skyline/mirage/check'
@@ -340,13 +364,13 @@ HIPCHAT_ENABLED = False
 
 PAGERDUTY_ENABLED = False
 """
-:var PAGERDUTY_ENABLED: Enables the Pagerduty alerter
+:var PAGERDUTY_ENABLED: Enables the Pagerduty alerter [USER_DEFINED]
 :vartype PAGERDUTY_ENABLED: boolean
 """
 
 SLACK_ENABLED = False
 """
-:var SLACK_ENABLED: Enables the Slack alerter
+:var SLACK_ENABLED: Enables the Slack alerter [USER_DEFINED]
 :vartype SLACK_ENABLED: boolean
 """
 
@@ -729,7 +753,7 @@ METRICS_INACTIVE_AFTER = FULL_DURATION - 3600
 
 CANARY_METRIC = 'statsd.numStats'
 """
-:var CANARY_METRIC: The metric name to use as the CANARY_METRIC
+:var CANARY_METRIC: The metric name to use as the CANARY_METRIC [USER_DEFINED]
 :vartype CANARY_METRIC: str
 
 - The canary metric should be a metric with a very high, reliable resolution
@@ -870,17 +894,18 @@ CUSTOM_ALGORITHMS = {}
             'use_with': ['analyzer', 'crucible'],
             'debug_logging': True,
         },
-        'matrixprofile': {
-            'namespaces': ['*'],
+        'skyline_matrixprofile': {
+            'namespaces': ["telegraf",],
             'algorithm_source': '/opt/skyline/github/skyline/skyline/custom_algorithms/skyline_matrixprofile.py',
-            'algorithm_parameters': {},
-            'max_execution_time': 30.0,
+            'algorithm_parameters': {'windows': 5, 'k_discords': 20},
+            'max_execution_time': 5.0,
             'consensus': 1,
-            'algorithms_allowed_in_consensus': ['matrixprofile'],
-            'run_3sigma_algorithms': False,
-            'run_before_3sigma': True,
-            'run_only_if_consensus': False,
-            'use_with': ['snab'],
+            'algorithms_allowed_in_consensus': ["skyline_matrixprofile"],
+            'run_3sigma_algorithms': True,
+            'run_before_3sigma': False,
+            'run_only_if_consensus': True,
+            'trigger_history_override': 4,
+            'use_with': ["mirage"],
             'debug_logging': False,
         },
     }
@@ -920,6 +945,9 @@ CUSTOM_ALGORITHMS = {}
     three-sigma algorithms, e.g. with the parameter ``run_before_3sigma: False``
     Currently this parameter only uses the CONSENSUS or MIRAGE_CONSENSUS setting
     and does not apply the consensus parameter above.
+:param trigger_history_override: If the 3-sigma algorithms have reached
+    CONSENSUS this many times in a row, override a custom algorithm result of
+    not anomalous. Optional. int
 :param use_with: a list of Skyline apps which should apply the algorithm if
     they handle the metric, it is only applied if the app handles the metric,
     generally set this to ``['analyzer', 'analyzer_batch', 'mirage', 'crucible']``
@@ -934,6 +962,7 @@ CUSTOM_ALGORITHMS = {}
 :type run_before_3sigma: boolean
 :type run_3sigma_algorithms: boolean
 :type run_only_if_consensus: boolean
+:type trigger_history_override: int
 :type use_with: list
 :type debug_logging: boolean
 
@@ -998,7 +1027,7 @@ ENABLE_ALERTS = True
 
 ENABLE_MIRAGE = False
 """
-:var ENABLE_MIRAGE: This enables Analyzer to output to Mirage
+:var ENABLE_MIRAGE: This enables Analyzer to output to Mirage [USER_DEFINED]
 :vartype ENABLE_MIRAGE: boolean
 """
 
@@ -1041,7 +1070,7 @@ ALERTS = (
     # ('carbon', 'http_alerter-otherapp', 60),
 )
 """
-:var ALERTS: This enables analyzer alerting.
+:var ALERTS: This enables analyzer alerting. [USER_DEFINED]
 :vartype ALERTS: tuples
 
 This is the config for which metrics to alert on and which strategy to use for
@@ -1064,16 +1093,20 @@ trigger again.
         ('metric4.thing\\..*.\\.requests', 'stmp', 900),
         # mirage - SECOND_ORDER_RESOLUTION_HOURS - if added and Mirage is enabled
         ('metric5.thing.*.rpm', 'smtp', 900, 168),
+        ('org_website.status_code.500', 'smtp', 1800),
         # NOTE: all other alert tuples MUST be declared AFTER smtp alert tuples
         ('metric3', 'slack', 600),
         ('stats.', 'http_alerter_external_endpoint', 30),
+        # Send SMS alert via AWS SNS and to slack
+        ('org_website.status_code.500', 'sms', 1800),
+        ('org_website.status_code.500', 'slack', 1800),
     )
 
 - Alert tuple parameters are:
 
 :param metric: metric name.
-:param alerter: the alerter name e.g. smtp, syslog, slack, pagerduty or
-    http_alerter_<name>
+:param alerter: the alerter name e.g. smtp, syslog, slack, pagerduty,
+    http_alerter_<name> or sms.
 :param EXPIRATION_TIME: Alerts will not fire twice within this amount of
     seconds, even if they trigger again.
 :param SECOND_ORDER_RESOLUTION_HOURS: (optional) The number of hours that Mirage
@@ -1181,7 +1214,7 @@ SMTP_OPTS = {
     'embed-images': True,
 }
 """
-:var SMTP_OPTS: Your SMTP settings.
+:var SMTP_OPTS: Your SMTP settings. [USER_DEFINED]
 :vartype SMTP_OPTS: dictionary
 
 It is possible to set the email addresses to no_email if you do not wish to
@@ -1255,7 +1288,7 @@ SLACK_OPTS = {
     'message_on_validated_features_profiles': True,
 }
 """
-:var SLACK_OPTS: Your slack settings.
+:var SLACK_OPTS: Your slack settings. [USER_DEFINED]
 :vartype SLACK_OPTS: dictionary
 
 slack alerts require slackclient
@@ -1269,7 +1302,7 @@ PAGERDUTY_OPTS = {
     'key': 'your_pagerduty_service_api_key',
 }
 """
-:var PAGERDUTY_OPTS: Your SMTP settings.
+:var PAGERDUTY_OPTS: Your SMTP settings. [USER_DEFINED]
 :vartype PAGERDUTY_OPTS: dictionary
 
 PagerDuty alerts require pygerduty
@@ -1310,8 +1343,69 @@ HTTP_ALERTERS_OPTS = {}
 
 All http_alerter alert names must be prefixed with `http_alerter` followed by
 the name you want to assign to it.  HTTP_ALERTERS_OPTS is used by Analyzer (in
-:mod:`settings.ALERTS`) and Bounary (in :mod:`settings.BOUNDARY_METRICS`) in
-conjunction with http_alerter defines,
+:mod:`settings.ALERTS`) and Boundary (in :mod:`settings.BOUNDARY_METRICS`) in
+conjunction with http_alerter defines.
+
+"""
+
+AWS_SNS_SMS_ALERTS_ENABLED = False
+"""
+:var AWS_SNS_SMS_ALERTS_ENABLED: Enables SMS alerting via AWS SNS.  If this is
+    set to True :mod:`settings.AWS_OPTS` and boto3 must be configured [USER_DEFINED]
+:vartype AWS_SNS_SMS_ALERTS_ENABLED: boolean
+
+By default Skyline by default just uses the boto3
+"""
+
+AWS_OPTS = {
+    # Just use boto3 credentials method (recommended)
+    'use_boto3_defaults': True,
+    # Optionally you can set use_boto3_defaults to False and specific the AWS
+    # credentials and region - TODO
+    # 'aws_access_key_id': 'YOUR_AWS_ACCESS_KEY_ID',
+    # 'aws_secret_access_key': 'YOUR_AWS_SECRET_ACCESS_KEY',
+    # 'region_name': 'YOUR_AWS_REGION',
+}
+"""
+:var AWS_OPTS: Your AWS settings. [USER_DEFINED]
+:vartype AWS_OPTS: dictionary
+
+For SMS alerts via AWS SNS using boto3.  Skyline by default just uses the boto3
+configuration which should be configured as normal.  Internally boto3 uses
+~/.aws/credentials and ~/.aws/config.  If you run Skyline as the skyline
+user that has /opt/skyline as their $HOME directory then boto3 will expect
+these files /opt/skyline/.aws/credentials and /opt/skyline/.aws/config
+For documentation on configuring AWS SNS to send SMS and AWS users/IAM user and
+permissions see AWS docs.
+
+"""
+
+SMS_ALERT_OPTS = {
+    'recipients': {},
+    'namespaces': {},
+}
+"""
+:var SMS_ALERT_OPTS: Define recipients and namespaces to route SMS alerts to.
+    Both :mod:`settings.AWS_SNS_SMS_ALERTS_ENABLED` and :mod:`settings.AWS_OPTS`
+    must be enabled and defined for SMS alerting. [USER_DEFINED]
+:vartype SMS_ALERT_OPTS: dict
+
+SMS alerts requires AWS_OPTS to be set and are routed via AWS SNS.
+
+- **Example**::
+
+    SMS_ALERT_OPTS = {
+        'recipients': {
+            'alice': '+1098765432',
+            'bob': '+12345678901',
+            'pager': '+11111111111',
+        },
+        'namespaces': {
+            'org_website.status_code.500': ['pager'],
+            'disk.used_percent': ['pager', 'alice'],
+            'skyline.analyzer.runtime': ['pager', 'bob']
+        }
+    }
 
 """
 
@@ -1349,7 +1443,7 @@ HORIZON_IP = 'YOUR_SKYLINE_INSTANCE_IP_ADDRESS'
 :var HORIZON_IP: The IP address for Horizon to bind to.  Skyline receives data
     from Graphite on this IP address.  This previously defaulted to
     ``gethostname()`` but has been change to be specifically specified by the
-    user. USER_DEFINED
+    user. [USER_DEFINED]
 :vartype HORIZON_IP: str
 """
 
@@ -1708,7 +1802,7 @@ THUNDER_CHECKS = {
     of Thunder checks as built-in Skyline ALERTS and BOUNDARY_METRICS checks
     specifically for your Skyline instance metrics and external applications,
     without you have to know what Skyline metrics and things to watch and know
-    the values of to configure.  WORK IN PROGRESS
+    the values of to configure.  WORK IN PROGRESS [USER_DEFINED]
 :vartype THUNDER_CHECKS: dict
 """
 
@@ -1731,6 +1825,7 @@ THUNDER_OPTS = {
     Boundary alert related settings and the values may be the same. However
     Thunder alerts are meant for the Skyline administrator/s whereas Analyzer
     and Boundary related alerts can be routed to many different parties.
+    [USER_DEFINED]
 :vartype THUNDER_ENABLED: boolean
 """
 
@@ -1740,7 +1835,7 @@ Panorama settings
 
 PANORAMA_ENABLED = True
 """
-:var PANORAMA_ENABLED: Enable Panorama
+:var PANORAMA_ENABLED: Enable Panorama [USER_DEFINED]
 :vartype PANORAMA_ENABLED: boolean
 """
 
@@ -1768,6 +1863,7 @@ PANORAMA_DATABASE = 'skyline'
 PANORAMA_DBHOST = '127.0.0.1'
 """
 :var PANORAMA_DBHOST: The IP address or FQDN of the database server
+    [USER_DEFINED]
 :vartype PANORAMA_DBHOST: str
 """
 
@@ -1785,7 +1881,7 @@ PANORAMA_DBUSER = 'skyline'
 
 PANORAMA_DBUSERPASS = 'the_user_password'
 """
-:var PANORAMA_DBUSERPASS: The database user password
+:var PANORAMA_DBUSERPASS: The database user password [USER_DEFINED]
 :vartype PANORAMA_DBUSERPASS: str
 """
 
@@ -1908,7 +2004,7 @@ MIRAGE_ENABLE_SECOND_ORDER = False
 
 MIRAGE_ENABLE_ALERTS = False
 """
-:var MIRAGE_ENABLE_ALERTS: This enables Mirage alerting.
+:var MIRAGE_ENABLE_ALERTS: This enables Mirage alerting. [USER_DEFINED]
 :vartype MIRAGE_ENABLE_ALERTS: boolean
 """
 
@@ -2236,7 +2332,7 @@ BOUNDARY_SMTP_OPTS = {
     'graphite_graph_line_color': 'pink',
 }
 """
-:var BOUNDARY_SMTP_OPTS: Your SMTP settings.
+:var BOUNDARY_SMTP_OPTS: Your SMTP settings. [USER_DEFINED]
 :vartype BOUNDARY_SMTP_OPTS: dictionary
 """
 
@@ -2274,7 +2370,7 @@ BOUNDARY_PAGERDUTY_OPTS = {
     'key': 'your_pagerduty_service_api_key',
 }
 """
-:var BOUNDARY_PAGERDUTY_OPTS: Your SMTP settings.
+:var BOUNDARY_PAGERDUTY_OPTS: Your PagerDuty settings. [USER_DEFINED]
 :vartype BOUNDARY_PAGERDUTY_OPTS: dictionary
 
 PagerDuty alerts require pygerduty
@@ -2294,7 +2390,7 @@ BOUNDARY_SLACK_OPTS = {
     'icon_emoji': ':chart_with_upwards_trend:',
 }
 """
-:var BOUNDARY_SLACK_OPTS: Your slack settings.
+:var BOUNDARY_SLACK_OPTS: Your slack settings. [USER_DEFINED]
 :vartype BOUNDARY_SLACK_OPTS: dictionary
 
 slack alerts require slackclient
@@ -2399,13 +2495,14 @@ WEBAPP_AUTH_ENABLED = True
 
 WEBAPP_AUTH_USER = 'admin'
 """
-:var WEBAPP_AUTH_USER: The username for pseudo basic HTTP auth
+:var WEBAPP_AUTH_USER: The username for pseudo basic HTTP auth [USER_DEFINED]
 :vartype WEBAPP_AUTH_USER: str
 """
 
 WEBAPP_AUTH_USER_PASSWORD = 'aec9ffb075f9443c8e8f23c4f2d06faa'
 """
 :var WEBAPP_AUTH_USER_PASSWORD: The user password for pseudo basic HTTP auth
+    [USER_DEFINED]
 :vartype WEBAPP_AUTH_USER_PASSWORD: str
 """
 
@@ -2636,7 +2733,7 @@ SKYLINE_URL = 'https://skyline.example.com'
 :var SKYLINE_URL: The http or https URL (and port if required) to access your
     Skyline on (no trailing slash).  For example if you were not using SSL
     termination and listening on a specific port it could be like
-    http://skyline.example.com:8080'
+    http://skyline.example.com:8080' [USER_DEFINED]
 
 :vartype SKYLINE_URL: str
 """
@@ -2664,6 +2761,7 @@ SERVER_PYTZ_TIMEZONE = 'UTC'
     UTC.  This must be a valid pytz timezone name, see:
     https://github.com/earthgecko/skyline/blob/ionosphere/docs/development/pytz.rst
     http://earthgecko-skyline.readthedocs.io/en/ionosphere/development/pytz.html#timezones-list-for-pytz-version
+    [USER_DEFINED]
 :vartype SERVER_PYTZ_TIMEZONE: str
 """
 
@@ -3054,7 +3152,7 @@ IONOSPHERE_INFERENCE_MOTIFS_TEST_ONLY = False
 MEMCACHE_ENABLED = False
 """
 :var MEMCACHE_ENABLED: Enables the use of memcache in Ionosphere to optimise
-    DB usage
+    DB usage [USER_DEFINED]
 :vartype MEMCACHE_ENABLED: boolean
 """
 
@@ -3295,6 +3393,70 @@ LUMINOSITY_CLASSIFY_ANOMALIES_SAVE_PLOTS = False
 :vartype LUMINOSITY_CLASSIFY_ANOMALIES_SAVE_PLOTS: boolean
 """
 
+LUMINOSITY_CLOUDBURST_ENABLED = True
+"""
+:var LUMINOSITY_CLOUDBURST_ENABLED: Whether to enable Luminosity cloudburst to
+    run and identify significant changepoints
+:vartype LUMINOSITY_CLOUDBURST_ENABLED: boolean
+"""
+
+LUMINOSITY_CLOUDBURST_PROCESSES = 1
+"""
+:var LUMINOSITY_CLOUDBURST_PROCESSES: The number of processes that
+    luminosity/cloudbursts should divide all the metrics up between to identify
+    significant changepoints in the metrics.  In a very large metric population
+    you may need to set this to more than 1.  As a guide a single process can
+    generally analyse and identify potentially significant changepoints in about
+    1500 metrics in 60 seconds.
+:vartype LUMINOSITY_CLOUDBURST_PROCESSES: int
+"""
+
+LUMINOSITY_CLOUDBURST_RUN_EVERY = 900
+"""
+:var LUMINOSITY_CLOUDBURST_RUN_EVERY: This is how often to run
+    luminosity/cloudbursts to identify significant changepoints in metrics.  To
+    disable luminosity/cloudbursts set this to 0.
+:vartype LUMINOSITY_CLOUDBURST_RUN_EVERY: int
+"""
+
+LUMINOSITY_RELATED_METRICS = False
+"""
+:var LUMINOSITY_RELATED_METRICS: Whether to enable Luminosity related_metrics to
+    run and learn related metrics.
+:vartype LUMINOSITY_RELATED_METRICS: boolean
+"""
+
+LUMINOSITY_RELATED_METRICS_MAX_5MIN_LOADAVG = 2.0
+"""
+:var LUMINOSITY_RELATED_METRICS_MAX_5MIN_LOADAVG: The Luminosity related_metrics
+    will ONLY run When the 5min loadavg on the machine running the process is
+    BELOW this loadavg.  Because the process is an offline process it can run as
+    and when appropriate.
+:vartype LUMINOSITY_RELATED_METRICS_MAX_5MIN_LOADAVG: float
+"""
+
+LUMINOSITY_RELATED_METRICS_MIN_CORRELATION_COUNT_PERCENTILE = 95.0
+"""
+:var LUMINOSITY_RELATED_METRICS_MIN_CORRELATION_COUNT_PERCENTILE: The percentile
+    of cross correlation counts to be included in the related metrics
+    evaluation.  This value should be in the range of >= 95.0 to ensure that
+    metrics are only related when there is a high degree of confidence.
+    This results in only assessing the metrics which have the highest number of
+    cross correlations being considered to be related.  Its purpose is to
+    discard the outlier, numeric significance only recorded correlations.
+:vartype LUMINOSITY_RELATED_METRICS_MIN_CORRELATION_COUNT_PERCENTILE: float
+"""
+
+LUMINOSITY_RELATED_METRICS_MINIMUM_CORRELATIONS_COUNT = 3
+"""
+:var LUMINOSITY_RELATED_METRICS_MINIMUM_CORRELATIONS_COUNT: The minimum number
+    of cross correlations recorded to include the metric for evaluation in
+    get_cross_correlation_relationships.  This number should not be less than 3
+    to ensure that metrics are only related when there is a high degree of
+    confidence.
+:vartype LUMINOSITY_RELATED_METRICS_MINIMUM_CORRELATIONS_COUNT: int
+"""
+
 """
 Docker settings
 """
@@ -3358,7 +3520,7 @@ FLUX_SELF_API_KEY = 'YOURown32charSkylineAPIkeySecret'
 :var FLUX_SELF_API_KEY: this is a 32 alphanumeric string that is used to
     validate direct requests to Flux. Vista uses it and connects directly to
     Flux and bypass the reverse proxy and authenticates itself.  It can only be
-    digits and letters e.g. [0-9][a-Z]
+    digits and letters e.g. [0-9][a-Z] [USER_DEFINED]
 :vartype FLUX_SELF_API_KEY: str
 """
 
@@ -3869,4 +4031,40 @@ EXTERNAL_SETTINGS = {
     please see the External Settings documentation page at:
     https://earthgecko-skyline.readthedocs.io/en/latest/external_settings.html
 :vartype EXTERNAL_SETTINGS: dict
+"""
+
+"""
+Prometheus settings
+"""
+PROMETHEUS_SETTINGS = {}
+"""
+:var PROMETHEUS_SETTINGS: UNDER DEVELOPMENT Prometheus can be enabled to push
+    metrics to Skyline which Skyline will add to Redis and analyse.  In the
+    Mirage context Skyline will fetch data from Prometheus.  For full details of
+    this functionality please see the Prometheus integration documentation page at:
+    https://earthgecko-skyline.readthedocs.io/en/latest/prometheus.html
+:vartype PROMETHEUS_SETTINGS: dict
+
+- **Example**::
+
+    PROMETHEUS_SETTINGS = {
+        'prometheus.example.org': {
+            'scheme': 'https',
+            'port': '443',
+            # Usernames and hashed passwords that have full access to the web
+            # server via basic authentication. If empty, no basic authentication is
+            # required. Passwords are hashed with bcrypt.
+            'basic_auth_users': {
+                'prometheus': '<bcrypt_password_str>',
+            },
+            'endpoint': 'api/v1',
+            'format': '<influxdb|graphite>',  # default influxdb
+            'learn_key_metrics': True,
+            'analyse_mode': '<key_metrics_and_group|key_metrics|all>',
+            'key_metrics_config': '<path_to_key_metrics_file>',
+            'longterm_storage': '<promscale|thanos|cortex>',
+            'longterm_storage_endpoint': '<promscale|thanos|cortex>',
+        }
+    }
+
 """

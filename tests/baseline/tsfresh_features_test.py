@@ -69,6 +69,9 @@ statsd_csv = '%s/%s' % (
 statsd_baseline = '%s/tsfresh-%s.%s.features.transposed.csv' % (
     baseline_dir, TSFRESH_BASELINE_VERSION, statsd_csv_file)
 
+original_baseline_ts_json_baseline = str(baseline_ts_json_baseline)
+baseline_ts_json_baseline = os.getenv('USE_TSFRESH_BASELINE', original_baseline_ts_json_baseline)
+
 
 class TestTsfreshBaseline(unittest.TestCase):
     """
@@ -108,6 +111,9 @@ class TestTsfreshBaseline(unittest.TestCase):
         self.fname_in = '%s/%s' % (self.test_path, baseline_ts_json_file)
         tmp_csv = '%s.tmp.csv' % (self.fname_in)
         t_fname_out = '%s.features.transposed.csv' % self.fname_in
+
+        if original_baseline_ts_json_baseline != baseline_ts_json_baseline:
+            print('Using tsfresh baseline json as passed with ENVIRONMENT variable USE_TSFRESH_BASELINE: %s' % baseline_ts_json_baseline)
 
         self.assertTrue(os.path.isfile(baseline_ts_json))
 
@@ -421,10 +427,12 @@ tests/tsfresh_features_test.py:204: AssertionError
             fail_msg = '''
 See the docs on how to update the baseline.
 New local baseline: %s
+OR if after verifying decimal changes only, you can test with the new baseline:
+export USE_TSFRESH_BASELINE=%s
 
 NOT in baseline   :: %s
 
-NOT in calculated :: %s''' % (t_fname_out_fail, str(not_in_baseline), str(not_in_calculated))
+NOT in calculated :: %s''' % (t_fname_out_fail, t_fname_out_fail, str(not_in_baseline), str(not_in_calculated))
         if not features_equal:
             shutil.move(t_fname_out, t_fname_out_fail)
         self.assertTrue(features_equal, msg=fail_msg)
