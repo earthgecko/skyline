@@ -16,7 +16,7 @@ def get_custom_algorithms_to_run(current_skyline_app, base_name, custom_algorith
         current_logger = None
 
     custom_algorithms_to_run = {}
-    for custom_algorithm in custom_algorithms:
+    for custom_algorithm in list(custom_algorithms.keys()):
         use_with_current_skyline_app = False
         try:
             use_with = custom_algorithms[custom_algorithm]['use_with']

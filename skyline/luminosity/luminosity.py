@@ -201,7 +201,7 @@ class Luminosity(Thread):
         except:
             # @added 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
             # Log warning
-            logger.warn('warning :: parent or current process dead')
+            logger.warning('warning :: parent or current process dead')
             exit(0)
 
     def mysql_insert(self, insert):
@@ -423,7 +423,7 @@ class Luminosity(Thread):
             else:
                 new_metrics_str = "%s,'%s'" % (metrics_str, metric_name)
             metrics_str = new_metrics_str
-        metrics_str
+        # metrics_str
 
         query = 'SELECT id,metric FROM metrics WHERE metric in (%s)' % str(metrics_str)
         try:
@@ -624,6 +624,7 @@ class Luminosity(Thread):
                 sleep(20)
                 continue
 
+
             """
             Determine if any new anomalies have been added
             """
@@ -723,10 +724,10 @@ class Luminosity(Thread):
                 if str(last_processed_anomaly_id) == 'None':
                     last_processed_anomaly_id = 0
 
-			          # @modified 20210525 - https://github.com/earthgecko/skyline/pull/429
-		      	    #                      Task #4102: Merge luminosity.PR429
+                # @modified 20210525 - https://github.com/earthgecko/skyline/pull/429
+                #                      Task #4102: Merge luminosity.PR429
                 # More efficient query, although it is only getting a few rows from the DB
-          			# every little helps (thanks @ashemez)
+                # every little helps (thanks @ashemez)
                 # query = 'SELECT * FROM anomalies WHERE id > \'%s\'' % str(last_processed_anomaly_id)  # nosec
                 query = 'SELECT id FROM anomalies WHERE id > \'%s\'' % str(last_processed_anomaly_id)  # nosec
                 results = None

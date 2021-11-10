@@ -8,11 +8,12 @@ from database import get_engine, engine_disposal, metrics_table_meta
 
 # @added 20210430  - Task #4022: Move mysql_select calls to SQLAlchemy
 # Add a global method to query the DB for all metric names
-def get_all_db_metric_names(current_skyline_app):
+def get_all_db_metric_names(current_skyline_app, with_ids=False):
     """
     Given return all metric names from the database as a list
     """
     metric_names = []
+    metric_names_with_ids = {}
     function_str = 'database_queries.get_all_db_metric_names'
 
     current_skyline_app_logger = current_skyline_app + 'Log'
@@ -45,10 +46,16 @@ def get_all_db_metric_names(current_skyline_app):
 
     try:
         connection = engine.connect()
-        stmt = select([metrics_table.c.metric])
+        if with_ids:
+            stmt = select([metrics_table.c.id, metrics_table.c.metric])
+        else:
+            stmt = select([metrics_table.c.metric])
         result = connection.execute(stmt)
         for row in result:
-            metric_names.append(row['metric'])
+            base_name = row['metric']
+            metric_names.append(base_name)
+            if with_ids:
+                metric_names_with_ids[base_name] = row['id']
         connection.close()
         current_logger.info('%s :: determined metric names from the db: %s' % (
             function_str, str(len(metric_names))))
@@ -70,4 +77,8 @@ def get_all_db_metric_names(current_skyline_app):
     if not metric_names:
         current_logger.error('error :: %s :: no metric names returned from the DB - %s' % (
             function_str))
+
+    if with_ids:
+        return metric_names, metric_names_with_ids
+
     return metric_names
