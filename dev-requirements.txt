@@ -291,7 +291,10 @@ pyparsing==2.4.7
 #Pillow==8.1.1
 # @modified 20210407 - Support #4008: SNYK-PYTHON-PILLOW-1090584
 #Pillow==8.1.2
-Pillow==8.2.0
+# @modified 20211110 - Task #4282: Update dependencies
+# SNYK-PYTHON-PILLOW-1316216, SNYK-PYTHON-PILLOW-1319443 and SNYK-PYTHON-PILLOW-1727377
+#Pillow==8.2.0
+Pillow==8.3.2
 
 # @modified 20160820 - Issue #23 Test dependency updates
 #matplotlib==1.5.1
