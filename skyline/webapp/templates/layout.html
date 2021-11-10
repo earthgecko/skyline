@@ -121,6 +121,16 @@ Using https://github.com/rendro/countdown
             class="active"
             {% endif %}
             ><a href="/rebrow"><span class="logo"><span class="re">re</span>brow</span></a></li>
+<!--
+# @added 20211102 - Branch #3068: SNAB
+#                   Bug #4308: matrixprofile - fN on big drops
+ -->
+          	<li
+          	{% if url_for("snab") in request.path %}
+          	class="active"
+          	{% endif %}
+          	><a href="/snab">SNAB</a></li>
+
             <li
             {% if url_for("utilities") in request.path %}
             class="active"

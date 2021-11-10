@@ -1,0 +1,163 @@
+{% extends "layout.html" %}
+{% block body %}
+<!-- BEGIN /SNAB block -->
+<!--
+# @added 20211102 - Branch #3068: SNAB
+ -->
+	<ol class="breadcrumb">
+  	<div class="breadcrumb">
+  		<li><a href="/">Home</a></li>
+  		<li><a href="/snab">SNAB</a></li>
+  		<li class="active"><span class="logo"><span class="sky">SNAB</span> <span class="re">results</span></li>
+    </div>
+	</ol>
+
+{% if display_message %}
+<code> ERROR </code></br>
+<code> message </code>: {{ display_message }}<br>
+{% endif %}
+
+<div class="navbar-header" role="navigation">
+  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+    <span class="sr-only">Toggle navigation</span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+  </button>
+		<ul class="nav nav-tabs" role="view_tablist" id="view">
+		  <li class="active"><a href="/SNAB"><span class="logo"><span class="sky">SNAB</span> <span class="re">results</span></span></a></li>
+		</ul>
+		<div class="tab-content">
+	  	<div class="tab-pane active" id="view">
+	<br>
+  <div class="navbar-header" role="navigation">
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+  </div>
+
+	<div class="col-md-12">
+	  <h4><span class="logo"><span class="sky">SNAB ::</span> <span class="re">results</span></span></h4>
+{% if results_data %}
+        <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#get_results">Show options</button>
+        <div id="get_results" class="collapse">
+{% endif %}
+        <form action="snab">
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Option</th>
+  		        <th>value</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+  		        <td>SNAB results</td>
+  		        <td><select name="SNAB">
+                <option value="true">true</option>
+              </select></td>
+  		      </tr>
+  		      <tr>
+  		        <td>namespaces</td>
+  		        <td><input type="text" name="namespaces" value="all" /> a comma separated list of metric namespaces, can be a single metric name</td>
+  		      </tr>
+  		      <tr>
+  		        <td>from_timestamp <code>[required]</code></td>
+  		        <td><input type="text" name="from_timestamp" value=""> (unix timestamp or %Y-%m-%d %H:%M)</td>
+  		      </tr>
+  		      <tr>
+  		        <td>until_timestamp</td>
+  		        <td><input type="text" name="until_timestamp" value="0"> (unix timestamp or %Y-%m-%d %H:%M)</td>
+  		      </tr>
+  		      <tr>
+              <td>result</td>
+  		        <td><select name="result">
+                <option value="all">all</option>
+                <option value="tP">tP</option>
+                <option value="tN">tN</option>
+                <option value="fP">fP</option>
+                <option value="fN">fN</option>
+                <option value="unsure">unsure</option>
+              </select><br>
+  		      </tr>
+  		      <tr>
+              <td>algorithm</td>
+  		        <td><select name="algorithm">
+                <option value="all">all</option>
+{% for algorithm in algorithms %}
+                <option value="{{ algorithm }}">{{ algorithm }}</option>
+{% endfor %}
+              </select><br>
+  		      </tr>
+  		      <tr>
+              <td>algorithm_group</td>
+  		        <td><select name="algorithm_group">
+                <option value="all">all</option>
+{% for algorithm_group in algorithm_groups %}
+                <option value="{{ algorithm_group }}">{{ algorithm_group }}</option>
+{% endfor %}
+              </select><br>
+  		      </tr>
+  		      <tr>
+              <td>plot</td>
+  		        <td><select name="plot">
+                <option value="false">false</option>
+                <option value="true">true</option>
+              </select><br>
+  		      </tr>
+  		    </tbody>
+  		  </table>
+        <br>
+        <input type="submit" value="Get results">
+      </form>
+      </div>
+{% if results_data %}
+<!-- collapse button div -->
+      </div>
+{% endif %}
+
+  {% if results_data %}
+	  <div class="tab-pane active" id="results">
+      <h4><span class="logo"><span class="sky">SNAB ::</span> <span class="re">results :: </span></span>{{ results_data|length }} found</h4>
+			<code>flitered_on: {{ filter_on }}</code><br>
+
+		<table class="table table-hover">
+			<thead>
+				<tr>
+{% if plot %}
+            <th>plot (anomaly + 1 hour)</th>
+{% endif %}
+{% for key in results_data_keys %}
+            <th>{{ key }}</th>
+{% endfor %}
+				</tr>
+			</thead>
+			<tbody>
+{% for snab_id in results_data %}
+          <tr>
+	{% if plot %}
+            <td><img src="snab_images?image={{ results_data[snab_id]['plot'] }}" alt="{{ metric }}" /></td>
+	{% endif %}
+  {% for key in results_data_keys %}
+    {% set value = results_data[snab_id][key] %}
+            <td>
+              {{ value }}
+            </td>
+  {% endfor %}
+          </tr>
+{% endfor %}
+			</tbody>
+		</table>
+		</div>
+  {% endif %}
+
+  </div>
+
+	</div>
+	</div>
+	</div>
+
+<!-- END /SNAB block -->
+{% endblock %}
