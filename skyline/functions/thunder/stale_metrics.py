@@ -40,26 +40,25 @@ def thunder_stale_metrics(current_skyline_app, log=True):
         """
         Determine the metric sparsity
         """
+        success = True
+        sparsity = None
         timeseries = []
         try:
             timeseries = get_metric_timeseries(current_skyline_app, base_name)
         except Exception as e:
-            if not log:
-                current_skyline_app_logger = current_skyline_app + 'Log'
-                current_logger = logging.getLogger(current_skyline_app_logger)
-            current_logger.error('error :: %s :: get_metric_timeseries failed for %s - %s' % (
-                function_str, base_name, e))
-        sparsity = None
+            success = e
+            sparsity = None
         if timeseries:
             try:
                 sparsity = determine_data_sparsity(current_skyline_app, timeseries, None, False)
             except Exception as e:
-                if not log:
-                    current_skyline_app_logger = current_skyline_app + 'Log'
-                    current_logger = logging.getLogger(current_skyline_app_logger)
-                current_logger.error('error :: %s :: determine_data_sparsity failed for %s - %s' % (
-                    function_str, base_name, e))
-        return sparsity
+                success = e
+                sparsity = None
+        else:
+            success = 'no timeseries data'
+            sparsity = None
+
+        return success, sparsity
 
     now = int(time())
     namespace_stale_metrics_dict = {}
@@ -309,9 +308,10 @@ def thunder_stale_metrics(current_skyline_app, log=True):
 
                     # Determine the metric sparsity if it is not known
                     if base_name not in base_names_of_known_sparsity:
+                        success = None
                         sparsity = None
                         try:
-                            sparsity = get_sparsity(base_name)
+                            success, sparsity = get_sparsity(base_name)
                             if sparsity is not None:
                                 if float(sparsity) < settings.SPARSELY_POPULATED_PERCENTAGE:
                                     if current_skyline_app == 'analyzer':
@@ -320,6 +320,13 @@ def thunder_stale_metrics(current_skyline_app, log=True):
                                     if current_skyline_app == 'webapp' and exclude_sparsely_populated:
                                         sparsely_populated_metrics.append(base_name)
                                         continue
+                            else:
+                                if success is not True:
+                                    if not log:
+                                        current_skyline_app_logger = current_skyline_app + 'Log'
+                                        current_logger = logging.getLogger(current_skyline_app_logger)
+                                    current_logger.error('error :: %s :: get_sparsity failed for %s - %s' % (
+                                        function_str, base_name, str(success)))
                         except Exception as e:
                             if not log:
                                 current_skyline_app_logger = current_skyline_app + 'Log'
@@ -362,9 +369,10 @@ def thunder_stale_metrics(current_skyline_app, log=True):
 
                     # Determine the metric sparsity if it is not known
                     if base_name not in base_names_of_known_sparsity:
+                        success = None
                         sparsity = None
                         try:
-                            sparsity = get_sparsity(base_name)
+                            success, sparsity = get_sparsity(base_name)
                             if sparsity is not None:
                                 if float(sparsity) < settings.SPARSELY_POPULATED_PERCENTAGE:
                                     # @modified 20210617 - Feature #4144: webapp - stale_metrics API endpoint
@@ -375,6 +383,13 @@ def thunder_stale_metrics(current_skyline_app, log=True):
                                     if current_skyline_app == 'webapp' and exclude_sparsely_populated:
                                         sparsely_populated_metrics.append(base_name)
                                         continue
+                            else:
+                                if success is not True:
+                                    if not log:
+                                        current_skyline_app_logger = current_skyline_app + 'Log'
+                                        current_logger = logging.getLogger(current_skyline_app_logger)
+                                    current_logger.error('error :: %s :: get_sparsity failed for %s - %s' % (
+                                        function_str, base_name, str(success)))
                         except Exception as e:
                             if not log:
                                 current_skyline_app_logger = current_skyline_app + 'Log'
