@@ -334,19 +334,19 @@ count
 
   {% if features_profiles %}
 	  <div class="tab-pane active" id="search">
-      <h4><span class="logo"><span class="sky">Metrics ::</span> <span class="re">features profiles :: </span></span></span>{{ for_metric }} -
+      <h4><span class="logo"><span class="sky">Metrics ::</span> <span class="re">features profiles :: </span></span>{{ for_metric }} -
           limited by {{ features_profiles|length }} features profiles ordered by {{ order }}</h4>
 
 <!-- # @added 20180918 - Feature #2602: Graphs in search_features_profiles -->
     {% if show_graphs == True %}
-	    <h5><span class="logo"><span class="sky">Existing ::</span> <span class="re">features profiles page link without graphs ::</span></span></span> <a href="?fp_search=true&metric={{ for_metric}}&limit=0&order=DESC" target="_blank">existing features profile page for {{ for_metric }}</a></h5>
+	    <h5><span class="logo"><span class="sky">Existing ::</span> <span class="re">features profiles page link without graphs ::</span></span> <a href="?fp_search=true&metric={{ for_metric}}&limit=0&order=DESC" target="_blank">existing features profile page for {{ for_metric }}</a></h5>
     {% else %}
       {% if for_metric != 'all' %}
-      <h5><span class="logo"><span class="sky">Existing ::</span> <span class="re">features profiles page link with graphs ::</span></span></span> <a href="?fp_search=true&metric={{ for_metric}}&limit=0&order=DESC&show_graphs=true" target="_blank">existing features profile page with graphs for {{ for_metric }}</a></h5>
+      <h5><span class="logo"><span class="sky">Existing ::</span> <span class="re">features profiles page link with graphs ::</span></span> <a href="?fp_search=true&metric={{ for_metric}}&limit=0&order=DESC&show_graphs=true" target="_blank">existing features profile page with graphs for {{ for_metric }}</a></h5>
       {% endif %}
     {% endif %}
 
-      <h5><span class="logo"><span class="sky">Validate ::</span> <span class="re">metric features profiles :: </span></span></span>
+      <h5><span class="logo"><span class="sky">Validate ::</span> <span class="re">metric features profiles :: </span></span>
         <a href="?fp_validate=true&metric={{ for_metric }}&validated_equals=false&limit=0&order=DESC"><span class="logo">{{ for_metric }}</a></h5>
 
 			<table class="table table-hover">

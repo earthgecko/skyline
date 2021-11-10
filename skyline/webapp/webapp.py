@@ -241,6 +241,33 @@ if True:
     from functions.redis.get_metric_timeseries import get_metric_timeseries
     from functions.timeseries.determine_data_sparsity import determine_data_sparsity
 
+    # @added 20210710 - Bug #4168: webapp/ionosphere_backend.py - handle old features profile dir not been found
+    from functions.database.queries.get_all_db_metric_names import get_all_db_metric_names
+
+    # @added 20210720 - Feature #4188: metrics_manager.boundary_metrics
+    from get_boundary_metrics import get_boundary_metrics
+
+    # @added 20210727 - Feature #4206: webapp - saved_training_data page
+    from get_saved_training_data import get_saved_training_data
+
+    # @added 20210825 - Feature #4164: luminosity - cloudbursts
+    from luminosity_cloudbursts import get_cloudbursts
+    from luminosity_plot_cloudburst import get_cloudburst_plot
+
+    # @added 20211001 - Feature #4264: luminosity - cross_correlation_relationships
+    from functions.metrics.get_related_metrics import get_related_metrics
+    from functions.metrics.get_metric_id_from_base_name import get_metric_id_from_base_name
+    # from functions.database.queries.base_name_from_metric_id import base_name_from_metric_id
+    from functions.metrics.get_base_name_from_metric_id import get_base_name_from_metric_id
+    from functions.database.queries.get_metric_group_info import get_metric_group_info
+    from functions.metrics.get_related_to_metric_groups import get_related_to_metric_groups
+
+    # @added 20211102 - Branch #3068: SNAB
+    #                   Bug #4308: matrixprofile - fN on big drops
+    from functions.database.queries.get_algorithms import get_algorithms
+    from functions.database.queries.get_algorithm_groups import get_algorithm_groups
+    from get_snab_results import get_snab_results
+
 # @added 20200516 - Feature #3538: webapp - upload_data endoint
 file_uploads_enabled = False
 try:
@@ -575,7 +602,7 @@ def internal_error(message, traceback_format_exc):
     trace = str(traceback_format_exc)
     logger.debug('debug :: returning 500 as there was an error, why else would 500 be returned...')
     logger.debug('debug :: sending the user that caused the error to happen, this useful information')
-    logger.debug('debug :: but they or I may have already emailed it to you, you should check your inbox')
+    # logger.debug('debug :: but they or I may have already emailed it to you, you should check your inbox')
     logger.debug('%s' % str(traceback_format_exc))
     logger.debug('debug :: which is accompanied with the message')
     logger.debug('debug :: %s' % str(message))
@@ -765,6 +792,8 @@ def api():
     # Allow for the cluster_data argument to be added to certain api requests
     # to allow for data from all remote Skyline instances to be concatenated
     # into a single response
+    # IMPORTANT: cluster_data MUST be the first argument that is evaluated as it
+    #            is used and required by many of the following API methods
     cluster_data = False
     if 'cluster_data' in request.args:
         try:
@@ -781,6 +810,128 @@ def api():
         except:
             logger.error('error :: /api request with invalid cluster_data argument')
             return 'Bad Request', 400
+
+    # IMPORTANT: cluster_data ^^ MUST be the first argument that is evaluated as it
+    #            is used and required by many of the following API methods
+
+    # @added 20211006 - Feature #4264: luminosity - cross_correlation_relationships
+    related_to_metrics_request = False
+    if 'related_to_metrics' in request.args:
+        logger.info('/api?related_to_metrics')
+        related_to_metrics_dict = {}
+        start_related_to_metrics = timer()
+        metric = None
+        metric_id = 0
+        try:
+            metric = request.args.get('metric', 'false')
+            if str(metric) == 'false':
+                metric = None
+        except:
+            logger.error('error :: /api?related_to_metrics request with invalid metric')
+            return 'Bad Request', 400
+        try:
+            metric_id = request.args.get('metric_id', 0)
+            if str(metric_id) != '0':
+                metric_id = int(metric_id)
+        except:
+            logger.error('error :: /api?related_to_metrics request with metric_id argument')
+            return 'Bad Request', 400
+        try:
+            related_to_metrics_dict = get_related_to_metric_groups(skyline_app, metric, metric_id)
+        except Exception as err:
+            logger.error(traceback.format_exc())
+            logger.error('error :: get_related_to_metric_groups failed - %s' % str(err))
+        end_related_to_metrics = timer()
+        related_to_metrics_time = (end_related_to_metrics - start_related_to_metrics)
+        if not related_to_metrics_dict:
+            data_dict = {"status": {"cluster_data": cluster_data, "request_time": related_to_metrics_time, "response": 404}, "data": related_to_metrics_dict}
+            return jsonify(data_dict), 404
+        data_dict = {"status": {"cluster_data": cluster_data, "request_time": related_to_metrics_time, "response": 200}, "data": related_to_metrics_dict}
+        # The related_to_metrics dict is an ordered dict sorted by confidence
+        # and avg_coefficient flask.jsonify does not preserve order so in this
+        # case the response is created with json.dumps to maintain insertion
+        # order in the dict.
+        response = app.response_class(
+            json.dumps(data_dict, sort_keys=False),
+            mimetype=app.config['JSONIFY_MIMETYPE'])
+        return response, 200
+
+    # @added 20211001 - Feature #4264: luminosity - cross_correlation_relationships
+    related_metrics_request = False
+    if 'related_metrics' in request.args:
+        related_metrics_request = True
+        metric = None
+        logger.info('/api?related_metrics')
+        start_related_metrics = timer()
+    if related_metrics_request:
+        metric = None
+        full_details = False
+        metric_id = 0
+        try:
+            metric = request.args.get('metric', 'false')
+            if str(metric) == 'false':
+                metric = False
+        except:
+            logger.error('error :: /api?related_metrics request with invalid metric')
+            return 'Bad Request', 400
+        try:
+            metric_id = request.args.get('metric_id', 0)
+            if str(metric_id) != '0':
+                metric_id = int(metric_id)
+        except:
+            logger.error('error :: /api?related_metrics request with metric_id argument')
+            return 'Bad Request', 400
+        if not metric and metric_id:
+            try:
+                # metric = base_name_from_metric_id(skyline_app, metric_id)
+                metric = get_base_name_from_metric_id(skyline_app, metric_id)
+            except Exception as err:
+                logger.error('error :: base_name_from_metric_id failed to determine metric from metric_id: %s - %s' % (
+                    str(metric_id), str(err)))
+                metric_id = 0
+        if not metric_id and metric:
+            try:
+                metric_id = get_metric_id_from_base_name(skyline_app, metric)
+            except Exception as err:
+                logger.error('error :: get_metric_id_from_base_name failed to determine metric_id from base_name: %s - %s' % (
+                    str(metric), str(err)))
+                metric_id = 0
+        if not metric and not metric_id:
+            logger.error('error :: /api?related_metrics request with invalid metric or metric_id argument')
+            return 'Bad Request', 400
+
+        if not metric_id:
+            end_related_metrics = timer()
+            related_metrics_time = (end_related_metrics - start_related_metrics)
+            data_dict = {"status": {"cluster_data": cluster_data, "request_time": related_metrics_time, "response": 404}, "data": {"error": "no metric found"}}
+            return jsonify(data_dict), 404
+        if 'full_details' in request.args:
+            try:
+                full_details_argument = request.args.get('full_details', 'false')
+                if str(full_details_argument) == 'true':
+                    full_details = True
+            except Exception as err:
+                logger.error('error :: /api invalid full_details argument - %s' % str(err))
+        related_metrics = {}
+        try:
+            related_metrics = get_related_metrics(skyline_app, cluster_data, full_details, metric, metric_id)
+        except Exception as err:
+            logger.error(traceback.format_exc())
+            logger.error('error :: get_related_metrics failed - %s' % str(err))
+        end_related_metrics = timer()
+        related_metrics_time = (end_related_metrics - start_related_metrics)
+        if not related_metrics:
+            data_dict = {"status": {"cluster_data": cluster_data, "request_time": related_metrics_time, "response": 404}, "data": related_metrics}
+            return jsonify(data_dict), 404
+        data_dict = {"status": {"cluster_data": cluster_data, "request_time": related_metrics_time, "response": 200}, "data": related_metrics}
+        # The related_metrics dict is an ordered dict sorted by avg_coefficient
+        # flask.jsonify does not preserve order so in this case the response is
+        # created with json.dumps to maintain insertion order in the dict.
+        # return jsonify(data_dict), 200
+        response = app.response_class(
+            json.dumps(data_dict, sort_keys=False),
+            mimetype=app.config['JSONIFY_MIMETYPE'])
+        return response, 200
 
     # @added 20210619 - Feature #4148: analyzer.metrics_manager.resolutions
     #                   Bug #4146: check_data_sparsity - incorrect on low fidelity and inconsistent metrics
@@ -882,7 +1033,7 @@ def api():
                     resolutions_dict = new_resolutions_dict.copy()
                     del new_resolutions_dict
             else:
-                logger.warn('warning :: failed to get remote_resolutions_dicts from the remote Skyline instances')
+                logger.warning('warning :: failed to get remote_resolutions_dicts from the remote Skyline instances')
         logger.info('%s resolutions determined' % (
             str(len(resolutions_dict))))
         filtered_discarded = 0
@@ -1012,7 +1163,7 @@ def api():
                     sparsity_dict = new_sparsity_dict.copy()
                     del new_sparsity_dict
             else:
-                logger.warn('warning :: failed to get remote_sparsity_dicts from the remote Skyline instances')
+                logger.warning('warning :: failed to get remote_sparsity_dicts from the remote Skyline instances')
         logger.info('%s sparsity determined' % (
             str(len(sparsity_dict))))
         filtered_discarded = 0
@@ -1107,7 +1258,7 @@ def api():
                     timestamp_resolutions_dict = new_timestamp_resolutions_dict.copy()
                     del new_timestamp_resolutions_dict
             else:
-                logger.warn('warning :: failed to get remote_timestamp_resolutions_dicts from the remote Skyline instances')
+                logger.warning('warning :: failed to get remote_timestamp_resolutions_dicts from the remote Skyline instances')
         logger.info('%s timestamp_resolutions determined' % (
             str(len(timestamp_resolutions_dict))))
         filtered_discarded = 0
@@ -1175,7 +1326,7 @@ def api():
                 if timeseries:
                     logger.info('got timeseries of length %s from the remote Skyline instances' % str(len(timeseries)))
                 else:
-                    logger.warn('warning :: failed to get timeseries from the remote Skyline instances')
+                    logger.warning('warning :: failed to get timeseries from the remote Skyline instances')
         if not timeseries:
             data_dict = {"status": {"cluster_data": cluster_data, "response": 404}, "data": {"sparsity": 'null'}}
             return jsonify(data_dict), 404
@@ -1287,6 +1438,86 @@ def api():
             data_dict = {"status": {"request_time": thunder_stale_metrics_time, "response": 404}, "data": {"metrics": 'null'}}
             return jsonify(data_dict), 404
 
+    # @added 20210720 - Branch #1444: thunder
+    if 'thunder_no_data_remove_namespace' in request.args:
+        logger.info('/api?thunder_no_data_remove_namespace')
+        start_thunder_no_data_remove_namespace = timer()
+        try:
+            namespace = request.args.get('namespace')
+        except:
+            logger.error(traceback.format_exc())
+            logger.error('error :: /api?thunder_no_data_remove_namespace request with no namespace argument')
+            namespace = None
+        if not namespace:
+            data_dict = {"status": {"error": "no namespace passed"}}
+            return jsonify(data_dict), 400
+        redis_key = 'webapp.thunder.remove.namespace.metrics.last_timeseries_timestamp'
+        key_set = False
+        try:
+            REDIS_CONN.set(redis_key, str(namespace))
+            key_set = True
+        except Exception as e:
+            logger.error(traceback.format_exc())
+            logger.error('error :: /api?thunder_no_data_remove_namespace fail to create Redis key %s  %s' % (redis_key, e))
+        end_thunder_no_data_remove_namespace = timer()
+        thunder_no_data_remove_namespace_time = (end_thunder_no_data_remove_namespace - start_thunder_no_data_remove_namespace)
+        if key_set:
+            data_dict = {"status": {"request_time": thunder_no_data_remove_namespace_time, "response": 200}, "data": {'namespace': namespace, 'remove_namespace_from_no_data_check': True}}
+            return jsonify(data_dict), 200
+        else:
+            data_dict = {"status": {"request_time": thunder_no_data_remove_namespace_time, "response": 500}, "data": {'namespace': namespace, 'remove_namespace_from_no_data_check': False, 'reason': 'failed to add key'}}
+            return jsonify(data_dict), 500
+
+    # @added 20210720 - Feature #4188: metrics_manager.boundary_metrics
+    if 'boundary_metrics' in request.args:
+        logger.info('/api?boundary_metrics')
+        start_boundary_metrics = timer()
+        metric = None
+        try:
+            metric = request.args.get('metric')
+        except KeyError:
+            metric = None
+        except Exception as e:
+            logger.error(traceback.format_exc())
+            logger.error('error :: /api?boundary_metrics request evaluating metric parameter - %s' % e)
+        namespaces = None
+        try:
+            namespaces = request.args.get('namespaces')
+        except KeyError:
+            namespaces = None
+        except Exception as e:
+            logger.error(traceback.format_exc())
+            namespaces = None
+            logger.error('error :: /api?boundary_metrics request evaluating namespaces parameter - %s' % e)
+        metrics = []
+        if metric is not None:
+            metrics = [str(metric)]
+        if namespaces is not None:
+            namespaces_str = namespaces
+            namespaces = namespaces_str.split(',')
+        else:
+            namespaces = []
+        logger.info('/api?boundary_metrics - get_boundary_metrics with metrics: %s, namespaces: %s' % (
+            str(metrics), str(namespaces)))
+        boundary_metrics = None
+        try:
+            boundary_metrics = get_boundary_metrics(skyline_app, metrics, namespaces, cluster_data, True)
+        except Exception as e:
+            logger.error(traceback.format_exc())
+            logger.error('error :: /api?boundary_metrics get_boundary_metrics failed - %s' % e)
+            end_boundary_metrics = timer()
+            boundary_metrics_time = (end_boundary_metrics - start_boundary_metrics)
+            data_dict = {"status": {"cluster_data": cluster_data, "request_time": boundary_metrics_time, "response": 500}, "data": None}
+            return jsonify(data_dict), 500
+        end_boundary_metrics = timer()
+        boundary_metrics_time = (end_boundary_metrics - start_boundary_metrics)
+        if boundary_metrics:
+            data_dict = {"status": {"cluster_data": cluster_data, "request_time": boundary_metrics_time, "response": 200}, "data": {"boundary_metrics": boundary_metrics}}
+            return jsonify(data_dict), 200
+        else:
+            data_dict = {"status": {"cluster_data": cluster_data, "request_time": boundary_metrics_time, "response": 404}, "data": {"boundary_metrics": None}}
+            return jsonify(data_dict), 404
+
     # @added 20210211 - Feature - last_analyzed_timestamp
     # @added 20210211 - Feature #3968: webapp - last_analyzed_timestamp API endpoint
     if 'last_analyzed_timestamp' in request.args:
@@ -1318,6 +1549,26 @@ def api():
                 logger.error(traceback.format_exc())
                 logger.error('error :: /api?last_analyzed_timestamp fail to query Redis hash key %s for %s - %s' % (redis_hash_key, redis_metric_name, e))
                 last_analyzed_timestamp = None
+
+        # @added 20210714 - Feature #3884: ANALYZER_CHECK_LAST_TIMESTAMP
+        # Alway return the last timestamp for the metric for the Redis metric
+        # data if the ANALYZER_CHECK_LAST_TIMESTAMP feature is not enabled
+        if not last_analyzed_timestamp:
+            metric_timeseries = None
+            try:
+                metric_timeseries = get_metric_timeseries(skyline_app, metric, log=True)
+            except Exception as e:
+                logger.error(traceback.format_exc())
+                logger.error('error :: /api?last_analyzed_timestamp get_metric_timeseries failed for %s - %s' % (redis_metric_name, e))
+                last_analyzed_timestamp = None
+            if metric_timeseries:
+                try:
+                    last_analyzed_timestamp = int(metric_timeseries[-1][0])
+                except Exception as e:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: /api?last_analyzed_timestamp failed to determine last timestamp for %s from metric_timeseries - %s' % (redis_metric_name, e))
+                    last_analyzed_timestamp = None
+
         if last_analyzed_timestamp:
             end_last_analyzed_timestamp = timer()
             last_analyzed_timestamp_time = '%.6f' % (end_last_analyzed_timestamp - start_last_analyzed_timestamp)
@@ -1557,7 +1808,7 @@ def api():
         # @added 20210511 - Feature #3770: webapp - analyzer_last_status API endoint
         # Handle a None result as a warning not an error
         except ValueError as e:
-            logger.warn('warning :: Webapp could not get the analyzer key from Redis - %s' % e)
+            logger.warning('warning :: Webapp could not get the analyzer key from Redis - %s' % e)
         except Exception as e:
             logger.error(traceback.format_exc())
             logger.error('error :: Webapp could not get the analyzer key from Redis - %s' % e)
@@ -2386,7 +2637,9 @@ def api():
     # @added 20191126 - Feature #3336: webapp api - derivative_metrics
     if 'derivative_metrics' in request.args:
         try:
-            derivative_metrics = list(REDIS_CONN.smembers('derivative_metrics'))
+            # @modified 20211012 - Feature #4280: aet.metrics_manager.derivative_metrics Redis hash
+            # derivative_metrics = list(REDIS_CONN.smembers('derivative_metrics'))
+            derivative_metrics = list(REDIS_CONN.smembers('aet.metrics_manager.derivative_metrics'))
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: Webapp could not get the derivative_metrics list from Redis')
@@ -2396,12 +2649,14 @@ def api():
         if settings.REMOTE_SKYLINE_INSTANCES and cluster_data:
             remote_derivative_metrics = None
             try:
-                remote_derivative_metrics = get_cluster_data('derivative_metrics', 'metrics')
+                # @modified 20211012 - Feature #4280: aet.metrics_manager.derivative_metrics Redis hash
+                # remote_derivative_metrics = get_cluster_data('derivative_metrics', 'metrics')
+                remote_derivative_metrics = get_cluster_data('aet.metrics_manager.derivative_metrics', 'metrics')
             except:
                 logger.error(traceback.format_exc())
-                logger.error('error :: Webapp could not get derivative_metrics from the remote Skyline instances')
+                logger.error('error :: Webapp could not get aet.metrics_manager.derivative_metrics from the remote Skyline instances')
             if remote_derivative_metrics:
-                logger.info('got %s remote derivative_metrics from the remote Skyline instances' % str(len(remote_derivative_metrics)))
+                logger.info('got %s remote aet.metrics_manager.derivative_metrics from the remote Skyline instances' % str(len(remote_derivative_metrics)))
                 derivative_metrics_list = derivative_metrics + remote_derivative_metrics
                 derivative_metrics = list(set(derivative_metrics_list))
 
@@ -4125,6 +4380,9 @@ def ionosphere():
     max_distance = None
     saved_training_data = None
 
+    # @added 20210727 - Feature #4206: webapp - saved_training_data page
+    ionosphere_saved_training_data = None
+
     # @added 20210415 - Feature #4014: Ionosphere - inference
     #                   Branch #3590: inference
     motif_analysis_images = None
@@ -4491,6 +4749,21 @@ def ionosphere():
                     metric_name = 'all'
                     limited_by = 0
                     ordered_by = 'DESC'
+
+                # @added 20210710 - Bug #4168: webapp/ionosphere_backend.py - handle old features profile dir not been found
+                # Check all known metrics not just those in Redis
+                if not metric_found:
+                    metric_names = []
+                    try:
+                        metric_names = get_all_db_metric_names(skyline_app)
+                    except Exception as e:
+                        logger.error(traceback.format_exc())
+                        logger.error('error :: failed to get_all_db_metric_names - %s' % (
+                            e))
+                    if base_name in metric_names:
+                        metric_found = True
+                        metric_name = base_name
+
                 if not metric_found:
                     metric_name = settings.FULL_NAMESPACE + base_name
                     try:
@@ -4622,6 +4895,93 @@ def ionosphere():
                 user=user,
                 duration=(time.time() - start), print_debug=False), 200
 
+###
+    # @added 20210727 - Feature #4206: webapp - saved_training_data page
+    saved_training_data_dict = {}
+    if 'ionosphere_saved_training' in request.args:
+        logger.info('/ionosphere?ionosphere_saved_training')
+        REQUEST_ARGS = [
+            'ionosphere_saved_training', 'metric', 'namespaces',
+            'label_includes',
+        ]
+        metrics = []
+        namespaces = []
+        from_timestamp = 0
+        until_timestamp = 0
+
+        for i in request.args:
+            key = str(i)
+            if key not in REQUEST_ARGS:
+                error_string = 'error :: ionosphere_saved_training request invalid request argument - %s' % (key)
+                logger.error(error_string)
+                resp = json.dumps(
+                    {'400 Bad Request': error_string})
+                return flask_escape(resp), 400
+
+        metric = None
+        try:
+            metric = request.args.get('metric')
+            if metric == 'all' or metric == '':
+                metric = None
+        except KeyError:
+            metric = None
+        except Exception as e:
+            logger.error(traceback.format_exc())
+            logger.error('error :: /ionosphere?ionosphere_saved_training request evaluating metric parameter - %s' % e)
+        namespaces = None
+        try:
+            namespaces = request.args.get('namespaces')
+            if namespaces == 'all' or namespaces == '':
+                namespaces = None
+        except KeyError:
+            namespaces = None
+        except Exception as e:
+            logger.error(traceback.format_exc())
+            namespaces = None
+            logger.error('error :: /ionosphere?ionosphere_saved_training request evaluating namespaces parameter - %s' % e)
+        try:
+            label_includes = request.args.get('label_includes')
+            if label_includes == '':
+                label_includes = None
+        except KeyError:
+            label_includes = None
+        except Exception as e:
+            logger.error(traceback.format_exc())
+            label_includes = None
+            logger.error('error :: /ionosphere?ionosphere_saved_training request evaluating namespaces parameter - %s' % e)
+
+        if metric is not None:
+            metrics = [str(metric)]
+        if namespaces is not None:
+            namespaces_str = namespaces
+            namespaces = namespaces_str.split(',')
+        else:
+            namespaces = []
+        logger.info('/ionosphere?ionosphere_saved_training with metrics: %s, namespaces: %s' % (
+            str(metrics), str(namespaces)))
+        try:
+            saved_training_data_dict = get_saved_training_data(skyline_app, 'ionosphere', metrics, namespaces, label_includes, False)
+        except Exception as e:
+            trace = traceback.format_exc()
+            fail_msg = 'error :: get_saved_training_data failed - %s' % e
+            logger.error(trace)
+            logger.error(fail_msg)
+            return internal_error(fail_msg, trace)
+        saved_training_data_metrics = []
+        if saved_training_data_dict:
+            for metric in list(saved_training_data_dict.keys()):
+                for timestamp in list(saved_training_data_dict[metric].keys()):
+                    saved_training_data_metrics.append([metric, timestamp])
+            saved_training_data_metrics = sorted(saved_training_data_metrics, key=lambda x: x[1], reverse=True)
+
+        return render_template(
+            'ionosphere.html', saved_training_data_page=True,
+            saved_training_data_dict=saved_training_data_dict,
+            saved_training_data_metrics=saved_training_data_metrics,
+            version=skyline_version, duration=(time.time() - start),
+            print_debug=False), 200
+
+###
     # @added 20210107 - Feature #3934: ionosphere_performance
     performance_request = False
     if 'performance' in request.args:
@@ -6442,7 +6802,9 @@ def ionosphere():
         # increasing monotonically metrics in graph_url
         known_derivative_metric = False
         try:
-            derivative_metrics = list(REDIS_CONN.smembers('derivative_metrics'))
+            # @modified 20211012 - Feature #4280: aet.metrics_manager.derivative_metrics Redis hash
+            # derivative_metrics = list(REDIS_CONN.smembers('derivative_metrics'))
+            derivative_metrics = list(REDIS_CONN.smembers('aet.metrics_manager.derivative_metrics'))
         except:
             derivative_metrics = []
         redis_metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(base_name))
@@ -6902,7 +7264,7 @@ def ionosphere():
                 try:
                     ionosphere_metrics = list(REDIS_CONN.smembers('ionosphere.unique_metrics'))
                 except:
-                    logger.warn('warning :: Webapp could not get the ionosphere.unique_metrics list from Redis, this could be because there are none')
+                    logger.warning('warning :: Webapp could not get the ionosphere.unique_metrics list from Redis, this could be because there are none')
                 metric_name = settings.FULL_NAMESPACE + str(base_name)
                 if metric_name in ionosphere_metrics:
                     iono_metric = True
@@ -6977,7 +7339,7 @@ def ionosphere():
                         if int(i_layer_algorithm[1]) == int(l_id):
                             fp_layer_algorithms.append(i_layer_algorithm)
                     except:
-                        logger.warn('warning :: Webapp could not determine layer_algorithm in metric_layers_algorithm_details')
+                        logger.warning('warning :: Webapp could not determine layer_algorithm in metric_layers_algorithm_details')
             fp_current_layer = []
             if metric_layers_details:
                 for i_layer in metric_layers_details:
@@ -6985,7 +7347,7 @@ def ionosphere():
                         if int(i_layer[0]) == int(l_id):
                             fp_current_layer.append(i_layer)
                     except:
-                        logger.warn('warning :: Webapp could not determine layer in metric_layers_details')
+                        logger.warning('warning :: Webapp could not determine layer in metric_layers_details')
 
             # @added 20170617 - Feature #2054: ionosphere.save.training_data
             training_data_saved = False
@@ -7532,6 +7894,10 @@ def ionosphere():
 # @added 20210328 - Feature #3994: Panorama - mirage not anomalous
 # Serve the panorama_file endpoint as well
 @app.route('/panorama_images')
+# @added 20211103 - Branch #3068: SNAB
+#                   Bug #4308: matrixprofile - fN on big drops
+# Serve the snab_images endpoint as well
+@app.route('/snab_images')
 def ionosphere_images():
 
     request_args_present = False
@@ -7745,7 +8111,7 @@ def ionosphere_files():
                 logger.error('error :: ionosphere_files failed to build files_list from %s' % str(required_dir))
     duration = time.time() - start
     if not files_dict:
-        logger.warn('warning :: ionosphere_files no files in required_dir - %s - returning 404' % str(required_dir))
+        logger.warning('warning :: ionosphere_files no files in required_dir - %s - returning 404' % str(required_dir))
         # return 'Not Found', 404
         data_dict = {"status": {"response": 404, "request_time": duration}, "data": {"metric": metric, "timestamp": timestamp, "source": source, "files": "not found"}}
         if algorithm_name and source == 'classify_metrics':
@@ -7841,7 +8207,7 @@ def ionosphere_file():
                         logger.error('error :: ionosphere_file failed to send_file - %s' % filename)
                         return 'Internal Server Error', 500
                 else:
-                    logger.warn('warning :: ionosphere_file not found - %s' % filename)
+                    logger.warning('warning :: ionosphere_file not found - %s' % filename)
                     return 'Not Found', 404
     return 'Bad Request', 400
 
@@ -8631,6 +8997,13 @@ def luminosity():
     LUMINOSITY_REQUEST_ARGS = [
         'classify_metrics', 'algorithm', 'metric', 'timestamp', 'significant',
         'classification', 'classify_metric',
+        # @added 20210825 - Feature #4164: luminosity - cloudbursts
+        'cloudbursts', 'base_name', 'namespaces', 'from_timestamp',
+        'until_timestamp', 'cloudbursts_plot', 'plot_cloudburst',
+        'cloudburst_id', 'all_in_period', 'shift',
+        # @added 20211001 - Feature #4264: luminosity - cross_correlation_relationships
+        'related_metrics', 'related_to_metrics', 'metric_id', 'cluster_data',
+        'metric_related_metrics', 'namespaces',
     ]
 
     classify_metrics = False
@@ -8642,8 +9015,52 @@ def luminosity():
     classify_metric = False
     request_arguments = []
 
+    # @added 20210825 - Feature #4164: luminosity - cloudbursts
+    cloudbursts_request = False
+    from_timestamp = 0
+    until_timestamp = 0
+    namespaces = []
+    cloudbursts_dict = {}
+    cloudburst_keys = []
+    plot_cloudburst = False
+    cloudbursts_plot = False
+    cloudburst_id = 0
+    all_in_period = False
+    shift = 3
+
+    # @added 20211001 - Feature #4264: luminosity - cross_correlation_relationships
+    related_metrics = False
+    related_to_metrics = False
+    metric_related_metrics = False
+    related_metrics_dict = {}
+    related_metrics_keys = []
+    related_to_metrics_dict = {}
+
+    metric_id = 0
+    namespaces = []
+
     if request_args_len == 0:
         classify_metrics = True
+        timestamp = str(int(time.time()) - 86400)
+
+    # IMPORTANT: cluster_data MUST be the first argument that is evaluated as it
+    #            is used and required by many of the following API methods
+    cluster_data = False
+    if 'cluster_data' in request.args:
+        try:
+            cluster_data_argument = request.args.get('cluster_data', 'false')
+            if cluster_data_argument == 'true':
+                cluster_data = True
+                logger.info('luminosity request with cluster_data=true')
+            elif cluster_data_argument == 'false':
+                cluster_data = False
+                logger.info('luminosity request with cluster_data=false')
+            else:
+                logger.error('error :: api request with invalid cluster_data argument - %s' % str(cluster_data_argument))
+                return 'Bad Request', 400
+        except:
+            logger.error('error :: /luminosity request with invalid cluster_data argument')
+            return 'Bad Request', 400
 
     if request_args_len:
         for key in request.args:
@@ -8651,6 +9068,42 @@ def luminosity():
                 value = request.args.get(key, None)
                 if str(value) == 'true':
                     classification = True
+
+            # @added 20211001 - Feature #4264: luminosity - cross_correlation_relationships
+            if key == 'related_metrics':
+                value = request.args.get(key, 'false')
+                if str(value) == 'true':
+                    related_metrics = True
+            if key == 'metric_related_metrics':
+                value = request.args.get(key, 'false')
+                if str(value) == 'true':
+                    metric_related_metrics = True
+            if key == 'related_to_metrics':
+                value = request.args.get(key, 'false')
+                if str(value) == 'true':
+                    related_to_metrics = True
+            if key == 'metric_id':
+                value = request.args.get(key, 0)
+                try:
+                    metric_id = int(value)
+                except Exception as err:
+                    error_string = 'error :: invalid request argument - %s - %s' % (key, str(err))
+                    logger.error(error_string)
+                    resp = {'400 Bad Request': error_string}
+                    return jsonify(resp), 400
+            if key == 'namespaces':
+                value = request.args.get(key, '')
+                try:
+                    namespaces_str = str(value)
+                    namespaces = namespaces_str.split(',')
+                    logger.info('filtering on namespaces: %s' % str(namespaces))
+
+                except Exception as err:
+                    error_string = 'error :: invalid request argument - %s - %s' % (key, str(err))
+                    logger.error(error_string)
+                    resp = {'400 Bad Request': error_string}
+                    return jsonify(resp), 400
+
         if classification:
             algorithm = None
             metric = None
@@ -8658,12 +9111,10 @@ def luminosity():
         for i in request.args:
             key = str(i)
             if key not in LUMINOSITY_REQUEST_ARGS:
-                logger.error('error :: invalid request argument - %s=%s' % (key, str(i)))
                 error_string = 'error :: invalid request argument - %s=%s' % (key, str(i))
                 logger.error(error_string)
-                resp = json.dumps(
-                    {'400 Bad Request': error_string})
-                return flask_escape(resp), 400
+                resp = {'400 Bad Request': error_string}
+                return jsonify(resp), 400
             value = request.args.get(key, None)
             request_arguments.append([key, value])
             if key == 'classify_metrics':
@@ -8683,6 +9134,67 @@ def luminosity():
             if key == 'classify_metric':
                 if str(value) == 'true':
                     classify_metric = True
+
+            # @added 20210825 - Feature #4164: luminosity - cloudbursts
+            if key == 'cloudbursts':
+                cloudbursts_request = True
+            if not namespaces:
+                if key == 'namespaces' and value != 'all':
+                    try:
+                        namespaces = value.split[',']
+                    except TypeError:
+                        logger.error('error :: TypeError from namespaces parameter' % str(value))
+                        namespaces = [value]
+            if key in ['from_timestamp', 'until_timestamp']:
+                timestamp_format_invalid = True
+                if value == 'all':
+                    timestamp_format_invalid = False
+                # unix timestamp
+                if value.isdigit():
+                    timestamp_format_invalid = False
+                # %Y%m%d %H:%M timestamp
+                if timestamp_format_invalid:
+                    value_strip_colon = value.replace(':', '')
+                    new_value = value_strip_colon.replace(' ', '')
+                    if new_value.isdigit():
+                        timestamp_format_invalid = False
+                if timestamp_format_invalid:
+                    error_string = 'error :: invalid %s value passed %s' % (key, value)
+                    logger.error('error :: invalid %s value passed %s' % (key, value))
+                    error_string = 'error :: invalid request argument - %s' % (key)
+                    logger.error(error_string)
+                    resp = json.dumps(
+                        {'400 Bad Request': error_string})
+                    return flask_escape(resp), 400
+            if key == 'from_timestamp':
+                from_timestamp = str(value)
+                if ":" in from_timestamp:
+                    new_from_timestamp = time.mktime(datetime.datetime.strptime(from_timestamp, '%Y%m%d %H:%M').timetuple())
+                    from_timestamp = int(new_from_timestamp)
+                elif from_timestamp == 'all':
+                    from_timestamp = 0
+                else:
+                    from_timestamp = int(from_timestamp)
+            if key == 'until_timestamp':
+                until_timestamp = str(value)
+                if ":" in until_timestamp:
+                    new_until_timestamp = time.mktime(datetime.datetime.strptime(until_timestamp, '%Y%m%d %H:%M').timetuple())
+                    from_timestamp = int(new_until_timestamp)
+                elif until_timestamp == 'all':
+                    until_timestamp = 0
+                else:
+                    until_timestamp = int(until_timestamp)
+            if key == 'plot_cloudburst':
+                if str(value) == 'true':
+                    plot_cloudburst = True
+            if key == 'cloudburst_id':
+                cloudburst_id = int(value)
+            if key == 'all_in_period':
+                if str(value) == 'true':
+                    all_in_period = True
+            if key == 'shift':
+                shift = int(value)
+
     logger.info('/luminosity request_arguments: %s' % str(request_arguments))
 
     valid_request = True
@@ -8693,6 +9205,8 @@ def luminosity():
             status_code = 400
             data_dict = {"status": {"classify_metrics": True, "reason": "required parameter not passed", "response": 400}, "data": {"metric": metric, "timestamp": timestamp, "algorithm": algorithm}}
             return jsonify(data_dict), status_code
+        if request_args_len == 1:
+            timestamp = str(int(time.time()) - 86400)
 
     if classification and valid_request:
         if not metric or not algorithm:
@@ -8701,26 +9215,29 @@ def luminosity():
             status_code = 400
             data_dict = {"status": {"classification": True, "reason": "required parameter not passed", "response": 400}, "data": {"metric": metric, "algorithm": algorithm}}
 
-    if classify_metric and valid_request:
-        if not metric or not algorithm and not timestamp:
+    # @added 20210825 - Feature #4164: luminosity - cloudbursts
+    if cloudbursts_request and valid_request:
+        if not metric and not from_timestamp and not until_timestamp:
             valid_request = False
         if not valid_request:
             status_code = 400
-            data_dict = {"status": {"classify_metric": True, "reason": "required parameter not passed", "response": 400}, "data": {"metric": metric, "algorithm": algorithm, "timestamp": timestamp}}
+            data_dict = {"status": {"cloudbursts": True, "reason": "required parameter not passed", "response": 400}, "data": {"metric": metric, "from_timestamp": from_timestamp, "until_timestamp": until_timestamp}}
 
     if not valid_request:
         return jsonify(data_dict), status_code
 
     classify_metrics_dict = {}
     classified_metrics = []
-    try:
-        classify_metrics_dict, classified_metrics, fail_msg, trace = get_classify_metrics(metric, timestamp, algorithm, significant)
-    except Exception as e:
-        trace = traceback.format_exc()
-        message = 'could not determine if metric matched - error - %s' % (e)
-        logger.error(trace)
-        logger.error('error :: %s' % message)
-        return internal_error(message, trace)
+    if classify_metrics or classify_metric or classification:
+        try:
+            if metric != 'all':
+                classify_metrics_dict, classified_metrics, fail_msg, trace = get_classify_metrics(metric, timestamp, algorithm, significant)
+        except Exception as e:
+            trace = traceback.format_exc()
+            message = 'could not determine if metric matched - error - %s' % (e)
+            logger.error(trace)
+            logger.error('error :: %s' % message)
+            return internal_error(message, trace)
 
     if classification:
         if metric == 'all' and algorithm == 'all':
@@ -8732,8 +9249,135 @@ def luminosity():
     siginificant_count = 0
     if len(classify_metrics_dict) > 0:
         if metric != 'all':
-            classification_count = classify_metrics_dict[metric][algorithm]['classifications']
-            siginificant_count = classify_metrics_dict[metric][algorithm]['significant']
+            # classification_count = classify_metrics_dict[metric][algorithm]['classifications']
+            # siginificant_count = classify_metrics_dict[metric][algorithm]['significant']
+            for current_algorithm in list(classify_metrics_dict[metric].keys()):
+                classification_count += classify_metrics_dict[metric][current_algorithm]['classifications']
+                siginificant_count += classify_metrics_dict[metric][current_algorithm]['significant']
+            classify_metrics = False
+            classification = True
+
+    # @added 20210825 - Feature #4164: luminosity - cloudbursts
+    if cloudbursts_request:
+        if from_timestamp == 0 and metric == 'all':
+            from_timestamp = int(time.time()) - (86400 * 3)
+        try:
+            cloudbursts_dict = get_cloudbursts(metric, namespaces, from_timestamp, until_timestamp)
+        except Exception as err:
+            trace = traceback.format_exc()
+            message = 'get_cloudbursts failed - %s' % (err)
+            logger.error(trace)
+            logger.error('error :: %s' % message)
+            return internal_error(message, trace)
+    if cloudbursts_dict:
+        cloudburst_id = list(cloudbursts_dict.keys())[0]
+        cloudburst_keys = list(cloudbursts_dict[cloudburst_id].keys())
+        logger.info('returning %s cloudbursts with cloudburst_keys: %s' % (
+            str(len(cloudbursts_dict)), str(cloudburst_keys)))
+
+    # @added 20210826 - Feature #4164: luminosity - cloudbursts
+    cloudburst_plot_image = None
+    cloudburst_dict = {}
+    if plot_cloudburst:
+        try:
+            cloudburst_dict, cloudburst_plot_image = get_cloudburst_plot(cloudburst_id, metric, shift, all_in_period)
+        except Exception as err:
+            trace = traceback.format_exc()
+            message = 'get_cloudbursts failed - %s' % (err)
+            logger.error(trace)
+            logger.error('error :: %s' % message)
+            return internal_error(message, trace)
+        if cloudburst_dict:
+            cloudburst_keys = list(cloudburst_dict.keys())
+
+    # @added 20211004 - Feature #4264: luminosity - cross_correlation_relationships
+    if related_metrics and not metric_id:
+        try:
+            metric_group_info = get_metric_group_info(skyline_app, 0, {'namespaces': namespaces})
+            if metric_group_info:
+                for metric_id in list(metric_group_info.keys()):
+                    related_metrics_dict[metric_id] = metric_group_info[metric_id]
+                    if not related_metrics_keys:
+                        for key in list(related_metrics_dict[metric_id].keys()):
+                            related_metrics_keys.append(key)
+        except Exception as err:
+            trace = traceback.format_exc()
+            message = 'get_cloudbursts failed - %s' % (err)
+            logger.error(trace)
+            logger.error('error :: %s' % message)
+            return internal_error(message, trace)
+
+    metric_related_metrics_keys = []
+    if metric_related_metrics:
+        try:
+            full_details = True
+            if metric == 'all':
+                metric = None
+            else:
+                if not metric_id:
+                    try:
+                        metric_id = get_metric_id_from_base_name(skyline_app, metric)
+                    except Exception as err:
+                        message = 'related_to_metric request :: get_metric_id_from_base_name failed to determine metric_id from metric: %s - %s' % (
+                            str(metric), str(err))
+                        logger.error('error :: %s' % message)
+                        return internal_error(message, trace)
+            metric_related_metrics = get_related_metrics(skyline_app, cluster_data, full_details, metric, metric_id)
+            if metric_related_metrics:
+                for related_metric in list(metric_related_metrics['related_metrics'].keys()):
+                    if not metric_related_metrics_keys:
+                        for key in list(metric_related_metrics['related_metrics'][related_metric].keys()):
+                            metric_related_metrics_keys.append(key)
+        except Exception as err:
+            logger.error(traceback.format_exc())
+            logger.error('error :: get_related_metrics failed to set metric_related_metrics - %s' % str(err))
+
+    # @added 20211006 - Feature #4264: luminosity - cross_correlation_relationships
+    related_to_metrics_keys = []
+    if related_to_metrics:
+        if not metric:
+            error_string = 'error :: invalid request no metric parameter'
+            logger.error(error_string)
+            resp = {'400 Bad Request': error_string}
+            return jsonify(resp), 400
+        if metric != 'all':
+            if not metric_id:
+                try:
+                    metric_id = get_metric_id_from_base_name(skyline_app, metric)
+                except Exception as err:
+                    message = 'related_to_metric request :: get_metric_id_from_base_name failed to determine metric_id from metric: %s - %s' % (
+                        str(metric), str(err))
+                    logger.error('error :: %s' % message)
+                    return internal_error(message, trace)
+            try:
+                related_to_metrics_dict = get_related_to_metric_groups(skyline_app, metric, metric_id)
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: get_related_to_metric_groups failed - %s' % str(err))
+            if not related_to_metrics_dict:
+                trace = 'None'
+                message = '%s - metric not found' % metric
+                logger.error('error :: %s' % message)
+                return internal_error(message, trace)
+
+            if related_to_metrics_dict:
+                try:
+                    for related_to_metric in list(related_to_metrics_dict[metric]['related_to_metrics'].keys()):
+                        if related_to_metrics_keys:
+                            break
+                        for key in list(related_to_metrics_dict[metric]['related_to_metrics'][related_to_metric].keys()):
+                            related_to_metrics_keys.append(key)
+                    logger.info('debug :: related_to_metrics_dict: %s' % str(related_to_metrics_dict))
+                    logger.info('debug :: related_to_metrics_keys: %s' % str(related_to_metrics_keys))
+                except Exception as err:
+                    trace = traceback.format_exc()
+                    message = 'get_related_to_metric_groups output failed - %s' % str(err)
+                    logger.error(trace)
+                    logger.error('error :: %s' % message)
+                    return internal_error(message, trace)
+        if metric == 'all':
+            related_to_metrics_dict = True
+            metric = None
 
     try:
         return render_template(
@@ -8745,8 +9389,185 @@ def luminosity():
             classified_metrics=classified_metrics,
             classification=classification,
             classify_metric=classify_metric,
+            # @added 20210825 - Feature #4164: luminosity - cloudbursts
+            cloudbursts=cloudbursts_request, cloudbursts_dict=cloudbursts_dict,
+            cloudburst_keys=cloudburst_keys, plot_cloudburst=plot_cloudburst,
+            cloudburst_plot_image=cloudburst_plot_image,
+            cloudburst_id=cloudburst_id, cloudburst_dict=cloudburst_dict,
+            all_in_period=all_in_period,
+            related_metrics=related_metrics_dict,
+            related_metrics_keys=related_metrics_keys,
+            metric_related_metrics=metric_related_metrics,
+            metric_related_metrics_keys=metric_related_metrics_keys,
+            namespaces=namespaces, metric_id=metric_id,
+            related_to_metrics=related_to_metrics_dict,
+            related_to_metrics_keys=related_to_metrics_keys,
             version=skyline_version, duration=(time.time() - start),
             print_debug=debug_on), 200
+    except:
+        message = 'Uh oh ... a Skyline 500 :('
+        trace = traceback.format_exc()
+        return internal_error(message, trace)
+
+
+# @added 20211102 - Branch #3068: SNAB
+#                   Bug #4308: matrixprofile - fN on big drops
+@app.route('/snab', methods=['GET'])
+def snab():
+
+    logger.info('/snab request')
+    start = time.time()
+    results_data = {}
+    filter_on = {}
+    filter_on['default'] = True
+    filter_on['algorithm'] = None
+    filter_on['algorithm_group'] = None
+
+    algorithms = {}
+    try:
+        algorithms = get_algorithms(skyline_app)
+    except Exception as err:
+        logger.error(traceback.format_exc())
+        logger.error('error :: /snab :: failed to get algorithms - %s' % str(err))
+
+    algorithm_groups = {}
+    try:
+        algorithm_groups = get_algorithm_groups(skyline_app)
+    except Exception as err:
+        logger.error(traceback.format_exc())
+        logger.error('error :: /snab :: failed to get algorithm_groups - %s' % str(err))
+
+    namespaces = []
+    filter_on['namespaces'] = namespaces
+    if 'namespaces' in request.args:
+        namespaces_list = []
+        namespaces = request.args.get('namespaces', 'all')
+        if namespaces != 'all':
+            namespaces_list = namespaces.split(',')
+        filter_on['namespaces'] = namespaces_list
+        filter_on['default'] = False
+
+    algorithm = None
+    algorithm_id = 0
+    filter_on['algorithm_id'] = algorithm_id
+    if 'algorithm' in request.args:
+        algorithm = request.args.get('algorithm', 'all')
+        if algorithm != 'all':
+            try:
+                algorithm_id = algorithms[algorithm]
+            except KeyError:
+                message = 'Unknown algorithm - %s, no ID found' % str(algorithm)
+                trace = traceback.format_exc()
+                return internal_error(message, trace)
+            if algorithm_id:
+                filter_on['algorithm_id'] = algorithm_id
+                filter_on['default'] = False
+                filter_on['algorithm'] = algorithm
+
+    algorithm_group = None
+    algorithm_group_id = 0
+    filter_on['algorithm_group_id'] = algorithm_group_id
+    if 'algorithm_group' in request.args:
+        algorithm_group = request.args.get('algorithm_group', 'all')
+        if algorithm_group != 'all':
+            try:
+                algorithm_group_id = algorithm_groups[algorithm_group]
+            except KeyError:
+                message = 'Unknown algorithm_group - %s, no ID found' % str(algorithm_group)
+                trace = traceback.format_exc()
+                return internal_error(message, trace)
+            if algorithm_group_id:
+                filter_on['algorithm_group_id'] = algorithm_group_id
+                filter_on['default'] = False
+                filter_on['algorithm_group'] = algorithm_group
+
+    from_timestamp = 0
+    filter_on['from_timestamp'] = from_timestamp
+    if 'from_timestamp' in request.args:
+        from_timestamp = request.args.get('from_timestamp', 0)
+        if from_timestamp:
+            if ":" in from_timestamp:
+                try:
+                    new_from_timestamp = time.mktime(datetime.datetime.strptime(from_timestamp, '%Y-%m-%d %H:%M').timetuple())
+                except Exception as err:
+                    trace = traceback.format_exc()
+                    logger.error('%s' % trace)
+                    fail_msg = 'error :: /snab :: failed to unix timestamp from from_timestamp - %s' % str(err)
+                    logger.error('%s' % fail_msg)
+                    return internal_error(fail_msg, trace)
+                from_timestamp = int(new_from_timestamp)
+            filter_on['from_timestamp'] = int(from_timestamp)
+    if not from_timestamp:
+        try:
+            from_timestamp = int(from_timestamp)
+        except Exception as err:
+            trace = traceback.format_exc()
+            logger.error('%s' % trace)
+            fail_msg = 'error :: /snab :: no from_timestamp parameter was passed - %s' % str(err)
+            logger.error('%s' % fail_msg)
+            return internal_error(fail_msg, trace)
+
+    until_timestamp = 0
+    if 'until_timestamp' in request.args:
+        until_timestamp = request.args.get('until_timestamp', 0)
+        if until_timestamp:
+            if ":" in until_timestamp:
+                try:
+                    new_until_timestamp = time.mktime(datetime.datetime.strptime(until_timestamp, '%Y-%m-%d %H:%M').timetuple())
+                except Exception as err:
+                    trace = traceback.format_exc()
+                    logger.error('%s' % trace)
+                    fail_msg = 'error :: snab :: failed to unix timestamp from until_timestamp - %s' % str(err)
+                    logger.error('%s' % fail_msg)
+                    return internal_error(fail_msg, trace)
+                until_timestamp = int(new_until_timestamp)
+            else:
+                until_timestamp = int(until_timestamp)
+    if not until_timestamp:
+        until_timestamp = int(time.time())
+
+    filter_on['until_timestamp'] = int(until_timestamp)
+
+    result = None
+    filter_on['result'] = result
+    if 'result' in request.args:
+        result = request.args.get('result', 'all')
+        if result in ['tP', 'fP', 'fN', 'tN', 'unsure']:
+            filter_on['result'] = result
+            filter_on['default'] = False
+
+    plot = False
+    if 'plot' in request.args:
+        plot = request.args.get('plot', 'false')
+        if plot == 'true':
+            plot = True
+    filter_on['plot'] = plot
+
+    if not filter_on['default']:
+        try:
+            results_data = get_snab_results(filter_on)
+        except Exception as err:
+            trace = traceback.format_exc()
+            logger.error('%s' % trace)
+            fail_msg = 'error :: snab :: failed to unix timestamp from until_timestamp - %s' % str(err)
+            logger.error('%s' % fail_msg)
+            return internal_error(fail_msg, trace)
+    results_data_keys = []
+    do_not_use_keys = ['runtime', 'app_id', 'snab_timestamp', 'slack_thread_ts', 'plot']
+    if results_data:
+        snab_id = list(results_data.keys())[0]
+        for key in list(results_data[snab_id].keys()):
+            if key not in do_not_use_keys:
+                results_data_keys.append(key)
+    try:
+        return render_template(
+            'snab.html', algorithms=algorithms,
+            algorithm_groups=algorithm_groups,
+            namespaces=namespaces, from_timestamp=from_timestamp,
+            until_timestamp=until_timestamp, result=result,
+            results_data=results_data, results_data_keys=results_data_keys,
+            filter_on=filter_on, plot=plot,
+            version=skyline_version, duration=(time.time() - start)), 200
     except:
         message = 'Uh oh ... a Skyline 500 :('
         trace = traceback.format_exc()
