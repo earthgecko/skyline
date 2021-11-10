@@ -1,0 +1,124 @@
+{% block ionosphere_saved_training_data %}
+<!-- BEGIN /ionosphere?ionosphere_saved_training_data=true block -->
+{% if print_debug == 'True' %}
+<code> DEBUG </code> :: /ionosphere saved_training_data_page block</br>
+{% endif %}
+
+{% if display_message %}
+<code> ERROR </code></br>
+<code> message </code>: {{ display_message }}<br>
+{% endif %}
+
+<div class="navbar-header" role="navigation">
+  <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+    <span class="sr-only">Toggle navigation</span>
+    <span class="icon-bar"></span>
+    <span class="icon-bar"></span>
+  </button>
+		<ul class="nav nav-tabs" role="view_tablist" id="view">
+		  <li class="active"><a href="/ionosphere"><span class="logo"><span class="sky">Training</span> <span class="re">data</span></span></a></li>
+		  <li><a href="?fp_view=true"><span class="logo"><span class="sky">Features</span> <span class="re">profiles</span></span></a></li>
+		</ul>
+		<div class="tab-content">
+	  	<div class="tab-pane active" id="view">
+	<br>
+  <div class="navbar-header" role="navigation">
+    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+      <span class="sr-only">Toggle navigation</span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+      <span class="icon-bar"></span>
+    </button>
+  </div>
+
+<!--	<div class="col-md-9 col-md-pull-3"> -->
+	<div class="col-md-12">
+		<ul class="nav nav-tabs" role="tablist" id="list_by-tabs">
+		  <li><a href="/ionosphere">List by metrics</a></li>
+		  <li><a href="?a_dated_list=true">List by date</a></li>
+		  <li class="active"><a href="?ionosphere_saved_training_data_page=true">Saved training_data</a></li>
+		</ul>
+		<div class="tab-content">
+
+  		<div class="col-md-12">
+  		  <h4><span class="logo"><span class="sky">Saved ::</span> <span class="re">training_data</span></span></h4>
+  {% if saved_training_data_dict %}
+        <button type="button" class="btn btn-info" data-toggle="collapse" data-target="#saved_training_data_options">Show saved training_data options</button>
+        <div id="saved_training_data_options" class="collapse">
+  {% endif %}
+        <form action="ionosphere">
+  		  <table class="table table-hover">
+  		    <thead>
+  		      <tr>
+  		        <th>Match criteria</th>
+  		        <th>filter</th>
+  		      </tr>
+  		    </thead>
+  		    <tbody>
+  		      <tr>
+  		        <td>Saved training_data search</td>
+  		        <td><select name="ionosphere_saved_training">
+                <option value="true">true</option>
+              </select></td>
+  		      </tr>
+  		      <tr>
+  		        <td>metric:</td>
+  		        <td><input type="text" name="metric" value="all" /></td>
+  		      </tr>
+  		      <tr>
+  		        <td>namespaces</td>
+  		        <td><input type="text" name="namespaces" value="all"> a comma separated list of namespaces to filter on</td>
+  		      </tr>
+  		      <tr>
+  		        <td>label_includes</td>
+  		        <td><input type="text" name="label_includes" value=""> a string in the label to filter on</td>
+  		      </tr>
+  		    </tbody>
+  		  </table>
+        <br>
+        <input type="submit" value="Search saved training_data">
+      </form>
+  {% if saved_training_data_dict %}
+<!-- collapse button div -->
+      </div>
+  {% endif %}
+      </div>
+  {% if saved_training_data_dict %}
+	  <div class="tab-pane active" id="saved_training_data">
+      <h4><span class="logo"><span class="sky">Saved ::</span> <span class="re">training_data</span></span> {{ saved_training_data_dict|length }} saved training_data instances</h4>
+			<table class="table table-hover">
+				<thead>
+					<tr>
+            <th>date</th>
+            <th>metric</th>
+            <th>label</th>
+					</tr>
+				</thead>
+				<tbody>
+    {% for item in saved_training_data_metrics %}
+          <tr>
+            <td>{{ saved_training_data_dict[item[0]][item[1]]['saved_date'] }}</td>
+            <td>
+              <a href="{{ saved_training_data_dict[item[0]][item[1]]['url'] }}">{{ item[0] }}</a>
+            </td>
+            <td>{{ saved_training_data_dict[item[0]][item[1]]['label'] }}</td>
+          </tr>
+    {% endfor %}
+				</tbody>
+			</table>
+		</div>
+  {% endif %}
+    </div> <!-- END div class="col-md-12" -->
+
+	</div>
+	</div>
+	</div>
+  </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<!-- END /ionosphere?saved_training_data_page=true block -->
+{% endblock %}
