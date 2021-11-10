@@ -81,7 +81,7 @@ class Thunder(Thread):
             kill(self.current_pid, 0)
             kill(self.parent_pid, 0)
         except:
-            logger.warn('warning :: parent or current process dead')
+            logger.warning('warning :: parent or current process dead')
             exit(0)
 
     def spin_thunder_process(self, i, validated_event_details, redis_item, event_file):
@@ -118,12 +118,13 @@ class Thunder(Thread):
             if redis_item:
                 # Delete the item from the Redis set
                 try:
-                    removed_item = update_redis_set(
+                    # removed_item = update_redis_set(
+                    update_redis_set(
                         skyline_app, thunder_redis_set, redis_item,
                         'remove', log=True)
-                    if removed_item:
-                        logger.error('error :: could not determine event_details from %s Redis set entry (removed) - %s' % (
-                            thunder_redis_set, str(redis_item)))
+                    # if removed_item:
+                    #     logger.error('error :: could not determine event_details from %s Redis set entry (removed) - %s' % (
+                    #         thunder_redis_set, str(redis_item)))
                 except Exception as e:
                     logger.error('error :: could not remove item from Redis set %s - %s' % (
                         thunder_redis_set, e))
@@ -260,7 +261,7 @@ class Thunder(Thread):
                     str(alerts_sent_dict['to_send']),
                     str(alerts_sent_dict['sent']), parent_namespace))
             if not all_sent:
-                logger.warn('warning :: all alerts were not sent - %s' % (
+                logger.warning('warning :: all alerts were not sent - %s' % (
                     str(alerts_sent_dict)))
             if all_sent:
                 if level == 'alert':
@@ -310,7 +311,7 @@ class Thunder(Thread):
                         str(alerts_sent_dict['to_send']),
                         str(alerts_sent_dict['sent']), parent_namespace))
                 if not all_sent:
-                    logger.warn('warning :: all alerts were not sent - %s' % (
+                    logger.warning('warning :: all alerts were not sent - %s' % (
                         str(alerts_sent_dict)))
                 if all_sent:
                     remove_event(redis_item, event_file)
@@ -343,7 +344,6 @@ class Thunder(Thread):
                 os.remove(skyline_app_logwait)
             except OSError:
                 logger.error('error - failed to remove %s, continuing' % skyline_app_logwait)
-                pass
 
         now = time()
         log_wait_for = now + 5
@@ -362,7 +362,6 @@ class Thunder(Thread):
                 logger.info('log lock file removed')
             except OSError:
                 logger.error('error - failed to remove %s, continuing' % skyline_app_loglock)
-                pass
         else:
             logger.info('bin/%s.d log management done' % skyline_app)
 
@@ -434,9 +433,7 @@ class Thunder(Thread):
                     logger.error('error :: cannot connect to get_redis_conn_decoded - %s' % e)
                 continue
 
-            """
-            Determine if any metric has been added to process
-            """
+            # Determine if any metric has been added to process
             thunder_last_run = int(time())
             total_thunder_events_item_count = 0
             while True:
@@ -468,11 +465,14 @@ class Thunder(Thread):
                         skyline_app, e))
 
                 if not settings.THUNDER_ENABLED:
+                    logger.info('sleeping 59 seconds settings.THUNDER_ENABLED not set')
                     sleep(59)
+                    logger.info('breaking after 59 seconds settings.THUNDER_ENABLED not set')
                     break
 
                 # break to send metrics
                 if int(time()) >= (last_sent_to_graphite + 60):
+                    logger.info('breaking as last_sent_to_graphite was > 59 seconds ago')
                     break
 
                 # Determine events to process from the Redis set
@@ -490,8 +490,8 @@ class Thunder(Thread):
                     if not isinstance(thunder_events, set):
                         thunder_events = set(thunder_events)
                 else:
+                    logger.info('no entries in thunder.events Redis set')
                     thunder_events = []
-                    thunder_events = set(thunder_events)
 
                 # Check the filesystem for failover event files
                 filesystem_check_timestamp = int(time())
@@ -703,12 +703,14 @@ class Thunder(Thread):
                                 if not event_file:
                                     # Delete the bad item in the Redis set
                                     try:
-                                        removed_item = update_redis_set(
+                                        # @modified 20210907 - Bug #4258: cleanup thunder.events
+                                        # removed_item = update_redis_set(
+                                        update_redis_set(
                                             skyline_app, thunder_redis_set, event_item,
                                             'remove', log=True)
-                                        if removed_item:
-                                            logger.error('error :: could not determine event_details from %s Redis set entry (removed) - %s' % (
-                                                thunder_redis_set, str(event_item)))
+                                        # if removed_item:
+                                        #     logger.error('error :: could not determine event_details from %s Redis set entry (removed) - %s' % (
+                                        #         thunder_redis_set, str(event_item)))
                                     except Exception as e:
                                         logger.error('error :: could not remove bad item from Redis set %s - %s' % (
                                             thunder_redis_set, e))
@@ -754,12 +756,14 @@ class Thunder(Thread):
                                 if redis_item:
                                     # Delete the item from the Redis set
                                     try:
-                                        removed_item = update_redis_set(
+                                        # @modified 20210907 - Bug #4258: cleanup thunder.events
+                                        # removed_item = update_redis_set(
+                                        update_redis_set(
                                             skyline_app, thunder_redis_set, redis_item,
                                             'remove', log=True)
-                                        if removed_item:
-                                            logger.info('alert key exists, removed event_details from %s Redis set entry - %s' % (
-                                                thunder_redis_set, str(redis_item)))
+                                        # if removed_item:
+                                        #     logger.info('alert key exists, removed event_details from %s Redis set entry - %s' % (
+                                        #         thunder_redis_set, str(redis_item)))
                                     except Exception as e:
                                         logger.error('error :: could not remove item from Redis set %s - %s' % (
                                             thunder_redis_set, e))
@@ -826,7 +830,11 @@ class Thunder(Thread):
                         sleep_for = 0.1
                     if (next_send_to_graphite - right_now) < sleep_for:
                         sleep_for = next_send_to_graphite - right_now
+                    logger.info('no validated_event_details sleeping for %s seconds' % str(sleep_for))
                     sleep(sleep_for)
+                    if int(time()) >= (last_sent_to_graphite + 60):
+                        logger.info('breaking to sending Graphite metrics')
+                        break
 
                 if validated_event_details:
                     logger.info('processing 1 event of %s thunder events to process' % str(total_thunder_events_item_count))
@@ -873,15 +881,78 @@ class Thunder(Thread):
                             logger.info('stopping spin_thunder_process - %s' % (str(p.is_alive())))
                             p.join()
 
-                if int(time()) >= (last_sent_to_graphite + 60):
-                    logger.info('alerts.sent          :: %s' % str(thunder_alerts_sent))
-                    send_metric_name = '%s.alerts.sent' % skyline_app_graphite_namespace
-                    send_graphite_metric(skyline_app, send_metric_name, str(thunder_alerts_sent))
-
-                    last_sent_to_graphite = int(time())
-                    thunder_alerts_sent = 0
-
+                    # @added 20210907 - Bug #4258: cleanup thunder.events
+                    # Remove event
                     try:
-                        thunder_events = self.redis_conn_decoded.smembers(thunder_redis_set)
+                        update_redis_set(
+                            skyline_app, thunder_redis_set, redis_item,
+                            'remove', log=True)
                     except Exception as e:
-                        logger.error('error :: could not query Redis for set %s - %s' % (thunder_redis_set, e))
+                        logger.error('error :: could not remove item from Redis set %s - %s' % (
+                            thunder_redis_set, e))
+
+            if int(time()) >= (last_sent_to_graphite + 60):
+                logger.info('sending Graphite metrics')
+
+                logger.info('alerts.sent          :: %s' % str(thunder_alerts_sent))
+                send_metric_name = '%s.alerts.sent' % skyline_app_graphite_namespace
+                send_graphite_metric(skyline_app, send_metric_name, str(thunder_alerts_sent))
+
+                last_sent_to_graphite = int(time())
+                thunder_alerts_sent = 0
+
+                # @modified 20210909 - Bug #4258: cleanup thunder.events
+                # Not required here
+                # try:
+                #     thunder_events = self.redis_conn_decoded.smembers(thunder_redis_set)
+                # except Exception as e:
+                #     logger.error('error :: could not query Redis for set %s - %s' % (thunder_redis_set, e))
+
+                # @added 20210907 - Bug #4258: cleanup thunder.events
+                # The original version of thunder never removed the
+                # thunder.events after processing, the event was only
+                # removed if it was bad.  Therefore no stale, no_data or
+                # recovered events were removed from the thunder.events
+                # Redis set.
+                # This feature works to be able to clean up the
+                # thunder.events of any big thunder.events sets and manages
+                # the set going forward.
+                thunder_events_list = []
+                logger.info('managing thunder.events Redis set and removing any items older than 86400')
+                try:
+                    thunder_events_list = list(self.redis_conn_decoded.smembers(thunder_redis_set))
+                except Exception as e:
+                    logger.error('error :: could not query Redis for set %s - %s' % (thunder_redis_set, e))
+                if not thunder_events_list:
+                    logger.info('managed thunder.events Redis set, no items in set')
+                if thunder_events_list:
+                    logger.info('managing %s items in thunder.events Redis set' % str(len(thunder_events_list)))
+                    for thunder_event_str in thunder_events_list:
+                        thunder_event = None
+                        remove_item = False
+                        try:
+                            thunder_event = literal_eval(thunder_event_str)
+                        except Exception as err:
+                            logger.error('error :: could not literal_eval(thunder_events_str) - %s' % str(err))
+                        thunder_event_timestamp = 0
+                        if thunder_event:
+                            try:
+                                thunder_event_timestamp = int(thunder_event['timestamp'])
+                            except KeyError:
+                                # No timestamp, remove event
+                                remove_item = thunder_event_str
+                                thunder_event_timestamp = None
+                        if thunder_event_timestamp:
+                            if thunder_event_timestamp > (last_sent_to_graphite - 86400):
+                                remove_item = thunder_event_str
+                        if remove_item:
+                            # Remove event
+                            logger.error('error :: removing event from thunder.events Redis set as the event is older than 86400 seconds. event:%s' % (
+                                str(thunder_event)))
+                            try:
+                                update_redis_set(
+                                    skyline_app, thunder_redis_set, redis_item,
+                                    'remove', log=True)
+                            except Exception as e:
+                                logger.error('error :: could not remove item from Redis set %s - %s' % (
+                                    thunder_redis_set, e))

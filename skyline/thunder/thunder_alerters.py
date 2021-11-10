@@ -95,7 +95,7 @@ def thunder_alert(alert_via, subject, body):
                 str(alerter_endpoint), e))
         try:
             if response.status_code != 200:
-                logger.warn('warning :: thunder_alert :: %s responded with status code %s and reason %s' % (
+                logger.warning('warning :: thunder_alert :: %s responded with status code %s and reason %s' % (
                     str(alerter_endpoint), str(response.status_code),
                     str(response.reason)))
         except Exception as e:
@@ -117,7 +117,8 @@ def thunder_alert(alert_via, subject, body):
         if response:
             if response.status_code == 200:
                 logger.info('thunder_alert :: alert sent to %s - %s' % (
-                    str(alerter_endpoint), str(alert_data_dict['status'])))
+                    # str(alerter_endpoint), str(alert_data_dict['status'])))
+                    str(alerter_endpoint), str(response.status_code)))
                 message_sent = True
         if message_sent:
             logger.info('thunder_alert :: external thunder message sent')
