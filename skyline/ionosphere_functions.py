@@ -317,7 +317,7 @@ def create_fp_ts_graph(
         created_fp_ts_graph = create_matplotlib_graph(current_skyline_app, fp_ts_graph_file, graph_title, timeseries)
     except:
         current_logger.error(traceback.format_exc())
-        current_logger.error('error :: failed to create matplotlib graph for %s fp id %' % (base_name. str(fp_id)))
+        current_logger.error('error :: failed to create matplotlib graph for %s fp id %s' % (base_name, str(fp_id)))
     return created_fp_ts_graph
 
 
