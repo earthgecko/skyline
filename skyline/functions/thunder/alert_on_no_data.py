@@ -142,6 +142,15 @@ def alert_on_no_data(self, level, message, parent_namespace, data):
                 total_recent_metrics, total_metrics, parent_namespace,
                 str(data['recovered_after_seconds']), this_host,
                 total_recent_metrics, total_stale_metrics, total_metrics)
+
+        # @added 20210720 - Branch #1444: thunder
+        # Added remove
+        if data['status'] == 'removed' and level == 'notice':
+            total_recent_metrics = str(data['total_recent_metrics'])
+            total_stale_metrics = str(data['total_stale_metrics'])
+            total_metrics = str(data['total_metrics'])
+            use_body = '%s %s namespace metrics were removed from the no data check (from %s)' % (
+                total_metrics, parent_namespace, this_host)
         try:
             if alert_via == 'alert_via_slack':
                 title = 'Skyline Thunder - %s - URGENT - %s no data' % (
@@ -149,6 +158,12 @@ def alert_on_no_data(self, level, message, parent_namespace, data):
                 if data['status'] == 'recovered' and level == 'notice':
                     title = 'Skyline Thunder - %s - %s receiving data (RECOVERED)' % (
                         level.upper(), parent_namespace)
+                # @added 20210720 - Branch #1444: thunder
+                # Added remove
+                if data['status'] == 'removed' and level == 'notice':
+                    title = 'Skyline Thunder - %s - %s - %s metrics removed from no data check' % (
+                        level.upper(), parent_namespace, total_metrics)
+
                 with_subject = subject.replace(level, '')
                 title = title + with_subject
                 alert_sent = thunder_alert(alert_via, title, use_body)

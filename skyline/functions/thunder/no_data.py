@@ -59,6 +59,99 @@ def thunder_no_data(current_skyline_app, log=True):
     if not metrics_last_timestamp_dict:
         return namespaces_no_data_dict
 
+    # @added 20210720 - Branch #1444: thunder
+    # Remove any entries that have been specified
+    remove_namespace = None
+    remove_namespace_key = 'webapp.thunder.remove.namespace.metrics.last_timeseries_timestamp'
+    try:
+        remove_namespace = redis_conn_decoded.get(remove_namespace_key)
+    except Exception as e:
+        if not log:
+            current_skyline_app_logger = current_skyline_app + 'Log'
+            current_logger = logging.getLogger(current_skyline_app_logger)
+        current_logger.error(traceback.format_exc())
+        current_logger.error('error :: %s :: failed to get Redis key %s - %s' % (
+            function_str, remove_namespace_key, e))
+    if remove_namespace:
+        if log:
+            current_logger.info('%s :: for removal of no_data on namespace %s requested' % (
+                function_str, remove_namespace))
+        try:
+            redis_conn_decoded.delete(remove_namespace_key)
+        except Exception as e:
+            if not log:
+                current_skyline_app_logger = current_skyline_app + 'Log'
+                current_logger = logging.getLogger(current_skyline_app_logger)
+            current_logger.error(traceback.format_exc())
+            current_logger.error('error :: %s :: failed to delete Redis key %s - %s' % (
+                function_str, remove_namespace_key, e))
+        metrics_removed_from_key = []
+        for base_name in list(metrics_last_timestamp_dict.keys()):
+            if base_name.startswith(remove_namespace):
+                try:
+                    redis_conn_decoded.hdel(hash_key, base_name)
+                    metrics_removed_from_key.append(base_name)
+                except Exception as e:
+                    if not log:
+                        current_skyline_app_logger = current_skyline_app + 'Log'
+                        current_logger = logging.getLogger(current_skyline_app_logger)
+                    current_logger.error(traceback.format_exc())
+                    current_logger.error('error :: %s :: failed to delete %s from Redis hash key %s - %s' % (
+                        function_str, base_name, hash_key, e))
+        if log:
+            current_logger.info('%s :: %s metrics for namesapce %s removed from Redis hash key %s' % (
+                function_str, len(metrics_removed_from_key), remove_namespace,
+                hash_key))
+        if len(metrics_removed_from_key) > 0:
+            level = 'notice'
+            event_type = 'no_data'
+            message = '%s - %s - was removed from the no_data check' % (
+                level, remove_namespace)
+            status = 'removed'
+            thunder_event = {
+                'level': level,
+                'event_type': event_type,
+                'message': message,
+                'app': current_skyline_app,
+                'metric': None,
+                'source': current_skyline_app,
+                'timestamp': time(),
+                'expiry': 59,
+                'data': {
+                    'namespace': remove_namespace,
+                    'last_timestamp': 0,
+                    'recovered_after_seconds': 0,
+                    'total_recent_metrics': 0,
+                    'total_stale_metrics': 0,
+                    'total_metrics': len(metrics_removed_from_key),
+                    'status': status,
+                },
+            }
+            submitted = False
+            try:
+                submitted = thunder_send_event(current_skyline_app, thunder_event, log=True)
+            except Exception as e:
+                if not log:
+                    current_skyline_app_logger = current_skyline_app + 'Log'
+                    current_logger = logging.getLogger(current_skyline_app_logger)
+                current_logger.error('error :: %s :: error encountered with thunder_send_event - %s' % (
+                    function_str, e))
+            if submitted:
+                if log:
+                    current_logger.info('%s :: send thunder event for removal of no_data on namespace %s' % (
+                        function_str, remove_namespace))
+            # Update with the new data
+            metrics_last_timestamp_dict = {}
+            try:
+                metrics_last_timestamp_dict = redis_conn_decoded.hgetall(hash_key)
+            except Exception as e:
+                if not log:
+                    current_skyline_app_logger = current_skyline_app + 'Log'
+                    current_logger = logging.getLogger(current_skyline_app_logger)
+                current_logger.error(traceback.format_exc())
+                current_logger.error('error :: %s :: failed to get Redis hash key %s - %s' % (
+                    function_str, hash_key, e))
+
     metrics_last_timestamps = []
     parent_namespaces = []
     unique_base_names = list(metrics_last_timestamp_dict.keys())
