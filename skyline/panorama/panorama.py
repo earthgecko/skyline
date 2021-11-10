@@ -53,6 +53,10 @@ from database import (
     #                   Branch #3068: SNAB
     snab_table_meta)
 
+# @added 20211001 - Feature #4268: Redis hash key - panorama.metrics.latest_anomaly
+#                   Feature #4264: luminosity - cross_correlation_relationships
+from functions.panorama.update_metric_latest_anomaly import update_metric_latest_anomaly
+
 skyline_app = 'panorama'
 skyline_app_logger = '%sLog' % skyline_app
 logger = logging.getLogger(skyline_app_logger)
@@ -202,7 +206,7 @@ class Panorama(Thread):
         except:
             # @added 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
             # Log warning
-            logger.warn('warning :: parent or current process dead')
+            logger.warning('warning :: parent or current process dead')
             exit(0)
 
     """
@@ -210,12 +214,12 @@ class Panorama(Thread):
     for timeseries.
     """
 
-    def mysql_select(self, select):
+    def mysql_select(self, select_stmt):
         """
         Select data from mysql database
 
-        :param select: the select string
-        :type select: str
+        :param select_stmt: the select string
+        :type select_stmt: str
         :return: tuple
         :rtype: tuple, boolean
 
@@ -251,9 +255,9 @@ class Panorama(Thread):
         if cnx:
             try:
                 if ENABLE_PANORAMA_DEBUG:
-                    logger.info('debug :: %s' % (str(select)))
+                    logger.info('debug :: %s' % (str(select_stmt)))
                 cursor = cnx.cursor()
-                query = ('%s' % (str(select)))
+                query = ('%s' % (str(select_stmt)))
                 cursor.execute(query)
                 result = cursor.fetchall()
                 cursor.close()
@@ -261,7 +265,7 @@ class Panorama(Thread):
                 return result
             except mysql.connector.Error as err:
                 logger.error('error :: mysql error - %s' % str(err))
-                logger.error('error :: failed to query database - %s' % (str(select)))
+                logger.error('error :: failed to query database - %s' % (str(select_stmt)))
                 try:
                     cnx.close()
                     return False
@@ -1165,8 +1169,8 @@ class Panorama(Thread):
                             runtime=float(analysis_run_time),
                             snab_timestamp=int(added_at))
                     result = connection.execute(ins)
-                    connection.close()
                     new_snab_id = result.inserted_primary_key[0]
+                    connection.close()
                     logger.info('update_snab :: new snab id: %s' % str(new_snab_id))
                     remove_item = True
                 except:
@@ -1917,6 +1921,16 @@ class Panorama(Thread):
                 metric, metric_timestamp))
             fail_check(skyline_app, metric_failed_check_dir, str(metric_check_file))
             return False
+
+        # @added 20211001 - Feature #4268: Redis hash key - panorama.metrics.latest_anomaly
+        #                   Feature #4264: luminosity - cross_correlation_relationships
+        if anomaly_id:
+            latest_anomaly = {}
+            try:
+                latest_anomaly = update_metric_latest_anomaly(skyline_app, metric, metric_id)
+            except Exception as err:
+                logger.error(traceback.format_exc())
+                logger.error('error :: update_metric_latest_anomaly failed - %s' % str(err))
 
         # @added 20200929 - Task #3748: POC SNAB
         #                   Branch #3068: SNAB
