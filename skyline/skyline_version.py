@@ -6,9 +6,14 @@ version info
 # __version_info__ = ('1', '1', '0')
 # @modified 20210614 - Branch #1444: thunder
 # __version_info__ = ('2', '1', '0')
-__version_info__ = ('2', '1', '0')
+# __version_info__ = ('2', '1', '0')
+# @modified 20211109 - Bug #4308: matrixprofile - fN on big drops
+# __version_info__ = ('2', '1', '0-4264')
+# __branch__ = 'SNAB'
+# __version_tag__ = 'cloudburst'
+__version_info__ = ('2', '1', '0-4309')
 __branch__ = 'SNAB'
-__version_tag__ = 'thunder'
+__version_tag__ = 'trigger_history_override'
 
 __version__ = '.'.join(__version_info__)
 # @modified 20190117 - release #2748: v1.2.11

@@ -465,6 +465,17 @@ def validate_settings_variables(current_skyline_app):
         print('error :: the SKYLINE_FEEDBACK_NAMESPACES list in settings.py - %s' % e)
         invalid_variables = True
 
+    try:
+        if not isinstance(settings.DO_NOT_SKIP_SKYLINE_FEEDBACK_NAMESPACES, list):
+            print('error :: DO_NOT_SKIP_SKYLINE_FEEDBACK_NAMESPACES in settings.py is not a list')
+            invalid_variables = True
+    except AttributeError:
+        print('error :: DO_NOT_SKIP_SKYLINE_FEEDBACK_NAMESPACES is not defined in settings.py')
+        invalid_variables = True
+    except Exception as e:
+        print('error :: the DO_NOT_SKIP_SKYLINE_FEEDBACK_NAMESPACES list in settings.py - %s' % e)
+        invalid_variables = True
+
     CRUCIBLE_CHECK_PATH = None
     try:
         if not isinstance(settings.CRUCIBLE_CHECK_PATH, str):
@@ -2065,6 +2076,103 @@ def validate_settings_variables(current_skyline_app):
         invalid_variables = True
     except Exception as e:
         print('error :: SPARSELY_POPULATED_PERCENTAGE is not defined in settings.py - %s' % e)
+        invalid_variables = True
+
+    # @added 20210724 - Feature #4196: functions.aws.send_sms
+    try:
+        if not isinstance(settings.AWS_OPTS, dict):
+            print('error :: AWS_OPTS in settings.py is not a dict')
+            invalid_variables = True
+    except AttributeError:
+        print('error :: AWS_OPTS is not defined in settings.py')
+        invalid_variables = True
+    except Exception as e:
+        print('error :: AWS_OPTS is not defined in settings.py - %s' % e)
+        invalid_variables = True
+    try:
+        if not isinstance(settings.AWS_SNS_SMS_ALERTS_ENABLED, bool):
+            print('error :: AWS_SNS_SMS_ALERTS_ENABLED in settings.py is not a bool')
+            invalid_variables = True
+    except AttributeError:
+        print('error :: AWS_SNS_SMS_ALERTS_ENABLED is not defined in settings.py')
+        invalid_variables = True
+    except Exception as e:
+        print('error :: AWS_SNS_SMS_ALERTS_ENABLED is not defined in settings.py - %s' % e)
+        invalid_variables = True
+    try:
+        if not isinstance(settings.SMS_ALERT_OPTS, dict):
+            print('error :: SMS_ALERT_OPTS in settings.py is not a dict')
+            invalid_variables = True
+    except AttributeError:
+        print('error :: SMS_ALERT_OPTS is not defined in settings.py')
+        invalid_variables = True
+    except Exception as e:
+        print('error :: SMS_ALERT_OPTS is not defined in settings.py - %s' % e)
+        invalid_variables = True
+
+    # @added 20210730 - Feature #4164: luminosity - cloudbursts
+    try:
+        if not isinstance(settings.LUMINOSITY_CLOUDBURST_ENABLED, bool):
+            print('error :: LUMINOSITY_CLOUDBURST_ENABLED in settings.py is not a boolean')
+            invalid_variables = True
+    except AttributeError:
+        print('error :: LUMINOSITY_CLOUDBURST_ENABLED is not defined in settings.py')
+        invalid_variables = True
+    except Exception as e:
+        print('error :: LUMINOSITY_CLOUDBURST_ENABLED is not defined in settings.py - %s' % e)
+        invalid_variables = True
+
+    # @added 20210930 - Feature #4264: luminosity - cross_correlation_relationships
+    try:
+        if not isinstance(settings.LUMINOSITY_RELATED_METRICS, bool):
+            print('error :: LUMINOSITY_RELATED_METRICS in settings.py is not a boolean')
+            invalid_variables = True
+    except AttributeError:
+        print('error :: LUMINOSITY_RELATED_METRICS is not defined in settings.py')
+        invalid_variables = True
+    except Exception as e:
+        print('error :: LUMINOSITY_RELATED_METRICS is not defined in settings.py - %s' % e)
+        invalid_variables = True
+    try:
+        if not isinstance(settings.LUMINOSITY_RELATED_METRICS_MAX_5MIN_LOADAVG, float):
+            print('error :: LUMINOSITY_RELATED_METRICS_MAX_5MIN_LOADAVG in settings.py is not a float')
+            invalid_variables = True
+    except AttributeError:
+        print('error :: LUMINOSITY_RELATED_METRICS_MAX_5MIN_LOADAVG is not defined in settings.py')
+        invalid_variables = True
+    except Exception as e:
+        print('error :: LUMINOSITY_RELATED_METRICS_MAX_5MIN_LOADAVG is not defined in settings.py - %s' % e)
+        invalid_variables = True
+    try:
+        if not isinstance(settings.LUMINOSITY_RELATED_METRICS_MIN_CORRELATION_COUNT_PERCENTILE, float):
+            print('error :: LUMINOSITY_RELATED_METRICS_MIN_CORRELATION_COUNT_PERCENTILE in settings.py is not a float')
+            invalid_variables = True
+    except AttributeError:
+        print('error :: LUMINOSITY_RELATED_METRICS_MIN_CORRELATION_COUNT_PERCENTILE is not defined in settings.py')
+        invalid_variables = True
+    except Exception as e:
+        print('error :: LUMINOSITY_RELATED_METRICS_MIN_CORRELATION_COUNT_PERCENTILE is not defined in settings.py - %s' % e)
+        invalid_variables = True
+    try:
+        if not isinstance(settings.LUMINOSITY_RELATED_METRICS_MINIMUM_CORRELATIONS_COUNT, int):
+            print('error :: LUMINOSITY_RELATED_METRICS_MINIMUM_CORRELATIONS_COUNT in settings.py is not an int')
+            invalid_variables = True
+    except AttributeError:
+        print('error :: LUMINOSITY_RELATED_METRICS_MINIMUM_CORRELATIONS_COUNT is not defined in settings.py')
+        invalid_variables = True
+    except Exception as e:
+        print('error :: LUMINOSITY_RELATED_METRICS_MINIMUM_CORRELATIONS_COUNT is not defined in settings.py - %s' % e)
+        invalid_variables = True
+
+    try:
+        if not isinstance(settings.PROMETHEUS_SETTINGS, dict):
+            print('error :: PROMETHEUS_SETTINGS in settings.py is not a dict')
+            invalid_variables = True
+    except AttributeError:
+        print('error :: PROMETHEUS_SETTINGS is not defined in settings.py')
+        invalid_variables = True
+    except Exception as e:
+        print('error :: PROMETHEUS_SETTINGS is not defined in settings.py - %s' % e)
         invalid_variables = True
 
     if current_skyline_app == 'test_settings':
