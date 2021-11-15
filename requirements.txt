@@ -64,3 +64,4 @@ timeout-decorator==0.4.1
 matrixprofile==1.1.4
 git+git://github.com/earthgecko/adtk@895c517#egg=adtk
 mass-ts==0.1.4
+boto3==1.20.6

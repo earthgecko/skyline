@@ -706,3 +706,6 @@ git+git://github.com/earthgecko/adtk@895c517#egg=adtk
 # @added 20210411 - Feature #4014: Ionosphere - inference
 #                   Branch #3590: inference
 mass-ts==0.1.4
+
+# @added 20211115 - Feature #4196: functions.aws.send_sms
+boto3==1.20.6
