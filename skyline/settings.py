@@ -1561,11 +1561,30 @@ analyzer_batch to fake Mirage analysed for historical data.  analyzer_batch
 roomba will use this setting for the euthanize older than value if the metric
 name is in a metric namespace found in a list.
 
-- **Tuple example**::
+- **List example**::
 
     ROOMBA_BATCH_METRICS_CUSTOM_DURATIONS = [
         ['test.app6.requests.10minutely', 604800],
     ]
+
+"""
+
+BATCH_METRICS_CUSTOM_FULL_DURATIONS = {}
+"""
+:var BATCH_METRICS_CUSTOM_FULL_DURATIONS: This is ONLY applicable to metrics
+    declared in :mod:`settings.ROOMBA_BATCH_METRICS_CUSTOM_DURATIONS` that are
+    being back filled.  Metrics that are being backfilled and not managed by
+    roomba, but managed by analyzer_batch may have a very long custom duration
+    period, but may have a shorter FULL_DURATION period.  In order to backfill
+    and analyse at the correct full duration for the metric, the metric full
+    duration for analysis (not for analyzer batch roomba) can be declared here.
+:vartype BATCH_METRICS_CUSTOM_FULL_DURATIONS: dict
+
+- **dict example**::
+
+    BATCH_METRICS_CUSTOM_FULL_DURATIONS = {
+        'test.app6.requests.10minutely': 259200,
+    }
 
 """
 
