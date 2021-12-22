@@ -8,6 +8,8 @@ Requires - Panorama to be enabled and running.  It is enabled and configured
 via the ``LUMINOSITY_`` variables in ``settings.py``.
 
 Luminosity handles correlation and classification of anomalies and metrics.
+Luminosity also learns what metrics are related to each other using all the
+previous discovered correlations data for metrics.
 
 Luminosity correlation
 ----------------------
@@ -109,6 +111,49 @@ luminol.correlate is based on http://paulbourke.net/miscellaneous/correlate/
 and for the purposes of understanding the luminol.correlate, a pure Python
 implementation of the Paul Bourke method was implemented and verified with the
 results of the luminol.correlate.
+
+Luminosity related_metrics
+--------------------------
+
+Luminosity can also be enabled to analyse what metrics relate to what other
+metrics.  The resulting metric_group data can then be used to for further
+analysis and information/categorisation for the user.
+
+It is important to understand that metrics are only related to other metrics
+when there is **sufficient correlations** and **meaningful** data to classify
+the metrics as related. This point must be stressed to ensure that the relevant
+`settings.LUMINOSITY_RELATED_METRICS_*` are set to realistic values.  The
+cross correlations algorithm used by Luminosity in a large, high frequency
+metric population finds a lot of correlations which are often of a coincidental
+nature and of numerical significance only, there is no contextual aspect.  The
+related_metrics analysis is therefore designed to use strict configurations to
+terms of settings ensuring that only the high confidence metrics are grouped
+together.
+
+This means metric groups take time for the system to learn because there needs
+to be a history of data to work with.  This grows over time.  It may be possible
+to speed up that process with the addition of something like JumpStarter
+(https://github.com/NetManAIOps/JumpStarter) which looks to be a promising
+new method of multivariate time series anomaly detection approach based on
+Compressed Sensing (CS), which would at least decrease the time learn and live.
+
+For now it is based on Skyline's own history and even when other methods are
+introduced, these Skyline metric groups of related_metrics is a dynamic and
+fully relevant source of truth based on past observations, allowing Skyline to
+infer what metrics are related.  Even if the metric groups are not 100%
+representative **all** the metrics that have been related to a metric, they are
+descriptive enough to represent a large proportion of the most strongly related
+metrics (enough so to say "these" metrics are related and create relevant
+multivariate groups).
+
+The related_metrics process runs as a low priority process and
+creates and updates metric_group data structures as and when the Skyline
+instance is not heavily loaded.  The features of these metric groups are
+stored in the database as avg_coefficient, shifted_counts and
+avg_shifted_coefficient values.  These metric groups are **dynamic** and can and
+do change as the system and it metric population run over time.  There is also
+an unordered list (not sorted by any feature) of metrics in each metric_group
+stored in Redis.
 
 Running Luminosity on multiple, distributed Skyline instances
 -------------------------------------------------------------
