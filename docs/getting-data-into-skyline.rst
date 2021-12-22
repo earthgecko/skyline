@@ -12,7 +12,7 @@ things in Skyline will start to become less predictable, in terms of the
 functioning of certain algorithms which expect very recent datapoints.
 Time drift does decrease the accuracy and effectiveness of some
 algorithms. In terms of machine related metrics, normal production grade
-time snychronisation will suffice.
+time synchronisation will suffice.
 
 Secondly a note on the reliability of metric data
 =================================================
@@ -59,11 +59,11 @@ relay-rules.conf:
 
     [all]
     pattern = .*
-    destinations = 127.0.0.1:2014, <YOUR_SKYLINE_HOST>:2024
+    destinations = 127.0.0.1:2004, <YOUR_SKYLINE_HOST>:2024
 
     [default]
     default = true
-    destinations = 127.0.0.1:2014:a, <YOUR_SKYLINE_HOST>:2024:a
+    destinations = 127.0.0.1:2004:a, <YOUR_SKYLINE_HOST>:2024:a
 
 carbon.conf:
 
@@ -71,22 +71,26 @@ carbon.conf:
 
     [relay]
     RELAY_METHOD = rules
-    DESTINATIONS = 127.0.0.1:2014, <YOUR_SKYLINE_HOST>:2024
+    DESTINATIONS = 127.0.0.1:2004, <YOUR_SKYLINE_HOST>:2024
     USE_FLOW_CONTROL = False
     MAX_QUEUE_SIZE = 5000
 
 A quick note about the carbon agents: Carbon-relay is meant to be the
 primary metrics listener. The 127.0.0.1 destinations in the settings
-tell it to relay all metrics locally, to a carbon-cache instance that is
-presumably running. If you are currently running carbon-cache as your
-primary listener, you will need to switch it so carbon-relay is primary
-listener.
+tell it to relay all metrics locally to a carbon-cache instance that is
+presumably running **and** the Skyline host. If you are currently running
+carbon-cache as your primary listener, you will need to switch it so
+carbon-relay is primary listener and ensure that your metrics are being sent to
+the Graphite carbon-relay instance and port and **not** directly to the
+carbon-cache instance and port because carbon-cache **does not** forward them to
+Skyline.  This will mean reconfiguring your collector (e.g. telegraf, sensu, etc)
+to send to the carbon-relay instance and port.
 
 Note the small MAX\_QUEUE\_SIZE - in older versions of Graphite, issues
 can arise when a relayed host goes down. The queue will fill up, and
 then when the relayed host starts listening again, Carbon will attempt
 to flush the entire queue. This can block the event loop and crash
-Carbon. A small queue size prevents this behavior.
+Carbon. A small queue size prevents this behaviour.
 
 See `the
 docs <http://graphite.readthedocs.org/en/latest/carbon-daemons.html>`__
@@ -137,7 +141,7 @@ points to your new listener.
 =============================
 
 Once you get real data flowing through your system, the Analyzer will be
-able start analyzing for anomalies.
+able start analysing for anomalies.
 
 .. note:: Do not expect to see anomalies or anything in the Webapp immediately
   after starting the Skyline services. Realistically :mod:`settings.FULL_DURATION`
