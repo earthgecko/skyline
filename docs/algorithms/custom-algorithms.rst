@@ -71,6 +71,7 @@ following **example**:
             'run_3sigma_algorithms': True,
             'run_before_3sigma': True,
             'run_only_if_consensus': False,
+            'trigger_history_override': 0,
             'use_with': ['analyzer', 'analyzer_batch', 'mirage', 'crucible'],
             'debug_logging': False,
         },
@@ -89,6 +90,7 @@ following **example**:
             'run_3sigma_algorithms': True,
             'run_before_3sigma': True,
             'run_only_if_consensus': False,
+            'trigger_history_override': 0,
             # This does not run on analyzer as it is weekly data
             'use_with': ['mirage', 'crucible'],
             'debug_logging': False,
@@ -104,10 +106,11 @@ following **example**:
             'run_3sigma_algorithms': False,
             'run_before_3sigma': True,
             'run_only_if_consensus': False,
+            'trigger_history_override': 0,
             'use_with': ['analyzer', 'crucible'],
             'debug_logging': True,
         },
-        'matrixprofile': {
+        'skyline_matrixprofile': {
             'namespaces': ['*'],
             'algorithm_source': '/opt/skyline/github/skyline/skyline/custom_algorithms/skyline_matrixprofile.py',
             'algorithm_parameters': {},
@@ -117,7 +120,8 @@ following **example**:
             'run_3sigma_algorithms': False,
             'run_before_3sigma': True,
             'run_only_if_consensus': False,
-            'use_with': ['snab'],
+            'trigger_history_override': 4,
+            'use_with': ['mirage'],
             'debug_logging': False,
         },
     }
@@ -170,6 +174,14 @@ requirements.
   three-sigma algorithms, e.g. with the parameter ``run_before_3sigma: False``
   Currently this parameter only uses the CONSENSUS or MIRAGE_CONSENSUS setting
   and does not apply the consensus parameter above.
+- ``trigger_history_override``: an int defining whether override the outcome of
+  the custom algorithm if the three-sigma algorithms have triggered this many
+  times in a row.  Setting this to 0 disables the override and the number of
+  times the three-sigma algorithms have triggered is not checked.  If this value
+  is set to 4 then even if the custom algorithm evaluates the metric as not
+  anomalous, if the metric has been determined to be anomalous by the three-sigma
+  analysis 4 times in a row, the custom algorithm result will be overridden and
+  the metric will be classified as anomalous.
 - ``use_with`` - a list of the Skyline apps that should apply the custom
   algorithm.  All the apps can be declared but they will only apply the custom
   algorithm **if** they actually handle the metric.  Simply declaring them in

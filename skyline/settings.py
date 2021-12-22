@@ -858,6 +858,7 @@ CUSTOM_ALGORITHMS = {}
             'run_3sigma_algorithms': True,
             'run_before_3sigma': True,
             'run_only_if_consensus': False,
+            'trigger_history_override': 0,
             'use_with': ['analyzer', 'analyzer_batch', 'mirage', 'crucible'],
             'debug_logging': False,
         },
@@ -876,6 +877,7 @@ CUSTOM_ALGORITHMS = {}
             'run_3sigma_algorithms': True,
             'run_before_3sigma': True,
             'run_only_if_consensus': False,
+            'trigger_history_override': 0,
             # This does not run on analyzer as it is weekly data
             'use_with': ['mirage', 'crucible'],
             'debug_logging': False,
@@ -891,6 +893,7 @@ CUSTOM_ALGORITHMS = {}
             'run_3sigma_algorithms': False,
             'run_before_3sigma': True,
             'run_only_if_consensus': False,
+            'trigger_history_override': 0,
             'use_with': ['analyzer', 'crucible'],
             'debug_logging': True,
         },
@@ -947,7 +950,7 @@ CUSTOM_ALGORITHMS = {}
     and does not apply the consensus parameter above.
 :param trigger_history_override: If the 3-sigma algorithms have reached
     CONSENSUS this many times in a row, override a custom algorithm result of
-    not anomalous. Optional. int
+    not anomalous. int
 :param use_with: a list of Skyline apps which should apply the algorithm if
     they handle the metric, it is only applied if the app handles the metric,
     generally set this to ``['analyzer', 'analyzer_batch', 'mirage', 'crucible']``
