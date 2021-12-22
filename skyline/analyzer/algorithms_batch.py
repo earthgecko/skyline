@@ -37,6 +37,9 @@ try:
     from settings import DEBUG_CUSTOM_ALGORITHMS
 except:
     DEBUG_CUSTOM_ALGORITHMS = False
+
+run_custom_algorithm_on_timeseries = None
+get_custom_algorithms_to_run = None
 if CUSTOM_ALGORITHMS:
     try:
         from custom_algorithms_to_run import get_custom_algorithms_to_run
@@ -61,6 +64,13 @@ if ROOMBA_DO_NOT_PROCESS_BATCH_METRICS:
         from settings import ROOMBA_BATCH_METRICS_CUSTOM_DURATIONS
     except:
         ROOMBA_BATCH_METRICS_CUSTOM_DURATIONS = None
+
+# @added 20211127 - Feature #4328: BATCH_METRICS_CUSTOM_FULL_DURATIONS
+BATCH_METRICS_CUSTOM_FULL_DURATIONS = {}
+try:
+    from settings import BATCH_METRICS_CUSTOM_FULL_DURATIONS
+except:
+    BATCH_METRICS_CUSTOM_FULL_DURATIONS = {}
 
 skyline_app = 'analyzer_batch'
 skyline_app_logger = '%sLog' % skyline_app
@@ -206,7 +216,16 @@ def first_hour_average(timeseries, use_full_duration):
         # @modified 20200817 - Feature #3684: ROOMBA_BATCH_METRICS_CUSTOM_DURATIONS
         # Use use_full_duration
         # last_hour_threshold = time() - (FULL_DURATION - 3600)
-        last_hour_threshold = time() - (use_full_duration - 3600)
+        # @modified 20211127 - Feature #4328: BATCH_METRICS_CUSTOM_FULL_DURATIONS
+        # Calculate the "equivalent" of the last hour and handle daily frequency
+        # data
+        # last_hour_threshold = time() - (use_full_duration - 3600)
+        last_hour_threshold = timeseries[-1][0] - (use_full_duration - 3600)
+        # Handle daily data
+        resolution = (timeseries[-1][0] - timeseries[-2][0])
+        if resolution > 80000 and resolution < 90000:
+            last_hour_threshold = timeseries[-1][0] - ((resolution * 7) - resolution)
+
         series = pandas.Series([x[1] for x in timeseries if x[0] < last_hour_threshold])
         mean = (series).mean()
         stdDev = (series).std()
@@ -401,7 +420,7 @@ def histogram_bins(timeseries, use_full_duration):
                         return True
                 # Is it in the current bin?
                 elif t >= bins[index] and t < bins[index + 1]:
-                        return True
+                    return True
 
         return False
     except:
@@ -420,8 +439,19 @@ def ks_test(timeseries, use_full_duration):
     """
 
     try:
-        hour_ago = time() - 3600
-        ten_minutes_ago = time() - 600
+
+        # @modified 20211127 - Feature #4328: BATCH_METRICS_CUSTOM_FULL_DURATIONS
+        # Calculate the "equivalent" of hour and handle daily frequency data
+        # hour_ago = time() - 3600
+        # ten_minutes_ago = time() - 600
+        hour_ago = timeseries[-1][0] - 3600
+        ten_minutes_ago = timeseries[-1][0] - 600
+        # Handle daily data
+        resolution = (timeseries[-1][0] - timeseries[-2][0])
+        if resolution > 80000 and resolution < 90000:
+            hour_ago = timeseries[-1][0] - (86400 * 90)
+            ten_minutes_ago = timeseries[-1][0] - (86400 * 30)
+
         # @modified 20210420 - Support #4026: Change from scipy array to numpy array
         # Deprecation of scipy.array
         # reference = scipy.array([x[1] for x in timeseries if x[0] >= hour_ago and x[0] < ten_minutes_ago])
@@ -622,6 +652,11 @@ def run_selected_batch_algorithm(timeseries, metric_name, run_negatives_present)
     run_3sigma_algorithms = True
     run_3sigma_algorithms_overridden_by = []
     custom_algorithm = None
+
+    # @added 20211125 - Feature #3566: custom_algorithms
+    custom_algorithms_run = []
+    custom_algorithms_run_results = []
+
     # @modified 20200817 - Bug #3652: Handle multiple metrics in base_name conversion
     # base_name = metric_name.replace(FULL_NAMESPACE, '', 1)
     if metric_name.startswith(FULL_NAMESPACE):
@@ -648,6 +683,19 @@ def run_selected_batch_algorithm(timeseries, metric_name, run_negatives_present)
                     debug_logging = False
                 if DEBUG_CUSTOM_ALGORITHMS:
                     debug_logging = True
+
+                # @added 20211125 - Feature #3566: custom_algorithms
+                run_before_3sigma = False
+                try:
+                    run_before_3sigma = custom_algorithms_to_run[custom_algorithm]['run_before_3sigma']
+                except:
+                    run_before_3sigma = False
+                if not run_before_3sigma:
+                    if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
+                        logger.debug('debug :: algorithms :: not running custom algorithm %s before 3-sigma' % (
+                            str(algorithm)))
+                    continue
+
                 if send_algorithm_run_metrics:
                     algorithm_count_file = '%s%s.count' % (algorithm_tmp_file_prefix, algorithm)
                     algorithm_timings_file = '%s%s.timings' % (algorithm_tmp_file_prefix, algorithm)
@@ -661,9 +709,11 @@ def run_selected_batch_algorithm(timeseries, metric_name, run_negatives_present)
                     logger.debug('debug :: algorithms :: running custom algorithm %s on %s' % (
                         str(algorithm), str(base_name)))
                     start_debug_timer = timer()
-                run_custom_algorithm_on_timeseries = None
+                # @modified 20211124 - linting
+                # run_custom_algorithm_on_timeseries = None
                 try:
-                    from custom_algorithms import run_custom_algorithm_on_timeseries
+                    # @modified 20211124 - linting
+                    # from custom_algorithms import run_custom_algorithm_on_timeseries
                     if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
                         logger.debug('debug :: algorithms :: loaded run_custom_algorithm_on_timeseries')
                 except:
@@ -673,12 +723,18 @@ def run_selected_batch_algorithm(timeseries, metric_name, run_negatives_present)
                 result = None
                 anomalyScore = None
                 if run_custom_algorithm_on_timeseries:
+
+                    # @added 20211125 - Feature #3566: custom_algorithms
+                    custom_algorithms_run.append(custom_algorithm)
+
                     try:
                         result, anomalyScore = run_custom_algorithm_on_timeseries(skyline_app, getpid(), base_name, timeseries, custom_algorithm, custom_algorithms_to_run[custom_algorithm], DEBUG_CUSTOM_ALGORITHMS)
                         algorithm_result = [result]
                         if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
                             logger.debug('debug :: algorithms :: run_custom_algorithm_on_timeseries run with result - %s, anomalyScore - %s' % (
                                 str(result), str(anomalyScore)))
+                        # @added 20211125 - Feature #3566: custom_algorithms
+                        custom_algorithms_run_results.append(result)
                     except:
                         if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
                             logger.error(traceback.format_exc())
@@ -686,6 +742,8 @@ def run_selected_batch_algorithm(timeseries, metric_name, run_negatives_present)
                                 custom_algorithm, base_name))
                         result = None
                         algorithm_result = [None]
+                        # @added 20211125 - Feature #3566: custom_algorithms
+                        custom_algorithms_run_results.append(False)
                 else:
                     if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
                         logger.error('error :: debug :: algorithms :: run_custom_algorithm_on_timeseries was not loaded so was not run')
@@ -773,7 +831,27 @@ def run_selected_batch_algorithm(timeseries, metric_name, run_negatives_present)
         for metric_namespace, custom_full_duration in ROOMBA_BATCH_METRICS_CUSTOM_DURATIONS:
             if metric_namespace in base_name:
                 use_full_duration = custom_full_duration
+        # @added 20211127 - Feature #4328: BATCH_METRICS_CUSTOM_FULL_DURATIONS
+        if BATCH_METRICS_CUSTOM_FULL_DURATIONS:
+            for metric_namespace in list(BATCH_METRICS_CUSTOM_FULL_DURATIONS.keys()):
+                if metric_namespace in base_name:
+                    use_full_duration = BATCH_METRICS_CUSTOM_FULL_DURATIONS[metric_namespace]
+
     detect_drop_off_cliff_trigger = False
+
+    # @added 20211125 - Feature #3566: custom_algorithms
+    # If custom_algorithms were run and did not trigger reset the consensus
+    if consensus_possible and run_3sigma_algorithms:
+        if len(custom_algorithms_run) > 0:
+            none_count = custom_algorithms_run_results.count(None)
+            false_count = custom_algorithms_run_results.count(False)
+            not_anomalous_count = none_count + false_count
+            if len(custom_algorithms_run) == not_anomalous_count:
+                custom_consensus_override = False
+                custom_consensus = int(CONSENSUS)
+                final_ensemble = []
+                if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
+                    logger.debug('debug :: algorithms :: reset final_ensemble, custom_consensus and custom_consensus_override after custom_algorithms all calcuated False')
 
     for algorithm in ALGORITHMS:
         # @modified 20200607 - Feature #3566: custom_algorithms
@@ -785,7 +863,6 @@ def run_selected_batch_algorithm(timeseries, metric_name, run_negatives_present)
             if send_algorithm_run_metrics:
                 algorithm_count_file = '%s%s.count' % (algorithm_tmp_file_prefix, algorithm)
                 algorithm_timings_file = '%s%s.timings' % (algorithm_tmp_file_prefix, algorithm)
-
             run_algorithm = []
             run_algorithm.append(algorithm)
             number_of_algorithms_run += 1
@@ -799,6 +876,9 @@ def run_selected_batch_algorithm(timeseries, metric_name, run_negatives_present)
                 # Allow for custom durations on namespaces
                 # algorithm_result = [globals()[test_algorithm](timeseries) for test_algorithm in run_algorithm]
                 algorithm_result = [globals()[test_algorithm](timeseries, use_full_duration) for test_algorithm in run_algorithm]
+                if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
+                    logger.debug('debug :: algorithms :: ran 3-sigma algorithms on %s with algorithm_result: %s' % (
+                        str(base_name), str(algorithm_result)))
             except:
                 # logger.error('%s failed' % (algorithm))
                 algorithm_result = [None]

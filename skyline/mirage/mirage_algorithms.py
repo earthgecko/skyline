@@ -190,6 +190,13 @@ def first_hour_average(timeseries, second_order_resolution_seconds):
     """
     try:
         last_hour_threshold = time() - (second_order_resolution_seconds - 3600)
+        # @modified 20211127 - Feature #4328: BATCH_METRICS_CUSTOM_FULL_DURATIONS
+        # Calculate the "equivalent" of hour and handle daily frequency data
+        # Handle daily data
+        resolution = (timeseries[-1][0] - timeseries[-2][0])
+        if resolution > 80000 and resolution < 90000:
+            last_hour_threshold = timeseries[-1][0] - ((resolution * 7) - resolution)
+
         series = pandas.Series([x[1] for x in timeseries if x[0] < last_hour_threshold])
         mean = (series).mean()
         stdDev = (series).std()
@@ -369,7 +376,7 @@ def histogram_bins(timeseries, second_order_resolution_seconds):
                         return True
                 # Is it in the current bin?
                 elif t >= bins[index] and t < bins[index + 1]:
-                        return True
+                    return True
 
         return False
     except:
@@ -390,6 +397,14 @@ def ks_test(timeseries, second_order_resolution_seconds):
     try:
         hour_ago = time() - 3600
         ten_minutes_ago = time() - 600
+
+        # @modified 20211127 - Feature #4328: BATCH_METRICS_CUSTOM_FULL_DURATIONS
+        # Calculate the "equivalent" of hour and handle daily frequency data
+        resolution = (timeseries[-1][0] - timeseries[-2][0])
+        if resolution > 80000 and resolution < 90000:
+            hour_ago = timeseries[-1][0] - (86400 * 90)
+            ten_minutes_ago = timeseries[-1][0] - (86400 * 30)
+
         # @modified 20210420 - Support #4026: Change from scipy array to numpy array
         # Deprecation of scipy.array
         # reference = scipy.array([x[1] for x in timeseries if x[0] >= hour_ago and x[0] < ten_minutes_ago])
@@ -585,6 +600,10 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
     final_after_custom_ensemble = []
     custom_algorithm_not_anomalous = False
 
+    # @added 20211125 - Feature #3566: custom_algorithms
+    custom_algorithms_run = []
+    custom_algorithms_run_results = []
+
     if CUSTOM_ALGORITHMS:
         base_name = metric_name.replace(FULL_NAMESPACE, '', 1)
         custom_algorithms_to_run = {}
@@ -592,7 +611,7 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
             custom_algorithms_to_run = get_custom_algorithms_to_run(skyline_app, base_name, CUSTOM_ALGORITHMS, DEBUG_CUSTOM_ALGORITHMS)
             if DEBUG_CUSTOM_ALGORITHMS:
                 if custom_algorithms_to_run:
-                    logger.debug('algorithms :: debug :: custom algorithms ARE RUN on %s' % (str(base_name)))
+                    logger.debug('mirage_algorithms :: debug :: custom algorithms ARE RUN on %s' % (str(base_name)))
         except:
             logger.error('error :: get_custom_algorithms_to_run :: %s' % traceback.format_exc())
             custom_algorithms_to_run = {}
@@ -645,13 +664,25 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
                     logger.error('error :: mirage_algorithms :: failed to load run_custom_algorithm_on_timeseries')
             result = None
             anomalyScore = None
+
+            use_debug_logging = False
+            if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
+                use_debug_logging = True
+
             if run_custom_algorithm_on_timeseries:
+
+                # @added 20211125 - Feature #3566: custom_algorithms
+                custom_algorithms_run.append(custom_algorithm)
+
                 try:
-                    result, anomalyScore = run_custom_algorithm_on_timeseries(skyline_app, getpid(), base_name, timeseries, custom_algorithm, custom_algorithms_to_run[custom_algorithm], DEBUG_CUSTOM_ALGORITHMS)
+                    result, anomalyScore = run_custom_algorithm_on_timeseries(skyline_app, getpid(), base_name, timeseries, custom_algorithm, custom_algorithms_to_run[custom_algorithm], use_debug_logging)
                     algorithm_result = [result]
                     if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
                         logger.debug('debug :: mirage_algorithms :: run_custom_algorithm_on_timeseries run with result - %s, anomalyScore - %s' % (
                             str(result), str(anomalyScore)))
+                    # @added 20211125 - Feature #3566: custom_algorithms
+                    custom_algorithms_run_results.append(result)
+
                 except:
                     if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
                         logger.error(traceback.format_exc())
@@ -659,6 +690,9 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
                             custom_algorithm, base_name))
                     result = None
                     algorithm_result = [None]
+                    # @added 20211125 - Feature #3566: custom_algorithms
+                    custom_algorithms_run_results.append(False)
+
             else:
                 if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
                     logger.error('error :: debug :: mirage_algorithms :: run_custom_algorithm_on_timeseries was not loaded so was not run')
@@ -715,15 +749,15 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
                     algorithms_allowed_in_consensus = []
                 if custom_consensus == 1:
                     custom_consensus_override = True
-                    logger.info('algorithms :: overidding the CONSENSUS as custom algorithm %s overides on %s' % (
+                    logger.info('mirage_algorithms :: overidding the CONSENSUS as custom algorithm %s overides on %s' % (
                         str(custom_algorithm), str(base_name)))
                 # TODO - figure out how to handle consensus overrides if
                 #        multiple custom algorithms are used
     if DEBUG_CUSTOM_ALGORITHMS:
         if not run_3sigma_algorithms:
-            logger.debug('algorithms :: not running 3 sigma algorithms')
+            logger.debug('mirage_algorithms :: not running 3 sigma algorithms')
         if len(run_3sigma_algorithms_overridden_by) > 0:
-            logger.debug('algorithms :: run_3sigma_algorithms overridden by %s' % (
+            logger.debug('mirage_algorithms :: run_3sigma_algorithms overridden by %s' % (
                 str(run_3sigma_algorithms_overridden_by)))
 
     # @added 20200607 - Feature #3566: custom_algorithms
@@ -731,13 +765,28 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
     # ensemble = []
     ensemble = final_custom_ensemble
 
+    # @added 20211125 - Feature #3566: custom_algorithms
+    # If custom_algorithms were run and did not trigger reset the consensus
+    if run_3sigma_algorithms:
+        if len(custom_algorithms_run) > 0:
+            none_count = custom_algorithms_run_results.count(None)
+            false_count = custom_algorithms_run_results.count(False)
+            not_anomalous_count = none_count + false_count
+            if len(custom_algorithms_run) == not_anomalous_count:
+                custom_consensus_override = False
+                custom_consensus = int(MIRAGE_CONSENSUS)
+                ensemble = []
+                if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
+                    logger.debug('debug :: mirage-algorithms :: reset ensemble, custom_consensus and custom_consensus_override after custom_algorithms all calcuated False')
+
     # @modified 20201125 - Feature #3848: custom_algorithms - run_before_3sigma parameter
     # Check run_3sigma_algorithms as well to the conditional
     # if not custom_consensus_override:
     if run_3sigma_algorithms and not custom_consensus_override:
         if DEBUG_CUSTOM_ALGORITHMS:
-            logger.debug('debug :: running three-sigma algorithms')
+            logger.debug('debug :: mirage_algorithms :: running three-sigma algorithms')
         try:
+            logger.info('mirage_algorithms :: running three-sigma algorithms')
             ensemble = [globals()[algorithm](timeseries, second_order_resolution_seconds) for algorithm in MIRAGE_ALGORITHMS]
             for algorithm in MIRAGE_ALGORITHMS:
                 algorithms_run.append(algorithm)
@@ -855,9 +904,14 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
                     logger.error('error :: mirage_algorithms :: failed to load run_custom_algorithm_on_timeseries')
             result = None
             anomalyScore = None
+
+            use_debug_logging = False
+            if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
+                use_debug_logging = True
+
             if run_custom_algorithm_on_timeseries:
                 try:
-                    result, anomalyScore = run_custom_algorithm_on_timeseries(skyline_app, getpid(), base_name, timeseries, custom_algorithm, custom_algorithms_to_run[custom_algorithm], DEBUG_CUSTOM_ALGORITHMS)
+                    result, anomalyScore = run_custom_algorithm_on_timeseries(skyline_app, getpid(), base_name, timeseries, custom_algorithm, custom_algorithms_to_run[custom_algorithm], use_debug_logging)
                     algorithm_result = [result]
                     if DEBUG_CUSTOM_ALGORITHMS or debug_logging:
                         logger.debug('debug :: mirage_algorithms :: run_custom_algorithm_on_timeseries run with result - %s, anomalyScore - %s' % (
