@@ -13,11 +13,15 @@ wheel
 # @modified 20200701 - Task #3608: Update Skyline to Python 3.8.3 and deps
 #redis==3.3.8
 #hiredis==1.0.0
-redis==3.5.3
+# @modified 20211220 - Task #4344: Update dependencies
+#redis==3.5.3
+redis==4.0.2
 
 # @modified 20201229 - Task #3898: Test Python 3.8.6 and deps
 #hiredis==1.0.1
-hiredis==1.1.0
+# @modified 20211220 - Task #4344: Update dependencies
+#hiredis==1.1.0
+hiredis==2.0.0
 
 ## python-daemon and deps
 # @modified 20161224 - Task #1758: Update deps in Ionosphere
@@ -40,12 +44,16 @@ lockfile==0.12.2
 #python-daemon==2.2.0
 # @modified 20200701 - Task #3608: Update Skyline to Python 3.8.3 and deps
 #python-daemon==2.2.3
-python-daemon==2.2.4
+# @modified 20211220 - Task #4344: Update dependencies
+#python-daemon==2.2.4
+python-daemon==2.3.0
 
 ## Flask and deps
 # @modified 20190412 - Task #2926: Update dependencies
 #itsdangerous==0.24
-itsdangerous==1.1.0
+# @modified 20211220 - Task #4344: Update dependencies
+#itsdangerous==1.1.0
+itsdangerous==2.0.0
 
 # @modified 20170809 - Task #2138: Update deps
 #Jinja2==2.8
@@ -58,11 +66,15 @@ itsdangerous==1.1.0
 #Jinja2==2.10.1
 # @modified 20210202 - Task #3960: SNYK-PYTHON-JINJA2-1012994
 #Jinja2==2.11.2
-Jinja2==2.11.3
+# @modified 20211220 - Task #4344: Update dependencies
+#Jinja2==2.11.3
+Jinja2==3.0.3
 
 # @modified 20190412 - Task #2926: Update dependencies
 #MarkupSafe==1.0
-MarkupSafe==1.1.1
+# @modified 20211220 - Task #4344: Update dependencies
+#MarkupSafe==1.1.1
+MarkupSafe==2.0.1
 
 # @modified 20161119 - Branch #922: ionosphere
 #                      Task #1758: Update deps in Ionosphere
@@ -79,7 +91,9 @@ MarkupSafe==1.1.1
 #Werkzeug==0.15.4
 # @modified 20200701 - Task #3608: Update Skyline to Python 3.8.3 and deps
 #Werkzeug==0.15.5
-Werkzeug==1.0.1
+# @modified 20211220 - Task #4344: Update dependencies
+#Werkzeug==1.0.1
+Werkzeug==2.0.2
 
 # @modified 20180105 - Task #2272: update deps for luminosity branch
 #click==6.6
@@ -87,7 +101,9 @@ Werkzeug==1.0.1
 #click==6.7
 # @modified 20200701 - Task #3608: Update Skyline to Python 3.8.3 and deps
 #click==7.0
-click==7.1.2
+# @modified 20211220 - Task #4344: Update dependencies
+#click==7.1.2
+click==8.0.3
 
 # @modified 20161224 - Task #1758: Update deps in Ionosphere
 #Flask==0.11.1
@@ -101,7 +117,9 @@ click==7.1.2
 #Flask==1.0.3
 # @modified 20200701 - Task #3608: Update Skyline to Python 3.8.3 and deps
 #Flask==1.1.1
-Flask==1.1.2
+# @modified 20211220 - Task #4344: Update dependencies
+#Flask==1.1.2
+Flask==2.0.2
 
 # @modified 20161119 - Branch #922: ionosphere
 #                      Task #1758: Update deps in Ionosphere
@@ -116,7 +134,9 @@ Flask==1.1.2
 #simplejson==3.16.0
 # @modified 20201229 - Task #3898: Test Python 3.8.6 and deps
 #simplejson==3.17.0
-simplejson==3.17.2
+# @modified 20211220 - Task #4344: Update dependencies
+#simplejson==3.17.2
+simplejson==3.17.6
 
 # @modified 20180105 - Task #2272: update deps for luminosity branch
 #six==1.10.0
@@ -124,7 +144,9 @@ simplejson==3.17.2
 #six==1.11.0
 # @modified 20200701 - Task #3608: Update Skyline to Python 3.8.3 and deps
 #six==1.12.0
-six==1.15.0
+# @modified 20211220 - Task #4344: Update dependencies
+#six==1.15.0
+six==1.16.0
 
 ## unittest2 and deps
 argparse==1.4.0
@@ -150,7 +172,9 @@ funcsigs==1.0.2
 #pbr==5.4.2
 # @modified 20201229 - Task #3898: Test Python 3.8.6 and deps
 #pbr==5.4.5
-pbr==5.5.1
+# @modified 20211220 - Task #4344: Update dependencies
+#pbr==5.5.1
+pbr==5.8.0
 
 # @modified 20190529 - Task #3060: Update dependencies
 #mock==2.0.0
@@ -192,7 +216,9 @@ mock==4.0.3
 #numpy==1.16.4
 # @modified 20201229 - Task #3898: Test Python 3.8.6 and deps
 #numpy==1.19.0
-numpy==1.19.4
+# @modified 20211220 - Task #4344: Update dependencies
+#numpy==1.19.4
+numpy==1.21.5
 
 ## scipy and deps
 # @modified 20160820 - Issue #23 Test dependency updates
@@ -216,7 +242,9 @@ numpy==1.19.4
 #scipy==1.2.2
 # @modified 20201229 - Task #3898: Test Python 3.8.6 and deps
 #scipy==1.5.0
-scipy==1.5.4
+# @modified 20211220 - Task #4344: Update dependencies
+#scipy==1.5.4
+scipy==1.7.3
 
 ## matplotlib and co
 # @modified 20161119 - Branch #922: ionosphere
@@ -232,7 +260,9 @@ scipy==1.5.4
 #python-dateutil==2.7.3
 # @modified 20200701 - Task #3608: Update Skyline to Python 3.8.3 and deps
 #python-dateutil==2.8.0
-python-dateutil==2.8.1
+# @modified 20211220 - Task #4344: Update dependencies
+#python-dateutil==2.8.1
+python-dateutil==2.8.2
 
 # @modified 20160820 - Issue #23 Test dependency updates
 #pytz==2016.4
@@ -257,9 +287,14 @@ python-dateutil==2.8.1
 #pytz==2019.2
 # @modified 20201229 - Task #3898: Test Python 3.8.6 and deps
 #pytz==2020.1
-pytz==2020.5
+# @modified 20211220 - Task #4344: Update dependencies
+#pytz==2020.5
+pytz==2021.3
 
-cycler==0.10.0
+# @modified 20211220 - Task #4344: Update dependencies
+#cycler==0.10.0
+cycler==0.11.0
+
 # @modified 20160820 - Issue #23 Test dependency updates
 #pyparsing==2.1.5
 # @modified 20161119 - Branch #922: ionosphere
@@ -273,7 +308,9 @@ cycler==0.10.0
 #pyparsing==2.4.0
 # @modified 20200701 - Task #3608: Update Skyline to Python 3.8.3 and deps
 #pyparsing==2.4.2
-pyparsing==2.4.7
+# @modified 20211220 - Task #4344: Update dependencies
+#pyparsing==2.4.7
+pyparsing==3.0.6
 
 # @added 20210115 - Bug #3940: SNYK-PYTHON-PILLOW-1055461 and SNYK-PYTHON-PILLOW-1055462
 # Added as matplotlib@3.3.3 introduced pillow@8.0.1 and Pillow is now fixed at
@@ -294,7 +331,9 @@ pyparsing==2.4.7
 # @modified 20211110 - Task #4282: Update dependencies
 # SNYK-PYTHON-PILLOW-1316216, SNYK-PYTHON-PILLOW-1319443 and SNYK-PYTHON-PILLOW-1727377
 #Pillow==8.2.0
-Pillow==8.3.2
+# @modified 20211220 - Task #4344: Update dependencies
+#Pillow==8.3.2
+Pillow==8.4.0
 
 # @modified 20160820 - Issue #23 Test dependency updates
 #matplotlib==1.5.1
@@ -315,6 +354,12 @@ Pillow==8.3.2
 #matplotlib==2.2.4
 # @modified 20201229 - Task #3898: Test Python 3.8.6 and deps
 #matplotlib==3.2.2
+# @modified 20211220 - Task #4344: Update dependencies
+#matplotlib==3.3.3
+# @modified 20211221 - Bug #4348: matplotlib 3.5.1 error
+#                      Task #4344: Update dependencies
+# Error with 3.5.1
+#matplotlib==3.5.1
 matplotlib==3.3.3
 
 ## pandas and deps
@@ -337,13 +382,17 @@ matplotlib==3.3.3
 #pandas==0.24.2
 # @modified 20201231 - Task #3898: Test Python 3.8.6 and deps
 #pandas==0.25.3
-pandas==1.2.0
+# @modified 20211220 - Task #4344: Update dependencies
+#pandas==1.2.0
+pandas==1.3.5
 
 # @modified 20180416 - Task #2272: update deps for luminosity branch
 #patsy==0.4.1
 # @modified 20190412 - Task #2926: Update dependencies
 #patsy==0.5.0
-patsy==0.5.1
+# @modified 20211220 - Task #4344: Update dependencies
+#patsy==0.5.1
+patsy==0.5.2
 
 # @modified 20170809 - Task #2138: Update deps
 #statsmodels==0.6.1
@@ -370,6 +419,12 @@ patsy==0.5.1
 #statsmodels==0.10.1
 # @modified 20201229 - Task #3898: Test Python 3.8.6 and deps
 #statsmodels==0.11.1
+# @modified 20211220 - Task #4344: Update dependencies
+#statsmodels==0.12.1
+# @modified 20211220 - Bug #4346: statsmodel 0.13.1 error
+#                      Task #4344: Update dependencies
+# NotImplementedError: AR has been removed from statsmodels and replaced with statsmodels.tsa.ar_model.AutoReg.
+#statsmodels==0.13.1
 statsmodels==0.12.1
 
 # @modified 20160820 - Issue #23 Test dependency updates
@@ -402,10 +457,13 @@ msgpack-python==0.5.6
 #requests==2.22.0
 # @modified 20201229 - Task #3898: Test Python 3.8.6 and deps
 #requests==2.24.0
-requests==2.25.1
+# @modified 20211220 - Task #4344: Update dependencies
+#requests==2.25.1
+requests==2.26.0
 
 # ALERTERS - uncomment any alerters you want to enable
-python-simple-hipchat==0.4.0
+# @modified 20211220 - Task #4344: Update dependencies
+#python-simple-hipchat==0.4.0
 
 # @modified 20161119 - Branch #922: ionosphere
 #                      Task #1758: Update deps in Ionosphere
@@ -455,7 +513,9 @@ pygerduty==0.38.3
 #mysql-connector-python==8.0.16
 # @modified 20201229 - Task #3898: Test Python 3.8.6 and deps
 #mysql-connector-python==8.0.20
-mysql-connector-python==8.0.22
+# @modified 20211220 - Task #4344: Update dependencies
+#mysql-connector-python==8.0.22
+mysql-connector-python==8.0.27
 
 # For a production WSGI HTTP Server for the Webapp
 # @modified 20170809 - Task #2138: Update deps
@@ -464,7 +524,9 @@ mysql-connector-python==8.0.22
 #gunicorn==19.7.1
 # @modified 20200701 - Task #3608: Update Skyline to Python 3.8.3 and deps
 #gunicorn==19.9.0
-gunicorn==20.0.4
+# @modified 20211220 - Task #4344: Update dependencies
+#gunicorn==20.0.4
+gunicorn==20.1.0
 
 # For dependencies management and helpful for debugging
 # @modified 20161119 - Branch #922: ionosphere
@@ -482,12 +544,16 @@ gunicorn==20.0.4
 #pipdeptree==0.13.2
 # @modified 20201229 - Task #3898: Test Python 3.8.6 and deps
 #pipdeptree==1.0.0
-pipdeptree==2.0.0
+# @modified 20211220 - Task #4344: Update dependencies
+#pipdeptree==2.0.0
+pipdeptree==2.2.0
+
 # @added 20210614 - Task #4140: deps updates
 #                   Branch #1444: thunder
 # https://snyk.io/vuln/SNYK-PYTHON-PIP-1278135
 # Pin to 21.1.2 until pipdeptree updates
-pip==21.1.2
+# @modified 20211220 - Task #4344: Update dependencies
+#pip==21.1.2
 
 # @added 20161119 - Branch #922: ionosphere
 ## tsfresh and deps
@@ -507,7 +573,9 @@ pip==21.1.2
 #                      Branch #1444: thunder
 # https://snyk.io/vuln/SNYK-PYTHON-SCIKITLEARN-1079100
 #scikit-learn==0.24.0
-scikit-learn==0.24.2
+# @modified 20211220 - Task #4344: Update dependencies
+#scikit-learn==0.24.2
+scikit-learn==1.0.1
 
 # @modified 20190412 - Task #2926: Update dependencies
 #future==0.16.0
@@ -560,7 +628,9 @@ termcolor==1.1.0
 # Dependency vulnerability - py - CVE-2020-29651 #378
 # Update to py 1.10.0
 #py==1.9.0
-py==1.10.0
+# @modified 20211220 - Task #4344: Update dependencies
+#py==1.10.0
+py==1.11.0
 
 # @modified 20190426 - Task #2964: Update dependencies
 #pytest==4.4.0
@@ -572,7 +642,9 @@ py==1.10.0
 #pytest==4.6.5
 # @modified 20201229 - Task #3898: Test Python 3.8.6 and deps
 #pytest==5.4.3
-pytest==6.2.1
+# @modified 20211220 - Task #4344: Update dependencies
+#pytest==6.2.1
+pytest==6.2.5
 
 # @added 20161130 - Branch #922: ionosphere
 ## sqlalchemy by this stage of the (no deps)
@@ -598,7 +670,9 @@ pytest==6.2.1
 #SQLAlchemy==1.3.18
 # @modified 20201229 - Task #3898: Test Python 3.8.6 and deps
 #SQLAlchemy==1.3.19
-SQLAlchemy==1.3.22
+# @modified 20211220 - Task #4344: Update dependencies
+#SQLAlchemy==1.3.22
+SQLAlchemy==1.4.28
 
 # @added 20170809 - Task #2132: Optimise Ionosphere DB usage
 # @modified 20180416 - Task #2272: update deps for luminosity branch
@@ -611,7 +685,9 @@ SQLAlchemy==1.3.22
 #pymemcache==2.2.2
 # @modified 20201229 - Task #3898: Test Python 3.8.6 and deps
 #pymemcache==3.2.0
-pymemcache==3.4.0
+# @modified 20211220 - Task #4344: Update dependencies
+#pymemcache==3.4.0
+pymemcache==3.5.0
 
 # @added 20180520 - Feature #2378: Add redis auth to Skyline and rebrow
 # pycrypto replaced with pycryptodome
@@ -621,7 +697,9 @@ pymemcache==3.4.0
 #pycryptodome==3.6.1
 # @modified 20190412 - Task #2926: Update dependencies
 #PyJWT==1.6.4
-PyJWT==1.7.1
+# @modified 20211220 - Task #4344: Update dependencies
+#PyJWT==1.7.1
+PyJWT==2.3.0
 
 # @added 20180105 - Branch #2270: luminosity
 # @added 20180105 - Branch #2270: luminosity
@@ -650,7 +728,10 @@ slackclient==2.9.3
 # @added 20210305 - Support #3974: SNYK-PYTHON-AIOHTTP-1079232
 # Open Redirect in aiohttp@3.7.3 introduced by slackclient@2.9.3 > aiohttp@3.7.3
 # When slackclient requires aiohttp>=3.7.4 this can be removed
-aiohttp==3.7.4
+# @modified 20211220 - Support #4340: SNYK-PYTHON-AIOHTTP-1584144
+#                      Task #4344: Update dependencies
+#aiohttp==3.7.4
+aiohttp==3.8.0
 
 # @added 20190412 - Task #2926: Update dependencies
 # Added to address CVE-2018-20060 as is required by requests at >=1.21.1,<1.25
@@ -672,12 +753,18 @@ aiohttp==3.7.4
 #                      Branch #1444: thunder
 # https://github.com/earthgecko/skyline/pull/431
 #urllib3==1.26.4
-urllib3==1.26.5
+# @modified 20211220 - Task #4344: Update dependencies
+#urllib3==1.26.5
+urllib3==1.26.7
 
 # @added 201906025 - Branch #956: flux
-graphyte==1.6.0
+# @modified 20211220 - Task #4344: Update dependencies
+#graphyte==1.6.0
+graphyte==1.7.0
 statsd==3.3.0
-falcon==2.0.0
+# @modified 20211220 - Task #4344: Update dependencies
+#falcon==2.0.0
+falcon==3.0.1
 
 # @added 20200517 - Feature #3550: flux.uploaded_data_worker
 #                   Feature #3538: webapp - upload_data endpoint
@@ -693,10 +780,14 @@ xlrd==1.2.0
 pandas_log==0.1.6; python_version >= '3.2'
 
 # @added 20200604 - Feature #3566: custom_algorithms
-timeout-decorator==0.4.1
+# @modified 20211220 - Task #4344: Update dependencies
+#timeout-decorator==0.4.1
+timeout-decorator==0.5.0
 
 # @added 20200908 - Task #3744: POC matrixprofile
-matrixprofile==1.1.4
+# @modified 20211220 - Task #4344: Update dependencies
+#matrixprofile==1.1.4
+matrixprofile==1.1.10
 
 # @added 20210316 - Feature #3970: custom_algorithm - adtk_level_shift
 #                   Feature #3978: luminosity - classify_metrics
@@ -708,4 +799,6 @@ git+git://github.com/earthgecko/adtk@895c517#egg=adtk
 mass-ts==0.1.4
 
 # @added 20211115 - Feature #4196: functions.aws.send_sms
-boto3==1.20.6
+# @modified 20211220 - Task #4344: Update dependencies
+#boto3==1.20.6
+boto3==1.20.24
