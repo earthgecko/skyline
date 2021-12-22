@@ -1032,7 +1032,7 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
                         new_algorithms_run = []
                         for algorithm_run in algorithms_run:
                             if algorithm_run == custom_algorithm:
-                                algorithm_run = '%s (override - %s recent 3-three triggers)' % (
+                                algorithm_run = '%s (override - %s recent 3-sigma triggers)' % (
                                     custom_algorithm, str(recent_trigger_history_count))
                             new_algorithms_run.append(algorithm_run)
                         algorithms_run = list(new_algorithms_run)
