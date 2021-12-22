@@ -98,7 +98,7 @@ class Roomba(Thread):
         except:
             # @added 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
             # Log warning
-            logger.warn('warning :: parent process is dead')
+            logger.warning('warning :: parent process is dead')
             exit(0)
 
     def vacuum(self, i, namespace, duration):
@@ -121,7 +121,14 @@ class Roomba(Thread):
         #                   Feature #3486: analyzer_batch
         if ROOMBA_DO_NOT_PROCESS_BATCH_METRICS and BATCH_PROCESSING and BATCH_PROCESSING_NAMESPACES:
             try:
-                batch_metrics = list(self.redis_conn_decoded.smembers('aet.analyzer.batch_processing_metrics'))
+                # @modified 20211127 - Feature #4328: BATCH_METRICS_CUSTOM_FULL_DURATIONS
+                # Ensure that known and new batch_processing_metrics are
+                # accounted for
+                # batch_metrics = list(self.redis_conn_decoded.smembers('aet.analyzer.batch_processing_metrics'))
+                batch_metrics1 = list(self.redis_conn_decoded.smembers('aet.analyzer.batch_processing_metrics'))
+                batch_metrics2 = list(self.redis_conn_decoded.smembers('analyzer.batch_processing_metrics'))
+                all_batch_metrics = batch_metrics1 + batch_metrics2
+                batch_metrics = list(set(all_batch_metrics))
             except:
                 logger.error('error - failed to get Redis set aet.analyzer.batch_processing_metrics')
                 batch_metrics = []

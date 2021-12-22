@@ -549,7 +549,7 @@ class Analyzer(Thread):
         # global_anomalies can occur per shard in a cluster
         global_anomaly_in_progress = False
         if global_anomaly_in_progress:
-            logger.warn('warning :: a global anomaly event is in progress')
+            logger.warning('warning :: a global anomaly event is in progress')
 
         # @added 20201007 - Feature #3774: SNAB_LOAD_TEST_ANALYZER
         # The number of metrics to load test Analyzer with, testing is only done
@@ -3958,6 +3958,13 @@ class Analyzer(Thread):
                 sleep(10)
                 continue
 
+            # @added 20211129 - Feature #4328: BATCH_METRICS_CUSTOM_FULL_DURATIONS
+            try:
+                batch_metrics_list = list(self.redis_conn_decoded.smembers('aet.analyzer.batch_processing_metrics'))
+            except:
+                logger.error('error :: Analyzer could not get aet.analyzer.batch_processing_metrics from Redis')
+                logger.error(traceback.format_exc())
+
             # @added 20200528 - Feature #3560: External alert config
             external_alerts = {}
             external_from_cache = None
@@ -5234,6 +5241,13 @@ class Analyzer(Thread):
                                 try:
                                     sane_metricname = filesafe_metricname(str(metric[1]))
                                     anomaly_check_file = '%s/%s.%s.txt' % (settings.MIRAGE_CHECK_PATH, str(int(metric[2])), sane_metricname)
+                                    # @added 20211129 - Feature #4328: BATCH_METRICS_CUSTOM_FULL_DURATIONS
+                                    if str(metric[1]) in batch_metrics_list:
+                                        anomaly_check_file = '%s/%s.%s.%s.txt' % (
+                                            settings.MIRAGE_CHECK_PATH,
+                                            str(int(time())),
+                                            str(int(metric[2])),
+                                            sane_metricname)
                                 except:
                                     logger.error(traceback.format_exc())
                                     logger.error('error :: failed to determine anomaly_check_file')
@@ -5310,7 +5324,14 @@ class Analyzer(Thread):
                                         try:
                                             use_hours_to_resolve = int(alert[3])
                                         except:
-                                            use_hours_to_resolve = 168
+                                            # @added 20211127 - Feature #4328: BATCH_METRICS_CUSTOM_FULL_DURATIONS
+                                            # Attempt to get resolution from Redis
+                                            try:
+                                                use_hours_to_resolve_str = self.redis_conn_decoded.hget('mirage.hash_key.metrics_resolutions', metric[1])
+                                                if use_hours_to_resolve_str:
+                                                    use_hours_to_resolve = int(use_hours_to_resolve_str)
+                                            except:
+                                                use_hours_to_resolve = 168
 
                                         with open(anomaly_check_file, 'w') as fh:
                                             # metric_name, anomalous datapoint, hours to resolve, timestamp
@@ -5483,11 +5504,14 @@ class Analyzer(Thread):
                                         # hash key
                                         # mirage_metric_key = self.redis_conn.get(mirage_metric_cache_key)
                                         raw_mirage_metric_key = self.redis_conn_decoded.hget('mirage.hash_key.metrics_resolutions', metric[1])
-                                        mirage_metric_key = int(raw_mirage_metric_key)
+                                        if raw_mirage_metric_key:
+                                            mirage_metric_key = int(raw_mirage_metric_key)
+                                        else:
+                                            mirage_metric_key = False
                                         if LOCAL_DEBUG:
-                                            logger.debug('debug :: %s metric rsolution - %s' % (metric[1], str(mirage_metric_key)))
+                                            logger.debug('debug :: %s metric resolution - %s' % (metric[1], str(mirage_metric_key)))
                                     except Exception as e:
-                                        logger.warn('warning :: could not determine resolution for %s from mirage.hash_key.metrics_resolutions Redis hash key, setting mirage_metric_key to False.  error: %s' % (
+                                        logger.warning('warning :: could not determine resolution for %s from mirage.hash_key.metrics_resolutions Redis hash key, setting mirage_metric_key to False.  error: %s' % (
                                             metric[1], e))
                                         mirage_metric_key = False
 
@@ -5630,14 +5654,15 @@ class Analyzer(Thread):
                                 # @added 20210801 - Feature #4214: alert.paused
                                 alert_paused = False
                                 try:
-                                    cache_key = 'alert.paused.%s.%s' % (alert[1], base_name)
+                                    # cache_key = 'alert.paused.%s.%s' % (alert[1], base_name)
+                                    cache_key = 'alert.paused.%s.%s' % (alert[1], metric[1])
                                     alert_paused = self.redis_conn_decoded.get(cache_key)
                                 except Exception as e:
                                     logger.error('error :: alert_paused check failed: %s' % str(e))
                                     alert_paused = False
                                 if alert_paused:
                                     logger.info('alert_paused for %s %s until %s' % (
-                                        alert[1], base_name, str(alert_paused)))
+                                        alert[1], metric[1], str(alert_paused)))
 
                                 try:
                                     if alert[1] != 'smtp':

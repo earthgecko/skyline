@@ -311,6 +311,9 @@ def get_external_alert_configs(current_skyline_app):
                 second_order_resolution = second_order_resolution_hours * 3600
             except:
                 second_order_resolution = 0
+                # @added 20211128 - Feature #4328: BATCH_METRICS_CUSTOM_FULL_DURATIONS
+                # Added missing second_order_resolution_hours
+                second_order_resolution_hours = 0
             config_id = 'internal-%s' % str(index)
             internal_alert_config = {
                 'id': config_id,
