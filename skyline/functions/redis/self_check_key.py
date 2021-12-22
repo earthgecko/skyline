@@ -25,16 +25,16 @@ def check_redis_key(self, redis_key, log=True):
 
     if not self.redis_conn_decoded:
         if log:
-            logger.error('error :: %s :: no self.redis_conn_decoded to get %s - %s' % (
-                function_str, redis_key, e))
+            self.logger.error('error :: %s :: no self.redis_conn_decoded to get %s' % (
+                function_str, redis_key))
         return data
 
     try:
         data = self.redis_conn_decoded.get(redis_key)
     except Exception as e:
         if log:
-            current_logger.error(traceback.format_exc())
-            current_logger.error('error :: %s :: failed to remove item from Redis set %s - %s' % (
+            self.logger.error(traceback.format_exc())
+            self.logger.error('error :: %s :: failed to remove item from Redis set %s - %s' % (
                 function_str, redis_key, e))
         data = None
 

@@ -1757,7 +1757,7 @@ def get_related(current_skyline_app, anomaly_id, anomaly_timestamp):
         current_logger.error('error :: could not determine related anomalies from DB for anomaly id -  %s' % str(anomaly_id))
         if engine:
             fp_create_engine_disposal(current_skyline_app, engine)
-        del metrics_list
+        # del metrics_list
         raise
 
     # @added 20200808 - Feature #3568: Ionosphere - report anomalies in training period

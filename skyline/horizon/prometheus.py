@@ -74,14 +74,14 @@ class PrometheusMetrics(Process):
         Get Prometheus metrics from the Redis flux.prometheus_metrics hash key
         add submit them to the Horizon worker queue
         """
-        last_hash_check = int(time)
+        last_hash_check = int(time())
         last_log = int(last_hash_check)
         submitted_metrics = 0
 
         running = True
         while running:
             self.check_if_parent_is_alive()
-            now_ts = int(time)
+            now_ts = int(time())
 
             if now_ts >= (last_log + 59):
                 logger.info('prometheus :: submit_PrometheusMetrics - submitted %s metrics to worker in the last 60 seconds' % str(submitted_metrics))

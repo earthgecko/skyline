@@ -166,7 +166,7 @@ def get_metrics_timeseries(
                             for function_parmeter in list(function_arguments.keys()):
                                 function_parmeter_value = function_arguments[function_parmeter]
                                 if function_parmeter_value is None:
-                                    target = target
+                                    target = str(target)
                                 if isinstance(function_parmeter_value, int):
                                     target = '%s,%s' % (target, function_parmeter_value)
                                 if isinstance(function_parmeter_value, str):
@@ -217,7 +217,7 @@ def get_metrics_timeseries(
                     converted = []
                     for datapoint in datapoints:
                         try:
-                            new_datapoint = [float(datapoint[1]), float(datapoint[0])]
+                            new_datapoint = [int(datapoint[1]), float(datapoint[0])]
                             converted.append(new_datapoint)
                         except Exception as e:
                             data_error = e

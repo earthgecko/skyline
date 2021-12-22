@@ -225,7 +225,7 @@ class Listen(Process):
         except:
             # @added 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
             # Log warning
-            logger.warn('warning :: parent or current process dead')
+            logger.warning('warning :: parent or current process dead')
             exit(0)
 
     def listen_pickle(self):

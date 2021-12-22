@@ -2436,7 +2436,7 @@ def alert_sms(alert, metric, second_order_resolution_seconds, context, triggered
         if success:
             logger.info('sent SMS alert to %s' % sms_number)
         else:
-            logger.warn('warning :: falied to send SMS alert to %s' % sms_number)
+            logger.warning('warning :: falied to send SMS alert to %s' % sms_number)
     return
 
 
