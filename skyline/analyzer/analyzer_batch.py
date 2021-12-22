@@ -530,6 +530,23 @@ class AnalyzerBatch(Thread):
                 except:
                     pass
 
+            # @added 20211124 - Task #4322: Handle historical batch metrics full duration
+            # first_last_duration_timestamp = timeseries[-1][0] - settings.FULL_DURATION
+            first_last_duration_timestamp = last_analyzed_timestamp - settings.FULL_DURATION
+            timeseries_length = len(timeseries)
+            full_duration_timeseries = []
+            try:
+                full_duration_timeseries = [item for item in timeseries if item[0] >= first_last_duration_timestamp]
+                if full_duration_timeseries:
+                    full_duration_timeseries_length = len(full_duration_timeseries)
+                    timeseries = list(full_duration_timeseries)
+                    del full_duration_timeseries
+                    if timeseries_length != full_duration_timeseries_length:
+                        logger.info('timeseries has been pruned from %s datapoints to its FULL_DURATION %s datapoints' % (
+                            str(timeseries_length), str(full_duration_timeseries_length)))
+            except:
+                timeseries = []
+
             timestamps_to_analyse = []
             # Reverse the time series so that only the first (last) items now to be
             # iterated and break after the necessary iterations so the entire
@@ -973,7 +990,7 @@ class AnalyzerBatch(Thread):
                             int_metric_timestamp = int(batch_timestamp)
                             self.redis_conn.setex(
                                 analyzer_batch_metric_anomaly_key,
-                                3600, int_metric_timestamp)
+                                86400, int_metric_timestamp)
                             logger.info('set Redis key %s with %s for other apps to identify this as an analyzer_batch anomaly' % (
                                 analyzer_batch_metric_anomaly_key,
                                 str(int_metric_timestamp)))
@@ -1820,7 +1837,7 @@ class AnalyzerBatch(Thread):
                         anomaly_breakdown[i_anomaly_breakdown] = 0
 
                 exceptions_string = ''
-                for i_exception in exceptions.keys():
+                for i_exception in list(exceptions.keys()):
                     if exceptions_string == '':
                         exceptions_string = '%s: %s' % (str(i_exception), str(exceptions[i_exception]))
                     else:
@@ -1829,7 +1846,7 @@ class AnalyzerBatch(Thread):
 
                 anomaly_breakdown_string = ''
                 if anomaly_breakdown:
-                    for i_anomaly_breakdown in anomaly_breakdown.keys():
+                    for i_anomaly_breakdown in list(anomaly_breakdown.keys()):
                         if anomaly_breakdown_string == '':
                             anomaly_breakdown_string = '%s: %s' % (str(i_anomaly_breakdown), str(anomaly_breakdown[i_anomaly_breakdown]))
                         else:
