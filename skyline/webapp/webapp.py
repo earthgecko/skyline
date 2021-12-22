@@ -268,6 +268,9 @@ if True:
     from functions.database.queries.get_algorithm_groups import get_algorithm_groups
     from get_snab_results import get_snab_results
 
+    # @added 20211125 - Feature #4326: webapp - panorama_plot_anomalies
+    from panorama_plot_anomalies import panorama_plot_anomalies
+
 # @added 20200516 - Feature #3538: webapp - upload_data endoint
 file_uploads_enabled = False
 try:
@@ -3241,6 +3244,56 @@ def panorama():
             return 'Uh oh ... a Skyline 500 :(', 500
 
     start = time.time()
+
+    # @added 20211125 - Feature #4326: webapp - panorama_plot_anomalies
+    if 'plot_metric_anomalies' in request.args:
+        metric = None
+        anomalies_dict = {}
+        plot_file = None
+        if 'metric' in request.args:
+            metric = request.args.get('metric', 'None')
+            if metric == 'None':
+                metric = None
+        from_timestamp = None
+        if 'from_timestamp' in request.args:
+            from_timestamp = request.args.get('from_timestamp', 'all')
+            if ':' in from_timestamp:
+                new_from_timestamp = time.mktime(datetime.datetime.strptime(from_timestamp, '%Y-%m-%d %H:%M').timetuple())
+                from_timestamp = int(new_from_timestamp)
+            if from_timestamp == 'all':
+                from_timestamp = None
+            else:
+                try:
+                    from_timestamp = int(from_timestamp)
+                except:
+                    data_dict = {"status": {"response": 400, "request_time": (time.time() - start)}, "data": {"error": "invalid from_timestamp"}}
+                    return jsonify(data_dict), 400
+        until_timestamp = None
+        if 'until_timestamp' in request.args:
+            until_timestamp = request.args.get('until_timestamp', 'all')
+            if ':' in until_timestamp:
+                new_until_timestamp = time.mktime(datetime.datetime.strptime(until_timestamp, '%Y-%m-%d %H:%M').timetuple())
+                until_timestamp = int(new_until_timestamp)
+            if until_timestamp == 'all':
+                until_timestamp = None
+            else:
+                try:
+                    until_timestamp = int(until_timestamp)
+                except:
+                    data_dict = {"status": {"response": 400, "request_time": (time.time() - start)}, "data": {"error": "invalid until_timestamp"}}
+                    return jsonify(data_dict), 400
+        if metric:
+            try:
+                anomalies_dict, plot_file = panorama_plot_anomalies(metric, from_timestamp, until_timestamp)
+            except:
+                trace = traceback.format_exc()
+                message = 'Uh oh ... a Skyline 500 using panorama_plot_anomalies'
+                return internal_error(message, trace)
+        return render_template(
+            'panorama.html', plot_metric_anomalies=True, metric=metric,
+            anomalies_dict=anomalies_dict, plot_file=plot_file,
+            version=skyline_version,
+            duration=(time.time() - start), print_debug=False), 200
 
     # @added 20210326 - Feature #3994: Panorama - mirage not anomalous
     if 'not_anomalous' in request.args:
@@ -9969,8 +10022,10 @@ def rebrow():
 
         # @added 20180529 - Feature #2378: Add redis auth to Skyline and rebrow
         token_valid_for = int(request.form['token_valid_for'])
-        if token_valid_for > 3600:
-            token_valid_for = 3600
+        # if token_valid_for > 3600:
+        #     token_valid_for = 3600
+        if token_valid_for > 86400:
+            token_valid_for = 86400
         if token_valid_for < 30:
             token_valid_for = 30
 

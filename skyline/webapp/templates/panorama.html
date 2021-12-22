@@ -34,6 +34,18 @@
     </div>
 	</ol>
   {% include "not_anomalous_metric.html" %}
+
+<!-- # @added 20211125 - Feature #4326: webapp - panorama_plot_anomalies -->
+{% elif plot_metric_anomalies %}
+	<ol class="breadcrumb">
+  	<div class="breadcrumb">
+  		<li><a href="/">Home</a></li>
+  		<li><a href="/panorama">Panorama</a></li>
+  		<li class="active"><span class="logo"><span class="sky">Plot</span> <span class="re">metric anomalies</span></li>
+    </div>
+	</ol>
+  {% include "plot_metric_anomalies.html" %}
+
 {% else %}
 
   <script src="/static/js/panorama.js"></script>
@@ -66,6 +78,7 @@ Have Skyline serve the js, tried of allowing cloudflare scripts
 		  <li class="active"><a href="/panorama"><span class="logo"><span class="sky">Search</span> <span class="re">anomalies</span></span></a></li>
 		  <li><a href="?label_anomalies=true"><span class="logo"><span class="sky">Label</span> <span class="re">anomalies</span></span></a></li>
 		  <li><a href="?not_anomalous=true"><span class="logo"><span class="sky">Not</span> <span class="re">anomalous</span></span></a></li>
+		  <li><a href="?plot_metric_anomalies=true"><span class="logo"><span class="sky">Plot</span> <span class="re">metric anomalies</span></span></a></li>
 		</ul>
 		<div class="tab-content">
 	  	<div class="tab-pane active" id="view">
