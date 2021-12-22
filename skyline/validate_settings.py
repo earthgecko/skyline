@@ -2165,6 +2165,17 @@ def validate_settings_variables(current_skyline_app):
         invalid_variables = True
 
     try:
+        if not isinstance(settings.BATCH_METRICS_CUSTOM_FULL_DURATIONS, dict):
+            print('error :: BATCH_METRICS_CUSTOM_FULL_DURATIONS in settings.py is not a dict')
+            invalid_variables = True
+    except AttributeError:
+        print('error :: BATCH_METRICS_CUSTOM_FULL_DURATIONS is not defined in settings.py')
+        invalid_variables = True
+    except Exception as e:
+        print('error :: BATCH_METRICS_CUSTOM_FULL_DURATIONS is not defined in settings.py - %s' % e)
+        invalid_variables = True
+
+    try:
         if not isinstance(settings.PROMETHEUS_SETTINGS, dict):
             print('error :: PROMETHEUS_SETTINGS in settings.py is not a dict')
             invalid_variables = True
