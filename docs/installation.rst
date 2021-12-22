@@ -79,7 +79,7 @@ Steps
 -----
 
 .. note:: All the documentation and testing is based on running Skyline in a
-  Python-3.8.10 virtualenv, if you choose to deploy Skyline another way, you are
+  Python-3.8.12 virtualenv, if you choose to deploy Skyline another way, you are
   on your own.  Although it is possible to run Skyline in a different type of
   environment, it does not lend itself to repeatability or a common known state.
 
@@ -117,7 +117,7 @@ Python virtualenv
 ~~~~~~~~~~~~~~~~~
 
 - The first part of the installation is to build Python and create a
-  Python-3.8.10 virtualenv for Skyline to run in.  For this first step in the
+  Python-3.8.12 virtualenv for Skyline to run in.  For this first step in the
   installation process see and follow the steps laid out in
   `Running Skyline in a Python virtualenv <running-in-python-virtualenv.html>`__
 
@@ -237,7 +237,7 @@ Skyline and dependencies install
     #cd /opt/skyline/github/skyline
     #git checkout <COMMITREF>
 
-- Once again using the Python-3.8.10 virtualenv,  install the requirements using
+- Once again using the Python-3.8.12 virtualenv,  install the requirements using
   the virtualenv pip, this can take some time.
 
 .. warning:: When working with virtualenv Python versions you must always
@@ -254,7 +254,7 @@ Skyline and dependencies install
 
     PYTHON_MAJOR_VERSION="3"
     PYTHON_VIRTUALENV_DIR="/opt/python_virtualenv"
-    PROJECT="skyline-py3810"
+    PROJECT="skyline-py3812"
 
     cd "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}"
     source bin/activate
@@ -263,7 +263,7 @@ Skyline and dependencies install
     # statsmodels in requirements
     # https://github.com/statsmodels/statsmodels/issues/4654
     bin/"pip${PYTHON_MAJOR_VERSION}" install $(cat /opt/skyline/github/skyline/requirements.txt | grep "^numpy\|^scipy\|^patsy" | tr '\n' ' ')
-    bin/"pip${PYTHON_MAJOR_VERSION}" install $(cat /opt/skyline/github/skyline/requirements.txt | grep "^pandas")
+    bin/"pip${PYTHON_MAJOR_VERSION}" install $(cat /opt/skyline/github/skyline/requirements.txt | grep "^pandas==")
 
     # This can take lots of minutes...
     bin/"pip${PYTHON_MAJOR_VERSION}" install -r /opt/skyline/github/skyline/requirements.txt
@@ -273,7 +273,7 @@ Skyline and dependencies install
 
 - Copy the ``skyline.conf`` and edit the ``USE_PYTHON`` as appropriate to your
   set up if it is not using PATH
-  ``/opt/python_virtualenv/projects/skyline-py3810/bin/python3.8``
+  ``/opt/python_virtualenv/projects/skyline-py3812/bin/python3.8``
 
 .. code-block:: bash
 

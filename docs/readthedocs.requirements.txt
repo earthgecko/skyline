@@ -12,82 +12,159 @@ pip>=10.0.1
 # @modified 20200808 - Task #3608: Update Skyline to Python 3.8.3 and deps
 setuptools
 wheel
-redis==3.5.3
-hiredis==1.1.0
+# @modified 20211220 - Task #4344: Update dependencies
+#redis==3.5.3
+redis==4.0.2
+# @modified 20211220 - Task #4344: Update dependencies
+#hiredis==1.1.0
+hiredis==2.0.0
 docutils==0.16
 lockfile==0.12.2
-python-daemon==2.2.4
-itsdangerous==1.1.0
+# @modified 20211220 - Task #4344: Update dependencies
+#python-daemon==2.2.4
+python-daemon==2.3.0
+# @modified 20211220 - Task #4344: Update dependencies
+#itsdangerous==1.1.0
+itsdangerous==2.0.0
 # @modified 20210202 - Task #3960: SNYK-PYTHON-JINJA2-1012994
 # @modified 20210324 - Support #3990: Update jinja - CVE-2020-28493
 #                      Task #3960: SNYK-PYTHON-JINJA2-1012994
 #Jinja2==2.11.2
-Jinja2==2.11.3
-MarkupSafe==1.1.1
-Werkzeug==1.0.1
-click==7.1.2
-Flask==1.1.2
-simplejson==3.17.2
-six==1.15.0
+# @modified 20211220 - Task #4344: Update dependencies
+#Jinja2==2.11.3
+Jinja2==3.0.3
+# @modified 20211220 - Task #4344: Update dependencies
+#MarkupSafe==1.1.1
+MarkupSafe==2.0.1
+# @modified 20211220 - Task #4344: Update dependencies
+#Werkzeug==1.0.1
+Werkzeug==2.0.2
+# @modified 20211220 - Task #4344: Update dependencies
+#click==7.1.2
+click==8.0.3
+# @modified 20211220 - Task #4344: Update dependencies
+#Flask==1.1.2
+Flask==2.0.2
+# @modified 20211220 - Task #4344: Update dependencies
+#simplejson==3.17.2
+simplejson==3.17.6
+# @modified 20211220 - Task #4344: Update dependencies
+#six==1.15.0
+six==1.16.0
 argparse==1.4.0
 linecache2==1.0.0
 traceback2==1.4.0
 unittest2==1.1.0
 funcsigs==1.0.2
-pbr==5.5.1
+# @modified 20211220 - Task #4344: Update dependencies
+#pbr==5.5.1
+pbr==5.8.0
 mock==4.0.3
-numpy==1.19.4
-scipy==1.5.4
-python-dateutil==2.8.1
-pytz==2020.5
-cycler==0.10.0
-pyparsing==2.4.7
+# @modified 20211220 - Task #4344: Update dependencies
+#numpy==1.19.4
+numpy==1.21.5
+# @modified 20211220 - Task #4344: Update dependencies
+#scipy==1.5.4
+scipy==1.7.3
+# @modified 20211220 - Task #4344: Update dependencies
+#python-dateutil==2.8.1
+python-dateutil==2.8.2
+# @modified 20211220 - Task #4344: Update dependencies
+#pytz==2020.5
+pytz==2021.3
+# @modified 20211220 - Task #4344: Update dependencies
+#cycler==0.10.0
+cycler==0.11.0
+# @modified 20211220 - Task #4344: Update dependencies
+#pyparsing==2.4.7
+pyparsing==3.0.6
 # @modified 20210407 - Support #4008: SNYK-PYTHON-PILLOW-1090584
 #Pillow==8.1.2
 # @modified 20211110 - Task #4282: Update dependencies
 # SNYK-PYTHON-PILLOW-1316216, SNYK-PYTHON-PILLOW-1319443 and SNYK-PYTHON-PILLOW-1727377
 #Pillow==8.2.0
-Pillow==8.3.2
+# @modified 20211220 - Task #4344: Update dependencies
+#Pillow==8.3.2
+Pillow==8.4.0
 matplotlib==3.3.3
-pandas==1.2.0
-patsy==0.5.1
+# @modified 20211220 - Task #4344: Update dependencies
+#pandas==1.2.0
+pandas==1.3.5
+# @modified 20211220 - Task #4344: Update dependencies
+#patsy==0.5.1
+patsy==0.5.2
 statsmodels==0.12.1
 msgpack-python==0.5.6
-requests==2.25.1
+# @modified 20211220 - Task #4344: Update dependencies
+#requests==2.25.1
+requests==2.26.0
 #python-simple-hipchat==0.4.0
 pygerduty==0.38.3
-mysql-connector-python==8.0.22
-gunicorn==20.0.4
-pipdeptree==2.0.0
+# @modified 20211220 - Task #4344: Update dependencies
+#mysql-connector-python==8.0.22
+mysql-connector-python==8.0.27
+# @modified 20211220 - Task #4344: Update dependencies
+#gunicorn==20.0.4
+gunicorn==20.1.0
+# @modified 20211220 - Task #4344: Update dependencies
+#pipdeptree==2.0.0
+pipdeptree==2.2.0
 # @added 20210614 - Task #4140: deps updates
 #                   Branch #1444: thunder
 # https://snyk.io/vuln/SNYK-PYTHON-PIP-1278135
 # Pin to 21.1.2 until pipdeptree updates
-pip==21.1.2
+# @modified 20211220 - Task #4344: Update dependencies
+#pip==21.1.2
 # @modified 20210614 - Task #4140: deps updates
 #                      Branch #1444: thunder
 # https://snyk.io/vuln/SNYK-PYTHON-SCIKITLEARN-1079100
 #scikit-learn==0.24.0
-scikit-learn==0.24.2
+# @modified 20211220 - Task #4344: Update dependencies
+#scikit-learn==0.24.2
+scikit-learn==1.0.1
 future==0.18.2
 tsfresh==0.17.0
 termcolor==1.1.0
-py==1.10.0
-pytest==6.2.1
-SQLAlchemy==1.3.22
-pymemcache==3.4.0
-PyJWT==1.7.1
+# @modified 20211220 - Task #4344: Update dependencies
+#py==1.10.0
+py==1.11.0
+# @modified 20211220 - Task #4344: Update dependencies
+#pytest==6.2.1
+pytest==6.2.5
+# @modified 20211220 - Task #4344: Update dependencies
+#SQLAlchemy==1.3.22
+SQLAlchemy==1.4.28
+# @modified 20211220 - Task #4344: Update dependencies
+#pymemcache==3.4.0
+pymemcache==3.5.0
+# @modified 20211220 - Task #4344: Update dependencies
+#PyJWT==1.7.1
+PyJWT==2.3.0
 slackclient==2.9.3
 # @modified 20210614 - Task #4140: deps updates
 #                      Branch #1444: thunder
 # https://github.com/earthgecko/skyline/pull/431
 #urllib3==1.26.4
-urllib3==1.26.5
-graphyte==1.6.0
+# @modified 20211220 - Task #4344: Update dependencies
+#urllib3==1.26.5
+urllib3==1.26.7
+# @modified 20211220 - Task #4344: Update dependencies
+#graphyte==1.6.0
+graphyte==1.7.0
 statsd==3.3.0
-falcon==2.0.0
+# @modified 20211220 - Task #4344: Update dependencies
+#falcon==2.0.0
+falcon==3.0.1
+
 xlrd==1.2.0
 pandas_log==0.1.6; python_version >= '3.2'
-timeout-decorator==0.4.1
-matrixprofile==1.1.4
+# @modified 20211220 - Task #4344: Update dependencies
+#timeout-decorator==0.4.1
+timeout-decorator==0.5.0
+# @modified 20211220 - Task #4344: Update dependencies
+#matrixprofile==1.1.4
+matrixprofile==1.1.10
+mass-ts==0.1.4
+boto3==1.20.24
+
 adtk

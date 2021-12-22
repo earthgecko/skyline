@@ -131,7 +131,7 @@ Add Mirage parameters to :mod:`settings.ALERTS`
 
 Once you have an overview of metrics that have seasonality that are greater
 than the :mod:`settings.FULL_DURATION`, you can add their Mirage parameters to
-the :mod:`settings.ALERTS` tuples and start the Mirage daemon.
+the :mod:`settings.ALERTS` tuples to be analysed by Mirage.
 
 Add Boundary settings
 ---------------------

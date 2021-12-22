@@ -66,13 +66,13 @@ Python version
 ~~~~~~~~~~~~~~
 
 Below we use the path ``/opt/python_virtualenv``, which you can substitute
-with any path you choose.  We are going to use the Python-3.8.10 source and
-build and install an isolated Python-3.8.10, this has no effect on your system
+with any path you choose.  We are going to use the Python-3.8.12 source and
+build and install an isolated Python-3.8.12, this has no effect on your system
 Python:
 
 .. code-block:: bash
 
-    PYTHON_VERSION="3.8.10"
+    PYTHON_VERSION="3.8.12"
     PYTHON_MAJOR_VERSION="3.8"
     PYTHON_VIRTUALENV_DIR="/opt/python_virtualenv"
 
@@ -95,20 +95,20 @@ Python:
     make altinstall
 
 
-You will now have a Python-3.8.10 environment with the Python
-executable: ``/opt/python_virtualenv/versions/3.8.10/bin/python3.8``
+You will now have a Python-3.8.12 environment with the Python
+executable: ``/opt/python_virtualenv/versions/3.8.12/bin/python3.8``
 
 Create a Skyline Python virtualenv
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Once again using Python-3.8.10:
+Once again using Python-3.8.12:
 
 .. code-block:: bash
 
-    PYTHON_VERSION="3.8.10"
+    PYTHON_VERSION="3.8.12"
     PYTHON_MAJOR_VERSION="3.8"
     PYTHON_VIRTUALENV_DIR="/opt/python_virtualenv"
-    PROJECT="skyline-py3810"
+    PROJECT="skyline-py3812"
 
     cd "${PYTHON_VIRTUALENV_DIR}/projects"
     virtualenv --python="${PYTHON_VIRTUALENV_DIR}/versions/${PYTHON_VERSION}/bin/python${PYTHON_MAJOR_VERSION}" "$PROJECT"

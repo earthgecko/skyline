@@ -212,7 +212,7 @@ Example of log output:
 SNAB flux load tester
 ---------------------
 
-So how many metrics can Skyline handle ruuning on that digitalocean droplet?
+So how many metrics can Skyline handle running on that digitalocean droplet?
 
 It is difficult to tell how many metrics a single Skyline server can handle
 given the myriad combinations of configurations and hardware resources it may be
