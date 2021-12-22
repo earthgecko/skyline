@@ -1707,9 +1707,9 @@ class Mirage(Thread):
             #                   Feature #3480: batch_processing
             # Evaluate the reported anomaly timestamp to determine whether
             # EXPIRATION_TIME should be applied to a batch metric
+            analyzer_batch_anomaly = None
             if last_alert:
                 # Is this a analyzer_batch related anomaly
-                analyzer_batch_anomaly = None
                 analyzer_batch_metric_anomaly_key = 'analyzer_batch.anomaly.%s.%s' % (
                     str(int_metric_timestamp), base_name)
                 try:
@@ -1779,7 +1779,7 @@ class Mirage(Thread):
                             logger.error('error :: failed to determine seconds_between_batch_anomalies for batch metric Panorama key- %s' % cache_key)
                             last_timestamp = None
                     if seconds_between_batch_anomalies:
-                        if seconds_between_batch_anomalies > int(metric_expiration_time):
+                        if seconds_between_batch_anomalies >= int(metric_expiration_time):
                             logger.info('the difference between the last anomaly timestamp (%s) and the batch anomaly timestamp (%s) for batch metric %s is greater than the metric EXPIRATION_TIME of %s' % (
                                 str(last_timestamp), str(int_metric_timestamp), base_name,
                                 str(metric_expiration_time)))
@@ -1819,6 +1819,10 @@ class Mirage(Thread):
             if send_to_panorama:
                 if not os.path.exists(settings.PANORAMA_CHECK_PATH):
                     mkdir_p(settings.PANORAMA_CHECK_PATH)
+
+                if analyzer_batch_anomaly:
+                    from_timestamp = int_metric_timestamp - int(second_order_resolution_seconds)
+                    from_timestamp = str(from_timestamp)
 
                 # Note:
                 # The values are enclosed is single quoted intentionally

@@ -207,10 +207,10 @@ class RelatedMetrics(Thread):
                 logger.error('error :: related_metrics :: find_related :: failed to get Redis hash aet.metrics_manager.metric_names_with_ids - %s' % str(err))
             # Check the DB just in case Redis data was lost this will stop all
             # metrics being reanalysed if the Redis data is lost
+            metric_group_info = {}
             if not metric_info_last_updated:
                 logger.info('debug :: related_metrics :: find_related :: %s last_updated timestamp not found in Redis hash luminosity.metric_group.last_updated querying DB' % (
                     base_name))
-                metric_group_info = {}
                 try:
                     metric_group_info = get_metric_group_info(skyline_app, metric_id)
                 except Exception as err:

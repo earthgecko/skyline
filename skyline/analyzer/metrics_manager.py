@@ -3010,18 +3010,26 @@ class Metrics_Manager(Thread):
         # @added 20211011 - Feature #4278: luminosity - related_namespaces
         # Create and manage the metrics_manager.namespaces Redis hash but only
         # update it if new data
+        if not metric_names_with_ids:
+            logger.error('error :: metrics_manager :: metric_names_with_ids is empty')
         if metric_names_with_ids:
             update_namespaces = False
+            logger.info('metrics_manager :: %s metric_names_with_ids retrieved from DB' % str(len(metric_names_with_ids)))
+
             aet_metric_names_with_ids = {}
             try:
                 aet_metric_names_with_ids = self.redis_conn_decoded.hgetall('aet.metrics_manager.metric_names_with_ids')
-                logger.info('metrics_manager :: got last aet.metrics_manager.metric_names_with_ids from Redis to check namespaces')
+                logger.info('metrics_manager :: got %s last aet.metrics_manager.metric_names_with_ids from Redis to check namespaces' % str(len(aet_metric_names_with_ids)))
             except Exception as err:
                 logger.error('metrics_manager :: failed to hgetall aet.metrics_manager.metric_names_with_ids to check namespace - %s' % err)
+            if len(aet_metric_names_with_ids) == 0 and metric_names_with_ids:
+                logger.info('metrics_manager :: aet.metrics_manager.metric_names_with_ids from Redis is empty so using metric_names_with_ids to check namespaces')
+                aet_metric_names_with_ids = dict(metric_names_with_ids)
+
             namespaces = {}
             try:
                 namespaces = self.redis_conn_decoded.hgetall('metrics_manager.namespaces')
-                logger.info('metrics_manager :: got metrics_manager.namespaces from Redis to check namespaces')
+                logger.info('metrics_manager :: got %s metrics_manager.namespaces from Redis to check namespaces' % str(len(namespaces)))
             except Exception as err:
                 logger.error('metrics_manager :: failed to hgetall metrics_manager.namespaces to check namespaces - %s' % err)
             if not namespaces:
@@ -3037,6 +3045,7 @@ class Metrics_Manager(Thread):
             if not update_namespaces:
                 logger.info('metrics_manager :: no changes to metrics not updating namespaces')
             if update_namespaces:
+                logger.info('metrics_manager :: updating namespaces')
                 namespaces_list = []
                 for base_name in current_metric_names:
                     namespace_elements = base_name.split('.')

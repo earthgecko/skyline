@@ -75,7 +75,7 @@ def get_all_db_metric_names(current_skyline_app, with_ids=False):
         engine_disposal(current_skyline_app, engine)
 
     if not metric_names:
-        current_logger.error('error :: %s :: no metric names returned from the DB - %s' % (
+        current_logger.error('error :: %s :: no metric names returned from the DB' % (
             function_str))
 
     if with_ids:

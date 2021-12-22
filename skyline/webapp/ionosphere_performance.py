@@ -327,14 +327,18 @@ def get_ionosphere_performance(
         start_timestamp_date = None
         # If the from_timestamp is 0 or all
         if determine_start_timestamp:
+            created_dates = []
             try:
                 connection = engine.connect()
-                stmt = select([metrics_table.c.created_timestamp], metrics_table.c.id.in_(metric_ids)).limit(1)
+                # stmt = select([metrics_table.c.created_timestamp], metrics_table.c.id.in_(metric_ids)).limit(1)
+                stmt = select([metrics_table.c.created_timestamp], metrics_table.c.id.in_(metric_ids))
                 result = connection.execute(stmt)
                 for row in result:
-                    start_timestamp_date = row['created_timestamp']
-                    break
+                    # start_timestamp_date = row['created_timestamp']
+                    created_dates.append(row['created_timestamp'])
+                    # break
                 connection.close()
+                start_timestamp_date = sorted(created_dates)[0]
 
                 if not start_timestamp_date:
                     logger.error('error :: get_ionosphere_performance - could not determine created_timestamp - returning empty')

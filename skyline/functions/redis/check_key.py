@@ -7,7 +7,7 @@ from skyline_functions import get_redis_conn_decoded
 # @added 20210525 - Branch #1444: thunder
 #                   Task #4030: refactoring
 # Add a global method to check a Redis key
-def check_redis_key(redis_key, log=True):
+def check_redis_key(current_skyline_app, redis_key, log=True):
     """
     Check a Redis key.
 
