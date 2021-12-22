@@ -26,14 +26,6 @@ help you and your organisation unlock the full power of Skyline and more.
 Currently, we’re offering it as a free service for Skyline users.
 Find out more at https://anomify.ai/skyline
 
-## master branch - (currently a work in progress)
-
-If you clone from master be aware it is currently not deemed stable and is in a
-state of change.
-
-The last known stable master is https://github.com/earthgecko/skyline/commit/bc19690e0298f4020367649b55dfaafcd2baf262
-or the SNAB branch at https://github.com/earthgecko/skyline/commit/a1d21a2123f2f25aeb32cbe49874859966958ced
-
 ## Other
 
 https://gitter.im/earthgecko-skyline/Lobby
