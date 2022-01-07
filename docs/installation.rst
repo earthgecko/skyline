@@ -270,6 +270,17 @@ Skyline and dependencies install
 
     deactivate
 
+    # Fix python-daemon=>2.2.4 - which fails to run on Python 3 (numerous PRs are waiting
+    # to fix it https://pagure.io/python-daemon/pull-requests), however will not be
+    # as runner is to be deprecated, so in the future an alternative solution will be
+    # implemented
+    cp "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}/lib/python3.8/site-packages/daemon/runner.py" "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}/lib/python3.8/site-packages/daemon/runner.py.bak"
+    # Show minor change related to unbuffered bytes I/O - w+t to wb+
+    diff "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}/lib/python3.8/site-packages/daemon/runner.py.bak" /opt/skyline/github/skyline/utils/python-daemon/runner.3.0.0.py
+    # Deploy patched version to fix
+    cat /opt/skyline/github/skyline/utils/python-daemon/runner.3.0.0.py > "${PYTHON_VIRTUALENV_DIR}/projects/${PROJECT}/lib/python3.8/site-packages/daemon/runner.py"
+
+
 
 - Copy the ``skyline.conf`` and edit the ``USE_PYTHON`` as appropriate to your
   set up if it is not using PATH
