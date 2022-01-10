@@ -699,8 +699,11 @@ def get_correlations(
             # @modified 20201203 - Feature #3860: luminosity - handle low frequency data
             # Handle varying metric resolutions
             # if int(ts) > (anomaly_timestamp + 61):
-            if int(ts) > (anomaly_timestamp + (resolution + 1)):
-                break
+            # @modified 20211226 - Feature #3860: luminosity - handle low frequency data
+            # Only if resolution is known
+            if resolution:
+                if int(ts) > (anomaly_timestamp + (resolution + 1)):
+                    break
         if not correlate_ts:
             continue
 
