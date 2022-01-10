@@ -10057,7 +10057,13 @@ def rebrow():
             #                   Branch #3262: py3
             # As per https://github.com/jpadilla/pyjwt/issues/391 - jwt.encode generating bytes instead of a string
             if python_version == 3:
-                jwt_encoded_payload = jwt_encoded_payload.decode('UTF-8')
+                # @modified 20220110 - Task #4344: Update dependencies
+                #                      Task #4362: snyk - numpy and pillow updates
+                # PyJWT change no longer str
+                # jwt_encoded_payload = jwt_encoded_payload.decode('UTF-8')
+                # AttributeError: 'str' object has no attribute 'decode'
+                # jwt_encoded_payload = jwt_encoded_payload.decode('UTF-8')
+                jwt_encoded_payload = jwt_encoded_payload
         except:
             message = 'Failed to create set jwt_encoded_payload for %s' % client_id
             trace = traceback.format_exc()
