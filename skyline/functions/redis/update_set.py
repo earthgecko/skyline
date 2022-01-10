@@ -50,8 +50,11 @@ def update_redis_set(
             function_str, redis_set, e))
     try:
         redis_conn.srem(redis_set, str(original_data_str))
-        current_logger.info('removed item from Redis set %s - %s' % (
-            redis_set, str(original_data_str)))
+        # @added 20220110 - Bug #4364: Prune old thunder.events
+        #                   Branch #1444: thunder
+        if log:
+            current_logger.info('removed item from Redis set %s - %s' % (
+                redis_set, str(original_data_str)))
     except Exception as e:
         if not log:
             current_skyline_app_logger = current_skyline_app + 'Log'
@@ -62,8 +65,11 @@ def update_redis_set(
     if update_data_str != 'remove':
         try:
             redis_conn.sadd(redis_set, str(update_data_str))
-            current_logger.info('added updated item to Redis set %s - %s' % (
-                redis_set, str(update_data_str)))
+            # @added 20220110 - Bug #4364: Prune old thunder.events
+            #                   Branch #1444: thunder
+            if log:
+                current_logger.info('added updated item to Redis set %s - %s' % (
+                    redis_set, str(update_data_str)))
         except Exception as e:
             if not log:
                 current_skyline_app_logger = current_skyline_app + 'Log'
