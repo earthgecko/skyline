@@ -479,7 +479,10 @@ class Thunder(Thread):
                 thunder_events = []
                 if redis_is_up:
                     try:
-                        thunder_events = self.redis_conn_decoded.smembers(thunder_redis_set)
+                        # @modified 20220110 - Bug #4364: Prune old thunder.events
+                        #                      Branch #1444: thunder
+                        # thunder_events = self.redis_conn_decoded.smembers(thunder_redis_set)
+                        thunder_events = list(self.redis_conn_decoded.smembers(thunder_redis_set))
                     except Exception as e:
                         logger.error('error :: could not query Redis for set %s - %s' % (thunder_redis_set, e))
 
@@ -819,7 +822,9 @@ class Thunder(Thread):
                                     logger.info('added Redis failover - failover_key_file - %s' % (failover_key_file))
                                 except Exception as e:
                                     logger.error('error :: failed to add Redis failover failover_key_file - %s - %s' % (failover_key_file, e))
-                            redis_item = event_item
+                            # @modified 20220110 - Bug #4364: Prune old thunder.events
+                            #                      Branch #1444: thunder
+                            # redis_item = event_item
                             break
 
                 if not validated_event_details:

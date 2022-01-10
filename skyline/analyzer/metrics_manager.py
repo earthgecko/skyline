@@ -52,6 +52,10 @@ from functions.thunder.no_data import thunder_no_data
 from functions.timeseries.determine_data_frequency import determine_data_frequency
 from functions.timeseries.determine_data_sparsity import determine_data_sparsity
 
+# @added 20220110 - Bug #4364: Prune old thunder.events
+#                   Branch #1444: thunder
+from functions.redis.update_set import update_redis_set
+
 skyline_app = 'analyzer'
 skyline_app_logger = '%sLog' % skyline_app
 logger = logging.getLogger(skyline_app_logger)
@@ -2029,6 +2033,56 @@ class Metrics_Manager(Thread):
                 str(len(namespaces_no_data_dict))))
         else:
             logger.info('metrics_manager :: thunder_no_data - all namespaces receiving data OK')
+
+        # @added 20220110 - Bug #4364: Prune old thunder.events
+        #                   Branch #1444: thunder
+        # Any thunder events that are not acted on subsequent remain in the
+        # thunder.events set. Remove entries older than 3 days.
+        thunder_events_list = []
+        try:
+            thunder_events_list = list(self.redis_conn_decoded.smembers('thunder.events'))
+        except Exception as e:
+            logger.error(traceback.format_exc())
+            logger.error('error :: metrics_manager :: smembers thunder.events falied - %s' % (
+                e))
+        if thunder_events_list:
+            pruned_events = 0
+            oldest_event_timestamp = (int(spin_start) - (86400 * 3))
+            thunder_events_list_len = len(thunder_events_list)
+            logger.info('metrics_manager :: checking %s thunder.events items for pruning' % (
+                str(thunder_events_list_len)))
+            for event_item in thunder_events_list:
+                remove_item = False
+                event_timestamp = 0
+                event_expiry = 0
+                try:
+                    event_data = literal_eval(event_item)
+                    event_timestamp = int(float(event_data['timestamp']))
+                    event_expiry = int(float(event_data['expiry']))
+                except Exception as err:
+                    logger.error(traceback.format_exc())
+                    logger.error('error :: metrics_manager :: thunder.events determining event.timestamp failed - %s' % (
+                        err))
+                if not event_timestamp:
+                    remove_item = True
+                if event_timestamp < oldest_event_timestamp:
+                    remove_item = True
+                if event_expiry:
+                    if int(spin_start) > event_timestamp + event_expiry:
+                        remove_item = True
+                if remove_item:
+                    # Delete the item from the Redis set
+                    try:
+                        # self.redis_conn_decoded.sdel('thunder.events', event_item)
+                        update_redis_set(
+                            skyline_app, 'thunder.events', event_item,
+                            'remove', log=False)
+                        pruned_events += 1
+                    except Exception as err:
+                        logger.error('error :: could not remove item from Redis set thunder.events - %s' % (
+                            err))
+            logger.info('metrics_manager :: pruned %s old thunder.events items' % (
+                str(pruned_events)))
 
         # @added 20210720 - Feature #4188: metrics_manager.boundary_metrics
         if settings.BOUNDARY_METRICS:
