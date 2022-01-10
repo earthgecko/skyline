@@ -1343,7 +1343,7 @@ def get_mirage_not_anomalous_metrics(
             try:
                 new_from_timestamp = time.mktime(datetime.datetime.strptime(current_date_str, '%Y-%m-%d %H:%M').timetuple())
             except ValueError:
-                new_from_timestamp = time.mktime(.datetime.strptime(current_date_str, '%Y-%m-%d %H:%M').timetuple())
+                new_from_timestamp = time.mktime(datetime.datetime.strptime(current_date_str, '%Y-%m-%d %H:%M').timetuple())
             except Exception as err:
                 trace = traceback.format_exc()
                 logger.error('%s' % trace)
