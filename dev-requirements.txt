@@ -614,7 +614,9 @@ future==0.18.2
 # @added 20210101 - Task #3926: Test Skyline with dependencies updates - tsfresh v0.17.9
 # Update tsfresh to earthgecko/tsfresh branch v0.17.9
 #tsfresh==0.4.0
-git+git://github.com/earthgecko/tsfresh@05ee36c#egg=tsfresh
+# @modified 20220111 - Task #4368: Switch git clone to https
+#git+git://github.com/earthgecko/tsfresh@05ee36c#egg=tsfresh
+git+https://github.com/earthgecko/tsfresh@05ee36c#egg=tsfresh
 
 termcolor==1.1.0
 
@@ -729,7 +731,9 @@ PyJWT==2.3.0
 # @modified 20201231 - Task #3898: Test Python 3.8.6 and deps
 # Update future version in luminol
 #git+git://github.com/earthgecko/luminol@d429044#egg=luminol
-git+git://github.com/earthgecko/luminol@2de3fb2#egg=luminol
+# @modified 20220111 - Task #4368: Switch git clone to https
+#git+git://github.com/earthgecko/luminol@2de3fb2#egg=luminol
+git+https://github.com/earthgecko/luminol@2de3fb2#egg=luminol
 
 # @added 20181006 - Feature #2618: alert_slack
 # @modified 20190412 - Task #2926: Update dependencies
@@ -812,7 +816,9 @@ matrixprofile==1.1.10
 # @added 20210316 - Feature #3970: custom_algorithm - adtk_level_shift
 #                   Feature #3978: luminosity - classify_metrics
 #                   Feature #3642: Anomaly type classification
-git+git://github.com/earthgecko/adtk@895c517#egg=adtk
+# @modified 20220111 - Task #4368: Switch git clone to https
+#git+git://github.com/earthgecko/adtk@895c517#egg=adtk
+git+https://github.com/earthgecko/adtk@895c517#egg=adtk
 
 # @added 20210411 - Feature #4014: Ionosphere - inference
 #                   Branch #3590: inference
