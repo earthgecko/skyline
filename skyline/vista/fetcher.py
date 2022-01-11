@@ -106,7 +106,7 @@ class Fetcher(Thread):
         except:
             # @added 20201203 - Bug #3856: Handle boring sparsely populated metrics in derivative_metrics
             # Log warning
-            logger.warn('warning :: parent process is dead')
+            logger.warning('warning :: parent process is dead')
             exit(0)
 
     def fetch_process(self, i, metrics_to_fetch):
@@ -125,6 +125,39 @@ class Fetcher(Thread):
                 if i.startswith(param_name + '='):
                     param_value = i.split('=')[-1]
             return param_value
+
+        # @added 20220111 - Feature #4370: Manage vista.fetcher.metrics.json Redis set
+        logger.info('fetcher :: managing old entries in Redis set vista.fetcher.metrics.json')
+        vista_list = []
+        try:
+            vista_list = list(self.redis_conn_decoded.smembers('vista.fetcher.metrics.json'))
+        except Exception as err:
+            logger.error('error :: fetcher :: failed to get Redis set vista.fetcher.metrics.json to manage - %s' % (
+                err))
+            vista_list = []
+        vista_list_manage_error = None
+        vista_list_manage_removed = 0
+        for item in vista_list:
+            last_metric_ts = 0
+            try:
+                data_list = literal_eval(item)
+                last_metric_ts = int(literal_eval(literal_eval(data_list[0]['datapoints']))[-1][0])
+            except Exception as err:
+                vista_list_manage_error = 'error :: fetcher :: failed to determine timestamp from vista.fetcher.metrics.json data - %s - %s' % (
+                    str(item), err)
+            if last_metric_ts:
+                if last_metric_ts < (int(fetch_process_start) - 86400):
+                    try:
+                        self.redis_conn_decoded.srem('vista.fetcher.metrics.json', item)
+                        vista_list_manage_removed += 1
+                    except Exception as err:
+                        vista_list_manage_error = 'error :: fetcher :: failed to remove data from vista.fetcher.metrics.json data - %s - %s' % (
+                            str(item), err)
+        logger.info('fetcher :: manage Redis set vista.fetcher.metrics.json had %s entries, removed %s entries' % (
+            str(len(vista_list)), str(vista_list_manage_removed)))
+        if vista_list_manage_error:
+            logger.error('error :: fetcher :: manage Redis set vista.fetcher.metrics.json had errors')
+            logger.error('%s' % vista_list_manage_error)
 
         # @added 20191127 - Feature #3338: Vista - batch Graphite requests
         # Fetch metrics from the same Graphite host that have the same from
@@ -554,7 +587,7 @@ class Fetcher(Thread):
                 os.remove(skyline_app_logwait)
             except OSError:
                 logger.error('error - failed to remove %s, continuing' % skyline_app_logwait)
-                pass
+                # pass
 
         now = time()
         log_wait_for = now + 5
@@ -573,7 +606,7 @@ class Fetcher(Thread):
                 logger.info('log lock file removed')
             except OSError:
                 logger.error('error - failed to remove %s, continuing' % skyline_app_loglock)
-                pass
+                # pass
         else:
             logger.info('bin/%s.d log management done' % skyline_app)
 
@@ -1292,11 +1325,20 @@ class Fetcher(Thread):
                     logger.error(traceback.format_exc())
                     logger.error('error :: fetcher :: could not get Redis set %s' % redis_set)
 
+            # Use both the metrics sent to pre_populate_graphite_metric and
+            # @added 20220111 - Feature #4370: Manage vista.fetcher.metrics.json Redis set
+            # the ones submitted to flux
+            metrics_sent_to_flux_count = metrics_fetched_count + fetcher_sent_to_flux
+
             send_metric_name = '%s.sent_to_flux' % skyline_app_graphite_namespace
             try:
                 logger.info('fetcher :: sending Graphite - %s, %s' % (
-                    send_metric_name, str(fetcher_sent_to_flux)))
-                fetcher_sent_to_flux_str = str(fetcher_sent_to_flux)
+                    # @modified 20220111 - Feature #4370: Manage vista.fetcher.metrics.json Redis set
+                    # send_metric_name, str(fetcher_sent_to_flux)))
+                    send_metric_name, str(metrics_sent_to_flux_count)))
+                # @modified 20220111 - Feature #4370: Manage vista.fetcher.metrics.json Redis set
+                # fetcher_sent_to_flux_str = str(fetcher_sent_to_flux)
+                fetcher_sent_to_flux_str = str(metrics_sent_to_flux_count)
                 send_graphite_metric(parent_skyline_app, send_metric_name, fetcher_sent_to_flux_str)
             except:
                 logger.error(traceback.format_exc())
