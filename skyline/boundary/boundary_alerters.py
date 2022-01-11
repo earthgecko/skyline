@@ -1,3 +1,6 @@
+"""
+    boundary_alerters
+"""
 from __future__ import division
 import logging
 import traceback
@@ -5,6 +8,39 @@ import traceback
 # hashlib not used
 # import hashlib
 from smtplib import SMTP
+
+import re
+# from time import time
+import datetime
+import os.path
+import sys
+
+# @added 20181126 - Task #2742: Update Boundary
+#                   Feature #2618: alert_slack
+# Added dt, redis, gmtime and strftime
+# import datetime as dt
+# import redis
+from time import (time, gmtime, strftime)
+
+# @added 20201127 - Feature #3820: HORIZON_SHARDS
+from os import uname
+
+# @modified 20201207 - Task #3878: Add metric_trigger and alert_threshold to Boundary alerts
+# charset no longer used
+# from email import charset
+# @modified 20220111 - Bug #4366: Fix boundary slack channels match
+# Linting removed python 2 support
+# if python_version == 2:
+#     from email.MIMEMultipart import MIMEMultipart
+#     from email.MIMEText import MIMEText
+#     from email.MIMEImage import MIMEImage
+# if python_version == 3:
+#     from email.mime.multipart import MIMEMultipart
+#     from email.mime.text import MIMEText
+#     from email.mime.image import MIMEImage
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.image import MIMEImage
 
 # @added 20200122: Feature #3396: http_alerter
 from ast import literal_eval
@@ -25,35 +61,9 @@ try:
 except ImportError:
     from urllib import request as urllib
 
-import re
 from requests.utils import quote
-from time import time
-import datetime
-import os.path
-import sys
-
-# @added 20181126 - Task #2742: Update Boundary
-#                   Feature #2618: alert_slack
-# Added dt, redis, gmtime and strftime
-import datetime as dt
-# import redis
-from time import (gmtime, strftime)
-
-# @added 20201127 - Feature #3820: HORIZON_SHARDS
-from os import uname
 
 python_version = int(sys.version_info[0])
-# @modified 20201207 - Task #3878: Add metric_trigger and alert_threshold to Boundary alerts
-# charset no longer used
-# from email import charset
-if python_version == 2:
-    from email.MIMEMultipart import MIMEMultipart
-    from email.MIMEText import MIMEText
-    from email.MIMEImage import MIMEImage
-if python_version == 3:
-    from email.mime.multipart import MIMEMultipart
-    from email.mime.text import MIMEText
-    from email.mime.image import MIMEImage
 
 sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
 sys.path.insert(0, os.path.dirname(__file__))
@@ -152,7 +162,10 @@ def alert_smtp(datapoint, metric_name, expiration_time, metric_trigger, algorith
     recipients = unique_noHash(matched_recipients)
 
     # Backwards compatibility
-    if type(recipients) is str:
+    # @modified 20220111 - Bug #4366: Fix boundary slack channels match
+    # Linting
+    # if type(recipients) is str:
+    if isinstance(recipients, str):
         recipients = [recipients]
 
     # @added 20180524 - Task #2384: Change alerters to cc other recipients
@@ -269,9 +282,9 @@ def alert_smtp(datapoint, metric_name, expiration_time, metric_trigger, algorith
     until_timestamp = int(time())
     from_seconds_ago = graphite_previous_hours * 3600
     from_timestamp = until_timestamp - from_seconds_ago
-    graphite_from = dt.datetime.fromtimestamp(int(from_timestamp)).strftime('%H:%M_%Y%m%d')
+    graphite_from = datetime.datetime.fromtimestamp(int(from_timestamp)).strftime('%H:%M_%Y%m%d')
     logger.info('graphite_from - %s' % str(graphite_from))
-    graphite_until = dt.datetime.fromtimestamp(int(until_timestamp)).strftime('%H:%M_%Y%m%d')
+    graphite_until = datetime.datetime.fromtimestamp(int(until_timestamp)).strftime('%H:%M_%Y%m%d')
     logger.info('graphite_until - %s' % str(graphite_until))
     # @modified 20191022 - Task #3294: py3 - handle system parameter in Graphite cactiStyle
     # graphite_target = 'target=cactiStyle(%s)'
@@ -689,9 +702,9 @@ def alert_slack(datapoint, metric_name, expiration_time, metric_trigger, algorit
     target_seconds = int((graphite_previous_hours * 60) * 60)
     from_timestamp = str(until_timestamp - target_seconds)
 
-    graphite_from = dt.datetime.fromtimestamp(int(from_timestamp)).strftime('%H:%M_%Y%m%d')
+    graphite_from = datetime.datetime.fromtimestamp(int(from_timestamp)).strftime('%H:%M_%Y%m%d')
     logger.info('graphite_from - %s' % str(graphite_from))
-    graphite_until = dt.datetime.fromtimestamp(int(until_timestamp)).strftime('%H:%M_%Y%m%d')
+    graphite_until = datetime.datetime.fromtimestamp(int(until_timestamp)).strftime('%H:%M_%Y%m%d')
     logger.info('graphite_until - %s' % str(graphite_until))
     # @added 20181025 - Feature #2618: alert_slack
     # Added date and time info so you do not have to mouseover the slack
@@ -700,7 +713,7 @@ def alert_slack(datapoint, metric_name, expiration_time, metric_trigger, algorit
     # @modified 20181029 - Feature #2618: alert_slack
     # Use the standard UNIX data format
     # human_anomaly_time = dt.datetime.fromtimestamp(int(until_timestamp)).strftime('%Y-%m-%d %H:%M:%S')
-    human_anomaly_time = dt.datetime.fromtimestamp(int(until_timestamp)).strftime('%c')
+    human_anomaly_time = datetime.datetime.fromtimestamp(int(until_timestamp)).strftime('%c')
     slack_time_string = '%s %s' % (human_anomaly_time, timezone)
 
     # @added 20191106 - Branch #3262: py3
@@ -882,15 +895,17 @@ def alert_slack(datapoint, metric_name, expiration_time, metric_trigger, algorit
                 matched_channels.append(channel)
 
     if matched_channels != []:
-        for i_metric_name in matched_channels:
-            channels = settings.BOUNDARY_SLACK_OPTS['channels'][i_metric_name]
-            notify_channels.append(channels)
+        # @modified 20220111 - Bug #4366: Fix boundary slack channels match
+        # for i_metric_name in matched_channels:
+        #     channels = settings.BOUNDARY_SLACK_OPTS['channels'][i_metric_name]
+        for i_channel in matched_channels:
+            notify_channels.append(i_channel)
 
     if not notify_channels:
         logger.error('error :: alert_slack - could not determine channel')
         return False
-    else:
-        channels = notify_channels
+
+    channels = notify_channels
 
     try:
         icon_emoji = settings.BOUNDARY_SLACK_OPTS['icon_emoji']
@@ -921,7 +936,9 @@ def alert_slack(datapoint, metric_name, expiration_time, metric_trigger, algorit
     # is a tuple.
     channels_list = []
     for channel in channels:
-        if type(channel) == tuple:
+        # @modified 20220111 - Bug #4366: Fix boundary slack channels match
+        # if type(channel) == tuple:
+        if isinstance(channel, tuple):
             for ichannel in channel:
                 channels_list.append(str(ichannel))
         else:
@@ -994,7 +1011,6 @@ def alert_slack(datapoint, metric_name, expiration_time, metric_trigger, algorit
         os.remove(image_file)
     except OSError:
         logger.error('error - failed to remove %s, continuing' % image_file)
-        pass
 
 
 # @added 20200122: Feature #3396: http_alerter
@@ -1088,6 +1104,8 @@ def alert_http(alerter, datapoint, metric_name, expiration_time, metric_trigger,
                 del REDIS_HTTP_ALERTER_CONN_DECODED
             except:
                 pass
+
+        item_to_resend = None
         if resend_queue:
             try:
                 for index, resend_item in enumerate(resend_queue):
@@ -1099,6 +1117,7 @@ def alert_http(alerter, datapoint, metric_name, expiration_time, metric_trigger,
                         if int(resend_metric_alert_dict['timestamp']) == int(metric_timestamp):
                             previous_attempts = int(resend_metric_alert_dict['attempts'])
                             in_resend_queue = True
+                            item_to_resend = resend_item
                             break
             except:
                 logger.error(traceback.format_exc())
@@ -1133,13 +1152,15 @@ def alert_http(alerter, datapoint, metric_name, expiration_time, metric_trigger,
 
             if in_resend_queue:
                 try:
-                    REDIS_HTTP_ALERTER_CONN.srem(redis_set, str(resend_item))
+                    # REDIS_HTTP_ALERTER_CONN.srem(redis_set, str(resend_item))
+                    REDIS_HTTP_ALERTER_CONN.srem(redis_set, str(item_to_resend))
                     logger.info('alert_http :: alert removed from %s' % (
                         str(redis_set)))
                 except:
                     logger.error(traceback.format_exc())
                     logger.error('error :: alert_http :: failed remove %s from Redis set %s' % (
-                        str(resend_item), redis_set))
+                        # str(resend_item), redis_set))
+                        str(item_to_resend), redis_set))
 
             # @added 20200310 - Feature #3396: http_alerter
             # When the response code is 401 the response object appears to be
@@ -1175,12 +1196,11 @@ def alert_http(alerter, datapoint, metric_name, expiration_time, metric_trigger,
                                 'error :: failed to add Panorama alert event - panorama.alert.%s.%s' % (
                                     str(metric_timestamp), metric_name))
                     return
-                else:
-                    logger.error('error :: alert_http :: %s %s responded with status code %s and reason %s' % (
-                        str(alerter_name), str(alerter_endpoint),
-                        str(response.status_code), str(response.reason)))
-                    add_to_resend_queue = True
-                    fail_alerter = True
+                logger.error('error :: alert_http :: %s %s responded with status code %s and reason %s' % (
+                    str(alerter_name), str(alerter_endpoint),
+                    str(response.status_code), str(response.reason)))
+                add_to_resend_queue = True
+                fail_alerter = True
             else:
                 logger.error('error :: alert_http :: %s %s did not respond' % (
                     str(alerter_name), str(alerter_endpoint)))
@@ -1256,14 +1276,14 @@ def alert_sms(datapoint, metric_name, expiration_time, metric_trigger, algorithm
         response = None
         try:
             success, response = send_sms(skyline_app, sms_number, message)
-        except Exception as e:
+        except Exception as err:
             logger.error(traceback.format_exc())
             logger.error('error :: failed to determine number for SMS recipient %s - %s' % (
-                sms_number, e))
+                sms_number, err))
         if success:
             logger.info('sent SMS alert to %s' % sms_number)
         else:
-            logger.warn('warning :: falied to send SMS alert to %s' % sms_number)
+            logger.warning('warning :: failed to send SMS alert to %s' % sms_number)
 
 
 # @modified 20201207 - Task #3878: Add metric_trigger and alert_threshold to Boundary alerts
