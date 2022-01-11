@@ -952,7 +952,7 @@ class Thunder(Thread):
                                 remove_item = thunder_event_str
                         if remove_item:
                             # Remove event
-                            logger.error('error :: removing event from thunder.events Redis set as the event is older than 86400 seconds. event:%s' % (
+                            logger.info('removing event from thunder.events Redis set as the event is older than 86400 seconds. event: %s' % (
                                 str(thunder_event)))
                             try:
                                 update_redis_set(
