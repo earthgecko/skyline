@@ -604,6 +604,11 @@ def run_selected_algorithm(timeseries, metric_name, second_order_resolution_seco
     custom_algorithms_run = []
     custom_algorithms_run_results = []
 
+    # @added 20220111 - Feature #3566: custom_algorithms
+    # Set default values
+    base_name = metric_name.replace(FULL_NAMESPACE, '', 1)
+    custom_algorithms_to_run = {}
+
     if CUSTOM_ALGORITHMS:
         base_name = metric_name.replace(FULL_NAMESPACE, '', 1)
         custom_algorithms_to_run = {}
