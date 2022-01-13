@@ -114,7 +114,7 @@ class RollingThunder(Thread):
                         logger.info('thunder/rolling :: %s is reporting UP' % (
                             check_app))
                     else:
-                        logger.warn('warning :: thunder/rolling :: %s is NOT reporting UP' % (
+                        logger.warning('warning :: thunder/rolling :: %s is NOT reporting UP' % (
                             check_app))
             except Exception as e:
                 logger.error(traceback.format_exc())
@@ -147,13 +147,13 @@ class RollingThunder(Thread):
                         if success:
                             logger.info('thunder/rolling :: analyzer run_time OK')
                         else:
-                            logger.warn('warning :: thunder/rolling :: analyzer run_time overruning')
+                            logger.warning('warning :: thunder/rolling :: analyzer run_time overruning')
                     except Exception as e:
                         logger.error(traceback.format_exc())
                         logger.error('error :: thunder/rolling :: thunder_check_analyzer_run_time errored - %s' % (
                             e))
                 else:
-                    logger.warn('warning :: thunder/rolling :: did not check Analyzer run_time as thunder_check_analyzer_run_time failed to import')
+                    logger.warning('warning :: thunder/rolling :: did not check Analyzer run_time as thunder_check_analyzer_run_time failed to import')
 
         # Horizon checks
         if 'horizon' in thunder_apps:
@@ -178,13 +178,13 @@ class RollingThunder(Thread):
                         if success:
                             logger.info('thunder/rolling :: horizon metrics_received OK')
                         else:
-                            logger.warn('warning :: thunder/rolling :: horizon metrics_received has significantly changed')
+                            logger.warning('warning :: thunder/rolling :: horizon metrics_received has significantly changed')
                     except Exception as e:
                         logger.error(traceback.format_exc())
                         logger.error('error :: thunder/rolling :: tthunder_check_horizon_metrics_recieved errored - %s' % (
                             e))
                 else:
-                    logger.warn('warning :: thunder/rolling :: did not check horizon metrics_recieved as thunder_check_horizon_metrics_received failed to import')
+                    logger.warning('warning :: thunder/rolling :: did not check horizon metrics_recieved as thunder_check_horizon_metrics_received failed to import')
 
         spin_end = time() - spin_start
         logger.info('thunder/rolling :: checks took %.2f seconds' % spin_end)
@@ -222,7 +222,7 @@ class RollingThunder(Thread):
                 SERVER_METRIC_PATH = ''
         except Exception as e:
             SERVER_METRIC_PATH = ''
-            logger.warn('warning :: thunder/rolling :: settings.SERVER_METRICS_NAME is not declared in settings.py, defaults to \'\' - %s' % e)
+            logger.warning('warning :: thunder/rolling :: settings.SERVER_METRICS_NAME is not declared in settings.py, defaults to \'\' - %s' % e)
 
         run_every = 60
 

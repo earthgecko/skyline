@@ -2073,7 +2073,6 @@ class Metrics_Manager(Thread):
                 if remove_item:
                     # Delete the item from the Redis set
                     try:
-                        # self.redis_conn_decoded.sdel('thunder.events', event_item)
                         update_redis_set(
                             skyline_app, 'thunder.events', event_item,
                             'remove', log=False)

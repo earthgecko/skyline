@@ -598,7 +598,10 @@ class Mirage(Thread):
         # Do not handle batch processing metrics
         batch_processing_metrics = []
         try:
-            batch_processing_metrics = list(self.redis_conn_decoded.smembers('analyzer.batch_processing_metrics'))
+            # @modified 20220113 - Feature #4328: BATCH_METRICS_CUSTOM_FULL_DURATIONS
+            # Use aet.analyzer.batch_processing_metrics
+            # batch_processing_metrics = list(self.redis_conn_decoded.smembers('analyzer.batch_processing_metrics'))
+            batch_processing_metrics = list(self.redis_conn_decoded.smembers('aet.analyzer.batch_processing_metrics'))
         except:
             logger.error(traceback.format_exc())
             logger.error('error :: populate_redis :: failed to get analyzer.batch_processing_metrics from Redis')
@@ -2520,6 +2523,16 @@ class Mirage(Thread):
                 # else:
                 #    sleep(1)
 
+                # @added 20220113 - Feature #3486: analyzer_batch
+                #                   Feature #3480: batch_processing
+                # Do not remove batch_processing checks
+                batch_processing_metrics = []
+                try:
+                    batch_processing_metrics = list(self.redis_conn_decoded.smembers('aet.analyzer.batch_processing_metrics'))
+                except:
+                    logger.error('error :: Analyzer could not get aet.analyzer.batch_processing_metrics from Redis')
+                    logger.error(traceback.format_exc())
+
                 # Clean up old files
                 now_timestamp = time()
                 stale_age = now_timestamp - settings.MIRAGE_STALE_SECONDS
@@ -2527,6 +2540,14 @@ class Mirage(Thread):
                     if os.path.isfile(settings.MIRAGE_CHECK_PATH + "/" + current_file):
                         t = os.stat(settings.MIRAGE_CHECK_PATH + "/" + current_file)
                         c = t.st_ctime
+
+                        # @added 20220113 - Feature #3486: analyzer_batch
+                        #                   Feature #3480: batch_processing
+                        # Do not remove batch_processing checks
+                        for b_metric in batch_processing_metrics:
+                            if b_metric in current_file:
+                                continue
+
                         # delete file if older than a week
                         if c < stale_age:
                             os.remove(settings.MIRAGE_CHECK_PATH + "/" + current_file)
