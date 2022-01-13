@@ -30,6 +30,9 @@ from datetime import timedelta
 import os
 import base64
 
+# @added 20220112 - Bug #4374: webapp - handle url encoded chars
+import urllib.parse
+
 # @added 20210415 - Feature #4014: Ionosphere - inference
 from shutil import rmtree
 
@@ -95,6 +98,9 @@ from flask import escape as flask_escape
 # @added 20191029 - Task #3302: Handle csv.reader in py3
 #                   Branch #3262: py3
 import codecs
+
+# @added 20220112 - Bug #4374: webapp - handle url encoded chars
+from werkzeug.urls import iri_to_uri
 
 if True:
     sys.path.append(os.path.join(os.path.dirname(os.path.realpath(__file__)), os.pardir))
@@ -581,6 +587,19 @@ def gzipped(f):
         return f(*args, **kwargs)
 
     return view_func
+
+
+# @added 20220112 - Bug #4374: webapp - handle url encoded chars
+def url_encode_metric_name(metric_name):
+    url_encoded_metric_name = False
+    if ':' in metric_name:
+        url_encoded_metric_name = True
+    if '/' in metric_name:
+        url_encoded_metric_name = True
+    if url_encoded_metric_name:
+        metric_name = urllib.parse.quote(metric_name, safe='')
+        logger.info('url encoded metric_name to %s' % metric_name)
+    return metric_name
 
 
 @app.errorhandler(500)
@@ -1546,6 +1565,8 @@ def api():
         if not last_analyzed_timestamp:
             redis_hash_key = 'analyzer.low_priority_metrics.last_analyzed_timestamp'
             redis_metric_name = '%s%s' % (settings.FULL_NAMESPACE, metric)
+            # @added 20220112 - Bug #4374: webapp - handle url encoded chars
+            redis_metric_name = url_encode_metric_name(redis_metric_name)
             try:
                 last_analyzed_timestamp = REDIS_CONN.hget(redis_hash_key, redis_metric_name)
             except Exception as e:
@@ -2883,6 +2904,9 @@ def api():
             raw_series = REDIS_CONN_UNDECODE.get(metric)
             if not raw_series:
                 metric_name = '%s%s' % (settings.FULL_NAMESPACE, metric)
+                # @added 20220112 - Bug #4374: webapp - handle url encoded chars
+                metric_name = url_encode_metric_name(metric_name)
+
                 raw_series = REDIS_CONN_UNDECODE.get(metric_name)
             if not raw_series:
                 resp = json.dumps(
@@ -3651,6 +3675,8 @@ def panorama():
                         logger.info(traceback.format_exc())
                         return 'Internal Server Error', 500
                     metric_name = settings.FULL_NAMESPACE + value
+                    # @added 20220112 - Bug #4374: webapp - handle url encoded chars
+                    metric_name = url_encode_metric_name(metric_name)
 
                     # @added 20180423 - Feature #2034: analyse_derivatives
                     #                   Branch #2270: luminosity
@@ -4819,6 +4845,9 @@ def ionosphere():
 
                 if not metric_found:
                     metric_name = settings.FULL_NAMESPACE + base_name
+                    # @added 20220112 - Bug #4374: webapp - handle url encoded chars
+                    metric_name = url_encode_metric_name(metric_name)
+
                     try:
                         unique_metrics = list(REDIS_CONN.smembers(settings.FULL_NAMESPACE + 'unique_metrics'))
                     except:
@@ -5400,6 +5429,8 @@ def ionosphere():
                     logger.info(traceback.format_exc())
                     return 'Internal Server Error', 500
                 metric_name = settings.FULL_NAMESPACE + str(value)
+                # @added 20220112 - Bug #4374: webapp - handle url encoded chars
+                metric_name = url_encode_metric_name(metric_name)
 
                 # @added 20180423 - Feature #2034: analyse_derivatives
                 #                   Branch #2270: luminosity
@@ -6337,6 +6368,9 @@ def ionosphere():
                                 if settings.REMOTE_SKYLINE_INSTANCES:
                                     base_name = request.args.get('metric', 0)
                                     redis_metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(base_name))
+                                    # @added 20220112 - Bug #4374: webapp - handle url encoded chars
+                                    redis_metric_name = url_encode_metric_name(redis_metric_name)
+
                                     metric_assigned_to = None
                                     logger.info('checking which remote Skyline instance is assigned - %s' % str(base_name))
                                     for item in settings.REMOTE_SKYLINE_INSTANCES:
@@ -6448,6 +6482,8 @@ def ionosphere():
                         logger.info(traceback.format_exc())
                         return 'Internal Server Error', 500
                     metric_name = settings.FULL_NAMESPACE + str(value)
+                    # @added 20220112 - Bug #4374: webapp - handle url encoded chars
+                    metric_name = url_encode_metric_name(metric_name)
 
                     metric_found = False
                     if metric_name not in unique_metrics and settings.OTHER_SKYLINE_REDIS_INSTANCES:
@@ -6521,6 +6557,8 @@ def ionosphere():
                 if metric_arg or metric_td_arg:
                     if key == 'metric' or key == 'metric_td':
                         base_name = str(value)
+                        # @added 20220112 - Bug #4374: webapp - handle url encoded chars
+                        base_name = url_encode_metric_name(base_name)
 
                 # @added 20180804 - Feature #2488: Allow user to specifically set metric as a derivative metric in training_data
                 if timestamp_arg and metric_arg:
@@ -6600,6 +6638,9 @@ def ionosphere():
                         if settings.REMOTE_SKYLINE_INSTANCES and not training_data_dir_found:
                             base_name = request.args.get('metric', 0)
                             redis_metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(base_name))
+                            # @added 20220112 - Bug #4374: webapp - handle url encoded chars
+                            redis_metric_name = url_encode_metric_name(redis_metric_name)
+
                             metric_assigned_to = None
                             logger.info('checking which remote Skyline instance is assigned - %s' % str(base_name))
                             for item in settings.REMOTE_SKYLINE_INSTANCES:
@@ -6861,6 +6902,9 @@ def ionosphere():
         except:
             derivative_metrics = []
         redis_metric_name = '%s%s' % (settings.FULL_NAMESPACE, str(base_name))
+        # @added 20220112 - Bug #4374: webapp - handle url encoded chars
+        redis_metric_name = url_encode_metric_name(redis_metric_name)
+
         if redis_metric_name in derivative_metrics:
             known_derivative_metric = True
         if known_derivative_metric:
@@ -7319,6 +7363,9 @@ def ionosphere():
                 except:
                     logger.warning('warning :: Webapp could not get the ionosphere.unique_metrics list from Redis, this could be because there are none')
                 metric_name = settings.FULL_NAMESPACE + str(base_name)
+                # @added 20220112 - Bug #4374: webapp - handle url encoded chars
+                metric_name = url_encode_metric_name(metric_name)
+
                 if metric_name in ionosphere_metrics:
                     iono_metric = True
 
@@ -8008,6 +8055,11 @@ def ionosphere_images():
                 if '.png' not in filename:
                     logger.info('forbidden filename, not png, returning 403 - %s' % filename)
                     return 'Forbidden', 403
+
+                # @added 20220112 - Bug #4374: webapp - handle url encoded chars
+                if not os.path.isfile(filename):
+                    r_url = iri_to_uri(request.url)
+                    logger.info('r_url: %s' % r_url)
 
                 if os.path.isfile(filename):
                     try:
