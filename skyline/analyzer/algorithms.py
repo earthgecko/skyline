@@ -1594,7 +1594,19 @@ def run_selected_algorithm(
         else:
             threshold = len(ensemble) - CONSENSUS
 
-        if ensemble.count(False) <= threshold:
+        # @added 20220113 - Feature #3566: custom_algorithms
+        #                   Feature #4328: BATCH_METRICS_CUSTOM_FULL_DURATIONS
+        # With the addition of the custom_consensus_override and the possibility
+        # of the ensemble list being filled with None value when TooShort, etc
+        # handle if the ensemble list is all None and do not return anomalous as
+        # True
+        if ensemble.count(None) == len(ensemble):
+            return False, ensemble, timeseries[-1][1], negatives_found, algorithms_run
+
+        # @modified 20220113 - Feature #3566: custom_algorithms
+        #                      Feature #4328: BATCH_METRICS_CUSTOM_FULL_DURATIONS
+        # if ensemble.count(False) <= threshold:
+        if ensemble.count(False) <= threshold and ensemble.count(False) > 0:
 
             # @added 20200425 - Feature #3508: ionosphere.untrainable_metrics
             # Only run a negatives_present check if it is anomalous, there
