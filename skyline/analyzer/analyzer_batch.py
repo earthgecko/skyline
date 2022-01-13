@@ -380,6 +380,12 @@ class AnalyzerBatch(Thread):
                 now = int(time())
                 duration = settings.FULL_DURATION + settings.ROOMBA_GRACE_TIME
                 key = metric_name
+
+                # @added 20220113 - Feature #3566: custom_algorithms
+                #                   Feature #4328: BATCH_METRICS_CUSTOM_FULL_DURATIONS
+                # Enable pruning at custom_duration
+                custom_duration = False
+
                 # @added 20200817 - Feature #3684: ROOMBA_BATCH_METRICS_CUSTOM_DURATIONS
                 #                   Feature #3650: ROOMBA_DO_NOT_PROCESS_BATCH_METRICS
                 #                   Feature #3480: batch_processing
@@ -394,6 +400,9 @@ class AnalyzerBatch(Thread):
                                 duration = custom_full_duration + settings.ROOMBA_GRACE_TIME
                                 logger.info('batch_processing :: %s found in ROOMBA_BATCH_METRICS_CUSTOM_DURATIONS, duration for roomba set to %s' % (
                                     base_name, str(duration)))
+                                # @added 20220113 - Feature #3566: custom_algorithms
+                                #                   Feature #4328: BATCH_METRICS_CUSTOM_FULL_DURATIONS
+                                custom_duration = True
                 except:
                     logger.error(traceback.format_exc())
                     logger.error('error :: analyzer_batch :: failed to remove batch metric item - %s - from Redis set - %s' % (str(data), redis_set))
@@ -415,7 +424,25 @@ class AnalyzerBatch(Thread):
                         logger.info('batch_processing :: last_timestamp is %s, but for roomba setting to the last_analyzed_timestamp (%s) as it has not been analyzed' % (
                             str(last_timestamp), str(last_analyzed_timestamp)))
                         last_timestamp = last_analyzed_timestamp
+
+                    # @added 20220113 - Feature #3566: custom_algorithms
+                    #                   Feature #4328: BATCH_METRICS_CUSTOM_FULL_DURATIONS
+                    # I am not 100% certain how this will affect historical
+                    # batch processing
+                    drop_old_data = False
+                    if custom_duration and last_timestamp < (int(timeseries[-1][0]) - duration):
+                        last_timestamp = int(time()) - duration
+                        logger.info('batch_processing :: custom_duration set last_timestamp to %s' % (
+                            str(last_timestamp)))
+                        drop_old_data = True
+
                     now = int(last_analyzed_timestamp)
+
+                    # @added 20220113 - Feature #3566: custom_algorithms
+                    #                   Feature #4328: BATCH_METRICS_CUSTOM_FULL_DURATIONS
+                    if drop_old_data:
+                        now = last_timestamp
+
                     logger.info('batch_processing :: doing roomba on %s with %s data points' % (key, str(len(timeseries))))
                     roombaed = True
                     try:
@@ -815,11 +842,31 @@ class AnalyzerBatch(Thread):
             except:
                 test_anomaly = False
 
+            # @added 20220113 - Feature #3566: custom_algorithms
+            #                   Feature #4328: BATCH_METRICS_CUSTOM_FULL_DURATIONS
+            timestamps_processed = 0
+
             # Distill timeseries strings into lists
             for i, batch_timestamp in enumerate(timestamps_to_analyse):
                 self.check_if_parent_is_alive()
 
                 batch_timeseries = []
+
+                # @added 20220113 - Feature #3566: custom_algorithms
+                #                   Feature #4328: BATCH_METRICS_CUSTOM_FULL_DURATIONS
+                # Reset anomalous for every iteration, print iterations and
+                # break if approaching spin_batch_process limit
+                anomalous = False
+                timestamps_processed += 1
+                if not timestamps_processed % 500:
+                    logger.info('%s of %s timestamps processed for %s' % (
+                        str(timestamps_processed),
+                        str(len(timestamps_to_analyse)), base_name))
+                if int(time()) > (int(spin_start) + 290):
+                    logger.info('%s of %s timestamps processed, approaching time limit, breaking' % (
+                        str(timestamps_processed),
+                        str(len(timestamps_to_analyse))))
+                    break
 
                 for timestamp, value in timeseries:
                     if int(timestamp) <= batch_timestamp:
@@ -829,8 +876,9 @@ class AnalyzerBatch(Thread):
                     try:
                         derivative_timeseries = nonNegativeDerivative(batch_timeseries)
                         batch_timeseries = derivative_timeseries
-                    except:
-                        logger.error('error :: nonNegativeDerivative failed')
+                    except Exception as err:
+                        logger.error('error :: nonNegativeDerivative failed - %s' % err)
+                        batch_timeseries = []
 
                 try:
                     # Allow for testing.  If you want to test a metric and then stop
@@ -892,6 +940,10 @@ class AnalyzerBatch(Thread):
                     # @modified 20200815 - Feature #3678: SNAB - anomalyScore
                     # Added the number_of_algorithms to calculate anomalyScore from
                     anomalous, ensemble, datapoint, negatives_found, algorithms_run, number_of_algorithms = run_selected_batch_algorithm(batch_timeseries, metric_name, run_negatives_present)
+
+                    if anomalous:
+                        logger.info('anomalous: %s, ensemble: %s' % (
+                            str(anomalous), str(ensemble)))
 
                     if test_anomaly_batch_timeseries:
                         logger.info('test_anomaly - analyzed %s data with anomaly value in it and anomalous = %s' % (
@@ -1355,8 +1407,9 @@ class AnalyzerBatch(Thread):
                         if int_metric_timestamp == int(last_redis_data_timestamp):
                             logger.info('set Redis key %s to %s, even though it is too short' % (
                                 last_metric_timestamp_key, str(int_metric_timestamp)))
-                    except:
-                        logger.error('error :: failed to set Redis key %s, even though it is too short' % last_metric_timestamp_key)
+                    except Exception as err:
+                        logger.error('error :: failed to set Redis key %s, even though it is too short - %s' % (
+                            last_metric_timestamp_key, err))
                 except Stale:
                     exceptions['Stale'] += 1
                     # @added 20200423 - Feature #3504: Handle airgaps in batch metrics
@@ -1412,6 +1465,13 @@ class AnalyzerBatch(Thread):
                             last_metric_timestamp_key, str(int_metric_timestamp)))
                     except:
                         logger.error('error :: failed to set Redis key %s, when other exception was thrown' % last_metric_timestamp_key)
+
+            # @added 20220113 - Feature #3566: custom_algorithms
+            #                   Feature #4328: BATCH_METRICS_CUSTOM_FULL_DURATIONS
+            # break if approaching spin_batch_process limit
+            if int(time()) > (int(spin_start) + 290):
+                logger.info('approaching time limit, exiting')
+                break
 
             # Remove for work list
             redis_set = 'analyzer.batch'
