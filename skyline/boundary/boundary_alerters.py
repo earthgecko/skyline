@@ -892,14 +892,21 @@ def alert_slack(datapoint, metric_name, expiration_time, metric_trigger, algorit
             check_match_pattern = re.compile(CHECK_MATCH_PATTERN)
             pattern_match = check_match_pattern.match(metric_name)
             if pattern_match:
-                matched_channels.append(channel)
+                # @modified 20220114 - Bug #4366: Fix boundary slack channels match
+                # Handle multiple channels in the tuple
+                # matched_channels.append(channel)
+                for i_channel in settings.BOUNDARY_SLACK_OPTS['channels'][channel]:
+                    matched_channels.append(i_channel)
 
     if matched_channels != []:
         # @modified 20220111 - Bug #4366: Fix boundary slack channels match
         # for i_metric_name in matched_channels:
         #     channels = settings.BOUNDARY_SLACK_OPTS['channels'][i_metric_name]
-        for i_channel in matched_channels:
-            notify_channels.append(i_channel)
+        # @modified 20220114 - Bug #4366: Fix boundary slack channels match
+        # De-duplicate channels
+        # for i_channel in matched_channels:
+        #     notify_channels.append(i_channel)
+        notify_channels = list(set(matched_channels))
 
     if not notify_channels:
         logger.error('error :: alert_slack - could not determine channel')
