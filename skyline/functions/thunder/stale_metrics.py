@@ -248,7 +248,9 @@ def thunder_stale_metrics(current_skyline_app, log=True):
                 external_parent_namespaces_stale_periods[parent_namespace]['expiry'] = int(expiry)
     external_parent_namespaces = []
     if external_parent_namespaces:
-        external_parent_namespaces = list(external_parent_namespaces.keys())
+        # external_parent_namespaces = list(external_parent_namespaces.keys())
+        external_parent_namespaces = list(external_parent_namespaces_stale_periods.keys())
+
     parent_namespace_metrics_processed = []
     custom_stale_period_namespaces = []
     # Sort the list by the namespaces with the most elements to the least as
